@@ -155,6 +155,18 @@ class SystemSeeder extends Seeder
                 'updated_at' => $now,
                 'deleted_at' => null,
             ],
+            [
+                'module_id' => 1,
+                'section_id' => $sectionId,
+                'menu_name' => 'Users',
+                'route' => '/system/users',
+                'icon' => 'users',
+                'status' => 1,
+                'sort_order' => 9,
+                'created_at' => $now,
+                'updated_at' => $now,
+                'deleted_at' => null,
+            ],
         ];
 
         DB::table('menus')->insert($menus);

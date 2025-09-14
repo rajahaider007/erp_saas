@@ -65,4 +65,28 @@ class User extends Authenticatable
     {
         return trim($this->fname . ' ' . $this->mname . ' ' . $this->lname);
     }
+
+    /**
+     * Get the company that owns the user.
+     */
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'comp_id');
+    }
+
+    /**
+     * Get the location that owns the user.
+     */
+    public function location()
+    {
+        return $this->belongsTo(Location::class, 'location_id');
+    }
+
+    /**
+     * Get the department that owns the user.
+     */
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'dept_id');
+    }
 }

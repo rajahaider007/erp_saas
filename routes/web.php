@@ -11,6 +11,7 @@ use App\Http\Controllers\system\PackageController;
 use App\Http\Controllers\system\PackageFeatureController;
 use App\Http\Controllers\system\LocationController;
 use App\Http\Controllers\system\DepartmentController;
+use App\Http\Controllers\system\UserController;
 
 // Public routes
 Route::get('/', function () {
@@ -171,4 +172,19 @@ Route::prefix('system/departments')->name('system.departments.')->group(function
     Route::post('/update-sort-order', [DepartmentController::class, 'updateSortOrder'])->name('update-sort-order');
     // API
     Route::get('/by-location/{location}', [DepartmentController::class, 'listByLocation'])->name('by-location');
+});
+
+// Users Management Routes
+Route::prefix('system/users')->name('system.users.')->group(function () {
+    Route::get('/', [UserController::class, 'index'])->name('index');
+    Route::get('/create', [UserController::class, 'create'])->name('create');
+    Route::post('/', [UserController::class, 'store'])->name('store');
+    Route::get('/{user}', [UserController::class, 'show'])->name('show');
+    Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+    Route::put('/{user}', [UserController::class, 'update'])->name('update');
+    Route::patch('/{user}', [UserController::class, 'update'])->name('update');
+    Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+    // API
+    Route::get('/locations/by-company/{company}', [UserController::class, 'getLocationsByCompany'])->name('locations.by-company');
+    Route::get('/departments/by-location/{location}', [UserController::class, 'getDepartmentsByLocation'])->name('departments.by-location');
 });

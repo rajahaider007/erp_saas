@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, Globe, Mail, Phone, MapPin, Calendar, CreditCard, Shield, FileText, Plus, Home, List } from 'lucide-react';
+import { Building2, Globe, Mail, Phone, MapPin, Calendar, CreditCard, Shield, FileText, Plus, Home, List, Edit } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
@@ -53,15 +53,16 @@ const Breadcrumbs = ({ items }) => {
       </nav>
 
       <div className="breadcrumbs-description">
-        Register a new company in the system
+        {usePage().props.company ? 'Update company information' : 'Register a new company in the system'}
       </div>
     </div>
   );
 };
 
-// Company Registration Form Component
+// Company Form Component (Unified for Create and Edit)
 const CreateCompanyForm = () => {
-  const { errors: pageErrors, flash } = usePage().props;
+  const { errors: pageErrors, flash, company } = usePage().props;
+  const isEdit = !!company;
   
   const companyFields = [
     // Company Basic Information
@@ -352,109 +353,53 @@ const CreateCompanyForm = () => {
   }, [flash]);
 
   const handleCompanySubmit = async (submittedFormData) => {
-    console.log("Form submitted with data:", submittedFormData);
-    setErrors({});
+    setRequestStatus('processing');
     setAlert(null);
-    setRequestStatus('Sending request...');
 
     try {
-      // Client-side validation using the actual submitted data
-      const newErrors = {};
-
-      if (!submittedFormData.company_name || !submittedFormData.company_name.trim()) {
-        newErrors.company_name = 'Company name is required';
-      } else if (submittedFormData.company_name.trim().length < 2) {
-        newErrors.company_name = 'Company name must be at least 2 characters';
-      }
-
-      if (!submittedFormData.registration_number || !submittedFormData.registration_number.trim()) {
-        newErrors.registration_number = 'Registration number is required';
-      }
-
-      if (!submittedFormData.email || !submittedFormData.email.trim()) {
-        newErrors.email = 'Email address is required';
-      } else if (!/\S+@\S+\.\S+/.test(submittedFormData.email)) {
-        newErrors.email = 'Please enter a valid email address';
-      }
-
-      if (!submittedFormData.address_line_1 || !submittedFormData.address_line_1.trim()) {
-        newErrors.address_line_1 = 'Address is required';
-      }
-
-      if (!submittedFormData.city || !submittedFormData.city.trim()) {
-        newErrors.city = 'City is required';
-      }
-
-      if (!submittedFormData.country || !submittedFormData.country.trim()) {
-        newErrors.country = 'Country is required';
-      }
-
-      if (Object.keys(newErrors).length > 0) {
-        setErrors(newErrors);
-        setAlert({
-          type: 'error',
-          message: 'Please correct the errors below and try again.'
-        });
-        setRequestStatus('Validation failed');
-        return;
-      }
-
-      // Create FormData for file upload
-      const formDataToSend = new FormData();
+      const formData = new FormData();
       
       // Add all form fields to FormData
       Object.keys(submittedFormData).forEach(key => {
         if (submittedFormData[key] !== null && submittedFormData[key] !== undefined) {
           if (key === 'status') {
-            formDataToSend.append(key, submittedFormData[key] ? '1' : '0');
+            formData.append(key, submittedFormData[key] ? '1' : '0');
           } else {
-            formDataToSend.append(key, submittedFormData[key]);
+            formData.append(key, submittedFormData[key]);
           }
         }
       });
 
-      // Debug log
-      console.log('Sending FormData with:');
-      for (let pair of formDataToSend.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
+      // Add _method for edit operations
+      if (isEdit) {
+        formData.append('_method', 'put');
       }
 
-      // Make the request using Inertia
-      router.post('/system/companies', formDataToSend, {
+      const url = isEdit ? `/system/companies/${company.id}` : '/system/companies';
+
+      router.post(url, formData, {
         forceFormData: true,
-        onStart: () => {
-          setRequestStatus('Request started');
-        },
-        onProgress: () => {
-          setRequestStatus('Uploading...');
-        },
         onSuccess: (page) => {
-          setRequestStatus('Success');
+          setRequestStatus('success');
           setAlert({
             type: 'success',
-            message: 'Company registered successfully!'
+            message: isEdit ? 'Company updated successfully!' : 'Company registered successfully!'
           });
         },
         onError: (errors) => {
-          console.log('Server validation errors:', errors);
-          setRequestStatus('Server validation failed');
+          setRequestStatus('error');
           setErrors(errors);
           setAlert({
             type: 'error',
-            message: 'Failed to register company. Please check the errors below.'
+            message: 'Please correct the errors below and try again.'
           });
-        },
-        onFinish: () => {
-          setRequestStatus('Request finished');
         }
       });
-
     } catch (error) {
-      console.error('Form submission error:', error);
-      setRequestStatus('Exception: ' + error.message);
+      setRequestStatus('error');
       setAlert({
         type: 'error',
-        message: error.message || 'Failed to register company. Please try again.'
+        message: 'An unexpected error occurred. Please try again.'
       });
     }
   };
@@ -473,13 +418,18 @@ const CreateCompanyForm = () => {
       href: '/dashboard'
     },
     {
+      label: 'System',
+      icon: List,
+      href: '#'
+    },
+    {
       label: 'Companies',
       icon: Building2,
       href: '/system/companies'
     },
     {
-      label: 'Register Company',
-      icon: Plus,
+      label: isEdit ? 'Edit Company' : 'Register Company',
+      icon: isEdit ? Edit : Plus,
       href: null
     }
   ];
@@ -514,42 +464,42 @@ const CreateCompanyForm = () => {
         </div>
       )}
 
-      {/* Company Registration Form */}
+      {/* Company Form */}
       <GeneralizedForm
-        title="Register New Company"
-        subtitle="Complete the company registration form with all required information"
+        title={isEdit ? "Edit Company" : "Register New Company"}
+        subtitle={isEdit ? "Update company information and settings" : "Complete the company registration form with all required information"}
         fields={companyFields}
         onSubmit={handleCompanySubmit}
-        submitText="Register Company"
+        submitText={isEdit ? "Update Company" : "Register Company"}
         resetText="Clear Form"
         initialData={{ 
-          company_name: '',
-          company_code: '',
-          legal_name: '',
-          trading_name: '',
-          registration_number: '',
-          tax_id: '',
-          vat_number: '',
-          incorporation_date: '',
-          company_type: '',
-          email: '',
-          phone: '',
-          fax: '',
-          website: '',
-          address_line_1: '',
-          address_line_2: '',
-          city: '',
-          state_province: '',
-          postal_code: '',
-          country: '',
-          industry: '',
-          business_description: '',
-          employee_count: '',
-          annual_revenue: '',
-          currency: 'USD',
+          company_name: company?.company_name || '',
+          company_code: company?.company_code || '',
+          legal_name: company?.legal_name || '',
+          trading_name: company?.trading_name || '',
+          registration_number: company?.registration_number || '',
+          tax_id: company?.tax_id || '',
+          vat_number: company?.vat_number || '',
+          incorporation_date: company?.incorporation_date || '',
+          company_type: company?.company_type || '',
+          email: company?.email || '',
+          phone: company?.phone || '',
+          fax: company?.fax || '',
+          website: company?.website || '',
+          address_line_1: company?.address_line_1 || '',
+          address_line_2: company?.address_line_2 || '',
+          city: company?.city || '',
+          state_province: company?.state_province || '',
+          postal_code: company?.postal_code || '',
+          country: company?.country || '',
+          industry: company?.industry || '',
+          business_description: company?.business_description || '',
+          employee_count: company?.employee_count || '',
+          annual_revenue: company?.annual_revenue || '',
+          currency: company?.currency || 'USD',
           logo: null,
-          status: true,
-          subscription_status: 'trial'
+          status: company?.status ?? true,
+          subscription_status: company?.subscription_status || 'trial'
         }}
         showReset={true}
       />
