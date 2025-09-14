@@ -18,14 +18,79 @@ class UserController extends Controller
     /**
      * Display a listing of users.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with(['company', 'location', 'department'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        // Optimized query - only select columns needed for the list view
+        $query = User::with(['company', 'location', 'department'])->select([
+            'id',
+            'fname',
+            'mname',
+            'lname',
+            'email',
+            'phone',
+            'loginid',
+            'role',
+            'status',
+            'comp_id',
+            'location_id',
+            'dept_id',
+            'last_login_at',
+            'created_at',
+            'updated_at'
+        ]);
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('fname', 'like', "%{$search}%")
+                  ->orWhere('mname', 'like', "%{$search}%")
+                  ->orWhere('lname', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('loginid', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by company
+        if ($request->filled('company_id')) {
+            $query->where('comp_id', $request->company_id);
+        }
+
+        // Filter by location
+        if ($request->filled('location_id')) {
+            $query->where('location_id', $request->location_id);
+        }
+
+        // Filter by department
+        if ($request->filled('department_id')) {
+            $query->where('dept_id', $request->department_id);
+        }
+
+        // Filter by role
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Sort functionality
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDirection = $request->get('sort_direction', 'desc');
+        $query->orderBy($sortBy, $sortDirection);
+
+        $users = $query->paginate($request->get('per_page', 25));
 
         return Inertia::render('system/Users/index', [
-            'users' => $users
+            'users' => $users,
+            'companies' => Company::where('status', true)->orderBy('company_name')->get(['id', 'company_name']),
+            'locations' => Location::where('status', true)->orderBy('location_name')->get(['id', 'location_name', 'company_id']),
+            'departments' => Department::where('status', true)->orderBy('department_name')->get(['id', 'department_name', 'location_id', 'company_id']),
+            'filters' => $request->only(['search', 'company_id', 'location_id', 'department_id', 'role', 'status', 'sort_by', 'sort_direction', 'per_page']),
+            'pageTitle' => 'Users Management'
         ]);
     }
 
@@ -118,15 +183,16 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $companies = Company::where('status', true)->get(['id', 'company_name']);
-        $locations = Location::where('status', true)->get(['id', 'location_name', 'company_id']);
-        $departments = Department::where('status', true)->get(['id', 'department_name', 'location_id', 'company_id']);
+        $companies = Company::where('status', true)->orderBy('company_name')->get(['id', 'company_name']);
+        $locations = Location::where('status', true)->orderBy('location_name')->get(['id', 'location_name', 'company_id']);
+        $departments = Department::where('status', true)->orderBy('department_name')->get(['id', 'department_name', 'location_id', 'company_id']);
 
         return Inertia::render('system/Users/edit', [
             'user' => $user,
             'companies' => $companies,
             'locations' => $locations,
-            'departments' => $departments
+            'departments' => $departments,
+            'pageTitle' => 'Edit User'
         ]);
     }
 
@@ -224,5 +290,37 @@ class UserController extends Controller
             ->get(['id', 'department_name']);
 
         return response()->json(['data' => $departments]);
+    }
+
+    /**
+     * Bulk update user status
+     */
+    public function bulkUpdateStatus(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:tbl_users,id',
+            'status' => 'required|in:active,inactive,suspended,pending'
+        ]);
+
+        $count = User::whereIn('id', $request->ids)
+            ->update(['status' => $request->status]);
+
+        return redirect()->back()->with('success', "Status updated for {$count} user(s).");
+    }
+
+    /**
+     * Bulk delete users
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:tbl_users,id'
+        ]);
+
+        $count = User::whereIn('id', $request->ids)->delete();
+
+        return redirect()->back()->with('success', "{$count} user(s) deleted successfully.");
     }
 }

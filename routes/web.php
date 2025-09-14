@@ -184,6 +184,9 @@ Route::prefix('system/users')->name('system.users.')->group(function () {
     Route::put('/{user}', [UserController::class, 'update'])->name('update');
     Route::patch('/{user}', [UserController::class, 'update'])->name('update');
     Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+    // Bulk operations
+    Route::post('/bulk-status', [UserController::class, 'bulkUpdateStatus'])->name('bulk-status');
+    Route::post('/bulk-destroy', [UserController::class, 'bulkDestroy'])->name('bulk-destroy');
     // API
     Route::get('/locations/by-company/{company}', [UserController::class, 'getLocationsByCompany'])->name('locations.by-company');
     Route::get('/departments/by-location/{location}', [UserController::class, 'getDepartmentsByLocation'])->name('departments.by-location');

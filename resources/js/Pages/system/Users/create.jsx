@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   User, Mail, Phone, MapPin, Building, Users, 
-  Home, List, Plus, Lock, Shield, Globe, 
+  Home, List, Plus, Edit, Lock, Shield, Globe, 
   Clock, DollarSign, Palette, Eye, EyeOff
 } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
@@ -9,7 +9,7 @@ import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
 
 // Professional Breadcrumbs Component
-const Breadcrumbs = ({ items }) => {
+const Breadcrumbs = ({ items, isEdit }) => {
   return (
     <div className="breadcrumbs-themed">
       <nav className="breadcrumbs">
@@ -57,15 +57,16 @@ const Breadcrumbs = ({ items }) => {
       </nav>
 
       <div className="breadcrumbs-description">
-        Register a new user in the system
+        {isEdit ? 'Update user information and settings' : 'Register a new user in the system'}
       </div>
     </div>
   );
 };
 
-// User Registration Form Component
+// User Registration Form Component (Unified for Create and Edit)
 const UserRegistrationForm = () => {
-  const { errors: pageErrors, flash, companies, locations, departments } = usePage().props;
+  const { errors: pageErrors, flash, companies, locations, departments, user } = usePage().props;
+  const isEdit = !!user;
   
   const userFields = [
     // Personal Information Section
@@ -169,17 +170,17 @@ const UserRegistrationForm = () => {
       name: 'password',
       label: 'Password',
       type: 'password',
-      placeholder: 'Enter password',
+      placeholder: isEdit ? 'Enter new password (leave blank to keep current)' : 'Enter password',
       icon: Lock,
-      required: true
+      required: !isEdit
     },
     {
       name: 'password_confirmation',
       label: 'Confirm Password',
       type: 'password',
-      placeholder: 'Confirm password',
+      placeholder: isEdit ? 'Confirm new password' : 'Confirm password',
       icon: Lock,
-      required: true
+      required: !isEdit
     },
     
     // Role and Status Section
@@ -329,17 +330,28 @@ const UserRegistrationForm = () => {
       // Add all form fields to FormData
       Object.keys(submittedFormData).forEach(key => {
         if (submittedFormData[key] !== null && submittedFormData[key] !== undefined) {
+          // Skip empty passwords in edit mode
+          if (isEdit && (key === 'password' || key === 'password_confirmation') && !submittedFormData[key]) {
+            return;
+          }
           formData.append(key, submittedFormData[key]);
         }
       });
 
-      router.post('/system/users', formData, {
+      // Add _method for edit operations
+      if (isEdit) {
+        formData.append('_method', 'put');
+      }
+
+      const url = isEdit ? `/system/users/${user.id}` : '/system/users';
+
+      router.post(url, formData, {
         forceFormData: true,
         onSuccess: (page) => {
           setRequestStatus('success');
           setAlert({
             type: 'success',
-            message: 'User registered successfully!'
+            message: isEdit ? 'User updated successfully!' : 'User registered successfully!'
           });
         },
         onError: (errors) => {
@@ -377,8 +389,8 @@ const UserRegistrationForm = () => {
       href: '/system/users'
     },
     {
-      label: 'Register User',
-      icon: Plus,
+      label: isEdit ? 'Edit User' : 'Register User',
+      icon: isEdit ? Edit : Plus,
       href: null
     }
   ];
@@ -386,7 +398,7 @@ const UserRegistrationForm = () => {
   return (
     <div>
       {/* Professional Breadcrumbs */}
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs items={breadcrumbItems} isEdit={isEdit} />
 
       {/* Alert Messages */}
       {alert && (
@@ -415,31 +427,31 @@ const UserRegistrationForm = () => {
 
       {/* User Registration Form */}
       <GeneralizedForm
-        title="Register New User"
-        subtitle="Complete the user registration form with all required information"
+        title={isEdit ? "Edit User" : "Register New User"}
+        subtitle={isEdit ? "Update user information and settings" : "Complete the user registration form with all required information"}
         fields={userFields}
         onSubmit={handleUserSubmit}
-        submitText="Register User"
+        submitText={isEdit ? "Update User" : "Register User"}
         resetText="Clear Form"
         initialData={{ 
-          fname: '',
-          mname: '',
-          lname: '',
-          email: '',
-          phone: '',
-          loginid: '',
-          pincode: '',
-          comp_id: '',
-          location_id: '',
-          dept_id: '',
+          fname: user?.fname || '',
+          mname: user?.mname || '',
+          lname: user?.lname || '',
+          email: user?.email || '',
+          phone: user?.phone || '',
+          loginid: user?.loginid || '',
+          pincode: user?.pincode || '',
+          comp_id: user?.comp_id || '',
+          location_id: user?.location_id || '',
+          dept_id: user?.dept_id || '',
           password: '',
           password_confirmation: '',
-          role: 'user',
-          status: 'active',
-          timezone: 'UTC',
-          language: 'en',
-          currency: 'USD',
-          theme: 'system'
+          role: user?.role || 'user',
+          status: user?.status || 'active',
+          timezone: user?.timezone || 'UTC',
+          language: user?.language || 'en',
+          currency: user?.currency || 'USD',
+          theme: user?.theme || 'system'
         }}
         showReset={true}
       />
