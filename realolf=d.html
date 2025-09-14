@@ -1,0 +1,764 @@
+<!-- Custom Property Search Form -->
+<div id="property-search-form" class="search-form-container">
+    <form id="search-form">
+        <!-- Row 1: MLS Number and Listing Status -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="listing_num">MLS#</label>
+                <input type="text" id="listing_num" name="listing_num" class="form-control">
+            </div>
+            
+            <div class="form-group">
+                <label>Listing Status</label>
+                <select name="listing_status" id="listing_status" class="form-control">
+                    <option value="">Select Listing Status</option>
+                    <option value="active">For Sale</option>
+                    <option value="active-rental">For Rent</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Row 2: Property Type and Subtype -->
+        <div class="form-row">
+            <div class="form-group">
+                <label>Property Type</label>
+                <select name="property_type" id="property_type" class="form-control">
+                    <option value="">Select Property Type</option>
+                    <option value="boat facility">Boat Facility</option>
+                    <option value="commercial lease">Commercial Lease</option>
+                    <option value="commercial sale">Commercial Sale</option>
+                    <option value="land">Land</option>
+                    <option value="residential">Residential</option>
+                    <option value="residential income">Residential Income</option>
+                    <option value="residential lease">Residential Lease</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Property Subtype</label>
+                <select name="property_subtype" id="property_subtype" class="form-control">
+                    <option value="">Select Property Subtype</option>
+                    <option value="apartment">Apartment</option>
+                    <option value="condominium">Condominium</option>
+                    <option value="duplex">Duplex</option>
+                    <option value="mobile home">Mobile Home</option>
+                    <option value="multi-family">Multi-Family</option>
+                    <option value="other">Other</option>
+                    <option value="rec/vac">Rec/Vac</option>
+                    <option value="single family residence">Single Family Residence</option>
+                    <option value="townhouse">Townhouse</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Row 3: Price Range -->
+        <div class="form-row">
+            <div class="form-group">
+                <label>Price Range</label>
+                <div class="range-inputs">
+                    <input type="number" id="price_min" name="price_min" placeholder="Min Price" class="form-control">
+                    <input type="number" id="price_max" name="price_max" placeholder="Max Price" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 4: City and State -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="city">City</label>
+                <select name="city" class="form-control" add-to="#CityCheckBoxes" id="city">
+                    <option value="">Select City</option>
+              <option value="acton">Acton</option>
+              <option value="acworth">Acworth</option>
+              <option value="addison">Addison</option>
+              <option value="albany">Albany</option>
+              <option value="alburgh">Alburgh</option>
+              <option value="alexandria">Alexandria</option>
+              <option value="allenstown">Allenstown</option>
+              <option value="alstead">Alstead</option>
+              <option value="alton">Alton</option>
+              <option value="amesbury">Amesbury</option>
+              <option value="amherst">Amherst</option>
+              <option value="andover">Andover</option>
+              <option value="antrim">Antrim</option>
+              <option value="arlington">Arlington</option>
+              <option value="arundel">Arundel</option>
+              <option value="ashland">Ashland</option>
+              <option value="athens">Athens</option>
+              <option value="athol">Athol</option>
+              <option value="atkinson">Atkinson</option>
+              <option value="auburn">Auburn</option>
+              <option value="augusta">Augusta</option>
+              <option value="averill">Averill</option>
+              <option value="bakersfield">Bakersfield</option>
+              <option value="baltimore">Baltimore</option>
+              <option value="barnard">Barnard</option>
+              <option value="barnet">Barnet</option>
+              <option value="barnstead">Barnstead</option>
+              <option value="barre city">Barre City</option>
+              <option value="barre town">Barre Town</option>
+              <option value="barrington">Barrington</option>
+              <option value="bartlett">Bartlett</option>
+              <option value="barton">Barton</option>
+              <option value="bath">Bath</option>
+              <option value="bedford">Bedford</option>
+              <option value="bellingham">Bellingham</option>
+              <option value="belmont">Belmont</option>
+              <option value="belvidere">Belvidere</option>
+              <option value="bennington">Bennington</option>
+              <option value="benson">Benson</option>
+              <option value="benton">Benton</option>
+              <option value="berkshire">Berkshire</option>
+              <option value="berlin">Berlin</option>
+              <option value="berwick">Berwick</option>
+              <option value="bethel">Bethel</option>
+              <option value="bethlehem">Bethlehem</option>
+              <option value="biddeford">Biddeford</option>
+              <option value="billerica">Billerica</option>
+              <option value="bloomfield">Bloomfield</option>
+              <option value="bolton">Bolton</option>
+              <option value="boscawen">Boscawen</option>
+              <option value="bow">Bow</option>
+              <option value="bradford">Bradford</option>
+              <option value="braintree">Braintree</option>
+              <option value="brandon">Brandon</option>
+              <option value="brattleboro">Brattleboro</option>
+              <option value="brentwood">Brentwood</option>
+              <option value="bridgewater">Bridgewater</option>
+              <option value="bridgton">Bridgton</option>
+              <option value="bridport">Bridport</option>
+              <option value="brighton">Brighton</option>
+              <option value="bristol">Bristol</option>
+              <option value="brookfield">Brookfield</option>
+              <option value="brookline">Brookline</option>
+              <option value="brownfield">Brownfield</option>
+              <option value="brownington">Brownington</option>
+              <option value="brunswick">Brunswick</option>
+              <option value="burke">Burke</option>
+              <option value="burlington">Burlington</option>
+              <option value="cabot">Cabot</option>
+              <option value="calais">Calais</option>
+              <option value="cambridge">Cambridge</option>
+              <option value="campton">Campton</option>
+              <option value="canaan">Canaan</option>
+              <option value="candia">Candia</option>
+              <option value="canterbury">Canterbury</option>
+              <option value="carroll">Carroll</option>
+              <option value="casco">Casco</option>
+              <option value="castleton">Castleton</option>
+              <option value="cavendish">Cavendish</option>
+              <option value="center harbor">Center Harbor</option>
+              <option value="charleston">Charleston</option>
+              <option value="charlestown">Charlestown</option>
+              <option value="charlotte">Charlotte</option>
+              <option value="chatham">Chatham</option>
+              <option value="chelmsford">Chelmsford</option>
+              <option value="chelsea">Chelsea</option>
+              <option value="chester">Chester</option>
+              <option value="chesterfield">Chesterfield</option>
+              <option value="chichester">Chichester</option>
+              <option value="chittenden">Chittenden</option>
+              <option value="claremont">Claremont</option>
+              <option value="clarendon">Clarendon</option>
+              <option value="clarksville">Clarksville</option>
+              <option value="colchester">Colchester</option>
+              <option value="colebrook">Colebrook</option>
+              <option value="columbia">Columbia</option>
+              <option value="concord">Concord</option>
+              <option value="conway">Conway</option>
+              <option value="corinth">Corinth</option>
+              <option value="cornish">Cornish</option>
+              <option value="cornwall">Cornwall</option>
+              <option value="coventry">Coventry</option>
+              <option value="craftsbury">Craftsbury</option>
+              <option value="croydon">Croydon</option>
+              <option value="dalton">Dalton</option>
+              <option value="danbury">Danbury</option>
+              <option value="danby">Danby</option>
+              <option value="danville">Danville</option>
+              <option value="deerfield">Deerfield</option>
+              <option value="deering">Deering</option>
+              <option value="derby">Derby</option>
+              <option value="derry">Derry</option>
+              <option value="dorchester">Dorchester</option>
+              <option value="dorset">Dorset</option>
+              <option value="dover">Dover</option>
+              <option value="dracut">Dracut</option>
+              <option value="dublin">Dublin</option>
+              <option value="dummer">Dummer</option>
+              <option value="dummerston">Dummerston</option>
+              <option value="dunbarton">Dunbarton</option>
+              <option value="dunstable">Dunstable</option>
+              <option value="durham">Durham</option>
+              <option value="duxbury">Duxbury</option>
+              <option value="east haven">East Haven</option>
+              <option value="east kingston">East Kingston</option>
+              <option value="east montpelier">East Montpelier</option>
+              <option value="easton">Easton</option>
+              <option value="eaton">Eaton</option>
+              <option value="eden">Eden</option>
+              <option value="effingham">Effingham</option>
+              <option value="eliot">Eliot</option>
+              <option value="ellenburg">Ellenburg</option>
+              <option value="elmore">Elmore</option>
+              <option value="enfield">Enfield</option>
+              <option value="enosburg">Enosburg</option>
+              <option value="epping">Epping</option>
+              <option value="epsom">Epsom</option>
+              <option value="errol">Errol</option>
+              <option value="essex">Essex</option>
+              <option value="essex junction">Essex Junction</option>
+              <option value="exeter">Exeter</option>
+              <option value="fair haven">Fair Haven</option>
+              <option value="fairfax">Fairfax</option>
+              <option value="fairfield">Fairfield</option>
+              <option value="fairlee">Fairlee</option>
+              <option value="falmouth">Falmouth</option>
+              <option value="farmington">Farmington</option>
+              <option value="fayston">Fayston</option>
+              <option value="ferdinand">Ferdinand</option>
+              <option value="ferrisburgh">Ferrisburgh</option>
+              <option value="fitchburg">Fitchburg</option>
+              <option value="fitzwilliam">Fitzwilliam</option>
+              <option value="fletcher">Fletcher</option>
+              <option value="francestown">Francestown</option>
+              <option value="franconia">Franconia</option>
+              <option value="franklin">Franklin</option>
+              <option value="freedom">Freedom</option>
+              <option value="fremont">Fremont</option>
+              <option value="fryeburg">Fryeburg</option>
+              <option value="gardner">Gardner</option>
+              <option value="georgia">Georgia</option>
+              <option value="gilford">Gilford</option>
+              <option value="gilmanton">Gilmanton</option>
+              <option value="gilsum">Gilsum</option>
+              <option value="glover">Glover</option>
+              <option value="goffstown">Goffstown</option>
+              <option value="gorham">Gorham</option>
+              <option value="goshen">Goshen</option>
+              <option value="grafton">Grafton</option>
+              <option value="granby">Granby</option>
+              <option value="grand isle">Grand Isle</option>
+              <option value="grantham">Grantham</option>
+              <option value="granville">Granville</option>
+              <option value="greenfield">Greenfield</option>
+              <option value="greenland">Greenland</option>
+              <option value="greensboro">Greensboro</option>
+              <option value="greenville">Greenville</option>
+              <option value="groton">Groton</option>
+              <option value="guildhall">Guildhall</option>
+              <option value="guilford">Guilford</option>
+              <option value="halifax">Halifax</option>
+              <option value="hampstead">Hampstead</option>
+              <option value="hampton">Hampton</option>
+              <option value="hampton falls">Hampton Falls</option>
+              <option value="hancock">Hancock</option>
+              <option value="hanover">Hanover</option>
+              <option value="hardwick">Hardwick</option>
+              <option value="harrison">Harrison</option>
+              <option value="harrisville">Harrisville</option>
+              <option value="hartford">Hartford</option>
+              <option value="hartland">Hartland</option>
+              <option value="harts location">Harts Location</option>
+              <option value="haverhill">Haverhill</option>
+              <option value="hebron">Hebron</option>
+              <option value="henniker">Henniker</option>
+              <option value="highgate">Highgate</option>
+              <option value="hill">Hill</option>
+              <option value="hillsborough">Hillsborough</option>
+              <option value="hinesburg">Hinesburg</option>
+              <option value="hinsdale">Hinsdale</option>
+              <option value="hiram">Hiram</option>
+              <option value="holderness">Holderness</option>
+              <option value="holland">Holland</option>
+              <option value="hollis">Hollis</option>
+              <option value="hooksett">Hooksett</option>
+              <option value="hopkinton">Hopkinton</option>
+              <option value="hubbardton">Hubbardton</option>
+              <option value="hudson">Hudson</option>
+              <option value="huntington">Huntington</option>
+              <option value="hyde park">Hyde Park</option>
+              <option value="ira">Ira</option>
+              <option value="irasburg">Irasburg</option>
+              <option value="isle la motte">Isle La Motte</option>
+              <option value="jackson">Jackson</option>
+              <option value="jaffrey">Jaffrey</option>
+              <option value="jamaica">Jamaica</option>
+              <option value="jay">Jay</option>
+              <option value="jefferson">Jefferson</option>
+              <option value="jericho">Jericho</option>
+              <option value="johnson">Johnson</option>
+              <option value="keene">Keene</option>
+              <option value="kennebunk">Kennebunk</option>
+              <option value="kennebunk port">Kennebunk Port</option>
+              <option value="kensington">Kensington</option>
+              <option value="killington">Killington</option>
+              <option value="kingston">Kingston</option>
+              <option value="kirby">Kirby</option>
+              <option value="kittery">Kittery</option>
+              <option value="laconia">Laconia</option>
+              <option value="lancaster">Lancaster</option>
+              <option value="landaff">Landaff</option>
+              <option value="landgrove">Landgrove</option>
+              <option value="langdon">Langdon</option>
+              <option value="lawrence">Lawrence</option>
+              <option value="lebanon">Lebanon</option>
+              <option value="lee">Lee</option>
+              <option value="leicester">Leicester</option>
+              <option value="lemington">Lemington</option>
+              <option value="lempster">Lempster</option>
+              <option value="lewiston">Lewiston</option>
+              <option value="limerick">Limerick</option>
+              <option value="lincoln">Lincoln</option>
+              <option value="lisbon">Lisbon</option>
+              <option value="litchfield">Litchfield</option>
+              <option value="littleton">Littleton</option>
+              <option value="londonderry">Londonderry</option>
+              <option value="loudon">Loudon</option>
+              <option value="lovell">Lovell</option>
+              <option value="lowell">Lowell</option>
+              <option value="ludlow">Ludlow</option>
+              <option value="lunenburg">Lunenburg</option>
+              <option value="lyman">Lyman</option>
+              <option value="lyme">Lyme</option>
+              <option value="lyndeborough">Lyndeborough</option>
+              <option value="lyndon">Lyndon</option>
+              <option value="madbury">Madbury</option>
+              <option value="madison">Madison</option>
+              <option value="maidstone">Maidstone</option>
+              <option value="manchester">Manchester</option>
+              <option value="marlboro">Marlboro</option>
+              <option value="marlborough">Marlborough</option>
+              <option value="marlow">Marlow</option>
+              <option value="marshfield">Marshfield</option>
+              <option value="mason">Mason</option>
+              <option value="mechanic falls">Mechanic Falls</option>
+              <option value="mendon">Mendon</option>
+              <option value="meredith">Meredith</option>
+              <option value="merrimac">Merrimac</option>
+              <option value="merrimack">Merrimack</option>
+              <option value="methuen">Methuen</option>
+              <option value="middlebury">Middlebury</option>
+              <option value="middlesex">Middlesex</option>
+              <option value="middleton">Middleton</option>
+              <option value="middletown springs">Middletown Springs</option>
+              <option value="milan">Milan</option>
+              <option value="milford">Milford</option>
+              <option value="millsfield">Millsfield</option>
+              <option value="milton">Milton</option>
+              <option value="monkton">Monkton</option>
+              <option value="monroe">Monroe</option>
+              <option value="mont vernon">Mont Vernon</option>
+              <option value="montgomery">Montgomery</option>
+              <option value="montpelier">Montpelier</option>
+              <option value="moretown">Moretown</option>
+              <option value="morgan">Morgan</option>
+              <option value="morristown">Morristown</option>
+              <option value="moultonborough">Moultonborough</option>
+              <option value="mount holly">Mount Holly</option>
+              <option value="mount tabor">Mount Tabor</option>
+              <option value="nashua">Nashua</option>
+              <option value="nelson">Nelson</option>
+              <option value="new boston">New Boston</option>
+              <option value="new castle">New Castle</option>
+              <option value="new durham">New Durham</option>
+              <option value="new hampton">New Hampton</option>
+              <option value="new haven">New Haven</option>
+              <option value="new ipswich">New Ipswich</option>
+              <option value="new london">New London</option>
+              <option value="new portland">New Portland</option>
+              <option value="newark">Newark</option>
+              <option value="newbury">Newbury</option>
+              <option value="newfane">Newfane</option>
+              <option value="newfield">Newfield</option>
+              <option value="newfields">Newfields</option>
+              <option value="newington">Newington</option>
+              <option value="newmarket">Newmarket</option>
+              <option value="newport">Newport</option>
+              <option value="newport city">Newport City</option>
+              <option value="newport town">Newport Town</option>
+              <option value="newry">Newry</option>
+              <option value="newton">Newton</option>
+              <option value="north adams">North Adams</option>
+              <option value="north andover">North Andover</option>
+              <option value="north berwick">North Berwick</option>
+              <option value="north hampton">North Hampton</option>
+              <option value="north hero">North Hero</option>
+              <option value="northfield">Northfield</option>
+              <option value="northumberland">Northumberland</option>
+              <option value="northwood">Northwood</option>
+              <option value="norton">Norton</option>
+              <option value="norwich">Norwich</option>
+              <option value="nottingham">Nottingham</option>
+              <option value="odell">Odell</option>
+              <option value="ogunquit">Ogunquit</option>
+              <option value="old orchard beach">Old Orchard Beach</option>
+              <option value="orange">Orange</option>
+              <option value="orford">Orford</option>
+              <option value="orleans">Orleans</option>
+              <option value="orwell">Orwell</option>
+              <option value="ossipee">Ossipee</option>
+              <option value="panton">Panton</option>
+              <option value="pawlet">Pawlet</option>
+              <option value="peacham">Peacham</option>
+              <option value="pelham">Pelham</option>
+              <option value="pembroke">Pembroke</option>
+              <option value="pepperell">Pepperell</option>
+              <option value="perry">Perry</option>
+              <option value="peru">Peru</option>
+              <option value="peterborough">Peterborough</option>
+              <option value="piermont">Piermont</option>
+              <option value="pittsburg">Pittsburg</option>
+              <option value="pittsfield">Pittsfield</option>
+              <option value="pittsford">Pittsford</option>
+              <option value="plainfield">Plainfield</option>
+              <option value="plaistow">Plaistow</option>
+              <option value="plymouth">Plymouth</option>
+              <option value="pomfret">Pomfret</option>
+              <option value="portsmouth">Portsmouth</option>
+              <option value="poultney">Poultney</option>
+              <option value="pownal">Pownal</option>
+              <option value="proctor">Proctor</option>
+              <option value="putney">Putney</option>
+              <option value="randolph">Randolph</option>
+              <option value="raymond">Raymond</option>
+              <option value="reading">Reading</option>
+              <option value="readsboro">Readsboro</option>
+              <option value="richford">Richford</option>
+              <option value="richmond">Richmond</option>
+              <option value="rindge">Rindge</option>
+              <option value="ripton">Ripton</option>
+              <option value="rochester">Rochester</option>
+              <option value="rockingham">Rockingham</option>
+              <option value="rollinsford">Rollinsford</option>
+              <option value="roxbury">Roxbury</option>
+              <option value="royalton">Royalton</option>
+              <option value="rumney">Rumney</option>
+              <option value="rupert">Rupert</option>
+              <option value="rutland city">Rutland City</option>
+              <option value="rutland town">Rutland Town</option>
+              <option value="rye">Rye</option>
+              <option value="ryegate">Ryegate</option>
+              <option value="salem">Salem</option>
+              <option value="salisbury">Salisbury</option>
+              <option value="sanbornton">Sanbornton</option>
+              <option value="sandgate">Sandgate</option>
+              <option value="sandown">Sandown</option>
+              <option value="sandwich">Sandwich</option>
+              <option value="sanford">Sanford</option>
+              <option value="seabrook">Seabrook</option>
+              <option value="searsburg">Searsburg</option>
+              <option value="shaftsbury">Shaftsbury</option>
+              <option value="shapleigh">Shapleigh</option>
+              <option value="sharon">Sharon</option>
+              <option value="sheffield">Sheffield</option>
+              <option value="shelburne">Shelburne</option>
+              <option value="sheldon">Sheldon</option>
+              <option value="shoreham">Shoreham</option>
+              <option value="shrewsbury">Shrewsbury</option>
+              <option value="somersworth">Somersworth</option>
+              <option value="south berwick">South Berwick</option>
+              <option value="south burlington">South Burlington</option>
+              <option value="south hampton">South Hampton</option>
+              <option value="south hero">South Hero</option>
+              <option value="springfield">Springfield</option>
+              <option value="st. albans city">St. Albans City</option>
+              <option value="st. albans town">St. Albans Town</option>
+              <option value="st. george">St. George</option>
+              <option value="st. johnsbury">St. Johnsbury</option>
+              <option value="stamford">Stamford</option>
+              <option value="stark">Stark</option>
+              <option value="starksboro">Starksboro</option>
+              <option value="stephentown">Stephentown</option>
+              <option value="stewartstown">Stewartstown</option>
+              <option value="stockbridge">Stockbridge</option>
+              <option value="stoddard">Stoddard</option>
+              <option value="stoneham">Stoneham</option>
+              <option value="stow">Stow</option>
+              <option value="stowe">Stowe</option>
+              <option value="strafford">Strafford</option>
+              <option value="stratford">Stratford</option>
+              <option value="stratham">Stratham</option>
+              <option value="stratton">Stratton</option>
+              <option value="sudbury">Sudbury</option>
+              <option value="sugar hill">Sugar Hill</option>
+              <option value="sullivan">Sullivan</option>
+              <option value="sunapee">Sunapee</option>
+              <option value="sunderland">Sunderland</option>
+              <option value="surry">Surry</option>
+              <option value="sutton">Sutton</option>
+              <option value="swanton">Swanton</option>
+              <option value="swanzey">Swanzey</option>
+              <option value="sweden">Sweden</option>
+              <option value="tamworth">Tamworth</option>
+              <option value="temple">Temple</option>
+              <option value="templeton">Templeton</option>
+              <option value="tewksbury">Tewksbury</option>
+              <option value="thetford">Thetford</option>
+              <option value="thornton">Thornton</option>
+              <option value="tilton">Tilton</option>
+              <option value="tinmouth">Tinmouth</option>
+              <option value="topsham">Topsham</option>
+              <option value="townshend">Townshend</option>
+              <option value="troy">Troy</option>
+              <option value="tuftonboro">Tuftonboro</option>
+              <option value="tunbridge">Tunbridge</option>
+              <option value="tyngsborough">Tyngsborough</option>
+              <option value="underhill">Underhill</option>
+              <option value="unity">Unity</option>
+              <option value="upton">Upton</option>
+              <option value="vergennes">Vergennes</option>
+              <option value="vernon">Vernon</option>
+              <option value="vershire">Vershire</option>
+              <option value="victory">Victory</option>
+              <option value="waitsfield">Waitsfield</option>
+              <option value="wakefield">Wakefield</option>
+              <option value="walden">Walden</option>
+              <option value="wallingford">Wallingford</option>
+              <option value="walpole">Walpole</option>
+              <option value="waltham">Waltham</option>
+              <option value="wardsboro">Wardsboro</option>
+              <option value="warner">Warner</option>
+              <option value="warren">Warren</option>
+              <option value="warren gore">Warren Gore</option>
+              <option value="washington">Washington</option>
+              <option value="waterboro">Waterboro</option>
+              <option value="waterbury">Waterbury</option>
+              <option value="waterford">Waterford</option>
+              <option value="waterville">Waterville</option>
+              <option value="waterville valley">Waterville Valley</option>
+              <option value="weare">Weare</option>
+              <option value="weathersfield">Weathersfield</option>
+              <option value="webster">Webster</option>
+              <option value="wells">Wells</option>
+              <option value="wells river">Wells River</option>
+              <option value="wentworth">Wentworth</option>
+              <option value="west fairlee">West Fairlee</option>
+              <option value="west haven">West Haven</option>
+              <option value="west rutland">West Rutland</option>
+              <option value="west windsor">West Windsor</option>
+              <option value="westfield">Westfield</option>
+              <option value="westford">Westford</option>
+              <option value="westminster">Westminster</option>
+              <option value="westmore">Westmore</option>
+              <option value="westmoreland">Westmoreland</option>
+              <option value="weston">Weston</option>
+              <option value="weybridge">Weybridge</option>
+              <option value="wheelock">Wheelock</option>
+              <option value="whitefield">Whitefield</option>
+              <option value="whiting">Whiting</option>
+              <option value="whitingham">Whitingham</option>
+              <option value="williamstown">Williamstown</option>
+              <option value="williston">Williston</option>
+              <option value="wilmington">Wilmington</option>
+              <option value="wilmot">Wilmot</option>
+              <option value="wilton">Wilton</option>
+              <option value="winchester">Winchester</option>
+              <option value="windham">Windham</option>
+              <option value="windsor">Windsor</option>
+              <option value="winhall">Winhall</option>
+              <option value="winooski">Winooski</option>
+              <option value="wolcott">Wolcott</option>
+              <option value="wolfeboro">Wolfeboro</option>
+              <option value="woodbury">Woodbury</option>
+              <option value="woodford">Woodford</option>
+              <option value="woodstock">Woodstock</option>
+              <option value="worcester">Worcester</option>
+              <option value="york">York</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>State</label>
+                <select name="state" id="formstate" class="form-control">
+                    <option value="">Search All</option>
+                    <option value="ma">MA</option>
+                    <option value="me">ME</option>
+                    <option value="nh">NH</option>
+                    <option value="ny">NY</option>
+                    <option value="vt">VT</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Row 5: Bedrooms and Public Remarks -->
+        <div class="form-row">
+            <div class="form-group">
+                <label>Bedrooms</label>
+                <select id="bedrooms_total_min" name="bedrooms_total_min" class="form-control">
+                    <option value="">Select Beds</option>
+                    <option value="1">1+ Beds</option>
+                    <option value="2">2+ Beds</option>
+                    <option value="3">3+ Beds</option>
+                    <option value="4">4+ Beds</option>
+                    <option value="5">5+ Beds</option>
+                    <option value="6">6+ Beds</option>
+                    <option value="7">7+ Beds</option>
+                    <option value="8">8+ Beds</option>
+                    <option value="9">9+ Beds</option>
+                    <option value="10">10+ Beds</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="public_remarks">Public Remarks</label>
+                <input type="text" id="public_remarks" name="public_remarks" class="form-control">
+            </div>
+        </div>
+
+        <!-- Row 6: Search Button -->
+        <div class="form-row">
+            <button type="button" onclick="submitSearch()" class="search-button">Search</button>
+        </div>
+    </form>
+</div>
+
+<style>
+.search-form-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+}
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 250px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    height: 40px;
+}
+
+.range-inputs {
+    display: flex;
+    gap: 10px;
+}
+
+.range-inputs .form-control {
+    width: 50%;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.search-button {
+    width: 100%;
+    padding: 12px;
+    background: #700A15;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.search-button:hover {
+    background: #C01D2E;
+    transition: background-color 0.3s ease;
+}
+
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 1em;
+    padding-right: 30px;
+}
+</style>
+
+<script>
+function submitSearch() {
+  const baseUrl = 'https://summerviewrealestate.com/properties?filter=';
+  let filters = [];
+  
+  // Add static MLS ID
+  filters.push('mls_id:nh357');
+  
+  // Add static listing status
+  filters.push('listing_status:active,active-rental');
+  
+  // MLS Number
+  const listingNum = document.getElementById('listing_num').value;
+  if (listingNum) {
+      filters.push(`listing_num:${listingNum}`);
+  }
+  
+  const listingSat = document.getElementById('listing_status').value;
+  if (listingSat) {
+      filters.push(`listing_status:${listingSat}`);
+  }
+  
+    const state = document.getElementById('formstate').value;
+  if (state) {
+      filters.push(`state:${state}`);
+  }
+  
+  // Property Type
+  const propertyTypes = Array.from(document.getElementsByName('property_type'))
+      .filter(cb => cb.checked)
+      .map(cb => cb.value);
+  if (propertyTypes.length > 0) {
+      filters.push(`property_type:${propertyTypes.join(',')}`);
+  }
+  
+  // Property Subtype
+  const propertySubtypes = Array.from(document.getElementsByName('property_subtype'))
+      .filter(cb => cb.checked)
+      .map(cb => cb.value);
+  if (propertySubtypes.length > 0) {
+      filters.push(`property_subtype:${propertySubtypes.join(',')}`);
+  }
+  
+  // Price Range
+  const priceMin = document.getElementById('price_min').value;
+  const priceMax = document.getElementById('price_max').value;
+  if (priceMin) filters.push(`price_min:${priceMin}`);
+  if (priceMax) filters.push(`price_max:${priceMax}`);
+  
+  // City
+  const citySelect = document.getElementById('city');
+  const selectedCities = Array.from(citySelect.selectedOptions).map(option => option.value);
+  if (selectedCities.length > 0) {
+      filters.push(`city:${selectedCities.join(',')}`);
+  }
+  
+  // Bedrooms
+  const bedroomsMin = document.getElementById('bedrooms_total_min').value;
+  // const bedroomsMax = document.getElementById('bedrooms_total_max').value;
+  if (bedroomsMin) filters.push(`bedrooms_total_min:${bedroomsMin}`);
+  // if (bedroomsMax) filters.push(`bedrooms_total_max:${bedroomsMax}`);
+  
+  // Public Remarks
+  const remarks = document.getElementById('public_remarks').value;
+  if (remarks) {
+      filters.push(`public_remarks:${remarks}`);
+  }
+  
+  // Add static parameters
+  filters.push('limit:12');
+  filters.push('order:price');
+  
+  // Construct and navigate to URL
+  const finalUrl = baseUrl + filters.join('+');
+  window.location.href = finalUrl;
+}
+</script>
