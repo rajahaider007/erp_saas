@@ -146,105 +146,114 @@ const UsersIndex = () => {
 
         {/* Users Table */}
         <div className="data-table-container">
-          <div className="data-table">
-            <table className="table">
+          <div className="table-wrapper">
+            <table className="data-table">
               <thead>
                 <tr>
-                  <th className="checkbox-column">
-                    <input type="checkbox" className="table-checkbox" />
+                  <th className="checkbox-cell">
+                    <input type="checkbox" className="checkbox" />
                   </th>
                   <th className="sortable">
-                    ID
+                    <div className="th-content">
+                      ID
+                      <svg className="sort-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M5 12l5-5 5 5H5z" />
+                      </svg>
+                    </div>
                   </th>
                   <th className="sortable">
-                    USER INFO
-                    <svg className="sort-icon" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M5 12l5-5 5 5H5z" />
-                    </svg>
+                    <div className="th-content">
+                      USER INFO
+                      <svg className="sort-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M5 12l5-5 5 5H5z" />
+                      </svg>
+                    </div>
                   </th>
                   <th className="sortable">
-                    STATUS
-                    <svg className="sort-icon" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M5 12l5-5 5 5H5z" />
-                    </svg>
+                    <div className="th-content">
+                      STATUS
+                      <svg className="sort-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M5 12l5-5 5 5H5z" />
+                      </svg>
+                    </div>
                   </th>
                   <th className="sortable">
-                    UPDATED
-                    <svg className="sort-icon" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M5 12l5-5 5 5H5z" />
-                    </svg>
+                    <div className="th-content">
+                      UPDATED
+                      <svg className="sort-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M5 12l5-5 5 5H5z" />
+                      </svg>
+                    </div>
                   </th>
-                  <th>ACTIONS</th>
+                  <th className="actions-header">ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredUsers.map((user) => (
-                  <tr key={user.id}>
-                    <td className="checkbox-column">
-                      <input type="checkbox" className="table-checkbox" />
+                  <tr key={user.id} className="table-row">
+                    <td>
+                      <input type="checkbox" className="checkbox" />
                     </td>
                     <td>
-                      <Link href={`/system/users/${user.id}`} className="table-link">
-                        #{user.id}
-                      </Link>
+                      <span className="user-id">#{user.id}</span>
                     </td>
                     <td>
-                      <div className="table-cell-content">
-                        <div className="table-icon">
+                      <div className="user-info">
+                        <div className="user-avatar">
                           <UserIcon size={16} />
                         </div>
-                        <div className="table-text">
-                          <div className="table-text-primary">
+                        <div className="user-details">
+                          <div className="user-name">
                             {user.fname} {user.mname} {user.lname}
                           </div>
-                          <div className="table-text-secondary">
-                            @{user.loginid}
-                          </div>
+                          <div className="user-login">@{user.loginid}</div>
                         </div>
                       </div>
                     </td>
                     <td>
-                      <div className="status-badge status-active">
-                        <div className="status-dot"></div>
-                        {user.status?.charAt(0).toUpperCase() + user.status?.slice(1)}
+                      <div className="status-container">
+                        <span className={`status-badge status-${user.status}`}>
+                          <div className="status-dot"></div>
+                          {user.status?.charAt(0).toUpperCase() + user.status?.slice(1)}
+                        </span>
                       </div>
                     </td>
                     <td>
-                      <div className="table-date">
-                        <Calendar size={16} />
-                        {new Date(user.updated_at).toLocaleDateString('en-US', {
+                      <div className="date-cell">
+                        <Calendar size={14} />
+                        <span>{new Date(user.updated_at).toLocaleDateString('en-US', {
                           month: 'short',
                           day: '2-digit',
                           year: 'numeric',
                           hour: '2-digit',
                           minute: '2-digit'
-                        })}
+                        })}</span>
                       </div>
                     </td>
                     <td>
-                      <div className="action-buttons">
+                      <div className="actions-cell">
                         <Link
                           href={`/system/users/${user.id}`}
-                          className="action-btn action-view"
+                          className="action-btn view"
                           title="View User"
                         >
                           <Eye size={16} />
                         </Link>
                         <Link
                           href={`/system/users/${user.id}/edit`}
-                          className="action-btn action-edit"
+                          className="action-btn edit"
                           title="Edit User"
                         >
                           <Edit size={16} />
                         </Link>
                         <button
-                          className="action-btn action-copy"
-                          title="Duplicate User"
+                          className="action-btn copy"
+                          title="More Options"
                         >
                           <MoreVertical size={16} />
                         </button>
                         <button
-                          className="action-btn action-delete"
+                          className="action-btn delete"
                           title="Delete User"
                           onClick={() => {
                             if (confirm('Are you sure you want to delete this user?')) {
@@ -264,36 +273,31 @@ const UsersIndex = () => {
 
           {/* Empty State */}
           {filteredUsers.length === 0 && (
-            <div className="text-center py-12">
-              <Users className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No users found</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                {searchTerm || statusFilter !== 'all' || roleFilter !== 'all'
-                  ? 'Try adjusting your search or filter criteria.'
-                  : 'Get started by creating a new user.'}
-              </p>
-              {(!searchTerm && statusFilter === 'all' && roleFilter === 'all') && (
-                <div className="mt-6">
-                  <Link
-                    href="/system/users/create"
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add New User
-                  </Link>
-                </div>
-              )}
+            <div className="empty-state">
+              <Users className="empty-icon" />
+              <h3>No users found</h3>
+              <p>Try adjusting your filters or search criteria</p>
+              <Link href="/system/users/create" className="btn btn-primary">
+                <Plus size={20} />
+                Add Your First User
+              </Link>
             </div>
           )}
         </div>
 
         {/* Pagination */}
-        <div className="table-pagination">
+        <div className="pagination-container">
           <div className="pagination-info">
-            <span>Showing {users?.from || 1} to {users?.to || users?.data?.length || 0} of {users?.total || users?.data?.length || 0} entries</span>
-            <div className="pagination-per-page">
+            <div className="results-info">
+              Showing {users?.from || 1} to {users?.to || users?.data?.length || 0} of {users?.total || users?.data?.length || 0} entries
+            </div>
+            <div className="page-size-selector">
               <span>Show:</span>
-              <input type="number" value="25" className="pagination-input" />
+              <select className="page-size-select">
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
               <span>per page</span>
             </div>
           </div>
@@ -304,18 +308,18 @@ const UsersIndex = () => {
             <button className="pagination-btn" disabled>
               <span>&laquo;</span>
             </button>
-            <button className="pagination-btn pagination-btn-active">1</button>
+            <button className="pagination-btn active">1</button>
             <button className="pagination-btn" disabled>
               <span>&raquo;</span>
             </button>
             <button className="pagination-btn" disabled>
               <span>&raquo;&raquo;</span>
             </button>
-            <div className="pagination-goto">
-              <span>Go to:</span>
-              <input type="number" value="1" className="pagination-input" />
-              <span>of 1</span>
-            </div>
+          </div>
+          <div className="quick-jump">
+            <span>Go to:</span>
+            <input type="number" value="1" className="jump-input" />
+            <span>of 1</span>
           </div>
         </div>
       </div>
