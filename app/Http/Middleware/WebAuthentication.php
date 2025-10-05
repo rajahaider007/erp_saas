@@ -25,11 +25,18 @@ class WebAuthentication
         // Check for license alert
         $licenseAlert = $request->session()->get('license_alert');
         
+        // Convert user object to array to avoid stdClass issues
+        $userArray = (array) $user;
+        $permissions = json_decode($user->permissions, true);
+        if (!is_array($permissions)) {
+            $permissions = [];
+        }
+        
         $request->merge([
-            'authenticated_user' => $user,
+            'authenticated_user' => $userArray,
             'user_id' => $user->id,
             'user_role' => $user->role,
-            'user_permissions' => json_decode($user->permissions, true) ?? [],
+            'user_permissions' => $permissions,
             'license_alert' => $licenseAlert
         ]);
 

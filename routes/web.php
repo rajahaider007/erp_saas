@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\LoginController;
 use Inertia\Inertia;
 use App\Http\Controllers\system\ModuleController;
@@ -60,9 +61,9 @@ Route::get('/login', function () {
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::get('/dashboard', function () {
+Route::get('/dashboard', function (Request $request) {
     return Inertia::render('dashboard/index');
-})->middleware('auth')->name('dashboard');
+})->middleware('web.auth')->name('dashboard');
 
 // System Module Management Routes (ADD MISSING EDIT ROUTE)
 Route::get('/system/AddModules', [ModuleController::class, 'index'])->name('system.add_modules');

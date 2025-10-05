@@ -7,7 +7,7 @@
         const LoginPage = () => {
           const { errors: pageErrors, concurrent_sessions: concurrentSessions, login_data: loginData } = usePage().props;
           const [formData, setFormData] = useState({
-            email: '',
+            email: 'admin@erpsystem.com',
             password: '',
             remember_me: false,
             terminate_other_sessions: false
@@ -54,6 +54,8 @@
           const handleSubmit = (e) => {
             e.preventDefault();
             
+            console.log('Form submitted with data:', formData);
+            
             if (!formData.email || !formData.password) {
               setAlert({
                 type: 'error',
@@ -65,29 +67,49 @@
             setIsLoading(true);
             setAlert(null);
 
-            router.post('/login', formData, {
-              onSuccess: (page) => {
-                console.log('Login success, redirecting to dashboard...');
-                setAlert({
-                  type: 'success',
-                  message: 'Login successful! Redirecting...'
+            console.log('Making POST request to /login with data:', formData);
+
+            // Test if router is available
+            console.log('Router object:', router);
+            console.log('Router.post method:', typeof router.post);
+
+            try {
+                router.post('/login', formData, {
+                    onStart: () => {
+                        console.log('Request started...');
+                    },
+                    onSuccess: (page) => {
+                        console.log('Login success, redirecting to dashboard...', page);
+                        setAlert({
+                            type: 'success',
+                            message: 'Login successful! Redirecting...'
+                        });
+                        // Redirect to dashboard after successful login
+                        setTimeout(() => {
+                            router.visit('/dashboard');
+                        }, 1000);
+                    },
+                    onError: (errors) => {
+                        console.log('Login error:', errors);
+                        setAlert({
+                            type: 'error',
+                            message: errors.email || errors.password || errors.general || 'Login failed'
+                        });
+                        setIsLoading(false);
+                    },
+                    onFinish: () => {
+                        console.log('Request finished');
+                        setIsLoading(false);
+                    }
                 });
-                // Redirect to dashboard after successful login
-                setTimeout(() => {
-                  router.visit('/dashboard');
-                }, 1000);
-              },
-              onError: (errors) => {
+            } catch (error) {
+                console.error('Router error:', error);
                 setAlert({
-                  type: 'error',
-                  message: errors.email || errors.password || errors.general || 'Login failed'
+                    type: 'error',
+                    message: 'Failed to submit login form'
                 });
                 setIsLoading(false);
-              },
-              onFinish: () => {
-                setIsLoading(false);
-              }
-            });
+            }
           };
 
           const handleForceLogout = (sessionId) => {
@@ -387,7 +409,7 @@
               </div>
 
               {/* Custom styles */}
-              <style jsx>{`
+              <style jsx="true">{`
                 @keyframes float {
                   0%, 100% { transform: translateY(0px) rotate(0deg); }
                   50% { transform: translateY(-20px) rotate(180deg); }

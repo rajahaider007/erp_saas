@@ -23,9 +23,15 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
+        Log::info('Login attempt started', [
+            'email' => $request->email,
+            'ip' => $request->ip(),
+            'user_agent' => $request->header('User-Agent')
+        ]);
+        
         try {
             $request->validate([
-                'email' => 'required|email|max:255',
+                'email' => 'required|string|max:255',
                 'password' => 'required|string|min:6',
             ]);
 
@@ -89,14 +95,28 @@ class LoginController extends Controller
                 ]);
             $token = Str::random(80);
 
+            // Regenerate session BEFORE login to prevent session fixation attacks
+            $request->session()->regenerate();
+            
             // Create User model instance and login
             $userModel = User::find($user->id);
-            auth()->login($userModel);
+            auth()->login($userModel, $request->remember_me ?? false);
             
-            // Store additional session data
+            // Store additional session data (required by custom middleware)
             $request->session()->put('auth_token', $token);
             $request->session()->put('user_id', $user->id);
             $request->session()->put('auth_user', $user);
+            
+            // Save session immediately
+            $request->session()->save();
+            
+            // Debug: Log session data
+            Log::info('Session data after login:', [
+                'user_id' => $request->session()->get('user_id'),
+                'auth_check' => auth()->check(),
+                'auth_id' => auth()->id(),
+                'session_id' => $request->session()->getId()
+            ]);
 
             $this->logLoginHistory($user->id, $request);
 
@@ -110,10 +130,13 @@ class LoginController extends Controller
             Log::info('Login successful for user ID: ' . $user->id);
             
             // Redirect for Inertia SPA
-            return redirect()->route('dashboard');
+            return redirect()->intended('/dashboard');
         } catch (ValidationException $e) {
+            Log::error('Login validation error: ' . $e->getMessage());
             throw $e; // Let Inertia handle validation errors automatically
         } catch (\Exception $e) {
+            Log::error('Login exception: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
             return back()->withErrors([
                 'email' => 'An error occurred during login. Please try again.'
             ]);
