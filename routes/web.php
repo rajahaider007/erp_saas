@@ -73,8 +73,30 @@ Route::get('/erp-modules', function (Request $request) {
 
 // Chart of Accounts Route
 Route::get('/accounts/chart-of-accounts', function (Request $request) {
-    return Inertia::render('Accounts/ChartOfAccounts');
+    $currencies = DB::table('currencies')
+        ->where('is_active', true)
+        ->orderBy('sort_order')
+        ->get();
+    
+    $accounts = DB::table('chart_of_accounts')
+        ->where('comp_id', 1)
+        ->where('location_id', 1)
+        ->orderBy('account_code')
+        ->get();
+        
+    return Inertia::render('Accounts/ChartOfAccounts', [
+        'currencies' => $currencies,
+        'accounts' => $accounts
+    ]);
 })->middleware('web.auth')->name('accounts.chart-of-accounts');
+
+// Chart of Accounts API Routes
+Route::prefix('api/chart-of-accounts')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\ChartOfAccountsController::class, 'index']);
+    Route::post('/', [App\Http\Controllers\ChartOfAccountsController::class, 'store']);
+    Route::put('/{id}', [App\Http\Controllers\ChartOfAccountsController::class, 'update']);
+    Route::delete('/{id}', [App\Http\Controllers\ChartOfAccountsController::class, 'destroy']);
+});
 
 // Dynamic Module Dashboards
 Route::get('/{module}/dashboard', function (Request $request, $module) {

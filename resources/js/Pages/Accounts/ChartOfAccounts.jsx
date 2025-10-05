@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import App from '../App.jsx';
 import Swal from 'sweetalert2';
 import {
@@ -31,7 +31,10 @@ import {
 } from 'lucide-react';
 
 const ChartOfAccounts = () => {
-  const [accounts, setAccounts] = useState([]);
+  const { props } = usePage();
+  const { currencies = [], accounts: seededAccounts = [] } = props;
+  
+  const [accounts, setAccounts] = useState(seededAccounts);
   const [loading, setLoading] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState({
     assets: true,
@@ -40,147 +43,140 @@ const ChartOfAccounts = () => {
     revenue: true,
     expenses: true
   });
+  const [expandedAccounts, setExpandedAccounts] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [formData, setFormData] = useState({
     account_code: '',
     account_name: '',
+    short_code: '',
     account_type: 'Assets',
-    account_subtype: '',
     parent_account_id: null,
-    normal_balance: 'Debit',
-    opening_balance: 0.00,
     currency: 'USD',
-    is_parent: false,
-    is_child: false,
-    is_transactional: false,
-    status: 'Active',
-    tax_category: 'Taxable',
-    reporting_category: '',
-    cost_center: '',
-    department: '',
-    min_balance: null,
-    max_balance: null,
-    requires_approval: false,
-    comp_id: null,
-    location_id: null
+    status: 'Active'
   });
-
-  // Sample data structure
-  const accountCategories = [
-    {
-      id: 'assets',
-      name: 'Assets',
-      code: '100000000000000',
-      icon: Building,
-      color: 'blue',
-      accounts: [
-        {
-          id: 1,
-          account_code: '100000000000000',
-          account_name: 'Current Assets',
-          account_type: 'Assets',
-          account_subtype: 'Current Assets',
-          parent_account_id: null,
-          account_level: 1,
-          normal_balance: 'Debit',
-          current_balance: 0.00,
-          is_parent: true,
-          is_child: false,
-          is_transactional: false,
-          status: 'Active',
-          children: [
-            {
-              id: 2,
-              account_code: '100000000000001',
-              account_name: 'Cash & Cash Equivalents',
-              account_type: 'Assets',
-              account_subtype: 'Current Assets',
-              parent_account_id: 1,
-              account_level: 2,
-              normal_balance: 'Debit',
-              current_balance: 0.00,
-              is_parent: true,
-              is_child: false,
-              is_transactional: false,
-              status: 'Active',
-              children: [
-                {
-                  id: 3,
-                  account_code: '100000000000002',
-                  account_name: 'Petty Cash',
-                  account_type: 'Assets',
-                  account_subtype: 'Current Assets',
-                  parent_account_id: 2,
-                  account_level: 3,
-                  normal_balance: 'Debit',
-                  current_balance: 0.00,
-                  is_parent: false,
-                  is_child: true,
-                  is_transactional: true,
-                  status: 'Active'
-                },
-                {
-                  id: 4,
-                  account_code: '100000000000003',
-                  account_name: 'Cash in Hand',
-                  account_type: 'Assets',
-                  account_subtype: 'Current Assets',
-                  parent_account_id: 2,
-                  account_level: 3,
-                  normal_balance: 'Debit',
-                  current_balance: 0.00,
-                  is_parent: false,
-                  is_child: true,
-                  is_transactional: true,
-                  status: 'Active'
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'liabilities',
-      name: 'Liabilities',
-      code: '200000000000000',
-      icon: CreditCard,
-      color: 'red',
-      accounts: []
-    },
-    {
-      id: 'equity',
-      name: 'Equity',
-      code: '300000000000000',
-      icon: Users,
-      color: 'green',
-      accounts: []
-    },
-    {
-      id: 'revenue',
-      name: 'Revenue',
-      code: '400000000000000',
-      icon: TrendingUp,
-      color: 'emerald',
-      accounts: []
-    },
-    {
-      id: 'expenses',
-      name: 'Expenses',
-      code: '500000000000000',
-      icon: TrendingDown,
-      color: 'orange',
-      accounts: []
+  
+  // Generate account code based on hierarchy (sequential, not random)
+  const generateAccountCode = (parentCode = '', level = 1) => {
+    if (level === 1) {
+      // Level 1: 100000000000000, 200000000000000, etc.
+      const typeCodes = {
+        'Assets': '100000000000000',
+        'Liabilities': '200000000000000',
+        'Equity': '300000000000000',
+        'Revenue': '400000000000000',
+        'Expenses': '500000000000000'
+      };
+      return typeCodes[formData.account_type] || '100000000000000';
+    } else if (level === 2) {
+      // Level 2: 100010000000000, 100020000000000, etc.
+      const baseCode = parentCode.substring(0, 5);
+      // Find next sequential number for this parent
+      const existingAccounts = accounts.filter(acc => 
+        acc.account_code.startsWith(baseCode) && 
+        acc.account_level === 2
+      );
+      const nextNumber = existingAccounts.length + 1;
+      return baseCode + nextNumber.toString().padStart(5, '0') + '000000000';
+    } else if (level === 3) {
+      // Level 3: 100010000000001, 100010000000002, etc.
+      const baseCode = parentCode.substring(0, 10);
+      // Find next sequential number for this parent
+      const existingAccounts = accounts.filter(acc => 
+        acc.account_code.startsWith(baseCode) && 
+        acc.account_level === 3
+      );
+      const nextNumber = existingAccounts.length + 1;
+      return baseCode + nextNumber.toString().padStart(5, '0');
     }
-  ];
+    return '';
+  };
+
+  // Auto-detect account properties (system will handle this automatically)
+  const getAccountProperties = (parentCode = '', level = 1) => {
+    // System will automatically detect these properties based on hierarchy
+    return {
+      is_parent: level < 3,
+      is_child: level > 1,
+      is_transactional: level === 3,
+      comp_id: 1, // Auto-detect from current user session
+      location_id: 1 // Auto-detect from current user session
+    };
+  };
+
+  // Dynamic categories based on seeded data
+  const getAccountCategories = () => {
+    const categories = [
+      {
+        id: 'assets',
+        name: 'Assets',
+        code: '100000000000000',
+        icon: Building,
+        color: 'blue',
+        accounts: []
+      },
+      {
+        id: 'liabilities',
+        name: 'Liabilities',
+        code: '200000000000000',
+        icon: CreditCard,
+        color: 'red',
+        accounts: []
+      },
+      {
+        id: 'equity',
+        name: 'Equity',
+        code: '300000000000000',
+        icon: Users,
+        color: 'green',
+        accounts: []
+      },
+      {
+        id: 'revenue',
+        name: 'Revenue',
+        code: '400000000000000',
+        icon: TrendingUp,
+        color: 'emerald',
+        accounts: []
+      },
+      {
+        id: 'expenses',
+        name: 'Expenses',
+        code: '500000000000000',
+        icon: TrendingDown,
+        color: 'orange',
+        accounts: []
+      }
+    ];
+
+    // Group accounts by type
+    accounts.forEach(account => {
+      const categoryId = account.account_type.toLowerCase();
+      const category = categories.find(cat => cat.id === categoryId);
+      if (category) {
+        category.accounts.push(account);
+      }
+    });
+
+    return categories;
+  };
+
+  const accountCategories = getAccountCategories();
 
   // Toggle category expansion
   const toggleCategory = (categoryId) => {
     setExpandedCategories(prev => ({
       ...prev,
       [categoryId]: !prev[categoryId]
+    }));
+  };
+
+  // Toggle account expansion
+  const toggleAccount = (accountId) => {
+    setExpandedAccounts(prev => ({
+      ...prev,
+      [accountId]: !prev[accountId]
     }));
   };
 
@@ -193,6 +189,12 @@ const ChartOfAccounts = () => {
       revenue: true,
       expenses: true
     });
+    // Expand all accounts too
+    const allAccountIds = {};
+    accounts.forEach(account => {
+      allAccountIds[account.id] = true;
+    });
+    setExpandedAccounts(allAccountIds);
   };
 
   // Collapse all categories
@@ -204,10 +206,11 @@ const ChartOfAccounts = () => {
       revenue: false,
       expenses: false
     });
+    setExpandedAccounts({});
   };
 
   // Open modal for add/edit
-  const openModal = (mode, account = null) => {
+  const openModal = (mode, account = null, parentAccount = null) => {
     setModalMode(mode);
     setSelectedAccount(account);
     
@@ -215,49 +218,24 @@ const ChartOfAccounts = () => {
       setFormData({
         account_code: account.account_code,
         account_name: account.account_name,
+        short_code: account.short_code || '',
         account_type: account.account_type,
-        account_subtype: account.account_subtype || '',
         parent_account_id: account.parent_account_id,
-        normal_balance: account.normal_balance,
-        opening_balance: account.opening_balance || 0.00,
         currency: account.currency || 'USD',
-        is_parent: account.is_parent,
-        is_child: account.is_child,
-        is_transactional: account.is_transactional,
-        status: account.status,
-        tax_category: account.tax_category || 'Taxable',
-        reporting_category: account.reporting_category || '',
-        cost_center: account.cost_center || '',
-        department: account.department || '',
-        min_balance: account.min_balance,
-        max_balance: account.max_balance,
-        requires_approval: account.requires_approval || false,
-        comp_id: account.comp_id,
-        location_id: account.location_id
+        status: account.status
       });
     } else {
+      const level = parentAccount ? parentAccount.account_level + 1 : 1;
+      const generatedCode = generateAccountCode(parentAccount?.account_code, level);
+      
       setFormData({
-        account_code: '',
+        account_code: generatedCode,
         account_name: '',
-        account_type: 'Assets',
-        account_subtype: '',
-        parent_account_id: null,
-        normal_balance: 'Debit',
-        opening_balance: 0.00,
+        short_code: '',
+        account_type: parentAccount ? parentAccount.account_type : 'Assets',
+        parent_account_id: parentAccount?.id || null,
         currency: 'USD',
-        is_parent: false,
-        is_child: false,
-        is_transactional: false,
-        status: 'Active',
-        tax_category: 'Taxable',
-        reporting_category: '',
-        cost_center: '',
-        department: '',
-        min_balance: null,
-        max_balance: null,
-        requires_approval: false,
-        comp_id: null,
-        location_id: null
+        status: 'Active'
       });
     }
     
@@ -268,29 +246,15 @@ const ChartOfAccounts = () => {
   const closeModal = () => {
     setShowModal(false);
     setSelectedAccount(null);
-      setFormData({
-        account_code: '',
-        account_name: '',
-        account_type: 'Assets',
-        account_subtype: '',
-        parent_account_id: null,
-        normal_balance: 'Debit',
-        opening_balance: 0.00,
-        currency: 'USD',
-        is_parent: false,
-        is_child: false,
-        is_transactional: false,
-        status: 'Active',
-        tax_category: 'Taxable',
-        reporting_category: '',
-        cost_center: '',
-        department: '',
-        min_balance: null,
-        max_balance: null,
-        requires_approval: false,
-        comp_id: null,
-        location_id: null
-      });
+    setFormData({
+      account_code: '',
+      account_name: '',
+      short_code: '',
+      account_type: 'Assets',
+      parent_account_id: null,
+      currency: 'USD',
+      status: 'Active'
+    });
   };
 
   // Handle form submission
@@ -299,38 +263,77 @@ const ChartOfAccounts = () => {
     setLoading(true);
     
     try {
-      // AJAX call will be implemented here
-      console.log('Form submitted:', formData);
+      // Auto-detect properties based on hierarchy
+      const level = selectedAccount ? selectedAccount.account_level + 1 : 1;
+      const autoDetectedProperties = getAccountProperties(formData.parent_account_id, level);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Prepare data with auto-detected properties
+      const submitData = {
+        ...formData,
+        ...autoDetectedProperties,
+        account_level: level
+      };
       
-      // Show success message
-      if (modalMode === 'add') {
-        await Swal.fire({
-          icon: 'success',
-          title: 'Success!',
-          text: 'Account has been added successfully.',
-          confirmButtonColor: '#3B82F6',
-          confirmButtonText: 'OK'
-        });
+      // Make API call
+      const url = modalMode === 'add' 
+        ? '/api/chart-of-accounts' 
+        : `/api/chart-of-accounts/${selectedAccount.id}`;
+      
+      const method = modalMode === 'add' ? 'POST' : 'PUT';
+      
+      // Get CSRF token
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                       document.querySelector('input[name="_token"]')?.value ||
+                       window.Laravel?.csrfToken;
+      
+      if (!csrfToken) {
+        throw new Error('CSRF token not found. Please refresh the page and try again.');
+      }
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify(submitData)
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Show success message
+        if (modalMode === 'add') {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Account has been added successfully.',
+            confirmButtonColor: '#3B82F6',
+            confirmButtonText: 'OK'
+          });
+        } else {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Updated!',
+            text: 'Account has been updated successfully.',
+            confirmButtonColor: '#3B82F6',
+            confirmButtonText: 'OK'
+          });
+        }
+        
+        // Refresh accounts list
+        window.location.reload();
+        closeModal();
       } else {
-        await Swal.fire({
-          icon: 'success',
-          title: 'Updated!',
-          text: 'Account has been updated successfully.',
-          confirmButtonColor: '#3B82F6',
-          confirmButtonText: 'OK'
-        });
+        throw new Error(result.message || 'Operation failed');
       }
       
-      closeModal();
     } catch (error) {
       console.error('Error:', error);
       await Swal.fire({
         icon: 'error',
         title: 'Error!',
-        text: 'Something went wrong. Please try again.',
+        text: error.message || 'Something went wrong. Please try again.',
         confirmButtonColor: '#EF4444',
         confirmButtonText: 'OK'
       });
@@ -342,6 +345,47 @@ const ChartOfAccounts = () => {
   // Handle delete
   const handleDelete = async (account) => {
     try {
+      // Check if it's a Level 1 account (main categories)
+      if (account.account_level === 1) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Cannot Delete!',
+          text: 'Main account categories (Level 1) cannot be deleted. These are fundamental accounting categories.',
+          confirmButtonColor: '#EF4444',
+          confirmButtonText: 'OK'
+        });
+        return;
+      }
+
+      // Check if account has children
+      const hasChildren = accounts.some(acc => acc.parent_account_id === account.id);
+      
+      if (hasChildren) {
+        const childAccounts = accounts.filter(acc => acc.parent_account_id === account.id);
+        const childNames = childAccounts.map(child => child.account_name).join(', ');
+        
+        await Swal.fire({
+          icon: 'warning',
+          title: 'Cannot Delete Parent Account!',
+          html: `
+            <div class="text-left">
+              <p class="mb-3">This account has child accounts that must be deleted first:</p>
+              <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg mb-3">
+                <strong>Child Accounts:</strong><br/>
+                ${childNames}
+              </div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Please delete all child accounts first, then you can delete this parent account.
+              </p>
+            </div>
+          `,
+          confirmButtonColor: '#3B82F6',
+          confirmButtonText: 'I Understand'
+        });
+        return;
+      }
+
+      // Proceed with deletion for accounts without children
       const result = await Swal.fire({
         title: 'Are you sure?',
         text: `You are about to delete "${account.account_name}". This action cannot be undone!`,
@@ -354,107 +398,185 @@ const ChartOfAccounts = () => {
       });
 
       if (result.isConfirmed) {
-        // AJAX call will be implemented here
-        console.log('Delete account:', account);
+        // Get CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                         document.querySelector('input[name="_token"]')?.value ||
+                         window.Laravel?.csrfToken;
         
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        await Swal.fire({
-          icon: 'success',
-          title: 'Deleted!',
-          text: 'Account has been deleted successfully.',
-          confirmButtonColor: '#3B82F6',
-          confirmButtonText: 'OK'
+        if (!csrfToken) {
+          throw new Error('CSRF token not found. Please refresh the page and try again.');
+        }
+
+        // Make API call
+        const response = await fetch(`/api/chart-of-accounts/${account.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+          }
         });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Deleted!',
+            text: 'Account has been deleted successfully.',
+            confirmButtonColor: '#3B82F6',
+            confirmButtonText: 'OK'
+          });
+          
+          // Refresh accounts list
+          window.location.reload();
+        } else {
+          throw new Error(result.message || 'Delete failed');
+        }
       }
     } catch (error) {
       console.error('Error:', error);
       await Swal.fire({
         icon: 'error',
         title: 'Error!',
-        text: 'Something went wrong. Please try again.',
+        text: error.message || 'Something went wrong. Please try again.',
         confirmButtonColor: '#EF4444',
         confirmButtonText: 'OK'
       });
     }
   };
 
-  // Render account tree
+  // Render account tree with accordion functionality
   const renderAccountTree = (accounts, level = 0) => {
-    return accounts.map((account) => (
-      <div key={account.id} className="ml-4">
-        <div className={`flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 ${level > 0 ? 'ml-4' : ''}`}>
-          <div className="flex items-center space-x-3">
-            <div className={`w-2 h-2 rounded-full ${
-              account.account_type === 'Assets' ? 'bg-blue-500' :
-              account.account_type === 'Liabilities' ? 'bg-red-500' :
-              account.account_type === 'Equity' ? 'bg-green-500' :
-              account.account_type === 'Revenue' ? 'bg-emerald-500' :
-              'bg-orange-500'
-            }`} />
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-mono text-sm text-gray-500 dark:text-gray-400">
-                  {account.account_code}
-                </span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {account.account_name}
-                </span>
-                {account.is_transactional && (
-                  <span className="px-2 py-1 text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full">
-                    Transactional
-                  </span>
-                )}
-                {account.is_parent && (
-                  <span className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full">
-                    Parent
-                  </span>
-                )}
+    return accounts.map((account) => {
+      const hasChildren = accounts.some(acc => acc.parent_account_id === account.id);
+      const isExpanded = expandedAccounts[account.id];
+      
+      return (
+        <div key={account.id} className="ml-4">
+          <div className={`flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 ${level > 0 ? 'ml-4' : ''}`}>
+            <div className="flex items-center space-x-3 flex-1">
+              {/* Accordion Toggle Button */}
+              {hasChildren && (
+                <button
+                  onClick={() => toggleAccount(account.id)}
+                  className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors duration-200"
+                  title={isExpanded ? 'Collapse' : 'Expand'}
+                >
+                  {isExpanded ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </button>
+              )}
+              
+              {/* Account Info */}
+              <div className="flex items-center space-x-3 flex-1">
+                <div className={`w-2 h-2 rounded-full ${
+                  account.account_type === 'Assets' ? 'bg-blue-500' :
+                  account.account_type === 'Liabilities' ? 'bg-red-500' :
+                  account.account_type === 'Equity' ? 'bg-green-500' :
+                  account.account_type === 'Revenue' ? 'bg-emerald-500' :
+                  'bg-orange-500'
+                }`} />
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-mono text-sm text-gray-500 dark:text-gray-400">
+                      {account.account_code}
+                    </span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      {account.account_name}
+                    </span>
+                    {account.short_code && (
+                      <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full">
+                        {account.short_code}
+                      </span>
+                    )}
+                    {account.account_level === 3 && (
+                      <span className="px-2 py-1 text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full">
+                        Transactional
+                      </span>
+                    )}
+                    {account.account_level < 3 && (
+                      <span className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full">
+                        Parent
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {account.account_type} • Level {account.account_level} • {account.currency}
+                  </div>
+                </div>
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                {account.account_type} • {account.normal_balance} • Balance: ${account.current_balance.toLocaleString()}
-              </div>
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => openModal('edit', account)}
+                className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors duration-200"
+                title="Edit Account"
+              >
+                <Edit className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => handleDelete(account)}
+                className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200"
+                title="Delete Account"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+              {account.account_level < 3 && (
+                <button
+                  onClick={() => openModal('add', null, account)}
+                  className="p-2 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors duration-200"
+                  title="Add Child Account"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              )}
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => openModal('edit', account)}
-              className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors duration-200"
-              title="Edit Account"
-            >
-              <Edit className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => handleDelete(account)}
-              className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200"
-              title="Delete Account"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => openModal('add', account)}
-              className="p-2 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors duration-200"
-              title="Add Child Account"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
+          {/* Children Accounts */}
+          {hasChildren && isExpanded && (
+            <div className="ml-4 mt-2">
+              {renderAccountTree(
+                accounts.filter(acc => acc.parent_account_id === account.id),
+                level + 1
+              )}
+            </div>
+          )}
         </div>
-        
-        {account.children && account.children.length > 0 && (
-          <div className="ml-4">
-            {renderAccountTree(account.children, level + 1)}
-          </div>
-        )}
-      </div>
-    ));
+      );
+    });
   };
 
   return (
     <App>
       <Head title="Chart of Accounts" />
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { 
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+          }
+          to { 
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+        .animate-slideUp {
+          animation: slideUp 0.3s ease-out;
+        }
+      `}</style>
       
       <div className="space-y-6">
         {/* Header */}
@@ -474,29 +596,22 @@ const ChartOfAccounts = () => {
               </div>
             </div>
             
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={expandAll}
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
-              >
-                <Expand className="h-4 w-4" />
-                <span>Expand All</span>
-              </button>
-              <button
-                onClick={collapseAll}
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
-              >
-                <Minimize className="h-4 w-4" />
-                <span>Collapse All</span>
-              </button>
-              <button
-                onClick={() => openModal('add')}
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors duration-200"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Add Account</span>
-              </button>
-            </div>
+             <div className="flex items-center space-x-3">
+               <button
+                 onClick={expandAll}
+                 className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
+               >
+                 <Expand className="h-4 w-4" />
+                 <span>Expand All</span>
+               </button>
+               <button
+                 onClick={collapseAll}
+                 className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
+               >
+                 <Minimize className="h-4 w-4" />
+                 <span>Collapse All</span>
+               </button>
+             </div>
           </div>
         </div>
 
@@ -574,8 +689,8 @@ const ChartOfAccounts = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100 opacity-100 animate-slideUp">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {modalMode === 'add' ? 'Add New Account' : 'Edit Account'}
@@ -588,21 +703,36 @@ const ChartOfAccounts = () => {
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Account Code
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.account_code}
-                    onChange={(e) => setFormData({...formData, account_code: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    placeholder="Enter account code"
-                    required
-                  />
-                </div>
+             <form onSubmit={handleSubmit} className="p-6 space-y-6">
+               {/* Parent Account Info */}
+               {modalMode === 'add' && selectedAccount && (
+                 <div className="md:col-span-2 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                   <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                     Adding under: <span className="font-semibold">{selectedAccount.account_name} ({selectedAccount.account_code})</span>
+                   </p>
+                 </div>
+               )}
+
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                     Account Code
+                   </label>
+                   <input
+                     type="text"
+                     value={formData.account_code}
+                     onChange={(e) => setFormData({...formData, account_code: e.target.value})}
+                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                     placeholder="Enter account code"
+                     required
+                     readOnly={modalMode === 'add'}
+                   />
+                   {modalMode === 'add' && formData.parent_account_id && (
+                     <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                       Auto-generated under parent account
+                     </p>
+                   )}
+                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -618,51 +748,23 @@ const ChartOfAccounts = () => {
                   />
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Account Type
-                  </label>
-                  <select
-                    value={formData.account_type}
-                    onChange={(e) => setFormData({...formData, account_type: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    required
-                  >
-                    <option value="Assets">Assets</option>
-                    <option value="Liabilities">Liabilities</option>
-                    <option value="Equity">Equity</option>
-                    <option value="Revenue">Revenue</option>
-                    <option value="Expenses">Expenses</option>
-                  </select>
-                </div>
+                
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Normal Balance
-                  </label>
-                  <select
-                    value={formData.normal_balance}
-                    onChange={(e) => setFormData({...formData, normal_balance: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    required
-                  >
-                    <option value="Debit">Debit</option>
-                    <option value="Credit">Credit</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Opening Balance
+                    Short Code (Optional)
                   </label>
                   <input
-                    type="number"
-                    step="0.01"
-                    value={formData.opening_balance}
-                    onChange={(e) => setFormData({...formData, opening_balance: parseFloat(e.target.value) || 0})}
+                    type="text"
+                    value={formData.short_code}
+                    onChange={(e) => setFormData({...formData, short_code: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    placeholder="0.00"
+                    placeholder="e.g., CASH, BANK, AR"
+                    maxLength={20}
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Company-specific short code for easy reference
+                  </p>
                 </div>
                 
                 <div>
@@ -674,176 +776,31 @@ const ChartOfAccounts = () => {
                     onChange={(e) => setFormData({...formData, currency: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   >
-                    <option value="USD">🇺🇸 USD - United States Dollar</option>
-                    <option value="EUR">🇪🇺 EUR - Euro</option>
-                    <option value="GBP">🇬🇧 GBP - British Pound Sterling</option>
-                    <option value="JPY">🇯🇵 JPY - Japanese Yen</option>
-                    <option value="CHF">🇨🇭 CHF - Swiss Franc</option>
-                    <option value="CAD">🇨🇦 CAD - Canadian Dollar</option>
-                    <option value="AUD">🇦🇺 AUD - Australian Dollar</option>
-                    <option value="NZD">🇳🇿 NZD - New Zealand Dollar</option>
-                    <option value="CNY">🇨🇳 CNY - Chinese Yuan</option>
-                    <option value="HKD">🇭🇰 HKD - Hong Kong Dollar</option>
-                    <option value="SGD">🇸🇬 SGD - Singapore Dollar</option>
-                    <option value="KRW">🇰🇷 KRW - South Korean Won</option>
-                    <option value="INR">🇮🇳 INR - Indian Rupee</option>
-                    <option value="PKR">🇵🇰 PKR - Pakistani Rupee</option>
-                    <option value="BDT">🇧🇩 BDT - Bangladeshi Taka</option>
-                    <option value="LKR">🇱🇰 LKR - Sri Lankan Rupee</option>
-                    <option value="NPR">🇳🇵 NPR - Nepalese Rupee</option>
-                    <option value="THB">🇹🇭 THB - Thai Baht</option>
-                    <option value="MYR">🇲🇾 MYR - Malaysian Ringgit</option>
-                    <option value="IDR">🇮🇩 IDR - Indonesian Rupiah</option>
-                    <option value="PHP">🇵🇭 PHP - Philippine Peso</option>
-                    <option value="VND">🇻🇳 VND - Vietnamese Dong</option>
-                    <option value="AED">🇦🇪 AED - UAE Dirham</option>
-                    <option value="SAR">🇸🇦 SAR - Saudi Riyal</option>
-                    <option value="QAR">🇶🇦 QAR - Qatari Riyal</option>
-                    <option value="KWD">🇰🇼 KWD - Kuwaiti Dinar</option>
-                    <option value="BHD">🇧🇭 BHD - Bahraini Dinar</option>
-                    <option value="OMR">🇴🇲 OMR - Omani Rial</option>
-                    <option value="JOD">🇯🇴 JOD - Jordanian Dinar</option>
-                    <option value="LBP">🇱🇧 LBP - Lebanese Pound</option>
-                    <option value="EGP">🇪🇬 EGP - Egyptian Pound</option>
-                    <option value="ZAR">🇿🇦 ZAR - South African Rand</option>
-                    <option value="NGN">🇳🇬 NGN - Nigerian Naira</option>
-                    <option value="KES">🇰🇪 KES - Kenyan Shilling</option>
-                    <option value="GHS">🇬🇭 GHS - Ghanaian Cedi</option>
-                    <option value="SEK">🇸🇪 SEK - Swedish Krona</option>
-                    <option value="NOK">🇳🇴 NOK - Norwegian Krone</option>
-                    <option value="DKK">🇩🇰 DKK - Danish Krone</option>
-                    <option value="PLN">🇵🇱 PLN - Polish Zloty</option>
-                    <option value="CZK">🇨🇿 CZK - Czech Koruna</option>
-                    <option value="HUF">🇭🇺 HUF - Hungarian Forint</option>
-                    <option value="RON">🇷🇴 RON - Romanian Leu</option>
-                    <option value="BGN">🇧🇬 BGN - Bulgarian Lev</option>
-                    <option value="HRK">🇭🇷 HRK - Croatian Kuna</option>
-                    <option value="RSD">🇷🇸 RSD - Serbian Dinar</option>
-                    <option value="BRL">🇧🇷 BRL - Brazilian Real</option>
-                    <option value="MXN">🇲🇽 MXN - Mexican Peso</option>
-                    <option value="ARS">🇦🇷 ARS - Argentine Peso</option>
-                    <option value="CLP">🇨🇱 CLP - Chilean Peso</option>
-                    <option value="COP">🇨🇴 COP - Colombian Peso</option>
-                    <option value="PEN">🇵🇪 PEN - Peruvian Sol</option>
-                    <option value="UYU">🇺🇾 UYU - Uruguayan Peso</option>
-                    <option value="BOB">🇧🇴 BOB - Bolivian Boliviano</option>
-                    <option value="VES">🇻🇪 VES - Venezuelan Bolívar</option>
-                    <option value="RUB">🇷🇺 RUB - Russian Ruble</option>
-                    <option value="TRY">🇹🇷 TRY - Turkish Lira</option>
-                    <option value="ILS">🇮🇱 ILS - Israeli Shekel</option>
-                    <option value="UAH">🇺🇦 UAH - Ukrainian Hryvnia</option>
-                    <option value="BYN">🇧🇾 BYN - Belarusian Ruble</option>
-                    <option value="KZT">🇰🇿 KZT - Kazakhstani Tenge</option>
-                    <option value="UZS">🇺🇿 UZS - Uzbekistani Som</option>
-                    <option value="KGS">🇰🇬 KGS - Kyrgyzstani Som</option>
-                    <option value="TJS">🇹🇯 TJS - Tajikistani Somoni</option>
-                    <option value="TMT">🇹🇲 TMT - Turkmenistani Manat</option>
-                    <option value="AFN">🇦🇫 AFN - Afghan Afghani</option>
-                    <option value="IRR">🇮🇷 IRR - Iranian Rial</option>
-                    <option value="IQD">🇮🇶 IQD - Iraqi Dinar</option>
-                    <option value="SYP">🇸🇾 SYP - Syrian Pound</option>
-                    <option value="YER">🇾🇪 YER - Yemeni Rial</option>
-                    <option value="SOS">🇸🇴 SOS - Somali Shilling</option>
-                    <option value="ETB">🇪🇹 ETB - Ethiopian Birr</option>
-                    <option value="TZS">🇹🇿 TZS - Tanzanian Shilling</option>
-                    <option value="UGX">🇺🇬 UGX - Ugandan Shilling</option>
-                    <option value="RWF">🇷🇼 RWF - Rwandan Franc</option>
-                    <option value="BIF">🇧🇮 BIF - Burundian Franc</option>
-                    <option value="MWK">🇲🇼 MWK - Malawian Kwacha</option>
-                    <option value="ZMW">🇿🇲 ZMW - Zambian Kwacha</option>
-                    <option value="BWP">🇧🇼 BWP - Botswana Pula</option>
-                    <option value="NAD">🇳🇦 NAD - Namibian Dollar</option>
-                    <option value="SZL">🇸🇿 SZL - Swazi Lilangeni</option>
-                    <option value="LSL">🇱🇸 LSL - Lesotho Loti</option>
-                    <option value="MUR">🇲🇺 MUR - Mauritian Rupee</option>
-                    <option value="SCR">🇸🇨 SCR - Seychellois Rupee</option>
-                    <option value="MAD">🇲🇦 MAD - Moroccan Dirham</option>
-                    <option value="TND">🇹🇳 TND - Tunisian Dinar</option>
-                    <option value="DZD">🇩🇿 DZD - Algerian Dinar</option>
-                    <option value="LYD">🇱🇾 LYD - Libyan Dinar</option>
-                    <option value="SDG">🇸🇩 SDG - Sudanese Pound</option>
-                    <option value="SSP">🇸🇸 SSP - South Sudanese Pound</option>
-                    <option value="CDF">🇨🇩 CDF - Congolese Franc</option>
-                    <option value="XAF">🇨🇲 XAF - Central African CFA Franc</option>
-                    <option value="XOF">🇸🇳 XOF - West African CFA Franc</option>
-                    <option value="GMD">🇬🇲 GMD - Gambian Dalasi</option>
-                    <option value="GNF">🇬🇳 GNF - Guinean Franc</option>
-                    <option value="SLL">🇸🇱 SLL - Sierra Leonean Leone</option>
-                    <option value="LRD">🇱🇷 LRD - Liberian Dollar</option>
-                    <option value="CVE">🇨🇻 CVE - Cape Verdean Escudo</option>
-                    <option value="STN">🇸🇹 STN - São Tomé and Príncipe Dobra</option>
-                    <option value="AOA">🇦🇴 AOA - Angolan Kwanza</option>
-                    <option value="ZWL">🇿🇼 ZWL - Zimbabwean Dollar</option>
+                    {currencies.map((currency) => (
+                      <option key={currency.id} value={currency.code}>
+                        {currency.symbol} {currency.code} - {currency.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Company
-                  </label>
-                  <select
-                    value={formData.comp_id || ''}
-                    onChange={(e) => setFormData({...formData, comp_id: e.target.value ? parseInt(e.target.value) : null})}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    required
-                  >
-                    <option value="">Select Company</option>
-                    <option value="1">Acme Corporation</option>
-                    <option value="2">Tech Solutions Ltd</option>
-                    <option value="3">Global Industries</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Location
-                  </label>
-                  <select
-                    value={formData.location_id || ''}
-                    onChange={(e) => setFormData({...formData, location_id: e.target.value ? parseInt(e.target.value) : null})}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    required
-                  >
-                    <option value="">Select Location</option>
-                    <option value="1">Head Office - New York</option>
-                    <option value="2">Branch Office - London</option>
-                    <option value="3">Regional Office - Dubai</option>
-                    <option value="4">Local Office - Karachi</option>
-                  </select>
-                </div>
               </div>
               
-              <div className="flex items-center space-x-4">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.is_parent}
-                    onChange={(e) => setFormData({...formData, is_parent: e.target.checked})}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Parent Account</span>
-                </label>
-                
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.is_transactional}
-                    onChange={(e) => setFormData({...formData, is_transactional: e.target.checked})}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Transactional</span>
-                </label>
-                
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.requires_approval}
-                    onChange={(e) => setFormData({...formData, requires_approval: e.target.checked})}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Requires Approval</span>
-                </label>
-              </div>
+               {/* Auto-detected fields - System will handle these automatically */}
+               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                 <div className="flex items-center space-x-2 mb-2">
+                   <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                   <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                     Auto-Detected Properties
+                   </span>
+                 </div>
+                 <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                   <p>• <strong>Account Type:</strong> Automatically inherited from parent account</p>
+                   <p>• <strong>Company & Location:</strong> Auto-detected from current user session</p>
+                   <p>• <strong>Parent/Child Status:</strong> Auto-determined by hierarchy level</p>
+                   <p>• <strong>Transactional Status:</strong> Auto-determined (Level 3 accounts only)</p>
+                 </div>
+               </div>
               
               <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <button
@@ -871,3 +828,4 @@ const ChartOfAccounts = () => {
 };
 
 export default ChartOfAccounts;
+

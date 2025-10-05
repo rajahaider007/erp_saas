@@ -149,6 +149,7 @@ const Sidebar = () => {
 
   // Function to detect if we're in a module-specific URL
   const isModuleUrl = (url) => {
+    if (!url) return false;
     const path = url.replace(/^\/+/, '').split('/');
     return path.length > 0 && 
            path[0] !== 'system' && 
@@ -159,6 +160,7 @@ const Sidebar = () => {
 
   // Function to get current module name from URL
   const getCurrentModuleName = (url) => {
+    if (!url) return null;
     const path = url.replace(/^\/+/, '').split('/');
     return path[0];
   };
@@ -254,9 +256,9 @@ const Sidebar = () => {
     loadCurrentModuleData();
   }, [url]);
 
-  // Load dynamic menus from availableMenus
+  // Load dynamic menus from availableMenus - only show system menus when not in a specific module
   React.useEffect(() => {
-    if (availableMenus && availableMenus.length > 0) {
+    if (availableMenus && availableMenus.length > 0 && !isModuleUrl(url)) {
       // For super admin, show all menus without permission check
       let systemMenus;
       if (user?.role === 'super_admin') {
@@ -288,6 +290,11 @@ const Sidebar = () => {
           return [...existingItems, systemGroup];
         });
       }
+    } else if (isModuleUrl(url)) {
+      // When in a module, remove system group from navigation
+      setNavigation(prev => {
+        return prev.filter(i => i.name !== 'System');
+      });
     }
   }, [url, canView, availableMenus, user?.role]);
 

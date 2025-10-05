@@ -120,9 +120,20 @@ const Header = () => {
     buildHeaderNavigation();
   }, [url, canView, user?.role, modules]);
 
-  // Load dynamic header menus from availableMenus
+  // Function to detect if we're in a module-specific URL
+  const isModuleUrl = (url) => {
+    if (!url) return false;
+    const path = url.replace(/^\/+/, '').split('/');
+    return path.length > 0 && 
+           path[0] !== 'system' && 
+           path[0] !== 'dashboard' && 
+           path[0] !== 'erp-modules' &&
+           path[0] !== '';
+  };
+
+  // Load dynamic header menus from availableMenus - only show system menus when not in a specific module
   React.useEffect(() => {
-    if (availableMenus && availableMenus.length > 0) {
+    if (availableMenus && availableMenus.length > 0 && !isModuleUrl(url)) {
       // For super admin, show all menus without permission check
       let systemMenus;
       if (user?.role === 'super_admin') {
@@ -153,6 +164,11 @@ const Header = () => {
           return [...existingItems, systemGroup];
         });
       }
+    } else if (isModuleUrl(url)) {
+      // When in a module, remove system group from navigation
+      setNavigationItems(prev => {
+        return prev.filter(i => i.name !== 'System');
+      });
     }
   }, [url, canView, availableMenus, user?.role]);
 
