@@ -56,6 +56,54 @@ class User extends Authenticatable
     ];
 
     /**
+     * Get the name of the unique identifier for the user.
+     */
+    public function getAuthIdentifierName()
+    {
+        return 'id';
+    }
+
+    /**
+     * Get the unique identifier for the user.
+     */
+    public function getAuthIdentifier()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Get the password for the user.
+     */
+    public function getAuthPassword()
+    {
+        return $this->password;
+    }
+
+    /**
+     * Get the token value for the "remember me" session.
+     */
+    public function getRememberToken()
+    {
+        return $this->remember_token;
+    }
+
+    /**
+     * Set the token value for the "remember me" session.
+     */
+    public function setRememberToken($value)
+    {
+        $this->remember_token = $value;
+    }
+
+    /**
+     * Get the column name for the "remember me" token.
+     */
+    public function getRememberTokenName()
+    {
+        return 'remember_token';
+    }
+
+    /**
      * Cast attributes to native types.
      */
     protected $casts = [

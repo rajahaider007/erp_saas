@@ -1,6 +1,8 @@
 import React from 'react';
 import App from "../../App.jsx";
 import GeneralizedForm from '../../../Components/GeneralizedForm';
+import PermissionAwareForm from '../../../Components/PermissionAwareForm';
+import { usePermissions } from '../../../hooks/usePermissions';
 import { usePage, router } from '@inertiajs/react';
 
 const EditSectionForm = () => {
@@ -29,15 +31,25 @@ const EditSectionForm = () => {
   );
 };
 
-const Edit = () => (
-  <App>
-    <div className="rounded-xl shadow-lg form-container border-slate-200">
-      <div className="p-6">
-        <EditSectionForm />
+const Edit = () => {
+  const { canEdit } = usePermissions();
+  
+  return (
+    <App>
+      <div className="rounded-xl shadow-lg form-container border-slate-200">
+        <div className="p-6">
+          <PermissionAwareForm
+            requiredPermission="can_edit"
+            route="/system/sections"
+            fallbackMessage="You don't have permission to edit sections. Please contact your administrator."
+          >
+            <EditSectionForm />
+          </PermissionAwareForm>
+        </div>
       </div>
-    </div>
-  </App>
-);
+    </App>
+  );
+};
 
 export default Edit;
 

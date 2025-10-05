@@ -7,10 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 use App\Models\User;
+use Inertia\Inertia;
 
 class LoginController extends Controller
 {
@@ -87,9 +89,14 @@ class LoginController extends Controller
                 ]);
             $token = Str::random(80);
 
-            // Store token in SESSION only (not in database)
+            // Create User model instance and login
+            $userModel = User::find($user->id);
+            auth()->login($userModel);
+            
+            // Store additional session data
             $request->session()->put('auth_token', $token);
             $request->session()->put('user_id', $user->id);
+            $request->session()->put('auth_user', $user);
 
             $this->logLoginHistory($user->id, $request);
 
@@ -99,8 +106,11 @@ class LoginController extends Controller
                 $request->session()->put('license_alert', $licenseAlert);
             }
 
+            // Debug logging
+            Log::info('Login successful for user ID: ' . $user->id);
+            
             // Redirect for Inertia SPA
-            return redirect()->intended('/dashboard');
+            return redirect()->route('dashboard');
         } catch (ValidationException $e) {
             throw $e; // Let Inertia handle validation errors automatically
         } catch (\Exception $e) {
@@ -260,7 +270,7 @@ class LoginController extends Controller
 
             return null;
         } catch (\Exception $e) {
-            \Log::error('License check failed: ' . $e->getMessage());
+            Log::error('License check failed: ' . $e->getMessage());
             return null;
         }
     }

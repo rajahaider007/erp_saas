@@ -2,6 +2,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { Link, usePage } from '@inertiajs/react';
 import { useLayout } from '../../Contexts/LayoutContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import {
   X,
   Home,
@@ -127,6 +128,8 @@ const Sidebar = () => {
     sidebarCollapsed,
     headerAsSidebar
   } = useLayout();
+  
+  const { canView, getAccessibleMenus } = usePermissions();
 
   const [expandedItems, setExpandedItems] = React.useState([]);
   // hovered item object when collapsed
@@ -149,20 +152,33 @@ const Sidebar = () => {
       .then(r => r.json())
       .then(res => {
         const sections = res?.data?.sections || [];
-        const dynamicGroups = sections.map(section => ({
-          name: section.section_name,
-          href: '#',
-          icon: Settings,
-          current: (section.menus || []).some(menu => {
-            const href = menu.route || '';
-            return href && (url === href || (url || '').startsWith(href + '/'));
-          }),
-          children: (section.menus || []).map(menu => ({
-            name: menu.menu_name,
-            href: menu.route || '#',
-            icon: iconFromName(menu.icon)
-          }))
-        }));
+        const dynamicGroups = sections.map(section => {
+          // Filter menus based on user permissions
+          const accessibleMenus = (section.menus || []).filter(menu => 
+            canView(menu.id)
+          );
+          
+          // Only show section if it has accessible menus
+          if (accessibleMenus.length === 0) {
+            return null;
+          }
+          
+          return {
+            name: section.section_name,
+            href: '#',
+            icon: Settings,
+            current: accessibleMenus.some(menu => {
+              const href = menu.route || '';
+              return href && (url === href || (url || '').startsWith(href + '/'));
+            }),
+            children: accessibleMenus.map(menu => ({
+              name: menu.menu_name,
+              href: menu.route || '#',
+              icon: iconFromName(menu.icon)
+            }))
+          };
+        }).filter(Boolean); // Remove null sections
+        
         setNavigation(prev => {
           // keep only Dashboard; dynamic groups come from DB (avoids duplicates)
           const base = prev.filter(i => i.name === 'Dashboard');
@@ -173,7 +189,7 @@ const Sidebar = () => {
         });
       })
       .catch(() => {});
-  }, [url]);
+  }, [url, canView]);
 
   // Map icon name string from DB to lucide-react icon component
   const iconFromName = (name) => {

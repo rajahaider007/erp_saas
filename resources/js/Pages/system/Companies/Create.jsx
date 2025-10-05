@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Building2, Globe, Mail, Phone, MapPin, Calendar, CreditCard, Shield, FileText, Plus, Home, List, Edit, Package, Users } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
+import PermissionAwareForm, { PermissionButton } from '../../../Components/PermissionAwareForm';
+import { usePermissions } from '../../../hooks/usePermissions';
 import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
 
@@ -549,12 +551,20 @@ const formatDateForInput = (date) => {
 
 // Main Create Component
 const Create = () => {
+  const { canAdd } = usePermissions();
+  
   return (
     <App>
       {/* Main Content Card */}
       <div className="rounded-xl shadow-lg form-container border-slate-200">
         <div className="p-6">
-          <CreateCompanyForm />
+          <PermissionAwareForm
+            requiredPermission="can_add"
+            route="/system/companies"
+            fallbackMessage="You don't have permission to create companies. Please contact your administrator."
+          >
+            <CreateCompanyForm />
+          </PermissionAwareForm>
         </div>
       </div>
     </App>

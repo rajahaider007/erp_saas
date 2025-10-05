@@ -18,49 +18,60 @@ class TokenAuthentication
      */
     public function handle(Request $request, Closure $next)
     {
-        $token = $request->bearerToken();
-
-        if (!$token) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Authentication token required.',
-                'error' => 'Unauthorized'
-            ], 401);
+        // Check if user is authenticated via session
+        $sessionUser = session('auth_user');
+        $userId = session('user_id');
+        
+        
+        if (!$sessionUser || !$userId) {
+            // For web requests, redirect to login
+            if ($request->expectsJson() || $request->header('X-Inertia')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Authentication required.',
+                    'error' => 'Unauthorized'
+                ], 401);
+            }
+            
+            return redirect()->route('login')->with('error', 'Please log in to access this resource.');
         }
 
         try {
-            $hashedToken = hash('sha256', $token);
-            
+            // Get user from database to verify status
             $user = DB::table('tbl_users')
-                ->where('token', $hashedToken)
+                ->where('id', $userId)
                 ->where('status', 'active')
                 ->first();
 
             if (!$user) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid or expired authentication token.',
-                    'error' => 'Unauthorized'
-                ], 401);
+                // Clear invalid session
+                session()->forget(['auth_user', 'user_id', 'auth_token']);
+                
+                // For web requests, redirect to login
+                if ($request->expectsJson() || $request->header('X-Inertia')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'User not found or inactive.',
+                        'error' => 'Unauthorized'
+                    ], 401);
+                }
+                
+                return redirect()->route('login')->with('error', 'User not found or inactive.');
             }
 
             // Check if account is locked
             if ($user->locked_until && Carbon::parse($user->locked_until)->isFuture()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Account is temporarily locked.',
-                    'error' => 'Account locked'
-                ], 423);
+                // For web requests, redirect to login
+                if ($request->expectsJson() || $request->header('X-Inertia')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Account is temporarily locked.',
+                        'error' => 'Account locked'
+                    ], 423);
+                }
+                
+                return redirect()->route('login')->with('error', 'Account is temporarily locked.');
             }
-
-            // Optional: Check token expiry (if you implement token expiration)
-            // if ($user->token_expires_at && Carbon::parse($user->token_expires_at)->isPast()) {
-            //     return response()->json([
-            //         'success' => false,
-            //         'message' => 'Authentication token has expired.',
-            //         'error' => 'Token expired'
-            //     ], 401);
-            // }
 
             // Add user data to request for use in controllers
             $request->merge([
@@ -73,11 +84,18 @@ class TokenAuthentication
             return $next($request);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Authentication error.',
-                'error' => 'Internal server error'
-            ], 500);
+            // Clear session on error
+            session()->forget(['auth_user', 'user_id', 'auth_token']);
+            
+            if ($request->expectsJson() || $request->header('X-Inertia')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Authentication error.',
+                    'error' => 'Internal server error'
+                ], 500);
+            }
+            
+            return redirect()->route('login')->with('error', 'Authentication error occurred.');
         }
     }
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { useLayout } from '../../Contexts/LayoutContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import {
   Menu,
   Search,
@@ -28,6 +29,7 @@ import {
 
 const Header = () => {
   const { user, url } = usePage().props;
+  const { canView } = usePermissions();
   const {
     sidebarOpen,
     setSidebarOpen,
@@ -84,16 +86,29 @@ const Header = () => {
       .then(r => r.json())
       .then(res => {
         const sections = res?.data?.sections || [];
-        const groups = sections.map(section => ({
-          name: section.section_name,
-          href: '#',
-          icon: Settings,
-          children: (section.menus || []).map(menu => ({
-            name: menu.menu_name,
-            href: menu.route || '#',
-            icon: iconFromName(menu.icon),
-          }))
-        }));
+        const groups = sections.map(section => {
+          // Filter menus based on user permissions
+          const accessibleMenus = (section.menus || []).filter(menu => 
+            canView(menu.id)
+          );
+          
+          // Only show section if it has accessible menus
+          if (accessibleMenus.length === 0) {
+            return null;
+          }
+          
+          return {
+            name: section.section_name,
+            href: '#',
+            icon: Settings,
+            children: accessibleMenus.map(menu => ({
+              name: menu.menu_name,
+              href: menu.route || '#',
+              icon: iconFromName(menu.icon),
+            }))
+          };
+        }).filter(Boolean); // Remove null sections
+        
         setNavigationItems(prev => {
           const base = prev.filter(i => i.name === 'Dashboard');
           const names = new Set();
@@ -102,7 +117,7 @@ const Header = () => {
         });
       })
       .catch(() => {});
-  }, [url]);
+  }, [url]); // Removed canView from dependencies
 
   // Map icon names from DB to lucide-react components
   const iconFromName = (name) => {

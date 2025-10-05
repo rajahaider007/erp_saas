@@ -3,6 +3,8 @@ import { Type, Settings, Layers, Home, List, Plus } from 'lucide-react';
 import { router, usePage } from '@inertiajs/react';
 import App from "../../App.jsx";
 import GeneralizedForm from '../../../Components/GeneralizedForm';
+import PermissionAwareForm from '../../../Components/PermissionAwareForm';
+import { usePermissions } from '../../../hooks/usePermissions';
 
 // Debug Panel removed per requirement
 
@@ -144,71 +146,26 @@ const AddSectionForm = () => {
   );
 };
 
+
 const Add = () => {
+  const { canAdd } = usePermissions();
+  
   return (
     <App>
       <div className="rounded-xl shadow-lg form-container border-slate-200">
         <div className="p-6">
-          <AddSectionForm />
+          <PermissionAwareForm
+            requiredPermission="can_add"
+            route="/system/sections"
+            fallbackMessage="You don't have permission to create sections. Please contact your administrator."
+          >
+            <AddSectionForm />
+          </PermissionAwareForm>
         </div>
       </div>
     </App>
   );
 };
-
-export default Add;
-
-import React, { useEffect, useState } from 'react';
-import App from "../../App.jsx";
-import GeneralizedForm from '../../../Components/GeneralizedForm';
-import { usePage, router } from '@inertiajs/react';
-import { List } from 'lucide-react';
-
-const AddSectionForm = () => {
-  const { modules, errors: pageErrors, flash } = usePage().props;
-  const [alert, setAlert] = useState(null);
-  useEffect(() => {
-    if (flash?.success) setAlert({ type: 'success', message: flash.success });
-    if (flash?.error) setAlert({ type: 'error', message: flash.error });
-  }, [flash]);
-
-  const fields = [
-    { name: 'module_id', label: 'Module', type: 'select', required: true, options: modules.map(m => ({ value: m.id, label: m.module_name })) },
-    { name: 'section_name', label: 'Section Name', type: 'text', placeholder: 'Enter section name', required: true },
-    { name: 'status', label: 'Status', type: 'toggle', required: false },
-    { name: 'sort_order', label: 'Order', type: 'number', placeholder: 'Enter display order', required: false, min: 0 },
-  ];
-
-  const handleSubmit = (data) => {
-    router.post('/system/sections', data, {
-      onSuccess: () => setAlert({ type: 'success', message: 'Section created successfully!' }),
-      onError: () => setAlert({ type: 'error', message: 'Failed to create section.' })
-    });
-  };
-
-  return (
-    <GeneralizedForm
-      title="Add Section"
-      subtitle="Create a new section within a module"
-      fields={fields}
-      onSubmit={handleSubmit}
-      submitText="Create Section"
-      resetText="Reset"
-      initialData={{ module_id: '', section_name: '', status: true, sort_order: 0 }}
-      showReset={true}
-    />
-  );
-};
-
-const Add = () => (
-  <App>
-    <div className="rounded-xl shadow-lg form-container border-slate-200">
-      <div className="p-6">
-        <AddSectionForm />
-      </div>
-    </div>
-  </App>
-);
 
 export default Add;
 

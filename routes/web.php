@@ -20,19 +20,19 @@ Route::get('/', function () {
 
 // Sections Management Routes
 Route::prefix('system/sections')->name('system.sections.')->group(function () {
-    Route::get('/', [SectionController::class, 'index'])->name('index');
-    Route::get('/create', [SectionController::class, 'create'])->name('create');
-    Route::post('/', [SectionController::class, 'store'])->name('store');
-    Route::get('/{section}/edit', [SectionController::class, 'edit'])->name('edit');
-    Route::put('/{section}', [SectionController::class, 'update'])->name('update');
-    Route::patch('/{section}', [SectionController::class, 'update'])->name('update');
-    Route::delete('/{section}', [SectionController::class, 'destroy'])->name('destroy');
+    Route::get('/', [SectionController::class, 'index'])->middleware('permission:can_view,/system/sections')->name('index');
+    Route::get('/create', [SectionController::class, 'create'])->middleware('permission:can_add,/system/sections')->name('create');
+    Route::post('/', [SectionController::class, 'store'])->middleware('permission:can_add,/system/sections')->name('store');
+    Route::get('/{section}/edit', [SectionController::class, 'edit'])->middleware('permission:can_edit,/system/sections')->name('edit');
+    Route::put('/{section}', [SectionController::class, 'update'])->middleware('permission:can_edit,/system/sections')->name('update');
+    Route::patch('/{section}', [SectionController::class, 'update'])->middleware('permission:can_edit,/system/sections')->name('update');
+    Route::delete('/{section}', [SectionController::class, 'destroy'])->middleware('permission:can_delete,/system/sections')->name('destroy');
     // API
-    Route::get('/by-module/{module}', [SectionController::class, 'listByModule'])->name('by-module');
+    Route::get('/by-module/{module}', [SectionController::class, 'listByModule'])->middleware('permission:can_view,/system/sections')->name('by-module');
     // Bulk & export
-    Route::post('/bulk-status', [SectionController::class, 'bulkUpdateStatus'])->name('bulk-status');
-    Route::post('/bulk-destroy', [SectionController::class, 'bulkDestroy'])->name('bulk-destroy');
-    Route::get('/export-csv', [SectionController::class, 'exportCsv'])->name('export-csv');
+    Route::post('/bulk-status', [SectionController::class, 'bulkUpdateStatus'])->middleware('permission:can_edit,/system/sections')->name('bulk-status');
+    Route::post('/bulk-destroy', [SectionController::class, 'bulkDestroy'])->middleware('permission:can_delete,/system/sections')->name('bulk-destroy');
+    Route::get('/export-csv', [SectionController::class, 'exportCsv'])->middleware('permission:can_view,/system/sections')->name('export-csv');
 });
 
 // Menus Management Routes
@@ -62,7 +62,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/dashboard', function () {
     return Inertia::render('dashboard/index');
-})->name('dashboard');
+})->middleware('auth')->name('dashboard');
 
 // System Module Management Routes (ADD MISSING EDIT ROUTE)
 Route::get('/system/AddModules', [ModuleController::class, 'index'])->name('system.add_modules');
@@ -97,19 +97,19 @@ Route::prefix('modules')->name('modules.')->group(function () {
 
 // Companies Management Routes
 Route::prefix('system/companies')->name('system.companies.')->group(function () {
-    Route::get('/', [CompanyController::class, 'index'])->name('index');
-    Route::get('/create', [CompanyController::class, 'create'])->name('create');
-    Route::post('/', [CompanyController::class, 'store'])->name('store');
-    Route::get('/{company}', [CompanyController::class, 'show'])->name('show');
-    Route::get('/{company}/edit', [CompanyController::class, 'edit'])->name('edit');
-    Route::put('/{company}', [CompanyController::class, 'update'])->name('update');
-    Route::patch('/{company}', [CompanyController::class, 'update'])->name('update');
-    Route::delete('/{company}', [CompanyController::class, 'destroy'])->name('destroy');
+    Route::get('/', [CompanyController::class, 'index'])->middleware('permission:can_view,/system/companies')->name('index');
+    Route::get('/create', [CompanyController::class, 'create'])->middleware('permission:can_add,/system/companies')->name('create');
+    Route::post('/', [CompanyController::class, 'store'])->middleware('permission:can_add,/system/companies')->name('store');
+    Route::get('/{company}', [CompanyController::class, 'show'])->middleware('permission:can_view,/system/companies')->name('show');
+    Route::get('/{company}/edit', [CompanyController::class, 'edit'])->middleware('permission:can_edit,/system/companies')->name('edit');
+    Route::put('/{company}', [CompanyController::class, 'update'])->middleware('permission:can_edit,/system/companies')->name('update');
+    Route::patch('/{company}', [CompanyController::class, 'update'])->middleware('permission:can_edit,/system/companies')->name('update');
+    Route::delete('/{company}', [CompanyController::class, 'destroy'])->middleware('permission:can_delete,/system/companies')->name('destroy');
     // Bulk operations
-    Route::post('/bulk-status', [CompanyController::class, 'bulkUpdateStatus'])->name('bulk-status');
-    Route::post('/bulk-destroy', [CompanyController::class, 'bulkDestroy'])->name('bulk-destroy');
+    Route::post('/bulk-status', [CompanyController::class, 'bulkUpdateStatus'])->middleware('permission:can_edit,/system/companies')->name('bulk-status');
+    Route::post('/bulk-destroy', [CompanyController::class, 'bulkDestroy'])->middleware('permission:can_delete,/system/companies')->name('bulk-destroy');
     // Export functionality
-    Route::get('/export-csv', [CompanyController::class, 'exportCsv'])->name('export-csv');
+    Route::get('/export-csv', [CompanyController::class, 'exportCsv'])->middleware('permission:can_view,/system/companies')->name('export-csv');
 });
 
 // Packages Management Routes

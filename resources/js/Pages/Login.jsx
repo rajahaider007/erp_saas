@@ -66,11 +66,16 @@
             setAlert(null);
 
             router.post('/login', formData, {
-              onSuccess: () => {
+              onSuccess: (page) => {
+                console.log('Login success, redirecting to dashboard...');
                 setAlert({
                   type: 'success',
                   message: 'Login successful! Redirecting...'
                 });
+                // Redirect to dashboard after successful login
+                setTimeout(() => {
+                  router.visit('/dashboard');
+                }, 1000);
               },
               onError: (errors) => {
                 setAlert({

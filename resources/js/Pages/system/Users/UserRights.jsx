@@ -89,6 +89,25 @@ const UserRights = () => {
     return groups;
   }, [availableMenus]);
 
+  // Initialize expanded states to expand all modules and sections by default
+  useEffect(() => {
+    if (Object.keys(groupedMenus).length > 0) {
+      const initialExpandedModules = {};
+      const initialExpandedSections = {};
+      
+      Object.keys(groupedMenus).forEach(moduleName => {
+        initialExpandedModules[moduleName] = true;
+        
+        Object.keys(groupedMenus[moduleName]).forEach(sectionName => {
+          initialExpandedSections[`${moduleName}-${sectionName}`] = true;
+        });
+      });
+      
+      setExpandedModules(initialExpandedModules);
+      setExpandedSections(initialExpandedSections);
+    }
+  }, [groupedMenus]);
+
   // Toggle individual right
   const toggleRight = (menuId, rightType) => {
     setRights(prev => ({
@@ -226,13 +245,22 @@ const UserRights = () => {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Employee ID</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">User ID</div>
                 <div className="font-medium text-gray-900 dark:text-white">{user.loginid}</div>
               </div>
             </div>
             
             {/* Company Information */}
-            <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="flex items-center space-x-2">
+                <User className="h-4 w-4 text-gray-400" />
+                <div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">User Name</div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                    {user.fname} {user.mname} {user.lname}
+                  </div>
+                </div>
+              </div>
               <div className="flex items-center space-x-2">
                 <Building className="h-4 w-4 text-gray-400" />
                 <div>
