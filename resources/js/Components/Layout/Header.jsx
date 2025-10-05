@@ -28,8 +28,16 @@ import {
 } from 'lucide-react';
 
 const Header = () => {
-  const { auth, url } = usePage().props;
+  const { auth, company, url, userRights, availableMenus } = usePage().props;
   const user = auth?.user;
+  
+  // Debug: Check what data we're getting
+  console.log('Header Debug:');
+  console.log('Auth:', auth);
+  console.log('User:', user);
+  console.log('Company:', company);
+  console.log('User Rights:', userRights);
+  console.log('Available Menus:', availableMenus);
   const { canView } = usePermissions();
   const {
     sidebarOpen,
@@ -81,44 +89,58 @@ const Header = () => {
     }
   ]);
 
-  // Load dynamic header menus for Module 1 (Admin Panel)
+  // Load dynamic header menus from availableMenus
   React.useEffect(() => {
-    fetch('/system/menus/by-module/1')
-      .then(r => r.json())
-      .then(res => {
-        const sections = res?.data?.sections || [];
-        const groups = sections.map(section => {
-          // Filter menus based on user permissions
-          const accessibleMenus = (section.menus || []).filter(menu => 
-            canView(menu.id)
-          );
-          
-          // Only show section if it has accessible menus
-          if (accessibleMenus.length === 0) {
-            return null;
-          }
-          
-          return {
-            name: section.section_name,
-            href: '#',
-            icon: Settings,
-            children: accessibleMenus.map(menu => ({
-              name: menu.menu_name,
-              href: menu.route || '#',
-              icon: iconFromName(menu.icon),
-            }))
-          };
-        }).filter(Boolean); // Remove null sections
+    console.log('useEffect - availableMenus:', availableMenus);
+    console.log('useEffect - user role:', user?.role);
+    console.log('useEffect - canView function:', canView);
+    
+    if (availableMenus && availableMenus.length > 0) {
+      console.log('Processing availableMenus:', availableMenus);
+      
+      // For super admin, show all menus without permission check
+      let systemMenus;
+      if (user?.role === 'super_admin') {
+        console.log('Super admin - showing all menus');
+        systemMenus = availableMenus;
+      } else {
+        // For other users, check permissions
+        systemMenus = availableMenus.filter(menu => {
+          const canViewMenu = canView(menu.id);
+          console.log(`Menu ${menu.menu_name} (ID: ${menu.id}) - canView: ${canViewMenu}`);
+          return canViewMenu;
+        });
+      }
+      
+      console.log('Filtered systemMenus:', systemMenus);
+      
+      if (systemMenus.length > 0) {
+        const systemGroup = {
+          name: 'System',
+          href: '#',
+          icon: Settings,
+          children: systemMenus.map(menu => ({
+            name: menu.menu_name,
+            href: menu.route || '#',
+            icon: iconFromName(menu.icon),
+          }))
+        };
+        
+        console.log('System group created:', systemGroup);
         
         setNavigationItems(prev => {
           const base = prev.filter(i => i.name === 'Dashboard');
-          const names = new Set();
-          const uniqueGroups = groups.filter(g => (names.has(g.name) ? false : (names.add(g.name), true)));
-          return [...base, ...uniqueGroups];
+          const newItems = [...base, systemGroup];
+          console.log('New navigation items:', newItems);
+          return newItems;
         });
-      })
-      .catch(() => {});
-  }, [url]); // Removed canView from dependencies
+      } else {
+        console.log('No accessible menus found');
+      }
+    } else {
+      console.log('No availableMenus or empty array');
+    }
+  }, [url, canView, availableMenus, user?.role]);
 
   // Map icon names from DB to lucide-react components
   const iconFromName = (name) => {
@@ -437,7 +459,7 @@ const Header = () => {
         <div className="container mx-auto flex h-16 max-w-none items-center justify-between px-4 lg:px-6">
 
           {/* Left Section */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-5">
             {/* Menu Button */}
             {!headerAsSidebar && (
               <button
@@ -459,6 +481,13 @@ const Header = () => {
               </span>
             </Link>
 
+            {/* Company Name - Left Side */}
+            <div className="hidden lg:block ml-8">
+              <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                {company?.company_name || 'ERP Enterprise'}
+              </span>
+            </div>
+
             {/* Navigation Menu (when header as sidebar is enabled) */}
             {headerAsSidebar && (
               <nav className="hidden lg:flex items-center space-x-1 ml-8 notranslate">
@@ -467,30 +496,9 @@ const Header = () => {
             )}
           </div>
 
-          {/* Center Section - Search */}
-          <div className="flex-1 max-w-lg mx-4 hidden md:block">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full rounded-lg border border-gray-300 bg-white pl-10 pr-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 transition-colors duration-200 notranslate"
-                onFocus={() => setSearchOpen(true)}
-              />
-            </div>
-          </div>
 
           {/* Right Section */}
           <div className="flex items-center space-x-2">
-
-            {/* Search Button (Mobile) */}
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="inline-flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white md:hidden transition-colors duration-200"
-              aria-label="Search"
-            >
-              <Search className="h-5 w-5" />
-            </button>
 
             {/* Language Selector */}
             <div className="relative">
@@ -633,7 +641,7 @@ const Header = () => {
                   )}
                 </div>
                 <span className="hidden sm:block text-sm font-medium">
-                  {user?.name || 'User'}
+                  {user?.fname ? `${user.fname} ${user.lname}`.trim() : 'User'}
                 </span>
                 <ChevronDown className="h-4 w-4" />
               </button>
@@ -643,7 +651,7 @@ const Header = () => {
                 <div className="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800 z-50 notranslate">
                   <div className="p-3 border-b border-gray-200 dark:border-gray-700">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {user?.name}
+                      {user?.fname ? `${user.fname} ${user.lname}`.trim() : 'User'}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       {user?.email}
@@ -665,30 +673,6 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Mobile Search Overlay */}
-      {searchOpen && (
-        <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm md:hidden">
-          <div className="absolute top-0 left-0 right-0 bg-white p-4 shadow-lg dark:bg-gray-800">
-            <div className="flex items-center space-x-2">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="w-full rounded-lg border border-gray-300 bg-white pl-10 pr-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-                  autoFocus
-                />
-              </div>
-              <button
-                onClick={() => setSearchOpen(false)}
-                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Click outside handlers */}
       {(profileOpen || notificationsOpen || themeMenuOpen || languageMenuOpen || hoveredNavItem) && (

@@ -29,10 +29,17 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $user = $request->user();
+        // Get user from custom authentication system
+        $user = null;
+        $userId = $request->session()->get('user_id');
+        
+        if ($userId) {
+            $user = \DB::table('tbl_users')->where('id', $userId)->first();
+        }
         
         $userRights = [];
         $availableMenus = [];
+        $company = null;
         
         
 
@@ -51,6 +58,13 @@ class HandleInertiaRequests extends Middleware
                     ];
                 })
                 ->toArray();
+                
+            // Get company data
+            if ($user->comp_id) {
+                $company = \DB::table('companies')
+                    ->where('id', $user->comp_id)
+                    ->first();
+            }
 
             // Get available menus for the user's company
             if ($user->comp_id) {
@@ -94,6 +108,15 @@ class HandleInertiaRequests extends Middleware
         }
 
 
+        // Debug: Log the data being shared
+        \Log::info('HandleInertiaRequests - Shared data:', [
+            'user_id' => $user ? $user->id : null,
+            'user_role' => $user ? $user->role : null,
+            'userRights_count' => count($userRights),
+            'availableMenus_count' => count($availableMenus),
+            'company_name' => $company ? $company->company_name : null
+        ]);
+
         $sharedData = [
             ...parent::share($request),
             'auth' => [
@@ -101,6 +124,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'userRights' => $userRights,
             'availableMenus' => $availableMenus,
+            'company' => $company,
         ];
         
         

@@ -146,50 +146,46 @@ const Sidebar = () => {
     }
   ]);
 
-  // Load dynamic menus for Module 1 (Admin Panel)
+  // Get props at component level
+  const { availableMenus, auth } = usePage().props;
+  const user = auth?.user;
+
+  // Load dynamic menus from availableMenus
   React.useEffect(() => {
-    fetch('/system/menus/by-module/1')
-      .then(r => r.json())
-      .then(res => {
-        const sections = res?.data?.sections || [];
-        const dynamicGroups = sections.map(section => {
-          // Filter menus based on user permissions
-          const accessibleMenus = (section.menus || []).filter(menu => 
-            canView(menu.id)
-          );
-          
-          // Only show section if it has accessible menus
-          if (accessibleMenus.length === 0) {
-            return null;
-          }
-          
-          return {
-            name: section.section_name,
-            href: '#',
-            icon: Settings,
-            current: accessibleMenus.some(menu => {
-              const href = menu.route || '';
-              return href && (url === href || (url || '').startsWith(href + '/'));
-            }),
-            children: accessibleMenus.map(menu => ({
-              name: menu.menu_name,
-              href: menu.route || '#',
-              icon: iconFromName(menu.icon)
-            }))
-          };
-        }).filter(Boolean); // Remove null sections
+    
+    if (availableMenus && availableMenus.length > 0) {
+      // For super admin, show all menus without permission check
+      let systemMenus;
+      if (user?.role === 'super_admin') {
+        systemMenus = availableMenus;
+      } else {
+        // For other users, check permissions
+        systemMenus = availableMenus.filter(menu => canView(menu.id));
+      }
+      
+      if (systemMenus.length > 0) {
+        const systemGroup = {
+          name: 'System',
+          href: '#',
+          icon: Settings,
+          current: systemMenus.some(menu => {
+            const href = menu.route || '';
+            return href && (url === href || (url || '').startsWith(href + '/'));
+          }),
+          children: systemMenus.map(menu => ({
+            name: menu.menu_name,
+            href: menu.route || '#',
+            icon: iconFromName(menu.icon)
+          }))
+        };
         
         setNavigation(prev => {
-          // keep only Dashboard; dynamic groups come from DB (avoids duplicates)
           const base = prev.filter(i => i.name === 'Dashboard');
-          // de-duplicate by group name
-          const names = new Set();
-          const uniqueGroups = dynamicGroups.filter(g => (names.has(g.name) ? false : (names.add(g.name), true)));
-          return [...base, ...uniqueGroups];
+          return [...base, systemGroup];
         });
-      })
-      .catch(() => {});
-  }, [url, canView]);
+      }
+    }
+  }, [url, canView, availableMenus, user?.role]);
 
   // Map icon name string from DB to lucide-react icon component
   const iconFromName = (name) => {
