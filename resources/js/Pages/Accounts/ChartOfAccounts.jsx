@@ -95,13 +95,16 @@ const ChartOfAccounts = () => {
 
   // Auto-detect account properties (system will handle this automatically)
   const getAccountProperties = (parentCode = '', level = 1) => {
+    // Get user data from page props
+    const { user } = props;
+    
     // System will automatically detect these properties based on hierarchy
     return {
       is_parent: level < 3,
       is_child: level > 1,
       is_transactional: level === 3,
-      comp_id: 1, // Auto-detect from current user session
-      location_id: 1 // Auto-detect from current user session
+      comp_id: user?.comp_id || 1, // Get from logged-in user
+      location_id: user?.location_id || 1 // Get from logged-in user
     };
   };
 
@@ -150,13 +153,30 @@ const ChartOfAccounts = () => {
       }
     ];
 
-    // Group accounts by type
+    // Group accounts by type and create proper hierarchy
     accounts.forEach(account => {
       const categoryId = account.account_type.toLowerCase();
       const category = categories.find(cat => cat.id === categoryId);
       if (category) {
-        category.accounts.push(account);
+        // Only add accounts that don't have a parent (Level 1 accounts) or 
+        // accounts that are direct children of Level 1 accounts (Level 2 accounts)
+        // This prevents child accounts from appearing at the category level
+        if (account.account_level === 1 || 
+            (account.account_level === 2 && account.parent_account_id && 
+             accounts.find(acc => acc.id === account.parent_account_id)?.account_level === 1)) {
+          category.accounts.push(account);
+        }
       }
+    });
+
+    // Sort accounts within each category by level and code
+    categories.forEach(category => {
+      category.accounts.sort((a, b) => {
+        if (a.account_level !== b.account_level) {
+          return a.account_level - b.account_level;
+        }
+        return a.account_code.localeCompare(b.account_code);
+      });
     });
 
     return categories;
@@ -446,14 +466,14 @@ const ChartOfAccounts = () => {
   };
 
   // Render account tree with accordion functionality
-  const renderAccountTree = (accounts, level = 0) => {
-    return accounts.map((account) => {
+  const renderAccountTree = (accountsToRender, level = 0) => {
+    return accountsToRender.map((account) => {
       const hasChildren = accounts.some(acc => acc.parent_account_id === account.id);
       const isExpanded = expandedAccounts[account.id];
       
       return (
-        <div key={account.id} className="ml-4">
-          <div className={`flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 ${level > 0 ? 'ml-4' : ''}`}>
+        <div key={account.id} className={`${level > 0 ? 'ml-4' : ''} mb-2`}>
+          <div className={`flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200`}>
             <div className="flex items-center space-x-3 flex-1">
               {/* Accordion Toggle Button */}
               {hasChildren && (
@@ -538,9 +558,9 @@ const ChartOfAccounts = () => {
             </div>
           </div>
           
-          {/* Children Accounts */}
+          {/* Children Accounts - Only render if parent is expanded */}
           {hasChildren && isExpanded && (
-            <div className="ml-4 mt-2">
+            <div className="mt-3 ml-4 space-y-2">
               {renderAccountTree(
                 accounts.filter(acc => acc.parent_account_id === account.id),
                 level + 1
@@ -555,7 +575,7 @@ const ChartOfAccounts = () => {
   return (
     <App>
       <Head title="Chart of Accounts" />
-      <style jsx>{`
+      <style jsx="true">{`
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
@@ -656,7 +676,7 @@ const ChartOfAccounts = () => {
                 {isExpanded && (
                   <div className="border-t border-gray-200 dark:border-gray-700 p-4">
                     {category.accounts.length > 0 ? (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {renderAccountTree(category.accounts)}
                       </div>
                     ) : (
@@ -828,4 +848,3 @@ const ChartOfAccounts = () => {
 };
 
 export default ChartOfAccounts;
-

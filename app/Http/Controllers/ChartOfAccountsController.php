@@ -9,15 +9,37 @@ use Illuminate\Support\Facades\Validator;
 class ChartOfAccountsController extends Controller
 {
     // Get all accounts
-    public function index()
+    public function index(Request $request)
     {
-        $accounts = DB::table('chart_of_accounts')
-            ->where('comp_id', 1)
-            ->where('location_id', 1)
-            ->orderBy('account_code')
-            ->get();
+        try {
+            // Get user's company and location from session
+            $userId = $request->session()->get('user_id');
+            $user = DB::table('tbl_users')->where('id', $userId)->first();
             
-        return response()->json($accounts);
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
+            
+            $accounts = DB::table('chart_of_accounts')
+                ->where('comp_id', $user->comp_id)
+                ->where('location_id', $user->location_id)
+                ->orderBy('account_code')
+                ->get();
+                
+            return response()->json([
+                'success' => true,
+                'data' => $accounts
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching accounts: ' . $e->getMessage()
+            ], 500);
+        }
     }
     
     // Store new account
@@ -39,6 +61,17 @@ class ChartOfAccountsController extends Controller
         }
         
         try {
+            // Get user's company and location from session
+            $userId = $request->session()->get('user_id');
+            $user = DB::table('tbl_users')->where('id', $userId)->first();
+            
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
+            
             $accountId = DB::table('chart_of_accounts')->insertGetId([
                 'account_code' => $request->account_code,
                 'account_name' => $request->account_name,
@@ -48,8 +81,8 @@ class ChartOfAccountsController extends Controller
                 'parent_account_id' => $request->parent_account_id,
                 'currency' => $request->currency,
                 'status' => $request->status,
-                'comp_id' => 1, // Auto-detect from session
-                'location_id' => 1, // Auto-detect from session
+                'comp_id' => $user->comp_id, // Get from logged-in user
+                'location_id' => $user->location_id, // Get from logged-in user
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
@@ -84,10 +117,21 @@ class ChartOfAccountsController extends Controller
         }
         
         try {
+            // Get user's company and location from session
+            $userId = $request->session()->get('user_id');
+            $user = DB::table('tbl_users')->where('id', $userId)->first();
+            
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
+            
             $updated = DB::table('chart_of_accounts')
                 ->where('id', $id)
-                ->where('comp_id', 1)
-                ->where('location_id', 1)
+                ->where('comp_id', $user->comp_id)
+                ->where('location_id', $user->location_id)
                 ->update([
                     'account_name' => $request->account_name,
                     'short_code' => $request->short_code,
@@ -118,14 +162,25 @@ class ChartOfAccountsController extends Controller
     }
     
     // Delete account
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
+            // Get user's company and location from session
+            $userId = $request->session()->get('user_id');
+            $user = DB::table('tbl_users')->where('id', $userId)->first();
+            
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
+            
             // Get the account first
             $account = DB::table('chart_of_accounts')
                 ->where('id', $id)
-                ->where('comp_id', 1)
-                ->where('location_id', 1)
+                ->where('comp_id', $user->comp_id)
+                ->where('location_id', $user->location_id)
                 ->first();
                 
             if (!$account) {
@@ -146,15 +201,15 @@ class ChartOfAccountsController extends Controller
             // Check if account has children
             $hasChildren = DB::table('chart_of_accounts')
                 ->where('parent_account_id', $id)
-                ->where('comp_id', 1)
-                ->where('location_id', 1)
+                ->where('comp_id', $user->comp_id)
+                ->where('location_id', $user->location_id)
                 ->exists();
                 
             if ($hasChildren) {
                 $childAccounts = DB::table('chart_of_accounts')
                     ->where('parent_account_id', $id)
-                    ->where('comp_id', 1)
-                    ->where('location_id', 1)
+                    ->where('comp_id', $user->comp_id)
+                    ->where('location_id', $user->location_id)
                     ->pluck('account_name')
                     ->toArray();
                     
@@ -167,8 +222,8 @@ class ChartOfAccountsController extends Controller
             // Proceed with deletion
             $deleted = DB::table('chart_of_accounts')
                 ->where('id', $id)
-                ->where('comp_id', 1)
-                ->where('location_id', 1)
+                ->where('comp_id', $user->comp_id)
+                ->where('location_id', $user->location_id)
                 ->delete();
                 
             if ($deleted) {
