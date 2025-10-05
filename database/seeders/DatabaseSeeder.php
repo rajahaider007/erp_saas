@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             SystemSeeder::class,
             UserRightsSeeder::class,
+            ChartOfAccountsSeeder::class,
         ]);
     }
 }

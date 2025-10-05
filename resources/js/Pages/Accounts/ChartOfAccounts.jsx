@@ -158,12 +158,9 @@ const ChartOfAccounts = () => {
       const categoryId = account.account_type.toLowerCase();
       const category = categories.find(cat => cat.id === categoryId);
       if (category) {
-        // Only add accounts that don't have a parent (Level 1 accounts) or 
-        // accounts that are direct children of Level 1 accounts (Level 2 accounts)
-        // This prevents child accounts from appearing at the category level
-        if (account.account_level === 1 || 
-            (account.account_level === 2 && account.parent_account_id && 
-             accounts.find(acc => acc.id === account.parent_account_id)?.account_level === 1)) {
+        // Only add Level 1 accounts (main categories) to the category level
+        // Level 2 and Level 3 accounts should only appear under their parents
+        if (account.account_level === 1) {
           category.accounts.push(account);
         }
       }

@@ -388,14 +388,58 @@ class ChartOfAccountsSeeder extends Seeder
                 'updated_at' => now()
             ],
             
-            // Level 3 - Expenses (Transactional)
+            // Level 2 - Expenses Subcategories
+            [
+                'account_code' => '500010000000000',
+                'account_name' => 'Operating Expenses',
+                'short_code' => 'OPEX',
+                'account_type' => 'Expenses',
+                'account_level' => 2,
+                'parent_account_id' => 5,
+                'status' => 'Active',
+                'currency' => 'USD',
+                'comp_id' => 1,
+                'location_id' => 1,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'account_code' => '500020000000000',
+                'account_name' => 'Administrative Expenses',
+                'short_code' => 'ADMIN',
+                'account_type' => 'Expenses',
+                'account_level' => 2,
+                'parent_account_id' => 5,
+                'status' => 'Active',
+                'currency' => 'USD',
+                'comp_id' => 1,
+                'location_id' => 1,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'account_code' => '500030000000000',
+                'account_name' => 'Marketing Expenses',
+                'short_code' => 'MKT',
+                'account_type' => 'Expenses',
+                'account_level' => 2,
+                'parent_account_id' => 5,
+                'status' => 'Active',
+                'currency' => 'USD',
+                'comp_id' => 1,
+                'location_id' => 1,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Level 3 - Operating Expenses (Transactional)
             [
                 'account_code' => '500010000000001',
                 'account_name' => 'Office Rent',
                 'short_code' => 'RENT',
                 'account_type' => 'Expenses',
                 'account_level' => 3,
-                'parent_account_id' => 5,
+                'parent_account_id' => 12, // Operating Expenses
                 'status' => 'Active',
                 'currency' => 'USD',
                 'comp_id' => 1,
@@ -409,7 +453,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'short_code' => 'UTIL',
                 'account_type' => 'Expenses',
                 'account_level' => 3,
-                'parent_account_id' => 5,
+                'parent_account_id' => 12, // Operating Expenses
                 'status' => 'Active',
                 'currency' => 'USD',
                 'comp_id' => 1,
@@ -423,7 +467,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'short_code' => 'SAL',
                 'account_type' => 'Expenses',
                 'account_level' => 3,
-                'parent_account_id' => 5,
+                'parent_account_id' => 12, // Operating Expenses
                 'status' => 'Active',
                 'currency' => 'USD',
                 'comp_id' => 1,
@@ -437,7 +481,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'short_code' => 'SUPP',
                 'account_type' => 'Expenses',
                 'account_level' => 3,
-                'parent_account_id' => 5,
+                'parent_account_id' => 12, // Operating Expenses
                 'status' => 'Active',
                 'currency' => 'USD',
                 'comp_id' => 1,
@@ -447,11 +491,11 @@ class ChartOfAccountsSeeder extends Seeder
             ],
             [
                 'account_code' => '500010000000005',
-                'account_name' => 'Marketing Expenses',
-                'short_code' => 'MKT',
+                'account_name' => 'Insurance',
+                'short_code' => 'INS',
                 'account_type' => 'Expenses',
                 'account_level' => 3,
-                'parent_account_id' => 5,
+                'parent_account_id' => 12, // Operating Expenses
                 'status' => 'Active',
                 'currency' => 'USD',
                 'comp_id' => 1,
@@ -461,39 +505,43 @@ class ChartOfAccountsSeeder extends Seeder
             ],
             [
                 'account_code' => '500010000000006',
-                'account_name' => 'Professional Fees',
-                'short_code' => 'PROF',
-                'account_type' => 'Expenses',
-                'account_level' => 3,
-                'parent_account_id' => 5,
-                'status' => 'Active',
-                'currency' => 'USD',
-                'comp_id' => 1,
-                'location_id' => 1,
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'account_code' => '500010000000007',
-                'account_name' => 'Insurance',
-                'short_code' => 'INS',
-                'account_type' => 'Expenses',
-                'account_level' => 3,
-                'parent_account_id' => 5,
-                'status' => 'Active',
-                'currency' => 'USD',
-                'comp_id' => 1,
-                'location_id' => 1,
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'account_code' => '500010000000008',
                 'account_name' => 'Depreciation',
                 'short_code' => 'DEP',
                 'account_type' => 'Expenses',
                 'account_level' => 3,
-                'parent_account_id' => 5,
+                'parent_account_id' => 12, // Operating Expenses
+                'status' => 'Active',
+                'currency' => 'USD',
+                'comp_id' => 1,
+                'location_id' => 1,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Level 3 - Administrative Expenses (Transactional)
+            [
+                'account_code' => '500020000000001',
+                'account_name' => 'Professional Fees',
+                'short_code' => 'PROF',
+                'account_type' => 'Expenses',
+                'account_level' => 3,
+                'parent_account_id' => 13, // Administrative Expenses
+                'status' => 'Active',
+                'currency' => 'USD',
+                'comp_id' => 1,
+                'location_id' => 1,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            
+            // Level 3 - Marketing Expenses (Transactional)
+            [
+                'account_code' => '500030000000001',
+                'account_name' => 'Marketing Expenses',
+                'short_code' => 'MKT',
+                'account_type' => 'Expenses',
+                'account_level' => 3,
+                'parent_account_id' => 14, // Marketing Expenses
                 'status' => 'Active',
                 'currency' => 'USD',
                 'comp_id' => 1,
