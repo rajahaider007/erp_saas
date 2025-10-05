@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 05, 2025 at 10:06 AM
+-- Generation Time: Oct 05, 2025 at 05:03 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -142,57 +142,6 @@ CREATE TABLE `departments` (
 
 INSERT INTO `departments` (`id`, `company_id`, `location_id`, `department_name`, `description`, `manager_name`, `manager_email`, `manager_phone`, `status`, `sort_order`, `created_at`, `updated_at`) VALUES
 (1, 6, 1, 'Accounts Department', NULL, NULL, NULL, NULL, 1, 1, '2025-09-14 04:36:38', '2025-09-14 04:36:38');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `failed_jobs`
---
-
-CREATE TABLE `failed_jobs` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `uuid` varchar(255) NOT NULL,
-  `connection` text NOT NULL,
-  `queue` text NOT NULL,
-  `payload` longtext NOT NULL,
-  `exception` longtext NOT NULL,
-  `failed_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `jobs`
---
-
-CREATE TABLE `jobs` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `queue` varchar(255) NOT NULL,
-  `payload` longtext NOT NULL,
-  `attempts` tinyint(3) UNSIGNED NOT NULL,
-  `reserved_at` int(10) UNSIGNED DEFAULT NULL,
-  `available_at` int(10) UNSIGNED NOT NULL,
-  `created_at` int(10) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `job_batches`
---
-
-CREATE TABLE `job_batches` (
-  `id` varchar(255) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `total_jobs` int(11) NOT NULL,
-  `pending_jobs` int(11) NOT NULL,
-  `failed_jobs` int(11) NOT NULL,
-  `failed_job_ids` longtext NOT NULL,
-  `options` mediumtext DEFAULT NULL,
-  `cancelled_at` int(11) DEFAULT NULL,
-  `created_at` int(11) NOT NULL,
-  `finished_at` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -376,21 +325,33 @@ CREATE TABLE `package_features` (
 --
 
 INSERT INTO `package_features` (`id`, `package_id`, `menu_id`, `is_enabled`, `created_at`, `updated_at`) VALUES
-(1, 1, 6, 1, '2025-09-14 03:56:01', '2025-09-14 03:56:01'),
-(2, 1, 7, 1, '2025-09-14 03:56:01', '2025-09-14 03:56:01'),
-(3, 1, 8, 1, '2025-09-14 03:56:01', '2025-09-14 03:56:01'),
-(4, 1, 9, 1, '2025-09-14 03:56:01', '2025-09-14 03:56:01'),
-(5, 1, 10, 1, '2025-09-14 03:56:01', '2025-09-14 03:56:01'),
-(6, 2, 6, 1, '2025-09-14 03:58:31', '2025-09-14 03:58:31'),
-(7, 2, 7, 1, '2025-09-14 03:58:31', '2025-09-14 03:58:31'),
-(8, 2, 8, 1, '2025-09-14 03:58:31', '2025-09-14 03:58:31'),
-(9, 2, 9, 1, '2025-09-14 03:58:31', '2025-09-14 03:58:31'),
-(10, 2, 10, 1, '2025-09-14 03:58:31', '2025-09-14 03:58:31'),
-(11, 3, 6, 1, '2025-09-14 03:58:39', '2025-09-14 03:58:39'),
-(12, 3, 7, 1, '2025-09-14 03:58:39', '2025-09-14 03:58:39'),
-(13, 3, 8, 1, '2025-09-14 03:58:39', '2025-09-14 03:58:39'),
-(14, 3, 9, 1, '2025-09-14 03:58:39', '2025-09-14 03:58:39'),
-(15, 3, 10, 1, '2025-09-14 03:58:39', '2025-09-14 03:58:39');
+(16, 3, 40, 1, '2025-10-05 03:07:38', '2025-10-05 03:07:38'),
+(17, 3, 41, 1, '2025-10-05 03:07:38', '2025-10-05 03:07:38'),
+(18, 3, 42, 1, '2025-10-05 03:07:38', '2025-10-05 03:07:38'),
+(19, 3, 43, 1, '2025-10-05 03:07:38', '2025-10-05 03:07:38'),
+(20, 3, 44, 1, '2025-10-05 03:07:38', '2025-10-05 03:07:38'),
+(21, 3, 45, 1, '2025-10-05 03:07:38', '2025-10-05 03:07:38'),
+(22, 3, 46, 1, '2025-10-05 03:07:38', '2025-10-05 03:07:38'),
+(23, 3, 47, 1, '2025-10-05 03:07:38', '2025-10-05 03:07:38'),
+(24, 3, 48, 1, '2025-10-05 03:07:38', '2025-10-05 03:07:38'),
+(25, 2, 40, 1, '2025-10-05 03:07:47', '2025-10-05 03:07:47'),
+(26, 2, 41, 1, '2025-10-05 03:07:47', '2025-10-05 03:07:47'),
+(27, 2, 42, 1, '2025-10-05 03:07:47', '2025-10-05 03:07:47'),
+(28, 2, 43, 1, '2025-10-05 03:07:47', '2025-10-05 03:07:47'),
+(29, 2, 44, 1, '2025-10-05 03:07:47', '2025-10-05 03:07:47'),
+(30, 2, 45, 1, '2025-10-05 03:07:47', '2025-10-05 03:07:47'),
+(31, 2, 46, 1, '2025-10-05 03:07:47', '2025-10-05 03:07:47'),
+(32, 2, 47, 1, '2025-10-05 03:07:47', '2025-10-05 03:07:47'),
+(33, 2, 48, 1, '2025-10-05 03:07:47', '2025-10-05 03:07:47'),
+(34, 1, 40, 1, '2025-10-05 03:07:51', '2025-10-05 03:07:51'),
+(35, 1, 41, 1, '2025-10-05 03:07:51', '2025-10-05 03:07:51'),
+(36, 1, 42, 1, '2025-10-05 03:07:51', '2025-10-05 03:07:51'),
+(37, 1, 43, 1, '2025-10-05 03:07:51', '2025-10-05 03:07:51'),
+(38, 1, 44, 1, '2025-10-05 03:07:51', '2025-10-05 03:07:51'),
+(39, 1, 45, 1, '2025-10-05 03:07:51', '2025-10-05 03:07:51'),
+(40, 1, 46, 1, '2025-10-05 03:07:51', '2025-10-05 03:07:51'),
+(41, 1, 47, 1, '2025-10-05 03:07:51', '2025-10-05 03:07:51'),
+(42, 1, 48, 1, '2025-10-05 03:07:51', '2025-10-05 03:07:51');
 
 -- --------------------------------------------------------
 
@@ -403,31 +364,6 @@ CREATE TABLE `password_reset_tokens` (
   `token` varchar(255) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `sections`
---
-
-CREATE TABLE `sections` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `module_id` bigint(20) UNSIGNED NOT NULL,
-  `section_name` varchar(255) NOT NULL,
-  `slug` varchar(255) NOT NULL,
-  `status` tinyint(1) NOT NULL DEFAULT 1,
-  `sort_order` int(11) NOT NULL DEFAULT 0,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `sections`
---
-
-INSERT INTO `sections` (`id`, `module_id`, `section_name`, `slug`, `status`, `sort_order`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(7, 1, 'Configuration', 'configuration', 1, 1, '2025-09-14 05:39:19', '2025-09-14 05:39:19', NULL);
 
 -- --------------------------------------------------------
 
@@ -506,7 +442,7 @@ CREATE TABLE `tbl_users` (
 --
 
 INSERT INTO `tbl_users` (`id`, `fname`, `mname`, `lname`, `email`, `phone`, `loginid`, `pincode`, `comp_id`, `location_id`, `dept_id`, `email_verified_at`, `password`, `token`, `remember_token`, `status`, `role`, `permissions`, `avatar`, `timezone`, `language`, `currency`, `theme`, `last_login_at`, `last_login_ip`, `failed_login_attempts`, `locked_until`, `two_factor_enabled`, `two_factor_secret`, `recovery_codes`, `session_id`, `device_info`, `force_password_change`, `password_changed_at`, `login_history`, `created_by`, `updated_by`, `created_at`, `updated_at`, `deleted_at`, `last_activity`) VALUES
-(1, 'System', NULL, 'Administrator', 'admin@erpsystem.com', '+1234567890', 'admin', '12345', 11, 1, 1, NULL, '$2y$12$QZ/KZc6V/wK3YGJDrzVLaehK4R7EU.wRkOugBu/7kgg47SxX3yHPm', 'f9bb13bea372d3c7005ca92ca5796e18bb0fbbf7639c927e973d5d86765b5237', 'kPr6fz7a5ML1jMSpAZNO7T9SEsBuPwQonwGJImdArGWZ6MXD3cX3HiqdejjpVYGoDCHFH4b5FqVkFakkJbRVYy2f4VPK7RLmfijJ', 'active', 'super_admin', '{\"users\":[\"create\",\"read\",\"update\",\"delete\"],\"financial\":[\"create\",\"read\",\"update\",\"delete\"],\"reports\":[\"create\",\"read\",\"update\",\"delete\"],\"settings\":[\"create\",\"read\",\"update\",\"delete\"],\"system\":[\"create\",\"read\",\"update\",\"delete\"]}', NULL, 'UTC', 'en', 'USD', 'system', '2025-10-05 01:39:09', '127.0.0.1', 0, NULL, 0, NULL, NULL, 'auOwxLZ7LU8BQuT6CH8Pbp9JeUqTHhIPYBeaKigb', NULL, 0, '2025-08-14 10:19:49', '[{\"timestamp\":\"2025-10-05T06:39:09.658910Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-09-26T18:06:08.357458Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-09-14T10:59:01.712644Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/137.0.0.0 Safari\\/537.36 OPR\\/121.0.0.0\",\"success\":true},{\"timestamp\":\"2025-09-14T10:47:55.799115Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/137.0.0.0 Safari\\/537.36 OPR\\/121.0.0.0\",\"success\":true},{\"timestamp\":\"2025-09-14T10:26:22.924384Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/137.0.0.0 Safari\\/537.36 OPR\\/121.0.0.0\",\"success\":true},{\"timestamp\":\"2025-09-14T10:21:59.690292Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/137.0.0.0 Safari\\/537.36 OPR\\/121.0.0.0\",\"success\":true},{\"timestamp\":\"2025-09-14T06:20:13.946962Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/137.0.0.0 Safari\\/537.36 OPR\\/121.0.0.0\",\"success\":true},{\"timestamp\":\"2025-09-07T13:25:13.553050Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/135.0.0.0 Safari\\/537.36 OPR\\/120.0.0.0\",\"success\":true},{\"timestamp\":\"2025-09-07T12:33:52.351347Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/135.0.0.0 Safari\\/537.36 OPR\\/120.0.0.0\",\"success\":true},{\"timestamp\":\"2025-09-07T11:40:07.362843Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/135.0.0.0 Safari\\/537.36 OPR\\/120.0.0.0\",\"success\":true},{\"timestamp\":\"2025-08-29T15:37:40.891774Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/135.0.0.0 Safari\\/537.36 OPR\\/120.0.0.0\",\"success\":true},{\"timestamp\":\"2025-08-29T15:20:54.114036Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/135.0.0.0 Safari\\/537.36 OPR\\/120.0.0.0\",\"success\":true},{\"timestamp\":\"2025-08-29T15:19:28.567732Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/135.0.0.0 Safari\\/537.36 OPR\\/120.0.0.0\",\"success\":true},{\"timestamp\":\"2025-08-29T14:45:34.046684Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/135.0.0.0 Safari\\/537.36 OPR\\/120.0.0.0\",\"success\":true},{\"timestamp\":\"2025-08-26T15:08:19.937574Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/135.0.0.0 Safari\\/537.36 OPR\\/120.0.0.0\",\"success\":true},{\"timestamp\":\"2025-08-26T14:43:26.804782Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/135.0.0.0 Safari\\/537.36 OPR\\/120.0.0.0\",\"success\":true},{\"timestamp\":\"2025-08-16T06:04:40.987780Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/135.0.0.0 Safari\\/537.36 OPR\\/120.0.0.0\",\"success\":true},{\"timestamp\":\"2025-08-14T15:23:38.218569Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/135.0.0.0 Safari\\/537.36 OPR\\/120.0.0.0\",\"success\":true},{\"timestamp\":\"2025-08-14T15:22:44.632761Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/135.0.0.0 Safari\\/537.36 OPR\\/120.0.0.0\",\"success\":true}]', NULL, NULL, '2025-08-14 10:19:49', '2025-10-05 03:01:20', NULL, NULL),
+(1, 'System', NULL, 'Administrator', 'admin@erpsystem.com', '+1234567890', 'admin', '12345', 11, 1, 1, NULL, '$2y$12$QZ/KZc6V/wK3YGJDrzVLaehK4R7EU.wRkOugBu/7kgg47SxX3yHPm', NULL, 'umdBf0gAAeVLS9joUD6JpN80AedzCW4hKUQL9t15jLQNM9ypbTe7HmDepjCd51ZVYSr73viiYhWzgyifMeZo7h34dJE3UG1VUh8Z', 'active', 'super_admin', '{\"users\":[\"create\",\"read\",\"update\",\"delete\"],\"financial\":[\"create\",\"read\",\"update\",\"delete\"],\"reports\":[\"create\",\"read\",\"update\",\"delete\"],\"settings\":[\"create\",\"read\",\"update\",\"delete\"],\"system\":[\"create\",\"read\",\"update\",\"delete\"]}', NULL, 'UTC', 'en', 'USD', 'system', '2025-10-05 10:02:32', '127.0.0.1', 0, NULL, 0, NULL, NULL, NULL, NULL, 0, '2025-08-14 10:19:49', '[{\"timestamp\":\"2025-10-05T15:02:32.769691Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T15:02:01.980624Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:54:46.102193Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:52:57.710543Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:50:53.638158Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:50:49.083904Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:50:04.328881Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:46:20.001957Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:46:17.760901Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:44:55.156103Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:44:51.016780Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:44:23.423233Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:40:29.355631Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:38:30.142226Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:31:37.203407Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:28:33.979196Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:27:39.756712Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:27:31.369900Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T14:24:45.203249Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-05T12:13:47.895119Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true}]', NULL, NULL, '2025-08-14 10:19:49', '2025-10-05 10:02:47', NULL, NULL),
 (2, 'Finance', NULL, 'Manager', 'finance@erpsystem.com', '+1234567891', 'finance_mgr', '12346', 1, 1, 2, NULL, '$2y$12$.Kwr9rgMKPjrBG45kDk8x.kTh/l9u1VSLPMZ/BAI0n2Jw69lIf9SG', NULL, NULL, 'active', 'manager', '{\"financial\":[\"create\",\"read\",\"update\",\"delete\"],\"reports\":[\"read\",\"create\"],\"users\":[\"read\"]}', NULL, 'UTC', 'en', 'USD', 'light', NULL, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL, 0, '2025-08-14 10:19:50', NULL, NULL, NULL, '2025-08-14 10:19:50', '2025-08-14 10:19:50', NULL, NULL),
 (3, 'Account', NULL, 'Executive', 'accounts@erpsystem.com', '+1234567892', 'acc_exec', '12347', 1, 1, 2, NULL, '$2y$12$voUVJ1fWNi9mo0rkJppxZ.V96Gn0MF.y6L1KSjKBz7tJGp/7/QN3m', NULL, NULL, 'active', 'user', '{\"financial\":[\"create\",\"read\",\"update\"],\"reports\":[\"read\"]}', NULL, 'Asia/Karachi', 'en', 'PKR', 'dark', NULL, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL, 1, '2025-05-14 10:19:50', NULL, NULL, NULL, '2025-08-14 10:19:50', '2025-08-14 10:19:50', NULL, NULL);
 
@@ -544,6 +480,23 @@ CREATE TABLE `user_rights` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `user_rights`
+--
+
+INSERT INTO `user_rights` (`id`, `user_id`, `menu_id`, `can_view`, `can_add`, `can_edit`, `can_delete`, `created_at`, `updated_at`) VALUES
+(37, 1, 40, 1, 1, 1, 1, '2025-10-05 06:54:05', '2025-10-05 06:54:05'),
+(38, 1, 41, 1, 1, 1, 1, '2025-10-05 06:54:05', '2025-10-05 06:54:05'),
+(39, 1, 42, 1, 1, 1, 1, '2025-10-05 06:54:05', '2025-10-05 06:54:05'),
+(40, 1, 43, 1, 1, 1, 1, '2025-10-05 06:54:05', '2025-10-05 06:54:05'),
+(41, 1, 44, 1, 1, 1, 1, '2025-10-05 06:54:05', '2025-10-05 06:54:05'),
+(42, 1, 45, 1, 1, 1, 1, '2025-10-05 06:54:05', '2025-10-05 06:54:05'),
+(43, 1, 46, 1, 1, 1, 1, '2025-10-05 06:54:05', '2025-10-05 06:54:05'),
+(44, 1, 47, 1, 1, 1, 1, '2025-10-05 06:54:05', '2025-10-05 06:54:05'),
+(45, 1, 48, 1, 1, 1, 1, '2025-10-05 06:54:05', '2025-10-05 06:54:05'),
+(46, 1, 49, 1, 1, 1, 1, '2025-10-05 06:54:05', '2025-10-05 06:54:05'),
+(47, 1, 50, 1, 1, 1, 1, '2025-10-05 06:54:05', '2025-10-05 06:54:05');
 
 -- --------------------------------------------------------
 
@@ -609,26 +562,6 @@ ALTER TABLE `departments`
   ADD KEY `departments_company_id_foreign` (`company_id`);
 
 --
--- Indexes for table `failed_jobs`
---
-ALTER TABLE `failed_jobs`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`);
-
---
--- Indexes for table `jobs`
---
-ALTER TABLE `jobs`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `jobs_queue_index` (`queue`);
-
---
--- Indexes for table `job_batches`
---
-ALTER TABLE `job_batches`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `locations`
 --
 ALTER TABLE `locations`
@@ -681,15 +614,6 @@ ALTER TABLE `package_features`
 --
 ALTER TABLE `password_reset_tokens`
   ADD PRIMARY KEY (`email`);
-
---
--- Indexes for table `sections`
---
-ALTER TABLE `sections`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `sections_module_id_section_name_unique` (`module_id`,`section_name`),
-  ADD UNIQUE KEY `sections_slug_unique` (`slug`),
-  ADD KEY `sections_module_id_status_sort_order_index` (`module_id`,`status`,`sort_order`);
 
 --
 -- Indexes for table `sessions`
@@ -758,18 +682,6 @@ ALTER TABLE `departments`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `failed_jobs`
---
-ALTER TABLE `failed_jobs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `jobs`
---
-ALTER TABLE `jobs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `locations`
 --
 ALTER TABLE `locations`
@@ -803,13 +715,7 @@ ALTER TABLE `packages`
 -- AUTO_INCREMENT for table `package_features`
 --
 ALTER TABLE `package_features`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
-
---
--- AUTO_INCREMENT for table `sections`
---
-ALTER TABLE `sections`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `tbl_users`
@@ -827,7 +733,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `user_rights`
 --
 ALTER TABLE `user_rights`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT for table `user_sessions`

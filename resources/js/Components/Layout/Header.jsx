@@ -28,7 +28,8 @@ import {
 } from 'lucide-react';
 
 const Header = () => {
-  const { user, url } = usePage().props;
+  const { auth, url } = usePage().props;
+  const user = auth?.user;
   const { canView } = usePermissions();
   const {
     sidebarOpen,
@@ -649,19 +650,6 @@ const Header = () => {
                     </p>
                   </div>
                   <div className="py-1">
-                    <Link
-                      href="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 notranslate"
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                      href="/settings"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 notranslate"
-                    >
-                      Settings
-                    </Link>
-                    <hr className="my-1 border-gray-200 dark:border-gray-700" />
                     <Link
                       href="/logout"
                       method="post"
