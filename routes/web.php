@@ -181,6 +181,8 @@ Route::prefix('system/users')->name('system.users.')->group(function () {
     Route::post('/', [UserController::class, 'store'])->name('store');
     Route::get('/{user}', [UserController::class, 'show'])->name('show');
     Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+    Route::get('/{user}/rights', [UserController::class, 'rights'])->name('rights');
+    Route::put('/{user}/rights', [UserController::class, 'updateRights'])->name('update-rights');
     Route::put('/{user}', [UserController::class, 'update'])->name('update');
     Route::patch('/{user}', [UserController::class, 'update'])->name('update');
     Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');

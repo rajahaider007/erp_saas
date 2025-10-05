@@ -229,6 +229,57 @@ class UserController extends Controller
     }
 
     /**
+     * Show the user rights configuration form.
+     */
+    public function rights(User $user)
+    {
+        // Load user with relationships
+        $user->load(['company', 'location', 'department']);
+        
+        // Get available menus for rights based on user's company package
+        $availableMenus = collect();
+        if ($user->comp_id) {
+            $company = Company::with('package')->find($user->comp_id);
+            if ($company) {
+                $availableMenus = $company->getAvailableMenusForRights();
+            }
+        }
+        
+        // Get user's current rights
+        $userRights = $user->rights()->get()->keyBy('menu_id');
+
+        return Inertia::render('system/Users/UserRights', [
+            'user' => $user,
+            'availableMenus' => $availableMenus,
+            'userRights' => $userRights,
+            'pageTitle' => 'User Rights Configuration'
+        ]);
+    }
+
+    /**
+     * Update user rights only.
+     */
+    public function updateRights(Request $request, User $user)
+    {
+        \Log::info('updateRights called for user: ' . $user->id);
+        \Log::info('User rights data received:', $request->user_rights);
+        
+        try {
+            $this->updateUserRights($user, $request->user_rights);
+            \Log::info('User rights updated successfully for user: ' . $user->id);
+            
+            return redirect()->route('system.users.rights', $user)
+                ->with('success', 'User rights updated successfully!');
+        } catch (\Exception $e) {
+            \Log::error('Error updating user rights: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            return redirect()->back()
+                ->with('error', 'Failed to update user rights: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Update the specified user in storage.
      */
     public function update(Request $request, User $user)
@@ -282,11 +333,6 @@ class UserController extends Controller
         }
 
         $user->update($updateData);
-
-        // Handle user rights if provided
-        if ($request->has('user_rights')) {
-            $this->updateUserRights($user, $request->user_rights);
-        }
 
         return redirect()->route('system.users.edit', $user)
             ->with('success', 'User updated successfully!');
@@ -364,22 +410,48 @@ class UserController extends Controller
      */
     private function updateUserRights(User $user, array $userRights)
     {
+        \Log::info('updateUserRights called with data:', $userRights);
+        
         // Delete existing rights
         $user->rights()->delete();
+        \Log::info('Existing rights deleted for user: ' . $user->id);
 
         // Create new rights
-        foreach ($userRights as $menuId => $rights) {
-            if (isset($rights['can_view']) && $rights['can_view']) {
+        foreach ($userRights as $rightData) {
+            \Log::info('Processing right data:', $rightData);
+            
+            // Check if this is an array with menu_id key (from our form)
+            if (is_array($rightData) && isset($rightData['menu_id'])) {
+                \Log::info('Creating right for menu_id: ' . $rightData['menu_id']);
+                
+                \App\Models\UserRight::create([
+                    'user_id' => $user->id,
+                    'menu_id' => $rightData['menu_id'],
+                    'can_view' => $rightData['can_view'] ?? false,
+                    'can_add' => $rightData['can_add'] ?? false,
+                    'can_edit' => $rightData['can_edit'] ?? false,
+                    'can_delete' => $rightData['can_delete'] ?? false,
+                ]);
+            }
+            // Check if this is an array with menu_id as key (alternative format)
+            elseif (is_array($rightData) && isset($rightData['can_view'])) {
+                $menuId = array_search($rightData, $userRights);
+                \Log::info('Creating right for menu_id (alt format): ' . $menuId);
+                
                 \App\Models\UserRight::create([
                     'user_id' => $user->id,
                     'menu_id' => $menuId,
-                    'can_view' => $rights['can_view'] ?? false,
-                    'can_add' => $rights['can_add'] ?? false,
-                    'can_edit' => $rights['can_edit'] ?? false,
-                    'can_delete' => $rights['can_delete'] ?? false,
+                    'can_view' => $rightData['can_view'] ?? false,
+                    'can_add' => $rightData['can_add'] ?? false,
+                    'can_edit' => $rightData['can_edit'] ?? false,
+                    'can_delete' => $rightData['can_delete'] ?? false,
                 ]);
+            } else {
+                \Log::warning('Skipping invalid right data:', $rightData);
             }
         }
+        
+        \Log::info('User rights update completed for user: ' . $user->id);
     }
 
     /**

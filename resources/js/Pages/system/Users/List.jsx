@@ -145,7 +145,7 @@ const List = () => {
                         <button className="action-btn edit" title="Edit User" onClick={()=>router.get(`/system/users/${user.id}/edit`)}>
                           <Edit3 size={16} />
                         </button>
-                        <button className="action-btn rights" title="Configure User Rights" onClick={()=>router.get(`/system/users/${user.id}/edit`, { showRights: true })}>
+                        <button className="action-btn rights" title="Configure User Rights" onClick={()=>router.get(`/system/users/${user.id}/rights`)}>
                           <Shield size={16} />
                         </button>
                         <button className="action-btn copy" title="Duplicate" onClick={()=>router.get('/system/users/create', { duplicate: user.id })}>
