@@ -24,7 +24,8 @@ import {
   CreditCard,
   Calendar,
   Mail,
-  Building
+  Building,
+  Grid3X3
 } from 'lucide-react';
 
 const Header = () => {
@@ -78,6 +79,12 @@ const Header = () => {
       href: '/dashboard',
       icon: Home,
       current: url === '/dashboard'
+    },
+    {
+      name: 'Modules',
+      href: '/erp-modules',
+      icon: Grid3X3,
+      current: url === '/erp-modules'
     }
   ]);
 

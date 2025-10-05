@@ -39,6 +39,7 @@ class HandleInertiaRequests extends Middleware
         
         $userRights = [];
         $availableMenus = [];
+        $availableModules = [];
         $company = null;
         
         
@@ -64,6 +65,58 @@ class HandleInertiaRequests extends Middleware
                 $company = \DB::table('companies')
                     ->where('id', $user->comp_id)
                     ->first();
+            }
+
+            // Get available modules for the user's company
+            if ($user->comp_id) {
+                // For super admin, get all modules
+                if ($user->role === 'super_admin') {
+                    $availableModules = \DB::table('modules')
+                        ->where('status', true)
+                        ->orderBy('sort_order', 'asc')
+                        ->orderBy('module_name', 'asc')
+                        ->get()
+                        ->map(function ($module) {
+                            return [
+                                'id' => $module->id,
+                                'module_name' => $module->module_name,
+                                'folder_name' => $module->folder_name,
+                                'slug' => $module->slug,
+                                'image' => $module->image,
+                                'status' => $module->status,
+                                'sort_order' => $module->sort_order,
+                                'created_at' => $module->created_at,
+                                'updated_at' => $module->updated_at,
+                            ];
+                        })
+                        ->toArray();
+                } else {
+                    // For other users, get modules through package system
+                    $availableModules = \DB::table('modules')
+                        ->join('package_modules', 'modules.id', '=', 'package_modules.module_id')
+                        ->join('packages', 'package_modules.package_id', '=', 'packages.id')
+                        ->join('companies', 'packages.id', '=', 'companies.package_id')
+                        ->where('companies.id', $user->comp_id)
+                        ->where('modules.status', true)
+                        ->select('modules.*')
+                        ->orderBy('modules.sort_order', 'asc')
+                        ->orderBy('modules.module_name', 'asc')
+                        ->get()
+                        ->map(function ($module) {
+                            return [
+                                'id' => $module->id,
+                                'module_name' => $module->module_name,
+                                'folder_name' => $module->folder_name,
+                                'slug' => $module->slug,
+                                'image' => $module->image,
+                                'status' => $module->status,
+                                'sort_order' => $module->sort_order,
+                                'created_at' => $module->created_at,
+                                'updated_at' => $module->updated_at,
+                            ];
+                        })
+                        ->toArray();
+                }
             }
 
             // Get available menus for the user's company
@@ -114,6 +167,7 @@ class HandleInertiaRequests extends Middleware
             'user_role' => $user ? $user->role : null,
             'userRights_count' => count($userRights),
             'availableMenus_count' => count($availableMenus),
+            'availableModules_count' => count($availableModules),
             'company_name' => $company ? $company->company_name : null
         ]);
 
@@ -124,6 +178,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'userRights' => $userRights,
             'availableMenus' => $availableMenus,
+            'availableModules' => $availableModules,
             'company' => $company,
         ];
         

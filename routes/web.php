@@ -65,6 +65,46 @@ Route::get('/dashboard', function (Request $request) {
     return Inertia::render('dashboard/index');
 })->middleware('web.auth')->name('dashboard');
 
+// Modules page - ERP modules selection
+Route::get('/erp-modules', function (Request $request) {
+    return Inertia::render('Modules/index');
+})->middleware('web.auth')->name('erp.modules');
+
+// Dynamic Module Dashboards
+Route::get('/{module}/dashboard', function (Request $request, $module) {
+    // Get module info from database
+    $moduleData = DB::table('modules')
+        ->where('folder_name', $module)
+        ->where('status', true)
+        ->first();
+    
+    if (!$moduleData) {
+        abort(404, 'Module not found');
+    }
+    
+    // Get module's sections and menus
+    $sections = DB::table('sections')
+        ->where('module_id', $moduleData->id)
+        ->where('status', true)
+        ->orderBy('sort_order', 'asc')
+        ->get();
+    
+    $menus = DB::table('menus')
+        ->join('sections', 'menus.section_id', '=', 'sections.id')
+        ->where('sections.module_id', $moduleData->id)
+        ->where('menus.status', true)
+        ->orderBy('sections.sort_order', 'asc')
+        ->orderBy('menus.sort_order', 'asc')
+        ->select('menus.*', 'sections.section_name')
+        ->get();
+    
+    return Inertia::render('Modules/Dynamic/index', [
+        'module' => $moduleData,
+        'sections' => $sections,
+        'menus' => $menus
+    ]);
+})->middleware('web.auth')->name('module.dashboard');
+
 // System Module Management Routes (ADD MISSING EDIT ROUTE)
 Route::get('/system/AddModules', [ModuleController::class, 'index'])->name('system.add_modules');
 Route::get('/system/AddModules/add', [ModuleController::class, 'create'])->name('system.add_modules.add');

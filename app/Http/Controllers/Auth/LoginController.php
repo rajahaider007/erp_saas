@@ -124,7 +124,7 @@ class LoginController extends Controller
                 Cookie::queue('remember_token', $rememberToken, 43200); // 30 days
             }
 
-            return redirect()->intended('/dashboard');
+            return redirect()->intended('/erp-modules');
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors());
         } catch (\Exception $e) {
