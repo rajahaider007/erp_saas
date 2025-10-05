@@ -137,22 +137,125 @@ const Sidebar = () => {
   const [hoveredAnchor, setHoveredAnchor] = React.useState(null);
   const hoverCloseTimeoutRef = React.useRef(null);
 
-  const [navigation, setNavigation] = React.useState([
-    {
-      name: 'Dashboard',
-      href: '/dashboard',
-      icon: Home,
-      current: url === '/dashboard'
-    }
-  ]);
+  const [navigation, setNavigation] = React.useState([]);
+
+  // State for current module data
+  const [currentModuleData, setCurrentModuleData] = React.useState(null);
+  const [loadingModuleData, setLoadingModuleData] = React.useState(false);
 
   // Get props at component level
-  const { availableMenus, auth } = usePage().props;
+  const { availableMenus, auth, modules } = usePage().props;
   const user = auth?.user;
+
+  // Function to detect if we're in a module-specific URL
+  const isModuleUrl = (url) => {
+    const path = url.replace(/^\/+/, '').split('/');
+    return path.length > 0 && 
+           path[0] !== 'system' && 
+           path[0] !== 'dashboard' && 
+           path[0] !== 'erp-modules' &&
+           path[0] !== '';
+  };
+
+  // Function to get current module name from URL
+  const getCurrentModuleName = (url) => {
+    const path = url.replace(/^\/+/, '').split('/');
+    return path[0];
+  };
+
+  // Function to get module icon based on folder name
+  const getModuleIcon = (folderName) => {
+    const iconMap = {
+      'accounts': FileText,
+      'inventory': Package,
+      'sales': ShoppingCart,
+      'purchases': CreditCard,
+      'hr': Users,
+      'finance': BarChart3,
+      'system': Settings,
+      'reports': BarChart3,
+      'dashboard': Home
+    };
+    return iconMap[folderName] || Package;
+  };
+
+  // Build navigation based on user permissions
+  React.useEffect(() => {
+    const buildNavigation = () => {
+      const navItems = [
+        {
+          name: 'Dashboard',
+          href: '/dashboard',
+          icon: Home,
+          current: url === '/dashboard'
+        }
+      ];
+
+      // Add ERP Modules link if user has access
+      if (canView('/erp-modules')) {
+        navItems.push({
+          name: 'ERP Modules',
+          href: '/erp-modules',
+          icon: Package,
+          current: url === '/erp-modules'
+        });
+      }
+
+      // Add accessible modules
+      if (modules && Array.isArray(modules)) {
+        modules.forEach(module => {
+          if (canView(`/${module.folder_name}`)) {
+            navItems.push({
+              name: module.module_name,
+              href: `/${module.folder_name}`,
+              icon: getModuleIcon(module.folder_name),
+              current: url.startsWith(`/${module.folder_name}`),
+              children: [] // Will be populated with sections/menus
+            });
+          }
+        });
+      }
+
+      setNavigation(navItems);
+    };
+
+    buildNavigation();
+  }, [url, modules, canView]);
+
+  // Load current module data when URL changes
+  React.useEffect(() => {
+    const loadCurrentModuleData = async () => {
+      if (!isModuleUrl(url)) {
+        setCurrentModuleData(null);
+        return;
+      }
+
+      const moduleName = getCurrentModuleName(url);
+      if (!moduleName) return;
+
+      setLoadingModuleData(true);
+      try {
+        const response = await fetch(`/modules/current-module-data?url=${encodeURIComponent(url)}`);
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          setCurrentModuleData(data.data);
+        } else {
+          setCurrentModuleData(null);
+        }
+      } catch (error) {
+        console.error('Failed to load module data:', error);
+        setCurrentModuleData(null);
+      } finally {
+        setLoadingModuleData(false);
+      }
+    };
+
+    loadCurrentModuleData();
+  }, [url]);
 
   // Load dynamic menus from availableMenus
   React.useEffect(() => {
-    
     if (availableMenus && availableMenus.length > 0) {
       // For super admin, show all menus without permission check
       let systemMenus;
@@ -180,12 +283,58 @@ const Sidebar = () => {
         };
         
         setNavigation(prev => {
-          const base = prev.filter(i => i.name === 'Dashboard');
-          return [...base, systemGroup];
+          // Keep existing navigation items and add system group
+          const existingItems = prev.filter(i => i.name !== 'System');
+          return [...existingItems, systemGroup];
         });
       }
     }
   }, [url, canView, availableMenus, user?.role]);
+
+  // Update navigation when current module data changes
+  React.useEffect(() => {
+    if (!currentModuleData) return;
+
+    const moduleGroup = {
+      name: currentModuleData.module.name,
+      href: '#',
+      icon: getModuleIcon(currentModuleData.module.folder_name),
+      current: true,
+      children: currentModuleData.sections
+        .filter(section => {
+          // Check if user has permission to view this section
+          if (user?.role === 'super_admin') {
+            return true;
+          }
+          return canView(`/${currentModuleData.module.folder_name}/${section.slug}`);
+        })
+        .map(section => ({
+          name: section.section_name,
+          href: `/${currentModuleData.module.folder_name}/${section.slug}`,
+          icon: Layers,
+          children: section.menus
+            .filter(menu => {
+              // Check if user has permission to view this menu
+              if (user?.role === 'super_admin') {
+                return true;
+              }
+              return canView(menu.id);
+            })
+            .map(menu => ({
+              name: menu.menu_name,
+              href: menu.route || '#',
+              icon: iconFromName(menu.icon)
+          }))
+      }))
+      .filter(section => section.children.length > 0) // Only show sections that have accessible menus
+    };
+
+    setNavigation(prev => {
+      // Keep existing navigation items and add/update module group
+      const existingItems = prev.filter(i => i.name !== currentModuleData.module.name);
+      return [...existingItems, moduleGroup];
+    });
+  }, [currentModuleData, canView, user?.role]);
 
   // Map icon name string from DB to lucide-react icon component
   const iconFromName = (name) => {

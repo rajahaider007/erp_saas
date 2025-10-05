@@ -73,20 +73,52 @@ const Header = () => {
   ];
 
   // Enhanced navigation with sub-menus
-  const [navigationItems, setNavigationItems] = React.useState([
-    {
-      name: 'Dashboard',
-      href: '/dashboard',
-      icon: Home,
-      current: url === '/dashboard'
-    },
-    {
-      name: 'Modules',
-      href: '/erp-modules',
-      icon: Grid3X3,
-      current: url === '/erp-modules'
-    }
-  ]);
+  const [navigationItems, setNavigationItems] = React.useState([]);
+
+  // Get modules from props at component level
+  const { modules } = usePage().props;
+
+  // Build header navigation based on user permissions
+  React.useEffect(() => {
+    const buildHeaderNavigation = () => {
+      const navItems = [
+        {
+          name: 'Dashboard',
+          href: '/dashboard',
+          icon: Home,
+          current: url === '/dashboard'
+        }
+      ];
+
+      // Add ERP Modules link if user has access
+      if (canView('/erp-modules')) {
+        navItems.push({
+          name: 'Modules',
+          href: '/erp-modules',
+          icon: Grid3X3,
+          current: url === '/erp-modules'
+        });
+      }
+
+      // Add accessible modules
+      if (modules && Array.isArray(modules)) {
+        modules.forEach(module => {
+          if (canView(`/${module.folder_name}`)) {
+            navItems.push({
+              name: module.module_name,
+              href: `/${module.folder_name}`,
+              icon: getModuleIcon(module.folder_name),
+              current: url.startsWith(`/${module.folder_name}`)
+            });
+          }
+        });
+      }
+
+      setNavigationItems(navItems);
+    };
+
+    buildHeaderNavigation();
+  }, [url, canView, user?.role, modules]);
 
   // Load dynamic header menus from availableMenus
   React.useEffect(() => {
@@ -116,13 +148,29 @@ const Header = () => {
         };
         
         setNavigationItems(prev => {
-          const base = prev.filter(i => i.name === 'Dashboard');
-          const newItems = [...base, systemGroup];
-          return newItems;
+          // Keep existing navigation items and add system group
+          const existingItems = prev.filter(i => i.name !== 'System');
+          return [...existingItems, systemGroup];
         });
       }
     }
   }, [url, canView, availableMenus, user?.role]);
+
+  // Function to get module icon based on folder name
+  const getModuleIcon = (folderName) => {
+    const iconMap = {
+      'accounts': FileText,
+      'inventory': Package,
+      'sales': ShoppingCart,
+      'purchases': CreditCard,
+      'hr': Users,
+      'finance': BarChart3,
+      'system': Settings,
+      'reports': BarChart3,
+      'dashboard': Home
+    };
+    return iconMap[folderName] || Package;
+  };
 
   // Map icon names from DB to lucide-react components
   const iconFromName = (name) => {

@@ -19,10 +19,18 @@ class CheckPermission
      */
     public function handle(Request $request, Closure $next, string $permission = 'can_view', string $menuRoute = null)
     {
-        $user = $request->user();
+        // Get user from custom authentication system
+        $userId = $request->session()->get('user_id');
+        
+        if (!$userId) {
+            return redirect()->route('login')->with('error', 'Please log in to access this resource.');
+        }
+
+        // Get user from database
+        $user = DB::table('tbl_users')->where('id', $userId)->first();
         
         if (!$user) {
-            return redirect()->route('login')->with('error', 'Please log in to access this resource.');
+            return redirect()->route('login')->with('error', 'User not found.');
         }
 
         // Super admin bypass
@@ -61,9 +69,20 @@ class CheckPermission
         // Try to get from current route name
         $currentRoute = $request->route()->getName();
         if ($currentRoute) {
+            // Try exact match first
             $menu = DB::table('menus')->where('route_name', $currentRoute)->first();
             if ($menu) {
                 return $menu->id;
+            }
+            
+            // Try to match by route pattern (e.g., system.companies.create -> /system/companies)
+            $routeParts = explode('.', $currentRoute);
+            if (count($routeParts) >= 2) {
+                $baseRoute = '/' . implode('/', array_slice($routeParts, 0, 2));
+                $menu = DB::table('menus')->where('route', $baseRoute)->first();
+                if ($menu) {
+                    return $menu->id;
+                }
             }
         }
 

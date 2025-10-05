@@ -128,69 +128,67 @@ const ModulesPage = () => {
           <div className="absolute inset-0 -top-4 -left-4 w-[calc(100%+2rem)] h-[calc(100%+2rem)] bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-pulse transition-opacity duration-700" />
         )}
         
-        {/* Card Content - Compact */}
-        <div className="relative p-4 z-10">
+        {/* Card Content - Professional */}
+        <div className="relative p-6 z-10">
           {/* Header with Modern Design */}
-          <div className="flex items-start justify-between mb-4">
-            <div className={`p-3 rounded-2xl bg-gradient-to-br ${module.gradient} text-white shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105`}>
-              <Icon className="h-6 w-6" />
+          <div className="flex items-start justify-between mb-6">
+            <div className={`p-4 rounded-2xl bg-gradient-to-br ${module.gradient} text-white shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
+              <Icon className="h-8 w-8" />
             </div>
             
             {isDisabled ? (
-              <div className="flex items-center space-x-1 text-gray-400 bg-gray-100/50 dark:bg-gray-700/50 backdrop-blur-sm px-2 py-1 rounded-full border border-gray-200/50">
-                <Lock className="h-3 w-3" />
-                <span className="text-xs font-medium">Restricted</span>
+              <div className="flex items-center space-x-2 text-gray-400 bg-gray-100/50 dark:bg-gray-700/50 backdrop-blur-sm px-3 py-2 rounded-full border border-gray-200/50">
+                <Lock className="h-4 w-4" />
+                <span className="text-sm font-medium">Restricted</span>
               </div>
             ) : (
-              <div className="flex items-center space-x-1 text-green-600 bg-green-50/80 dark:bg-green-900/20 backdrop-blur-sm px-2 py-1 rounded-full border border-green-200/50 group-hover:bg-green-100/80 dark:group-hover:bg-green-900/30 transition-all duration-300">
-                <Unlock className="h-3 w-3" />
-                <span className="text-xs font-medium">Active</span>
+              <div className="flex items-center space-x-2 text-green-600 bg-green-50/80 dark:bg-green-900/20 backdrop-blur-sm px-3 py-2 rounded-full border border-green-200/50 group-hover:bg-green-100/80 dark:group-hover:bg-green-900/30 transition-all duration-300">
+                <Unlock className="h-4 w-4" />
+                <span className="text-sm font-medium">Active</span>
               </div>
             )}
           </div>
 
-          {/* Module Info - Compact */}
-          <div className="mb-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors duration-300">
+          {/* Module Info - Professional */}
+          <div className="mb-6">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors duration-300">
               {module.name}
             </h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors duration-300 line-clamp-2">
+            <p className="text-gray-600 dark:text-gray-300 text-base leading-relaxed group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors duration-300">
               {module.description}
             </p>
           </div>
 
-          {/* Enhanced Features - Compact */}
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-1">
-              {module.features.slice(0, 3).map((feature, index) => (
+          {/* Enhanced Features - Professional */}
+          <div className="mb-6">
+            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide">
+              Key Features
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {module.features.map((feature, index) => (
                 <span
                   key={index}
-                  className={`px-2 py-1 rounded-lg text-xs font-medium transition-all duration-300 ${
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
                     isDisabled 
                       ? 'bg-gray-100/50 text-gray-500 dark:bg-gray-700/50 dark:text-gray-400'
-                      : `bg-gradient-to-r ${module.gradient} text-white group-hover:shadow-md group-hover:scale-105`
+                      : `bg-gradient-to-r ${module.gradient} text-white group-hover:shadow-lg group-hover:scale-105`
                   }`}
                 >
                   {feature}
                 </span>
               ))}
-              {module.features.length > 3 && (
-                <span className="px-2 py-1 rounded-lg text-xs font-medium bg-gray-100/50 text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
-                  +{module.features.length - 3} more
-                </span>
-              )}
             </div>
           </div>
 
-          {/* Modern Action Button - Compact */}
+          {/* Modern Action Button - Professional */}
           {!isDisabled && (
-            <div className="flex items-center justify-between p-2 bg-gradient-to-r from-gray-50/80 to-gray-100/80 dark:from-gray-700/80 dark:to-gray-600/80 backdrop-blur-sm rounded-xl group-hover:from-gray-100/80 group-hover:to-gray-200/80 dark:group-hover:from-gray-600/80 dark:group-hover:to-gray-500/80 transition-all duration-300 border border-gray-200/50">
-              <span className="text-xs text-gray-700 dark:text-gray-200 font-medium">
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50/80 to-gray-100/80 dark:from-gray-700/80 dark:to-gray-600/80 backdrop-blur-sm rounded-xl group-hover:from-gray-100/80 group-hover:to-gray-200/80 dark:group-hover:from-gray-600/80 dark:group-hover:to-gray-500/80 transition-all duration-300 border border-gray-200/50">
+              <span className="text-sm text-gray-700 dark:text-gray-200 font-semibold">
                 Access Module
               </span>
-              <div className="flex items-center space-x-1">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                <ChevronRight className="h-4 w-4 text-gray-500 group-hover:text-gray-700 group-hover:translate-x-1 transition-all duration-300" />
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <ChevronRight className="h-5 w-5 text-gray-500 group-hover:text-gray-700 group-hover:translate-x-2 transition-all duration-300" />
               </div>
             </div>
           )}
@@ -256,11 +254,11 @@ const ModulesPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Accessible Modules */}
         {accessibleModules.length > 0 && (
-          <div className="mb-12">
-            <div className="flex items-center mb-6">
+          <div className="mb-6">
+            <div className="flex items-center mb-4">
               <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400">
                 <Unlock className="h-5 w-5" />
               </div>
@@ -269,7 +267,7 @@ const ModulesPage = () => {
               </h2>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {accessibleModules.map((module) => (
                 <Link
                   key={module.id}
@@ -286,7 +284,7 @@ const ModulesPage = () => {
         {/* Disabled Modules */}
         {disabledModules.length > 0 && (
           <div>
-            <div className="flex items-center mb-6">
+            <div className="flex items-center mb-4">
               <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
                 <Lock className="h-5 w-5" />
               </div>
@@ -295,7 +293,7 @@ const ModulesPage = () => {
               </h2>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {disabledModules.map((module) => (
                 <div key={module.id}>
                   <ModuleCard module={module} isDisabled={true} />

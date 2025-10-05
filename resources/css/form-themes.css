@@ -183,11 +183,17 @@
      gap: 0.5rem;
  }
 
- .input-wrapper {
-     position: relative;
-     display: flex;
-     align-items: center;
- }
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
 
  .form-input,
  .form-select,
@@ -229,17 +235,20 @@
      transform: translateY(-1px);
  }
 
- .input-with-icon {
-     padding-left: 3.5rem;
- }
+.input-with-icon {
+    padding-left: 3.5rem;
+}
 
- .input-icon {
-     position: absolute;
-     left: 1.25rem;
-     color: var(--text-secondary);
-     z-index: 2;
-     transition: all 0.3s;
- }
+.input-icon {
+    position: absolute;
+    left: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    z-index: 2;
+    transition: all 0.3s;
+    pointer-events: none;
+}
 
  .input-wrapper:focus-within .input-icon {
      color: var(--primary-color);
@@ -249,41 +258,49 @@
      position: relative;
  }
 
- .password-toggle {
-     position: absolute;
-     right: 1.25rem;
-     background: none;
-     border: none;
-     color: var(--text-secondary);
-     cursor: pointer;
-     padding: 0.5rem;
-     border-radius: 8px;
-     transition: all 0.3s;
-     z-index: 2;
- }
+.password-toggle {
+    position: absolute;
+    right: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.3s;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
- .password-toggle:hover {
-     color: var(--primary-color);
-     background: var(--primary-light);
-     transform: scale(1.1);
- }
+.password-toggle:hover {
+    color: var(--primary-color);
+    background: var(--primary-light);
+    transform: translateY(-50%) scale(1.1);
+}
 
  .select-wrapper {
      position: relative;
  }
 
- .select-icon {
-     position: absolute;
-     right: 1.25rem;
-     color: var(--text-secondary);
-     pointer-events: none;
-     transition: all 0.3s;
- }
+.select-icon {
+    position: absolute;
+    right: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+    transition: all 0.3s;
+    z-index: 2;
+}
 
- .select-wrapper:focus-within .select-icon {
-     color: var(--primary-color);
-     transform: rotate(180deg);
- }
+.select-wrapper:focus-within .select-icon {
+    color: var(--primary-color);
+    transform: translateY(-50%) rotate(180deg);
+}
 
  .form-select {
      appearance: none;

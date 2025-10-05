@@ -563,4 +563,76 @@ public function exportCsv(Request $request)
         return redirect()->back()->with('error', 'Failed to export modules. Please try again.');
     }
 }
+
+/**
+ * Get current module data based on URL
+ */
+public function getCurrentModuleData(Request $request)
+{
+    try {
+        $url = $request->get('url', '');
+        
+        // Parse URL to extract module name
+        $path = parse_url($url, PHP_URL_PATH);
+        $pathSegments = explode('/', trim($path, '/'));
+        
+        // Check if this is a module-specific URL (e.g., /accounting/dashboard, /inventory/items)
+        $moduleName = null;
+        if (count($pathSegments) >= 1 && $pathSegments[0] !== 'system' && $pathSegments[0] !== 'dashboard' && $pathSegments[0] !== 'erp-modules') {
+            $moduleName = $pathSegments[0];
+        }
+        
+        if (!$moduleName) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No module detected in URL',
+                'data' => null
+            ]);
+        }
+        
+        // Get module data
+        $module = Module::where('folder_name', $moduleName)
+            ->where('status', true)
+            ->first();
+            
+        if (!$module) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Module not found',
+                'data' => null
+            ]);
+        }
+        
+        // Get sections and menus for this module
+        $sections = $module->sections()
+            ->where('status', true)
+            ->orderBy('sort_order')
+            ->with(['menus' => function ($q) {
+                $q->where('status', true)
+                  ->orderBy('sort_order')
+                  ->select('id', 'section_id', 'menu_name', 'route', 'icon', 'sort_order', 'status');
+            }])
+            ->get(['id', 'module_id', 'section_name', 'sort_order']);
+        
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'module' => [
+                    'id' => $module->id,
+                    'name' => $module->module_name,
+                    'folder_name' => $module->folder_name,
+                ],
+                'sections' => $sections,
+            ]
+        ]);
+        
+    } catch (\Exception $e) {
+        \Log::error('Get current module data failed: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to get module data',
+            'data' => null
+        ], 500);
+    }
+}
 }

@@ -75,5 +75,19 @@ class Module extends Model
         return $this->image ? asset('storage/' . $this->image) : null;
     }
 
-  
+    /**
+     * Get the sections for this module
+     */
+    public function sections()
+    {
+        return $this->hasMany(Section::class);
+    }
+
+    /**
+     * Get the menus for this module
+     */
+    public function menus()
+    {
+        return $this->hasMany(Menu::class);
+    }
 }

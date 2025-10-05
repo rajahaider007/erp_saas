@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\LoginController;
 use Inertia\Inertia;
@@ -20,7 +21,7 @@ Route::get('/', function () {
 });
 
 // Sections Management Routes
-Route::prefix('system/sections')->name('system.sections.')->group(function () {
+Route::prefix('system/sections')->name('system.sections.')->middleware('web.auth')->group(function () {
     Route::get('/', [SectionController::class, 'index'])->middleware('permission:can_view,/system/sections')->name('index');
     Route::get('/create', [SectionController::class, 'create'])->middleware('permission:can_add,/system/sections')->name('create');
     Route::post('/', [SectionController::class, 'store'])->middleware('permission:can_add,/system/sections')->name('store');
@@ -37,7 +38,7 @@ Route::prefix('system/sections')->name('system.sections.')->group(function () {
 });
 
 // Menus Management Routes
-Route::prefix('system/menus')->name('system.menus.')->group(function () {
+Route::prefix('system/menus')->name('system.menus.')->middleware('web.auth')->group(function () {
     Route::get('/', [MenuController::class, 'index'])->name('index');
     Route::get('/create', [MenuController::class, 'create'])->name('create');
     Route::post('/', [MenuController::class, 'store'])->name('store');
@@ -69,6 +70,11 @@ Route::get('/dashboard', function (Request $request) {
 Route::get('/erp-modules', function (Request $request) {
     return Inertia::render('Modules/index');
 })->middleware('web.auth')->name('erp.modules');
+
+// Chart of Accounts Route
+Route::get('/accounts/chart-of-accounts', function (Request $request) {
+    return Inertia::render('Accounts/ChartOfAccounts');
+})->middleware('web.auth')->name('accounts.chart-of-accounts');
 
 // Dynamic Module Dashboards
 Route::get('/{module}/dashboard', function (Request $request, $module) {
@@ -106,13 +112,18 @@ Route::get('/{module}/dashboard', function (Request $request, $module) {
 })->middleware('web.auth')->name('module.dashboard');
 
 // System Module Management Routes (ADD MISSING EDIT ROUTE)
-Route::get('/system/AddModules', [ModuleController::class, 'index'])->name('system.add_modules');
-Route::get('/system/AddModules/add', [ModuleController::class, 'create'])->name('system.add_modules.add');
-Route::get('/system/AddModules/{module}/edit', [ModuleController::class, 'edit'])->name('system.add_modules.edit');
-Route::get('/system/AddModules/{module}', [ModuleController::class, 'show'])->name('system.add_modules.show');
+Route::get('/system/AddModules', [ModuleController::class, 'index'])->middleware('web.auth')->name('system.add_modules');
+Route::get('/system/AddModules/add', [ModuleController::class, 'create'])->middleware('web.auth')->name('system.add_modules.add');
+Route::get('/system/AddModules/{module}/edit', [ModuleController::class, 'edit'])->middleware('web.auth')->name('system.add_modules.edit');
+Route::get('/system/AddModules/{module}', [ModuleController::class, 'show'])->middleware('web.auth')->name('system.add_modules.show');
 
 // Module Management Routes
-Route::prefix('modules')->name('modules.')->group(function () {
+Route::prefix('modules')->name('modules.')->middleware('web.auth')->group(function () {
+    // API endpoints (must be before parameterized routes)
+    Route::get('/current-module-data', [ModuleController::class, 'getCurrentModuleData'])->name('current-module-data');
+    Route::get('/active/list', [ModuleController::class, 'getActiveModules'])->name('active.list');
+    Route::get('/api/{id}', [ModuleController::class, 'getSingleModule'])->name('api.single');
+    
     // Main CRUD routes
     Route::get('/', [ModuleController::class, 'index'])->name('index');
     Route::get('/create', [ModuleController::class, 'create'])->name('create');
@@ -130,14 +141,10 @@ Route::prefix('modules')->name('modules.')->group(function () {
     
     // Export functionality
     Route::get('/export-csv', [ModuleController::class, 'exportCsv'])->name('export-csv');
-    
-    // API endpoints
-    Route::get('/active/list', [ModuleController::class, 'getActiveModules'])->name('active.list');
-    Route::get('/api/{id}', [ModuleController::class, 'getSingleModule'])->name('api.single');
 });
 
 // Companies Management Routes
-Route::prefix('system/companies')->name('system.companies.')->group(function () {
+Route::prefix('system/companies')->name('system.companies.')->middleware('web.auth')->group(function () {
     Route::get('/', [CompanyController::class, 'index'])->middleware('permission:can_view,/system/companies')->name('index');
     Route::get('/create', [CompanyController::class, 'create'])->middleware('permission:can_add,/system/companies')->name('create');
     Route::post('/', [CompanyController::class, 'store'])->middleware('permission:can_add,/system/companies')->name('store');
@@ -154,7 +161,7 @@ Route::prefix('system/companies')->name('system.companies.')->group(function () 
 });
 
 // Packages Management Routes
-Route::prefix('system/packages')->name('system.packages.')->group(function () {
+Route::prefix('system/packages')->name('system.packages.')->middleware('web.auth')->group(function () {
     Route::get('/', [PackageController::class, 'index'])->name('index');
     Route::get('/create', [PackageController::class, 'create'])->name('create');
     Route::post('/', [PackageController::class, 'store'])->name('store');
@@ -169,7 +176,7 @@ Route::prefix('system/packages')->name('system.packages.')->group(function () {
 });
 
 // Package Features Management Routes
-Route::prefix('system/package-features')->name('system.package-features.')->group(function () {
+Route::prefix('system/package-features')->name('system.package-features.')->middleware('web.auth')->group(function () {
     Route::get('/', [PackageFeatureController::class, 'index'])->name('index');
     Route::get('/create', [PackageFeatureController::class, 'create'])->name('create');
     Route::post('/', [PackageFeatureController::class, 'store'])->name('store');
@@ -182,7 +189,7 @@ Route::prefix('system/package-features')->name('system.package-features.')->grou
 });
 
 // Locations Management Routes
-Route::prefix('system/locations')->name('system.locations.')->group(function () {
+Route::prefix('system/locations')->name('system.locations.')->middleware('web.auth')->group(function () {
     Route::get('/', [LocationController::class, 'index'])->name('index');
     Route::get('/create', [LocationController::class, 'create'])->name('create');
     Route::post('/', [LocationController::class, 'store'])->name('store');
@@ -199,7 +206,7 @@ Route::prefix('system/locations')->name('system.locations.')->group(function () 
 });
 
 // Departments Management Routes
-Route::prefix('system/departments')->name('system.departments.')->group(function () {
+Route::prefix('system/departments')->name('system.departments.')->middleware('web.auth')->group(function () {
     Route::get('/', [DepartmentController::class, 'index'])->name('index');
     Route::get('/create', [DepartmentController::class, 'create'])->name('create');
     Route::post('/', [DepartmentController::class, 'store'])->name('store');
@@ -216,7 +223,7 @@ Route::prefix('system/departments')->name('system.departments.')->group(function
 });
 
 // Users Management Routes
-Route::prefix('system/users')->name('system.users.')->group(function () {
+Route::prefix('system/users')->name('system.users.')->middleware('web.auth')->group(function () {
     Route::get('/', [UserController::class, 'index'])->name('index');
     Route::get('/create', [UserController::class, 'create'])->name('create');
     Route::post('/', [UserController::class, 'store'])->name('store');
