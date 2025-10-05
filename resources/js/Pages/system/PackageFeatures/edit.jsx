@@ -99,7 +99,7 @@ const EditPackageFeatureForm = () => {
       menu_features: menuFeaturesArray
     };
 
-    router.post(`/system/package-features/${packageData.id}`, formData, {
+    router.put(`/system/package-features/${packageData.id}`, formData, {
       onSuccess: () => { 
         setRequestStatus('Success'); 
         setAlert({ type: 'success', message: 'Package features updated successfully!' }); 
