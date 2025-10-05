@@ -93,6 +93,12 @@ class LoginController extends Controller
 
             $this->logLoginHistory($user->id, $request);
 
+            // Check license expiration
+            $licenseAlert = $this->checkLicenseExpiration($user->id);
+            if ($licenseAlert) {
+                $request->session()->put('license_alert', $licenseAlert);
+            }
+
             // Redirect for Inertia SPA
             return redirect()->intended('/dashboard');
         } catch (ValidationException $e) {
@@ -209,5 +215,53 @@ class LoginController extends Controller
             'force_password_change' => $user->force_password_change,
             'two_factor_enabled' => $user->two_factor_enabled
         ];
+    }
+
+    private function checkLicenseExpiration($userId)
+    {
+        try {
+            // Get user with company information
+            $user = DB::table('tbl_users')
+                ->join('companies', 'tbl_users.comp_id', '=', 'companies.id')
+                ->where('tbl_users.id', $userId)
+                ->select('companies.company_name', 'companies.license_end_date', 'companies.license_start_date')
+                ->first();
+
+            if (!$user || !$user->license_end_date) {
+                return null;
+            }
+
+            $licenseEndDate = Carbon::parse($user->license_end_date);
+            $now = Carbon::now();
+            $daysUntilExpiry = $now->diffInDays($licenseEndDate, false);
+
+            // Show alert if license expires within 30 days or has expired
+            if ($daysUntilExpiry <= 30) {
+                if ($daysUntilExpiry < 0) {
+                    return [
+                        'type' => 'error',
+                        'title' => 'License Expired',
+                        'message' => "Your company license for {$user->company_name} has expired on {$licenseEndDate->format('M d, Y')}. Please contact your administrator to renew the license.",
+                        'company_name' => $user->company_name,
+                        'expiry_date' => $licenseEndDate->format('M d, Y'),
+                        'days_expired' => abs($daysUntilExpiry)
+                    ];
+                } else {
+                    return [
+                        'type' => 'warning',
+                        'title' => 'License Expiring Soon',
+                        'message' => "Your company license for {$user->company_name} will expire on {$licenseEndDate->format('M d, Y')}. Please contact your administrator to renew the license.",
+                        'company_name' => $user->company_name,
+                        'expiry_date' => $licenseEndDate->format('M d, Y'),
+                        'days_remaining' => $daysUntilExpiry
+                    ];
+                }
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            \Log::error('License check failed: ' . $e->getMessage());
+            return null;
+        }
     }
 }

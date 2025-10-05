@@ -27,8 +27,6 @@ class CompanyController extends Controller
             'country',
             'industry',
             'status',
-            'subscription_status',
-            'subscription_expiry',
             'created_at',
             'updated_at'
         ]);
@@ -50,9 +48,6 @@ class CompanyController extends Controller
         }
 
         // Filter by subscription status
-        if ($request->filled('subscription_status')) {
-            $query->where('subscription_status', $request->subscription_status);
-        }
 
         // Filter by country
         if ($request->filled('country')) {
@@ -69,7 +64,7 @@ class CompanyController extends Controller
 
         return Inertia::render('system/Companies/List', [
             'companies' => $companies,
-            'filters' => $request->only(['search', 'status', 'subscription_status', 'country', 'sort_by', 'sort_direction', 'per_page']),
+            'filters' => $request->only(['search', 'status', 'country', 'sort_by', 'sort_direction', 'per_page']),
             'pageTitle' => 'Companies Management'
         ]);
     }
@@ -79,7 +74,12 @@ class CompanyController extends Controller
      */
     public function create()
     {
+        $packages = \App\Models\Package::where('status', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'package_name']);
+            
         return Inertia::render('system/Companies/Create', [
+            'packages' => $packages,
             'pageTitle' => 'Register New Company'
         ]);
     }
@@ -101,15 +101,20 @@ class CompanyController extends Controller
             $validated['logo'] = $request->file('logo')->store('companies/logos', 'public');
         }
 
-        // Set default subscription expiry for trial (30 days)
-        if ($validated['subscription_status'] === 'trial' && !isset($validated['subscription_expiry'])) {
-            $validated['subscription_expiry'] = now()->addDays(30);
+        // Set default license dates if not provided
+        if (!isset($validated['license_start_date'])) {
+            $validated['license_start_date'] = now();
+        }
+        
+        if (!isset($validated['license_end_date'])) {
+            $validated['license_end_date'] = now()->addYear();
         }
 
         // Set created_by
         $validated['created_by'] = auth()->id();
 
         $company = Company::create($validated);
+
 
         return redirect()->route('system.companies.index')
                         ->with('success', 'Company "' . $company->company_name . '" registered successfully!');
@@ -133,8 +138,13 @@ class CompanyController extends Controller
      */
     public function edit(Company $company)
     {
-        return Inertia::render('system/Companies/Edit', [
+        $packages = \App\Models\Package::where('status', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'package_name']);
+            
+        return Inertia::render('system/Companies/Create', [
             'company' => $company,
+            'packages' => $packages,
             'pageTitle' => 'Edit Company: ' . $company->company_name
         ]);
     }
@@ -159,6 +169,7 @@ class CompanyController extends Controller
         $validated['updated_by'] = auth()->id();
 
         $company->update($validated);
+
 
         return redirect()->route('system.companies.index')
                         ->with('success', 'Company "' . $company->company_name . '" updated successfully!');
@@ -267,7 +278,6 @@ class CompanyController extends Controller
             'country',
             'industry',
             'status',
-            'subscription_status',
             'created_at',
             'updated_at'
         ])->get();
@@ -302,7 +312,7 @@ class CompanyController extends Controller
                     $company->country,
                     $company->industry,
                     $company->status ? 'Active' : 'Inactive',
-                    ucfirst($company->subscription_status),
+                    ucfirst($company->status),
                     $company->created_at->format('Y-m-d H:i:s'),
                     $company->updated_at->format('Y-m-d H:i:s')
                 ]);
@@ -347,7 +357,9 @@ class CompanyController extends Controller
             'currency' => 'nullable|string|max:10',
             'fiscal_year_start' => 'nullable|string|max:10',
             'license_number' => 'nullable|string|max:100',
-            'license_expiry' => 'nullable|date',
+            'license_start_date' => 'required|date',
+            'license_end_date' => 'required|date|after:license_start_date',
+            'package_id' => 'required|exists:packages,id',
             'compliance_certifications' => 'nullable|array',
             'legal_notes' => 'nullable|string|max:1000',
             'bank_name' => 'nullable|string|max:255',
@@ -359,8 +371,6 @@ class CompanyController extends Controller
             'brand_color_primary' => 'nullable|string|max:7',
             'brand_color_secondary' => 'nullable|string|max:7',
             'status' => 'required|boolean',
-            'subscription_status' => 'required|in:active,trial,expired,suspended',
-            'subscription_expiry' => 'nullable|date',
             'settings' => 'nullable|array',
             'features' => 'nullable|array'
         ];

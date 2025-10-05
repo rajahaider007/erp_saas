@@ -127,7 +127,6 @@ class UserController extends Controller
             'location_id' => 'nullable|exists:locations,id',
             'dept_id' => 'nullable|exists:departments,id',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:super_admin,admin,manager,user',
             'status' => 'required|in:active,inactive,suspended,pending',
             'timezone' => 'nullable|string|max:50',
             'language' => 'nullable|string|max:10',
@@ -153,7 +152,6 @@ class UserController extends Controller
             'location_id' => $request->location_id,
             'dept_id' => $request->dept_id,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
             'status' => $request->status,
             'timezone' => $request->timezone ?? 'UTC',
             'language' => $request->language ?? 'en',
@@ -183,15 +181,49 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
+        // Load user with relationships
+        $user->load(['company', 'location', 'department']);
+        
         $companies = Company::where('status', true)->orderBy('company_name')->get(['id', 'company_name']);
-        $locations = Location::where('status', true)->orderBy('location_name')->get(['id', 'location_name', 'company_id']);
-        $departments = Department::where('status', true)->orderBy('department_name')->get(['id', 'department_name', 'location_id', 'company_id']);
+        
+        // Get locations for the user's company (if any)
+        $locations = collect();
+        if ($user->comp_id) {
+            $locations = Location::where('company_id', $user->comp_id)
+                ->where('status', true)
+                ->orderBy('location_name')
+                ->get(['id', 'location_name', 'company_id']);
+        }
+        
+        // Get departments for the user's location (if any)
+        $departments = collect();
+        if ($user->location_id) {
+            $departments = Department::where('location_id', $user->location_id)
+                ->where('status', true)
+                ->orderBy('department_name')
+                ->get(['id', 'department_name', 'location_id', 'company_id']);
+        }
+        
+        // Get available menus for rights based on user's company package
+        $availableMenus = collect();
+        if ($user->comp_id) {
+            $company = Company::with('package')->find($user->comp_id);
+            if ($company) {
+                $availableMenus = $company->getAvailableMenusForRights();
+            }
+        }
+        
+        // Get user's current rights
+        $userRights = $user->rights()->get()->keyBy('menu_id');
 
-        return Inertia::render('system/Users/edit', [
+        return Inertia::render('system/Users/create', [
             'user' => $user,
             'companies' => $companies,
             'locations' => $locations,
             'departments' => $departments,
+            'availableMenus' => $availableMenus,
+            'userRights' => $userRights,
+            'showRights' => request('showRights', false),
             'pageTitle' => 'Edit User'
         ]);
     }
@@ -213,7 +245,6 @@ class UserController extends Controller
             'location_id' => 'nullable|exists:locations,id',
             'dept_id' => 'nullable|exists:departments,id',
             'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'required|in:super_admin,admin,manager,user',
             'status' => 'required|in:active,inactive,suspended,pending',
             'timezone' => 'nullable|string|max:50',
             'language' => 'nullable|string|max:10',
@@ -238,7 +269,6 @@ class UserController extends Controller
             'comp_id' => $request->comp_id,
             'location_id' => $request->location_id,
             'dept_id' => $request->dept_id,
-            'role' => $request->role,
             'status' => $request->status,
             'timezone' => $request->timezone ?? 'UTC',
             'language' => $request->language ?? 'en',
@@ -253,7 +283,12 @@ class UserController extends Controller
 
         $user->update($updateData);
 
-        return redirect()->route('system.users.index')
+        // Handle user rights if provided
+        if ($request->has('user_rights')) {
+            $this->updateUserRights($user, $request->user_rights);
+        }
+
+        return redirect()->route('system.users.edit', $user)
             ->with('success', 'User updated successfully!');
     }
 
@@ -322,5 +357,48 @@ class UserController extends Controller
         $count = User::whereIn('id', $request->ids)->delete();
 
         return redirect()->back()->with('success', "{$count} user(s) deleted successfully.");
+    }
+
+    /**
+     * Update user rights
+     */
+    private function updateUserRights(User $user, array $userRights)
+    {
+        // Delete existing rights
+        $user->rights()->delete();
+
+        // Create new rights
+        foreach ($userRights as $menuId => $rights) {
+            if (isset($rights['can_view']) && $rights['can_view']) {
+                \App\Models\UserRight::create([
+                    'user_id' => $user->id,
+                    'menu_id' => $menuId,
+                    'can_view' => $rights['can_view'] ?? false,
+                    'can_add' => $rights['can_add'] ?? false,
+                    'can_edit' => $rights['can_edit'] ?? false,
+                    'can_delete' => $rights['can_delete'] ?? false,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Get user rights for a specific user
+     */
+    public function getUserRights(User $user)
+    {
+        $company = Company::with('package')->find($user->comp_id);
+        $availableMenus = collect();
+        
+        if ($company) {
+            $availableMenus = $company->getAvailableMenusForRights();
+        }
+        
+        $userRights = $user->rights()->get()->keyBy('menu_id');
+
+        return response()->json([
+            'availableMenus' => $availableMenus,
+            'userRights' => $userRights
+        ]);
     }
 }

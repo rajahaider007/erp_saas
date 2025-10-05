@@ -15,10 +15,9 @@ const List = () => {
   const { companies: paginated, flash, filters } = usePage().props;
   const [search, setSearch] = useState(filters?.search || '');
   const [statusFilter, setStatusFilter] = useState(filters?.status || '');
-  const [subscriptionFilter, setSubscriptionFilter] = useState(filters?.subscription_status || '');
 
   const pushQuery = (obj) => { const params = new URLSearchParams(window.location.search); Object.entries(obj).forEach(([k,v])=>{ if(v===undefined||v===null||v===''||v==='all') params.delete(k); else params.set(k,v); }); if(!obj.page) params.set('page','1'); router.get('/system/companies?'+params.toString(), {}, { preserveState:true, preserveScroll:true }); };
-  const applyFilters = useCallback(() => { const params = {}; if (search) params.search = search; if (statusFilter) params.status = statusFilter; if (subscriptionFilter) params.subscription_status = subscriptionFilter; pushQuery(params); }, [search, statusFilter, subscriptionFilter]);
+  const applyFilters = useCallback(() => { const params = {}; if (search) params.search = search; if (statusFilter) params.status = statusFilter; pushQuery(params); }, [search, statusFilter]);
 
   const [sortConfig, setSortConfig] = useState({ key: filters?.sort_by || 'created_at', direction: filters?.sort_direction || 'desc' });
   const [currentPage, setCurrentPage] = useState(paginated?.current_page || 1);
@@ -53,7 +52,6 @@ const List = () => {
                 <div className="stat-item"><span>{paginated?.total || 0} Total</span></div>
                 <div className="stat-item"><span>{paginated?.data?.filter(c=>c.status).length || 0} Active</span></div>
                 <div className="stat-item"><span>{paginated?.data?.filter(c=>!c.status).length || 0} Inactive</span></div>
-                <div className="stat-item"><span>{paginated?.data?.filter(c=>c.subscription_status === 'trial').length || 0} Trial</span></div>
               </div>
             </div>
             <div className="header-actions">
@@ -68,13 +66,6 @@ const List = () => {
                 <option value="">All Status</option>
                 <option value="1">Active</option>
                 <option value="0">Inactive</option>
-              </select>
-              <select className="filter-select" value={subscriptionFilter} onChange={(e)=>setSubscriptionFilter(e.target.value)}>
-                <option value="">All Subscriptions</option>
-                <option value="active">Active</option>
-                <option value="trial">Trial</option>
-                <option value="expired">Expired</option>
-                <option value="suspended">Suspended</option>
               </select>
             </div>
             <div className="view-controls"><button className="btn btn-icon" onClick={()=>setShowColumnSelector(!showColumnSelector)} title="Show/Hide Columns"><Columns size={20} /></button></div>
@@ -94,7 +85,6 @@ const List = () => {
                   <th className="sortable" onClick={()=>{}}><div className="th-content">Contact<ArrowUpDown size={14} className="sort-icon" /></div></th>
                   <th className="sortable" onClick={()=>{}}><div className="th-content">Location<ArrowUpDown size={14} className="sort-icon" /></div></th>
                   <th className="sortable" onClick={()=>{}}><div className="th-content">Status<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Subscription<ArrowUpDown size={14} className="sort-icon" /></div></th>
                   <th className="sortable" onClick={()=>{}}><div className="th-content">Updated<ArrowUpDown size={14} className="sort-icon" /></div></th>
                   <th className="actions-header">Actions</th>
                 </tr>
@@ -118,7 +108,6 @@ const List = () => {
                       </div>
                     </td>
                     <td><span className={`status-badge status-${company.status ? 'active' : 'inactive'}`}>{company.status ? 'Active' : 'Inactive'}</span></td>
-                    <td><span className={`status-badge status-${company.subscription_status === 'active' ? 'active' : company.subscription_status === 'trial' ? 'warning' : company.subscription_status === 'expired' ? 'error' : 'secondary'}`}>{company.subscription_status}</span></td>
                     <td><div className="date-cell"><Clock size={14} /><span>{new Date(company.updated_at).toLocaleString()}</span></div></td>
                     <td>
                       <div className="actions-cell">

@@ -154,6 +154,7 @@ const GeneralizedForm = ({
       case 'tel':
       case 'url':
       case 'number':
+      case 'date':
         return (
           <div className="input-group" key={field.name}>
             <label className="input-label">{field.label}</label>

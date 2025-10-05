@@ -22,11 +22,15 @@ class WebAuthentication
 
         // ... locked account check ...
 
+        // Check for license alert
+        $licenseAlert = $request->session()->get('license_alert');
+        
         $request->merge([
             'authenticated_user' => $user,
             'user_id' => $user->id,
             'user_role' => $user->role,
-            'user_permissions' => json_decode($user->permissions, true) ?? []
+            'user_permissions' => json_decode($user->permissions, true) ?? [],
+            'license_alert' => $licenseAlert
         ]);
 
         return $next($request);

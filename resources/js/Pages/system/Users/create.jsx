@@ -4,7 +4,7 @@ import {
   Home, List, Plus, Edit, Lock, Shield, Globe, 
   Clock, DollarSign, Palette, Eye, EyeOff
 } from 'lucide-react';
-import GeneralizedForm from '../../../Components/GeneralizedForm';
+import DynamicUserForm from '../../../Components/DynamicUserForm';
 import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
 
@@ -426,35 +426,29 @@ const UserRegistrationForm = () => {
       )}
 
       {/* User Registration Form */}
-      <GeneralizedForm
-        title={isEdit ? "Edit User" : "Register New User"}
-        subtitle={isEdit ? "Update user information and settings" : "Complete the user registration form with all required information"}
-        fields={userFields}
-        onSubmit={handleUserSubmit}
-        submitText={isEdit ? "Update User" : "Register User"}
-        resetText="Clear Form"
-        initialData={{ 
-          fname: user?.fname || '',
-          mname: user?.mname || '',
-          lname: user?.lname || '',
-          email: user?.email || '',
-          phone: user?.phone || '',
-          loginid: user?.loginid || '',
-          pincode: user?.pincode || '',
-          comp_id: user?.comp_id || '',
-          location_id: user?.location_id || '',
-          dept_id: user?.dept_id || '',
-          password: '',
-          password_confirmation: '',
-          role: user?.role || 'user',
-          status: user?.status || 'active',
-          timezone: user?.timezone || 'UTC',
-          language: user?.language || 'en',
-          currency: user?.currency || 'USD',
-          theme: user?.theme || 'system'
-        }}
-        showReset={true}
-      />
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            {isEdit ? "Edit User" : "Register New User"}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            {isEdit ? "Update user information and settings" : "Complete the user registration form with all required information"}
+          </p>
+        </div>
+        
+        <DynamicUserForm
+          isEdit={isEdit}
+          user={user}
+          companies={companies}
+          initialLocations={locations}
+          initialDepartments={departments}
+          availableMenus={usePage().props.availableMenus || []}
+          userRights={usePage().props.userRights || {}}
+          onSubmit={handleUserSubmit}
+          submitText={isEdit ? "Update User" : "Register User"}
+          resetText="Clear Form"
+        />
+      </div>
     </div>
   );
 };

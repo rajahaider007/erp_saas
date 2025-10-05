@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, Globe, Mail, Phone, MapPin, Calendar, CreditCard, Shield, FileText, Plus, Home, List, Edit } from 'lucide-react';
+import { Building2, Globe, Mail, Phone, MapPin, Calendar, CreditCard, Shield, FileText, Plus, Home, List, Edit, Package, Users } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
@@ -306,19 +306,33 @@ const CreateCompanyForm = () => {
       required: false
     },
     {
-      name: 'subscription_status',
-      label: 'Subscription Status',
+      name: 'package_id',
+      label: 'Package',
       type: 'select',
-      placeholder: 'Select subscription status',
-      icon: CreditCard,
+      placeholder: 'Select package',
+      icon: Package,
       required: true,
-      options: [
-        { value: 'trial', label: 'Trial' },
-        { value: 'active', label: 'Active' },
-        { value: 'expired', label: 'Expired' },
-        { value: 'suspended', label: 'Suspended' }
-      ]
-    }
+      options: usePage().props.packages?.map(pkg => ({
+        value: pkg.id,
+        label: pkg.package_name
+      })) || []
+    },
+    {
+      name: 'license_start_date',
+      label: 'License Start Date',
+      type: 'date',
+      placeholder: 'Select license start date',
+      icon: Calendar,
+      required: true
+    },
+    {
+      name: 'license_end_date',
+      label: 'License End Date',
+      type: 'date',
+      placeholder: 'Select license end date',
+      icon: Calendar,
+      required: true
+    },
   ];
 
   // State for debugging and tracking
@@ -499,12 +513,38 @@ const CreateCompanyForm = () => {
           currency: company?.currency || 'USD',
           logo: null,
           status: company?.status ?? true,
-          subscription_status: company?.subscription_status || 'trial'
+          package_id: company?.package_id || '',
+          license_start_date: formatDateForInput(company?.license_start_date),
+          license_end_date: formatDateForInput(company?.license_end_date),
         }}
         showReset={true}
       />
     </div>
   );
+};
+
+// Helper function to format date for HTML input
+const formatDateForInput = (date) => {
+  if (!date) return '';
+  
+  // If it's already in YYYY-MM-DD format, return as is
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return date;
+  }
+  
+  // If it's a date string with time, extract just the date part
+  if (typeof date === 'string' && date.includes('T')) {
+    return date.split('T')[0];
+  }
+  
+  // If it's a date object or other format, convert to YYYY-MM-DD
+  try {
+    const dateObj = new Date(date);
+    return dateObj.toISOString().split('T')[0];
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return '';
+  }
 };
 
 // Main Create Component

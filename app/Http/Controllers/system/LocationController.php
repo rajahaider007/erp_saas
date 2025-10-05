@@ -174,6 +174,6 @@ class LocationController extends Controller
                            ->orderBy('location_name')
                            ->get(['id', 'location_name']);
 
-        return response()->json(['data' => ['locations' => $locations]]);
+        return response()->json(['data' => $locations]);
     }
 }

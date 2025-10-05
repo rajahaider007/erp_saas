@@ -42,7 +42,8 @@ class Company extends Model
         'currency',
         'fiscal_year_start',
         'license_number',
-        'license_expiry',
+        'license_start_date',
+        'license_end_date',
         'compliance_certifications',
         'legal_notes',
         'bank_name',
@@ -54,8 +55,7 @@ class Company extends Model
         'brand_color_primary',
         'brand_color_secondary',
         'status',
-        'subscription_status',
-        'subscription_expiry',
+        'package_id',
         'settings',
         'features',
         'created_by',
@@ -67,8 +67,8 @@ class Company extends Model
      */
     protected $casts = [
         'incorporation_date' => 'date',
-        'license_expiry' => 'date',
-        'subscription_expiry' => 'date',
+        'license_start_date' => 'date',
+        'license_end_date' => 'date',
         'compliance_certifications' => 'array',
         'settings' => 'array',
         'features' => 'array',
@@ -116,7 +116,7 @@ class Company extends Model
      */
     public function scopeActiveSubscription($query)
     {
-        return $query->whereIn('subscription_status', ['active', 'trial']);
+        return $query->where('status', true);
     }
 
     /**
@@ -154,18 +154,141 @@ class Company extends Model
     }
 
     /**
-     * Check if company has active subscription.
+     * Get the package associated with the company.
      */
-    public function hasActiveSubscription(): bool
+    public function package()
     {
-        if ($this->subscription_status === 'active') {
-            return true;
+        return $this->belongsTo(Package::class);
+    }
+
+
+    /**
+     * Check if company has valid license.
+     */
+    public function hasValidLicense(): bool
+    {
+        if (!$this->license_start_date || !$this->license_end_date) {
+            return false;
         }
         
-        if ($this->subscription_status === 'trial' && $this->subscription_expiry) {
-            return $this->subscription_expiry->isFuture();
+        $now = now();
+        return $now->between($this->license_start_date, $this->license_end_date);
+    }
+
+    /**
+     * Check if company license is expired.
+     */
+    public function isLicenseExpired(): bool
+    {
+        return $this->license_end_date && $this->license_end_date->isPast();
+    }
+
+    /**
+     * Get license status.
+     */
+    public function getLicenseStatus(): string
+    {
+        if (!$this->license_start_date || !$this->license_end_date) {
+            return 'not_configured';
         }
         
-        return false;
+        if ($this->isLicenseExpired()) {
+            return 'expired';
+        }
+        
+        if ($this->hasValidLicense()) {
+            return 'active';
+        }
+        
+        return 'not_started';
+    }
+
+    /**
+     * Check if a user has access to a specific menu/feature.
+     * This considers both the user's rights and the company's package features.
+     */
+    public function userHasAccessToFeature($userId, $menuId, $permission = 'can_view'): bool
+    {
+        // First check if the company has a valid license
+        if (!$this->hasValidLicense()) {
+            return false;
+        }
+
+        // Get user
+        $user = \App\Models\User::with(['company', 'rights'])->find($userId);
+        if (!$user || $user->comp_id !== $this->id) {
+            return false;
+        }
+
+        // Check if the menu is enabled in the company's package
+        $packageHasMenu = false;
+        if ($this->package) {
+            $packageHasMenu = $this->package->features()
+                ->where('menu_id', $menuId)
+                ->where('is_enabled', true)
+                ->exists();
+        }
+
+        if (!$packageHasMenu) {
+            return false;
+        }
+
+        // Check if the user has the specific permission for this menu
+        return $user->hasPermission($menuId, $permission);
+    }
+
+    /**
+     * Get all accessible menus for a user based on their rights and company package.
+     */
+    public function getAccessibleMenusForUser($userId): \Illuminate\Database\Eloquent\Collection
+    {
+        $user = \App\Models\User::with('rights')->find($userId);
+        if (!$user || $user->comp_id !== $this->id || !$this->hasValidLicense()) {
+            return collect();
+        }
+
+        // Get package features
+        $packageMenuIds = [];
+        if ($this->package) {
+            $packageMenuIds = $this->package->features()
+                ->where('is_enabled', true)
+                ->pluck('menu_id')
+                ->toArray();
+        }
+
+        // Get user's accessible menus (where they have view permission)
+        $userMenuIds = $user->rights()
+            ->where('can_view', true)
+            ->pluck('menu_id')
+            ->toArray();
+
+        // Get intersection of package and user features
+        $accessibleMenuIds = array_intersect($packageMenuIds, $userMenuIds);
+
+        return \App\Models\Menu::whereIn('id', $accessibleMenuIds)
+            ->where('status', true)
+            ->with(['section.module'])
+            ->get();
+    }
+
+    /**
+     * Get available menus for user rights configuration based on company package
+     */
+    public function getAvailableMenusForRights(): \Illuminate\Database\Eloquent\Collection
+    {
+        if (!$this->package) {
+            return collect();
+        }
+
+        $packageMenuIds = $this->package->features()
+            ->where('is_enabled', true)
+            ->pluck('menu_id')
+            ->toArray();
+
+        return \App\Models\Menu::whereIn('id', $packageMenuIds)
+            ->where('status', true)
+            ->with(['section.module'])
+            ->orderBy('menu_name')
+            ->get();
     }
 }

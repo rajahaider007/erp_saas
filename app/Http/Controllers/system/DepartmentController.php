@@ -179,6 +179,6 @@ class DepartmentController extends Controller
                                ->orderBy('department_name')
                                ->get(['id', 'department_name']);
 
-        return response()->json(['data' => ['departments' => $departments]]);
+        return response()->json(['data' => $departments]);
     }
 }

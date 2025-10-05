@@ -23,8 +23,13 @@ class User extends Authenticatable
         'mname',
         'lname',
         'email',
+        'phone',
+        'pincode',
         'loginid',
         'password',
+        'comp_id',
+        'location_id',
+        'dept_id',
         'role',
         'permissions',
         'status',
@@ -88,5 +93,40 @@ class User extends Authenticatable
     public function department()
     {
         return $this->belongsTo(Department::class, 'dept_id');
+    }
+
+    /**
+     * Get the user's rights/permissions.
+     */
+    public function rights()
+    {
+        return $this->hasMany(UserRight::class);
+    }
+
+    /**
+     * Check if user has specific permission for a menu
+     */
+    public function hasPermission($menuId, $permission = 'can_view')
+    {
+        $right = $this->rights()->where('menu_id', $menuId)->first();
+        
+        if (!$right) {
+            return false;
+        }
+
+        return $right->$permission ?? false;
+    }
+
+    /**
+     * Get user's accessible menus based on their rights
+     */
+    public function getAccessibleMenus()
+    {
+        $menuIds = $this->rights()->where('can_view', true)->pluck('menu_id');
+        
+        return Menu::whereIn('id', $menuIds)
+            ->where('status', true)
+            ->with(['section.module'])
+            ->get();
     }
 }

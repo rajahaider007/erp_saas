@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
-import { Search, Plus, Edit3, Trash2, Download, ChevronDown, ArrowUpDown, Columns, Clock, MoreHorizontal, RefreshCcw, FileText, CheckCircle2, X, Database, Eye, Copy, ChevronLeft, ChevronRight, User } from 'lucide-react';
+import { Search, Plus, Edit3, Trash2, Download, ChevronDown, ArrowUpDown, Columns, Clock, MoreHorizontal, RefreshCcw, FileText, CheckCircle2, X, Database, Eye, Copy, ChevronLeft, ChevronRight, User, Shield } from 'lucide-react';
 
 // SweetAlert-like alert
 const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, confirmButtonText = 'OK', cancelButtonText = 'Cancel', onConfirm, onCancel }) => {
@@ -18,10 +18,9 @@ const List = () => {
   const [locationId, setLocationId] = useState(filters?.location_id || '');
   const [departmentId, setDepartmentId] = useState(filters?.department_id || '');
   const [statusFilter, setStatusFilter] = useState(filters?.status || '');
-  const [roleFilter, setRoleFilter] = useState(filters?.role || '');
 
   const pushQuery = (obj) => { const params = new URLSearchParams(window.location.search); Object.entries(obj).forEach(([k,v])=>{ if(v===undefined||v===null||v===''||v==='all') params.delete(k); else params.set(k,v); }); if(!obj.page) params.set('page','1'); router.get('/system/users?'+params.toString(), {}, { preserveState:true, preserveScroll:true }); };
-  const applyFilters = useCallback(() => { const params = {}; if (search) params.search = search; if (companyId) params.company_id = companyId; if (locationId) params.location_id = locationId; if (departmentId) params.department_id = departmentId; if (statusFilter) params.status = statusFilter; if (roleFilter) params.role = roleFilter; pushQuery(params); }, [search, companyId, locationId, departmentId, statusFilter, roleFilter]);
+  const applyFilters = useCallback(() => { const params = {}; if (search) params.search = search; if (companyId) params.company_id = companyId; if (locationId) params.location_id = locationId; if (departmentId) params.department_id = departmentId; if (statusFilter) params.status = statusFilter; pushQuery(params); }, [search, companyId, locationId, departmentId, statusFilter]);
 
   const [sortConfig, setSortConfig] = useState({ key: filters?.sort_by || 'created_at', direction: filters?.sort_direction || 'desc' });
   const [currentPage, setCurrentPage] = useState(paginated?.current_page || 1);
@@ -56,7 +55,6 @@ const List = () => {
                 <div className="stat-item"><span>{paginated?.total || 0} Total</span></div>
                 <div className="stat-item"><span>{paginated?.data?.filter(u=>u.status === 'active').length || 0} Active</span></div>
                 <div className="stat-item"><span>{paginated?.data?.filter(u=>u.status === 'inactive').length || 0} Inactive</span></div>
-                <div className="stat-item"><span>{paginated?.data?.filter(u=>u.role === 'admin').length || 0} Admins</span></div>
               </div>
             </div>
             <div className="header-actions">
@@ -78,13 +76,6 @@ const List = () => {
               <select className="filter-select" value={departmentId} onChange={(e)=>setDepartmentId(e.target.value)}>
                 <option value="">All Departments</option>
                 {departments?.map(department => <option key={department.id} value={department.id}>{department.department_name}</option>)}
-              </select>
-              <select className="filter-select" value={roleFilter} onChange={(e)=>setRoleFilter(e.target.value)}>
-                <option value="">All Roles</option>
-                <option value="admin">Admin</option>
-                <option value="manager">Manager</option>
-                <option value="employee">Employee</option>
-                <option value="user">User</option>
               </select>
               <select className="filter-select" value={statusFilter} onChange={(e)=>setStatusFilter(e.target.value)}>
                 <option value="">All Status</option>
@@ -110,7 +101,6 @@ const List = () => {
                   <th className="sortable" onClick={()=>{}}><div className="th-content">User<ArrowUpDown size={14} className="sort-icon" /></div></th>
                   <th className="sortable" onClick={()=>{}}><div className="th-content">Contact<ArrowUpDown size={14} className="sort-icon" /></div></th>
                   <th className="sortable" onClick={()=>{}}><div className="th-content">Organization<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Role<ArrowUpDown size={14} className="sort-icon" /></div></th>
                   <th className="sortable" onClick={()=>{}}><div className="th-content">Status<ArrowUpDown size={14} className="sort-icon" /></div></th>
                   <th className="sortable" onClick={()=>{}}><div className="th-content">Last Login<ArrowUpDown size={14} className="sort-icon" /></div></th>
                   <th className="actions-header">Actions</th>
@@ -140,7 +130,6 @@ const List = () => {
                         {user.location?.location_name && <span className="text-gray-500 text-xs">{user.location.location_name}</span>}
                       </div>
                     </td>
-                    <td><span className={`status-badge status-${user.role === 'admin' ? 'warning' : user.role === 'manager' ? 'info' : 'secondary'}`}>{user.role}</span></td>
                     <td><span className={`status-badge status-${user.status === 'active' ? 'active' : user.status === 'suspended' ? 'error' : user.status === 'pending' ? 'warning' : 'inactive'}`}>{user.status}</span></td>
                     <td>
                       <div className="date-cell">
@@ -155,6 +144,9 @@ const List = () => {
                         </button>
                         <button className="action-btn edit" title="Edit User" onClick={()=>router.get(`/system/users/${user.id}/edit`)}>
                           <Edit3 size={16} />
+                        </button>
+                        <button className="action-btn rights" title="Configure User Rights" onClick={()=>router.get(`/system/users/${user.id}/edit`, { showRights: true })}>
+                          <Shield size={16} />
                         </button>
                         <button className="action-btn copy" title="Duplicate" onClick={()=>router.get('/system/users/create', { duplicate: user.id })}>
                           <Copy size={16} />

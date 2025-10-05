@@ -4,6 +4,7 @@ import { LayoutProvider, useLayout } from '@/Contexts/LayoutContext';
 import Header from '@/Components/Layout/Header';
 import Sidebar from '@/Components/Layout/Sidebar';
 import Footer from '@/Components/Layout/Footer';
+import LicenseAlert from '@/Components/LicenseAlert';
 
 // ThemeWrapper component to handle dark mode class
 const ThemeWrapper = ({ children }) => {
@@ -36,6 +37,7 @@ export default function App({ children }) {
             </main>
           </div>
           <Footer />
+          <LicenseAlert />
         </div>
       </ThemeWrapper>
     </LayoutProvider>
