@@ -31,13 +31,6 @@ const Header = () => {
   const { auth, company, url, userRights, availableMenus } = usePage().props;
   const user = auth?.user;
   
-  // Debug: Check what data we're getting
-  console.log('Header Debug:');
-  console.log('Auth:', auth);
-  console.log('User:', user);
-  console.log('Company:', company);
-  console.log('User Rights:', userRights);
-  console.log('Available Menus:', availableMenus);
   const { canView } = usePermissions();
   const {
     sidebarOpen,
@@ -58,7 +51,6 @@ const Header = () => {
   const [hoveredNavItem, setHoveredNavItem] = React.useState(null);
   const [currentLanguage, setCurrentLanguage] = React.useState('default');
   const [googleTranslateLoaded, setGoogleTranslateLoaded] = React.useState(false);
-  const [debugMode, setDebugMode] = React.useState(true);
 
   // Language options
   const languages = [
@@ -91,28 +83,18 @@ const Header = () => {
 
   // Load dynamic header menus from availableMenus
   React.useEffect(() => {
-    console.log('useEffect - availableMenus:', availableMenus);
-    console.log('useEffect - user role:', user?.role);
-    console.log('useEffect - canView function:', canView);
-    
     if (availableMenus && availableMenus.length > 0) {
-      console.log('Processing availableMenus:', availableMenus);
-      
       // For super admin, show all menus without permission check
       let systemMenus;
       if (user?.role === 'super_admin') {
-        console.log('Super admin - showing all menus');
         systemMenus = availableMenus;
       } else {
         // For other users, check permissions
         systemMenus = availableMenus.filter(menu => {
           const canViewMenu = canView(menu.id);
-          console.log(`Menu ${menu.menu_name} (ID: ${menu.id}) - canView: ${canViewMenu}`);
           return canViewMenu;
         });
       }
-      
-      console.log('Filtered systemMenus:', systemMenus);
       
       if (systemMenus.length > 0) {
         const systemGroup = {
@@ -126,19 +108,12 @@ const Header = () => {
           }))
         };
         
-        console.log('System group created:', systemGroup);
-        
         setNavigationItems(prev => {
           const base = prev.filter(i => i.name === 'Dashboard');
           const newItems = [...base, systemGroup];
-          console.log('New navigation items:', newItems);
           return newItems;
         });
-      } else {
-        console.log('No accessible menus found');
       }
-    } else {
-      console.log('No availableMenus or empty array');
     }
   }, [url, canView, availableMenus, user?.role]);
 
@@ -166,8 +141,6 @@ const Header = () => {
 
   // Initialize Google Translate
   const googleTranslateElementInit = React.useCallback(() => {
-    if (debugMode) console.log('🔧 Initializing Google Translate Element...');
-
     if (window.google && window.google.translate) {
       try {
         new window.google.translate.TranslateElement({
@@ -177,21 +150,15 @@ const Header = () => {
         }, 'google_translate_element');
 
         setGoogleTranslateLoaded(true);
-        if (debugMode) console.log('✅ Google Translate Element initialized');
       } catch (error) {
-        if (debugMode) console.error('❌ Error initializing Google Translate:', error);
+        // Silent error handling
       }
-    } else {
-      if (debugMode) console.warn('⚠️ Google Translate API not available');
     }
-  }, [debugMode]);
+  }, []);
 
   // Load Google Translate script
   const loadGoogleTranslate = React.useCallback(() => {
-    if (debugMode) console.log('🌍 Loading Google Translate...');
-
     if (googleTranslateLoaded || document.getElementById('google-translate-script')) {
-      if (debugMode) console.log('✅ Google Translate already loaded');
       return Promise.resolve();
     }
 
@@ -203,48 +170,39 @@ const Header = () => {
       script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
       script.async = true;
       script.onload = () => {
-        if (debugMode) console.log('✅ Google Translate script loaded');
         resolve();
       };
       script.onerror = (error) => {
-        if (debugMode) console.error('❌ Failed to load Google Translate:', error);
         reject(error);
       };
       document.body.appendChild(script);
     });
-  }, [googleTranslateLoaded, debugMode, googleTranslateElementInit]);
+  }, [googleTranslateLoaded, googleTranslateElementInit]);
 
   // Load saved language preference
   React.useEffect(() => {
     const savedLanguage = localStorage.getItem('selectedLanguage');
-    if (debugMode) console.log('💾 Saved language:', savedLanguage);
 
     if (savedLanguage) {
       setCurrentLanguage(savedLanguage);
       if (savedLanguage !== 'default') {
-        if (debugMode) console.log('🔄 Applying saved language:', savedLanguage);
         loadGoogleTranslate().then(() => {
           setTimeout(() => {
             changeLanguage(savedLanguage, false);
           }, 2000);
         }).catch((error) => {
-          if (debugMode) console.error('❌ Failed to load Google Translate for saved language:', error);
+          // Silent error handling
         });
       }
     }
-  }, [loadGoogleTranslate, debugMode]);
+  }, [loadGoogleTranslate]);
 
   // Function to change language
   const changeLanguage = (languageCode, saveToStorage = true) => {
-    if (debugMode) console.log('🌍 Changing language to:', languageCode);
-
     if (languageCode === 'default') {
-      if (debugMode) console.log('🔄 Resetting to default language...');
-
       const translateElement = document.getElementById('google_translate_element');
       if (translateElement) {
         translateElement.innerHTML = '';
-        if (debugMode) console.log('🧹 Cleared translate element');
       }
 
       const translateBars = document.querySelectorAll('.goog-te-banner-frame, .goog-te-menu-frame, .skiptranslate');
@@ -253,45 +211,31 @@ const Header = () => {
       document.body.classList.remove('translated-ltr', 'translated-rtl');
 
       setTimeout(() => {
-        if (debugMode) console.log('🔄 Reloading page to reset translation...');
         window.location.reload();
       }, 100);
 
     } else {
-      if (debugMode) console.log('🔄 Loading translation for:', languageCode);
-
       loadGoogleTranslate().then(() => {
-        if (debugMode) console.log('✅ Google Translate loaded, waiting for element...');
-
         const waitForTranslateElement = (maxAttempts = 10, attempt = 1) => {
-          if (debugMode) console.log(`🎯 Looking for translate element, attempt ${attempt}/${maxAttempts}...`);
-
           const select = document.querySelector('#google_translate_element select');
           if (select) {
-            if (debugMode) console.log('✅ Found translate select element, triggering translation');
-
             select.value = languageCode;
             select.dispatchEvent(new Event('change'));
-
-            if (debugMode) console.log('🎯 Translation triggered successfully');
           } else if (attempt < maxAttempts) {
             setTimeout(() => waitForTranslateElement(maxAttempts, attempt + 1), 500);
-          } else {
-            if (debugMode) console.error('❌ Could not find translate element after', maxAttempts, 'attempts');
           }
         };
 
         setTimeout(() => waitForTranslateElement(), 1000);
 
       }).catch((error) => {
-        if (debugMode) console.error('❌ Failed to load Google Translate:', error);
+        // Silent error handling
       });
     }
 
     setCurrentLanguage(languageCode);
     if (saveToStorage) {
       localStorage.setItem('selectedLanguage', languageCode);
-      if (debugMode) console.log('💾 Saved language to localStorage:', languageCode);
     }
     setLanguageMenuOpen(false);
   };

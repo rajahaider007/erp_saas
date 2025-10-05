@@ -157,7 +157,6 @@ export function LayoutProvider({ children }) {
         formTheme,
       };
       localStorage.setItem('erp-layout-settings', JSON.stringify(settings));
-      console.log('Layout settings saved:', settings);
     }
   }, [sidebarCollapsed, headerAsSidebar, theme, primaryColor, animationsEnabled, compactMode, borderRadius, fontSize, formTheme]);
 
@@ -214,18 +213,15 @@ export function LayoutProvider({ children }) {
 
   // Customizer helper functions
   const openCustomizer = () => {
-    console.log('🎨 Opening customizer');
     setCustomizer(true);
   };
 
   const closeCustomizer = () => {
-    console.log('🎨 Closing customizer');
     setCustomizer(false);
     setPreviewMode(false);
   };
 
   const applyCustomizerSettings = () => {
-    console.log('🎨 Applying customizer settings:', tempSettings);
     setTheme(tempSettings.theme);
     setSidebarCollapsed(tempSettings.sidebarCollapsed);
     setHeaderAsSidebar(tempSettings.headerAsSidebar);
@@ -240,7 +236,6 @@ export function LayoutProvider({ children }) {
   };
 
   const resetToDefaults = () => {
-    console.log('🎨 Resetting to defaults');
     const defaults = {
       theme: 'light',
       sidebarCollapsed: false,
@@ -266,7 +261,6 @@ export function LayoutProvider({ children }) {
   };
 
   const updateTempSetting = (key, value) => {
-    console.log(`🎨 Updating temp ${key} to:`, value);
     setTempSettings(prev => ({
       ...prev,
       [key]: value
