@@ -57,6 +57,11 @@ const ChartOfAccounts = () => {
     status: 'Active'
   });
 
+  // Load saved expanded state on component mount
+  useEffect(() => {
+    loadExpandedState();
+  }, []);
+
   // Generate account code based on hierarchy (sequential, not random)
   const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
     if (level === 1) {
@@ -289,6 +294,77 @@ const ChartOfAccounts = () => {
     });
   };
 
+  // Save expanded state to localStorage before refresh
+  const saveExpandedState = () => {
+    const stateToSave = {
+      expandedAccounts,
+      expandedCategories
+    };
+    localStorage.setItem('chartOfAccountsState', JSON.stringify(stateToSave));
+  };
+
+  // Load expanded state from localStorage
+  const loadExpandedState = () => {
+    try {
+      const savedState = localStorage.getItem('chartOfAccountsState');
+      if (savedState) {
+        const state = JSON.parse(savedState);
+        setExpandedAccounts(state.expandedAccounts || {});
+        setExpandedCategories(state.expandedCategories || {
+          assets: true,
+          liabilities: true,
+          equity: true,
+          revenue: true,
+          expenses: true
+        });
+      }
+    } catch (error) {
+      console.error('Error loading saved state:', error);
+    }
+  };
+
+  // Refresh accounts data with AJAX call
+  const refreshAccounts = async () => {
+    try {
+      setLoading(true);
+      
+      // Get CSRF token
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+        document.querySelector('input[name="_token"]')?.value ||
+        window.Laravel?.csrfToken;
+
+      if (!csrfToken) {
+        throw new Error('CSRF token not found. Please refresh the page and try again.');
+      }
+
+      const response = await fetch('/api/chart-of-accounts', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': csrfToken,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          setAccounts(data.data);
+        } else {
+          console.error('Failed to refresh accounts:', data.message);
+        }
+      } else {
+        console.error('Failed to refresh accounts');
+      }
+    } catch (error) {
+      console.error('Error refreshing accounts:', error);
+      // Fallback to page reload if AJAX fails
+      window.location.reload();
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -364,8 +440,21 @@ const ChartOfAccounts = () => {
           });
         }
 
-        // Refresh accounts list
-        window.location.reload();
+        // Update local state optimistically instead of page reload
+        if (modalMode === 'add') {
+          // For new accounts, we need to fetch fresh data since we don't have the new account details
+          await refreshAccounts();
+        } else {
+          // For updates, we can update the local state directly
+          setAccounts(prevAccounts => 
+            prevAccounts.map(account => 
+              account.id === selectedAccount.id 
+                ? { ...account, ...formData }
+                : account
+            )
+          );
+        }
+        
         closeModal();
       } else {
         throw new Error(result.message || 'Operation failed');
@@ -482,8 +571,10 @@ const ChartOfAccounts = () => {
             confirmButtonText: 'OK'
           });
 
-          // Refresh accounts list
-          window.location.reload();
+          // Update local state optimistically instead of page reload
+          setAccounts(prevAccounts => 
+            prevAccounts.filter(account => account.id !== accountToDelete.id)
+          );
         } else {
           throw new Error(result.message || 'Delete failed');
         }
