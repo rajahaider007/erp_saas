@@ -11,7 +11,14 @@ import {
   DollarSign,
   AlertCircle,
   CheckCircle,
-  X
+  X,
+  Database,
+  RefreshCcw,
+  Download,
+  ChevronDown,
+  Settings,
+  Users,
+  TrendingUp
 } from 'lucide-react';
 import App from '../../App.jsx';
 
@@ -181,37 +188,47 @@ const JournalVoucherCreate = () => {
 
   return (
     <App>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => router.visit('/accounts/journal-voucher')}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {isEdit ? 'Edit Journal Voucher' : 'Create Journal Voucher'}
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  {isEdit ? 'Edit journal voucher entry' : 'Create a new journal voucher entry'}
-                </p>
+      <div className="advanced-module-manager">
+        {/* Enhanced Header */}
+        <div className="manager-header">
+          <div className="header-main">
+            <div className="title-section">
+              <h1 className="page-title">
+                <Database className="title-icon" />
+                {isEdit ? 'Edit Journal Voucher' : 'Create Journal Voucher'}
+              </h1>
+              <div className="stats-summary">
+                <div className="stat-item">
+                  <TrendingUp size={16} />
+                  <span>{accounts?.length || 0} Accounts Available</span>
+                </div>
+                <div className="stat-item">
+                  <Users size={16} />
+                  <span>{formData.entries?.length || 0} Entries</span>
+                </div>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
+
+            <div className="header-actions">
               <button
+                className="btn btn-icon"
                 onClick={() => router.visit('/accounts/journal-voucher')}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                title="Back to List"
+              >
+                <ArrowLeft size={20} />
+              </button>
+
+              <button
+                className="btn btn-secondary"
+                onClick={() => router.visit('/accounts/journal-voucher')}
               >
                 Cancel
               </button>
+
               <button
+                className="btn btn-primary"
                 onClick={handleSubmit}
                 disabled={isSubmitting || !isBalanced}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>
@@ -220,7 +237,7 @@ const JournalVoucherCreate = () => {
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save size={20} />
                     {isEdit ? 'Update Voucher' : 'Create Voucher'}
                   </>
                 )}
@@ -229,32 +246,12 @@ const JournalVoucherCreate = () => {
           </div>
         </div>
 
-        {/* Alert Messages */}
-        {alert && (
-          <div className={`p-4 rounded-lg animate-slideIn ${
-            alert.type === 'success' 
-              ? 'bg-green-50 border border-green-200 text-green-800'
-              : 'bg-red-50 border border-red-200 text-red-800'
-          }`}>
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                {alert.type === 'success' ? (
-                  <CheckCircle className="h-5 w-5" />
-                ) : (
-                  <AlertCircle className="h-5 w-5" />
-                )}
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium">{alert.message}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Voucher Details */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Voucher Details</h2>
+        {/* Main Content */}
+        <div className="main-content">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Voucher Details */}
+            <div className="bg-white/70 backdrop-blur-xl rounded-xl shadow-sm border border-white/20 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Voucher Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -264,8 +261,8 @@ const JournalVoucherCreate = () => {
                   type="date"
                   value={formData.voucher_date}
                   onChange={(e) => setFormData(prev => ({ ...prev, voucher_date: e.target.value }))}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.voucher_date ? 'border-red-300' : 'border-gray-300'
+                  className={`w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.voucher_date ? 'border-red-300' : ''
                   }`}
                 />
                 {errors.voucher_date && (
@@ -282,7 +279,7 @@ const JournalVoucherCreate = () => {
                   value={formData.reference_number}
                   onChange={(e) => setFormData(prev => ({ ...prev, reference_number: e.target.value }))}
                   placeholder="Enter reference number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
 
@@ -293,7 +290,7 @@ const JournalVoucherCreate = () => {
                 <select
                   value={formData.currency_code}
                   onChange={(e) => setFormData(prev => ({ ...prev, currency_code: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="USD">USD</option>
                   <option value="EUR">EUR</option>
@@ -311,7 +308,7 @@ const JournalVoucherCreate = () => {
                   step="0.000001"
                   value={formData.exchange_rate}
                   onChange={(e) => setFormData(prev => ({ ...prev, exchange_rate: parseFloat(e.target.value) }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
             </div>
@@ -325,8 +322,8 @@ const JournalVoucherCreate = () => {
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Enter voucher description"
                 rows={3}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.description ? 'border-red-300' : 'border-gray-300'
+                className={`w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.description ? 'border-red-300' : ''
                 }`}
               />
               {errors.description && (
@@ -335,19 +332,20 @@ const JournalVoucherCreate = () => {
             </div>
           </div>
 
-          {/* Journal Entries */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Journal Entries</h2>
-              <button
-                type="button"
-                onClick={addEntry}
-                className="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Entry
-              </button>
-            </div>
+            {/* Journal Entries */}
+            <div className="bg-white/70 backdrop-blur-xl rounded-xl shadow-sm border border-white/20 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Journal Entries</h2>
+                <button
+                  type="button"
+                  onClick={addEntry}
+                  className="btn btn-primary"
+                  style={{ background: '#10B981' }}
+                >
+                  <Plus size={20} />
+                  Add Entry
+                </button>
+              </div>
 
             {errors.entries && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -357,7 +355,7 @@ const JournalVoucherCreate = () => {
 
             <div className="space-y-4">
               {formData.entries.map((entry, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <div key={index} className="bg-white/50 backdrop-blur-sm border border-white/30 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-medium text-gray-700">Entry {index + 1}</h3>
                     {formData.entries.length > 2 && (
@@ -379,8 +377,8 @@ const JournalVoucherCreate = () => {
                       <select
                         value={entry.account_id}
                         onChange={(e) => updateEntry(index, 'account_id', e.target.value)}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                          errors[`entries.${index}.account_id`] ? 'border-red-300' : 'border-gray-300'
+                        className={`w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                          errors[`entries.${index}.account_id`] ? 'border-red-300' : ''
                         }`}
                       >
                         <option value="">Select Account</option>
@@ -410,8 +408,8 @@ const JournalVoucherCreate = () => {
                           }
                         }}
                         placeholder="0.00"
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                          errors[`entries.${index}.amount`] ? 'border-red-300' : 'border-gray-300'
+                        className={`w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                          errors[`entries.${index}.amount`] ? 'border-red-300' : ''
                         }`}
                       />
                     </div>
@@ -431,8 +429,8 @@ const JournalVoucherCreate = () => {
                           }
                         }}
                         placeholder="0.00"
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                          errors[`entries.${index}.amount`] ? 'border-red-300' : 'border-gray-300'
+                        className={`w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                          errors[`entries.${index}.amount`] ? 'border-red-300' : ''
                         }`}
                       />
                     </div>
@@ -447,7 +445,7 @@ const JournalVoucherCreate = () => {
                       value={entry.description}
                       onChange={(e) => updateEntry(index, 'description', e.target.value)}
                       placeholder="Enter entry description"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
 
@@ -457,13 +455,13 @@ const JournalVoucherCreate = () => {
                 </div>
               ))}
             </div>
-          </div>
+            </div>
 
-          {/* Totals Summary */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Totals Summary</h2>
+            {/* Totals Summary */}
+            <div className="bg-white/70 backdrop-blur-xl rounded-xl shadow-sm border border-white/20 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Totals Summary</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-white/40 backdrop-blur-sm rounded-lg p-4 border border-white/30">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700">Total Debit</span>
                   <span className="text-lg font-semibold text-gray-900">
@@ -471,7 +469,7 @@ const JournalVoucherCreate = () => {
                   </span>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-white/40 backdrop-blur-sm rounded-lg p-4 border border-white/30">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700">Total Credit</span>
                   <span className="text-lg font-semibold text-gray-900">
@@ -479,8 +477,8 @@ const JournalVoucherCreate = () => {
                   </span>
                 </div>
               </div>
-              <div className={`rounded-lg p-4 ${
-                isBalanced ? 'bg-green-50' : 'bg-red-50'
+              <div className={`rounded-lg p-4 border border-white/30 backdrop-blur-sm ${
+                isBalanced ? 'bg-green-500/20' : 'bg-red-500/20'
               }`}>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700">Balance</span>
@@ -498,9 +496,10 @@ const JournalVoucherCreate = () => {
                   </div>
                 </div>
               </div>
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </App>
   );
