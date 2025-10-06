@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Inertia\Inertia;
 
 class VoucherNumberConfigurationController extends Controller
 {
@@ -225,6 +227,152 @@ class VoucherNumberConfigurationController extends Controller
                 'success' => false,
                 'message' => 'Error deleting configuration: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Bulk update status of voucher number configurations
+     */
+    public function bulkUpdateStatus(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'ids' => 'required|array|min:1',
+                'ids.*' => 'required|integer',
+                'status' => 'required|boolean'
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator->errors());
+            }
+
+            $compId = $request->input('user_comp_id');
+            $locationId = $request->input('user_location_id');
+
+            if (!$compId || !$locationId) {
+                return redirect()->back()->with('error', 'Company and Location information is required.');
+            }
+
+            $updated = DB::table('voucher_number_configurations')
+                ->whereIn('id', $request->ids)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->update([
+                    'is_active' => $request->status,
+                    'updated_at' => now()
+                ]);
+
+            return redirect()->back()->with('success', "Successfully updated {$updated} configuration(s)");
+
+        } catch (\Exception $e) {
+            Log::error('Voucher Number Configuration Bulk Status Update Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error updating configurations: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Bulk delete voucher number configurations
+     */
+    public function bulkDestroy(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'ids' => 'required|array|min:1',
+                'ids.*' => 'required|integer'
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator->errors());
+            }
+
+            $compId = $request->input('user_comp_id');
+            $locationId = $request->input('user_location_id');
+
+            if (!$compId || !$locationId) {
+                return redirect()->back()->with('error', 'Company and Location information is required.');
+            }
+
+            $deleted = DB::table('voucher_number_configurations')
+                ->whereIn('id', $request->ids)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->delete();
+
+            return redirect()->back()->with('success', "Successfully deleted {$deleted} configuration(s)");
+
+        } catch (\Exception $e) {
+            Log::error('Voucher Number Configuration Bulk Delete Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error deleting configurations: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export voucher number configurations to CSV
+     */
+    public function exportCsv(Request $request)
+    {
+        try {
+            $compId = $request->input('user_comp_id');
+            $locationId = $request->input('user_location_id');
+
+            if (!$compId || !$locationId) {
+                return redirect()->back()->with('error', 'Company and Location information is required.');
+            }
+
+            $configurations = DB::table('voucher_number_configurations')
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->orderBy('voucher_type')
+                ->get();
+
+            $filename = 'voucher_number_configurations_' . date('Y-m-d_H-i-s') . '.csv';
+            
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ];
+
+            $callback = function() use ($configurations) {
+                $file = fopen('php://output', 'w');
+                
+                // CSV Headers
+                fputcsv($file, [
+                    'ID',
+                    'Voucher Type',
+                    'Prefix',
+                    'Running Number',
+                    'Number Length',
+                    'Reset Frequency',
+                    'Last Reset Date',
+                    'Status',
+                    'Created At',
+                    'Updated At'
+                ]);
+
+                // CSV Data
+                foreach ($configurations as $config) {
+                    fputcsv($file, [
+                        $config->id,
+                        $config->voucher_type,
+                        $config->prefix,
+                        $config->running_number,
+                        $config->number_length,
+                        $config->reset_frequency,
+                        $config->last_reset_date ?? 'Never',
+                        $config->is_active ? 'Active' : 'Inactive',
+                        $config->created_at,
+                        $config->updated_at
+                    ]);
+                }
+
+                fclose($file);
+            };
+
+            return response()->stream($callback, 200, $headers);
+
+        } catch (\Exception $e) {
+            Log::error('Voucher Number Configuration Export Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error exporting configurations: ' . $e->getMessage());
         }
     }
 }

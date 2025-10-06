@@ -195,6 +195,12 @@ const Sidebar = () => {
 
       const navItems = [
         {
+          name: 'ERP Modules',
+          href: '/erp-modules',
+          icon: Package,
+          current: url === '/erp-modules'
+        },
+        {
           name: 'Dashboard',
           href: getDashboardHref(),
           icon: Home,
@@ -233,7 +239,7 @@ const Sidebar = () => {
     buildNavigation();
   }, [url, modules, canView]);
 
-  // Load current module data when URL changes
+  // Load current module data from session
   React.useEffect(() => {
     const loadCurrentModuleData = async () => {
       if (!isModuleUrl(url)) {
@@ -241,12 +247,9 @@ const Sidebar = () => {
         return;
       }
 
-      const moduleName = getCurrentModuleName(url);
-      if (!moduleName) return;
-
       setLoadingModuleData(true);
       try {
-        const response = await fetch(`/modules/current-module-data?url=${encodeURIComponent(url)}`);
+        const response = await fetch('/get-current-module');
         const data = await response.json();
         
         console.log('Module data response:', data);
@@ -270,6 +273,7 @@ const Sidebar = () => {
 
   // Load dynamic menus from availableMenus - only show system menus when not in a specific module
   React.useEffect(() => {
+    // Only show static system menus when NOT in any module (dashboard, erp-modules, etc.)
     if (availableMenus && availableMenus.length > 0 && !isModuleUrl(url)) {
       // For super admin, show all menus without permission check
       let systemMenus;
@@ -303,7 +307,7 @@ const Sidebar = () => {
         });
       }
     } else if (isModuleUrl(url)) {
-      // When in a module, remove system group from navigation
+      // When in any module (including system), remove static system group from navigation
       setNavigation(prev => {
         return prev.filter(i => i.name !== 'System');
       });
@@ -316,50 +320,47 @@ const Sidebar = () => {
     
     console.log('Current module data:', currentModuleData);
 
-    const moduleGroup = {
-      name: currentModuleData.module.name,
-      href: '#',
-      icon: getModuleIcon(currentModuleData.module.folder_name),
-      current: true,
-      children: (currentModuleData.sections || [])
-        .filter(section => {
-          // Check if section has required properties
-          if (!section || !section.section_name) return false;
-          
-          // Check if user has permission to view this section
-          if (user?.role === 'super_admin') {
-            return true;
-          }
-          return canView(`/${currentModuleData.module.folder_name}/${section.slug || ''}`);
-        })
-        .map(section => ({
-          name: section.section_name,
-          href: section.slug ? `/${currentModuleData.module.folder_name}/${section.slug}` : `/${currentModuleData.module.folder_name}`,
-          icon: Layers,
-          children: (section.menus || [])
-            .filter(menu => {
-              // Check if menu has required properties
-              if (!menu || !menu.menu_name) return false;
-              
-              // Check if user has permission to view this menu
-              if (user?.role === 'super_admin') {
-                return true;
-              }
-              return canView(menu.id);
-            })
-            .map(menu => ({
-              name: menu.menu_name,
-              href: (menu.route && menu.route !== 'undefined' && menu.route !== 'null') ? menu.route : '#',
-              icon: iconFromName(menu.icon)
+    // Instead of creating a module group, add sections directly to navigation
+    const sectionsToAdd = (currentModuleData.sections || [])
+      .filter(section => {
+        // Check if section has required properties
+        if (!section || !section.section_name) return false;
+        
+        // Check if user has permission to view this section
+        if (user?.role === 'super_admin') {
+          return true;
+        }
+        return canView(`/${currentModuleData.module.folder_name}/${section.slug || ''}`);
+      })
+      .map(section => ({
+        name: section.section_name,
+        href: section.slug ? `/${currentModuleData.module.folder_name}/${section.slug}` : `/${currentModuleData.module.folder_name}`,
+        icon: Layers,
+        children: (section.menus || [])
+          .filter(menu => {
+            // Check if menu has required properties
+            if (!menu || !menu.menu_name) return false;
+            
+            // Check if user has permission to view this menu
+            if (user?.role === 'super_admin') {
+              return true;
+            }
+            return canView(menu.id);
+          })
+          .map(menu => ({
+            name: menu.menu_name,
+            href: (menu.route && menu.route !== 'undefined' && menu.route !== 'null') ? menu.route : '#',
+            icon: iconFromName(menu.icon)
           }))
       }))
-      .filter(section => section.children.length > 0) // Only show sections that have accessible menus
-    };
+      .filter(section => section.children.length > 0); // Only show sections that have accessible menus
 
     setNavigation(prev => {
-      // Keep existing navigation items and add/update module group
-      const existingItems = prev.filter(i => i.name !== currentModuleData.module.name);
-      return [...existingItems, moduleGroup];
+      // Remove any existing sections from this module and add new ones
+      const existingItems = prev.filter(item => 
+        !currentModuleData.sections.some(section => section.section_name === item.name)
+      );
+      return [...existingItems, ...sectionsToAdd];
     });
   }, [currentModuleData, canView, user?.role]);
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { usePermissions } from '../../hooks/usePermissions';
 import {
   Settings,
@@ -109,6 +109,31 @@ const ModulesPage = () => {
   const modules = getModules();
   const accessibleModules = modules.filter(module => module.hasAccess);
   const disabledModules = modules.filter(module => !module.hasAccess);
+
+  const handleModuleClick = async (module) => {
+    try {
+      // Save module to session first
+      const response = await fetch('/set-current-module', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ module_id: module.id })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Navigate to module dashboard
+        router.visit(module.route);
+      } else {
+        console.error('Failed to set module:', result.message);
+      }
+    } catch (error) {
+      console.error('Error setting module:', error);
+    }
+  };
 
   const ModuleCard = ({ module, isDisabled = false }) => {
     const Icon = module.icon;
@@ -269,13 +294,9 @@ const ModulesPage = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {accessibleModules.map((module) => (
-                <Link
-                  key={module.id}
-                  href={module.route}
-                  className="block"
-                >
+                <div key={module.id} onClick={() => handleModuleClick(module)} className="block">
                   <ModuleCard module={module} />
-                </Link>
+                </div>
               ))}
             </div>
           </div>

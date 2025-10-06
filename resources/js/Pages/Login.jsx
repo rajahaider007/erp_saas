@@ -79,14 +79,14 @@
                         console.log('Request started...');
                     },
                     onSuccess: (page) => {
-                        console.log('Login success, redirecting to dashboard...', page);
+                        console.log('Login success, redirecting to ERP modules...', page);
                         setAlert({
                             type: 'success',
                             message: 'Login successful! Redirecting...'
                         });
-                        // Redirect to dashboard after successful login
+                        // Redirect to ERP modules after successful login
                         setTimeout(() => {
-                            router.visit('/dashboard');
+                            router.visit('/erp-modules');
                         }, 1000);
                     },
                     onError: (errors) => {

@@ -121,27 +121,71 @@ const DynamicModuleDashboard = () => {
           </div>
         </div>
 
-        {/* Module Content - Clean Design */}
-        <div className="text-center py-12">
-          <div className="p-6 rounded-3xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl shadow-2xl border border-white/20 dark:border-gray-700/50 inline-block mb-8">
-            <Grid3X3 className="h-20 w-20 text-blue-600 dark:text-blue-400" />
+        {/* Module Content - Show Menus */}
+        <div className="space-y-8">
+          <div className="text-center py-8">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              {module.module_name} Features
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Access all available features and manage your {module.module_name.toLowerCase()} operations
+            </p>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            Welcome to {module.module_name}
-          </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
-            This module is currently under development. We're working hard to bring you the best experience.
-          </p>
-          <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-              <span>Coming Soon</span>
+
+          {/* Show Menus Directly */}
+          {menus && menus.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {menus.map((menu) => (
+                <Link
+                  key={menu.id}
+                  href={menu.route || '#'}
+                  className="group bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 p-6 hover:shadow-2xl transition-all duration-500 hover:scale-105"
+                >
+                  <div className="flex items-center space-x-4 mb-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg">
+                      <Settings className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                        {menu.menu_name}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">
+                        Access {menu.menu_name.toLowerCase()} features
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-blue-600 dark:text-blue-400 text-sm font-medium group-hover:text-blue-700">
+                      Open Feature
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all duration-300" />
+                  </div>
+                </Link>
+              ))}
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span>In Development</span>
+          ) : (
+            <div className="text-center py-12">
+              <div className="p-6 rounded-3xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl shadow-2xl border border-white/20 dark:border-gray-700/50 inline-block mb-8">
+                <Grid3X3 className="h-20 w-20 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                No Features Available
+              </h2>
+              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
+                This module is currently under development. We're working hard to bring you the best experience.
+              </p>
+              <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                  <span>Coming Soon</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <span>In Development</span>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Back to Modules */}

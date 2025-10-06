@@ -577,9 +577,9 @@ public function getCurrentModuleData(Request $request)
         $path = parse_url($url, PHP_URL_PATH);
         $pathSegments = explode('/', trim($path, '/'));
         
-        // Check if this is a module-specific URL (e.g., /accounting/dashboard, /inventory/items)
+        // Check if this is a module-specific URL (e.g., /accounting/dashboard, /inventory/items, /system/dashboard)
         $moduleName = null;
-        if (count($pathSegments) >= 1 && $pathSegments[0] !== 'system' && $pathSegments[0] !== 'dashboard' && $pathSegments[0] !== 'erp-modules') {
+        if (count($pathSegments) >= 1 && $pathSegments[0] !== 'dashboard' && $pathSegments[0] !== 'erp-modules') {
             $moduleName = $pathSegments[0];
         }
         
