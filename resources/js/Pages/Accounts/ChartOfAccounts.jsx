@@ -33,7 +33,7 @@ import {
 const ChartOfAccounts = () => {
   const { props } = usePage();
   const { currencies = [], accounts: seededAccounts = [] } = props;
-  
+
   const [accounts, setAccounts] = useState(seededAccounts);
   const [loading, setLoading] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState({
@@ -56,9 +56,9 @@ const ChartOfAccounts = () => {
     currency: 'USD',
     status: 'Active'
   });
-  
+
   // Generate account code based on hierarchy (sequential, not random)
-  const generateAccountCode = (parentCode = '', level = 1) => {
+  const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
     if (level === 1) {
       // Level 1: 100000000000000, 200000000000000, etc.
       const typeCodes = {
@@ -70,21 +70,30 @@ const ChartOfAccounts = () => {
       };
       return typeCodes[formData.account_type] || '100000000000000';
     } else if (level === 2) {
-      // Level 2: 100010000000000, 100020000000000, etc.
-      const baseCode = parentCode.substring(0, 5);
-      // Find next sequential number for this parent
-      const existingAccounts = accounts.filter(acc => 
-        acc.account_code.startsWith(baseCode) && 
+      // Level 2: Use parent's base code and append sequential number
+      const baseCode = parentCode.substring(0, 5); // Get first 5 digits: 50000
+
+      // Find next sequential number for this specific parent
+      const existingAccounts = accounts.filter(acc =>
+        acc.parent_account_id === parentId &&
         acc.account_level === 2
       );
       const nextNumber = existingAccounts.length + 1;
-      return baseCode + nextNumber.toString().padStart(5, '0') + '000000000';
+
+      // Format: 50000 + 4 + 0000000000 = 500040000000000 (15 digits total)
+      // So we need: 5 (base) + 1 (sequential) + 9 (zeros) = 15 digits
+      const paddedNumber = nextNumber.toString().padStart(1, '0'); // Just 1 digit for the sequential number
+      const result = baseCode + paddedNumber + '0000000000'; // 10 zeros to make total 15
+
+
+      return result;
     } else if (level === 3) {
-      // Level 3: 100010000000001, 100010000000002, etc.
+      // Level 3: Use parent's full code as base and append sequential number
+      // For example: if parent is 500010000000000, child should be 500010000000001
       const baseCode = parentCode.substring(0, 10);
-      // Find next sequential number for this parent
-      const existingAccounts = accounts.filter(acc => 
-        acc.account_code.startsWith(baseCode) && 
+      // Find next sequential number for this specific parent
+      const existingAccounts = accounts.filter(acc =>
+        acc.parent_account_id === parentId &&
         acc.account_level === 3
       );
       const nextNumber = existingAccounts.length + 1;
@@ -97,7 +106,7 @@ const ChartOfAccounts = () => {
   const getAccountProperties = (parentCode = '', level = 1) => {
     // Get user data from page props
     const { user } = props;
-    
+
     // System will automatically detect these properties based on hierarchy
     return {
       is_parent: level < 3,
@@ -229,8 +238,8 @@ const ChartOfAccounts = () => {
   // Open modal for add/edit
   const openModal = (mode, account = null, parentAccount = null) => {
     setModalMode(mode);
-    setSelectedAccount(account);
-    
+    setSelectedAccount(parentAccount); // Store parent account for code generation
+
     if (mode === 'edit' && account) {
       setFormData({
         account_code: account.account_code,
@@ -243,8 +252,8 @@ const ChartOfAccounts = () => {
       });
     } else {
       const level = parentAccount ? parentAccount.account_level + 1 : 1;
-      const generatedCode = generateAccountCode(parentAccount?.account_code, level);
-      
+      const generatedCode = generateAccountCode(parentAccount?.account_code, level, parentAccount?.id);
+
       setFormData({
         account_code: generatedCode,
         account_name: '',
@@ -255,7 +264,7 @@ const ChartOfAccounts = () => {
         status: 'Active'
       });
     }
-    
+
     setShowModal(true);
   };
 
@@ -278,31 +287,31 @@ const ChartOfAccounts = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       // Auto-detect properties based on hierarchy
       const level = selectedAccount ? selectedAccount.account_level + 1 : 1;
       const autoDetectedProperties = getAccountProperties(formData.parent_account_id, level);
-      
+
       // Prepare data with auto-detected properties
       const submitData = {
         ...formData,
         ...autoDetectedProperties,
         account_level: level
       };
-      
+
       // Make API call
-      const url = modalMode === 'add' 
-        ? '/api/chart-of-accounts' 
+      const url = modalMode === 'add'
+        ? '/api/chart-of-accounts'
         : `/api/chart-of-accounts/${selectedAccount.id}`;
-      
+
       const method = modalMode === 'add' ? 'POST' : 'PUT';
-      
+
       // Get CSRF token
-      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                       document.querySelector('input[name="_token"]')?.value ||
-                       window.Laravel?.csrfToken;
-      
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+        document.querySelector('input[name="_token"]')?.value ||
+        window.Laravel?.csrfToken;
+
       if (!csrfToken) {
         throw new Error('CSRF token not found. Please refresh the page and try again.');
       }
@@ -315,9 +324,9 @@ const ChartOfAccounts = () => {
         },
         body: JSON.stringify(submitData)
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         // Show success message
         if (modalMode === 'add') {
@@ -337,14 +346,14 @@ const ChartOfAccounts = () => {
             confirmButtonText: 'OK'
           });
         }
-        
+
         // Refresh accounts list
         window.location.reload();
         closeModal();
       } else {
         throw new Error(result.message || 'Operation failed');
       }
-      
+
     } catch (error) {
       console.error('Error:', error);
       await Swal.fire({
@@ -376,11 +385,11 @@ const ChartOfAccounts = () => {
 
       // Check if account has children
       const hasChildren = accounts.some(acc => acc.parent_account_id === account.id);
-      
+
       if (hasChildren) {
         const childAccounts = accounts.filter(acc => acc.parent_account_id === account.id);
         const childNames = childAccounts.map(child => child.account_name).join(', ');
-        
+
         await Swal.fire({
           icon: 'warning',
           title: 'Cannot Delete Parent Account!',
@@ -416,10 +425,10 @@ const ChartOfAccounts = () => {
 
       if (result.isConfirmed) {
         // Get CSRF token
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                         document.querySelector('input[name="_token"]')?.value ||
-                         window.Laravel?.csrfToken;
-        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+          document.querySelector('input[name="_token"]')?.value ||
+          window.Laravel?.csrfToken;
+
         if (!csrfToken) {
           throw new Error('CSRF token not found. Please refresh the page and try again.');
         }
@@ -432,9 +441,9 @@ const ChartOfAccounts = () => {
             'X-CSRF-TOKEN': csrfToken
           }
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
           await Swal.fire({
             icon: 'success',
@@ -443,7 +452,7 @@ const ChartOfAccounts = () => {
             confirmButtonColor: '#3B82F6',
             confirmButtonText: 'OK'
           });
-          
+
           // Refresh accounts list
           window.location.reload();
         } else {
@@ -467,7 +476,7 @@ const ChartOfAccounts = () => {
     return accountsToRender.map((account) => {
       const hasChildren = accounts.some(acc => acc.parent_account_id === account.id);
       const isExpanded = expandedAccounts[account.id];
-      
+
       return (
         <div key={account.id} className={`${level > 0 ? 'ml-4' : ''} mb-2`}>
           <div className={`flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200`}>
@@ -486,16 +495,15 @@ const ChartOfAccounts = () => {
                   )}
                 </button>
               )}
-              
+
               {/* Account Info */}
               <div className="flex items-center space-x-3 flex-1">
-                <div className={`w-2 h-2 rounded-full ${
-                  account.account_type === 'Assets' ? 'bg-blue-500' :
-                  account.account_type === 'Liabilities' ? 'bg-red-500' :
-                  account.account_type === 'Equity' ? 'bg-green-500' :
-                  account.account_type === 'Revenue' ? 'bg-emerald-500' :
-                  'bg-orange-500'
-                }`} />
+                <div className={`w-2 h-2 rounded-full ${account.account_type === 'Assets' ? 'bg-blue-500' :
+                    account.account_type === 'Liabilities' ? 'bg-red-500' :
+                      account.account_type === 'Equity' ? 'bg-green-500' :
+                        account.account_type === 'Revenue' ? 'bg-emerald-500' :
+                          'bg-orange-500'
+                  }`} />
                 <div className="flex-1">
                   <div className="flex items-center space-x-2">
                     <span className="font-mono text-sm text-gray-500 dark:text-gray-400">
@@ -526,7 +534,7 @@ const ChartOfAccounts = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Action Buttons */}
             <div className="flex items-center space-x-2">
               <button
@@ -554,7 +562,7 @@ const ChartOfAccounts = () => {
               )}
             </div>
           </div>
-          
+
           {/* Children Accounts - Only render if parent is expanded */}
           {hasChildren && isExpanded && (
             <div className="mt-3 ml-4 space-y-2">
@@ -594,7 +602,7 @@ const ChartOfAccounts = () => {
           animation: slideUp 0.3s ease-out;
         }
       `}</style>
-      
+
       <div className="space-y-6">
         {/* Header */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -612,23 +620,23 @@ const ChartOfAccounts = () => {
                 </p>
               </div>
             </div>
-            
-             <div className="flex items-center space-x-3">
-               <button
-                 onClick={expandAll}
-                 className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
-               >
-                 <Expand className="h-4 w-4" />
-                 <span>Expand All</span>
-               </button>
-               <button
-                 onClick={collapseAll}
-                 className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
-               >
-                 <Minimize className="h-4 w-4" />
-                 <span>Collapse All</span>
-               </button>
-             </div>
+
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={expandAll}
+                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
+              >
+                <Expand className="h-4 w-4" />
+                <span>Expand All</span>
+              </button>
+              <button
+                onClick={collapseAll}
+                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
+              >
+                <Minimize className="h-4 w-4" />
+                <span>Collapse All</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -637,7 +645,7 @@ const ChartOfAccounts = () => {
           {accountCategories.map((category) => {
             const Icon = category.icon;
             const isExpanded = expandedCategories[category.id];
-            
+
             return (
               <div key={category.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div
@@ -657,7 +665,7 @@ const ChartOfAccounts = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-4">
                     <span className="text-sm text-gray-500 dark:text-gray-400">
                       {category.accounts.length} accounts
@@ -669,7 +677,7 @@ const ChartOfAccounts = () => {
                     )}
                   </div>
                 </div>
-                
+
                 {isExpanded && (
                   <div className="border-t border-gray-200 dark:border-gray-700 p-4">
                     {category.accounts.length > 0 ? (
@@ -719,38 +727,38 @@ const ChartOfAccounts = () => {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            
-             <form onSubmit={handleSubmit} className="p-6 space-y-6">
-               {/* Parent Account Info */}
-               {modalMode === 'add' && selectedAccount && (
-                 <div className="md:col-span-2 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
-                   <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
-                     Adding under: <span className="font-semibold">{selectedAccount.account_name} ({selectedAccount.account_code})</span>
-                   </p>
-                 </div>
-               )}
 
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <div>
-                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                     Account Code
-                   </label>
-                   <input
-                     type="text"
-                     value={formData.account_code}
-                     onChange={(e) => setFormData({...formData, account_code: e.target.value})}
-                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                     placeholder="Enter account code"
-                     required
-                     readOnly={modalMode === 'add'}
-                   />
-                   {modalMode === 'add' && formData.parent_account_id && (
-                     <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                       Auto-generated under parent account
-                     </p>
-                   )}
-                 </div>
-                
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              {/* Parent Account Info */}
+              {modalMode === 'add' && selectedAccount && (
+                <div className="md:col-span-2 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                  <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                    Adding under: <span className="font-semibold">{selectedAccount.account_name} ({selectedAccount.account_code})</span>
+                  </p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Account Code
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.account_code}
+                    onChange={(e) => setFormData({ ...formData, account_code: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                    placeholder="Enter account code"
+                    required
+                    readOnly={modalMode === 'add'}
+                  />
+                  {modalMode === 'add' && formData.parent_account_id && (
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                      Auto-generated under parent account
+                    </p>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Account Name
@@ -758,15 +766,15 @@ const ChartOfAccounts = () => {
                   <input
                     type="text"
                     value={formData.account_name}
-                    onChange={(e) => setFormData({...formData, account_name: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                     placeholder="Enter account name"
                     required
                   />
                 </div>
-                
-                
-                
+
+
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Short Code (Optional)
@@ -774,7 +782,7 @@ const ChartOfAccounts = () => {
                   <input
                     type="text"
                     value={formData.short_code}
-                    onChange={(e) => setFormData({...formData, short_code: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, short_code: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                     placeholder="e.g., CASH, BANK, AR"
                     maxLength={20}
@@ -783,14 +791,14 @@ const ChartOfAccounts = () => {
                     Company-specific short code for easy reference
                   </p>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Currency
                   </label>
                   <select
                     value={formData.currency}
-                    onChange={(e) => setFormData({...formData, currency: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   >
                     {currencies.map((currency) => (
@@ -800,25 +808,25 @@ const ChartOfAccounts = () => {
                     ))}
                   </select>
                 </div>
-                
+
               </div>
-              
-               {/* Auto-detected fields - System will handle these automatically */}
-               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
-                 <div className="flex items-center space-x-2 mb-2">
-                   <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                   <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
-                     Auto-Detected Properties
-                   </span>
-                 </div>
-                 <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                   <p>• <strong>Account Type:</strong> Automatically inherited from parent account</p>
-                   <p>• <strong>Company & Location:</strong> Auto-detected from current user session</p>
-                   <p>• <strong>Parent/Child Status:</strong> Auto-determined by hierarchy level</p>
-                   <p>• <strong>Transactional Status:</strong> Auto-determined (Level 3 accounts only)</p>
-                 </div>
-               </div>
-              
+
+              {/* Auto-detected fields - System will handle these automatically */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                    Auto-Detected Properties
+                  </span>
+                </div>
+                <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                  <p>• <strong>Account Type:</strong> Automatically inherited from parent account</p>
+                  <p>• <strong>Company & Location:</strong> Auto-detected from current user session</p>
+                  <p>• <strong>Parent/Child Status:</strong> Auto-determined by hierarchy level</p>
+                  <p>• <strong>Transactional Status:</strong> Auto-determined (Level 3 accounts only)</p>
+                </div>
+              </div>
+
               <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <button
                   type="button"

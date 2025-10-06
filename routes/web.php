@@ -71,16 +71,38 @@ Route::get('/erp-modules', function (Request $request) {
     return Inertia::render('Modules/index');
 })->middleware('web.auth')->name('erp.modules');
 
-// Chart of Accounts Route
+// Accounts Module Routes
+Route::get('/accounts', function (Request $request) {
+    return Inertia::render('Modules/Accounts/index');
+})->middleware('web.auth')->name('accounts');
+
 Route::get('/accounts/chart-of-accounts', function (Request $request) {
+    // User is already authenticated by web.auth middleware
+    $userId = $request->input('user_id'); // Set by web.auth middleware
+    
+    // Debug: Log the user ID
+    \Log::info('Chart of Accounts - User ID: ' . $userId);
+    
+    $user = DB::table('tbl_users')->where('id', $userId)->first();
+    
+    // Debug: Log if user is found
+    \Log::info('Chart of Accounts - User found: ' . ($user ? 'Yes' : 'No'));
+    
+    // Fallback: If user not found, try to get from session directly
+    if (!$user) {
+        $userId = $request->session()->get('user_id');
+        $user = DB::table('tbl_users')->where('id', $userId)->where('status', 'active')->first();
+        \Log::info('Chart of Accounts - Fallback user found: ' . ($user ? 'Yes' : 'No'));
+    }
+    
     $currencies = DB::table('currencies')
         ->where('is_active', true)
         ->orderBy('sort_order')
         ->get();
     
     $accounts = DB::table('chart_of_accounts')
-        ->where('comp_id', 1)
-        ->where('location_id', 1)
+        ->where('comp_id', $user->comp_id)
+        ->where('location_id', $user->location_id)
         ->orderBy('account_code')
         ->get();
         

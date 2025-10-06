@@ -458,7 +458,7 @@ const Create = () => {
   return (
     <App>
       {/* Main Content Card */}
-      <div className="rounded-xl shadow-lg form-container border-slate-200">
+      <div className="rounded-xl shadow-lg form-container border-slate-200 form-theme-2">
         <div className="p-6">
           <UserRegistrationForm />
         </div>

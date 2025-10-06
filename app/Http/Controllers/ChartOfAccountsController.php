@@ -12,15 +12,14 @@ class ChartOfAccountsController extends Controller
     public function index(Request $request)
     {
         try {
-            // Get user's company and location from session
-            $userId = $request->session()->get('user_id');
-            $user = DB::table('tbl_users')->where('id', $userId)->first();
+            // Get authenticated user
+            $user = $request->user();
             
             if (!$user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'User not found'
-                ], 404);
+                    'message' => 'User not authenticated'
+                ], 401);
             }
             
             $accounts = DB::table('chart_of_accounts')
@@ -61,15 +60,14 @@ class ChartOfAccountsController extends Controller
         }
         
         try {
-            // Get user's company and location from session
-            $userId = $request->session()->get('user_id');
-            $user = DB::table('tbl_users')->where('id', $userId)->first();
+            // Get authenticated user
+            $user = $request->user();
             
             if (!$user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'User not found'
-                ], 404);
+                    'message' => 'User not authenticated'
+                ], 401);
             }
             
             $accountId = DB::table('chart_of_accounts')->insertGetId([
@@ -117,15 +115,14 @@ class ChartOfAccountsController extends Controller
         }
         
         try {
-            // Get user's company and location from session
-            $userId = $request->session()->get('user_id');
-            $user = DB::table('tbl_users')->where('id', $userId)->first();
+            // Get authenticated user
+            $user = $request->user();
             
             if (!$user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'User not found'
-                ], 404);
+                    'message' => 'User not authenticated'
+                ], 401);
             }
             
             $updated = DB::table('chart_of_accounts')
@@ -165,15 +162,14 @@ class ChartOfAccountsController extends Controller
     public function destroy(Request $request, $id)
     {
         try {
-            // Get user's company and location from session
-            $userId = $request->session()->get('user_id');
-            $user = DB::table('tbl_users')->where('id', $userId)->first();
+            // Get authenticated user
+            $user = $request->user();
             
             if (!$user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'User not found'
-                ], 404);
+                    'message' => 'User not authenticated'
+                ], 401);
             }
             
             // Get the account first

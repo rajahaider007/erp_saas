@@ -242,10 +242,10 @@ const DynamicUserForm = ({
             value={formData[name]}
             onChange={handleInputChange}
             disabled={disabled || loading}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+            className={`form-input ${
               Icon ? 'pl-10' : ''
-            } ${errors[name] ? 'border-red-500' : 'border-gray-300'} ${
-              disabled || loading ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'
+            } ${errors[name] ? 'border-red-500' : ''} ${
+              disabled || loading ? 'cursor-not-allowed opacity-50' : ''
             }`}
           >
             <option value="">{placeholder}</option>
@@ -263,9 +263,9 @@ const DynamicUserForm = ({
             onChange={handleInputChange}
             placeholder={placeholder}
             disabled={disabled}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+            className={`form-input ${
               Icon ? 'pl-10' : ''
-            } ${errors[name] ? 'border-red-500' : 'border-gray-300'}`}
+            } ${errors[name] ? 'border-red-500' : ''}`}
           />
         )}
       </div>
@@ -276,7 +276,7 @@ const DynamicUserForm = ({
   );
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 form-theme-2">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Personal Information */}
         <div className="space-y-4">
@@ -442,7 +442,7 @@ const DynamicUserForm = ({
             <button
               type="button"
               onClick={() => setShowRightsConfig(!showRightsConfig)}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="btn btn-secondary"
             >
               <Settings className="w-4 h-4 mr-2" />
               {showRightsConfig ? 'Hide Rights' : 'Configure Rights'}
@@ -471,7 +471,7 @@ const DynamicUserForm = ({
         <button
           type="button"
           onClick={handleReset}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="btn btn-secondary"
         >
           {resetText}
         </button>

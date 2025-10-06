@@ -184,12 +184,21 @@ const Sidebar = () => {
   // Build navigation based on user permissions
   React.useEffect(() => {
     const buildNavigation = () => {
+      // Determine dashboard href based on current module
+      const getDashboardHref = () => {
+        if (isModuleUrl(url)) {
+          const moduleName = getCurrentModuleName(url);
+          return `/${moduleName}`;
+        }
+        return '/dashboard';
+      };
+
       const navItems = [
         {
           name: 'Dashboard',
-          href: '/dashboard',
+          href: getDashboardHref(),
           icon: Home,
-          current: url === '/dashboard'
+          current: url === '/dashboard' || (isModuleUrl(url) && url === `/${getCurrentModuleName(url)}`)
         }
       ];
 
@@ -240,9 +249,12 @@ const Sidebar = () => {
         const response = await fetch(`/modules/current-module-data?url=${encodeURIComponent(url)}`);
         const data = await response.json();
         
+        console.log('Module data response:', data);
+        
         if (data.success && data.data) {
           setCurrentModuleData(data.data);
         } else {
+          console.warn('Module data loading failed:', data);
           setCurrentModuleData(null);
         }
       } catch (error) {
@@ -300,27 +312,35 @@ const Sidebar = () => {
 
   // Update navigation when current module data changes
   React.useEffect(() => {
-    if (!currentModuleData) return;
+    if (!currentModuleData || !currentModuleData.module) return;
+    
+    console.log('Current module data:', currentModuleData);
 
     const moduleGroup = {
       name: currentModuleData.module.name,
       href: '#',
       icon: getModuleIcon(currentModuleData.module.folder_name),
       current: true,
-      children: currentModuleData.sections
+      children: (currentModuleData.sections || [])
         .filter(section => {
+          // Check if section has required properties
+          if (!section || !section.section_name) return false;
+          
           // Check if user has permission to view this section
           if (user?.role === 'super_admin') {
             return true;
           }
-          return canView(`/${currentModuleData.module.folder_name}/${section.slug}`);
+          return canView(`/${currentModuleData.module.folder_name}/${section.slug || ''}`);
         })
         .map(section => ({
           name: section.section_name,
-          href: `/${currentModuleData.module.folder_name}/${section.slug}`,
+          href: section.slug ? `/${currentModuleData.module.folder_name}/${section.slug}` : `/${currentModuleData.module.folder_name}`,
           icon: Layers,
-          children: section.menus
+          children: (section.menus || [])
             .filter(menu => {
+              // Check if menu has required properties
+              if (!menu || !menu.menu_name) return false;
+              
               // Check if user has permission to view this menu
               if (user?.role === 'super_admin') {
                 return true;
@@ -329,7 +349,7 @@ const Sidebar = () => {
             })
             .map(menu => ({
               name: menu.menu_name,
-              href: menu.route || '#',
+              href: (menu.route && menu.route !== 'undefined' && menu.route !== 'null') ? menu.route : '#',
               icon: iconFromName(menu.icon)
           }))
       }))

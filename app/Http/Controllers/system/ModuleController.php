@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -612,7 +613,7 @@ public function getCurrentModuleData(Request $request)
                   ->orderBy('sort_order')
                   ->select('id', 'section_id', 'menu_name', 'route', 'icon', 'sort_order', 'status');
             }])
-            ->get(['id', 'module_id', 'section_name', 'sort_order']);
+            ->get(['id', 'module_id', 'section_name', 'slug', 'sort_order']);
         
         return response()->json([
             'success' => true,
