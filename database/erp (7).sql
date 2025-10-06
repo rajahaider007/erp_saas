@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 05, 2025 at 08:32 PM
+-- Generation Time: Oct 06, 2025 at 07:07 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -53,36 +53,62 @@ CREATE TABLE `cache_locks` (
 
 CREATE TABLE `chart_of_accounts` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `comp_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `location_id` bigint(20) UNSIGNED DEFAULT NULL,
   `account_code` varchar(15) NOT NULL,
   `account_name` varchar(255) NOT NULL,
   `account_type` enum('Assets','Liabilities','Equity','Revenue','Expenses') NOT NULL,
-  `account_subtype` varchar(255) DEFAULT NULL,
   `parent_account_id` bigint(20) UNSIGNED DEFAULT NULL,
   `account_level` tinyint(4) NOT NULL DEFAULT 1,
-  `account_path` text DEFAULT NULL,
-  `normal_balance` enum('Debit','Credit') NOT NULL,
-  `opening_balance` decimal(18,2) NOT NULL DEFAULT 0.00,
-  `current_balance` decimal(18,2) NOT NULL DEFAULT 0.00,
   `currency` varchar(3) NOT NULL DEFAULT 'USD',
-  `is_parent` tinyint(1) NOT NULL DEFAULT 0,
-  `is_child` tinyint(1) NOT NULL DEFAULT 0,
-  `is_transactional` tinyint(1) NOT NULL DEFAULT 0,
   `status` enum('Active','Inactive') NOT NULL DEFAULT 'Active',
-  `tax_category` enum('Taxable','Non-taxable','Exempt') NOT NULL DEFAULT 'Taxable',
-  `reporting_category` varchar(255) DEFAULT NULL,
-  `cost_center` varchar(255) DEFAULT NULL,
-  `department` varchar(255) DEFAULT NULL,
-  `min_balance` decimal(18,2) DEFAULT NULL,
-  `max_balance` decimal(18,2) DEFAULT NULL,
-  `requires_approval` tinyint(1) NOT NULL DEFAULT 0,
-  `created_by` bigint(20) UNSIGNED DEFAULT NULL,
-  `updated_by` bigint(20) UNSIGNED DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `short_code` varchar(20) DEFAULT NULL,
+  `comp_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `location_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `chart_of_accounts`
+--
+
+INSERT INTO `chart_of_accounts` (`id`, `account_code`, `account_name`, `account_type`, `parent_account_id`, `account_level`, `currency`, `status`, `created_at`, `updated_at`, `short_code`, `comp_id`, `location_id`) VALUES
+(1, '100000000000000', 'ASSETS', 'Assets', NULL, 1, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'ASSETS', 1, 1),
+(2, '200000000000000', 'LIABILITIES', 'Liabilities', NULL, 1, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'LIAB', 1, 1),
+(3, '300000000000000', 'EQUITY', 'Equity', NULL, 1, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'EQUITY', 1, 1),
+(4, '400000000000000', 'REVENUE', 'Revenue', NULL, 1, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'REV', 1, 1),
+(5, '500000000000000', 'EXPENSES', 'Expenses', NULL, 1, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'EXP', 1, 1),
+(6, '100010000000000', 'Current Assets', 'Assets', 1, 2, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'CA', 1, 1),
+(7, '100020000000000', 'Fixed Assets', 'Assets', 1, 2, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'FA', 1, 1),
+(8, '100030000000000', 'Intangible Assets', 'Assets', 1, 2, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'IA', 1, 1),
+(9, '200010000000000', 'Current Liabilities', 'Liabilities', 2, 2, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'CL', 1, 1),
+(10, '200020000000000', 'Long-term Liabilities', 'Liabilities', 2, 2, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'LTL', 1, 1),
+(11, '100010000000001', 'Cash in Hand', 'Assets', 6, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'CASH', 1, 1),
+(12, '100010000000002', 'Bank Account', 'Assets', 6, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'BANK', 1, 1),
+(13, '100010000000003', 'Accounts Receivable', 'Assets', 6, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'AR', 1, 1),
+(14, '100010000000004', 'Inventory', 'Assets', 6, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'INV', 1, 1),
+(15, '100010000000005', 'Prepaid Expenses', 'Assets', 6, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'PREP', 1, 1),
+(16, '100020000000001', 'Office Equipment', 'Assets', 7, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'OFFEQ', 1, 1),
+(17, '100020000000002', 'Computer Equipment', 'Assets', 7, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'COMP', 1, 1),
+(18, '100020000000003', 'Furniture & Fixtures', 'Assets', 7, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'FURN', 1, 1),
+(19, '200010000000001', 'Accounts Payable', 'Liabilities', 9, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'AP', 1, 1),
+(20, '200010000000002', 'Accrued Expenses', 'Liabilities', 9, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'ACCR', 1, 1),
+(21, '200010000000003', 'Short-term Loans', 'Liabilities', 9, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'STL', 1, 1),
+(22, '300010000000001', 'Owner\'s Capital', 'Equity', 3, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'CAP', 1, 1),
+(23, '300010000000002', 'Retained Earnings', 'Equity', 3, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'RE', 1, 1),
+(24, '400010000000001', 'Sales Revenue', 'Revenue', 4, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'SALES', 1, 1),
+(25, '400010000000002', 'Service Revenue', 'Revenue', 4, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'SERV', 1, 1),
+(26, '400010000000003', 'Interest Income', 'Revenue', 4, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'INT', 1, 1),
+(27, '500010000000000', 'Operating Expenses', 'Expenses', 5, 2, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'OPEX', 1, 1),
+(28, '500020000000000', 'Administrative Expenses', 'Expenses', 5, 2, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'ADMIN', 1, 1),
+(29, '500030000000000', 'Marketing Expenses', 'Expenses', 5, 2, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'MKT', 1, 1),
+(30, '500010000000001', 'Office Rent', 'Expenses', 12, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'RENT', 1, 1),
+(31, '500010000000002', 'Utilities', 'Expenses', 12, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'UTIL', 1, 1),
+(32, '500010000000003', 'Salaries & Wages', 'Expenses', 12, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'SAL', 1, 1),
+(33, '500010000000004', 'Office Supplies', 'Expenses', 12, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'SUPP', 1, 1),
+(34, '500010000000005', 'Insurance', 'Expenses', 12, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'INS', 1, 1),
+(35, '500010000000006', 'Depreciation', 'Expenses', 12, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'DEP', 1, 1),
+(36, '500020000000001', 'Professional Fees', 'Expenses', 13, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'PROF', 1, 1),
+(37, '500030000000001', 'Marketing Expenses', 'Expenses', 14, 3, 'USD', 'Active', '2025-10-06 00:01:07', '2025-10-06 00:01:07', 'MKT', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -724,10 +750,7 @@ ALTER TABLE `chart_of_accounts`
   ADD KEY `chart_of_accounts_account_type_index` (`account_type`),
   ADD KEY `chart_of_accounts_parent_account_id_index` (`parent_account_id`),
   ADD KEY `chart_of_accounts_account_level_index` (`account_level`),
-  ADD KEY `chart_of_accounts_status_index` (`status`),
-  ADD KEY `chart_of_accounts_comp_id_index` (`comp_id`),
-  ADD KEY `chart_of_accounts_location_id_index` (`location_id`),
-  ADD KEY `chart_of_accounts_comp_id_location_id_index` (`comp_id`,`location_id`);
+  ADD KEY `chart_of_accounts_status_index` (`status`);
 
 --
 -- Indexes for table `companies`
@@ -860,7 +883,8 @@ ALTER TABLE `users`
 -- Indexes for table `user_rights`
 --
 ALTER TABLE `user_rights`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_rights_user_id_foreign` (`user_id`);
 
 --
 -- Indexes for table `user_sessions`
@@ -883,7 +907,7 @@ ALTER TABLE `user_sessions`
 -- AUTO_INCREMENT for table `chart_of_accounts`
 --
 ALTER TABLE `chart_of_accounts`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `companies`
