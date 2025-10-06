@@ -199,47 +199,68 @@ const ChartOfAccounts = () => {
 
   // Toggle category expansion
   const toggleCategory = (categoryId) => {
-    setExpandedCategories(prev => ({
-      ...prev,
-      [categoryId]: !prev[categoryId]
-    }));
+    setExpandedCategories(prev => {
+      const newState = {
+        ...prev,
+        [categoryId]: !prev[categoryId]
+      };
+      // Save to localStorage
+      saveExpandedStateToLocalStorage(newState, expandedAccounts);
+      return newState;
+    });
   };
 
   // Toggle account expansion
   const toggleAccount = (accountId) => {
-    setExpandedAccounts(prev => ({
-      ...prev,
-      [accountId]: !prev[accountId]
-    }));
+    setExpandedAccounts(prev => {
+      const newState = {
+        ...prev,
+        [accountId]: !prev[accountId]
+      };
+      // Save to localStorage
+      saveExpandedStateToLocalStorage(expandedCategories, newState);
+      return newState;
+    });
   };
 
   // Expand all categories
   const expandAll = () => {
-    setExpandedCategories({
+    const newCategories = {
       assets: true,
       liabilities: true,
       equity: true,
       revenue: true,
       expenses: true
-    });
+    };
     // Expand all accounts too
     const allAccountIds = {};
     accounts.forEach(account => {
       allAccountIds[account.id] = true;
     });
+    
+    setExpandedCategories(newCategories);
     setExpandedAccounts(allAccountIds);
+    
+    // Save to localStorage
+    saveExpandedStateToLocalStorage(newCategories, allAccountIds);
   };
 
   // Collapse all categories
   const collapseAll = () => {
-    setExpandedCategories({
+    const newCategories = {
       assets: false,
       liabilities: false,
       equity: false,
       revenue: false,
       expenses: false
-    });
-    setExpandedAccounts({});
+    };
+    const emptyAccounts = {};
+    
+    setExpandedCategories(newCategories);
+    setExpandedAccounts(emptyAccounts);
+    
+    // Save to localStorage
+    saveExpandedStateToLocalStorage(newCategories, emptyAccounts);
   };
 
   // Open modal for add/edit
@@ -299,6 +320,15 @@ const ChartOfAccounts = () => {
     const stateToSave = {
       expandedAccounts,
       expandedCategories
+    };
+    localStorage.setItem('chartOfAccountsState', JSON.stringify(stateToSave));
+  };
+
+  // Save expanded state to localStorage (helper function)
+  const saveExpandedStateToLocalStorage = (categories, accounts) => {
+    const stateToSave = {
+      expandedAccounts: accounts,
+      expandedCategories: categories
     };
     localStorage.setItem('chartOfAccountsState', JSON.stringify(stateToSave));
   };
