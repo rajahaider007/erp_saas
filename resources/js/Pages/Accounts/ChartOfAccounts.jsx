@@ -343,7 +343,9 @@ const ChartOfAccounts = () => {
           'Content-Type': 'application/json',
           'X-Requested-With': 'XMLHttpRequest',
           'X-CSRF-TOKEN': csrfToken,
+          'Accept': 'application/json',
         },
+        credentials: 'same-origin', // Include cookies for session
       });
 
       if (response.ok) {
@@ -410,8 +412,11 @@ const ChartOfAccounts = () => {
         method: method,
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': csrfToken
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': csrfToken,
+          'Accept': 'application/json',
         },
+        credentials: 'same-origin', // Include cookies for session
         body: JSON.stringify(submitData)
       });
 
@@ -556,8 +561,11 @@ const ChartOfAccounts = () => {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
-          }
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+          },
+          credentials: 'same-origin', // Include cookies for session
         });
 
         const result = await response.json();
@@ -573,7 +581,7 @@ const ChartOfAccounts = () => {
 
           // Update local state optimistically instead of page reload
           setAccounts(prevAccounts => 
-            prevAccounts.filter(account => account.id !== accountToDelete.id)
+            prevAccounts.filter(acc => acc.id !== account.id)
           );
         } else {
           throw new Error(result.message || 'Delete failed');
