@@ -105,6 +105,8 @@ class LoginController extends Controller
             // Store additional session data (required by custom middleware)
             $request->session()->put('auth_token', $token);
             $request->session()->put('user_id', $user->id);
+            $request->session()->put('user_comp_id', $user->comp_id);
+            $request->session()->put('user_location_id', $user->location_id);
             $request->session()->put('auth_user', $user);
             
             // Save session immediately

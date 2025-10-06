@@ -32,7 +32,7 @@ import {
 
 const ChartOfAccounts = () => {
   const { props } = usePage();
-  const { currencies = [], accounts: seededAccounts = [] } = props;
+  const { currencies = [], accounts: seededAccounts = [], error } = props;
 
   const [accounts, setAccounts] = useState(seededAccounts);
   const [loading, setLoading] = useState(false);
@@ -70,22 +70,14 @@ const ChartOfAccounts = () => {
       };
       return typeCodes[formData.account_type] || '100000000000000';
     } else if (level === 2) {
-      // Level 2: Use parent's base code and append sequential number
-      const baseCode = parentCode.substring(0, 5); // Get first 5 digits: 50000
-
-      // Find next sequential number for this specific parent
-      const existingAccounts = accounts.filter(acc =>
+      const existingAccountsInDB = accounts.filter(acc =>
         acc.parent_account_id === parentId &&
         acc.account_level === 2
       );
-      const nextNumber = existingAccounts.length + 1;
-
-      // Format: 50000 + 4 + 0000000000 = 500040000000000 (15 digits total)
-      // So we need: 5 (base) + 1 (sequential) + 9 (zeros) = 15 digits
-      const paddedNumber = nextNumber.toString().padStart(1, '0'); // Just 1 digit for the sequential number
-      const result = baseCode + paddedNumber + '0000000000'; // 10 zeros to make total 15
-
-
+      const nextNumber = existingAccountsInDB.length + 1;
+      // Build: 5 + 000 + 4 + 0000000000 = 500040000000000
+      const firstDigit = parentCode.charAt(0); // "5"
+      const result = firstDigit + '000' + nextNumber + '0000000000';
       return result;
     } else if (level === 3) {
       // Level 3: Use parent's full code as base and append sequential number
@@ -96,7 +88,17 @@ const ChartOfAccounts = () => {
         acc.parent_account_id === parentId &&
         acc.account_level === 3
       );
-      const nextNumber = existingAccounts.length + 1;
+
+      // Get the highest existing number to avoid duplicates
+      let nextNumber = 1;
+      if (existingAccounts.length > 0) {
+        const existingNumbers = existingAccounts.map(acc => {
+          const code = acc.account_code;
+          const numberPart = code.substring(10, 15); // Get the last 5 digits
+          return parseInt(numberPart) || 0;
+        });
+        nextNumber = Math.max(...existingNumbers) + 1;
+      }
       return baseCode + nextNumber.toString().padStart(5, '0');
     }
     return '';
@@ -238,9 +240,9 @@ const ChartOfAccounts = () => {
   // Open modal for add/edit
   const openModal = (mode, account = null, parentAccount = null) => {
     setModalMode(mode);
-    setSelectedAccount(parentAccount); // Store parent account for code generation
-
+    
     if (mode === 'edit' && account) {
+      setSelectedAccount(account); // Store the account being edited
       setFormData({
         account_code: account.account_code,
         account_name: account.account_name,
@@ -251,8 +253,12 @@ const ChartOfAccounts = () => {
         status: account.status
       });
     } else {
+      setSelectedAccount(parentAccount); // Store parent account for code generation
       const level = parentAccount ? parentAccount.account_level + 1 : 1;
       const generatedCode = generateAccountCode(parentAccount?.account_code, level, parentAccount?.id);
+
+      // Debug: Log the generated code
+      console.log('Generated account code:', generatedCode, 'for level:', level, 'parent:', parentAccount?.account_code);
 
       setFormData({
         account_code: generatedCode,
@@ -293,12 +299,20 @@ const ChartOfAccounts = () => {
       const level = selectedAccount ? selectedAccount.account_level + 1 : 1;
       const autoDetectedProperties = getAccountProperties(formData.parent_account_id, level);
 
-      // Prepare data with auto-detected properties
+      // Prepare data with only required fields for backend
       const submitData = {
-        ...formData,
-        ...autoDetectedProperties,
+        account_code: formData.account_code,
+        account_name: formData.account_name,
+        short_code: formData.short_code,
+        account_type: formData.account_type,
+        currency: formData.currency,
+        status: formData.status,
+        parent_account_id: formData.parent_account_id,
         account_level: level
       };
+
+      // Debug: Log the data being sent
+      console.log('Submitting data:', submitData);
 
       // Make API call
       const url = modalMode === 'add'
@@ -326,6 +340,9 @@ const ChartOfAccounts = () => {
       });
 
       const result = await response.json();
+
+      // Debug: Log the response
+      console.log('API Response:', result);
 
       if (result.success) {
         // Show success message
@@ -356,13 +373,25 @@ const ChartOfAccounts = () => {
 
     } catch (error) {
       console.error('Error:', error);
-      await Swal.fire({
-        icon: 'error',
-        title: 'Error!',
-        text: error.message || 'Something went wrong. Please try again.',
-        confirmButtonColor: '#EF4444',
-        confirmButtonText: 'OK'
-      });
+
+      // Check if it's a validation error
+      if (error.message && error.message.includes('Validation failed')) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Validation Error!',
+          text: 'Please check the form data and try again.',
+          confirmButtonColor: '#EF4444',
+          confirmButtonText: 'OK'
+        });
+      } else {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: error.message || 'Something went wrong. Please try again.',
+          confirmButtonColor: '#EF4444',
+          confirmButtonText: 'OK'
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -499,10 +528,10 @@ const ChartOfAccounts = () => {
               {/* Account Info */}
               <div className="flex items-center space-x-3 flex-1">
                 <div className={`w-2 h-2 rounded-full ${account.account_type === 'Assets' ? 'bg-blue-500' :
-                    account.account_type === 'Liabilities' ? 'bg-red-500' :
-                      account.account_type === 'Equity' ? 'bg-green-500' :
-                        account.account_type === 'Revenue' ? 'bg-emerald-500' :
-                          'bg-orange-500'
+                  account.account_type === 'Liabilities' ? 'bg-red-500' :
+                    account.account_type === 'Equity' ? 'bg-green-500' :
+                      account.account_type === 'Revenue' ? 'bg-emerald-500' :
+                        'bg-orange-500'
                   }`} />
                 <div className="flex-1">
                   <div className="flex items-center space-x-2">
@@ -576,6 +605,36 @@ const ChartOfAccounts = () => {
       );
     });
   };
+
+  // Show error if company/location info is missing
+  if (error) {
+    return (
+      <App>
+        <Head title="Chart of Accounts" />
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+          <div className="max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6">
+            <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-900/20 rounded-full mb-4">
+              <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white text-center mb-2">
+              Configuration Required
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 text-center mb-4">
+              {error}
+            </p>
+            <div className="text-center">
+              <button
+                onClick={() => window.location.href = '/dashboard'}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Go to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </App>
+    );
+  }
 
   return (
     <App>

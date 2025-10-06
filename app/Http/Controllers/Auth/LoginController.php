@@ -117,6 +117,8 @@ class LoginController extends Controller
 
             $request->session()->put('auth_token', $token);
             $request->session()->put('user_id', $user->id);
+            $request->session()->put('user_comp_id', $user->comp_id);
+            $request->session()->put('user_location_id', $user->location_id);
             $this->logLoginHistory($user->id, $request);
 
             // Set remember me cookie
@@ -205,7 +207,7 @@ class LoginController extends Controller
                 ->where('id', $userId)
                 ->update($updateData);
         } catch (\Exception $e) {
-            \Log::error('Failed login handling error: ' . $e->getMessage());
+            Log::error('Failed login handling error: ' . $e->getMessage());
         }
     }
 
@@ -223,7 +225,7 @@ class LoginController extends Controller
                     'locked_until' => null
                 ]);
         } catch (\Exception $e) {
-            \Log::error('Successful login handling error: ' . $e->getMessage());
+            Log::error('Successful login handling error: ' . $e->getMessage());
         }
     }
 
@@ -253,7 +255,7 @@ class LoginController extends Controller
                     'login_history' => json_encode($loginHistory)
                 ]);
         } catch (\Exception $e) {
-            \Log::error('Login history logging error: ' . $e->getMessage());
+            Log::error('Login history logging error: ' . $e->getMessage());
         }
     }
 
@@ -285,7 +287,7 @@ class LoginController extends Controller
 
             return redirect('/login');
         } catch (\Exception $e) {
-            \Log::error('Logout error: ' . $e->getMessage());
+            Log::error('Logout error: ' . $e->getMessage());
             return redirect('/login');
         }
     }
@@ -341,7 +343,7 @@ class LoginController extends Controller
                 'data' => ['user' => $userData]
             ], 200);
         } catch (\Exception $e) {
-            \Log::error('User fetch error: ' . $e->getMessage());
+            Log::error('User fetch error: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,

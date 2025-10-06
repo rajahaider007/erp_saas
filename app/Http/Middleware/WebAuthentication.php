@@ -32,11 +32,17 @@ class WebAuthentication
             $permissions = [];
         }
         
+        // Get comp_id and location_id from session first, then from user object
+        $compId = $request->session()->get('user_comp_id') ?? $user->comp_id;
+        $locationId = $request->session()->get('user_location_id') ?? $user->location_id;
+        
         $request->merge([
             'authenticated_user' => $userArray,
             'user_id' => $user->id,
             'user_role' => $user->role,
             'user_permissions' => $permissions,
+            'user_comp_id' => $compId,
+            'user_location_id' => $locationId,
             'license_alert' => $licenseAlert
         ]);
 

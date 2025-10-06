@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class ChartOfAccountsController extends Controller
@@ -12,19 +13,31 @@ class ChartOfAccountsController extends Controller
     public function index(Request $request)
     {
         try {
-            // Get authenticated user
-            $user = $request->user();
+            // Get authenticated user from custom middleware
+            $user = $request->input('authenticated_user');
+            $userId = $request->input('user_id');
             
-            if (!$user) {
+            if (!$user || !$userId) {
                 return response()->json([
                     'success' => false,
                     'message' => 'User not authenticated'
                 ], 401);
             }
             
+            $compId = $request->input('user_comp_id');
+            $locationId = $request->input('user_location_id');
+            
+            // Validate required company and location IDs
+            if (!$compId || !$locationId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Company and Location information is required. Please contact administrator.'
+                ], 400);
+            }
+            
             $accounts = DB::table('chart_of_accounts')
-                ->where('comp_id', $user->comp_id)
-                ->where('location_id', $user->location_id)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
                 ->orderBy('account_code')
                 ->get();
                 
@@ -56,18 +69,37 @@ class ChartOfAccountsController extends Controller
         ]);
         
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            Log::error('Chart of Accounts validation failed:', [
+                'errors' => $validator->errors(),
+                'request_data' => $request->all()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
         }
         
         try {
-            // Get authenticated user
-            $user = $request->user();
+            // Get authenticated user from custom middleware
+            $user = $request->input('authenticated_user');
+            $userId = $request->input('user_id');
+            $compId = $request->input('user_comp_id');
+            $locationId = $request->input('user_location_id');
             
-            if (!$user) {
+            if (!$user || !$userId) {
                 return response()->json([
                     'success' => false,
                     'message' => 'User not authenticated'
                 ], 401);
+            }
+            
+            // Validate required company and location IDs
+            if (!$compId || !$locationId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Company and Location information is required. Please contact administrator.'
+                ], 400);
             }
             
             $accountId = DB::table('chart_of_accounts')->insertGetId([
@@ -79,8 +111,8 @@ class ChartOfAccountsController extends Controller
                 'parent_account_id' => $request->parent_account_id,
                 'currency' => $request->currency,
                 'status' => $request->status,
-                'comp_id' => $user->comp_id, // Get from logged-in user
-                'location_id' => $user->location_id, // Get from logged-in user
+                'comp_id' => $compId, // Use authenticated user's company ID
+                'location_id' => $locationId, // Use authenticated user's location ID
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
@@ -111,24 +143,44 @@ class ChartOfAccountsController extends Controller
         ]);
         
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            Log::error('Chart of Accounts validation failed:', [
+                'errors' => $validator->errors(),
+                'request_data' => $request->all()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
         }
         
         try {
-            // Get authenticated user
-            $user = $request->user();
+            // Get authenticated user from custom middleware
+            $user = $request->input('authenticated_user');
+            $userId = $request->input('user_id');
             
-            if (!$user) {
+            if (!$user || !$userId) {
                 return response()->json([
                     'success' => false,
                     'message' => 'User not authenticated'
                 ], 401);
             }
             
+            $compId = $request->input('user_comp_id');
+            $locationId = $request->input('user_location_id');
+            
+            // Validate required company and location IDs
+            if (!$compId || !$locationId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Company and Location information is required. Please contact administrator.'
+                ], 400);
+            }
+            
             $updated = DB::table('chart_of_accounts')
                 ->where('id', $id)
-                ->where('comp_id', $user->comp_id)
-                ->where('location_id', $user->location_id)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
                 ->update([
                     'account_name' => $request->account_name,
                     'short_code' => $request->short_code,
@@ -162,21 +214,33 @@ class ChartOfAccountsController extends Controller
     public function destroy(Request $request, $id)
     {
         try {
-            // Get authenticated user
-            $user = $request->user();
+            // Get authenticated user from custom middleware
+            $user = $request->input('authenticated_user');
+            $userId = $request->input('user_id');
             
-            if (!$user) {
+            if (!$user || !$userId) {
                 return response()->json([
                     'success' => false,
                     'message' => 'User not authenticated'
                 ], 401);
             }
             
+            $compId = $request->input('user_comp_id');
+            $locationId = $request->input('user_location_id');
+            
+            // Validate required company and location IDs
+            if (!$compId || !$locationId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Company and Location information is required. Please contact administrator.'
+                ], 400);
+            }
+            
             // Get the account first
             $account = DB::table('chart_of_accounts')
                 ->where('id', $id)
-                ->where('comp_id', $user->comp_id)
-                ->where('location_id', $user->location_id)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
                 ->first();
                 
             if (!$account) {
@@ -197,15 +261,15 @@ class ChartOfAccountsController extends Controller
             // Check if account has children
             $hasChildren = DB::table('chart_of_accounts')
                 ->where('parent_account_id', $id)
-                ->where('comp_id', $user->comp_id)
-                ->where('location_id', $user->location_id)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
                 ->exists();
                 
             if ($hasChildren) {
                 $childAccounts = DB::table('chart_of_accounts')
                     ->where('parent_account_id', $id)
-                    ->where('comp_id', $user->comp_id)
-                    ->where('location_id', $user->location_id)
+                    ->where('comp_id', $compId)
+                    ->where('location_id', $locationId)
                     ->pluck('account_name')
                     ->toArray();
                     
@@ -218,8 +282,8 @@ class ChartOfAccountsController extends Controller
             // Proceed with deletion
             $deleted = DB::table('chart_of_accounts')
                 ->where('id', $id)
-                ->where('comp_id', $user->comp_id)
-                ->where('location_id', $user->location_id)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
                 ->delete();
                 
             if ($deleted) {
