@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Package, Home, List, Plus, CheckSquare, Square } from 'lucide-react';
+import { Package, Home, List, Plus, CheckSquare, Square, X } from 'lucide-react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
 
@@ -122,10 +122,10 @@ const EditPackageFeatureForm = () => {
   const totalCount = menus.length;
 
   return (
-    <div>
+    <div className="form-theme-system min-h-screen transition-all duration-500">
       <Breadcrumbs items={breadcrumbItems} />
       {alert && (
-        <div className={`mb-4 p-4 rounded-lg animate-slideIn ${alert.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'}`}>
+        <div className={`alert ${alert.type === 'success' ? 'alert-success' : 'alert-error'}`}>
           <div className="flex items-center">
             <div className="flex-shrink-0">
               {alert.type === 'success' ? (
@@ -139,14 +139,14 @@ const EditPackageFeatureForm = () => {
         </div>
       )}
       
-      <div className="rounded-xl shadow-lg form-container border-slate-200">
-        <div className="p-6">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Edit Package Features: {packageData.package_name}</h1>
-            <p className="text-gray-600">Configure which menu features are available for this package</p>
-          </div>
+      <div className="form-container">
+        <div className="form-header mb-8">
+          <h1 className="form-title">Edit Package Features: {packageData.package_name}</h1>
+          <p className="form-subtitle">Configure which menu features are available for this package</p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit}>
+          <div className="form-grid">
             {/* Package Selection */}
             <div className="input-group">
               <label className="input-label">Package</label>
@@ -169,25 +169,25 @@ const EditPackageFeatureForm = () => {
             </div>
 
             {/* Menu Features Selection */}
-            <div className="input-group">
+            <div className="input-group fieldset-group">
               <div className="flex items-center justify-between mb-4">
                 <label className="input-label">Menu Features</label>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm" style={{color: 'var(--text-secondary)'}}>
                     {selectedCount} of {totalCount} selected
                   </span>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => handleSelectAll(true)}
-                      className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                      className="btn btn-sm btn-primary"
                     >
                       Select All
                     </button>
                     <button
                       type="button"
                       onClick={() => handleSelectAll(false)}
-                      className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                      className="btn btn-sm btn-secondary"
                     >
                       Clear All
                     </button>
@@ -197,8 +197,8 @@ const EditPackageFeatureForm = () => {
 
               <div className="space-y-4">
                 {Object.entries(groupedMenus).map(([sectionName, sectionMenus]) => (
-                  <div key={sectionName} className="border border-gray-200 rounded-lg p-4">
-                    <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <div key={sectionName} className="form-fieldset">
+                    <h3 className="form-legend flex items-center gap-2">
                       <Package className="w-4 h-4" />
                       {sectionName}
                     </h3>
@@ -206,17 +206,31 @@ const EditPackageFeatureForm = () => {
                       {sectionMenus.map(menu => (
                         <label
                           key={menu.id}
-                          className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                          className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
+                          style={{
+                            borderColor: 'var(--border)',
+                            backgroundColor: menuFeatures[menu.id] ? 'var(--primary-light)' : 'transparent'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!menuFeatures[menu.id]) {
+                              e.target.style.backgroundColor = 'var(--glass-bg)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!menuFeatures[menu.id]) {
+                              e.target.style.backgroundColor = 'transparent';
+                            }
+                          }}
                         >
                           <div className="flex-shrink-0">
                             {menuFeatures[menu.id] ? (
-                              <CheckSquare className="w-5 h-5 text-blue-600" />
+                              <CheckSquare className="w-5 h-5" style={{color: 'var(--primary-color)'}} />
                             ) : (
-                              <Square className="w-5 h-5 text-gray-400" />
+                              <Square className="w-5 h-5" style={{color: 'var(--text-secondary)'}} />
                             )}
                           </div>
                           <div className="flex-1">
-                            <span className="text-sm font-medium text-gray-900">
+                            <span className="text-sm font-medium" style={{color: 'var(--text-primary)'}}>
                               {menu.menu_name}
                             </span>
                           </div>
@@ -234,30 +248,32 @@ const EditPackageFeatureForm = () => {
               </div>
               {errors.menu_features && <p className="text-red-500 text-sm mt-1">{errors.menu_features}</p>}
             </div>
+          </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuFeatures(packageFeatures || {});
-                  setErrors({});
-                  setAlert(null);
-                }}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Reset Changes
-              </button>
-              <button
-                type="submit"
-                disabled={Object.keys(menuFeatures).length === 0}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-              >
-                Update Package Features
-              </button>
-            </div>
-          </form>
-        </div>
+          {/* Submit Buttons */}
+          <div className="button-group">
+            <button
+              type="button"
+              onClick={() => {
+                setMenuFeatures(packageFeatures || {});
+                setErrors({});
+                setAlert(null);
+              }}
+              className="btn btn-secondary"
+            >
+              <X className="btn-icon" size={20} />
+              Reset Changes
+            </button>
+            <button
+              type="submit"
+              disabled={Object.keys(menuFeatures).length === 0}
+              className="btn btn-primary"
+            >
+              <CheckSquare className="btn-icon" size={20} />
+              Update Package Features
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

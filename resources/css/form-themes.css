@@ -65,7 +65,8 @@
  /* Global Styles */
  .form-theme-1,
  .form-theme-2,
- .form-theme-3 {
+ .form-theme-3,
+ .form-theme-system {
      background: var(--background);
      color: var(--text-primary);
      min-height: 100vh;
@@ -75,7 +76,8 @@
 
  .form-theme-1::before,
  .form-theme-2::before,
- .form-theme-3::before {
+ .form-theme-3::before,
+ .form-theme-system::before {
      content: '';
      position: fixed;
      top: 0;
@@ -87,6 +89,50 @@
          radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
      pointer-events: none;
  }
+
+/* System Theme Variables (for dynamic theming) */
+.form-theme-system {
+    --primary-color: #3B82F6;
+    --primary-hover: #2563EB;
+    --primary-light: #DBEAFE;
+    --secondary-color: #64748B;
+    --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --surface: rgba(255, 255, 255, 0.95);
+    --surface-hover: rgba(255, 255, 255, 1);
+    --text-primary: #1E293B;
+    --text-secondary: #64748B;
+    --border: rgba(148, 163, 184, 0.3);
+    --border-focus: var(--primary-color);
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+}
+
+/* Dark mode for system theme */
+.dark .form-theme-system {
+    --primary-color: #3B82F6;
+    --primary-hover: #2563EB;
+    --primary-light: rgba(59, 130, 246, 0.1);
+    --secondary-color: #94A3B8;
+    --background: linear-gradient(135deg, #1e1e2e 0%, #2d1b69 100%);
+    --surface: rgba(30, 41, 59, 0.95);
+    --surface-hover: rgba(30, 41, 59, 1);
+    --text-primary: #F1F5F9;
+    --text-secondary: #CBD5E1;
+    --border: rgba(148, 163, 184, 0.2);
+    --border-focus: var(--primary-color);
+    --success: #059669;
+    --warning: #D97706;
+    --error: #DC2626;
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.4);
+    --glass-bg: rgba(139, 92, 246, 0.1);
+    --glass-border: rgba(139, 92, 246, 0.2);
+}
 
  .theme-selector {
      border: 1px solid var(--glass-border);
@@ -151,6 +197,25 @@
      border: 1px solid var(--glass-border);
      position: relative;
      z-index: 5;
+ }
+
+ .form-header {
+     margin-bottom: 2rem;
+ }
+
+ .form-title {
+     font-size: 2rem;
+     font-weight: 700;
+     color: var(--text-primary);
+     margin: 0 0 0.75rem 0;
+     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+ }
+
+ .form-subtitle {
+     color: var(--text-secondary);
+     font-size: 1rem;
+     margin: 0;
+     line-height: 1.5;
  }
 
  .form-grid {
@@ -1515,6 +1580,9 @@
  .btn-sm {
      padding: 0.5rem 1rem;
      font-size: 0.8125rem;
+     min-width: auto;
+     text-transform: none;
+     letter-spacing: normal;
  }
 
  .dropdown {

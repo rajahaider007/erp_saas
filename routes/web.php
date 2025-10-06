@@ -135,12 +135,25 @@ Route::get('/accounts/chart-of-accounts', function (Request $request) {
     ]);
 })->middleware('web.auth')->name('accounts.chart-of-accounts');
 
+// Voucher Number Configuration Page
+Route::get('/accounts/voucher-number-configuration', function (Request $request) {
+    return Inertia::render('Accounts/VoucherNumberConfiguration');
+})->middleware('web.auth')->name('accounts.voucher-number-configuration');
+
 // Chart of Accounts API Routes
 Route::prefix('api/chart-of-accounts')->middleware('web.auth')->group(function () {
-    Route::get('/', [App\Http\Controllers\ChartOfAccountsController::class, 'index']);
-    Route::post('/', [App\Http\Controllers\ChartOfAccountsController::class, 'store']);
-    Route::put('/{id}', [App\Http\Controllers\ChartOfAccountsController::class, 'update']);
-    Route::delete('/{id}', [App\Http\Controllers\ChartOfAccountsController::class, 'destroy']);
+    Route::get('/', [App\Http\Controllers\Accounts\ChartOfAccountsController::class, 'index']);
+    Route::post('/', [App\Http\Controllers\Accounts\ChartOfAccountsController::class, 'store']);
+    Route::put('/{id}', [App\Http\Controllers\Accounts\ChartOfAccountsController::class, 'update']);
+    Route::delete('/{id}', [App\Http\Controllers\Accounts\ChartOfAccountsController::class, 'destroy']);
+});
+
+// Voucher Number Configuration API Routes
+Route::prefix('api/voucher-number-configurations')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\Accounts\VoucherNumberConfigurationController::class, 'index']);
+    Route::post('/', [App\Http\Controllers\Accounts\VoucherNumberConfigurationController::class, 'store']);
+    Route::put('/{id}', [App\Http\Controllers\Accounts\VoucherNumberConfigurationController::class, 'update']);
+    Route::delete('/{id}', [App\Http\Controllers\Accounts\VoucherNumberConfigurationController::class, 'destroy']);
 });
 
 // Dynamic Module Dashboards
