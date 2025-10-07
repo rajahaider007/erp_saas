@@ -4,6 +4,16 @@
 /* General Ledger Report Styles */
 @import './general-ledger-report.css';
 
+/* Form Themes */
+@import './form-themes.css';
+
+/* List Styles */
+@import './list.css';
+
+/* Professional Filters */
+@import './professional-filters.css';
+@import './modern-filters.css';
+
 
 @tailwind base;
 @tailwind components;

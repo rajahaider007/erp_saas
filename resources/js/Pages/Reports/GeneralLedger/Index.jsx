@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
-import App from '../../../Components/Layout/App';
+import AppLayout from '../../../Components/Layout/AppLayout';
 import {
   FileText, Download, Filter, Eye, EyeOff, Calendar, 
   Building, User, Settings, Search, RefreshCw, 
@@ -205,8 +205,7 @@ const GeneralLedgerReport = () => {
   }, [filters]);
 
   return (
-    <App>
-      <Head title="General Ledger Report" />
+    <AppLayout title="General Ledger Report">
       
       {/* Header */}
       <div className="page-header">
@@ -595,7 +594,7 @@ const GeneralLedgerReport = () => {
           )}
         </div>
       </div>
-    </App>
+    </AppLayout>
   );
 };
 

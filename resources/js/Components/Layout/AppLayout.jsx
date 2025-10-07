@@ -1,10 +1,10 @@
 import React from 'react';
-import { Head } from '../Components/Layout/Head';
-import { Header } from '../Components/Layout/Header';
-import { Sidebar } from '../Components/Layout/Sidebar';
-import { Footer } from '../Components/Layout/Footer';
-import { Customizer } from '../Components/Layout/Customizer';
-import { useLayout } from '../Contexts/LayoutContext';
+import Head from './Head';
+import Header from './Header';
+import Sidebar from './Sidebar';
+import Footer from './Footer';
+import Customizer from './Customizer';
+import { useLayout } from '../../Contexts/LayoutContext';
 
 const AppLayout = ({ children, title }) => {
   const { sidebarCollapsed, headerAsSidebar } = useLayout();

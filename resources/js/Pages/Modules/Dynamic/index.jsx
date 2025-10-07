@@ -51,9 +51,9 @@ const DynamicModuleDashboard = () => {
   };
 
   // Group menus by sections
-  const groupedMenus = sections.map(section => ({
+  const groupedMenus = (sections || []).map(section => ({
     ...section,
-    menus: menus.filter(menu => menu.section_id === section.id)
+    menus: (menus || []).filter(menu => menu.section_id === section.id)
   }));
 
   const SectionCard = ({ section }) => {
@@ -71,7 +71,7 @@ const DynamicModuleDashboard = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {section.menus.map((menu) => (
+          {(section.menus || []).map((menu) => (
             <Link
               key={menu.id}
               href={menu.route || '#'}

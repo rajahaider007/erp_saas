@@ -1,6 +1,6 @@
 import React from 'react';
 import Header from '@/Components/Layout/Header';
-import { Head } from '../Components/Layout/Head';
+import { Head } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
 
 const Welcome = () => {

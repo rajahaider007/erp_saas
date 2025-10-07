@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import { 
   Plus, 
@@ -26,23 +26,125 @@ import {
   ChevronLeft,
   ChevronRight,
   CheckCircle2,
-  XCircle
+  XCircle,
+  FileSpreadsheet,
+  Printer,
+  X,
+  Check
 } from 'lucide-react';
 import App from '../../App.jsx';
 
+// SweetAlert-like component
+const CustomAlert = {
+  fire: ({ title, text, icon, showCancelButton = false, confirmButtonText = 'OK', cancelButtonText = 'Cancel', onConfirm, onCancel }) => {
+    const alertDiv = document.createElement('div');
+    alertDiv.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    `;
+
+    const iconHtml = {
+      success: '<div style="color: #10B981; font-size: 48px;">✓</div>',
+      error: '<div style="color: #EF4444; font-size: 48px;">✗</div>',
+      warning: '<div style="color: #F59E0B; font-size: 48px;">⚠</div>',
+      question: '<div style="color: #3B82F6; font-size: 48px;">?</div>',
+    }[icon] || '';
+
+    alertDiv.innerHTML = `
+      <div style="
+        background: white;
+        border-radius: 12px;
+        padding: 32px;
+        text-align: center;
+        min-width: 400px;
+        max-width: 500px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        animation: slideIn 0.3s ease-out;
+      ">
+        ${iconHtml}
+        <h3 style="margin: 20px 0 12px; font-size: 20px; font-weight: 600; color: #1F2937;">${title}</h3>
+        <p style="margin: 0 0 24px; color: #6B7280; line-height: 1.5;">${text}</p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          ${showCancelButton ? `
+            <button id="cancelBtn" style="
+              background: #F3F4F6;
+              color: #374151;
+              border: none;
+              padding: 12px 24px;
+              border-radius: 8px;
+              font-weight: 500;
+              cursor: pointer;
+              transition: all 0.2s;
+            ">${cancelButtonText}</button>
+          ` : ''}
+          <button id="confirmBtn" style="
+            background: ${icon === 'error' || icon === 'warning' ? '#EF4444' : '#3B82F6'};
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+          ">${confirmButtonText}</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(alertDiv);
+
+    // Add animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { opacity: 0; transform: scale(0.9) translateY(-20px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    const confirmBtn = alertDiv.querySelector('#confirmBtn');
+    const cancelBtn = alertDiv.querySelector('#cancelBtn');
+
+    confirmBtn.addEventListener('click', () => {
+      document.body.removeChild(alertDiv);
+      document.head.removeChild(style);
+      if (onConfirm) onConfirm();
+    });
+
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        document.body.removeChild(alertDiv);
+        document.head.removeChild(style);
+        if (onCancel) onCancel();
+      });
+    }
+  }
+};
+
 const JournalVoucherList = () => {
-  const { journalVouchers = [], accounts = [], flash } = usePage().props;
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [dateFilter, setDateFilter] = useState('all');
+  const { journalVouchers: paginatedVouchers = [], accounts = [], flash, filters } = usePage().props;
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(filters?.search || '');
+  const [statusFilter, setStatusFilter] = useState(filters?.status || 'all');
+  const [fromDate, setFromDate] = useState(filters?.from_date || '');
+  const [toDate, setToDate] = useState(filters?.to_date || '');
   const [selectedVouchers, setSelectedVouchers] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [showColumnSelector, setShowColumnSelector] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [sortConfig, setSortConfig] = useState({
-    key: 'id',
-    direction: 'desc'
+    key: filters?.sort_by || 'id',
+    direction: filters?.sort_direction || 'desc'
   });
+  const [currentPage, setCurrentPage] = useState(paginatedVouchers?.current_page || 1);
+  const [pageSize, setPageSize] = useState(filters?.per_page || 25);
 
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
@@ -54,30 +156,130 @@ const JournalVoucherList = () => {
     actions: true
   });
 
-  // Handle flash messages
+  const handleColumnToggle = (column) => {
+    if (column) {
+      setVisibleColumns(prev => ({
+        ...prev,
+        [column]: !prev[column]
+      }));
+    }
+  };
+
+  // Show flash messages
   useEffect(() => {
     if (flash?.success) {
-      // Flash message will be handled by the CustomAlert component
+      CustomAlert.fire({
+        title: 'Success!',
+        text: flash.success,
+        icon: 'success',
+        confirmButtonText: 'Great!'
+      });
     } else if (flash?.error) {
-      // Flash message will be handled by the CustomAlert component
+      CustomAlert.fire({
+        title: 'Error!',
+        text: flash.error,
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
     }
   }, [flash]);
 
-  // Handle search
+  // Handle search and filters
   const handleSearch = useCallback((term) => {
     setSearchTerm(term);
+    const params = new URLSearchParams(window.location.search);
+    if (term) {
+      params.set('search', term);
+    } else {
+      params.delete('search');
+    }
+    params.set('page', '1');
+    router.get(window.location.pathname + '?' + params.toString(), {}, {
+      preserveState: true,
+      preserveScroll: true
+    });
   }, []);
 
-  // Handle status filter
   const handleStatusFilter = useCallback((status) => {
     setStatusFilter(status);
+    const params = new URLSearchParams(window.location.search);
+    if (status && status !== 'all') {
+      params.set('status', status);
+    } else {
+      params.delete('status');
+    }
+    params.set('page', '1');
+    router.get(window.location.pathname + '?' + params.toString(), {}, {
+      preserveState: true,
+      preserveScroll: true
+    });
   }, []);
 
-  // Handle sort
+  const handleFromDateFilter = useCallback((date) => {
+    setFromDate(date);
+    const params = new URLSearchParams(window.location.search);
+    if (date) {
+      params.set('from_date', date);
+    } else {
+      params.delete('from_date');
+    }
+    params.set('page', '1');
+    router.get(window.location.pathname + '?' + params.toString(), {}, {
+      preserveState: true,
+      preserveScroll: true
+    });
+  }, []);
+
+  const handleToDateFilter = useCallback((date) => {
+    setToDate(date);
+    const params = new URLSearchParams(window.location.search);
+    if (date) {
+      params.set('to_date', date);
+    } else {
+      params.delete('to_date');
+    }
+    params.set('page', '1');
+    router.get(window.location.pathname + '?' + params.toString(), {}, {
+      preserveState: true,
+      preserveScroll: true
+    });
+  }, []);
+
   const handleSort = useCallback((key) => {
     const direction = sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc';
     setSortConfig({ key, direction });
+
+    const params = new URLSearchParams(window.location.search);
+    params.set('sort_by', key);
+    params.set('sort_direction', direction);
+    params.set('page', '1');
+
+    router.get(window.location.pathname + '?' + params.toString(), {}, {
+      preserveState: true,
+      preserveScroll: true
+    });
   }, [sortConfig]);
+
+  const handlePageChange = useCallback((page) => {
+    setCurrentPage(page);
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', page);
+    router.get(window.location.pathname + '?' + params.toString(), {}, {
+      preserveState: true,
+      preserveScroll: true
+    });
+  }, []);
+
+  const handlePageSizeChange = useCallback((size) => {
+    setPageSize(size);
+    const params = new URLSearchParams(window.location.search);
+    params.set('per_page', size);
+    params.set('page', '1');
+    router.get(window.location.pathname + '?' + params.toString(), {}, {
+      preserveState: true,
+      preserveScroll: true
+    });
+  }, []);
 
   // Format functions
   const formatDate = (dateString) => {
@@ -99,33 +301,134 @@ const JournalVoucherList = () => {
     { value: 'rejected', label: 'Rejected' }
   ];
 
-  // Filter vouchers based on search and filters
-  const filteredVouchers = journalVouchers.filter(voucher => {
-    const matchesSearch = voucher.voucher_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         voucher.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         voucher.reference_number?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || voucher.status.toLowerCase() === statusFilter.toLowerCase();
-    
-    const matchesDate = dateFilter === 'all' || 
-                       (dateFilter === 'today' && new Date(voucher.voucher_date).toDateString() === new Date().toDateString()) ||
-                       (dateFilter === 'this_week' && isThisWeek(new Date(voucher.voucher_date))) ||
-                       (dateFilter === 'this_month' && isThisMonth(new Date(voucher.voucher_date)));
-    
-    return matchesSearch && matchesStatus && matchesDate;
-  });
+  const pageSizeOptions = [10, 25, 50, 100];
 
-  // Helper functions for date filtering
-  const isThisWeek = (date) => {
+  // Quick filter helper functions
+  const isTodayFilter = () => {
+    if (!fromDate || !toDate) return false;
+    const today = new Date().toISOString().split('T')[0];
+    return fromDate === today && toDate === today;
+  };
+
+  const isThisWeekFilter = () => {
+    if (!fromDate || !toDate) return false;
     const now = new Date();
     const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
     const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 6));
-    return date >= startOfWeek && date <= endOfWeek;
+    const startStr = startOfWeek.toISOString().split('T')[0];
+    const endStr = endOfWeek.toISOString().split('T')[0];
+    return fromDate === startStr && toDate === endStr;
   };
 
-  const isThisMonth = (date) => {
+  const isThisMonthFilter = () => {
+    if (!fromDate || !toDate) return false;
     const now = new Date();
-    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const startStr = startOfMonth.toISOString().split('T')[0];
+    const endStr = endOfMonth.toISOString().split('T')[0];
+    return fromDate === startStr && toDate === endStr;
+  };
+
+  const setTodayFilter = () => {
+    const today = new Date().toISOString().split('T')[0];
+    setFromDate(today);
+    setToDate(today);
+    const params = new URLSearchParams(window.location.search);
+    params.set('from_date', today);
+    params.set('to_date', today);
+    params.set('page', '1');
+    router.get(window.location.pathname + '?' + params.toString(), {}, {
+      preserveState: true,
+      preserveScroll: true
+    });
+  };
+
+  const setThisWeekFilter = () => {
+    const now = new Date();
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+    const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 6));
+    const startStr = startOfWeek.toISOString().split('T')[0];
+    const endStr = endOfWeek.toISOString().split('T')[0];
+    setFromDate(startStr);
+    setToDate(endStr);
+    const params = new URLSearchParams(window.location.search);
+    params.set('from_date', startStr);
+    params.set('to_date', endStr);
+    params.set('page', '1');
+    router.get(window.location.pathname + '?' + params.toString(), {}, {
+      preserveState: true,
+      preserveScroll: true
+    });
+  };
+
+  const setThisMonthFilter = () => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const startStr = startOfMonth.toISOString().split('T')[0];
+    const endStr = endOfMonth.toISOString().split('T')[0];
+    setFromDate(startStr);
+    setToDate(endStr);
+    const params = new URLSearchParams(window.location.search);
+    params.set('from_date', startStr);
+    params.set('to_date', endStr);
+    params.set('page', '1');
+    router.get(window.location.pathname + '?' + params.toString(), {}, {
+      preserveState: true,
+      preserveScroll: true
+    });
+  };
+
+  // Helper functions for quick filter select
+  const getCurrentQuickFilter = () => {
+    if (isTodayFilter()) return 'today';
+    if (isThisWeekFilter()) return 'thisWeek';
+    if (isThisMonthFilter()) return 'thisMonth';
+    return '';
+  };
+
+  const handleQuickFilterChange = (value) => {
+    switch (value) {
+      case 'today':
+        setTodayFilter();
+        break;
+      case 'thisWeek':
+        setThisWeekFilter();
+        break;
+      case 'thisMonth':
+        setThisMonthFilter();
+        break;
+      default:
+        setFromDate('');
+        setToDate('');
+        const params = new URLSearchParams(window.location.search);
+        params.delete('from_date');
+        params.delete('to_date');
+        params.set('page', '1');
+        router.get(window.location.pathname + '?' + params.toString(), {}, {
+          preserveState: true,
+          preserveScroll: true
+        });
+        break;
+    }
+  };
+
+  // Bulk actions
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      setSelectedVouchers(paginatedVouchers.data.map(voucher => voucher.id));
+    } else {
+      setSelectedVouchers([]);
+    }
+  };
+
+  const handleSelectVoucher = (voucherId, checked) => {
+    if (checked) {
+      setSelectedVouchers(prev => [...prev, voucherId]);
+    } else {
+      setSelectedVouchers(prev => prev.filter(id => id !== voucherId));
+    }
   };
 
   // Handle voucher actions
@@ -135,7 +438,11 @@ const JournalVoucherList = () => {
 
   const handleEdit = (voucher) => {
     if (voucher.status !== 'Draft') {
-      setAlert({ type: 'error', message: 'Only draft vouchers can be edited' });
+      CustomAlert.fire({
+        title: 'Cannot Edit',
+        text: 'Only draft vouchers can be edited',
+        icon: 'error'
+      });
       return;
     }
     router.visit(`/accounts/journal-voucher/${voucher.id}/edit`);
@@ -143,39 +450,188 @@ const JournalVoucherList = () => {
 
   const handleDelete = (voucher) => {
     if (voucher.status !== 'Draft') {
-      setAlert({ type: 'error', message: 'Only draft vouchers can be deleted' });
+      CustomAlert.fire({
+        title: 'Cannot Delete',
+        text: 'Only draft vouchers can be deleted',
+        icon: 'error'
+      });
       return;
     }
     
-    if (confirm('Are you sure you want to delete this journal voucher?')) {
-      router.delete(`/accounts/journal-voucher/${voucher.id}`);
-    }
+    CustomAlert.fire({
+      title: 'Are you sure?',
+      text: `You are about to delete voucher "${voucher.voucher_number}". This action cannot be undone!`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+      onConfirm: () => {
+        setLoading(true);
+        router.delete(`/accounts/journal-voucher/${voucher.id}`, {
+          onFinish: () => setLoading(false)
+        });
+      }
+    });
   };
 
   const handlePost = (voucher) => {
     if (voucher.status !== 'Draft') {
-      setAlert({ type: 'error', message: 'Only draft vouchers can be posted' });
+      CustomAlert.fire({
+        title: 'Cannot Post',
+        text: 'Only draft vouchers can be posted',
+        icon: 'error'
+      });
       return;
     }
     
-    if (confirm('Are you sure you want to post this journal voucher? This action cannot be undone.')) {
-      router.post(`/accounts/journal-voucher/${voucher.id}/post`);
-    }
+    CustomAlert.fire({
+      title: 'Post Voucher?',
+      text: `You are about to post voucher "${voucher.voucher_number}". This action cannot be undone.`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, post it!',
+      cancelButtonText: 'Cancel',
+      onConfirm: () => {
+        setLoading(true);
+        router.post(`/accounts/journal-voucher/${voucher.id}/post`, {}, {
+          onFinish: () => setLoading(false)
+        });
+      }
+    });
   };
 
   const handleBulkAction = (action) => {
     if (selectedVouchers.length === 0) {
-      setAlert({ type: 'error', message: 'Please select vouchers to perform bulk action' });
+      CustomAlert.fire({
+        title: 'No Selection',
+        text: 'Please select vouchers to perform bulk action',
+        icon: 'warning'
+      });
       return;
     }
 
     if (action === 'delete') {
-      if (confirm(`Are you sure you want to delete ${selectedVouchers.length} journal vouchers?`)) {
-        selectedVouchers.forEach(id => {
-          router.delete(`/accounts/journal-voucher/${id}`);
-        });
-      }
+      CustomAlert.fire({
+        title: 'Delete Selected Vouchers?',
+        text: `You are about to delete ${selectedVouchers.length} journal voucher(s). This action cannot be undone!`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete them!',
+        cancelButtonText: 'Cancel',
+        onConfirm: () => {
+          setLoading(true);
+          selectedVouchers.forEach(id => {
+            router.delete(`/accounts/journal-voucher/${id}`);
+          });
+          setSelectedVouchers([]);
+          setLoading(false);
+        }
+      });
     }
+
+    if (action === 'post') {
+      // Check if all selected vouchers are draft
+      const selectedVoucherData = paginatedVouchers.data.filter(v => selectedVouchers.includes(v.id));
+      const nonDraftVouchers = selectedVoucherData.filter(v => v.status !== 'Draft');
+      
+      if (nonDraftVouchers.length > 0) {
+        CustomAlert.fire({
+          title: 'Cannot Post Selected Vouchers',
+          text: `${nonDraftVouchers.length} voucher(s) are not in Draft status and cannot be posted. Only Draft vouchers can be posted.`,
+          icon: 'error'
+        });
+        return;
+      }
+
+      CustomAlert.fire({
+        title: 'Post Selected Vouchers?',
+        text: `You are about to post ${selectedVouchers.length} journal voucher(s). This action cannot be undone!`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, post them!',
+        cancelButtonText: 'Cancel',
+        onConfirm: () => {
+          setLoading(true);
+          router.post('/accounts/journal-voucher/bulk-post', {
+            ids: selectedVouchers
+          }, {
+            onSuccess: (page) => {
+              setSelectedVouchers([]);
+              CustomAlert.fire({
+                title: 'Success!',
+                text: `Successfully posted ${selectedVouchers.length} voucher(s).`,
+                icon: 'success'
+              });
+            },
+            onError: (errors) => {
+              CustomAlert.fire({
+                title: 'Error!',
+                text: 'Failed to post some vouchers. Please try again.',
+                icon: 'error'
+              });
+            },
+            onFinish: () => setLoading(false)
+          });
+        }
+      });
+    }
+  };
+
+  // Export functions
+  const exportToCSV = () => {
+    CustomAlert.fire({
+      title: 'Export to CSV',
+      text: 'Download all journal vouchers as CSV file?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, download!',
+      cancelButtonText: 'Cancel',
+      onConfirm: () => {
+        // Build query parameters for current filters
+        const params = new URLSearchParams(window.location.search);
+        const exportUrl = `/accounts/journal-voucher/export-csv?${params.toString()}`;
+        window.open(exportUrl, '_blank');
+      }
+    });
+  };
+
+  const exportToExcel = () => {
+    CustomAlert.fire({
+      title: 'Export to Excel',
+      text: 'Download all journal vouchers as Excel file?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, download!',
+      cancelButtonText: 'Cancel',
+      onConfirm: () => {
+        // Build query parameters for current filters
+        const params = new URLSearchParams(window.location.search);
+        const exportUrl = `/accounts/journal-voucher/export-excel?${params.toString()}`;
+        window.open(exportUrl, '_blank');
+      }
+    });
+  };
+
+  const exportToPDF = () => {
+    CustomAlert.fire({
+      title: 'Export to PDF',
+      text: 'Download all journal vouchers as PDF file?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, download!',
+      cancelButtonText: 'Cancel',
+      onConfirm: () => {
+        // Build query parameters for current filters
+        const params = new URLSearchParams(window.location.search);
+        const exportUrl = `/accounts/journal-voucher/export-pdf?${params.toString()}`;
+        window.open(exportUrl, '_blank');
+      }
+    });
+  };
+
+  const printVouchers = () => {
+    // Print current filtered results
+    window.print();
   };
 
   const getStatusIcon = (status) => {
@@ -210,7 +666,7 @@ const JournalVoucherList = () => {
 
   return (
     <App>
-      <div className="advanced-module-manager">
+      <div className="advanced-module-manager form-theme-system">
         {/* Enhanced Header */}
         <div className="manager-header">
           <div className="header-main">
@@ -222,11 +678,11 @@ const JournalVoucherList = () => {
               <div className="stats-summary">
                 <div className="stat-item">
                   <TrendingUp size={16} />
-                  <span>{journalVouchers?.length || 0} Total</span>
+                  <span>{paginatedVouchers?.total || 0} Total</span>
                 </div>
                 <div className="stat-item">
                   <Users size={16} />
-                  <span>{journalVouchers?.filter(v => v.status === 'Posted').length || 0} Posted</span>
+                  <span>{paginatedVouchers?.data?.filter(v => v.status === 'Posted').length || 0} Posted</span>
                 </div>
               </div>
             </div>
@@ -249,9 +705,21 @@ const JournalVoucherList = () => {
                   <ChevronDown size={16} />
                 </button>
                 <div className="dropdown-menu">
-                  <button onClick={() => console.log('Export CSV')}>
+                  <button onClick={exportToCSV}>
                     <FileText size={16} />
                     Export as CSV
+                  </button>
+                  <button onClick={exportToExcel}>
+                    <FileSpreadsheet size={16} />
+                    Export as Excel
+                  </button>
+                  <button onClick={exportToPDF}>
+                    <FileText size={16} />
+                    Export as PDF
+                  </button>
+                  <button onClick={printVouchers}>
+                    <Printer size={16} />
+                    Print
                   </button>
                 </div>
               </div>
@@ -291,58 +759,149 @@ const JournalVoucherList = () => {
           </div>
         )}
 
-        {/* Enhanced Filters */}
-        <div className="filters-bar">
-          <div className="filter-group">
-            <div className="search-container">
-              <Search className="search-icon" size={20} />
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Search journal vouchers..."
-                value={searchTerm}
-                onChange={(e) => handleSearch(e.target.value)}
-              />
+        {/* Modern Compact Filters */}
+        <div className="modern-filters-container">
+          <div className="filters-toolbar">
+            <div className="search-section">
+              <div className="search-input-wrapper">
+                <Search className="search-icon" size={18} />
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder="Search vouchers..."
+                  value={searchTerm}
+                  onChange={(e) => handleSearch(e.target.value)}
+                />
+              </div>
             </div>
 
-            <select
-              className="filter-select"
-              value={statusFilter}
-              onChange={(e) => handleStatusFilter(e.target.value)}
-            >
-              {statusOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+            <div className="filters-section">
+              <div className="filter-group">
+                <label className="filter-label">Date Range</label>
+                <div className="date-inputs">
+                  <input
+                    type="date"
+                    className="date-input"
+                    value={fromDate}
+                    onChange={(e) => handleFromDateFilter(e.target.value)}
+                    placeholder="From"
+                  />
+                  <span className="date-separator">to</span>
+                  <input
+                    type="date"
+                    className="date-input"
+                    value={toDate}
+                    onChange={(e) => handleToDateFilter(e.target.value)}
+                    placeholder="To"
+                  />
+                </div>
+              </div>
 
-          <div className="view-controls">
-            <button
-              className="btn btn-icon"
-              onClick={() => setShowColumnSelector(!showColumnSelector)}
-              title="Show/Hide Columns"
-            >
-              <Columns size={20} />
-            </button>
+              <div className="filter-group">
+                <label className="filter-label">Status</label>
+                <select
+                  className="filter-select"
+                  value={statusFilter}
+                  onChange={(e) => handleStatusFilter(e.target.value)}
+                >
+                  {statusOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="filter-group">
+                <label className="filter-label">Quick</label>
+                <select
+                  className="filter-select"
+                  value={getCurrentQuickFilter()}
+                  onChange={(e) => handleQuickFilterChange(e.target.value)}
+                >
+                  <option value="">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="thisWeek">This Week</option>
+                  <option value="thisMonth">This Month</option>
+                </select>
+              </div>
+
+              <div className="filter-group">
+                <label className="filter-label">Columns</label>
+                <select
+                  className="filter-select"
+                  value=""
+                  onChange={(e) => handleColumnToggle(e.target.value)}
+                >
+                  <option value="">Show/Hide</option>
+                  {Object.entries(visibleColumns).map(([key, visible]) => (
+                    <option key={key} value={key}>
+                      {visible ? 'Hide' : 'Show'} {key}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="actions-section">
+              <button
+                className="reset-btn"
+                onClick={() => {
+                  setSearchTerm('');
+                  setStatusFilter('all');
+                  setFromDate('');
+                  setToDate('');
+                  const params = new URLSearchParams();
+                  params.set('page', '1');
+                  router.get(window.location.pathname + '?' + params.toString(), {}, {
+                    preserveState: true,
+                    preserveScroll: true
+                  });
+                }}
+                title="Reset all filters"
+              >
+                <RefreshCcw size={16} />
+              </button>
+            </div>
           </div>
         </div>
+
 
         {/* Bulk Actions Bar */}
         {selectedVouchers.length > 0 && (
           <div className="bulk-actions-bar">
             <div className="selection-info">
-              <span>{selectedVouchers.length} voucher(s) selected</span>
+              <CheckCircle2 size={20} />
+              <span>{selectedVouchers.length} voucher{selectedVouchers.length !== 1 ? 's' : ''} selected</span>
             </div>
+
             <div className="bulk-actions">
-              <button
-                className="btn btn-sm btn-danger"
-                onClick={() => handleBulkAction('delete')}
-              >
-                <Trash2 size={16} />
-                Delete Selected
+              <button className="btn btn-sm btn-secondary" onClick={() => setSelectedVouchers([])}>
+                <X size={16} />
+                Clear Selection
               </button>
+
+              <div className="dropdown">
+                <button className="btn btn-sm btn-secondary dropdown-toggle">
+                  <Settings size={16} />
+                  Bulk Actions
+                  <ChevronDown size={12} />
+                </button>
+                <div className="dropdown-menu">
+                  <button onClick={() => handleBulkAction('post')}>
+                    <CheckCircle size={16} />
+                    Post Selected
+                  </button>
+                  <div className="dropdown-divider"></div>
+                  <button 
+                    onClick={() => handleBulkAction('delete')}
+                    className="text-danger"
+                  >
+                    <Trash2 size={16} />
+                    Delete Selected
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -356,7 +915,7 @@ const JournalVoucherList = () => {
                 <div className="loading-spinner"></div>
                 <p>Loading journal vouchers...</p>
               </div>
-            ) : !filteredVouchers?.length ? (
+            ) : !paginatedVouchers?.data?.length ? (
               <div className="empty-state">
                 <Database className="empty-icon" />
                 <h3>No journal vouchers found</h3>
@@ -376,14 +935,8 @@ const JournalVoucherList = () => {
                           <input
                             type="checkbox"
                             className="checkbox"
-                            checked={selectedVouchers.length === filteredVouchers.length && filteredVouchers.length > 0}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedVouchers(filteredVouchers.map(v => v.id));
-                              } else {
-                                setSelectedVouchers([]);
-                              }
-                            }}
+                            checked={selectedVouchers.length === paginatedVouchers.data.length && paginatedVouchers.data.length > 0}
+                            onChange={(e) => handleSelectAll(e.target.checked)}
                           />
                         </th>
 
@@ -438,20 +991,14 @@ const JournalVoucherList = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredVouchers.map((voucher) => (
+                      {paginatedVouchers.data.map((voucher) => (
                         <tr key={voucher.id} className="table-row">
                           <td>
                             <input
                               type="checkbox"
                               className="checkbox"
                               checked={selectedVouchers.includes(voucher.id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedVouchers([...selectedVouchers, voucher.id]);
-                                } else {
-                                  setSelectedVouchers(selectedVouchers.filter(id => id !== voucher.id));
-                                }
-                              }}
+                              onChange={(e) => handleSelectVoucher(voucher.id, e.target.checked)}
                             />
                           </td>
 
@@ -562,6 +1109,113 @@ const JournalVoucherList = () => {
                       ))}
                     </tbody>
                   </table>
+                </div>
+
+                {/* Enhanced Pagination */}
+                <div className="pagination-container">
+                  <div className="pagination-info">
+                    <div className="results-info">
+                      Showing {paginatedVouchers.from || 0} to {paginatedVouchers.to || 0} of {paginatedVouchers.total || 0} entries
+                    </div>
+
+                    <div className="page-size-selector">
+                      <span>Show:</span>
+                      <select
+                        value={pageSize}
+                        onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                        className="page-size-select"
+                      >
+                        {pageSizeOptions.map(size => (
+                          <option key={size} value={size}>{size}</option>
+                        ))}
+                      </select>
+                      <span>per page</span>
+                    </div>
+                  </div>
+
+                  <div className="pagination-controls">
+                    <button
+                      className="pagination-btn"
+                      disabled={currentPage === 1}
+                      onClick={() => handlePageChange(1)}
+                      title="First Page"
+                    >
+                      <ChevronLeft size={14} />
+                      <ChevronLeft size={14} />
+                    </button>
+
+                    <button
+                      className="pagination-btn"
+                      disabled={currentPage === 1}
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      title="Previous Page"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+
+                    {/* Page Numbers */}
+                    <div className="page-numbers">
+                      {Array.from({ length: Math.min(7, paginatedVouchers.last_page || 1) }, (_, index) => {
+                        let pageNumber;
+                        const totalPages = paginatedVouchers.last_page || 1;
+
+                        if (totalPages <= 7) {
+                          pageNumber = index + 1;
+                        } else if (currentPage <= 4) {
+                          pageNumber = index + 1;
+                        } else if (currentPage > totalPages - 4) {
+                          pageNumber = totalPages - 6 + index;
+                        } else {
+                          pageNumber = currentPage - 3 + index;
+                        }
+
+                        return (
+                          <button
+                            key={pageNumber}
+                            className={`pagination-btn ${currentPage === pageNumber ? 'active' : ''}`}
+                            onClick={() => handlePageChange(pageNumber)}
+                          >
+                            {pageNumber}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      className="pagination-btn"
+                      disabled={currentPage === (paginatedVouchers.last_page || 1)}
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      title="Next Page"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+
+                    <button
+                      className="pagination-btn"
+                      disabled={currentPage === (paginatedVouchers.last_page || 1)}
+                      onClick={() => handlePageChange(paginatedVouchers.last_page || 1)}
+                      title="Last Page"
+                    >
+                      <ChevronRight size={14} />
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+
+                  <div className="quick-jump">
+                    <span>Go to:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max={paginatedVouchers.last_page || 1}
+                      value={currentPage}
+                      onChange={(e) => {
+                        const page = Math.max(1, Math.min(paginatedVouchers.last_page || 1, Number(e.target.value)));
+                        handlePageChange(page);
+                      }}
+                      className="jump-input"
+                    />
+                    <span>of {paginatedVouchers.last_page || 1}</span>
+                  </div>
                 </div>
               </>
             )}

@@ -15,13 +15,21 @@ const Select2 = ({
   multiple = false,
   allowClear = true,
   searchable = true,
+  tabIndex = 0,
+  onKeyDown = () => {},
   ...props
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedValues, setSelectedValues] = useState(multiple ? (Array.isArray(value) ? value : []) : []);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const containerRef = useRef(null);
   const searchInputRef = useRef(null);
+  const optionsListRef = useRef(null);
+  
+  // Generate unique ID if not provided
+  const componentId = useRef(id || `select2-${Math.random().toString(36).substr(2, 9)}`);
+  const uniqueId = componentId.current;
 
   // Filter options based on search term
   const filteredOptions = options.filter(option => {
@@ -43,12 +51,44 @@ const Select2 = ({
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         setIsOpen(false);
         setSearchTerm('');
+        setHighlightedIndex(-1);
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Reset highlighted index when dropdown opens
+  useEffect(() => {
+    if (isOpen) {
+      setHighlightedIndex(-1);
+    }
+  }, [isOpen]);
+
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (isOpen && highlightedIndex >= 0 && optionsListRef.current) {
+      const optionElement = optionsListRef.current.querySelector(`[data-option-index="${highlightedIndex}"]`);
+      
+      if (optionElement) {
+        const listElement = optionsListRef.current;
+        const optionTop = optionElement.offsetTop;
+        const optionBottom = optionTop + optionElement.offsetHeight;
+        const listScrollTop = listElement.scrollTop;
+        const listHeight = listElement.clientHeight;
+        
+        // Scroll down if option is below visible area
+        if (optionBottom > listScrollTop + listHeight) {
+          listElement.scrollTop = optionBottom - listHeight;
+        }
+        // Scroll up if option is above visible area
+        else if (optionTop < listScrollTop) {
+          listElement.scrollTop = optionTop;
+        }
+      }
+    }
+  }, [highlightedIndex, isOpen]);
 
   const handleSelect = (option) => {
     const optionValue = typeof option === 'string' ? option : option.value;
@@ -81,6 +121,78 @@ const Select2 = ({
       onChange('');
     }
     setSearchTerm('');
+  };
+
+  const handleKeyDown = (e) => {
+    // Call the parent onKeyDown handler first
+    onKeyDown(e);
+    
+    // Handle Enter key to open/close dropdown or select highlighted option
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (!disabled) {
+        if (!isOpen) {
+          setIsOpen(true);
+          if (searchable) {
+            setTimeout(() => {
+              if (searchInputRef.current) {
+                searchInputRef.current.focus();
+              }
+            }, 100);
+          }
+        } else if (highlightedIndex >= 0 && highlightedIndex < filteredOptions.length) {
+          // Select the highlighted option
+          handleSelect(filteredOptions[highlightedIndex]);
+        }
+      }
+    }
+    
+    // Handle Escape key to close dropdown
+    if (e.key === 'Escape') {
+      setIsOpen(false);
+      setSearchTerm('');
+      setHighlightedIndex(-1);
+    }
+    
+    // Handle Arrow keys for navigation
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (!disabled) {
+        if (!isOpen) {
+          setIsOpen(true);
+          if (searchable) {
+            setTimeout(() => {
+              if (searchInputRef.current) {
+                searchInputRef.current.focus();
+              }
+            }, 100);
+          }
+        } else if (filteredOptions.length > 0) {
+          // Navigate down in the dropdown
+          setHighlightedIndex(prev => {
+            const nextIndex = prev + 1;
+            return nextIndex < filteredOptions.length ? nextIndex : 0;
+          });
+        }
+      }
+    }
+    
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!disabled && isOpen && filteredOptions.length > 0) {
+        // Navigate up in the dropdown
+        setHighlightedIndex(prev => {
+          const prevIndex = prev - 1;
+          return prevIndex >= 0 ? prevIndex : filteredOptions.length - 1;
+        });
+      }
+    }
+    
+    // Handle Tab key - let it pass through for normal tab navigation
+    if (e.key === 'Tab') {
+      // Don't prevent default - let tab navigation work normally
+      return;
+    }
   };
 
   const isSelected = (option) => {
@@ -122,6 +234,12 @@ const Select2 = ({
           ${isOpen ? 'ring-2 ring-blue-500 border-blue-500' : ''}
         `}
         onClick={() => !disabled && setIsOpen(!isOpen)}
+        onKeyDown={handleKeyDown}
+        tabIndex={disabled ? -1 : tabIndex}
+        role="combobox"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-label={placeholder}
         {...props}
       >
         <div className="flex items-center justify-between">
@@ -197,6 +315,36 @@ const Select2 = ({
                   placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                    // Handle arrow keys in search input
+                    if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      if (filteredOptions.length > 0) {
+                        setHighlightedIndex(prev => {
+                          const nextIndex = prev + 1;
+                          return nextIndex < filteredOptions.length ? nextIndex : 0;
+                        });
+                      }
+                    } else if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      if (filteredOptions.length > 0) {
+                        setHighlightedIndex(prev => {
+                          const prevIndex = prev - 1;
+                          return prevIndex >= 0 ? prevIndex : filteredOptions.length - 1;
+                        });
+                      }
+                    } else if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (highlightedIndex >= 0 && highlightedIndex < filteredOptions.length) {
+                        handleSelect(filteredOptions[highlightedIndex]);
+                      }
+                    } else if (e.key === 'Escape') {
+                      e.preventDefault();
+                      setIsOpen(false);
+                      setSearchTerm('');
+                      setHighlightedIndex(-1);
+                    }
+                  }}
                   className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   autoFocus
                 />
@@ -205,7 +353,10 @@ const Select2 = ({
           )}
 
           {/* Options List */}
-          <div className="max-h-60 overflow-y-auto">
+          <div 
+            ref={optionsListRef}
+            className="max-h-60 overflow-y-auto"
+          >
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option, index) => {
                 const optionValue = typeof option === 'string' ? option : option.value;
@@ -213,13 +364,19 @@ const Select2 = ({
                 const subtext = typeof option === 'object' && option.subtext ? option.subtext : '';
                 const isOptionSelected = isSelected(option);
                 
+                const isHighlighted = index === highlightedIndex;
+                
                 return (
                   <div
                     key={optionValue || index}
-                    className={`px-3 py-2 cursor-pointer flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                    data-option-index={index}
+                    className={`px-3 py-2 cursor-pointer flex items-center justify-between transition-colors ${
                       isOptionSelected ? 'bg-blue-100 dark:bg-blue-900/40' : ''
+                    } ${
+                      isHighlighted ? 'bg-blue-200 dark:bg-blue-800 border-l-4 border-blue-500' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                     onClick={() => handleSelect(option)}
+                    onMouseEnter={() => setHighlightedIndex(index)}
                   >
                     <div>
                       <div className="font-medium text-sm text-gray-900 dark:text-gray-100">

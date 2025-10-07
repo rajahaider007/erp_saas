@@ -881,6 +881,8 @@ const JournalVoucherCreate = () => {
                             placeholder="Search and select account..."
                             name={`account_id_${index}`}
                             id={`account_id_${index}`}
+                            tabIndex={10 + (index * 6) + 1}
+                            onKeyDown={handleKeyDown}
                             error={errors[`entries.${index}.account_id`]}
                           />
                           {errors[`entries.${index}.account_id`] && (
@@ -910,6 +912,8 @@ const JournalVoucherCreate = () => {
                             placeholder="Search and select currency..."
                             name={`currency_code_${index}`}
                             id={`currency_code_${index}`}
+                            tabIndex={10 + (index * 6) + 2}
+                            onKeyDown={handleKeyDown}
                           />
                         </div>
 

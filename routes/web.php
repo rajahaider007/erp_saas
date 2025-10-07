@@ -123,6 +123,12 @@ Route::prefix('accounts/journal-voucher')->name('accounts.journal-voucher.')->mi
     Route::get('/{id}', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'show'])->name('show');
     Route::get('/{id}/edit', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'edit'])->name('edit');
     Route::put('/{id}', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'update'])->name('update');
+    // Export routes
+    Route::get('/export-csv', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'exportCsv'])->name('export-csv');
+    Route::get('/export-excel', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'exportExcel'])->name('export-excel');
+    Route::get('/export-pdf', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'exportPdf'])->name('export-pdf');
+    // Bulk actions
+    Route::post('/bulk-post', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'bulkPost'])->name('bulk-post');
 });
 
 

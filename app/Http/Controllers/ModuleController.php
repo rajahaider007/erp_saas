@@ -21,10 +21,10 @@ class ModuleController extends Controller
         // Store in session
         $request->session()->put('current_module', [
             'id' => $module->id,
-            'name' => $module->name,
+            'name' => $module->module_name,
             'folder_name' => $module->folder_name,
-            'icon' => $module->icon,
-            'description' => $module->description
+            'slug' => $module->slug,
+            'image' => $module->image
         ]);
 
         return response()->json([

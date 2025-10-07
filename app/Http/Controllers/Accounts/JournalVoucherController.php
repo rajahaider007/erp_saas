@@ -20,25 +20,78 @@ class JournalVoucherController extends Controller
         
         if (!$compId || !$locationId) {
             return Inertia::render('Accounts/JournalVoucher/List', [
-                'journalVouchers' => [],
+                'journalVouchers' => [
+                    'data' => [],
+                    'total' => 0,
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'from' => 0,
+                    'to' => 0
+                ],
                 'accounts' => [],
+                'filters' => [],
                 'error' => 'Company and Location information is required. Please contact administrator.'
             ]);
         }
 
-        $journalVouchers = DB::table('transactions')
+        // Get filters
+        $search = $request->input('search');
+        $status = $request->input('status');
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+        $sortBy = $request->input('sort_by', 'id');
+        $sortDirection = $request->input('sort_direction', 'desc');
+        $perPage = $request->input('per_page', 25);
+
+        // Build query
+        $query = DB::table('transactions')
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->where('voucher_type', 'Journal')
-            ->orderBy('voucher_date', 'desc')
-            ->orderBy('voucher_number', 'desc')
-            ->get();
+            ->where('voucher_type', 'Journal');
+
+        // Apply search filter
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('voucher_number', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('reference_number', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply status filter
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        // Apply date filters
+        if ($fromDate) {
+            $query->whereDate('voucher_date', '>=', $fromDate);
+        }
+
+        if ($toDate) {
+            $query->whereDate('voucher_date', '<=', $toDate);
+        }
+
+        // Apply sorting
+        $query->orderBy($sortBy, $sortDirection);
+
+        // Paginate results
+        $journalVouchers = $query->paginate($perPage);
 
         $accounts = $this->getTransactionalAccounts($compId, $locationId);
 
         return Inertia::render('Accounts/JournalVoucher/List', [
             'journalVouchers' => $journalVouchers,
-            'accounts' => $accounts
+            'accounts' => $accounts,
+            'filters' => [
+                'search' => $search,
+                'status' => $status,
+                'from_date' => $fromDate,
+                'to_date' => $toDate,
+                'sort_by' => $sortBy,
+                'sort_direction' => $sortDirection,
+                'per_page' => $perPage
+            ]
         ]);
     }
 
@@ -432,6 +485,62 @@ class JournalVoucherController extends Controller
                                 break;
                             }
                         }
+                        
+                        // If no exact match found, try to find any file with similar characteristics
+                        if (empty($attachments) || count($attachments) === 0) {
+                            foreach ($files as $file) {
+                                $fileName = basename($file);
+                                
+                                // Check if the file has a similar extension or contains part of the original name
+                                $originalExt = pathinfo($originalFileName, PATHINFO_EXTENSION);
+                                $fileExt = pathinfo($fileName, PATHINFO_EXTENSION);
+                                
+                                if ($originalExt && $fileExt && strtolower($originalExt) === strtolower($fileExt)) {
+                                    // Same extension, use this file
+                                    $attachments[] = [
+                                        'id' => $fileName,
+                                        'original_name' => $originalFileName,
+                                        'url' => url('/storage/voucher-attachments/' . $fileName),
+                                        'size' => filesize($file)
+                                    ];
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // If still no match found, use the most recent file with the same extension
+                        if (empty($attachments) || count($attachments) === 0) {
+                            $originalExt = pathinfo($originalFileName, PATHINFO_EXTENSION);
+                            $matchingFiles = [];
+                            
+                            foreach ($files as $file) {
+                                $fileName = basename($file);
+                                $fileExt = pathinfo($fileName, PATHINFO_EXTENSION);
+                                
+                                if ($originalExt && $fileExt && strtolower($originalExt) === strtolower($fileExt)) {
+                                    $matchingFiles[] = [
+                                        'file' => $file,
+                                        'name' => $fileName,
+                                        'mtime' => filemtime($file)
+                                    ];
+                                }
+                            }
+                            
+                            if (!empty($matchingFiles)) {
+                                // Sort by modification time (most recent first)
+                                usort($matchingFiles, function($a, $b) {
+                                    return $b['mtime'] - $a['mtime'];
+                                });
+                                
+                                $selectedFile = $matchingFiles[0];
+                                $attachments[] = [
+                                    'id' => $selectedFile['name'],
+                                    'original_name' => $originalFileName,
+                                    'url' => url('/storage/voucher-attachments/' . $selectedFile['name']),
+                                    'size' => filesize($selectedFile['file'])
+                                ];
+                            }
+                        }
                     }
                 }
             }
@@ -760,5 +869,346 @@ class JournalVoucherController extends Controller
             ]);
 
         return $voucherNumber;
+    }
+
+    /**
+     * Export journal vouchers to CSV
+     */
+    public function exportCsv(Request $request)
+    {
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+
+        // Get filters (same as index method)
+        $search = $request->input('search');
+        $status = $request->input('status');
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+        $sortBy = $request->input('sort_by', 'voucher_date');
+        $sortDirection = $request->input('sort_direction', 'desc');
+
+        // Build query (same as index method)
+        $query = DB::table('transactions')
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('voucher_type', 'Journal');
+
+        // Apply search filter
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('voucher_number', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('reference_number', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply status filter
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        // Apply date filters
+        if ($fromDate) {
+            $query->whereDate('voucher_date', '>=', $fromDate);
+        }
+
+        if ($toDate) {
+            $query->whereDate('voucher_date', '<=', $toDate);
+        }
+
+        // Apply sorting
+        $query->orderBy($sortBy, $sortDirection);
+
+        $vouchers = $query->get();
+
+        $filename = 'journal_vouchers_' . date('Y-m-d_His') . '.csv';
+        
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($vouchers) {
+            $file = fopen('php://output', 'w');
+            
+            // Add CSV headers
+            fputcsv($file, ['ID', 'Voucher Number', 'Date', 'Description', 'Reference', 'Debit', 'Credit', 'Currency', 'Status']);
+            
+            // Add data rows
+            foreach ($vouchers as $voucher) {
+                fputcsv($file, [
+                    $voucher->id,
+                    $voucher->voucher_number,
+                    $voucher->voucher_date,
+                    $voucher->description,
+                    $voucher->reference_number ?? '',
+                    $voucher->total_debit,
+                    $voucher->total_credit,
+                    $voucher->currency_code,
+                    $voucher->status
+                ]);
+            }
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export journal vouchers to Excel
+     */
+    public function exportExcel(Request $request)
+    {
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+
+        // Get filters (same as index method)
+        $search = $request->input('search');
+        $status = $request->input('status');
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+        $sortBy = $request->input('sort_by', 'voucher_date');
+        $sortDirection = $request->input('sort_direction', 'desc');
+
+        // Build query (same as index method)
+        $query = DB::table('transactions')
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('voucher_type', 'Journal');
+
+        // Apply search filter
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('voucher_number', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('reference_number', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply status filter
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        // Apply date filters
+        if ($fromDate) {
+            $query->whereDate('voucher_date', '>=', $fromDate);
+        }
+
+        if ($toDate) {
+            $query->whereDate('voucher_date', '<=', $toDate);
+        }
+
+        // Apply sorting
+        $query->orderBy($sortBy, $sortDirection);
+
+        $vouchers = $query->get();
+
+        // For now, use CSV format but with .xlsx extension (can be enhanced with PhpSpreadsheet later)
+        $filename = 'journal_vouchers_' . date('Y-m-d_His') . '.xlsx';
+        
+        $headers = [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($vouchers) {
+            $file = fopen('php://output', 'w');
+            
+            // CSV Headers
+            fputcsv($file, [
+                'Voucher Number',
+                'Voucher Date',
+                'Description',
+                'Reference Number',
+                'Status',
+                'Total Amount',
+                'Created By',
+                'Created At'
+            ]);
+
+            foreach ($vouchers as $voucher) {
+                fputcsv($file, [
+                    $voucher->voucher_number,
+                    $voucher->voucher_date,
+                    $voucher->description,
+                    $voucher->reference_number,
+                    $voucher->status,
+                    $voucher->total_amount,
+                    $voucher->created_by,
+                    $voucher->created_at
+                ]);
+            }
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export journal vouchers to PDF
+     */
+    public function exportPdf(Request $request)
+    {
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+
+        // Get filters (same as index method)
+        $search = $request->input('search');
+        $status = $request->input('status');
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+        $sortBy = $request->input('sort_by', 'voucher_date');
+        $sortDirection = $request->input('sort_direction', 'desc');
+
+        // Build query (same as index method)
+        $query = DB::table('transactions')
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('voucher_type', 'Journal');
+
+        // Apply search filter
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('voucher_number', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('reference_number', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply status filter
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        // Apply date filters
+        if ($fromDate) {
+            $query->whereDate('voucher_date', '>=', $fromDate);
+        }
+
+        if ($toDate) {
+            $query->whereDate('voucher_date', '<=', $toDate);
+        }
+
+        // Apply sorting
+        $query->orderBy($sortBy, $sortDirection);
+
+        $vouchers = $query->get();
+
+        // Simple HTML to PDF conversion
+        $html = '<html><head><style>
+            body { font-family: Arial, sans-serif; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #4CAF50; color: white; }
+        </style></head><body>';
+        
+        $html .= '<h1>Journal Vouchers Report</h1>';
+        $html .= '<table><tr><th>ID</th><th>Voucher Number</th><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Status</th></tr>';
+        
+        foreach ($vouchers as $voucher) {
+            $html .= '<tr>';
+            $html .= '<td>' . $voucher->id . '</td>';
+            $html .= '<td>' . $voucher->voucher_number . '</td>';
+            $html .= '<td>' . $voucher->voucher_date . '</td>';
+            $html .= '<td>' . $voucher->description . '</td>';
+            $html .= '<td>' . number_format($voucher->total_debit, 2) . '</td>';
+            $html .= '<td>' . number_format($voucher->total_credit, 2) . '</td>';
+            $html .= '<td>' . $voucher->status . '</td>';
+            $html .= '</tr>';
+        }
+        
+        $html .= '</table></body></html>';
+
+        return response($html)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="journal_vouchers_' . date('Y-m-d_His') . '.pdf"');
+    }
+
+    /**
+     * Bulk post journal vouchers
+     */
+    public function bulkPost(Request $request)
+    {
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+        
+        $voucherIds = $request->input('ids', []);
+        
+        if (empty($voucherIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No vouchers selected for posting.'
+            ], 400);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $postedCount = 0;
+            $errors = [];
+
+            foreach ($voucherIds as $voucherId) {
+                $voucher = DB::table('transactions')
+                    ->where('id', $voucherId)
+                    ->where('comp_id', $compId)
+                    ->where('location_id', $locationId)
+                    ->where('voucher_type', 'Journal')
+                    ->first();
+
+                if (!$voucher) {
+                    $errors[] = "Voucher ID {$voucherId} not found.";
+                    continue;
+                }
+
+                if ($voucher->status !== 'Draft') {
+                    $errors[] = "Voucher {$voucher->voucher_number} is not in Draft status and cannot be posted.";
+                    continue;
+                }
+
+                // Update voucher status to Posted
+                DB::table('transactions')
+                    ->where('id', $voucherId)
+                    ->update([
+                        'status' => 'Posted',
+                        'posted_at' => now(),
+                        'posted_by' => auth()->id(),
+                        'updated_at' => now()
+                    ]);
+
+                $postedCount++;
+            }
+
+            DB::commit();
+
+            $message = "Successfully posted {$postedCount} voucher(s).";
+            if (!empty($errors)) {
+                $message .= " " . count($errors) . " voucher(s) could not be posted.";
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'posted_count' => $postedCount,
+                'errors' => $errors
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            Log::error('Error in bulk post journal vouchers', [
+                'error' => $e->getMessage(),
+                'voucher_ids' => $voucherIds,
+                'comp_id' => $compId,
+                'location_id' => $locationId
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while posting vouchers. Please try again.'
+            ], 500);
+        }
     }
 }

@@ -1,0 +1,257 @@
+/* Modern Compact Filter Design */
+.modern-filters-container {
+  background: var(--glass-bg, linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)));
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow, 0 4px 20px rgba(0, 0, 0, 0.1));
+}
+
+.filters-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-section {
+  flex: 0 0 200px;
+  min-width: 180px;
+  max-width: 200px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-secondary, #6b7280);
+  z-index: 2;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2.75rem;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.2));
+  border-radius: 8px;
+  background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+  color: var(--text-primary, #ffffff);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--border-focus, #3b82f6);
+  background: var(--surface-focus, rgba(255, 255, 255, 0.1));
+  box-shadow: 0 0 0 3px var(--focus-ring, rgba(59, 130, 246, 0.1));
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary, #9ca3af);
+}
+
+.filters-section {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.filter-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary, #9ca3af);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+  transition: color 0.2s ease;
+}
+
+.date-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.date-input {
+  padding: 0.5rem;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.2));
+  border-radius: 6px;
+  background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+  color: var(--text-primary, #ffffff);
+  font-size: 0.8rem;
+  width: 120px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.date-input:focus {
+  border-color: var(--border-focus, #3b82f6);
+  background: var(--surface-focus, rgba(255, 255, 255, 0.1));
+}
+
+.date-separator {
+  color: var(--text-secondary, #6b7280);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.filter-select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.2));
+  border-radius: 6px;
+  background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+  color: var(--text-primary, #ffffff);
+  font-size: 0.8rem;
+  min-width: 100px;
+  transition: all 0.2s ease;
+  outline: none;
+  cursor: pointer;
+}
+
+.filter-select:focus {
+  border-color: var(--border-focus, #3b82f6);
+  background: var(--surface-focus, rgba(255, 255, 255, 0.1));
+}
+
+.filter-select option {
+  background: var(--surface, #1f2937);
+  color: var(--text-primary, #ffffff);
+}
+
+.actions-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reset-btn {
+  padding: 0.5rem;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.2));
+  border-radius: 6px;
+  background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+  color: var(--text-secondary, #9ca3af);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reset-btn:hover {
+  background: var(--surface-focus, rgba(255, 255, 255, 0.1));
+  color: var(--text-primary, #ffffff);
+  border-color: var(--border-hover, rgba(255, 255, 255, 0.3));
+}
+
+.reset-btn:focus {
+  border-color: var(--border-focus, #3b82f6);
+  box-shadow: 0 0 0 3px var(--focus-ring, rgba(59, 130, 246, 0.1));
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .filters-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-section {
+    flex: 1;
+    min-width: auto;
+    max-width: none;
+  }
+  
+  .filters-section {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .filters-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .filter-group {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .date-inputs {
+    flex: 1;
+    justify-content: space-between;
+  }
+  
+  .date-input {
+    width: 100%;
+  }
+  
+  .filter-select {
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modern-filters-container {
+    padding: 0.75rem;
+    margin: 0.5rem;
+  }
+  
+  .date-inputs {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .date-separator {
+    text-align: center;
+  }
+}
+
+/* Dark mode enhancements */
+.dark .modern-filters-container {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.6));
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.dark .search-input,
+.dark .date-input,
+.dark .filter-select {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #e2e8f0;
+}
+
+.dark .search-input:focus,
+.dark .date-input:focus,
+.dark .filter-select:focus {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: #3b82f6;
+}
+
+.dark .reset-btn {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #94a3b8;
+}
+
+.dark .reset-btn:hover {
+  background: rgba(30, 41, 59, 0.8);
+  color: #e2e8f0;
+}
