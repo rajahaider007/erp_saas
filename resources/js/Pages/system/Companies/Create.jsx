@@ -63,7 +63,7 @@ const Breadcrumbs = ({ items }) => {
 
 // Company Form Component (Unified for Create and Edit)
 const CreateCompanyForm = () => {
-  const { errors: pageErrors, flash, company } = usePage().props;
+  const { errors: pageErrors, flash, company, currencies } = usePage().props;
   const isEdit = !!company;
   
   const companyFields = [
@@ -277,18 +277,7 @@ const CreateCompanyForm = () => {
       placeholder: 'Select currency',
       icon: CreditCard,
       required: false,
-      options: [
-        { value: 'USD', label: 'US Dollar (USD)' },
-        { value: 'EUR', label: 'Euro (EUR)' },
-        { value: 'GBP', label: 'British Pound (GBP)' },
-        { value: 'JPY', label: 'Japanese Yen (JPY)' },
-        { value: 'CAD', label: 'Canadian Dollar (CAD)' },
-        { value: 'AUD', label: 'Australian Dollar (AUD)' },
-        { value: 'CHF', label: 'Swiss Franc (CHF)' },
-        { value: 'CNY', label: 'Chinese Yuan (CNY)' },
-        { value: 'INR', label: 'Indian Rupee (INR)' },
-        { value: 'BRL', label: 'Brazilian Real (BRL)' }
-      ]
+      options: currencies || []
     },
     
     // Company Branding
@@ -304,6 +293,12 @@ const CreateCompanyForm = () => {
     {
       name: 'status',
       label: 'Status',
+      type: 'toggle',
+      required: false
+    },
+    {
+      name: 'auto_voucher_numbering',
+      label: 'Auto Voucher Numbering',
       type: 'toggle',
       required: false
     },

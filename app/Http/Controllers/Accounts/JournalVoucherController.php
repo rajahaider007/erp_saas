@@ -113,7 +113,23 @@ class JournalVoucherController extends Controller
     public function store(Request $request)
     {
         try {
-            $validator = Validator::make($request->all(), [
+            $compId = $request->input('user_comp_id');
+            $locationId = $request->input('user_location_id');
+            $userId = $request->input('user_id');
+
+            if (!$compId || !$locationId || !$userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User authentication information is required.'
+                ], 400);
+            }
+
+            // Check if company has auto voucher numbering enabled
+            $company = DB::table('companies')->where('id', $compId)->first();
+            $autoVoucherNumbering = $company->auto_voucher_numbering ?? false;
+
+            // Prepare validation rules
+            $validationRules = [
                 'voucher_date' => 'required|date',
                 'description' => 'required|string|max:500',
                 'reference_number' => 'nullable|string|max:100',
@@ -124,25 +140,37 @@ class JournalVoucherController extends Controller
                 'entries.*.credit_amount' => 'required_without:entries.*.debit_amount|numeric|min:0',
                 'currency_code' => 'required|string|max:3',
                 'exchange_rate' => 'required|numeric|min:0.000001'
-            ]);
+            ];
+
+            // Add voucher_number validation if manual numbering
+            if (!$autoVoucherNumbering) {
+                $validationRules['voucher_number'] = 'required|string|max:100';
+                
+                // Check for duplicate voucher number within same company and location
+                $duplicate = DB::table('transactions')
+                    ->where('comp_id', $compId)
+                    ->where('location_id', $locationId)
+                    ->where('voucher_number', $request->voucher_number)
+                    ->where('voucher_type', 'Journal Voucher')
+                    ->exists();
+                    
+                if ($duplicate) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Duplicate voucher number',
+                        'errors' => ['voucher_number' => ['This voucher number already exists for this company and location']]
+                    ], 422);
+                }
+            }
+
+            $validator = Validator::make($request->all(), $validationRules);
 
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Validation failed',
                     'errors' => $validator->errors()
-                ], 400);
-            }
-
-            $compId = $request->input('user_comp_id');
-            $locationId = $request->input('user_location_id');
-            $userId = $request->input('user_id');
-
-            if (!$compId || !$locationId || !$userId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'User authentication information is required.'
-                ], 400);
+                ], 422);
             }
 
             // Validate double entry principle
@@ -178,8 +206,12 @@ class JournalVoucherController extends Controller
                 ], 400);
             }
 
-            // Generate voucher number
-            $voucherNumber = $this->generateVoucherNumber($compId, $locationId, 'Journal Voucher');
+            // Get voucher number (auto-generate or use provided)
+            if ($autoVoucherNumbering) {
+                $voucherNumber = $this->generateVoucherNumber($compId, $locationId, 'Journal Voucher');
+            } else {
+                $voucherNumber = $request->voucher_number;
+            }
 
             DB::beginTransaction();
             

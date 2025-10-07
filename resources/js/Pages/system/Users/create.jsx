@@ -65,7 +65,7 @@ const Breadcrumbs = ({ items, isEdit }) => {
 
 // User Registration Form Component (Unified for Create and Edit)
 const UserRegistrationForm = () => {
-  const { errors: pageErrors, flash, companies, locations, departments, user } = usePage().props;
+  const { errors: pageErrors, flash, companies, locations, departments, user, currencies } = usePage().props;
   const isEdit = !!user;
   
   const userFields = [
@@ -261,18 +261,7 @@ const UserRegistrationForm = () => {
       placeholder: 'Select currency',
       icon: DollarSign,
       required: false,
-      options: [
-        { value: 'USD', label: 'US Dollar (USD)' },
-        { value: 'EUR', label: 'Euro (EUR)' },
-        { value: 'GBP', label: 'British Pound (GBP)' },
-        { value: 'JPY', label: 'Japanese Yen (JPY)' },
-        { value: 'CAD', label: 'Canadian Dollar (CAD)' },
-        { value: 'AUD', label: 'Australian Dollar (AUD)' },
-        { value: 'CHF', label: 'Swiss Franc (CHF)' },
-        { value: 'CNY', label: 'Chinese Yuan (CNY)' },
-        { value: 'INR', label: 'Indian Rupee (INR)' },
-        { value: 'BRL', label: 'Brazilian Real (BRL)' }
-      ]
+      options: currencies || []
     },
     {
       name: 'theme',

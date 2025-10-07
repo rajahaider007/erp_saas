@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\Currency;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -161,6 +162,23 @@ class HandleInertiaRequests extends Middleware
         }
 
 
+        // Get active currencies for dropdowns
+        $currencies = \Cache::remember('active_currencies', 3600, function () {
+            return Currency::active()
+                ->ordered()
+                ->get()
+                ->map(function ($currency) {
+                    return [
+                        'value' => $currency->code,
+                        'label' => "{$currency->name} ({$currency->code})",
+                        'symbol' => $currency->symbol,
+                        'exchange_rate' => $currency->exchange_rate,
+                        'country' => $currency->country
+                    ];
+                })
+                ->toArray();
+        });
+
         // Debug: Log the data being shared
         \Log::info('HandleInertiaRequests - Shared data:', [
             'user_id' => $user ? $user->id : null,
@@ -168,7 +186,8 @@ class HandleInertiaRequests extends Middleware
             'userRights_count' => count($userRights),
             'availableMenus_count' => count($availableMenus),
             'availableModules_count' => count($availableModules),
-            'company_name' => $company ? $company->company_name : null
+            'company_name' => $company ? $company->company_name : null,
+            'currencies_count' => count($currencies)
         ]);
 
         $sharedData = [
@@ -180,6 +199,7 @@ class HandleInertiaRequests extends Middleware
             'availableMenus' => $availableMenus,
             'availableModules' => $availableModules,
             'company' => $company,
+            'currencies' => $currencies,
         ];
         
         

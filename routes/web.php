@@ -15,6 +15,7 @@ use App\Http\Controllers\system\PackageFeatureController;
 use App\Http\Controllers\system\LocationController;
 use App\Http\Controllers\system\DepartmentController;
 use App\Http\Controllers\system\UserController;
+use App\Http\Controllers\system\CurrencyController;
 
 // Public routes
 Route::get('/', function () {
@@ -338,9 +339,27 @@ Route::prefix('accounts/journal-voucher')->name('accounts.journal-voucher.')->mi
         if (!$compId || !$locationId) {
             return Inertia::render('Accounts/JournalVoucher/Create', [
                 'accounts' => [],
+                'currencies' => [],
+                'company' => null,
                 'error' => 'Company and Location information is required. Please contact administrator.'
             ]);
         }
+
+        // Get company settings
+        $company = DB::table('companies')->where('id', $compId)->first();
+
+        // Get currencies
+        $currencies = DB::table('currencies')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get()
+            ->map(function ($currency) {
+                return [
+                    'value' => $currency->code,
+                    'label' => $currency->name,
+                    'symbol' => $currency->symbol
+                ];
+            });
 
         $accounts = DB::table('chart_of_accounts')
             ->where('comp_id', $compId)
@@ -350,7 +369,9 @@ Route::prefix('accounts/journal-voucher')->name('accounts.journal-voucher.')->mi
             ->get();
 
         return Inertia::render('Accounts/JournalVoucher/Create', [
-            'accounts' => $accounts
+            'accounts' => $accounts,
+            'currencies' => $currencies,
+            'company' => $company
         ]);
     })->name('create');
 
@@ -729,4 +750,28 @@ Route::prefix('system/users')->name('system.users.')->middleware('web.auth')->gr
     // API
     Route::get('/locations/by-company/{company}', [UserController::class, 'getLocationsByCompany'])->name('locations.by-company');
     Route::get('/departments/by-location/{location}', [UserController::class, 'getDepartmentsByLocation'])->name('departments.by-location');
+});
+
+// Currencies Management Routes
+Route::prefix('system/currencies')->name('system.currencies.')->middleware('web.auth')->group(function () {
+    Route::get('/', [CurrencyController::class, 'index'])->name('index');
+    Route::get('/create', [CurrencyController::class, 'create'])->name('create');
+    Route::post('/', [CurrencyController::class, 'store'])->name('store');
+    Route::get('/converter', [CurrencyController::class, 'converter'])->name('converter');
+    Route::get('/{currency}', [CurrencyController::class, 'show'])->name('show');
+    Route::get('/{currency}/edit', [CurrencyController::class, 'edit'])->name('edit');
+    Route::get('/{currency}/history', [CurrencyController::class, 'history'])->name('history');
+    Route::put('/{currency}', [CurrencyController::class, 'update'])->name('update');
+    Route::patch('/{currency}', [CurrencyController::class, 'update'])->name('update');
+    Route::delete('/{currency}', [CurrencyController::class, 'destroy'])->name('destroy');
+    // Special actions
+    Route::post('/{currency}/toggle-status', [CurrencyController::class, 'toggleStatus'])->name('toggle-status');
+    Route::post('/{currency}/set-as-base', [CurrencyController::class, 'setAsBase'])->name('set-as-base');
+    Route::post('/bulk-update-rates', [CurrencyController::class, 'bulkUpdateRates'])->name('bulk-update-rates');
+    Route::post('/update-from-api', [CurrencyController::class, 'updateFromApi'])->name('update-from-api');
+    Route::post('/convert', [CurrencyController::class, 'convertCurrency'])->name('convert');
+    // API endpoints for dropdowns
+    Route::get('/api/active', [CurrencyController::class, 'getActive'])->name('api.active');
+    Route::get('/api/all', [CurrencyController::class, 'getAll'])->name('api.all');
+    Route::get('/{currency}/history-data', [CurrencyController::class, 'getHistoryData'])->name('history-data');
 });

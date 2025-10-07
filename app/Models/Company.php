@@ -55,6 +55,7 @@ class Company extends Model
         'brand_color_primary',
         'brand_color_secondary',
         'status',
+        'auto_voucher_numbering',
         'package_id',
         'settings',
         'features',

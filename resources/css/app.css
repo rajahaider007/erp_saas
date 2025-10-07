@@ -1,6 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Floating Currency Widget Styles */
+@import './floating-widget.css';
+
 /* Enhanced Customizer CSS Styles */
 
 /* CSS Custom Properties for Dynamic Theming */
