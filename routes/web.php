@@ -79,203 +79,20 @@ Route::get('/accounts', function (Request $request) {
     return Inertia::render('Modules/Accounts/index');
 })->middleware('web.auth')->name('accounts');
 
-Route::get('/accounts/chart-of-accounts', function (Request $request) {
-    // User is already authenticated by web.auth middleware
-    $userId = $request->input('user_id'); // Set by web.auth middleware
-
-    // Debug: Log the user ID
-    Log::info('Chart of Accounts - User ID: ' . $userId);
-
-    $user = DB::table('tbl_users')->where('id', $userId)->first();
-
-    // Debug: Log if user is found
-    Log::info('Chart of Accounts - User found: ' . ($user ? 'Yes' : 'No'));
-
-    // Fallback: If user not found, try to get from session directly
-    if (!$user) {
-        $userId = $request->session()->get('user_id');
-        $user = DB::table('tbl_users')->where('id', $userId)->where('status', 'active')->first();
-        Log::info('Chart of Accounts - Fallback user found: ' . ($user ? 'Yes' : 'No'));
-    }
-
-    $currencies = DB::table('currencies')
-        ->where('is_active', true)
-        ->orderBy('sort_order')
-        ->get();
-
-    // Debug: Log user data
-    Log::info('Chart of Accounts - User data:', [
-        'user_comp_id' => $user->comp_id ?? 'null',
-        'user_location_id' => $user->location_id ?? 'null',
-        'session_comp_id' => $request->session()->get('user_comp_id') ?? 'null',
-        'session_location_id' => $request->session()->get('user_location_id') ?? 'null',
-        'final_comp_id' => $compId ?? 'null',
-        'final_location_id' => $locationId ?? 'null'
-    ]);
-
-    $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id') ?? $user->comp_id;
-    $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id') ?? $user->location_id;
-
-    // Validate required company and location IDs
-    if (!$compId || !$locationId) {
-        return Inertia::render('Accounts/ChartOfAccounts', [
-            'currencies' => $currencies,
-            'accounts' => [],
-            'error' => 'Company and Location information is required. Please contact administrator.'
-        ]);
-    }
-
-    $accounts = DB::table('chart_of_accounts')
-        ->where('comp_id', $compId)
-        ->where('location_id', $locationId)
-        ->orderBy('account_code')
-        ->get();
-
-    return Inertia::render('Accounts/ChartOfAccounts', [
-        'currencies' => $currencies,
-        'accounts' => $accounts
-    ]);
-})->middleware('web.auth')->name('accounts.chart-of-accounts');
+Route::get('/accounts/chart-of-accounts', [App\Http\Controllers\Accounts\ChartOfAccountsController::class, 'index'])->middleware('web.auth')->name('accounts.chart-of-accounts');
 
 // Voucher Number Configuration Routes
 Route::prefix('accounts/voucher-number-configuration')->name('accounts.voucher-number-configuration.')->middleware('web.auth')->group(function () {
-    Route::get('/', function (Request $request) {
-        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
-        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
-        
-        if (!$compId || !$locationId) {
-            return Inertia::render('Accounts/VoucherNumberConfiguration/List', [
-                'configurations' => [],
-                'error' => 'Company and Location information is required. Please contact administrator.'
-            ]);
-        }
+    Route::get('/', [App\Http\Controllers\Accounts\VoucherNumberConfigurationController::class, 'index'])->name('index');
 
-        $configurations = DB::table('voucher_number_configurations')
-            ->where('comp_id', $compId)
-            ->where('location_id', $locationId)
-            ->orderBy('voucher_type')
-            ->get();
+    Route::get('/create', [App\Http\Controllers\Accounts\VoucherNumberConfigurationController::class, 'create'])->name('create');
 
-        return Inertia::render('Accounts/VoucherNumberConfiguration/List', [
-            'configurations' => [
-                'data' => $configurations,
-                'total' => $configurations->count(),
-                'current_page' => 1,
-                'last_page' => 1,
-                'per_page' => 25,
-                'from' => 1,
-                'to' => $configurations->count()
-            ]
-        ]);
-    })->name('index');
+    Route::post('/create', [App\Http\Controllers\Accounts\VoucherNumberConfigurationController::class, 'store'])->name('store');
 
-    Route::get('/create', function (Request $request) {
-        return Inertia::render('Accounts/VoucherNumberConfiguration/create');
-    })->name('create');
+    Route::get('/{id}/edit', [App\Http\Controllers\Accounts\VoucherNumberConfigurationController::class, 'edit'])->name('edit');
 
-    Route::post('/create', function (Request $request) {
-        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
-        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
-        $userId = $request->input('user_id') ?? $request->session()->get('user_id');
-
-        if (!$compId || !$locationId || !$userId) {
-            return redirect()->back()->with('error', 'User authentication information is required.');
-        }
-
-        // Validate the request
-        $validator = Validator::make($request->all(), [
-            'voucher_type' => 'required|string|max:50',
-            'prefix' => 'required|string|max:20',
-            'number_length' => 'required|integer|min:1|max:10',
-            'reset_frequency' => 'required|in:Monthly,Yearly,Never',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        // Check if configuration already exists
-        $existing = DB::table('voucher_number_configurations')
-            ->where('comp_id', $compId)
-            ->where('location_id', $locationId)
-            ->where('voucher_type', $request->voucher_type)
-            ->first();
-
-        if ($existing) {
-            return redirect()->back()->with('error', 'Configuration already exists for this voucher type')->withInput();
-        }
-
-        // Create the configuration
-        $id = DB::table('voucher_number_configurations')->insertGetId([
-            'comp_id' => $compId,
-            'location_id' => $locationId,
-            'voucher_type' => $request->voucher_type,
-            'prefix' => $request->prefix,
-            'running_number' => 1,
-            'number_length' => $request->number_length,
-            'reset_frequency' => $request->reset_frequency,
-            'last_reset_date' => null,
-            'is_active' => true,
-            'created_by' => $userId,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-
-        return redirect()->route('accounts.voucher-number-configuration.index')
-            ->with('success', 'Voucher configuration created successfully!');
-    });
-
-    Route::get('/{id}/edit', function (Request $request, $id) {
-        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
-        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
-        
-        if (!$compId || !$locationId) {
-            return redirect()->route('accounts.voucher-number-configuration.index')
-                ->with('error', 'Company and Location information is required.');
-        }
-
-        $configuration = DB::table('voucher_number_configurations')
-            ->where('id', $id)
-            ->where('comp_id', $compId)
-            ->where('location_id', $locationId)
-            ->first();
-
-        if (!$configuration) {
-            return redirect()->route('accounts.voucher-number-configuration.index')
-                ->with('error', 'Configuration not found.');
-        }
-
-         return Inertia::render('Accounts/VoucherNumberConfiguration/create', [
-             'configuration' => $configuration,
-             'id' => $id,
-             'edit_mode' => true
-         ]);
-    })->name('edit');
-
-    Route::get('/{id}/show', function (Request $request, $id) {
-        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
-        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
-        
-        if (!$compId || !$locationId) {
-            return redirect()->route('accounts.voucher-number-configuration.index')
-                ->with('error', 'Company and Location information is required.');
-        }
-
-        $configuration = DB::table('voucher_number_configurations')
-            ->where('id', $id)
-            ->where('comp_id', $compId)
-            ->where('location_id', $locationId)
-            ->first();
-
-        if (!$configuration) {
-            return redirect()->route('accounts.voucher-number-configuration.index')
-                ->with('error', 'Configuration not found.');
-        }
-
-        return Inertia::render('Accounts/VoucherNumberConfiguration/show', [
-            'configuration' => $configuration
-        ]);
-    })->name('show');
+    Route::get('/{id}', [App\Http\Controllers\Accounts\VoucherNumberConfigurationController::class, 'show'])->name('show');
+    Route::put('/{id}', [App\Http\Controllers\Accounts\VoucherNumberConfigurationController::class, 'update'])->name('update');
 });
 
 // Chart of Accounts API Routes
@@ -315,7 +132,7 @@ Route::prefix('api/exchange-rate')->middleware('web.auth')->group(function () {
         try {
             $exchangeRateService = new \App\Services\ExchangeRateService();
             $result = $exchangeRateService->convert(1, $fromCurrency, $toCurrency);
-            
+
             if ($result) {
                 return response()->json([
                     'success' => true,
@@ -342,46 +159,7 @@ Route::prefix('api/exchange-rate')->middleware('web.auth')->group(function () {
 
 // Attachment Upload API Routes
 Route::prefix('api')->middleware('web.auth')->group(function () {
-    Route::post('/upload-attachments', function (Request $request) {
-        try {
-            $request->validate([
-                'attachments.*' => 'required|file|max:300|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif'
-            ]);
-
-            $uploadedAttachments = [];
-            
-            if ($request->hasFile('attachments')) {
-                foreach ($request->file('attachments') as $file) {
-                    $filename = time() . '_' . $file->getClientOriginalName();
-                    $path = $file->storeAs('voucher-attachments', $filename, 'public');
-                    
-                    $attachment = [
-                        'id' => uniqid(),
-                        'name' => $file->getClientOriginalName(),
-                        'filename' => $filename,
-                        'path' => $path,
-                        'url' => asset('storage/' . $path),
-                        'size' => $file->getSize(),
-                        'mime_type' => $file->getMimeType(),
-                        'created_at' => now()
-                    ];
-                    
-                    $uploadedAttachments[] = $attachment;
-                }
-            }
-
-            return response()->json([
-                'success' => true,
-                'attachments' => $uploadedAttachments
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error uploading attachments: ' . $e->getMessage()
-            ], 500);
-        }
-    });
+    Route::post('/upload-attachments', [App\Http\Controllers\AttachmentController::class, 'uploadAttachments']);
 });
 
 // Journal Voucher API Routes
@@ -394,29 +172,26 @@ Route::prefix('api/journal-voucher')->middleware('web.auth')->group(function () 
     Route::post('/{id}/post', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'post']);
 });
 
+
+// Voucher Attachments Routes
+Route::prefix('storage/voucher-attachments')->middleware('web.auth')->group(function () {
+    Route::get('/{filename}', [App\Http\Controllers\AttachmentController::class, 'serveVoucherAttachment']);
+});
+
+Route::prefix('attachments')->middleware('web.auth')->group(function () {
+    Route::get('/download/{filename}', [App\Http\Controllers\AttachmentController::class, 'downloadVoucherAttachment']);
+    Route::get('/list/{voucherId}', [App\Http\Controllers\AttachmentController::class, 'listVoucherAttachments']);
+});
+
+Route::post('/generate-voucher', [App\Http\Controllers\TestController::class, 'generateVoucher']);
+
+Route::post('/transactions', [App\Http\Controllers\TestController::class, 'getTransactions']);
+
+Route::post('/create-voucher', [App\Http\Controllers\TestController::class, 'createVoucher']);
+
+
 // Set selected module in session
-Route::post('/set-current-module', function (Request $request) {
-    $request->validate([
-        'module_id' => 'required|exists:modules,id'
-    ]);
-
-    $module = DB::table('modules')->where('id', $request->module_id)->first();
-    if (!$module) {
-        return response()->json(['success' => false, 'message' => 'Module not found']);
-    }
-
-    // Save module data to session
-    session([
-        'current_module' => [
-            'id' => $module->id,
-            'name' => $module->module_name,
-            'folder_name' => $module->folder_name,
-            'slug' => $module->slug
-        ]
-    ]);
-
-    return response()->json(['success' => true, 'module' => session('current_module')]);
-})->middleware('web.auth');
+Route::post('/set-current-module', [App\Http\Controllers\ModuleController::class, 'setCurrentModule'])->middleware('web.auth');
 
 // Get current module data from session
 Route::get('/get-current-module', function (Request $request) {
@@ -459,86 +234,10 @@ Route::get('/get-current-module', function (Request $request) {
 })->middleware('web.auth');
 
 // System Module Dashboard
-Route::get('/system/dashboard', function (Request $request) {
-    // Get system module info
-    $moduleData = DB::table('modules')
-        ->where('folder_name', 'system')
-        ->where('status', true)
-        ->first();
-
-    if (!$moduleData) {
-        abort(404, 'System module not found');
-    }
-
-    // Get system module's sections with their menus
-    $sections = DB::table('sections')
-        ->where('module_id', $moduleData->id)
-        ->where('status', true)
-        ->orderBy('sort_order', 'asc')
-        ->get();
-
-    // Get all menus for system module
-    $menus = DB::table('menus')
-        ->join('sections', 'menus.section_id', '=', 'sections.id')
-        ->where('sections.module_id', $moduleData->id)
-        ->where('menus.status', true)
-        ->orderBy('menus.sort_order', 'asc')
-        ->select('menus.*', 'sections.id as section_id')
-        ->get();
-
-    // Group menus by sections
-    $sectionsWithMenus = $sections->map(function ($section) use ($menus) {
-        $section->menus = $menus->where('section_id', $section->id)->values();
-        return $section;
-    });
-
-    return Inertia::render('Modules/Dynamic/index', [
-        'module' => $moduleData,
-        'sections' => $sectionsWithMenus,
-        'menus' => $menus
-    ]);
-})->middleware('web.auth')->name('system.dashboard');
+Route::get('/system/dashboard', [App\Http\Controllers\DashboardController::class, 'systemDashboard'])->middleware('web.auth')->name('system.dashboard');
 
 // Dynamic Module Dashboards
-Route::get('/{module}/dashboard', function (Request $request, $module) {
-    // Get module info from database
-    $moduleData = DB::table('modules')
-        ->where('folder_name', $module)
-        ->where('status', true)
-        ->first();
-
-    if (!$moduleData) {
-        abort(404, 'Module not found');
-    }
-
-    // Get module's sections with their menus
-    $sections = DB::table('sections')
-        ->where('module_id', $moduleData->id)
-        ->where('status', true)
-        ->orderBy('sort_order', 'asc')
-        ->get();
-
-    // Get all menus for this module
-    $menus = DB::table('menus')
-        ->join('sections', 'menus.section_id', '=', 'sections.id')
-        ->where('sections.module_id', $moduleData->id)
-        ->where('menus.status', true)
-        ->orderBy('menus.sort_order', 'asc')
-        ->select('menus.*', 'sections.id as section_id')
-        ->get();
-
-    // Group menus by sections
-    $sectionsWithMenus = $sections->map(function ($section) use ($menus) {
-        $section->menus = $menus->where('section_id', $section->id)->values();
-        return $section;
-    });
-
-    return Inertia::render('Modules/Dynamic/index', [
-        'module' => $moduleData,
-        'sections' => $sectionsWithMenus,
-        'menus' => $menus
-    ]);
-})->middleware('web.auth')->name('module.dashboard');
+Route::get('/{module}/dashboard', [App\Http\Controllers\DashboardController::class, 'moduleDashboard'])->middleware('web.auth')->name('module.dashboard');
 
 // System Module Management Routes (ADD MISSING EDIT ROUTE)
 Route::get('/system/AddModules', [ModuleController::class, 'index'])->middleware('web.auth')->name('system.add_modules');

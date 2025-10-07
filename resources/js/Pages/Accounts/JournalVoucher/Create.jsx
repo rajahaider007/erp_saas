@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import App from '../../App.jsx';
 import FloatingCurrencyWidget from '../../../Components/FloatingCurrencyWidget';
+import Select2 from '../../../Components/Select2';
 
 // Breadcrumbs Component
 const Breadcrumbs = ({ items }) => {
@@ -51,45 +52,45 @@ const Breadcrumbs = ({ items }) => {
 };
 
 const JournalVoucherCreate = () => {
-  const { accounts = [], voucher = null, entries = [], flash, currencies = [], company = null } = usePage().props;
+  const { accounts = [], voucher = null, entries = [], flash, currencies = [], company = null, preview_voucher_number = null } = usePage().props;
   const isEdit = !!voucher;
   const autoVoucherNumbering = true; // Always auto-generate voucher numbers
   
   const [formData, setFormData] = useState({
     voucher_date: voucher?.voucher_date || new Date().toISOString().split('T')[0],
-    voucher_number: voucher?.voucher_number || '',
+    voucher_number: voucher?.voucher_number || preview_voucher_number || '',
     description: voucher?.description || '',
     reference_number: voucher?.reference_number || '',
     base_currency_code: company?.default_currency_code || 'PKR',
     entries: entries.length > 0 ? entries.map(entry => ({
       account_id: entry.account_id,
       description: entry.description || '',
-      debit_amount: entry.debit_amount || '',
-      credit_amount: entry.credit_amount || '',
+      debit_amount: entry.debit_amount && entry.debit_amount !== '' ? parseFloat(entry.debit_amount) : null,
+      credit_amount: entry.credit_amount && entry.credit_amount !== '' ? parseFloat(entry.credit_amount) : null,
       currency_code: entry.currency_code || company?.default_currency_code || 'PKR',
       exchange_rate: entry.exchange_rate || 1.0,
-      base_debit_amount: entry.base_debit_amount || '',
-      base_credit_amount: entry.base_credit_amount || ''
+      base_debit_amount: entry.base_debit_amount && entry.base_debit_amount !== '' ? parseFloat(entry.base_debit_amount) : null,
+      base_credit_amount: entry.base_credit_amount && entry.base_credit_amount !== '' ? parseFloat(entry.base_credit_amount) : null
     })) : [
       { 
-        account_id: '', 
+        account_id: null, 
         description: '', 
-        debit_amount: '', 
-        credit_amount: '', 
+        debit_amount: null, 
+        credit_amount: null, 
         currency_code: company?.default_currency_code || 'PKR',
         exchange_rate: 1.0,
-        base_debit_amount: '', 
-        base_credit_amount: '' 
+        base_debit_amount: null, 
+        base_credit_amount: null 
       },
       { 
-        account_id: '', 
+        account_id: null, 
         description: '', 
-        debit_amount: '', 
-        credit_amount: '', 
+        debit_amount: null, 
+        credit_amount: null, 
         currency_code: company?.default_currency_code || 'PKR',
         exchange_rate: 1.0,
-        base_debit_amount: '', 
-        base_credit_amount: '' 
+        base_debit_amount: null, 
+        base_credit_amount: null 
       }
     ]
   });
@@ -99,7 +100,31 @@ const JournalVoucherCreate = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingExchangeRate, setIsLoadingExchangeRate] = useState(false);
   const [exchangeRateSource, setExchangeRateSource] = useState('manual');
-  const [attachments, setAttachments] = useState(voucher?.attachments || []);
+  const [attachments, setAttachments] = useState(() => {
+    // Handle attachments data properly - it might be a JSON string or array
+    if (!voucher?.attachments) return [];
+    
+    console.log('Initializing attachments:', { 
+      type: typeof voucher.attachments, 
+      value: voucher.attachments,
+      isArray: Array.isArray(voucher.attachments)
+    });
+    
+    // If it's a string, try to parse it as JSON
+    if (typeof voucher.attachments === 'string') {
+      try {
+        const parsed = JSON.parse(voucher.attachments);
+        console.log('Parsed attachments JSON:', parsed);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        console.warn('Failed to parse attachments JSON:', e);
+        return [];
+      }
+    }
+    
+    // If it's already an array, return it
+    return Array.isArray(voucher.attachments) ? voucher.attachments : [];
+  });
   const [uploadingAttachments, setUploadingAttachments] = useState(false);
 
   // Auto-focus on first input
@@ -223,7 +248,11 @@ const JournalVoucherCreate = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setAttachments(prev => [...prev, ...data.attachments]);
+        setAttachments(prev => {
+          const currentAttachments = Array.isArray(prev) ? prev : [];
+          const newAttachments = Array.isArray(data.attachments) ? data.attachments : [];
+          return [...currentAttachments, ...newAttachments];
+        });
         setAlert({ type: 'success', message: `${validFiles.length} attachment(s) uploaded successfully` });
       } else {
         setAlert({ type: 'error', message: 'Failed to upload attachments' });
@@ -237,7 +266,10 @@ const JournalVoucherCreate = () => {
 
   // Remove attachment
   const removeAttachment = (attachmentId) => {
-    setAttachments(prev => prev.filter(att => att.id !== attachmentId));
+    setAttachments(prev => {
+      if (!Array.isArray(prev)) return [];
+      return prev.filter(att => att && att.id !== attachmentId);
+    });
   };
 
   // Format file size
@@ -252,7 +284,9 @@ const JournalVoucherCreate = () => {
   // Calculate base currency amounts for specific entry
   const calculateBaseAmountsForEntry = (amount, exchangeRate) => {
     if (!amount || amount === '') return '';
-    const baseAmount = parseFloat(amount) * exchangeRate;
+    // Exchange rate is stored as base_currency/foreign_currency, so we need to invert it
+    // If exchange rate is 0.00353 (PKR/USD), then 1 USD = 1/0.00353 = 283.286119 PKR
+    const baseAmount = parseFloat(amount) * (1/exchangeRate);
     return baseAmount.toFixed(2);
   };
 
@@ -268,11 +302,44 @@ const JournalVoucherCreate = () => {
       entries: prev.entries.map((entry, i) => 
         i === index ? { 
           ...entry, 
-          [field]: value,
-          [baseField]: baseAmount
+          [field]: value === '' ? null : value,
+          [baseField]: baseAmount === '' ? null : baseAmount
         } : entry
       )
     }));
+  };
+
+  // Handle amount input events (onChange, onInput, onPaste)
+  const handleAmountInput = (index, field, value) => {
+    updateEntryWithBaseAmounts(index, field, value);
+    
+    // Clear opposite field if this field has a value
+    if (value && parseFloat(value) > 0) {
+      const oppositeField = field === 'debit_amount' ? 'credit_amount' : 'debit_amount';
+      updateEntryWithBaseAmounts(index, oppositeField, null);
+    }
+  };
+
+  // Handle paste events with delay to ensure value is processed
+  const handlePaste = (index, field, event) => {
+    setTimeout(() => {
+      handleAmountInput(index, field, event.target.value);
+    }, 10);
+  };
+
+  // Handle exchange rate input events
+  const handleExchangeRateInput = (index, value) => {
+    const newRate = parseFloat(value) || 0;
+    updateEntry(index, 'exchange_rate', newRate);
+    
+    // Recalculate base amounts when exchange rate changes
+    const entry = formData.entries[index];
+    if (entry.debit_amount) {
+      updateEntryWithBaseAmounts(index, 'debit_amount', entry.debit_amount);
+    }
+    if (entry.credit_amount) {
+      updateEntryWithBaseAmounts(index, 'credit_amount', entry.credit_amount);
+    }
   };
 
   // Calculate totals
@@ -305,14 +372,14 @@ const JournalVoucherCreate = () => {
     setFormData(prev => ({
       ...prev,
       entries: [...prev.entries, { 
-        account_id: '', 
+        account_id: null, 
         description: '', 
-        debit_amount: '', 
-        credit_amount: '', 
+        debit_amount: null, 
+        credit_amount: null, 
         currency_code: formData.base_currency_code,
         exchange_rate: 1.0,
-        base_debit_amount: '', 
-        base_credit_amount: '' 
+        base_debit_amount: null, 
+        base_credit_amount: null 
       }]
     }));
   };
@@ -347,7 +414,12 @@ const JournalVoucherCreate = () => {
     setErrors({});
     setAlert(null);
 
+    // Debug: Log form data
+
     // Client-side validation
+    console.log('Starting form submission validation...');
+    console.log('Form data:', formData);
+    console.log('Entries:', formData.entries);
     const newErrors = {};
 
     if (!formData.voucher_date) {
@@ -361,57 +433,89 @@ const JournalVoucherCreate = () => {
       }
     }
 
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
-    }
+    // Description is optional - no validation needed
 
+    console.log('Balance check:', { totalBaseDebit, totalBaseCredit, isBaseBalanced });
+    
     if (!isBaseBalanced) {
       newErrors.entries = 'Total debits must equal total credits in base currency';
+      console.log('Balance validation failed:', Math.abs(totalBaseDebit - totalBaseCredit));
     }
 
     // Validate entries
     formData.entries.forEach((entry, index) => {
+      console.log(`Validating entry ${index}:`, entry);
+      
       if (!entry.account_id) {
         newErrors[`entries.${index}.account_id`] = 'Account is required';
+        console.log(`Entry ${index}: Missing account_id`);
       }
       
       if (!entry.currency_code) {
         newErrors[`entries.${index}.currency_code`] = 'Currency is required';
+        console.log(`Entry ${index}: Missing currency_code`);
       }
       
       if (!entry.exchange_rate || entry.exchange_rate <= 0) {
         newErrors[`entries.${index}.exchange_rate`] = 'Valid exchange rate is required';
+        console.log(`Entry ${index}: Invalid exchange_rate:`, entry.exchange_rate);
       }
       
       const debit = parseFloat(entry.debit_amount) || 0;
       const credit = parseFloat(entry.credit_amount) || 0;
       
+      console.log(`Entry ${index} amounts:`, { debit, credit });
+      
       if (debit === 0 && credit === 0) {
         newErrors[`entries.${index}.amount`] = 'Either debit or credit amount is required';
+        console.log(`Entry ${index}: Both amounts are zero`);
       }
       
       if (debit > 0 && credit > 0) {
         newErrors[`entries.${index}.amount`] = 'Cannot have both debit and credit amounts';
+        console.log(`Entry ${index}: Both amounts are non-zero`);
       }
     });
 
+    console.log('Validation errors:', newErrors);
+    
     if (Object.keys(newErrors).length > 0) {
+      console.log('Validation failed, errors:', newErrors);
       setErrors(newErrors);
       setAlert({ type: 'error', message: 'Please correct the errors below' });
       setIsSubmitting(false);
       return;
     }
 
+    console.log('Client-side validation passed, preparing to submit...');
+    
+
     try {
       const submitData = {
         ...formData,
-        attachments: attachments.map(att => att.id)
+        entries: formData.entries.map(entry => ({
+          ...entry,
+          account_id: entry.account_id ? parseInt(entry.account_id) : null,
+          debit_amount: entry.debit_amount !== null && entry.debit_amount !== '' ? parseFloat(entry.debit_amount) : null,
+          credit_amount: entry.credit_amount !== null && entry.credit_amount !== '' ? parseFloat(entry.credit_amount) : null,
+          exchange_rate: entry.exchange_rate ? parseFloat(entry.exchange_rate) : 1.0,
+          currency_code: entry.currency_code || formData.base_currency_code,
+          base_debit_amount: entry.base_debit_amount !== null && entry.base_debit_amount !== '' ? parseFloat(entry.base_debit_amount) : null,
+          base_credit_amount: entry.base_credit_amount !== null && entry.base_credit_amount !== '' ? parseFloat(entry.base_credit_amount) : null
+        })),
+        attachments: Array.isArray(attachments) && attachments.length > 0 ? attachments.map(att => att.id) : null
       };
+
 
       if (isEdit) {
         router.put(`/accounts/journal-voucher/${voucher.id}`, submitData, {
           onSuccess: () => {
             setAlert({ type: 'success', message: 'Journal voucher updated successfully!' });
+            
+            // Don't redirect automatically - let user see the success message
+            // setTimeout(() => {
+            //   router.visit('/accounts/journal-voucher');
+            // }, 2000);
           },
           onError: (errors) => {
             setErrors(errors);
@@ -424,9 +528,16 @@ const JournalVoucherCreate = () => {
       } else {
         router.post('/accounts/journal-voucher', submitData, {
           onSuccess: () => {
+            console.log('Form submitted successfully!');
             setAlert({ type: 'success', message: 'Journal voucher created successfully!' });
+            
+            // Don't redirect automatically - let user see the success message
+            // setTimeout(() => {
+            //   router.visit('/accounts/journal-voucher');
+            // }, 2000);
           },
           onError: (errors) => {
+            console.log('Server validation errors:', errors);
             setErrors(errors);
             setAlert({ type: 'error', message: 'Please correct the errors below' });
           },
@@ -524,7 +635,7 @@ const JournalVoucherCreate = () => {
                           value={formData.voucher_number}
                           onChange={(e) => setFormData(prev => ({ ...prev, voucher_number: e.target.value }))}
                           onKeyDown={handleKeyDown}
-                          placeholder={autoVoucherNumbering ? 'Auto-generated' : 'Enter voucher number'}
+                          placeholder={autoVoucherNumbering ? (formData.voucher_number || 'Auto-generated') : 'Enter voucher number'}
                           disabled={autoVoucherNumbering || isEdit}
                           tabIndex={autoVoucherNumbering || isEdit ? -1 : 2}
                           className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
@@ -534,7 +645,9 @@ const JournalVoucherCreate = () => {
                           }`}
                         />
                         {autoVoucherNumbering && (
-                          <p className="mt-0.5 text-xs text-blue-600 dark:text-blue-400">Auto-generated</p>
+                          <p className="mt-0.5 text-xs text-blue-600 dark:text-blue-400">
+                            {formData.voucher_number ? `Voucher Number: ${formData.voucher_number}` : 'Auto-generated'}
+                          </p>
                         )}
                         {errors.voucher_number && (
                           <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.voucher_number}</p>
@@ -560,7 +673,7 @@ const JournalVoucherCreate = () => {
 
                       <div className="md:col-span-2">
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                          Description *
+                          Description
                         </label>
                         <textarea
                           id="description"
@@ -571,13 +684,24 @@ const JournalVoucherCreate = () => {
                           placeholder="Enter voucher description"
                           rows={3}
                           tabIndex={5}
+                          maxLength={250}
                           className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-vertical ${
                             errors.description ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                           }`}
                         />
-                        {errors.description && (
-                          <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.description}</p>
-                        )}
+                        <div className="flex justify-between items-center mt-1">
+                          <div>
+                            {errors.description && (
+                              <p className="text-xs text-red-600 dark:text-red-400">{errors.description}</p>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            <span className={formData.description.length > 200 ? 'text-orange-500' : formData.description.length > 230 ? 'text-red-500' : ''}>
+                              {formData.description.length}
+                            </span>
+                            /250 characters
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -628,7 +752,7 @@ const JournalVoucherCreate = () => {
                         </div>
 
                         {/* Display uploaded attachments */}
-                        {attachments.length > 0 && (
+                        {Array.isArray(attachments) && attachments.length > 0 && (
                           <div className="space-y-2">
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Uploaded Files:</h4>
                             {attachments.map((attachment) => (
@@ -640,7 +764,7 @@ const JournalVoucherCreate = () => {
                                     </svg>
                                   </div>
                                   <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{attachment.name}</p>
+                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{attachment.original_name}</p>
                                     <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(attachment.size)}</p>
                                   </div>
                                 </div>
@@ -677,6 +801,7 @@ const JournalVoucherCreate = () => {
                   </div>
                 </div>
               </div>
+
 
               {/* Journal Entries Section - Full Width */}
               <div className="mb-4">
@@ -723,10 +848,14 @@ const JournalVoucherCreate = () => {
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Account *
                           </label>
-                          <select
-                            value={entry.account_id}
-                            onChange={(e) => {
-                              const selectedAccountId = e.target.value;
+                          <Select2
+                            options={accounts.map(account => ({
+                              value: account.id,
+                              label: `${account.account_code} - ${account.account_name}`,
+                              subtext: account.account_type
+                            }))}
+                            value={entry.account_id || ''}
+                            onChange={(selectedAccountId) => {
                               updateEntry(index, 'account_id', selectedAccountId);
                               
                               // Auto-set currency based on account selection
@@ -743,19 +872,11 @@ const JournalVoucherCreate = () => {
                                 }
                               }
                             }}
-                            onKeyDown={handleKeyDown}
-                            tabIndex={10 + (index * 6) + 1}
-                            className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                              errors[`entries.${index}.account_id`] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                            }`}
-                          >
-                            <option value="">Select Account</option>
-                            {accounts.map(account => (
-                              <option key={account.id} value={account.id}>
-                                {account.account_code} - {account.account_name}
-                              </option>
-                            ))}
-                          </select>
+                            placeholder="Search and select account..."
+                            name={`account_id_${index}`}
+                            id={`account_id_${index}`}
+                            error={errors[`entries.${index}.account_id`]}
+                          />
                           {errors[`entries.${index}.account_id`] && (
                             <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors[`entries.${index}.account_id`]}</p>
                           )}
@@ -765,30 +886,25 @@ const JournalVoucherCreate = () => {
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Currency
                           </label>
-                          <select
+                          <Select2
+                            options={currencies.length > 0 ? currencies.map(currency => ({
+                              value: currency.value,
+                              label: `${currency.symbol} ${currency.label}`,
+                              subtext: currency.value
+                            })) : [{ value: 'USD', label: '$ USD - United States Dollar', subtext: 'USD' }]}
                             value={entry.currency_code}
-                            onChange={(e) => {
-                              updateEntry(index, 'currency_code', e.target.value);
-                              if (e.target.value !== formData.base_currency_code) {
-                                fetchExchangeRateForEntry(index, e.target.value);
+                            onChange={(selectedCurrency) => {
+                              updateEntry(index, 'currency_code', selectedCurrency);
+                              if (selectedCurrency !== formData.base_currency_code) {
+                                fetchExchangeRateForEntry(index, selectedCurrency);
                               } else {
                                 updateEntry(index, 'exchange_rate', 1.0);
                               }
                             }}
-                            onKeyDown={handleKeyDown}
-                            tabIndex={10 + (index * 6) + 2}
-                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                          >
-                            {currencies.length > 0 ? (
-                              currencies.map((currency) => (
-                                <option key={currency.value} value={currency.value}>
-                                  {currency.symbol} {currency.label}
-                                </option>
-                              ))
-                            ) : (
-                              <option value="USD">USD - United States Dollar</option>
-                            )}
-                          </select>
+                            placeholder="Search and select currency..."
+                            name={`currency_code_${index}`}
+                            id={`currency_code_${index}`}
+                          />
                         </div>
 
                         <div>
@@ -800,7 +916,9 @@ const JournalVoucherCreate = () => {
                               type="number"
                               step="0.000001"
                               value={entry.exchange_rate}
-                              onChange={(e) => updateEntry(index, 'exchange_rate', parseFloat(e.target.value) || 0)}
+                              onChange={(e) => handleExchangeRateInput(index, e.target.value)}
+                              onInput={(e) => handleExchangeRateInput(index, e.target.value)}
+                              onPaste={(e) => setTimeout(() => handleExchangeRateInput(index, e.target.value), 10)}
                               onKeyDown={handleKeyDown}
                               tabIndex={10 + (index * 6) + 3}
                               className="flex-1 px-2 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
@@ -836,13 +954,10 @@ const JournalVoucherCreate = () => {
                           <input
                             type="number"
                             step="0.01"
-                            value={entry.debit_amount}
-                            onChange={(e) => {
-                              updateEntryWithBaseAmounts(index, 'debit_amount', e.target.value);
-                              if (e.target.value > 0) {
-                                updateEntryWithBaseAmounts(index, 'credit_amount', '');
-                              }
-                            }}
+                            value={entry.debit_amount || ''}
+                            onChange={(e) => handleAmountInput(index, 'debit_amount', e.target.value)}
+                            onInput={(e) => handleAmountInput(index, 'debit_amount', e.target.value)}
+                            onPaste={(e) => handlePaste(index, 'debit_amount', e)}
                             onKeyDown={handleKeyDown}
                             onFocus={(e) => e.target.select()}
                             placeholder="0.00"
@@ -865,13 +980,10 @@ const JournalVoucherCreate = () => {
                           <input
                             type="number"
                             step="0.01"
-                            value={entry.credit_amount}
-                            onChange={(e) => {
-                              updateEntryWithBaseAmounts(index, 'credit_amount', e.target.value);
-                              if (e.target.value > 0) {
-                                updateEntryWithBaseAmounts(index, 'debit_amount', '');
-                              }
-                            }}
+                            value={entry.credit_amount || ''}
+                            onChange={(e) => handleAmountInput(index, 'credit_amount', e.target.value)}
+                            onInput={(e) => handleAmountInput(index, 'credit_amount', e.target.value)}
+                            onPaste={(e) => handlePaste(index, 'credit_amount', e)}
                             onKeyDown={handleKeyDown}
                             onFocus={(e) => e.target.select()}
                             placeholder="0.00"

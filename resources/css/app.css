@@ -4,6 +4,7 @@
 /* General Ledger Report Styles */
 @import './general-ledger-report.css';
 
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
