@@ -53,29 +53,54 @@ const Breadcrumbs = ({ items }) => {
 const JournalVoucherCreate = () => {
   const { accounts = [], voucher = null, entries = [], flash, currencies = [], company = null } = usePage().props;
   const isEdit = !!voucher;
-  const autoVoucherNumbering = company?.auto_voucher_numbering || false;
+  const autoVoucherNumbering = true; // Always auto-generate voucher numbers
   
   const [formData, setFormData] = useState({
     voucher_date: voucher?.voucher_date || new Date().toISOString().split('T')[0],
     voucher_number: voucher?.voucher_number || '',
     description: voucher?.description || '',
     reference_number: voucher?.reference_number || '',
-    currency_code: voucher?.currency_code || 'USD',
-    exchange_rate: voucher?.exchange_rate || 1.0,
+    base_currency_code: company?.default_currency_code || 'PKR',
     entries: entries.length > 0 ? entries.map(entry => ({
       account_id: entry.account_id,
       description: entry.description || '',
       debit_amount: entry.debit_amount || '',
-      credit_amount: entry.credit_amount || ''
+      credit_amount: entry.credit_amount || '',
+      currency_code: entry.currency_code || company?.default_currency_code || 'PKR',
+      exchange_rate: entry.exchange_rate || 1.0,
+      base_debit_amount: entry.base_debit_amount || '',
+      base_credit_amount: entry.base_credit_amount || ''
     })) : [
-      { account_id: '', description: '', debit_amount: '', credit_amount: '' },
-      { account_id: '', description: '', debit_amount: '', credit_amount: '' }
+      { 
+        account_id: '', 
+        description: '', 
+        debit_amount: '', 
+        credit_amount: '', 
+        currency_code: company?.default_currency_code || 'PKR',
+        exchange_rate: 1.0,
+        base_debit_amount: '', 
+        base_credit_amount: '' 
+      },
+      { 
+        account_id: '', 
+        description: '', 
+        debit_amount: '', 
+        credit_amount: '', 
+        currency_code: company?.default_currency_code || 'PKR',
+        exchange_rate: 1.0,
+        base_debit_amount: '', 
+        base_credit_amount: '' 
+      }
     ]
   });
   
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingExchangeRate, setIsLoadingExchangeRate] = useState(false);
+  const [exchangeRateSource, setExchangeRateSource] = useState('manual');
+  const [attachments, setAttachments] = useState(voucher?.attachments || []);
+  const [uploadingAttachments, setUploadingAttachments] = useState(false);
 
   // Auto-focus on first input
   useEffect(() => {
@@ -131,6 +156,125 @@ const JournalVoucherCreate = () => {
     }
   }, [flash]);
 
+  // Fetch exchange rate from API for specific entry
+  const fetchExchangeRateForEntry = async (entryIndex, currencyCode) => {
+    if (currencyCode === formData.base_currency_code) {
+      updateEntry(entryIndex, 'exchange_rate', 1.0);
+      return;
+    }
+
+    setIsLoadingExchangeRate(true);
+    try {
+      const response = await fetch(`/api/exchange-rate/${formData.base_currency_code}/${currencyCode}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.rate) {
+          updateEntry(entryIndex, 'exchange_rate', data.rate);
+          setAlert({ type: 'success', message: `Exchange rate updated for entry ${entryIndex + 1}: ${data.rate}` });
+        } else {
+          setAlert({ type: 'error', message: 'Failed to fetch exchange rate from API' });
+        }
+      } else {
+        setAlert({ type: 'error', message: 'Failed to fetch exchange rate from API' });
+      }
+    } catch (error) {
+      setAlert({ type: 'error', message: 'Error fetching exchange rate: ' + error.message });
+    } finally {
+      setIsLoadingExchangeRate(false);
+    }
+  };
+
+  // Handle attachment upload
+  const handleAttachmentUpload = async (files) => {
+    const maxSize = 300 * 1024; // 300KB
+    const validFiles = [];
+    const invalidFiles = [];
+
+    // Validate files
+    for (let file of files) {
+      if (file.size > maxSize) {
+        invalidFiles.push(`${file.name} (${(file.size / 1024).toFixed(1)}KB - exceeds 300KB limit)`);
+      } else {
+        validFiles.push(file);
+      }
+    }
+
+    if (invalidFiles.length > 0) {
+      setAlert({ type: 'error', message: `Files too large: ${invalidFiles.join(', ')}` });
+      return;
+    }
+
+    if (validFiles.length === 0) return;
+
+    setUploadingAttachments(true);
+    try {
+      const formData = new FormData();
+      validFiles.forEach((file, index) => {
+        formData.append(`attachments[${index}]`, file);
+      });
+
+      const response = await fetch('/api/upload-attachments', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAttachments(prev => [...prev, ...data.attachments]);
+        setAlert({ type: 'success', message: `${validFiles.length} attachment(s) uploaded successfully` });
+      } else {
+        setAlert({ type: 'error', message: 'Failed to upload attachments' });
+      }
+    } catch (error) {
+      setAlert({ type: 'error', message: 'Error uploading attachments: ' + error.message });
+    } finally {
+      setUploadingAttachments(false);
+    }
+  };
+
+  // Remove attachment
+  const removeAttachment = (attachmentId) => {
+    setAttachments(prev => prev.filter(att => att.id !== attachmentId));
+  };
+
+  // Format file size
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // Calculate base currency amounts for specific entry
+  const calculateBaseAmountsForEntry = (amount, exchangeRate) => {
+    if (!amount || amount === '') return '';
+    const baseAmount = parseFloat(amount) * exchangeRate;
+    return baseAmount.toFixed(2);
+  };
+
+  // Update entry with base currency amounts
+  const updateEntryWithBaseAmounts = (index, field, value) => {
+    const isDebit = field === 'debit_amount';
+    const baseField = isDebit ? 'base_debit_amount' : 'base_credit_amount';
+    const entry = formData.entries[index];
+    const baseAmount = calculateBaseAmountsForEntry(value, entry.exchange_rate);
+    
+    setFormData(prev => ({
+      ...prev,
+      entries: prev.entries.map((entry, i) => 
+        i === index ? { 
+          ...entry, 
+          [field]: value,
+          [baseField]: baseAmount
+        } : entry
+      )
+    }));
+  };
+
   // Calculate totals
   const calculateTotals = () => {
     const totalDebit = formData.entries.reduce((sum, entry) => {
@@ -140,18 +284,36 @@ const JournalVoucherCreate = () => {
     const totalCredit = formData.entries.reduce((sum, entry) => {
       return sum + (parseFloat(entry.credit_amount) || 0);
     }, 0);
+
+    const totalBaseDebit = formData.entries.reduce((sum, entry) => {
+      return sum + (parseFloat(entry.base_debit_amount) || 0);
+    }, 0);
     
-    return { totalDebit, totalCredit };
+    const totalBaseCredit = formData.entries.reduce((sum, entry) => {
+      return sum + (parseFloat(entry.base_credit_amount) || 0);
+    }, 0);
+    
+    return { totalDebit, totalCredit, totalBaseDebit, totalBaseCredit };
   };
 
-  const { totalDebit, totalCredit } = calculateTotals();
+  const { totalDebit, totalCredit, totalBaseDebit, totalBaseCredit } = calculateTotals();
   const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01;
+  const isBaseBalanced = Math.abs(totalBaseDebit - totalBaseCredit) < 0.01;
 
   // Add new entry
   const addEntry = () => {
     setFormData(prev => ({
       ...prev,
-      entries: [...prev.entries, { account_id: '', description: '', debit_amount: '', credit_amount: '' }]
+      entries: [...prev.entries, { 
+        account_id: '', 
+        description: '', 
+        debit_amount: '', 
+        credit_amount: '', 
+        currency_code: formData.base_currency_code,
+        exchange_rate: 1.0,
+        base_debit_amount: '', 
+        base_credit_amount: '' 
+      }]
     }));
   };
 
@@ -203,14 +365,22 @@ const JournalVoucherCreate = () => {
       newErrors.description = 'Description is required';
     }
 
-    if (!isBalanced) {
-      newErrors.entries = 'Total debits must equal total credits';
+    if (!isBaseBalanced) {
+      newErrors.entries = 'Total debits must equal total credits in base currency';
     }
 
     // Validate entries
     formData.entries.forEach((entry, index) => {
       if (!entry.account_id) {
         newErrors[`entries.${index}.account_id`] = 'Account is required';
+      }
+      
+      if (!entry.currency_code) {
+        newErrors[`entries.${index}.currency_code`] = 'Currency is required';
+      }
+      
+      if (!entry.exchange_rate || entry.exchange_rate <= 0) {
+        newErrors[`entries.${index}.exchange_rate`] = 'Valid exchange rate is required';
       }
       
       const debit = parseFloat(entry.debit_amount) || 0;
@@ -233,8 +403,13 @@ const JournalVoucherCreate = () => {
     }
 
     try {
+      const submitData = {
+        ...formData,
+        attachments: attachments.map(att => att.id)
+      };
+
       if (isEdit) {
-        router.put(`/accounts/journal-voucher/${voucher.id}`, formData, {
+        router.put(`/accounts/journal-voucher/${voucher.id}`, submitData, {
           onSuccess: () => {
             setAlert({ type: 'success', message: 'Journal voucher updated successfully!' });
           },
@@ -247,7 +422,7 @@ const JournalVoucherCreate = () => {
           }
         });
       } else {
-        router.post('/accounts/journal-voucher', formData, {
+        router.post('/accounts/journal-voucher', submitData, {
           onSuccess: () => {
             setAlert({ type: 'success', message: 'Journal voucher created successfully!' });
           },
@@ -374,28 +549,6 @@ const JournalVoucherCreate = () => {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      Currency
-                    </label>
-                    <select
-                      value={formData.currency_code}
-                      onChange={(e) => setFormData(prev => ({ ...prev, currency_code: e.target.value }))}
-                      onKeyDown={handleKeyDown}
-                      tabIndex={4}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    >
-                      {currencies.length > 0 ? (
-                        currencies.map((currency) => (
-                          <option key={currency.value} value={currency.value}>
-                            {currency.symbol} {currency.label}
-                          </option>
-                        ))
-                      ) : (
-                        <option value="USD">USD - United States Dollar</option>
-                      )}
-                    </select>
-                  </div>
 
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -414,6 +567,92 @@ const JournalVoucherCreate = () => {
                     />
                     {errors.description && (
                       <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.description}</p>
+                    )}
+                  </div>
+
+                  {/* Attachments Section */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Attachments (Max 300KB per file)
+                    </label>
+                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4">
+                      <input
+                        type="file"
+                        multiple
+                        onChange={(e) => handleAttachmentUpload(Array.from(e.target.files))}
+                        className="hidden"
+                        id="attachment-upload"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
+                      />
+                      <label
+                        htmlFor="attachment-upload"
+                        className="cursor-pointer flex flex-col items-center justify-center py-4"
+                      >
+                        {uploadingAttachments ? (
+                          <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                            <span className="text-sm">Uploading...</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                              <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                              </svg>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Click to upload files</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">PDF, DOC, XLS, Images (Max 300KB each)</p>
+                            </div>
+                          </div>
+                        )}
+                      </label>
+                    </div>
+
+                    {/* Display uploaded attachments */}
+                    {attachments.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Uploaded Files:</h4>
+                        {attachments.map((attachment) => (
+                          <div key={attachment.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <div className="p-1 bg-blue-100 dark:bg-blue-900/30 rounded">
+                                <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{attachment.name}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(attachment.size)}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <a
+                                href={attachment.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-colors"
+                                title="View file"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                              </a>
+                              <button
+                                type="button"
+                                onClick={() => removeAttachment(attachment.id)}
+                                className="p-1 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
+                                title="Remove file"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -459,16 +698,33 @@ const JournalVoucherCreate = () => {
                         )}
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div className="md:col-span-3">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div className="md:col-span-2">
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Account *
                           </label>
                           <select
                             value={entry.account_id}
-                            onChange={(e) => updateEntry(index, 'account_id', e.target.value)}
+                            onChange={(e) => {
+                              const selectedAccountId = e.target.value;
+                              updateEntry(index, 'account_id', selectedAccountId);
+                              
+                              // Auto-set currency based on account selection
+                              if (selectedAccountId) {
+                                const selectedAccount = accounts.find(acc => acc.id == selectedAccountId);
+                                if (selectedAccount && selectedAccount.currency) {
+                                  updateEntry(index, 'currency_code', selectedAccount.currency);
+                                  // Fetch exchange rate if currency is different from base currency
+                                  if (selectedAccount.currency !== formData.base_currency_code) {
+                                    fetchExchangeRateForEntry(index, selectedAccount.currency);
+                                  } else {
+                                    updateEntry(index, 'exchange_rate', 1.0);
+                                  }
+                                }
+                              }
+                            }}
                             onKeyDown={handleKeyDown}
-                            tabIndex={10 + (index * 4) + 1}
+                            tabIndex={10 + (index * 6) + 1}
                             className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                               errors[`entries.${index}.account_id`] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                             }`}
@@ -487,53 +743,131 @@ const JournalVoucherCreate = () => {
 
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Debit Amount
+                            Currency
+                          </label>
+                          <select
+                            value={entry.currency_code}
+                            onChange={(e) => {
+                              updateEntry(index, 'currency_code', e.target.value);
+                              if (e.target.value !== formData.base_currency_code) {
+                                fetchExchangeRateForEntry(index, e.target.value);
+                              } else {
+                                updateEntry(index, 'exchange_rate', 1.0);
+                              }
+                            }}
+                            onKeyDown={handleKeyDown}
+                            tabIndex={10 + (index * 6) + 2}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                          >
+                            {currencies.length > 0 ? (
+                              currencies.map((currency) => (
+                                <option key={currency.value} value={currency.value}>
+                                  {currency.symbol} {currency.label}
+                                </option>
+                              ))
+                            ) : (
+                              <option value="USD">USD - United States Dollar</option>
+                            )}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Exchange Rate
+                          </label>
+                          <div className="flex gap-1">
+                            <input
+                              type="number"
+                              step="0.000001"
+                              value={entry.exchange_rate}
+                              onChange={(e) => updateEntry(index, 'exchange_rate', parseFloat(e.target.value) || 0)}
+                              onKeyDown={handleKeyDown}
+                              tabIndex={10 + (index * 6) + 3}
+                              className="flex-1 px-2 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                              placeholder="1.000000"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => fetchExchangeRateForEntry(index, entry.currency_code)}
+                              disabled={isLoadingExchangeRate || entry.currency_code === formData.base_currency_code}
+                              className="px-2 py-2 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center"
+                              title="Fetch current exchange rate"
+                            >
+                              {isLoadingExchangeRate ? (
+                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                              ) : (
+                                <Calculator size={12} />
+                              )}
+                            </button>
+                          </div>
+                            <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                              {entry.currency_code !== formData.base_currency_code ? (
+                                `1 ${entry.currency_code} = ${(1/entry.exchange_rate).toFixed(6)} ${formData.base_currency_code}`
+                              ) : (
+                                'Base currency'
+                              )}
+                            </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Debit Amount ({entry.currency_code})
                           </label>
                           <input
                             type="number"
                             step="0.01"
                             value={entry.debit_amount}
                             onChange={(e) => {
-                              updateEntry(index, 'debit_amount', e.target.value);
+                              updateEntryWithBaseAmounts(index, 'debit_amount', e.target.value);
                               if (e.target.value > 0) {
-                                updateEntry(index, 'credit_amount', '');
+                                updateEntryWithBaseAmounts(index, 'credit_amount', '');
                               }
                             }}
                             onKeyDown={handleKeyDown}
                             onFocus={(e) => e.target.select()}
                             placeholder="0.00"
-                            tabIndex={10 + (index * 4) + 2}
+                            tabIndex={10 + (index * 6) + 4}
                             className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                               errors[`entries.${index}.amount`] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                             }`}
                           />
+                          {entry.debit_amount && entry.currency_code !== formData.base_currency_code && (
+                            <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                              Base: {entry.base_debit_amount} {formData.base_currency_code}
+                            </div>
+                          )}
                         </div>
 
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Credit Amount
+                            Credit Amount ({entry.currency_code})
                           </label>
                           <input
                             type="number"
                             step="0.01"
                             value={entry.credit_amount}
                             onChange={(e) => {
-                              updateEntry(index, 'credit_amount', e.target.value);
+                              updateEntryWithBaseAmounts(index, 'credit_amount', e.target.value);
                               if (e.target.value > 0) {
-                                updateEntry(index, 'debit_amount', '');
+                                updateEntryWithBaseAmounts(index, 'debit_amount', '');
                               }
                             }}
                             onKeyDown={handleKeyDown}
                             onFocus={(e) => e.target.select()}
                             placeholder="0.00"
-                            tabIndex={10 + (index * 4) + 3}
+                            tabIndex={10 + (index * 6) + 5}
                             className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                               errors[`entries.${index}.amount`] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                             }`}
                           />
+                          {entry.credit_amount && entry.currency_code !== formData.base_currency_code && (
+                            <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                              Base: {entry.base_credit_amount} {formData.base_currency_code}
+                            </div>
+                          )}
                         </div>
 
-                        <div>
+                        <div className="md:col-span-4">
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Description
                           </label>
@@ -543,7 +877,7 @@ const JournalVoucherCreate = () => {
                             onChange={(e) => updateEntry(index, 'description', e.target.value)}
                             onKeyDown={handleKeyDown}
                             placeholder="Entry description (optional)"
-                            tabIndex={10 + (index * 4) + 4}
+                            tabIndex={10 + (index * 6) + 6}
                             className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                           />
                         </div>
@@ -559,39 +893,98 @@ const JournalVoucherCreate = () => {
 
               {/* Totals Summary Section */}
               <div className="mb-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div>
-                    <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Total Debit</span>
-                    <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                      {totalDebit.toFixed(2)}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Total Credit</span>
-                    <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                      {totalCredit.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className={`rounded-lg px-2 py-1 ${
-                    isBalanced 
-                      ? 'bg-green-100 dark:bg-green-900/30' 
-                      : 'bg-red-100 dark:bg-red-900/30'
-                  }`}>
-                    <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Balance</span>
-                    <div className="flex items-center justify-center gap-1.5">
-                      {isBalanced ? (
-                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                      ) : (
-                        <X className="h-4 w-4 text-red-600 dark:text-red-400" />
-                      )}
-                      <span className={`text-lg font-bold ${
-                        isBalanced ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                      }`}>
-                        {Math.abs(totalDebit - totalCredit).toFixed(2)}
+                <div className="mb-3">
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    Base Currency Summary ({formData.base_currency_code})
+                  </h4>
+                  <div className="grid grid-cols-3 gap-3 text-center">
+                    <div>
+                      <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Total Debit</span>
+                      <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                        {totalBaseDebit.toFixed(2)} {formData.base_currency_code}
                       </span>
+                    </div>
+                    <div>
+                      <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Total Credit</span>
+                      <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                        {totalBaseCredit.toFixed(2)} {formData.base_currency_code}
+                      </span>
+                    </div>
+                    <div className={`rounded-lg px-2 py-1 ${
+                      isBaseBalanced 
+                        ? 'bg-green-100 dark:bg-green-900/30' 
+                        : 'bg-red-100 dark:bg-red-900/30'
+                    }`}>
+                      <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Balance</span>
+                      <div className="flex items-center justify-center gap-1.5">
+                        {isBaseBalanced ? (
+                          <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        ) : (
+                          <X className="h-4 w-4 text-red-600 dark:text-red-400" />
+                        )}
+                        <span className={`text-lg font-bold ${
+                          isBaseBalanced ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                        }`}>
+                          {Math.abs(totalBaseDebit - totalBaseCredit).toFixed(2)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                {/* Show currency breakdown */}
+                {(() => {
+                  const currencyBreakdown = {};
+                  formData.entries.forEach(entry => {
+                    if (entry.currency_code && !currencyBreakdown[entry.currency_code]) {
+                      currencyBreakdown[entry.currency_code] = { debit: 0, credit: 0 };
+                    }
+                    if (entry.currency_code) {
+                      currencyBreakdown[entry.currency_code].debit += parseFloat(entry.debit_amount) || 0;
+                      currencyBreakdown[entry.currency_code].credit += parseFloat(entry.credit_amount) || 0;
+                    }
+                  });
+
+                  return Object.keys(currencyBreakdown).length > 1 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Multi-Currency Breakdown
+                      </h4>
+                      <div className="space-y-2">
+                        {Object.entries(currencyBreakdown).map(([currency, amounts]) => (
+                          <div key={currency} className="grid grid-cols-3 gap-3 text-center text-sm">
+                            <div>
+                              <span className="block text-xs font-medium text-gray-600 dark:text-gray-400">Debit</span>
+                              <span className="font-semibold text-gray-900 dark:text-gray-100">
+                                {amounts.debit.toFixed(2)} {currency}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="block text-xs font-medium text-gray-600 dark:text-gray-400">Credit</span>
+                              <span className="font-semibold text-gray-900 dark:text-gray-100">
+                                {amounts.credit.toFixed(2)} {currency}
+                              </span>
+                            </div>
+                            <div className={`rounded px-2 py-1 ${
+                              Math.abs(amounts.debit - amounts.credit) < 0.01 
+                                ? 'bg-green-100 dark:bg-green-900/30' 
+                                : 'bg-red-100 dark:bg-red-900/30'
+                            }`}>
+                              <span className="block text-xs font-medium text-gray-600 dark:text-gray-400">Balance</span>
+                              <span className={`font-semibold ${
+                                Math.abs(amounts.debit - amounts.credit) < 0.01 
+                                  ? 'text-green-600 dark:text-green-400' 
+                                  : 'text-red-600 dark:text-red-400'
+                              }`}>
+                                {Math.abs(amounts.debit - amounts.credit).toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Form Actions */}

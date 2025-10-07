@@ -23,9 +23,6 @@ class CreateTransactionEntriesTable extends Migration
             $table->decimal('exchange_rate', 10, 6);
             $table->decimal('base_debit_amount', 15, 2)->default(0.00);
             $table->decimal('base_credit_amount', 15, 2)->default(0.00);
-            $table->unsignedBigInteger('cost_center_id')->nullable();
-            $table->unsignedBigInteger('project_id')->nullable();
-            $table->unsignedBigInteger('department_id')->nullable();
             $table->string('reference', 100)->nullable();
             $table->unsignedBigInteger('comp_id');
             $table->unsignedBigInteger('location_id');

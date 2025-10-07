@@ -271,47 +271,12 @@ const Sidebar = () => {
     loadCurrentModuleData();
   }, [url]);
 
-  // Load dynamic menus from availableMenus - only show system menus when not in a specific module
+  // Remove System section completely
   React.useEffect(() => {
-    // Only show static system menus when NOT in any module (dashboard, erp-modules, etc.)
-    if (availableMenus && availableMenus.length > 0 && !isModuleUrl(url)) {
-      // For super admin, show all menus without permission check
-      let systemMenus;
-      if (user?.role === 'super_admin') {
-        systemMenus = availableMenus;
-      } else {
-        // For other users, check permissions
-        systemMenus = availableMenus.filter(menu => canView(menu.id));
-      }
-      
-      if (systemMenus.length > 0) {
-        const systemGroup = {
-          name: 'System',
-          href: '#',
-          icon: Settings,
-          current: systemMenus.some(menu => {
-            const href = menu.route || '';
-            return href && (url === href || (url || '').startsWith(href + '/'));
-          }),
-          children: systemMenus.map(menu => ({
-            name: menu.menu_name,
-            href: menu.route || '#',
-            icon: iconFromName(menu.icon)
-          }))
-        };
-        
-        setNavigation(prev => {
-          // Keep existing navigation items and add system group
-          const existingItems = prev.filter(i => i.name !== 'System');
-          return [...existingItems, systemGroup];
-        });
-      }
-    } else if (isModuleUrl(url)) {
-      // When in any module (including system), remove static system group from navigation
-      setNavigation(prev => {
-        return prev.filter(i => i.name !== 'System');
-      });
-    }
+    // Always remove System section from navigation
+    setNavigation(prev => {
+      return prev.filter(i => i.name !== 'System');
+    });
   }, [url, canView, availableMenus, user?.role]);
 
   // Update navigation when current module data changes
@@ -363,6 +328,50 @@ const Sidebar = () => {
       return [...existingItems, ...sectionsToAdd];
     });
   }, [currentModuleData, canView, user?.role]);
+
+  // Build navigation from availableMenus (filtered by module)
+  React.useEffect(() => {
+    if (!availableMenus || availableMenus.length === 0) return;
+
+    // Get current module from URL
+    const currentModule = getCurrentModuleName(url);
+    if (!currentModule) return;
+
+    // Filter menus by current module
+    const moduleMenus = availableMenus.filter(menu => 
+      menu.folder_name === currentModule
+    );
+
+    // Group menus by section
+    const sectionsMap = {};
+    moduleMenus.forEach(menu => {
+      const sectionName = menu.section_name || 'General';
+      if (!sectionsMap[sectionName]) {
+        sectionsMap[sectionName] = {
+          name: sectionName,
+          icon: Layers,
+          children: []
+        };
+      }
+      sectionsMap[sectionName].children.push({
+        name: menu.menu_name,
+        href: menu.route || '#',
+        icon: iconFromName(menu.icon)
+      });
+    });
+
+    // Convert to array and filter out empty sections
+    const sectionsToAdd = Object.values(sectionsMap)
+      .filter(section => section.children.length > 0);
+
+    setNavigation(prev => {
+      // Remove any existing sections from this module and add new ones
+      const existingItems = prev.filter(item => 
+        !sectionsToAdd.some(section => section.name === item.name)
+      );
+      return [...existingItems, ...sectionsToAdd];
+    });
+  }, [availableMenus, url, canView, user?.role]);
 
   // Map icon name string from DB to lucide-react icon component
   const iconFromName = (name) => {

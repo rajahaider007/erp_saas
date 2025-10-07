@@ -16,36 +16,56 @@ class ExchangeRateService
     private $freeApiProviders = [
         'exchangerate-api' => 'https://api.exchangerate-api.com/v4/latest/',
         'frankfurter' => 'https://api.frankfurter.app/latest',
+        'fixer' => 'https://api.fixer.io/latest',
+        'currencylayer' => 'http://api.currencylayer.com/live',
+        'exchangerate-host' => 'https://api.exchangerate.host/latest',
+        'ecb' => 'https://api.exchangerate-api.com/v4/latest/',
     ];
 
     /**
-     * Get exchange rates from free API
+     * Get exchange rates from free API with fallback
      */
-    public function fetchExchangeRates($baseCurrency = 'USD', $provider = 'frankfurter')
+    public function fetchExchangeRates($baseCurrency = 'USD', $provider = 'auto')
     {
-        try {
-            $url = $this->getApiUrl($provider, $baseCurrency);
-            
-            Log::info("Fetching exchange rates from {$provider}", ['url' => $url]);
-            
-            $response = Http::timeout(10)->get($url);
-            
-            if (!$response->successful()) {
-                Log::error("Failed to fetch exchange rates from {$provider}", [
-                    'status' => $response->status(),
-                    'body' => $response->body()
-                ]);
-                return null;
-            }
+        // Try multiple APIs in order of reliability
+        $providers = $provider === 'auto' ? 
+            ['exchangerate-api', 'frankfurter', 'exchangerate-host'] : 
+            [$provider];
 
-            $data = $response->json();
-            
-            return $this->parseApiResponse($data, $provider);
-            
-        } catch (\Exception $e) {
-            Log::error("Error fetching exchange rates: " . $e->getMessage());
-            return null;
+        foreach ($providers as $currentProvider) {
+            try {
+                $url = $this->getApiUrl($currentProvider, $baseCurrency);
+                
+                Log::info("Fetching exchange rates from {$currentProvider}", ['url' => $url]);
+                
+                $response = Http::timeout(15)->get($url);
+                
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $parsedData = $this->parseApiResponse($data, $currentProvider);
+                    
+                    if ($parsedData && !empty($parsedData['rates'])) {
+                        Log::info("Successfully fetched rates from {$currentProvider}", [
+                            'rates_count' => count($parsedData['rates']),
+                            'base' => $parsedData['base']
+                        ]);
+                        return $parsedData;
+                    }
+                }
+                
+                Log::warning("Failed to fetch from {$currentProvider}", [
+                    'status' => $response->status(),
+                    'body' => substr($response->body(), 0, 200)
+                ]);
+                
+            } catch (\Exception $e) {
+                Log::error("Error fetching from {$currentProvider}: " . $e->getMessage());
+                continue;
+            }
         }
+        
+        Log::error("All exchange rate APIs failed");
+        return null;
     }
 
     /**
@@ -60,8 +80,17 @@ class ExchangeRateService
             case 'frankfurter':
                 return $this->freeApiProviders['frankfurter'] . '?from=' . $baseCurrency;
             
+            case 'exchangerate-host':
+                return $this->freeApiProviders['exchangerate-host'] . '?base=' . $baseCurrency;
+            
+            case 'fixer':
+                return $this->freeApiProviders['fixer'] . '?base=' . $baseCurrency;
+            
+            case 'currencylayer':
+                return $this->freeApiProviders['currencylayer'] . '?access_key=free&currencies=';
+            
             default:
-                return $this->freeApiProviders['frankfurter'] . '?from=' . $baseCurrency;
+                return $this->freeApiProviders['exchangerate-host'] . '?base=' . $baseCurrency;
         }
     }
 
@@ -85,6 +114,27 @@ class ExchangeRateService
                     'rates' => $data['rates'] ?? []
                 ];
             
+            case 'exchangerate-host':
+                return [
+                    'base' => $data['base'] ?? 'USD',
+                    'date' => $data['date'] ?? now()->toDateString(),
+                    'rates' => $data['rates'] ?? []
+                ];
+            
+            case 'fixer':
+                return [
+                    'base' => $data['base'] ?? 'USD',
+                    'date' => $data['date'] ?? now()->toDateString(),
+                    'rates' => $data['rates'] ?? []
+                ];
+            
+            case 'currencylayer':
+                return [
+                    'base' => $data['source'] ?? 'USD',
+                    'date' => $data['timestamp'] ? date('Y-m-d', $data['timestamp']) : now()->toDateString(),
+                    'rates' => $data['quotes'] ?? []
+                ];
+            
             default:
                 return null;
         }
@@ -93,7 +143,7 @@ class ExchangeRateService
     /**
      * Update all currency exchange rates from API
      */
-    public function updateAllCurrencyRates($provider = 'frankfurter', $forceUpdate = false)
+    public function updateAllCurrencyRates($provider = 'auto', $forceUpdate = false)
     {
         try {
             // Get base currency
@@ -245,6 +295,18 @@ class ExchangeRateService
     public function getSupportedProviders()
     {
         return [
+            [
+                'id' => 'auto',
+                'name' => 'Auto (Best Available)',
+                'description' => 'Automatically tries multiple APIs for best accuracy',
+                'url' => 'https://exchangerate.host/'
+            ],
+            [
+                'id' => 'exchangerate-host',
+                'name' => 'ExchangeRate-Host',
+                'description' => 'Free, real-time rates, no API key required',
+                'url' => 'https://exchangerate.host/'
+            ],
             [
                 'id' => 'frankfurter',
                 'name' => 'Frankfurter API',

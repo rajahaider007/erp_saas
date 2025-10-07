@@ -5,6 +5,9 @@
 /* Floating Currency Widget Styles */
 @import './floating-widget.css';
 
+/* General Ledger Report Styles */
+@import './general-ledger-report.css';
+
 /* Enhanced Customizer CSS Styles */
 
 /* CSS Custom Properties for Dynamic Theming */
@@ -364,4 +367,25 @@
   font-weight: 600;
   z-index: 1000;
   pointer-events: none;
+}
+
+/* Fix for form themes - remove min-height */
+.form-theme-1, .form-theme-2, .form-theme-3, .form-theme-system {
+    background: var(--background);
+    color: var(--text-primary);
+    min-height: auto !important; /* Changed from 100vh to auto */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    position: relative;
+}
+
+/* Specific fix for voucher configuration form only */
+.voucher-config-form .card {
+  height: auto !important;
+  min-height: auto !important;
+}
+
+.voucher-config-form .card-body {
+  height: auto !important;
+  min-height: auto !important;
+  padding-bottom: 1rem !important;
 }

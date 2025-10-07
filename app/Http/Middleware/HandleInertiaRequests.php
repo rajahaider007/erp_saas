@@ -125,7 +125,12 @@ class HandleInertiaRequests extends Middleware
                 // For super admin, get all menus
                 if ($user->role === 'super_admin') {
                     $availableMenus = \DB::table('menus')
-                        ->where('status', true)
+                        ->join('sections', 'menus.section_id', '=', 'sections.id')
+                        ->join('modules', 'sections.module_id', '=', 'modules.id')
+                        ->where('menus.status', true)
+                        ->where('sections.status', true)
+                        ->where('modules.status', true)
+                        ->select('menus.*', 'sections.section_name', 'sections.module_id', 'modules.module_name', 'modules.folder_name')
                         ->get()
                         ->map(function ($menu) {
                             return [
@@ -133,6 +138,10 @@ class HandleInertiaRequests extends Middleware
                                 'menu_name' => $menu->menu_name,
                                 'route' => $menu->route,
                                 'icon' => $menu->icon,
+                                'section_name' => $menu->section_name,
+                                'module_id' => $menu->module_id,
+                                'module_name' => $menu->module_name,
+                                'folder_name' => $menu->folder_name,
                             ];
                         })
                         ->toArray();
@@ -146,7 +155,9 @@ class HandleInertiaRequests extends Middleware
                         ->join('companies', 'packages.id', '=', 'companies.package_id')
                         ->where('companies.id', $user->comp_id)
                         ->where('menus.status', true)
-                        ->select('menus.*')
+                        ->where('sections.status', true)
+                        ->where('modules.status', true)
+                        ->select('menus.*', 'sections.section_name', 'sections.module_id', 'modules.module_name', 'modules.folder_name')
                         ->get()
                         ->map(function ($menu) {
                             return [
@@ -154,6 +165,10 @@ class HandleInertiaRequests extends Middleware
                                 'menu_name' => $menu->menu_name,
                                 'route' => $menu->route,
                                 'icon' => $menu->icon,
+                                'section_name' => $menu->section_name,
+                                'module_id' => $menu->module_id,
+                                'module_name' => $menu->module_name,
+                                'folder_name' => $menu->folder_name,
                             ];
                         })
                         ->toArray();
