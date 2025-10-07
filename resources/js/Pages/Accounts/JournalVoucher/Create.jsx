@@ -473,7 +473,7 @@ const JournalVoucherCreate = () => {
 
         {/* Main Form Container */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-          <div className="p-6">
+          <div className="p-6">                                           
             <form onSubmit={handleSubmit} onKeyDown={(e) => handleKeyDown(e)}>
               {/* Form Header */}
               <div className="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -485,180 +485,200 @@ const JournalVoucherCreate = () => {
                 </p>
               </div>
 
-              {/* Voucher Details Section */}
+              {/* Voucher Details and Attachments - Two Column Layout */}
               <div className="mb-4">
-                <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3">Voucher Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      Voucher Date *
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.voucher_date}
-                      onChange={(e) => setFormData(prev => ({ ...prev, voucher_date: e.target.value }))}
-                      onKeyDown={handleKeyDown}
-                      tabIndex={1}
-                      className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                        errors.voucher_date ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                      }`}
-                    />
-                    {errors.voucher_date && (
-                      <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.voucher_date}</p>
-                    )}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Voucher Details - Left Side */}
+                  <div className="lg:col-span-2">
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3">Voucher Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="voucher_date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                          Voucher Date *
+                        </label>
+                        <input
+                          type="date"
+                          id="voucher_date"
+                          name="voucher_date"
+                          value={formData.voucher_date}
+                          onChange={(e) => setFormData(prev => ({ ...prev, voucher_date: e.target.value }))}
+                          onKeyDown={handleKeyDown}
+                          tabIndex={1}
+                          className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                            errors.voucher_date ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                          }`}
+                        />
+                        {errors.voucher_date && (
+                          <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.voucher_date}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label htmlFor="voucher_number" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                          Voucher Number {!autoVoucherNumbering && !isEdit && '*'}
+                        </label>
+                        <input
+                          type="text"
+                          id="voucher_number"
+                          name="voucher_number"
+                          value={formData.voucher_number}
+                          onChange={(e) => setFormData(prev => ({ ...prev, voucher_number: e.target.value }))}
+                          onKeyDown={handleKeyDown}
+                          placeholder={autoVoucherNumbering ? 'Auto-generated' : 'Enter voucher number'}
+                          disabled={autoVoucherNumbering || isEdit}
+                          tabIndex={autoVoucherNumbering || isEdit ? -1 : 2}
+                          className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                            (autoVoucherNumbering || isEdit) ? 'bg-gray-100 dark:bg-gray-600 cursor-not-allowed opacity-60' : ''
+                          } ${
+                            errors.voucher_number ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                          }`}
+                        />
+                        {autoVoucherNumbering && (
+                          <p className="mt-0.5 text-xs text-blue-600 dark:text-blue-400">Auto-generated</p>
+                        )}
+                        {errors.voucher_number && (
+                          <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.voucher_number}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label htmlFor="reference_number" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                          Reference Number
+                        </label>
+                        <input
+                          type="text"
+                          id="reference_number"
+                          name="reference_number"
+                          value={formData.reference_number}
+                          onChange={(e) => setFormData(prev => ({ ...prev, reference_number: e.target.value }))}
+                          onKeyDown={handleKeyDown}
+                          placeholder="Enter reference number"
+                          tabIndex={3}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        />
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                          Description *
+                        </label>
+                        <textarea
+                          id="description"
+                          name="description"
+                          value={formData.description}
+                          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                          onKeyDown={handleKeyDown}
+                          placeholder="Enter voucher description"
+                          rows={3}
+                          tabIndex={5}
+                          className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-vertical ${
+                            errors.description ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                          }`}
+                        />
+                        {errors.description && (
+                          <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.description}</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      Voucher Number {!autoVoucherNumbering && !isEdit && '*'}
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.voucher_number}
-                      onChange={(e) => setFormData(prev => ({ ...prev, voucher_number: e.target.value }))}
-                      onKeyDown={handleKeyDown}
-                      placeholder={autoVoucherNumbering ? 'Auto-generated' : 'Enter voucher number'}
-                      disabled={autoVoucherNumbering || isEdit}
-                      tabIndex={autoVoucherNumbering || isEdit ? -1 : 2}
-                      className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                        (autoVoucherNumbering || isEdit) ? 'bg-gray-100 dark:bg-gray-600 cursor-not-allowed opacity-60' : ''
-                      } ${
-                        errors.voucher_number ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                      }`}
-                    />
-                    {autoVoucherNumbering && (
-                      <p className="mt-0.5 text-xs text-blue-600 dark:text-blue-400">Auto-generated</p>
-                    )}
-                    {errors.voucher_number && (
-                      <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.voucher_number}</p>
-                    )}
-                  </div>
+                  {/* Attachments - Right Side */}
+                  <div className="lg:col-span-1">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                      <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                        Attachments
+                      </h3>
+                      
+                      <div className="space-y-3">
+                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4">
+                          <input
+                            type="file"
+                            multiple
+                            onChange={(e) => handleAttachmentUpload(Array.from(e.target.files))}
+                            className="hidden"
+                            id="attachment-upload"
+                            accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
+                          />
+                          <label
+                            htmlFor="attachment-upload"
+                            className="cursor-pointer flex flex-col items-center justify-center py-4"
+                          >
+                            {uploadingAttachments ? (
+                              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                                <span className="text-sm">Uploading...</span>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center gap-2">
+                                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                                  <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                  </svg>
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Click to upload files</p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">Max 300KB each</p>
+                                </div>
+                              </div>
+                            )}
+                          </label>
+                        </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      Reference Number
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.reference_number}
-                      onChange={(e) => setFormData(prev => ({ ...prev, reference_number: e.target.value }))}
-                      onKeyDown={handleKeyDown}
-                      placeholder="Enter reference number"
-                      tabIndex={3}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    />
-                  </div>
-
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      Description *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.description}
-                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                      onKeyDown={handleKeyDown}
-                      placeholder="Enter voucher description"
-                      tabIndex={5}
-                      className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                        errors.description ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                      }`}
-                    />
-                    {errors.description && (
-                      <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.description}</p>
-                    )}
-                  </div>
-
-                  {/* Attachments Section */}
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      Attachments (Max 300KB per file)
-                    </label>
-                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4">
-                      <input
-                        type="file"
-                        multiple
-                        onChange={(e) => handleAttachmentUpload(Array.from(e.target.files))}
-                        className="hidden"
-                        id="attachment-upload"
-                        accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
-                      />
-                      <label
-                        htmlFor="attachment-upload"
-                        className="cursor-pointer flex flex-col items-center justify-center py-4"
-                      >
-                        {uploadingAttachments ? (
-                          <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                            <span className="text-sm">Uploading...</span>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center gap-2">
-                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-                              <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                              </svg>
-                            </div>
-                            <div className="text-center">
-                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Click to upload files</p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">PDF, DOC, XLS, Images (Max 300KB each)</p>
-                            </div>
+                        {/* Display uploaded attachments */}
+                        {attachments.length > 0 && (
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Uploaded Files:</h4>
+                            {attachments.map((attachment) => (
+                              <div key={attachment.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                  <div className="p-1 bg-blue-100 dark:bg-blue-900/30 rounded flex-shrink-0">
+                                    <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{attachment.name}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(attachment.size)}</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1 flex-shrink-0">
+                                  <a
+                                    href={attachment.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-1 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-colors"
+                                    title="View file"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                  </a>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeAttachment(attachment.id)}
+                                    className="p-1 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
+                                    title="Remove file"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         )}
-                      </label>
-                    </div>
-
-                    {/* Display uploaded attachments */}
-                    {attachments.length > 0 && (
-                      <div className="mt-3 space-y-2">
-                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Uploaded Files:</h4>
-                        {attachments.map((attachment) => (
-                          <div key={attachment.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div className="flex items-center gap-2">
-                              <div className="p-1 bg-blue-100 dark:bg-blue-900/30 rounded">
-                                <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{attachment.name}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(attachment.size)}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <a
-                                href={attachment.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-1 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-colors"
-                                title="View file"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                              </a>
-                              <button
-                                type="button"
-                                onClick={() => removeAttachment(attachment.id)}
-                                className="p-1 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
-                                title="Remove file"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
-                        ))}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Journal Entries Section */}
+              {/* Journal Entries Section - Full Width */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Journal Entries</h3>
@@ -891,7 +911,8 @@ const JournalVoucherCreate = () => {
                 </div>
               </div>
 
-              {/* Totals Summary Section */}
+
+              {/* Totals Summary Section - Full Width */}
               <div className="mb-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
                 <div className="mb-3">
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
@@ -911,8 +932,8 @@ const JournalVoucherCreate = () => {
                       </span>
                     </div>
                     <div className={`rounded-lg px-2 py-1 ${
-                      isBaseBalanced 
-                        ? 'bg-green-100 dark:bg-green-900/30' 
+                      isBaseBalanced
+                        ? 'bg-green-100 dark:bg-green-900/30'
                         : 'bg-red-100 dark:bg-red-900/30'
                     }`}>
                       <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Balance</span>
@@ -986,6 +1007,7 @@ const JournalVoucherCreate = () => {
                   );
                 })()}
               </div>
+
 
               {/* Form Actions */}
               <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">

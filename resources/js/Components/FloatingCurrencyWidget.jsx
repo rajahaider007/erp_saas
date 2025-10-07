@@ -316,6 +316,12 @@ const FloatingCurrencyWidget = ({ defaultOpen = false }) => {
               <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
                 💱 Real-time currency conversion powered by live exchange rates
               </p>
+              <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+                <p className="text-xs text-yellow-700 dark:text-yellow-300 text-center">
+                  ⚠️ <strong>Disclaimer:</strong> Exchange rates are approximate and may vary from actual market rates. 
+                  Rates are for informational purposes only and should not be used for official financial transactions.
+                </p>
+              </div>
             </div>
           </div>
         )}

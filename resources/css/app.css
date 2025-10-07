@@ -1,12 +1,12 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Floating Currency Widget Styles */
 @import './floating-widget.css';
 
 /* General Ledger Report Styles */
 @import './general-ledger-report.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Enhanced Customizer CSS Styles */
 

@@ -2,574 +2,481 @@
 
 namespace App\Http\Controllers\Accounts;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
+use Inertia\Inertia;
 
 class JournalVoucherController extends Controller
 {
     /**
-     * Get all journal vouchers
+     * Display a listing of journal vouchers
      */
     public function index(Request $request)
     {
-        try {
-            $compId = $request->input('user_comp_id');
-            $locationId = $request->input('user_location_id');
-            
-            if (!$compId || !$locationId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Company and Location information is required.'
-                ], 400);
-            }
-            
-            $vouchers = DB::table('transactions')
-                ->where('comp_id', $compId)
-                ->where('location_id', $locationId)
-                ->where('voucher_type', 'Journal Voucher')
-                ->orderBy('voucher_date', 'desc')
-                ->orderBy('voucher_number', 'desc')
-                ->get();
-                
-            return response()->json([
-                'success' => true,
-                'data' => $vouchers
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+        
+        if (!$compId || !$locationId) {
+            return Inertia::render('Accounts/JournalVoucher/List', [
+                'journalVouchers' => [],
+                'accounts' => [],
+                'error' => 'Company and Location information is required. Please contact administrator.'
             ]);
-            
-        } catch (\Exception $e) {
-            Log::error('Journal Voucher Index Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error retrieving journal vouchers: ' . $e->getMessage()
-            ], 500);
         }
+
+        $journalVouchers = DB::table('transactions')
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('voucher_type', 'Journal Voucher')
+            ->orderBy('voucher_date', 'desc')
+            ->orderBy('voucher_number', 'desc')
+            ->get();
+
+        $accounts = DB::table('chart_of_accounts')
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('status', 'Active')
+            ->orderBy('account_code')
+            ->get();
+
+        return Inertia::render('Accounts/JournalVoucher/List', [
+            'journalVouchers' => $journalVouchers,
+            'accounts' => $accounts
+        ]);
     }
 
     /**
-     * Get specific journal voucher with entries
+     * Show the form for creating a new journal voucher
      */
-    public function show(Request $request, $id)
+    public function create(Request $request)
     {
-        try {
-            $compId = $request->input('user_comp_id');
-            $locationId = $request->input('user_location_id');
-            
-            if (!$compId || !$locationId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Company and Location information is required.'
-                ], 400);
-            }
-            
-            $voucher = DB::table('transactions')
-                ->where('id', $id)
-                ->where('comp_id', $compId)
-                ->where('location_id', $locationId)
-                ->where('voucher_type', 'Journal Voucher')
-                ->first();
-                
-            if (!$voucher) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Journal voucher not found'
-                ], 404);
-            }
-            
-            // Get transaction entries
-            $entries = DB::table('transaction_entries')
-                ->join('chart_of_accounts', 'transaction_entries.account_id', '=', 'chart_of_accounts.id')
-                ->where('transaction_entries.transaction_id', $id)
-                ->select(
-                    'transaction_entries.*',
-                    'chart_of_accounts.account_code',
-                    'chart_of_accounts.account_name',
-                    'chart_of_accounts.account_type'
-                )
-                ->orderBy('transaction_entries.line_number')
-                ->get();
-                
-            $voucher->entries = $entries;
-                
-            return response()->json([
-                'success' => true,
-                'data' => $voucher
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+        
+        if (!$compId || !$locationId) {
+            return Inertia::render('Accounts/JournalVoucher/Create', [
+                'accounts' => [],
+                'currencies' => [],
+                'company' => null,
+                'error' => 'Company and Location information is required. Please contact administrator.'
             ]);
-            
-        } catch (\Exception $e) {
-            Log::error('Journal Voucher Show Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error retrieving journal voucher: ' . $e->getMessage()
-            ], 500);
         }
+
+        // Get company settings
+        $company = DB::table('companies')->where('id', $compId)->first();
+
+        // Get currencies
+        $currencies = DB::table('currencies')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get()
+            ->map(function ($currency) {
+                return [
+                    'value' => $currency->code,
+                    'label' => $currency->name,
+                    'symbol' => $currency->symbol
+                ];
+            });
+
+        $accounts = DB::table('chart_of_accounts')
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('status', 'Active')
+            ->orderBy('account_code')
+            ->get();
+
+        return Inertia::render('Accounts/JournalVoucher/Create', [
+            'accounts' => $accounts,
+            'currencies' => $currencies,
+            'company' => $company
+        ]);
     }
 
     /**
-     * Create new journal voucher
+     * Store a newly created journal voucher
      */
     public function store(Request $request)
     {
-        try {
-            $compId = $request->input('user_comp_id');
-            $locationId = $request->input('user_location_id');
-            $userId = $request->input('user_id');
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+        $userId = $request->input('user_id') ?? $request->session()->get('user_id');
+        
+        if (!$compId || !$locationId || !$userId) {
+            return redirect()->back()->with('error', 'User authentication information is required.');
+        }
 
-            if (!$compId || !$locationId || !$userId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'User authentication information is required.'
-                ], 400);
-            }
+        // Validate request
+        $validated = $request->validate([
+            'voucher_date' => 'required|date',
+            'description' => 'required|string|max:500',
+            'reference_number' => 'nullable|string|max:100',
+            'entries' => 'required|array|min:2',
+            'entries.*.account_id' => 'required|integer|exists:chart_of_accounts,id',
+            'entries.*.description' => 'nullable|string|max:500',
+            'entries.*.debit_amount' => 'required_without:entries.*.credit_amount|numeric|min:0',
+            'entries.*.credit_amount' => 'required_without:entries.*.debit_amount|numeric|min:0',
+            'entries.*.currency_code' => 'required|string|max:3',
+            'entries.*.exchange_rate' => 'required|numeric|min:0.000001',
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'string'
+        ]);
 
-            // Check if company has auto voucher numbering enabled
-            $company = DB::table('companies')->where('id', $compId)->first();
-            $autoVoucherNumbering = $company->auto_voucher_numbering ?? false;
+        // Always auto-generate voucher number for Journal Vouchers
+        $company = DB::table('companies')->where('id', $compId)->first();
 
-            // Prepare validation rules
-            $validationRules = [
-                'voucher_date' => 'required|date',
-                'description' => 'required|string|max:500',
-                'reference_number' => 'nullable|string|max:100',
-                'entries' => 'required|array|min:2',
-                'entries.*.account_id' => 'required|integer|exists:chart_of_accounts,id',
-                'entries.*.description' => 'nullable|string|max:500',
-                'entries.*.debit_amount' => 'required_without:entries.*.credit_amount|numeric|min:0',
-                'entries.*.credit_amount' => 'required_without:entries.*.debit_amount|numeric|min:0',
-                'currency_code' => 'required|string|max:3',
-                'exchange_rate' => 'required|numeric|min:0.000001'
-            ];
-
-            // Add voucher_number validation if manual numbering
-            if (!$autoVoucherNumbering) {
-                $validationRules['voucher_number'] = 'required|string|max:100';
-                
-                // Check for duplicate voucher number within same company and location
-                $duplicate = DB::table('transactions')
-                    ->where('comp_id', $compId)
-                    ->where('location_id', $locationId)
-                    ->where('voucher_number', $request->voucher_number)
-                    ->where('voucher_type', 'Journal Voucher')
-                    ->exists();
-                    
-                if ($duplicate) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Duplicate voucher number',
-                        'errors' => ['voucher_number' => ['This voucher number already exists for this company and location']]
-                    ], 422);
-                }
-            }
-
-            $validator = Validator::make($request->all(), $validationRules);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            // Validate double entry principle
-            $totalDebit = 0;
-            $totalCredit = 0;
+        // Validate double entry principle in base currency
+        $totalBaseDebit = 0;
+        $totalBaseCredit = 0;
+        
+        foreach ($request->entries as $entry) {
+            $debit = $entry['debit_amount'] ?? 0;
+            $credit = $entry['credit_amount'] ?? 0;
+            $exchangeRate = $entry['exchange_rate'] ?? 1.0;
             
-            foreach ($request->entries as $entry) {
+            if ($debit > 0 && $credit > 0) {
+                return redirect()->back()->withErrors(['entries' => 'Each entry must be either debit or credit, not both']);
+            }
+            
+            if ($debit == 0 && $credit == 0) {
+                return redirect()->back()->withErrors(['entries' => 'Each entry must have either debit or credit amount']);
+            }
+            
+            // Convert to base currency
+            $baseDebit = $debit * $exchangeRate;
+            $baseCredit = $credit * $exchangeRate;
+            
+            $totalBaseDebit += $baseDebit;
+            $totalBaseCredit += $baseCredit;
+        }
+        
+        if (abs($totalBaseDebit - $totalBaseCredit) > 0.01) {
+            return redirect()->back()->withErrors(['entries' => 'Total debits must equal total credits in base currency (Double Entry Principle)']);
+        }
+
+        // Auto-generate voucher number
+        $voucherNumber = $this->generateVoucherNumber($compId, $locationId, 'Journal Voucher');
+        
+        // Debug: Log the generated voucher number
+        Log::info('Generated voucher number: ' . $voucherNumber . ' for company: ' . $compId . ', location: ' . $locationId);
+
+        DB::beginTransaction();
+        
+        try {
+            // Create transaction
+            $transactionId = DB::table('transactions')->insertGetId([
+                'voucher_number' => $voucherNumber,
+                'voucher_date' => $request->voucher_date,
+                'voucher_type' => 'Journal Voucher',
+                'reference_number' => $request->reference_number,
+                'description' => $request->description,
+                'status' => 'Draft',
+                'total_debit' => $totalBaseDebit,
+                'total_credit' => $totalBaseCredit,
+                'currency_code' => $company->default_currency_code ?? 'PKR',
+                'exchange_rate' => 1.0,
+                'base_currency_total' => $totalBaseDebit,
+                'attachments' => json_encode($request->attachments ?? []),
+                'period_id' => 1, // Default period - should be calculated based on date
+                'comp_id' => $compId,
+                'location_id' => $locationId,
+                'created_by' => $userId,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            // Create transaction entries
+            foreach ($request->entries as $index => $entry) {
                 $debit = $entry['debit_amount'] ?? 0;
                 $credit = $entry['credit_amount'] ?? 0;
+                $exchangeRate = $entry['exchange_rate'] ?? 1.0;
                 
-                if ($debit > 0 && $credit > 0) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Each entry must be either debit or credit, not both'
-                    ], 400);
-                }
+                // Calculate base currency amounts
+                $baseDebit = $debit * $exchangeRate;
+                $baseCredit = $credit * $exchangeRate;
                 
-                if ($debit == 0 && $credit == 0) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Each entry must have either debit or credit amount'
-                    ], 400);
-                }
-                
-                $totalDebit += $debit;
-                $totalCredit += $credit;
-            }
-            
-            if (abs($totalDebit - $totalCredit) > 0.01) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Total debits must equal total credits (Double Entry Principle)'
-                ], 400);
-            }
-
-            // Get voucher number (auto-generate or use provided)
-            if ($autoVoucherNumbering) {
-                $voucherNumber = $this->generateVoucherNumber($compId, $locationId, 'Journal Voucher');
-            } else {
-                $voucherNumber = $request->voucher_number;
-            }
-
-            DB::beginTransaction();
-            
-            try {
-                // Create transaction
-                $transactionId = DB::table('transactions')->insertGetId([
-                    'voucher_number' => $voucherNumber,
-                    'voucher_date' => $request->voucher_date,
-                    'voucher_type' => 'Journal Voucher',
-                    'reference_number' => $request->reference_number,
-                    'description' => $request->description,
-                    'status' => 'Draft',
-                    'total_debit' => $totalDebit,
-                    'total_credit' => $totalCredit,
-                    'currency_code' => $request->currency_code,
-                    'exchange_rate' => $request->exchange_rate,
-                    'base_currency_total' => $totalDebit,
-                    'period_id' => 1, // Default period - should be calculated based on date
+                DB::table('transaction_entries')->insert([
+                    'transaction_id' => $transactionId,
+                    'line_number' => $index + 1,
+                    'account_id' => $entry['account_id'],
+                    'description' => $entry['description'],
+                    'debit_amount' => $debit,
+                    'credit_amount' => $credit,
+                    'currency_code' => $entry['currency_code'],
+                    'exchange_rate' => $exchangeRate,
+                    'base_debit_amount' => $baseDebit,
+                    'base_credit_amount' => $baseCredit,
                     'comp_id' => $compId,
                     'location_id' => $locationId,
-                    'created_by' => $userId,
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
-
-                // Create transaction entries
-                foreach ($request->entries as $index => $entry) {
-                    DB::table('transaction_entries')->insert([
-                        'transaction_id' => $transactionId,
-                        'line_number' => $index + 1,
-                        'account_id' => $entry['account_id'],
-                        'description' => $entry['description'],
-                        'debit_amount' => $entry['debit_amount'] ?? 0,
-                        'credit_amount' => $entry['credit_amount'] ?? 0,
-                        'currency_code' => $request->currency_code,
-                        'exchange_rate' => $request->exchange_rate,
-                        'base_debit_amount' => $entry['debit_amount'] ?? 0,
-                        'base_credit_amount' => $entry['credit_amount'] ?? 0,
-                        'comp_id' => $compId,
-                        'location_id' => $locationId,
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ]);
-                }
-
-                DB::commit();
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Journal voucher created successfully',
-                    'data' => [
-                        'transaction_id' => $transactionId,
-                        'voucher_number' => $voucherNumber
-                    ]
-                ]);
-
-            } catch (\Exception $e) {
-                DB::rollback();
-                throw $e;
             }
 
+            DB::commit();
+
+            return redirect()->route('accounts.journal-voucher.index')
+                           ->with('success', 'Journal voucher created successfully!');
+
         } catch (\Exception $e) {
-            Log::error('Journal Voucher Store Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error creating journal voucher: ' . $e->getMessage()
-            ], 500);
+            DB::rollback();
+            return redirect()->back()->with('error', 'Error creating journal voucher: ' . $e->getMessage());
         }
     }
 
     /**
-     * Update journal voucher
+     * Display the specified journal voucher
+     */
+    public function show(Request $request, $id)
+    {
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+        
+        if (!$compId || !$locationId) {
+            return Inertia::render('Accounts/JournalVoucher/Show', [
+                'voucher' => null,
+                'entries' => [],
+                'error' => 'Company and Location information is required. Please contact administrator.'
+            ]);
+        }
+
+        $voucher = DB::table('transactions')
+            ->where('id', $id)
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('voucher_type', 'Journal Voucher')
+            ->first();
+
+        if (!$voucher) {
+            abort(404, 'Journal voucher not found');
+        }
+
+        $entries = DB::table('transaction_entries')
+            ->join('chart_of_accounts', 'transaction_entries.account_id', '=', 'chart_of_accounts.id')
+            ->where('transaction_entries.transaction_id', $id)
+            ->select(
+                'transaction_entries.*',
+                'chart_of_accounts.account_code',
+                'chart_of_accounts.account_name',
+                'chart_of_accounts.account_type'
+            )
+            ->orderBy('transaction_entries.line_number')
+            ->get();
+
+        return Inertia::render('Accounts/JournalVoucher/Show', [
+            'voucher' => $voucher,
+            'entries' => $entries
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified journal voucher
+     */
+    public function edit(Request $request, $id)
+    {
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+        
+        if (!$compId || !$locationId) {
+            return Inertia::render('Accounts/JournalVoucher/Create', [
+                'accounts' => [],
+                'voucher' => null,
+                'entries' => [],
+                'error' => 'Company and Location information is required. Please contact administrator.'
+            ]);
+        }
+
+        $voucher = DB::table('transactions')
+            ->where('id', $id)
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('voucher_type', 'Journal Voucher')
+            ->first();
+
+        if (!$voucher) {
+            abort(404, 'Journal voucher not found');
+        }
+
+        if ($voucher->status !== 'Draft') {
+            return redirect()->route('accounts.journal-voucher.index')
+                ->with('error', 'Only draft vouchers can be edited');
+        }
+
+        $entries = DB::table('transaction_entries')
+            ->where('transaction_id', $id)
+            ->orderBy('line_number')
+            ->get();
+
+        $accounts = DB::table('chart_of_accounts')
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('status', 'Active')
+            ->orderBy('account_code')
+            ->get();
+
+        // Load attachments
+        $attachments = [];
+        if ($voucher->attachments) {
+            $attachmentIds = json_decode($voucher->attachments, true);
+            if (is_array($attachmentIds)) {
+                // In a real implementation, you would fetch from a proper attachments table
+                // For now, we'll create mock attachment objects
+                $attachments = array_map(function($id) {
+                    return [
+                        'id' => $id,
+                        'name' => 'Attachment ' . $id,
+                        'url' => '#',
+                        'size' => 0
+                    ];
+                }, $attachmentIds);
+            }
+        }
+
+        return Inertia::render('Accounts/JournalVoucher/Create', [
+            'voucher' => $voucher,
+            'entries' => $entries,
+            'accounts' => $accounts,
+            'attachments' => $attachments
+        ]);
+    }
+
+    /**
+     * Update the specified journal voucher
      */
     public function update(Request $request, $id)
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'voucher_date' => 'required|date',
-                'description' => 'required|string|max:500',
-                'reference_number' => 'nullable|string|max:100',
-                'entries' => 'required|array|min:2',
-                'entries.*.account_id' => 'required|integer|exists:chart_of_accounts,id',
-                'entries.*.description' => 'nullable|string|max:500',
-                'entries.*.debit_amount' => 'required_without:entries.*.credit_amount|numeric|min:0',
-                'entries.*.credit_amount' => 'required_without:entries.*.debit_amount|numeric|min:0',
-                'currency_code' => 'required|string|max:3',
-                'exchange_rate' => 'required|numeric|min:0.000001'
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 400);
-            }
-
-            $compId = $request->input('user_comp_id');
-            $locationId = $request->input('user_location_id');
-
-            if (!$compId || !$locationId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Company and Location information is required.'
-                ], 400);
-            }
-
-            // Check if voucher exists and is editable
-            $voucher = DB::table('transactions')
-                ->where('id', $id)
-                ->where('comp_id', $compId)
-                ->where('location_id', $locationId)
-                ->where('voucher_type', 'Journal Voucher')
-                ->first();
-
-            if (!$voucher) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Journal voucher not found'
-                ], 404);
-            }
-
-            if ($voucher->status !== 'Draft') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Only draft vouchers can be edited'
-                ], 400);
-            }
-
-            // Validate double entry principle
-            $totalDebit = 0;
-            $totalCredit = 0;
-            
-            foreach ($request->entries as $entry) {
-                $debit = $entry['debit_amount'] ?? 0;
-                $credit = $entry['credit_amount'] ?? 0;
-                
-                if ($debit > 0 && $credit > 0) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Each entry must be either debit or credit, not both'
-                    ], 400);
-                }
-                
-                if ($debit == 0 && $credit == 0) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Each entry must have either debit or credit amount'
-                    ], 400);
-                }
-                
-                $totalDebit += $debit;
-                $totalCredit += $credit;
-            }
-            
-            if (abs($totalDebit - $totalCredit) > 0.01) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Total debits must equal total credits (Double Entry Principle)'
-                ], 400);
-            }
-
-            DB::beginTransaction();
-            
-            try {
-                // Update transaction
-                DB::table('transactions')
-                    ->where('id', $id)
-                    ->update([
-                        'voucher_date' => $request->voucher_date,
-                        'reference_number' => $request->reference_number,
-                        'description' => $request->description,
-                        'total_debit' => $totalDebit,
-                        'total_credit' => $totalCredit,
-                        'currency_code' => $request->currency_code,
-                        'exchange_rate' => $request->exchange_rate,
-                        'base_currency_total' => $totalDebit,
-                        'updated_at' => now()
-                    ]);
-
-                // Delete existing entries
-                DB::table('transaction_entries')
-                    ->where('transaction_id', $id)
-                    ->delete();
-
-                // Create new transaction entries
-                foreach ($request->entries as $index => $entry) {
-                    DB::table('transaction_entries')->insert([
-                        'transaction_id' => $id,
-                        'line_number' => $index + 1,
-                        'account_id' => $entry['account_id'],
-                        'description' => $entry['description'],
-                        'debit_amount' => $entry['debit_amount'] ?? 0,
-                        'credit_amount' => $entry['credit_amount'] ?? 0,
-                        'currency_code' => $request->currency_code,
-                        'exchange_rate' => $request->exchange_rate,
-                        'base_debit_amount' => $entry['debit_amount'] ?? 0,
-                        'base_credit_amount' => $entry['credit_amount'] ?? 0,
-                        'comp_id' => $compId,
-                        'location_id' => $locationId,
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ]);
-                }
-
-                DB::commit();
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Journal voucher updated successfully'
-                ]);
-
-            } catch (\Exception $e) {
-                DB::rollback();
-                throw $e;
-            }
-
-        } catch (\Exception $e) {
-            Log::error('Journal Voucher Update Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error updating journal voucher: ' . $e->getMessage()
-            ], 500);
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+        
+        if (!$compId || !$locationId) {
+            return redirect()->back()->with('error', 'User authentication information is required.');
         }
-    }
 
-    /**
-     * Delete journal voucher
-     */
-    public function destroy(Request $request, $id)
-    {
-        try {
-            $compId = $request->input('user_comp_id');
-            $locationId = $request->input('user_location_id');
+        // Validate request
+        $validated = $request->validate([
+            'voucher_date' => 'required|date',
+            'description' => 'required|string|max:500',
+            'reference_number' => 'nullable|string|max:100',
+            'entries' => 'required|array|min:2',
+            'entries.*.account_id' => 'required|integer|exists:chart_of_accounts,id',
+            'entries.*.description' => 'nullable|string|max:500',
+            'entries.*.debit_amount' => 'required_without:entries.*.credit_amount|numeric|min:0',
+            'entries.*.credit_amount' => 'required_without:entries.*.debit_amount|numeric|min:0',
+            'entries.*.currency_code' => 'required|string|max:3',
+            'entries.*.exchange_rate' => 'required|numeric|min:0.000001',
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'string'
+        ]);
 
-            if (!$compId || !$locationId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Company and Location information is required.'
-                ], 400);
-            }
+        // Check if voucher exists and is editable
+        $voucher = DB::table('transactions')
+            ->where('id', $id)
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('voucher_type', 'Journal Voucher')
+            ->first();
 
-            // Check if voucher exists and is deletable
-            $voucher = DB::table('transactions')
-                ->where('id', $id)
-                ->where('comp_id', $compId)
-                ->where('location_id', $locationId)
-                ->where('voucher_type', 'Journal Voucher')
-                ->first();
-
-            if (!$voucher) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Journal voucher not found'
-                ], 404);
-            }
-
-            if ($voucher->status !== 'Draft') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Only draft vouchers can be deleted'
-                ], 400);
-            }
-
-            DB::beginTransaction();
-            
-            try {
-                // Delete transaction entries first
-                DB::table('transaction_entries')
-                    ->where('transaction_id', $id)
-                    ->delete();
-
-                // Delete transaction
-                DB::table('transactions')
-                    ->where('id', $id)
-                    ->delete();
-
-                DB::commit();
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Journal voucher deleted successfully'
-                ]);
-
-            } catch (\Exception $e) {
-                DB::rollback();
-                throw $e;
-            }
-
-        } catch (\Exception $e) {
-            Log::error('Journal Voucher Delete Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error deleting journal voucher: ' . $e->getMessage()
-            ], 500);
+        if (!$voucher) {
+            return redirect()->back()->with('error', 'Journal voucher not found');
         }
-    }
 
-    /**
-     * Post journal voucher (change status from Draft to Posted)
-     */
-    public function post(Request $request, $id)
-    {
+        if ($voucher->status !== 'Draft') {
+            return redirect()->back()->with('error', 'Only draft vouchers can be edited');
+        }
+
+        // Validate double entry principle in base currency
+        $totalBaseDebit = 0;
+        $totalBaseCredit = 0;
+        
+        foreach ($request->entries as $entry) {
+            $debit = $entry['debit_amount'] ?? 0;
+            $credit = $entry['credit_amount'] ?? 0;
+            $exchangeRate = $entry['exchange_rate'] ?? 1.0;
+            
+            if ($debit > 0 && $credit > 0) {
+                return redirect()->back()->withErrors(['entries' => 'Each entry must be either debit or credit, not both']);
+            }
+            
+            if ($debit == 0 && $credit == 0) {
+                return redirect()->back()->withErrors(['entries' => 'Each entry must have either debit or credit amount']);
+            }
+            
+            // Convert to base currency
+            $baseDebit = $debit * $exchangeRate;
+            $baseCredit = $credit * $exchangeRate;
+            
+            $totalBaseDebit += $baseDebit;
+            $totalBaseCredit += $baseCredit;
+        }
+        
+        if (abs($totalBaseDebit - $totalBaseCredit) > 0.01) {
+            return redirect()->back()->withErrors(['entries' => 'Total debits must equal total credits in base currency (Double Entry Principle)']);
+        }
+
+        // Get company for base currency
+        $company = DB::table('companies')->where('id', $compId)->first();
+
+        DB::beginTransaction();
+        
         try {
-            $compId = $request->input('user_comp_id');
-            $locationId = $request->input('user_location_id');
-            $userId = $request->input('user_id');
-
-            if (!$compId || !$locationId || !$userId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'User authentication information is required.'
-                ], 400);
-            }
-
-            // Check if voucher exists and can be posted
-            $voucher = DB::table('transactions')
-                ->where('id', $id)
-                ->where('comp_id', $compId)
-                ->where('location_id', $locationId)
-                ->where('voucher_type', 'Journal Voucher')
-                ->first();
-
-            if (!$voucher) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Journal voucher not found'
-                ], 404);
-            }
-
-            if ($voucher->status !== 'Draft') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Only draft vouchers can be posted'
-                ], 400);
-            }
-
-            // Update transaction status
+            // Update transaction
             DB::table('transactions')
                 ->where('id', $id)
                 ->update([
-                    'status' => 'Posted',
-                    'posted_by' => $userId,
-                    'posted_at' => now(),
+                    'voucher_date' => $request->voucher_date,
+                    'reference_number' => $request->reference_number,
+                    'description' => $request->description,
+                    'total_debit' => $totalBaseDebit,
+                    'total_credit' => $totalBaseCredit,
+                    'currency_code' => $company->default_currency_code ?? 'PKR',
+                    'exchange_rate' => 1.0,
+                    'base_currency_total' => $totalBaseDebit,
+                    'attachments' => json_encode($request->attachments ?? []),
                     'updated_at' => now()
                 ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Journal voucher posted successfully'
-            ]);
+            // Delete existing entries
+            DB::table('transaction_entries')
+                ->where('transaction_id', $id)
+                ->delete();
+
+            // Create new transaction entries
+            foreach ($request->entries as $index => $entry) {
+                $debit = $entry['debit_amount'] ?? 0;
+                $credit = $entry['credit_amount'] ?? 0;
+                $exchangeRate = $entry['exchange_rate'] ?? 1.0;
+                
+                // Calculate base currency amounts
+                $baseDebit = $debit * $exchangeRate;
+                $baseCredit = $credit * $exchangeRate;
+                
+                DB::table('transaction_entries')->insert([
+                    'transaction_id' => $id,
+                    'line_number' => $index + 1,
+                    'account_id' => $entry['account_id'],
+                    'description' => $entry['description'],
+                    'debit_amount' => $debit,
+                    'credit_amount' => $credit,
+                    'currency_code' => $entry['currency_code'],
+                    'exchange_rate' => $exchangeRate,
+                    'base_debit_amount' => $baseDebit,
+                    'base_credit_amount' => $baseCredit,
+                    'comp_id' => $compId,
+                    'location_id' => $locationId,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('accounts.journal-voucher.index')
+                           ->with('success', 'Journal voucher updated successfully!');
 
         } catch (\Exception $e) {
-            Log::error('Journal Voucher Post Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error posting journal voucher: ' . $e->getMessage()
-            ], 500);
+            DB::rollback();
+            return redirect()->back()->with('error', 'Error updating journal voucher: ' . $e->getMessage());
         }
     }
 
@@ -586,16 +493,53 @@ class JournalVoucherController extends Controller
             ->first();
 
         if (!$config) {
-            // Default format if no configuration found
-            return 'JV-' . date('Y') . '-' . str_pad(1, 4, '0', STR_PAD_LEFT);
+            // Create default configuration if none exists
+            $defaultConfig = [
+                'comp_id' => $compId,
+                'location_id' => $locationId,
+                'voucher_type' => $voucherType,
+                'prefix' => 'JV',
+                'number_length' => 4,
+                'running_number' => 1,
+                'reset_frequency' => 'Never',
+                'status' => 'Active',
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
+            
+            $configId = DB::table('voucher_number_configurations')->insertGetId($defaultConfig);
+            $config = (object) array_merge($defaultConfig, ['id' => $configId]);
+            
+            Log::info('Created default voucher configuration for company: ' . $compId . ', location: ' . $locationId);
         }
 
         $runningNumber = $config->running_number;
         $numberLength = $config->number_length;
         $prefix = $config->prefix;
+        $resetFrequency = $config->reset_frequency;
 
-        // Generate voucher number
-        $voucherNumber = $prefix . '-' . str_pad($runningNumber, $numberLength, '0', STR_PAD_LEFT);
+        // Check if we need to reset the running number based on frequency
+        $shouldReset = false;
+        $lastReset = $config->last_reset_date;
+        
+        if ($resetFrequency === 'Monthly') {
+            $shouldReset = !$lastReset || (now()->format('Y-m') !== date('Y-m', strtotime($lastReset)));
+        } elseif ($resetFrequency === 'Yearly') {
+            $shouldReset = !$lastReset || (now()->format('Y') !== date('Y', strtotime($lastReset)));
+        }
+
+        if ($shouldReset) {
+            $runningNumber = 1;
+            // Update last reset date
+            DB::table('voucher_number_configurations')
+                ->where('id', $config->id)
+                ->update(['last_reset_date' => now()]);
+        }
+
+        // Generate voucher number based on configuration
+        $voucherNumber = $prefix . str_pad($runningNumber, $numberLength, '0', STR_PAD_LEFT);
+        
+        Log::info('Generated voucher number: ' . $voucherNumber . ' (prefix: ' . $prefix . ', running: ' . $runningNumber . ', length: ' . $numberLength . ')');
 
         // Update running number
         DB::table('voucher_number_configurations')
