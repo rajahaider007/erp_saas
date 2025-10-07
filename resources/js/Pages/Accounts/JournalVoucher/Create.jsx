@@ -52,7 +52,7 @@ const Breadcrumbs = ({ items }) => {
 };
 
 const JournalVoucherCreate = () => {
-  const { accounts = [], voucher = null, entries = [], flash, currencies = [], company = null, preview_voucher_number = null } = usePage().props;
+  const { accounts = [], voucher = null, entries = [], flash, currencies = [], company = null, preview_voucher_number = null, attachments: initialAttachments = [] } = usePage().props;
   const isEdit = !!voucher;
   const autoVoucherNumbering = true; // Always auto-generate voucher numbers
   
@@ -101,10 +101,16 @@ const JournalVoucherCreate = () => {
   const [isLoadingExchangeRate, setIsLoadingExchangeRate] = useState(false);
   const [exchangeRateSource, setExchangeRateSource] = useState('manual');
   const [attachments, setAttachments] = useState(() => {
-    // Handle attachments data properly - it might be a JSON string or array
+    // Use initialAttachments from props if available (for edit mode)
+    if (initialAttachments && Array.isArray(initialAttachments) && initialAttachments.length > 0) {
+      console.log('Initializing attachments from props:', initialAttachments);
+      return initialAttachments;
+    }
+    
+    // Fallback to voucher.attachments if available
     if (!voucher?.attachments) return [];
     
-    console.log('Initializing attachments:', { 
+    console.log('Initializing attachments from voucher:', { 
       type: typeof voucher.attachments, 
       value: voucher.attachments,
       isArray: Array.isArray(voucher.attachments)

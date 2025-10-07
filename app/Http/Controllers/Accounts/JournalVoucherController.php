@@ -397,24 +397,67 @@ class JournalVoucherController extends Controller
         $attachments = [];
         if ($voucher->attachments) {
             $attachmentIds = json_decode($voucher->attachments, true);
+            
             if (is_array($attachmentIds)) {
-                // In a real implementation, you would fetch from a proper attachments table
-                // For now, we'll create mock attachment objects
-                $attachments = array_map(function($id) {
-                    return [
-                        'id' => $id,
-                        'name' => 'Attachment ' . $id,
-                        'url' => '#',
-                        'size' => 0
-                    ];
-                }, $attachmentIds);
+                foreach ($attachmentIds as $attachmentId) {
+                    $filePath = storage_path('app/public/voucher-attachments/' . $attachmentId);
+                    
+                    if (file_exists($filePath)) {
+                        $attachments[] = [
+                            'id' => $attachmentId,
+                            'original_name' => $attachmentId,
+                            'url' => url('/storage/voucher-attachments/' . $attachmentId),
+                            'size' => filesize($filePath)
+                        ];
+                    } else {
+                        // Try to find a matching file with similar name
+                        $attachmentDir = storage_path('app/public/voucher-attachments/');
+                        $files = glob($attachmentDir . '*');
+                        
+                        // Extract the original filename from the attachment ID
+                        $parts = explode('_', $attachmentId);
+                        $originalFileName = end($parts); // Get the last part which should be the original filename
+                        
+                        foreach ($files as $file) {
+                            $fileName = basename($file);
+                            
+                            // Check if the file ends with the original filename
+                            if (str_ends_with($fileName, $originalFileName)) {
+                                $attachments[] = [
+                                    'id' => $fileName,
+                                    'original_name' => $originalFileName, // Use the original filename
+                                    'url' => url('/storage/voucher-attachments/' . $fileName),
+                                    'size' => filesize($file)
+                                ];
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
+
+        // Get company settings and currencies for the form
+        $company = DB::table('companies')->where('id', $compId)->first();
+        
+        $currencies = DB::table('currencies')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get()
+            ->map(function ($currency) {
+                return [
+                    'value' => $currency->code,
+                    'label' => $currency->name,
+                    'symbol' => $currency->symbol
+                ];
+            });
 
         return Inertia::render('Accounts/JournalVoucher/Create', [
             'voucher' => $voucher,
             'entries' => $entries,
             'accounts' => $accounts,
+            'currencies' => $currencies,
+            'company' => $company,
             'attachments' => $attachments
         ]);
     }
