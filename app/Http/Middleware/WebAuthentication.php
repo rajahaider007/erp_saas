@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class WebAuthentication
@@ -14,10 +15,11 @@ class WebAuthentication
         $user = $this->getAuthenticatedUser($request);
 
         if (!$user) {
-            if ($request->header('X-Inertia')) {
-                return redirect()->route('login');
+            // For web requests, always redirect to login
+            if ($request->expectsJson() || $request->header('X-Inertia')) {
+                return response()->json(['error' => 'Unauthorized'], 401);
             }
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return redirect()->route('login')->with('error', 'Please log in to access this resource.');
         }
 
         // ... locked account check ...
@@ -65,7 +67,7 @@ class WebAuthentication
                 ->first();
 
         } catch (\Exception $e) {
-            \Log::error('Web auth error: '.$e->getMessage());
+            Log::error('Web auth error: '.$e->getMessage());
             return null;
         }
     }

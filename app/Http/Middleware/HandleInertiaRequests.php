@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use App\Models\Currency;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -35,7 +37,22 @@ class HandleInertiaRequests extends Middleware
         $userId = $request->session()->get('user_id');
         
         if ($userId) {
-            $user = \DB::table('tbl_users')->where('id', $userId)->first();
+            $user = DB::table('tbl_users')->where('id', $userId)->where('status', 'active')->first();
+        }
+        
+        // If no user is authenticated, return minimal shared data
+        if (!$user) {
+            return [
+                ...parent::share($request),
+                'auth' => [
+                    'user' => null,
+                ],
+                'userRights' => [],
+                'availableMenus' => [],
+                'availableModules' => [],
+                'company' => null,
+                'currencies' => [],
+            ];
         }
         
         $userRights = [];
@@ -47,7 +64,7 @@ class HandleInertiaRequests extends Middleware
 
         if ($user) {
             // Get user rights
-            $userRights = \DB::table('user_rights')
+            $userRights = DB::table('user_rights')
                 ->where('user_id', $user->id)
                 ->get()
                 ->map(function ($right) {
@@ -63,7 +80,7 @@ class HandleInertiaRequests extends Middleware
                 
             // Get company data
             if ($user->comp_id) {
-                $company = \DB::table('companies')
+                $company = DB::table('companies')
                     ->where('id', $user->comp_id)
                     ->first();
             }
@@ -72,7 +89,7 @@ class HandleInertiaRequests extends Middleware
             if ($user->comp_id) {
                 // For super admin, get all modules
                 if ($user->role === 'super_admin') {
-                    $availableModules = \DB::table('modules')
+                    $availableModules = DB::table('modules')
                         ->where('status', true)
                         ->orderBy('sort_order', 'asc')
                         ->orderBy('module_name', 'asc')
@@ -93,7 +110,7 @@ class HandleInertiaRequests extends Middleware
                         ->toArray();
                 } else {
                     // For other users, get modules through package system
-                    $availableModules = \DB::table('modules')
+                    $availableModules = DB::table('modules')
                         ->join('package_modules', 'modules.id', '=', 'package_modules.module_id')
                         ->join('packages', 'package_modules.package_id', '=', 'packages.id')
                         ->join('companies', 'packages.id', '=', 'companies.package_id')
@@ -124,7 +141,7 @@ class HandleInertiaRequests extends Middleware
             if ($user->comp_id) {
                 // For super admin, get all menus
                 if ($user->role === 'super_admin') {
-                    $availableMenus = \DB::table('menus')
+                    $availableMenus = DB::table('menus')
                         ->join('sections', 'menus.section_id', '=', 'sections.id')
                         ->join('modules', 'sections.module_id', '=', 'modules.id')
                         ->where('menus.status', true)
@@ -147,7 +164,7 @@ class HandleInertiaRequests extends Middleware
                         ->toArray();
                 } else {
                     // For other users, use package system
-                    $availableMenus = \DB::table('menus')
+                    $availableMenus = DB::table('menus')
                         ->join('sections', 'menus.section_id', '=', 'sections.id')
                         ->join('modules', 'sections.module_id', '=', 'modules.id')
                         ->join('package_modules', 'modules.id', '=', 'package_modules.module_id')
@@ -178,7 +195,7 @@ class HandleInertiaRequests extends Middleware
 
 
         // Get active currencies for dropdowns
-        $currencies = \Cache::remember('active_currencies', 3600, function () {
+        $currencies = Cache::remember('active_currencies', 3600, function () {
             return Currency::active()
                 ->ordered()
                 ->get()
@@ -194,16 +211,6 @@ class HandleInertiaRequests extends Middleware
                 ->toArray();
         });
 
-        // Debug: Log the data being shared
-        \Log::info('HandleInertiaRequests - Shared data:', [
-            'user_id' => $user ? $user->id : null,
-            'user_role' => $user ? $user->role : null,
-            'userRights_count' => count($userRights),
-            'availableMenus_count' => count($availableMenus),
-            'availableModules_count' => count($availableModules),
-            'company_name' => $company ? $company->company_name : null,
-            'currencies_count' => count($currencies)
-        ]);
 
         $sharedData = [
             ...parent::share($request),

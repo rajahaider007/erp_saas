@@ -786,7 +786,6 @@ const JournalVoucherList = () => {
                     onChange={(e) => handleFromDateFilter(e.target.value)}
                     placeholder="From"
                   />
-                  <span className="date-separator">to</span>
                   <input
                     type="date"
                     className="date-input"
