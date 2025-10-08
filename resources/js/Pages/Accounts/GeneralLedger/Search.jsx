@@ -1,0 +1,391 @@
+import React, { useState } from 'react';
+import { router, usePage } from '@inertiajs/react';
+import Select from 'react-select';
+import { 
+  Search as SearchIcon, 
+  Filter, 
+  FileText,
+  Database,
+  Calendar,
+  RefreshCcw,
+  ChevronRight,
+  BookOpen,
+  TrendingUp
+} from 'lucide-react';
+import App from '../../App.jsx';
+
+const GeneralLedgerSearch = () => {
+  const { accounts = [], flash } = usePage().props;
+  
+  const [selectedAccount, setSelectedAccount] = useState(null);
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [voucherType, setVoucherType] = useState('');
+  const [status, setStatus] = useState('Posted');
+  const [minAmount, setMinAmount] = useState('');
+  const [maxAmount, setMaxAmount] = useState('');
+
+  const handleGenerateReport = () => {
+    const params = new URLSearchParams();
+    if (selectedAccount) params.set('account_id', selectedAccount.value);
+    if (fromDate) params.set('from_date', fromDate);
+    if (toDate) params.set('to_date', toDate);
+    if (voucherType) params.set('voucher_type', voucherType);
+    if (status) params.set('status', status);
+    if (minAmount) params.set('min_amount', minAmount);
+    if (maxAmount) params.set('max_amount', maxAmount);
+    
+    router.get('/accounts/general-ledger/report?' + params.toString());
+  };
+
+  const handleReset = () => {
+    setSelectedAccount(null);
+    setFromDate('');
+    setToDate('');
+    setVoucherType('');
+    setStatus('Posted');
+    setMinAmount('');
+    setMaxAmount('');
+  };
+
+  // Prepare options for Select2
+  const accountOptions = [
+    { value: '', label: 'All Accounts (Consolidated Report)' },
+    ...accounts.map(account => ({
+      value: account.id,
+      label: `${account.account_code} - ${account.account_name}`
+    }))
+  ];
+
+
+  // Custom styles for react-select to match dark theme
+  const customSelectStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      backgroundColor: '#1e293b',
+      borderColor: state.isFocused ? '#3b82f6' : '#475569',
+      borderWidth: '1px',
+      borderRadius: '0.5rem',
+      padding: '0.375rem 0.5rem',
+      boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
+      '&:hover': {
+        borderColor: '#3b82f6'
+      }
+    }),
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: '#1e293b',
+      borderRadius: '0.5rem',
+      border: '1px solid #475569',
+      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)'
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? '#334155' : '#1e293b',
+      color: state.isFocused ? '#f1f5f9' : '#cbd5e1',
+      padding: '0.75rem 1rem',
+      cursor: 'pointer',
+      '&:active': {
+        backgroundColor: '#475569'
+      }
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: '#f1f5f9'
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: '#f1f5f9'
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: '#94a3b8'
+    }),
+    menuList: (provided) => ({
+      ...provided,
+      padding: 0,
+      maxHeight: '300px'
+    })
+  };
+
+  const setTodayFilter = () => {
+    const today = new Date().toISOString().split('T')[0];
+    setFromDate(today);
+    setToDate(today);
+  };
+
+  const setThisWeekFilter = () => {
+    const now = new Date();
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+    const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 6));
+    setFromDate(startOfWeek.toISOString().split('T')[0]);
+    setToDate(endOfWeek.toISOString().split('T')[0]);
+  };
+
+  const setThisMonthFilter = () => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    setFromDate(startOfMonth.toISOString().split('T')[0]);
+    setToDate(endOfMonth.toISOString().split('T')[0]);
+  };
+
+  const setThisYearFilter = () => {
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const endOfYear = new Date(now.getFullYear(), 11, 31);
+    setFromDate(startOfYear.toISOString().split('T')[0]);
+    setToDate(endOfYear.toISOString().split('T')[0]);
+  };
+
+  const statusOptions = [
+    { value: '', label: 'All Status' },
+    { value: 'Posted', label: 'Posted' },
+    { value: 'Approved', label: 'Approved' },
+    { value: 'Draft', label: 'Draft' }
+  ];
+
+  return (
+    <App>
+      <div className="advanced-module-manager form-theme-system">
+        {/* Header */}
+        <div className="manager-header">
+          <div className="header-main">
+            <div className="title-section">
+              <h1 className="page-title">
+                <BookOpen className="title-icon" />
+                General Ledger - Report Filters
+              </h1>
+              <div className="stats-summary">
+                <div className="stat-item">
+                  <Database size={16} />
+                  <span>{accounts?.length || 0} Accounts Available</span>
+                </div>
+                <div className="stat-item">
+                  <TrendingUp size={16} />
+                  <span>Select filters to generate report</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="header-actions">
+              <button
+                className="btn btn-icon"
+                onClick={handleReset}
+                title="Reset All Filters"
+              >
+                <RefreshCcw size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Flash Messages */}
+        {flash?.success && (
+          <div className="mb-4 p-4 rounded-lg bg-green-50 border border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300 animate-slideIn">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <FileText className="h-5 w-5" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">{flash.success}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Filter Selection Panel */}
+        <div className="main-content">
+          <div className="p-8">
+            <div className="max-w-4xl mx-auto">
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  <Filter className="inline-block mr-2" size={20} />
+                  Select Report Filters
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Choose the filters below to generate your General Ledger report. All filters are optional.
+                </p>
+              </div>
+
+              {/* Filters Grid */}
+              <div className="grid grid-cols-1 gap-6">
+                {/* Account Selection with Select2 */}
+                <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
+                    <Database size={16} />
+                    Account Selection
+                  </label>
+                  <Select
+                    options={accountOptions}
+                    value={selectedAccount}
+                    onChange={setSelectedAccount}
+                    styles={customSelectStyles}
+                    placeholder="Search and select account..."
+                    isClearable
+                    isSearchable
+                    className="react-select-container"
+                    classNamePrefix="react-select"
+                  />
+                  <p className="text-xs text-gray-400 mt-2">
+                    Leave blank to generate consolidated report for all accounts
+                  </p>
+                </div>
+
+                {/* Date Range */}
+                <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
+                    <Calendar size={16} />
+                    Date Range
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">From Date</label>
+                      <input
+                        type="date"
+                        className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        value={fromDate}
+                        onChange={(e) => setFromDate(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">To Date</label>
+                      <input
+                        type="date"
+                        className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        value={toDate}
+                        onChange={(e) => setToDate(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Quick Date Filters */}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                      onClick={setTodayFilter}
+                      className="px-3 py-1.5 bg-slate-600 hover:bg-blue-600 text-gray-300 hover:text-white rounded-lg text-xs font-medium transition-all"
+                    >
+                      Today
+                    </button>
+                    <button
+                      onClick={setThisWeekFilter}
+                      className="px-3 py-1.5 bg-slate-600 hover:bg-blue-600 text-gray-300 hover:text-white rounded-lg text-xs font-medium transition-all"
+                    >
+                      This Week
+                    </button>
+                    <button
+                      onClick={setThisMonthFilter}
+                      className="px-3 py-1.5 bg-slate-600 hover:bg-blue-600 text-gray-300 hover:text-white rounded-lg text-xs font-medium transition-all"
+                    >
+                      This Month
+                    </button>
+                    <button
+                      onClick={setThisYearFilter}
+                      className="px-3 py-1.5 bg-slate-600 hover:bg-blue-600 text-gray-300 hover:text-white rounded-lg text-xs font-medium transition-all"
+                    >
+                      This Year
+                    </button>
+                  </div>
+                </div>
+
+                {/* Voucher Type */}
+                <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
+                    <FileText size={16} />
+                    Voucher Type
+                  </label>
+                  <select
+                    className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    value={voucherType}
+                    onChange={(e) => setVoucherType(e.target.value)}
+                  >
+                    <option value="">All Voucher Types</option>
+                    <option value="Journal">Journal Voucher</option>
+                    <option value="Payment">Payment Voucher</option>
+                    <option value="Receipt">Receipt Voucher</option>
+                    <option value="Contra">Contra Voucher</option>
+                  </select>
+                </div>
+
+                {/* Status */}
+                <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
+                    <Filter size={16} />
+                    Transaction Status
+                  </label>
+                  <select
+                    className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                  >
+                    {statusOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+
+                {/* Amount Range */}
+                <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
+                    <TrendingUp size={16} />
+                    Amount Range (Optional)
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">Minimum Amount</label>
+                      <input
+                        type="number"
+                        className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="0.00"
+                        value={minAmount}
+                        onChange={(e) => setMinAmount(e.target.value)}
+                        step="0.01"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">Maximum Amount</label>
+                      <input
+                        type="number"
+                        className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="0.00"
+                        value={maxAmount}
+                        onChange={(e) => setMaxAmount(e.target.value)}
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-3 pt-6 border-t border-slate-600">
+                  <button
+                    onClick={handleReset}
+                    className="px-6 py-3 bg-slate-600 hover:bg-slate-500 text-gray-200 rounded-lg font-medium transition-all flex items-center gap-2"
+                  >
+                    <RefreshCcw size={18} />
+                    Reset Filters
+                  </button>
+                  <button
+                    onClick={handleGenerateReport}
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all flex items-center gap-2 shadow-lg hover:shadow-blue-500/50"
+                  >
+                    <SearchIcon size={18} />
+                    Generate Report
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </App>
+  );
+};
+
+export default GeneralLedgerSearch;
+

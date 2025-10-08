@@ -138,6 +138,15 @@ Route::prefix('accounts/journal-voucher')->name('accounts.journal-voucher.')->mi
     Route::post('/bulk-post', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'bulkPost'])->name('bulk-post');
 });
 
+// General Ledger Routes
+Route::prefix('accounts/general-ledger')->name('accounts.general-ledger.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\Accounts\GeneralLedgerController::class, 'search'])->name('search');
+    Route::get('/report', [App\Http\Controllers\Accounts\GeneralLedgerController::class, 'index'])->name('report');
+    Route::get('/print', [App\Http\Controllers\Accounts\GeneralLedgerController::class, 'print'])->name('print');
+    Route::get('/export-excel', [App\Http\Controllers\Accounts\GeneralLedgerController::class, 'exportExcel'])->name('export-excel');
+    Route::get('/export-pdf', [App\Http\Controllers\Accounts\GeneralLedgerController::class, 'exportPDF'])->name('export-pdf');
+});
+
 
 // Exchange Rate API Routes
 Route::prefix('api/exchange-rate')->middleware('web.auth')->group(function () {
@@ -418,3 +427,11 @@ Route::prefix('system/currencies')->name('system.currencies.')->middleware('web.
     Route::get('/api/all', [CurrencyController::class, 'getAll'])->name('api.all');
     Route::get('/{currency}/history-data', [CurrencyController::class, 'getHistoryData'])->name('history-data');
 });
+
+// Currency Ledger Routes
+Route::get('/accounts/currency-ledger', [App\Http\Controllers\Accounts\CurrencyLedgerController::class, 'search'])->name('currency-ledger');
+Route::get('/accounts/currency-ledger/search', [App\Http\Controllers\Accounts\CurrencyLedgerController::class, 'search'])->name('currency-ledger.search');
+Route::get('/accounts/currency-ledger/report', [App\Http\Controllers\Accounts\CurrencyLedgerController::class, 'index'])->name('currency-ledger.report');
+Route::get('/accounts/currency-ledger/print', [App\Http\Controllers\Accounts\CurrencyLedgerController::class, 'print'])->name('currency-ledger.print');
+Route::get('/accounts/currency-ledger/export-excel', [App\Http\Controllers\Accounts\CurrencyLedgerController::class, 'exportExcel'])->name('currency-ledger.export-excel');
+Route::get('/accounts/currency-ledger/export-pdf', [App\Http\Controllers\Accounts\CurrencyLedgerController::class, 'exportPDF'])->name('currency-ledger.export-pdf');

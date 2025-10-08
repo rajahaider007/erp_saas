@@ -4,6 +4,9 @@
 /* General Ledger Report Styles */
 @import './general-ledger-report.css';
 
+/* Reports Styles */
+@import './reports.css';
+
 /* Form Themes */
 @import './form-themes.css';
 
