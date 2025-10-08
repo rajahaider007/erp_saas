@@ -59,20 +59,64 @@ const List = () => {
               <a href='/system/locations/create' className="btn btn-primary"><Plus size={20} />Add Location</a>
             </div>
           </div>
-          <div className="filters-bar">
-            <div className="filter-group">
-              <div className="search-container"><Search className="search-icon" size={20} /><input type="text" className="search-input" placeholder="Search locations..." value={search} onChange={(e)=>setSearch(e.target.value)} /></div>
-              <select className="filter-select" value={companyId} onChange={(e)=>setCompanyId(e.target.value)}>
-                <option value="">All Companies</option>
-                {companies.map(company => <option key={company.id} value={company.id}>{company.company_name}</option>)}
-              </select>
-              <select className="filter-select" value={statusFilter} onChange={(e)=>setStatusFilter(e.target.value)}>
-                <option value="">All Status</option>
-                <option value="1">Active</option>
-                <option value="0">Inactive</option>
-              </select>
+          {/* Modern Compact Filters */}
+          <div className="modern-filters-container">
+            <div className="filters-toolbar">
+              <div className="search-section">
+                <div className="search-input-wrapper">
+                  <Search className="search-icon" size={18} />
+                  <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Search locations..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">Company</label>
+                  <select
+                    className="filter-select"
+                    value={companyId}
+                    onChange={(e) => setCompanyId(e.target.value)}
+                  >
+                    <option value="">All Companies</option>
+                    {companies.map(company => (
+                      <option key={company.id} value={company.id}>{company.company_name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">Status</label>
+                  <select
+                    className="filter-select"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  >
+                    <option value="">All Status</option>
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
+                  </select>
+                </div>
+
+                <button
+                  className="reset-btn"
+                  onClick={() => {
+                    setSearch('');
+                    setCompanyId('');
+                    setStatusFilter('');
+                    const params = new URLSearchParams();
+                    params.set('page', '1');
+                    router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
+                  }}
+                  title="Reset all filters"
+                >
+                  <RefreshCcw size={16} />
+                </button>
+              </div>
             </div>
-            <div className="view-controls"><button className="btn btn-icon" onClick={()=>setShowColumnSelector(!showColumnSelector)} title="Show/Hide Columns"><Columns size={20} /></button></div>
           </div>
         </div>
 

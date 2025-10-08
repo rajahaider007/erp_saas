@@ -123,6 +123,13 @@ Route::prefix('accounts/journal-voucher')->name('accounts.journal-voucher.')->mi
     Route::get('/{id}', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'show'])->name('show');
     Route::get('/{id}/edit', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'edit'])->name('edit');
     Route::put('/{id}', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'update'])->name('update');
+    // Print routes
+    Route::get('/{id}/print-summary', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'printSummary'])->name('print-summary');
+    Route::get('/{id}/print-detailed', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'printDetailed'])->name('print-detailed');
+    // Post route
+    Route::post('/{id}/post', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'post'])->name('post');
+    // Delete route
+    Route::delete('/{id}', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'destroy'])->name('destroy');
     // Export routes
     Route::get('/export-csv', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'exportCsv'])->name('export-csv');
     Route::get('/export-excel', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'exportExcel'])->name('export-excel');

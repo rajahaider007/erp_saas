@@ -135,13 +135,31 @@ const JournalVoucherShow = () => {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <button className="inline-flex items-center px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
-                <Printer className="h-4 w-4 mr-2" />
-                Print
-              </button>
+              <div className="relative group">
+                <button className="inline-flex items-center px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print
+                </button>
+                <div className="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                  <button
+                    onClick={() => window.open(`/accounts/journal-voucher/${voucher.id}/print-summary`, '_blank')}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-50 rounded-t-lg flex items-center"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Print Summary
+                  </button>
+                  <button
+                    onClick={() => window.open(`/accounts/journal-voucher/${voucher.id}/print-detailed`, '_blank')}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-50 rounded-b-lg flex items-center"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Print Detailed
+                  </button>
+                </div>
+              </div>
               <button className="inline-flex items-center px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
                 <Download className="h-4 w-4 mr-2" />
-                Export
+                Export PDF
               </button>
               {voucher.status === 'Draft' && (
                 <>

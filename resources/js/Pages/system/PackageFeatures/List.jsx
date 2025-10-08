@@ -78,15 +78,50 @@ const List = () => {
               <a href='/system/package-features/create' className="btn btn-primary"><Plus size={20} />Add Package Features</a>
             </div>
           </div>
-          <div className="filters-bar">
-            <div className="filter-group">
-              <div className="search-container"><Search className="search-icon" size={20} /><input type="text" className="search-input" placeholder="Search package features..." value={search} onChange={(e)=>setSearch(e.target.value)} /></div>
-              <select className="filter-select" value={packageId} onChange={(e)=>setPackageId(e.target.value)}>
-                <option value="">All Packages</option>
-                {packages.map(pkg => <option key={pkg.id} value={pkg.id}>{pkg.package_name}</option>)}
-              </select>
+          {/* Modern Compact Filters */}
+          <div className="modern-filters-container">
+            <div className="filters-toolbar">
+              <div className="search-section">
+                <div className="search-input-wrapper">
+                  <Search className="search-icon" size={18} />
+                  <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Search package features..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">Package</label>
+                  <select
+                    className="filter-select"
+                    value={packageId}
+                    onChange={(e) => setPackageId(e.target.value)}
+                  >
+                    <option value="">All Packages</option>
+                    {packages.map(pkg => (
+                      <option key={pkg.id} value={pkg.id}>{pkg.package_name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  className="reset-btn"
+                  onClick={() => {
+                    setSearch('');
+                    setPackageId('');
+                    const params = new URLSearchParams();
+                    params.set('page', '1');
+                    router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
+                  }}
+                  title="Reset all filters"
+                >
+                  <RefreshCcw size={16} />
+                </button>
+              </div>
             </div>
-            <div className="view-controls"><button className="btn btn-icon" onClick={()=>setShowColumnSelector(!showColumnSelector)} title="Show/Hide Columns"><Columns size={20} /></button></div>
           </div>
         </div>
 

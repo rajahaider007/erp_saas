@@ -1211,4 +1211,92 @@ class JournalVoucherController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Print journal voucher summary
+     */
+    public function printSummary(Request $request, $id)
+    {
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+        
+        if (!$compId || !$locationId) {
+            abort(403, 'Company and Location information is required.');
+        }
+
+        $voucher = DB::table('transactions')
+            ->where('id', $id)
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('voucher_type', 'Journal')
+            ->first();
+
+        if (!$voucher) {
+            abort(404, 'Journal voucher not found');
+        }
+
+        $entries = DB::table('transaction_entries')
+            ->join('chart_of_accounts', 'transaction_entries.account_id', '=', 'chart_of_accounts.id')
+            ->where('transaction_entries.transaction_id', $id)
+            ->select(
+                'transaction_entries.*',
+                'chart_of_accounts.account_code',
+                'chart_of_accounts.account_name',
+                'chart_of_accounts.account_type'
+            )
+            ->orderBy('transaction_entries.line_number')
+            ->get();
+
+        $company = DB::table('companies')->where('id', $compId)->first();
+
+        return Inertia::render('Accounts/JournalVoucher/PrintSummary', [
+            'voucher' => $voucher,
+            'entries' => $entries,
+            'company' => $company
+        ]);
+    }
+
+    /**
+     * Print journal voucher detailed
+     */
+    public function printDetailed(Request $request, $id)
+    {
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+        
+        if (!$compId || !$locationId) {
+            abort(403, 'Company and Location information is required.');
+        }
+
+        $voucher = DB::table('transactions')
+            ->where('id', $id)
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('voucher_type', 'Journal')
+            ->first();
+
+        if (!$voucher) {
+            abort(404, 'Journal voucher not found');
+        }
+
+        $entries = DB::table('transaction_entries')
+            ->join('chart_of_accounts', 'transaction_entries.account_id', '=', 'chart_of_accounts.id')
+            ->where('transaction_entries.transaction_id', $id)
+            ->select(
+                'transaction_entries.*',
+                'chart_of_accounts.account_code',
+                'chart_of_accounts.account_name',
+                'chart_of_accounts.account_type'
+            )
+            ->orderBy('transaction_entries.line_number')
+            ->get();
+
+        $company = DB::table('companies')->where('id', $compId)->first();
+
+        return Inertia::render('Accounts/JournalVoucher/PrintDetailed', [
+            'voucher' => $voucher,
+            'entries' => $entries,
+            'company' => $company
+        ]);
+    }
 }

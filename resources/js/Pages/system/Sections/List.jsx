@@ -67,16 +67,64 @@ export default function List() {
               <a href='/system/sections/create' className="btn btn-primary"><Plus size={20} />Add Section</a>
             </div>
           </div>
-          <div className="filters-bar">
-            <div className="filter-group">
-              <div className="search-container"><Search className="search-icon" size={20} /><input type="text" className="search-input" placeholder="Search sections..." value={searchTerm} onChange={(e)=>handleSearch(e.target.value)} /></div>
-              <select className="filter-select" value={statusFilter} onChange={(e)=>handleStatusFilter(e.target.value)}>{statusOptions.map(o=>(<option key={o.value} value={o.value}>{o.label}</option>))}</select>
-              <select className="filter-select" value={moduleFilter} onChange={(e)=>handleModuleFilter(e.target.value)}>
-                <option value="">All Modules</option>
-                {modules.map(m => <option key={m.id} value={m.id}>{m.module_name}</option>)}
-              </select>
+          {/* Modern Compact Filters */}
+          <div className="modern-filters-container">
+            <div className="filters-toolbar">
+              <div className="search-section">
+                <div className="search-input-wrapper">
+                  <Search className="search-icon" size={18} />
+                  <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Search sections..."
+                    value={searchTerm}
+                    onChange={(e) => handleSearch(e.target.value)}
+                  />
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">Status</label>
+                  <select
+                    className="filter-select"
+                    value={statusFilter}
+                    onChange={(e) => handleStatusFilter(e.target.value)}
+                  >
+                    {statusOptions.map(o => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">Module</label>
+                  <select
+                    className="filter-select"
+                    value={moduleFilter}
+                    onChange={(e) => handleModuleFilter(e.target.value)}
+                  >
+                    <option value="">All Modules</option>
+                    {modules.map(m => (
+                      <option key={m.id} value={m.id}>{m.module_name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  className="reset-btn"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setStatusFilter('all');
+                    setModuleFilter('');
+                    const params = new URLSearchParams();
+                    params.set('page', '1');
+                    router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
+                  }}
+                  title="Reset all filters"
+                >
+                  <RefreshCcw size={16} />
+                </button>
+              </div>
             </div>
-            <div className="view-controls"><button className="btn btn-icon" onClick={()=>setShowColumnSelector(!showColumnSelector)} title="Show/Hide Columns"><Columns size={20} /></button></div>
           </div>
           {showColumnSelector && (<div className="column-selector"><div className="column-selector-content"><h3>Show/Hide Columns</h3><div className="column-grid">{Object.entries(visibleColumns).map(([key, visible]) => (key!=='actions' && (<label key={key} className="column-item"><input type="checkbox" checked={visible} onChange={(e)=>setVisibleColumns({ ...visibleColumns, [key]: e.target.checked })} /><span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>s.toUpperCase())}</span></label>)))}
           </div><button className="btn btn-sm btn-secondary" onClick={()=>setShowColumnSelector(false)}>Close</button></div></div>)}

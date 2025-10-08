@@ -773,9 +773,7 @@ const JournalVoucherList = () => {
                   onChange={(e) => handleSearch(e.target.value)}
                 />
               </div>
-            </div>
-
-            <div className="filters-section">
+          
               <div className="filter-group">
                 <label className="filter-label">Date Range</label>
                 <div className="date-inputs">
@@ -840,9 +838,7 @@ const JournalVoucherList = () => {
                   ))}
                 </select>
               </div>
-            </div>
-
-            <div className="actions-section">
+            
               <button
                 className="reset-btn"
                 onClick={() => {
@@ -1069,13 +1065,24 @@ const JournalVoucherList = () => {
                           {visibleColumns.actions && (
                             <td>
                               <div className="actions-cell">
+                                {/* Print Summary Button */}
                                 <button
-                                  className="action-btn view"
-                                  title="View Details"
-                                  onClick={() => handleView(voucher)}
+                                  className="action-btn print-summary"
+                                  title="Print Summary"
+                                  onClick={() => window.open(`/accounts/journal-voucher/${voucher.id}/print-summary`, '_blank')}
                                 >
-                                  <Eye size={16} />
+                                  <Printer size={16} />
                                 </button>
+
+                                {/* Print Detailed Button */}
+                                <button
+                                  className="action-btn print-detailed"
+                                  title="Print Detailed"
+                                  onClick={() => window.open(`/accounts/journal-voucher/${voucher.id}/print-detailed`, '_blank')}
+                                >
+                                  <Printer size={16} />
+                                </button>
+
                                 {voucher.status === 'Draft' && (
                                   <>
                                     <button

@@ -10,9 +10,8 @@
 /* List Styles */
 @import './list.css';
 
-/* Professional Filters */
-@import './professional-filters.css';
-@import './modern-filters.css';
+
+
 
 
 @tailwind base;

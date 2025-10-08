@@ -61,13 +61,67 @@ const List = () => {
               <a href='/system/menus/create' className="btn btn-primary"><Plus size={20} />Add Menu</a>
             </div>
           </div>
-          <div className="filters-bar">
-            <div className="filter-group">
-              <div className="search-container"><Search className="search-icon" size={20} /><input type="text" className="search-input" placeholder="Search menus..." value={search} onChange={(e)=>setSearch(e.target.value)} /></div>
-              <select className="filter-select" value={moduleId} onChange={(e)=>setModuleId(e.target.value)}><option value="">All Modules</option>{modules.map(m => <option key={m.id} value={m.id}>{m.module_name}</option>)}</select>
-              <select className="filter-select" value={sectionId} onChange={(e)=>setSectionId(e.target.value)} disabled={!sections.length}><option value="">All Sections</option>{sections.map(s => <option key={s.id} value={s.id}>{s.section_name}</option>)}</select>
+          {/* Modern Compact Filters */}
+          <div className="modern-filters-container">
+            <div className="filters-toolbar">
+              <div className="search-section">
+                <div className="search-input-wrapper">
+                  <Search className="search-icon" size={18} />
+                  <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Search menus..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">Module</label>
+                  <select
+                    className="filter-select"
+                    value={moduleId}
+                    onChange={(e) => setModuleId(e.target.value)}
+                  >
+                    <option value="">All Modules</option>
+                    {modules.map(m => (
+                      <option key={m.id} value={m.id}>{m.module_name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">Section</label>
+                  <select
+                    className="filter-select"
+                    value={sectionId}
+                    onChange={(e) => setSectionId(e.target.value)}
+                    disabled={!sections.length}
+                  >
+                    <option value="">All Sections</option>
+                    {sections.map(s => (
+                      <option key={s.id} value={s.id}>{s.section_name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  className="reset-btn"
+                  onClick={() => {
+                    setSearch('');
+                    setModuleId('');
+                    setSectionId('');
+                    setSections([]);
+                    const params = new URLSearchParams();
+                    params.set('page', '1');
+                    router.get('/system/menus?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
+                  }}
+                  title="Reset all filters"
+                >
+                  <RefreshCcw size={16} />
+                </button>
+              </div>
             </div>
-            <div className="view-controls"><button className="btn btn-icon" onClick={()=>setShowColumnSelector(!showColumnSelector)} title="Show/Hide Columns"><Columns size={20} /></button></div>
           </div>
         </div>
 
