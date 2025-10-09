@@ -18,6 +18,7 @@ import {
 import App from '../../App.jsx';
 import FloatingCurrencyWidget from '../../../Components/FloatingCurrencyWidget';
 import Select2 from '../../../Components/Select2';
+import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
 
 // Breadcrumbs Component
 const Breadcrumbs = ({ items }) => {
@@ -613,17 +614,15 @@ const JournalVoucherCreate = () => {
                         <label htmlFor="voucher_date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                           Voucher Date *
                         </label>
-                        <input
+                        <CustomDatePicker
+                          selected={formData.voucher_date ? new Date(formData.voucher_date) : null}
+                          onChange={(date) => setFormData(prev => ({ ...prev, voucher_date: date ? date.toISOString().split('T')[0] : '' }))}
                           type="date"
-                          id="voucher_date"
-                          name="voucher_date"
-                          value={formData.voucher_date}
-                          onChange={(e) => setFormData(prev => ({ ...prev, voucher_date: e.target.value }))}
-                          onKeyDown={handleKeyDown}
-                          tabIndex={1}
+                          placeholder="Select voucher date"
                           className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                             errors.voucher_date ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                           }`}
+                          required
                         />
                         {errors.voucher_date && (
                           <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.voucher_date}</p>

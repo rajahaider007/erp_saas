@@ -7,14 +7,15 @@ import {
   ChevronDown, ChevronUp, Printer, FileSpreadsheet,
   FileBarChart, Columns, Settings2, BarChart3
 } from 'lucide-react';
+import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
 
 const GeneralLedgerReport = () => {
   const { auth, company, currencies } = usePage().props;
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState([]);
   const [filters, setFilters] = useState({
-    date_from: '',
-    date_to: '',
+    date_from: new Date().toISOString().split('T')[0],
+    date_to: new Date().toISOString().split('T')[0],
     account_codes: [],
     account_types: [],
     currency: company?.currency || 'USD',
@@ -278,20 +279,22 @@ const GeneralLedgerReport = () => {
               {/* Date Range */}
               <div>
                 <label className="form-label">From Date</label>
-                <input
+                <CustomDatePicker
+                  selected={filters.date_from ? new Date(filters.date_from) : null}
+                  onChange={(date) => setFilters({...filters, date_from: date ? date.toISOString().split('T')[0] : ''})}
                   type="date"
-                  value={filters.date_from}
-                  onChange={(e) => setFilters({...filters, date_from: e.target.value})}
+                  placeholder="Select from date"
                   className="form-input"
                 />
               </div>
               
               <div>
                 <label className="form-label">To Date</label>
-                <input
+                <CustomDatePicker
+                  selected={filters.date_to ? new Date(filters.date_to) : null}
+                  onChange={(date) => setFilters({...filters, date_to: date ? date.toISOString().split('T')[0] : ''})}
                   type="date"
-                  value={filters.date_to}
-                  onChange={(e) => setFilters({...filters, date_to: e.target.value})}
+                  placeholder="Select to date"
                   className="form-input"
                 />
               </div>

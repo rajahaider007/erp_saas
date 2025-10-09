@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Search, Calendar, Clock, Upload, ChevronDown } from 'lucide-react';
+import CustomDatePicker from '../../Components/DatePicker/DatePicker';
 
 const FormThemeSystem = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -149,11 +150,12 @@ const FormThemeSystem = () => {
             <label className="input-label">Birth Date</label>
             <div className="input-wrapper date-wrapper">
               <Calendar className="input-icon" size={20} />
-              <input
+              <CustomDatePicker
+                selected={formData.date ? new Date(formData.date) : null}
+                onChange={(date) => handleInputChange('date', date ? date.toISOString().split('T')[0] : '')}
                 type="date"
+                placeholder="Select date"
                 className="form-input input-with-icon"
-                value={formData.date}
-                onChange={(e) => handleInputChange('date', e.target.value)}
               />
             </div>
           </div>

@@ -1,9 +1,9 @@
 import React from 'react';
-import { LayoutProvider, useLayout } from './Contexts/LayoutContext';
+import { LayoutProvider, useLayout } from '../Contexts/LayoutContext';
 
-import Header from './Components/Layout/Header';
-import Sidebar from './Components/Layout/Sidebar';
-import Footer from './Components/Layout/Footer';
+import Header from '../Components/Layout/Header';
+import Sidebar from '../Components/Layout/Sidebar';
+import Footer from '../Components/Layout/Footer';
 
 const AppLayout = ({ children, title }) => {
   return (
@@ -16,7 +16,7 @@ const AppLayout = ({ children, title }) => {
 };
 
 const AppContent = ({ children, title }) => {
-  const { IntegratedCustomizer } = useLayout();
+  const { IntegratedCustomizer, sidebarCollapsed } = useLayout();
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200">

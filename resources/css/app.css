@@ -6,10 +6,22 @@
 
 /* Reports Styles */
 @import './reports.css';
+
+/* Form Themes */
+@import './form-themes.css';
+
+/* List Styles */
 @import './list.css';
+
 
 /* Custom DatePicker Styles */
 @import './datepicker-custom.css';
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 
 /* SweetAlert Dark Theme */
 .swal-dark-popup {
@@ -42,19 +54,6 @@
   color: #f59e0b !important;
 }
 
-/* Form Themes */
-@import './form-themes.css';
-
-/* List Styles */
-@import './list.css';
-
-
-
-
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 /* Enhanced Customizer CSS Styles */
 

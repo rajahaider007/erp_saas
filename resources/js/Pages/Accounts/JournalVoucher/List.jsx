@@ -33,6 +33,7 @@ import {
   Check
 } from 'lucide-react';
 import App from '../../App.jsx';
+import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
 
 // SweetAlert-like component
 const CustomAlert = {
@@ -135,8 +136,8 @@ const JournalVoucherList = () => {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
   const [statusFilter, setStatusFilter] = useState(filters?.status || 'all');
-  const [fromDate, setFromDate] = useState(filters?.from_date || '');
-  const [toDate, setToDate] = useState(filters?.to_date || '');
+  const [fromDate, setFromDate] = useState(filters?.from_date || new Date().toISOString().split('T')[0]);
+  const [toDate, setToDate] = useState(filters?.to_date || new Date().toISOString().split('T')[0]);
   const [selectedVouchers, setSelectedVouchers] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
   const [sortConfig, setSortConfig] = useState({
@@ -777,19 +778,19 @@ const JournalVoucherList = () => {
               <div className="filter-group">
                 <label className="filter-label">Date Range</label>
                 <div className="date-inputs">
-                  <input
+                  <CustomDatePicker
+                    selected={fromDate ? new Date(fromDate) : null}
+                    onChange={(date) => handleFromDateFilter(date ? date.toISOString().split('T')[0] : '')}
                     type="date"
+                    placeholder="From date"
                     className="date-input"
-                    value={fromDate}
-                    onChange={(e) => handleFromDateFilter(e.target.value)}
-                    placeholder="From"
                   />
-                  <input
+                  <CustomDatePicker
+                    selected={toDate ? new Date(toDate) : null}
+                    onChange={(date) => handleToDateFilter(date ? date.toISOString().split('T')[0] : '')}
                     type="date"
+                    placeholder="To date"
                     className="date-input"
-                    value={toDate}
-                    onChange={(e) => handleToDateFilter(e.target.value)}
-                    placeholder="To"
                   />
                 </div>
               </div>

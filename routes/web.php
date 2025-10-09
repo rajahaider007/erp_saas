@@ -435,3 +435,25 @@ Route::get('/accounts/currency-ledger/report', [App\Http\Controllers\Accounts\Cu
 Route::get('/accounts/currency-ledger/print', [App\Http\Controllers\Accounts\CurrencyLedgerController::class, 'print'])->name('currency-ledger.print');
 Route::get('/accounts/currency-ledger/export-excel', [App\Http\Controllers\Accounts\CurrencyLedgerController::class, 'exportExcel'])->name('currency-ledger.export-excel');
 Route::get('/accounts/currency-ledger/export-pdf', [App\Http\Controllers\Accounts\CurrencyLedgerController::class, 'exportPDF'])->name('currency-ledger.export-pdf');
+
+// ═══════════════════════════════════════════════════════════
+// LOG MANAGEMENT ROUTES
+// ═══════════════════════════════════════════════════════════
+use App\Http\Controllers\LogController;
+
+Route::prefix('system/logs')->name('logs.')->middleware('web.auth')->group(function () {
+    // Activity Logs
+    Route::get('/activity', [LogController::class, 'activityLogs'])->name('activity');
+    Route::get('/activity/{id}/details', [LogController::class, 'changeDetails'])->name('details');
+    Route::get('/timeline', [LogController::class, 'timeline'])->name('timeline');
+    
+    // Deleted Items & Recovery
+    Route::get('/deleted-items', [LogController::class, 'deletedItems'])->name('deleted-items');
+    Route::post('/deleted-items/{id}/restore', [LogController::class, 'restore'])->name('restore');
+    
+    // Security Logs
+    Route::get('/security', [LogController::class, 'securityLogs'])->name('security');
+    
+    // Reports & Analytics
+    Route::get('/reports', [LogController::class, 'reports'])->name('reports');
+});

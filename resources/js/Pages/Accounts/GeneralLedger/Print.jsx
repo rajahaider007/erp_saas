@@ -238,7 +238,7 @@ const GeneralLedgerPrint = () => {
           }
 
           .page-number::after {
-            content: "Page " counter(page) " of " counter(pages);
+            content: "";
           }
 
           /* Print specific */
@@ -351,7 +351,7 @@ const GeneralLedgerPrint = () => {
                   <React.Fragment key={accountData.id}>
                     {/* Account Header */}
                     <tr className="account-header-row">
-                      <td colSpan="8" className="text-center font-bold py-2 bg-gray-200">
+                      <td colSpan="8" className="text-left font-bold py-2 bg-gray-200">
                         {accountData.account_code} - {accountData.account_name} ({accountData.account_type})
                       </td>
                     </tr>
