@@ -22,5 +22,7 @@
     </head>
     <body class="font-sans antialiased">
         @inertia
+        <!-- DatePicker Portal for Mobile -->
+        <div id="datepicker-portal"></div>
     </body>
 </html>

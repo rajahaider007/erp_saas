@@ -72,26 +72,13 @@
 }
 
 .react-datepicker__day--selected {
-  background: linear-gradient(145deg, #3b82f6, #1d4ed8);
-  color: #ffffff !important; /* Bright white for selected date */
-  font-weight: bold;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
-  transform: scale(1.1);
-  position: relative;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-}
-
-.react-datepicker__day--selected::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
-  background: white;
-  border-radius: 50%;
-  box-shadow: 0 0 0 2px #3b82f6;
+  background: linear-gradient(145deg, #3b82f6, #1d4ed8) !important;
+  color: #ffffff !important;
+  font-weight: bold !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5) !important;
+  transform: scale(1.05) !important;
+  border-radius: 8px !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
 }
 
 .react-datepicker__day--keyboard-selected {
@@ -389,6 +376,167 @@
 .react-datepicker__current-month:hover {
   background-color: #475569;
   cursor: pointer;
+}
+
+/* Custom DatePicker Wrapper */
+.custom-datepicker-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Mobile Optimization */
+@media (max-width: 768px) {
+  /* Full-screen mobile calendar */
+  .react-datepicker-popper[data-placement^="bottom"] {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 9999 !important;
+    width: 95vw !important;
+    max-width: 400px !important;
+  }
+
+  /* Mobile calendar container */
+  .react-datepicker {
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 16px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  /* Larger touch targets */
+  .react-datepicker__day {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    line-height: 2.5rem !important;
+    font-size: 16px !important;
+    margin: 2px !important;
+  }
+
+  /* Larger navigation buttons */
+  .react-datepicker__navigation {
+    width: 40px !important;
+    height: 40px !important;
+    top: 12px !important;
+  }
+
+  /* Larger header */
+  .react-datepicker__header {
+    padding: 16px 12px !important;
+  }
+
+  /* Larger month/year dropdowns */
+  .react-datepicker__month-select,
+  .react-datepicker__year-select {
+    font-size: 16px !important;
+    padding: 8px 12px !important;
+    min-height: 44px !important;
+  }
+
+  /* Larger today button */
+  .react-datepicker__today-button {
+    font-size: 16px !important;
+    padding: 14px 24px !important;
+    min-height: 48px !important;
+  }
+
+  /* Portal overlay for mobile */
+  .react-datepicker__portal {
+    background-color: rgba(0, 0, 0, 0.7) !important;
+    backdrop-filter: blur(4px);
+  }
+
+  /* Month/year text visibility on mobile */
+  .react-datepicker__current-month {
+    font-size: 18px !important;
+    padding: 12px 16px !important;
+  }
+
+  /* Day names */
+  .react-datepicker__day-name {
+    width: 2.5rem !important;
+    font-size: 14px !important;
+    margin: 2px !important;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets */
+  .react-datepicker__day,
+  .react-datepicker__day-name {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    line-height: 44px !important;
+  }
+
+  /* Prevent text selection on touch */
+  .react-datepicker {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Better touch feedback */
+  .react-datepicker__day:active,
+  .react-datepicker__today-button:active {
+    transform: scale(0.95) !important;
+    transition: transform 0.1s ease !important;
+  }
+}
+
+/* Tablet optimization (portrait) */
+@media (min-width: 481px) and (max-width: 768px) and (orientation: portrait) {
+  .react-datepicker {
+    max-width: 90vw !important;
+  }
+}
+
+/* Tablet optimization (landscape) */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+  .react-datepicker {
+    max-width: 60vw !important;
+  }
+}
+
+/* Smooth transitions for all interactions */
+.react-datepicker__day,
+.react-datepicker__navigation,
+.react-datepicker__today-button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Focus visible for keyboard navigation */
+.react-datepicker__day:focus-visible,
+.react-datepicker__navigation:focus-visible,
+.react-datepicker__today-button:focus-visible {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Keyboard navigation highlight */
+.react-datepicker__day--keyboard-selected {
+  background: linear-gradient(145deg, #3b82f6, #1d4ed8) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Better accessibility for screen readers */
+.react-datepicker__aria-live {
+  position: absolute;
+  clip: rect(0, 0, 0, 0);
+  height: 1px;
+  width: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
 }
 
 /* Modern day navigation */

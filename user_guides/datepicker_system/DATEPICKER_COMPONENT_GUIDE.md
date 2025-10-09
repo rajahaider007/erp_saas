@@ -13,9 +13,12 @@ The CustomDatePicker is a generalized, reusable DatePicker component built on to
 - ✅ **Year/Month Pickers**: Year only, Month only, Quarter picker
 - ✅ **Validation**: Min/Max date limits, disabled dates
 - ✅ **Customization**: Custom styling, placeholders, formats
-- ✅ **Accessibility**: Keyboard navigation, screen reader support
+- ✅ **Accessibility**: Full keyboard navigation, screen reader support
 - ✅ **Localization**: Multi-language support
-- ✅ **Responsive**: Mobile-friendly design
+- ✅ **Responsive**: Mobile-optimized with touch support
+- ✅ **Keyboard Navigation**: Arrow keys, Enter, Escape, Tab
+- ✅ **Mobile Portal**: Full-screen modal on mobile devices
+- ✅ **Touch Optimized**: Large touch targets, swipe gestures
 
 ## Installation
 
@@ -319,12 +322,94 @@ The component automatically uses the dark theme styling that matches the ERP sys
 />
 ```
 
+## Keyboard Navigation
+
+The CustomDatePicker provides comprehensive keyboard navigation for better accessibility and user experience:
+
+### Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| **Arrow Down** | Open calendar (when closed) |
+| **Arrow Up** | Close calendar (when open) |
+| **Enter** | Open/toggle calendar |
+| **Escape** | Close calendar |
+| **Tab** | Navigate to next field (closes calendar if open) |
+| **Arrow Left/Right** | Navigate days in calendar (when open) |
+| **Arrow Up/Down** | Navigate weeks in calendar (when open) |
+| **Page Up/Down** | Navigate months in calendar (when open) |
+| **Home** | Go to first day of week |
+| **End** | Go to last day of week |
+
+### Keyboard Navigation Examples
+
+```jsx
+// Basic keyboard-enabled date picker
+<CustomDatePicker
+  selected={date}
+  onChange={setDate}
+  type="date"
+  placeholder="Use Arrow Down to open calendar"
+  className="w-full"
+/>
+```
+
+### Focus States
+
+The DatePicker includes clear visual focus indicators:
+- **Blue outline** when focused
+- **Highlighted selection** for keyboard-selected dates
+- **Smooth transitions** between focus states
+
+## Mobile Optimization
+
+The CustomDatePicker is fully optimized for mobile devices:
+
+### Mobile Features
+
+1. **Full-Screen Modal**: On mobile devices, the calendar opens in a centered modal overlay
+2. **Large Touch Targets**: All interactive elements are at least 44x44px
+3. **Touch Gestures**: Natural swipe and tap interactions
+4. **Portal Rendering**: Calendar renders in a portal for better positioning
+5. **Responsive Sizing**: Adapts to screen size (phone, tablet, desktop)
+
+### Mobile Behavior
+
+| Screen Size | Behavior |
+|-------------|----------|
+| **< 768px** | Full-screen centered modal with backdrop |
+| **768px - 1024px (Tablet)** | Optimized modal with larger touch targets |
+| **> 1024px (Desktop)** | Standard dropdown positioning |
+
+### Mobile Example
+
+```jsx
+// Automatically optimized for mobile
+<CustomDatePicker
+  selected={date}
+  onChange={setDate}
+  type="date"
+  placeholder="Tap to select date"
+  // Component automatically detects mobile and applies optimizations
+/>
+```
+
+### Touch Optimizations
+
+- **Tap Feedback**: Visual feedback on touch
+- **Prevent Text Selection**: No accidental text selection
+- **Backdrop Blur**: Beautiful modal overlay
+- **Large Buttons**: Easy-to-tap navigation buttons
+- **No Manual Input**: Prevents keyboard popup on mobile
+
 ## Accessibility Features
 
-- ✅ **Keyboard Navigation**: Full keyboard support (Tab, Arrow keys, Enter, Escape)
+- ✅ **Full Keyboard Navigation**: Complete support for all keyboard shortcuts
 - ✅ **Screen Reader Support**: Proper ARIA labels and descriptions
-- ✅ **Focus Management**: Clear focus indicators
+- ✅ **Focus Management**: Clear focus indicators and states
 - ✅ **Color Contrast**: WCAG compliant contrast ratios
+- ✅ **Touch Accessibility**: Minimum 44px touch targets
+- ✅ **Focus Visible**: Enhanced focus rings for keyboard navigation
 
 ## Browser Support
 

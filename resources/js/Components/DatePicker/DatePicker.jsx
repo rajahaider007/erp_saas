@@ -22,9 +22,7 @@ const CustomDatePicker = ({
   required = false,
   ...props
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const datePickerRef = useRef(null);
 
   // Detect mobile device
   useEffect(() => {
@@ -89,83 +87,22 @@ const CustomDatePicker = ({
 
   // Enhanced keyboard navigation handler
   const handleKeyDown = (e) => {
-    switch (e.key) {
-      case 'ArrowDown':
-        // Open calendar if closed
-        if (!isOpen) {
-          e.preventDefault();
-          setIsOpen(true);
-        }
-        break;
-      
-      case 'ArrowUp':
-        // Close calendar if open
-        if (isOpen) {
-          e.preventDefault();
-          setIsOpen(false);
-        }
-        break;
-      
-      case 'Enter':
-        // Toggle calendar or select date
-        if (!isOpen) {
-          e.preventDefault();
-          setIsOpen(true);
-        }
-        break;
-      
-      case 'Escape':
-        // Close calendar
-        e.preventDefault();
-        setIsOpen(false);
-        break;
-      
-      case 'Tab':
-        // Allow tab navigation
-        if (isOpen) {
-          setIsOpen(false);
-        }
-        break;
-      
-      default:
-        // Prevent manual typing
-        if (e.key !== 'Tab' && e.key !== 'Escape' && e.key !== 'Enter') {
-          e.preventDefault();
-        }
-        break;
+    // Allow navigation keys but prevent typing
+    const allowedKeys = ['Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'];
+    
+    if (!allowedKeys.includes(e.key)) {
+      e.preventDefault();
     }
   };
 
-  // Handle outside click
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (datePickerRef.current && !datePickerRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
-  }, [isOpen]);
-
   return (
-    <div ref={datePickerRef} className="custom-datepicker-wrapper">
+    <div className="custom-datepicker-wrapper">
       <DatePicker
         id={id}
         name={name}
         selected={selected}
         onChange={(date) => {
           onChange(date);
-          if (!selectsRange && !selectsMultiple) {
-            setIsOpen(false);
-          }
         }}
         placeholderText={placeholder}
         dateFormat={getDateFormat()}
@@ -178,10 +115,6 @@ const CustomDatePicker = ({
         className={`form-control ${className}`}
         autoComplete="off"
         required={required}
-        // Calendar control
-        open={isOpen}
-        onInputClick={() => setIsOpen(true)}
-        onClickOutside={() => setIsOpen(false)}
         // Disable manual typing - only calendar selection
         allowSameDay={true}
         shouldCloseOnSelect={!selectsRange && !selectsMultiple}
@@ -199,22 +132,6 @@ const CustomDatePicker = ({
         portalId="datepicker-portal"
         showPopperArrow={!isMobile}
         popperPlacement={isMobile ? "bottom" : "bottom-start"}
-        popperModifiers={[
-          {
-            name: 'preventOverflow',
-            options: {
-              rootBoundary: 'viewport',
-              tether: false,
-              altAxis: true,
-            },
-          },
-          {
-            name: 'flip',
-            options: {
-              fallbackPlacements: ['top', 'bottom'],
-            },
-          },
-        ]}
         // Keyboard navigation
         strictParsing={false}
         readOnly={false}
