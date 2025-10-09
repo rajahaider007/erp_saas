@@ -42,17 +42,17 @@ const CustomDatePicker = ({
     
     switch (type) {
       case 'datetime':
-        return "dd/MM/yyyy HH:mm";
+        return "yyyy-MM-dd HH:mm";
       case 'time':
         return "HH:mm";
       case 'year':
         return "yyyy";
       case 'month':
-        return "MM/yyyy";
+        return "yyyy-MM";
       case 'quarter':
         return "QQQ yyyy";
       default:
-        return "dd/MM/yyyy";
+        return "yyyy-MM-dd"; // Database format Y-m-d
     }
   };
 

@@ -6,6 +6,7 @@
 
 /* Reports Styles */
 @import './reports.css';
+@import './list.css';
 
 /* Custom DatePicker Styles */
 @import './datepicker-custom.css';
