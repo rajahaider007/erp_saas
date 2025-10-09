@@ -253,7 +253,9 @@ class CurrencyLedgerController extends Controller
         
         if (!$compId || !$locationId) {
             return Inertia::render('Accounts/CurrencyLedger/Print', [
-                'ledgerData' => [],
+                'groupedData' => [],
+                'accounts' => [],
+                'accountTotals' => [],
                 'account' => null,
                 'company' => null,
                 'filters' => [],
@@ -280,6 +282,7 @@ class CurrencyLedgerController extends Controller
             ->where('transactions.location_id', $locationId)
             ->where('transactions.status', 'Posted')
             ->select(
+                'transaction_entries.account_id',
                 'transaction_entries.debit_amount',
                 'transaction_entries.credit_amount',
                 'transaction_entries.base_debit_amount',
@@ -332,39 +335,78 @@ class CurrencyLedgerController extends Controller
             });
         }
 
-        $ledgerData = $query->orderBy('transactions.voucher_date', 'asc')
+        $ledgerData = $query->orderBy('chart_of_accounts.account_code', 'asc')
+            ->orderBy('transactions.voucher_date', 'asc')
             ->orderBy('transactions.id', 'asc')
             ->get();
 
-        // Get account details
+        // Group data by account (same logic as index method)
+        $groupedData = [];
+        $accounts = [];
         $selectedAccount = null;
-        $openingBalance = 0;
+        
         if ($accountId) {
+            // Single account view
             $selectedAccount = DB::table('chart_of_accounts')
                 ->where('id', $accountId)
                 ->where('comp_id', $compId)
                 ->where('location_id', $locationId)
                 ->first();
             
-            $openingBalance = $selectedAccount->opening_balance ?? 0;
+            if ($selectedAccount) {
+                $accounts = [$selectedAccount];
+                $groupedData[$accountId] = $ledgerData->toArray();
+            }
+        } else {
+            // All accounts view - group by account
+            $accountIds = $ledgerData->pluck('account_id')->unique();
+            $accounts = DB::table('chart_of_accounts')
+                ->whereIn('id', $accountIds)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->orderBy('account_code')
+                ->get();
+            
+            foreach ($accounts as $account) {
+                $accountTransactions = $ledgerData->where('account_id', $account->id)->values();
+                $groupedData[$account->id] = $accountTransactions->toArray();
+            }
         }
 
-        // Calculate totals
-        $totalDebit = (float) $ledgerData->sum('base_debit_amount');
-        $totalCredit = (float) $ledgerData->sum('base_credit_amount');
-        $closingBalance = (float) ($openingBalance + $totalDebit - $totalCredit);
+        // Calculate totals for each account
+        $accountTotals = [];
+        $grandTotalDebit = 0;
+        $grandTotalCredit = 0;
+        
+        foreach ($accounts as $account) {
+            $accountTransactions = $groupedData[$account->id] ?? [];
+            $accountDebit = (float) collect($accountTransactions)->sum('base_debit_amount');
+            $accountCredit = (float) collect($accountTransactions)->sum('base_credit_amount');
+            $openingBalance = (float) ($account->opening_balance ?? 0);
+            $closingBalance = (float) ($openingBalance + $accountDebit - $accountCredit);
+            
+            $accountTotals[$account->id] = [
+                'opening_balance' => $openingBalance,
+                'total_debit' => $accountDebit,
+                'total_credit' => $accountCredit,
+                'closing_balance' => $closingBalance
+            ];
+            
+            $grandTotalDebit += $accountDebit;
+            $grandTotalCredit += $accountCredit;
+        }
 
         // Get company details
         $company = DB::table('companies')->where('id', $compId)->first();
 
         return Inertia::render('Accounts/CurrencyLedger/Print', [
-            'ledgerData' => $ledgerData,
+            'groupedData' => $groupedData,
+            'accounts' => $accounts,
+            'accountTotals' => $accountTotals,
             'account' => $selectedAccount,
             'company' => $company,
-            'totalDebit' => $totalDebit,
-            'totalCredit' => $totalCredit,
-            'openingBalance' => $openingBalance,
-            'closingBalance' => $closingBalance,
+            'totalDebit' => $grandTotalDebit,
+            'totalCredit' => $grandTotalCredit,
             'filters' => [
                 'account_id' => $accountId,
                 'from_date' => $fromDate,
@@ -402,6 +444,16 @@ class CurrencyLedgerController extends Controller
         $minAmount = $request->input('min_amount');
         $maxAmount = $request->input('max_amount');
 
+        // Get account details
+        $account = null;
+        if ($accountId) {
+            $account = DB::table('chart_of_accounts')
+                ->where('id', $accountId)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->first();
+        }
+
         // Build query (same as index method)
         $query = DB::table('transaction_entries')
             ->join('transactions', 'transaction_entries.transaction_id', '=', 'transactions.id')
@@ -410,6 +462,7 @@ class CurrencyLedgerController extends Controller
             ->where('transactions.location_id', $locationId)
             ->where('transactions.status', 'Posted')
             ->select(
+                'transaction_entries.account_id',
                 'transaction_entries.debit_amount',
                 'transaction_entries.credit_amount',
                 'transaction_entries.base_debit_amount',
@@ -462,46 +515,122 @@ class CurrencyLedgerController extends Controller
             });
         }
 
-        $ledgerData = $query->orderBy('transactions.voucher_date', 'asc')
+        $ledgerData = $query->orderBy('chart_of_accounts.account_code', 'asc')
+            ->orderBy('transactions.voucher_date', 'asc')
             ->orderBy('transactions.id', 'asc')
             ->get();
 
-        // Generate CSV
-        $filename = 'currency_ledger_' . date('Y-m-d_H-i-s') . '.csv';
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-
-        $callback = function() use ($ledgerData) {
-            $file = fopen('php://output', 'w');
-            
-            // CSV Headers
-            fputcsv($file, [
-                'Date', 'Voucher No', 'Type', 'Description', 'Currency', 'Exchange Rate',
-                'Original Debit', 'Original Credit', 'Base Debit', 'Base Credit'
-            ]);
-
-            // CSV Data
-            foreach ($ledgerData as $entry) {
-                fputcsv($file, [
-                    $entry->voucher_date,
-                    $entry->voucher_number,
-                    $entry->voucher_type,
-                    $entry->description,
-                    $entry->currency_code,
-                    $entry->exchange_rate,
-                    $entry->debit_amount,
-                    $entry->credit_amount,
-                    $entry->base_debit_amount,
-                    $entry->base_credit_amount
-                ]);
+        // Group data by account
+        $groupedData = [];
+        $accounts = [];
+        
+        if ($accountId) {
+            // Single account view
+            if ($account) {
+                $accounts = [$account];
+                $groupedData[$accountId] = $ledgerData->toArray();
             }
+        } else {
+            // All accounts view - group by account
+            $accountIds = $ledgerData->pluck('account_id')->unique();
+            $accounts = DB::table('chart_of_accounts')
+                ->whereIn('id', $accountIds)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->orderBy('account_code')
+                ->get();
+            
+            foreach ($accounts as $accountData) {
+                $accountTransactions = $ledgerData->where('account_id', $accountData->id)->values();
+                $groupedData[$accountData->id] = $accountTransactions->toArray();
+            }
+        }
 
-            fclose($file);
-        };
+        // Calculate totals for each account
+        $accountTotals = [];
+        $grandTotalDebit = 0;
+        $grandTotalCredit = 0;
+        
+        foreach ($accounts as $accountData) {
+            $accountTransactions = $groupedData[$accountData->id] ?? [];
+            $accountDebit = (float) collect($accountTransactions)->sum('base_debit_amount');
+            $accountCredit = (float) collect($accountTransactions)->sum('base_credit_amount');
+            $openingBalance = (float) ($accountData->opening_balance ?? 0);
+            $closingBalance = (float) ($openingBalance + $accountDebit - $accountCredit);
+            
+            $accountTotals[$accountData->id] = [
+                'opening_balance' => $openingBalance,
+                'total_debit' => $accountDebit,
+                'total_credit' => $accountCredit,
+                'closing_balance' => $closingBalance
+            ];
+            
+            $grandTotalDebit += $accountDebit;
+            $grandTotalCredit += $accountCredit;
+        }
 
-        return response()->stream($callback, 200, $headers);
+        // Create CSV content with grouped structure
+        $csvContent = "Currency Ledger Report\n";
+        $csvContent .= "Date Range: " . ($fromDate ?: 'All') . " to " . ($toDate ?: 'All') . "\n";
+        $csvContent .= "Generated: " . now()->format('Y-m-d H:i:s') . "\n\n";
+
+        foreach ($accounts as $accountData) {
+            $accountTransactions = $groupedData[$accountData->id] ?? [];
+            $totals = $accountTotals[$accountData->id] ?? [];
+            
+            // Account header
+            $csvContent .= "Account: " . $accountData->account_code . " - " . $accountData->account_name . "\n";
+            $csvContent .= "Account Type: " . $accountData->account_type . "\n";
+            $csvContent .= "Opening Balance: " . $totals['opening_balance'] . "\n\n";
+            
+            // Table headers
+            $csvContent .= "Date,Voucher No,Type,Description,Currency,Rate,Debit,Credit,Base Debit,Base Credit,Balance\n";
+            
+            // Opening balance row
+            if ($totals['opening_balance'] != 0) {
+                $csvContent .= "Opening,-,Balance,Balance brought forward,-,-,-,-,-,-," . $totals['opening_balance'] . "\n";
+            }
+            
+            // Transaction entries
+            $runningBalance = $totals['opening_balance'];
+            foreach ($accountTransactions as $entry) {
+                $baseDebit = (float) ($entry['base_debit_amount'] ?? 0);
+                $baseCredit = (float) ($entry['base_credit_amount'] ?? 0);
+                $runningBalance = $runningBalance + $baseDebit - $baseCredit;
+                
+                $csvContent .= implode(',', [
+                    $entry['voucher_date'],
+                    $entry['voucher_number'],
+                    $entry['voucher_type'] ?? 'JV',
+                    '"' . str_replace('"', '""', $entry['description'] ?? '') . '"',
+                    $entry['currency_code'] ?? '',
+                    $entry['exchange_rate'] ?? '',
+                    $entry['debit_amount'] ?? 0,
+                    $entry['credit_amount'] ?? 0,
+                    $baseDebit,
+                    $baseCredit,
+                    $runningBalance
+                ]) . "\n";
+            }
+            
+            // Account totals
+            $csvContent .= ",,,,,,,,Account Total," . $totals['total_debit'] . "," . $totals['total_credit'] . ",\n";
+            $csvContent .= ",,,,,,,,Closing Balance,,,". $totals['closing_balance'] . "\n\n";
+        }
+
+        // Grand totals
+        if (count($accounts) > 1) {
+            $csvContent .= "GRAND TOTALS - ALL ACCOUNTS\n";
+            $csvContent .= "Total Debit:," . $grandTotalDebit . "\n";
+            $csvContent .= "Total Credit:," . $grandTotalCredit . "\n";
+            $csvContent .= "Net Balance:," . ($grandTotalDebit - $grandTotalCredit) . "\n";
+        }
+
+        $filename = 'currency_ledger_' . ($account ? $account->account_code : 'all') . '_' . now()->format('Y_m_d_H_i_s') . '.csv';
+
+        return response($csvContent)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     /**
@@ -514,7 +643,9 @@ class CurrencyLedgerController extends Controller
         
         if (!$compId || !$locationId) {
             return Inertia::render('Accounts/CurrencyLedger/Print', [
-                'ledgerData' => [],
+                'groupedData' => [],
+                'accounts' => [],
+                'accountTotals' => [],
                 'account' => null,
                 'company' => null,
                 'filters' => [],
@@ -541,6 +672,7 @@ class CurrencyLedgerController extends Controller
             ->where('transactions.location_id', $locationId)
             ->where('transactions.status', 'Posted')
             ->select(
+                'transaction_entries.account_id',
                 'transaction_entries.debit_amount',
                 'transaction_entries.credit_amount',
                 'transaction_entries.base_debit_amount',
@@ -593,39 +725,78 @@ class CurrencyLedgerController extends Controller
             });
         }
 
-        $ledgerData = $query->orderBy('transactions.voucher_date', 'asc')
+        $ledgerData = $query->orderBy('chart_of_accounts.account_code', 'asc')
+            ->orderBy('transactions.voucher_date', 'asc')
             ->orderBy('transactions.id', 'asc')
             ->get();
 
-        // Get account details
+        // Group data by account (same logic as print method)
+        $groupedData = [];
+        $accounts = [];
         $selectedAccount = null;
-        $openingBalance = 0;
+        
         if ($accountId) {
+            // Single account view
             $selectedAccount = DB::table('chart_of_accounts')
                 ->where('id', $accountId)
                 ->where('comp_id', $compId)
                 ->where('location_id', $locationId)
                 ->first();
             
-            $openingBalance = $selectedAccount->opening_balance ?? 0;
+            if ($selectedAccount) {
+                $accounts = [$selectedAccount];
+                $groupedData[$accountId] = $ledgerData->toArray();
+            }
+        } else {
+            // All accounts view - group by account
+            $accountIds = $ledgerData->pluck('account_id')->unique();
+            $accounts = DB::table('chart_of_accounts')
+                ->whereIn('id', $accountIds)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->orderBy('account_code')
+                ->get();
+            
+            foreach ($accounts as $account) {
+                $accountTransactions = $ledgerData->where('account_id', $account->id)->values();
+                $groupedData[$account->id] = $accountTransactions->toArray();
+            }
         }
 
-        // Calculate totals
-        $totalDebit = (float) $ledgerData->sum('base_debit_amount');
-        $totalCredit = (float) $ledgerData->sum('base_credit_amount');
-        $closingBalance = (float) ($openingBalance + $totalDebit - $totalCredit);
+        // Calculate totals for each account
+        $accountTotals = [];
+        $grandTotalDebit = 0;
+        $grandTotalCredit = 0;
+        
+        foreach ($accounts as $account) {
+            $accountTransactions = $groupedData[$account->id] ?? [];
+            $accountDebit = (float) collect($accountTransactions)->sum('base_debit_amount');
+            $accountCredit = (float) collect($accountTransactions)->sum('base_credit_amount');
+            $openingBalance = (float) ($account->opening_balance ?? 0);
+            $closingBalance = (float) ($openingBalance + $accountDebit - $accountCredit);
+            
+            $accountTotals[$account->id] = [
+                'opening_balance' => $openingBalance,
+                'total_debit' => $accountDebit,
+                'total_credit' => $accountCredit,
+                'closing_balance' => $closingBalance
+            ];
+            
+            $grandTotalDebit += $accountDebit;
+            $grandTotalCredit += $accountCredit;
+        }
 
         // Get company details
         $company = DB::table('companies')->where('id', $compId)->first();
 
         return Inertia::render('Accounts/CurrencyLedger/Print', [
-            'ledgerData' => $ledgerData,
+            'groupedData' => $groupedData,
+            'accounts' => $accounts,
+            'accountTotals' => $accountTotals,
             'account' => $selectedAccount,
             'company' => $company,
-            'totalDebit' => $totalDebit,
-            'totalCredit' => $totalCredit,
-            'openingBalance' => $openingBalance,
-            'closingBalance' => $closingBalance,
+            'totalDebit' => $grandTotalDebit,
+            'totalCredit' => $grandTotalCredit,
             'filters' => [
                 'account_id' => $accountId,
                 'from_date' => $fromDate,

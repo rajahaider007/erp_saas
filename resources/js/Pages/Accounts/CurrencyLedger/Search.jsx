@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import Select from 'react-select';
+import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
+import Swal from 'sweetalert2';
 import { 
   Search as SearchIcon, 
   Filter, 
@@ -19,14 +21,64 @@ import App from '../../App.jsx';
 const CurrencyLedgerSearch = () => {
   const { accounts = [], currencies = [], flash } = usePage().props;
   
+  // Get current date in YYYY-MM-DD format
+  const getCurrentDate = () => {
+    return new Date().toISOString().split('T')[0];
+  };
+
   const [selectedAccount, setSelectedAccount] = useState(null);
-  const [fromDate, setFromDate] = useState('');
-  const [toDate, setToDate] = useState('');
+  const [fromDate, setFromDate] = useState(getCurrentDate());
+  const [toDate, setToDate] = useState(getCurrentDate());
   const [voucherType, setVoucherType] = useState('');
   const [status, setStatus] = useState('Posted');
   const [minAmount, setMinAmount] = useState('');
   const [maxAmount, setMaxAmount] = useState('');
   const [selectedCurrency, setSelectedCurrency] = useState(null);
+
+  // Load initial values from URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (urlParams.has('account_id')) {
+      const accountId = urlParams.get('account_id');
+      const account = accounts.find(acc => acc.id.toString() === accountId);
+      if (account) {
+        setSelectedAccount({ value: account.id, label: `${account.account_code} - ${account.account_name}` });
+      }
+    }
+    
+    if (urlParams.has('from_date')) {
+      setFromDate(urlParams.get('from_date'));
+    }
+    
+    if (urlParams.has('to_date')) {
+      setToDate(urlParams.get('to_date'));
+    }
+    
+    if (urlParams.has('voucher_type')) {
+      setVoucherType(urlParams.get('voucher_type'));
+    }
+    
+    if (urlParams.has('status')) {
+      setStatus(urlParams.get('status'));
+    }
+    
+    if (urlParams.has('min_amount')) {
+      setMinAmount(urlParams.get('min_amount'));
+    }
+    
+    if (urlParams.has('max_amount')) {
+      setMaxAmount(urlParams.get('max_amount'));
+    }
+    
+    if (urlParams.has('currency_code')) {
+      const currencyCode = urlParams.get('currency_code');
+      const currency = currencies.find(curr => curr.code === currencyCode);
+      if (currency) {
+        setSelectedCurrency({ value: currency.code, label: `${currency.code} - ${currency.name}` });
+      }
+    }
+  }, [accounts, currencies]);
 
   const handleGenerateReport = () => {
     const params = new URLSearchParams();
@@ -279,20 +331,71 @@ const CurrencyLedgerSearch = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-semibold text-gray-400 mb-2 block">From Date</label>
-                      <input
+                      <CustomDatePicker
+                        selected={fromDate ? new Date(fromDate) : null}
+                        onChange={(date) => {
+                          const selectedFromDate = date ? date.toISOString().split('T')[0] : '';
+                          const fromDateObj = date;
+                          const toDateObj = toDate ? new Date(toDate) : null;
+                          
+                          if (selectedFromDate && toDateObj && fromDateObj > toDateObj) {
+                            Swal.fire({
+                              title: 'Invalid Date Range',
+                              text: 'From Date cannot be later than To Date. Please select a valid date range.',
+                              icon: 'warning',
+                              confirmButtonText: 'OK',
+                              confirmButtonColor: '#3b82f6',
+                              background: '#1e293b',
+                              color: '#f1f5f9',
+                              customClass: {
+                                popup: 'swal-dark-popup',
+                                title: 'swal-dark-title',
+                                content: 'swal-dark-content'
+                              }
+                            });
+                            return;
+                          }
+                          
+                          setFromDate(selectedFromDate);
+                        }}
                         type="date"
+                        placeholder="Select from date"
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                        value={fromDate}
-                        onChange={(e) => setFromDate(e.target.value)}
                       />
                     </div>
                     <div>
                       <label className="text-xs font-semibold text-gray-400 mb-2 block">To Date</label>
-                      <input
+                      <CustomDatePicker
+                        selected={toDate ? new Date(toDate) : null}
+                        onChange={(date) => {
+                          const selectedToDate = date ? date.toISOString().split('T')[0] : '';
+                          const fromDateObj = fromDate ? new Date(fromDate) : null;
+                          const toDateObj = date;
+                          
+                          if (selectedToDate && fromDateObj && toDateObj < fromDateObj) {
+                            Swal.fire({
+                              title: 'Invalid Date Range',
+                              text: 'To Date cannot be earlier than From Date. Please select a valid date range.',
+                              icon: 'warning',
+                              confirmButtonText: 'OK',
+                              confirmButtonColor: '#3b82f6',
+                              background: '#1e293b',
+                              color: '#f1f5f9',
+                              customClass: {
+                                popup: 'swal-dark-popup',
+                                title: 'swal-dark-title',
+                                content: 'swal-dark-content'
+                              }
+                            });
+                            return;
+                          }
+                          
+                          setToDate(selectedToDate);
+                        }}
                         type="date"
+                        placeholder="Select to date"
+                        maxDate={new Date()}
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                        value={toDate}
-                        onChange={(e) => setToDate(e.target.value)}
                       />
                     </div>
                   </div>

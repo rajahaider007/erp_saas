@@ -7,6 +7,40 @@
 /* Reports Styles */
 @import './reports.css';
 
+/* Custom DatePicker Styles */
+@import './datepicker-custom.css';
+
+/* SweetAlert Dark Theme */
+.swal-dark-popup {
+  background-color: #1e293b !important;
+  border: 1px solid #475569 !important;
+  border-radius: 12px !important;
+}
+
+.swal-dark-title {
+  color: #f1f5f9 !important;
+  font-weight: 700 !important;
+}
+
+.swal-dark-content {
+  color: #cbd5e1 !important;
+}
+
+.swal2-confirm {
+  background-color: #3b82f6 !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+}
+
+.swal2-confirm:hover {
+  background-color: #1d4ed8 !important;
+}
+
+.swal2-warning {
+  color: #f59e0b !important;
+}
+
 /* Form Themes */
 @import './form-themes.css';
 

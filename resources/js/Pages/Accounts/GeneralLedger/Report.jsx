@@ -141,7 +141,25 @@ const GeneralLedgerReport = () => {
   }, [accounts]);
 
   const handleBackToFilters = () => {
-    router.get('/accounts/general-ledger');
+    // Preserve all current filters in the URL
+    const currentParams = new URLSearchParams(window.location.search);
+    const searchParams = new URLSearchParams();
+    
+    // Copy all relevant filter parameters
+    const filterKeys = [
+      'account_id', 'from_date', 'to_date', 'search', 'voucher_type', 
+      'status', 'min_amount', 'max_amount'
+    ];
+    
+    filterKeys.forEach(key => {
+      if (currentParams.has(key)) {
+        searchParams.set(key, currentParams.get(key));
+      }
+    });
+    
+    const queryString = searchParams.toString();
+    const url = queryString ? `/accounts/general-ledger?${queryString}` : '/accounts/general-ledger';
+    router.get(url);
   };
 
   const handlePrint = () => {
