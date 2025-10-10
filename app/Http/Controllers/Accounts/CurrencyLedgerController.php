@@ -127,7 +127,7 @@ class CurrencyLedgerController extends Controller
 
         // Group data by account
         $groupedData = [];
-        $accounts = [];
+        $accountsList = [];
         
         if ($accountId) {
             // Single account view
@@ -138,20 +138,20 @@ class CurrencyLedgerController extends Controller
                 ->first();
             
             if ($selectedAccount) {
-                $accounts = [$selectedAccount];
+                $accountsList = [$selectedAccount];
                 $groupedData[$accountId] = $ledgerData->toArray();
             }
         } else {
             // All accounts view - group by account
             $accountIds = $ledgerData->pluck('account_id')->unique();
-            $accounts = DB::table('chart_of_accounts')
+            $accountsList = DB::table('chart_of_accounts')
                 ->whereIn('id', $accountIds)
                 ->where('comp_id', $compId)
                 ->where('location_id', $locationId)
                 ->orderBy('account_code')
                 ->get();
             
-            foreach ($accounts as $account) {
+            foreach ($accountsList as $account) {
                 $accountTransactions = $ledgerData->where('account_id', $account->id)->values();
                 $groupedData[$account->id] = $accountTransactions->toArray();
             }
@@ -162,7 +162,7 @@ class CurrencyLedgerController extends Controller
         $grandTotalDebit = 0;
         $grandTotalCredit = 0;
         
-        foreach ($accounts as $account) {
+        foreach ($accountsList as $account) {
             $accountTransactions = $groupedData[$account->id] ?? [];
             $accountDebit = (float) collect($accountTransactions)->sum('base_debit_amount');
             $accountCredit = (float) collect($accountTransactions)->sum('base_credit_amount');
@@ -180,14 +180,14 @@ class CurrencyLedgerController extends Controller
             $grandTotalCredit += $accountCredit;
         }
 
-        $selectedAccount = $accountId ? $accounts->first() : null;
+        $selectedAccount = $accountId ? collect($accountsList)->first() : null;
 
         // Get company details
         $company = DB::table('companies')->where('id', $compId)->first();
 
         return Inertia::render('Accounts/CurrencyLedger/Report', [
             'groupedData' => $groupedData,
-            'accounts' => $accounts,
+            'accounts' => $accountsList,
             'accountTotals' => $accountTotals,
             'account' => $selectedAccount,
             'company' => $company,
@@ -342,7 +342,7 @@ class CurrencyLedgerController extends Controller
 
         // Group data by account (same logic as index method)
         $groupedData = [];
-        $accounts = [];
+        $accountsList = [];
         $selectedAccount = null;
         
         if ($accountId) {
@@ -354,20 +354,20 @@ class CurrencyLedgerController extends Controller
                 ->first();
             
             if ($selectedAccount) {
-                $accounts = [$selectedAccount];
+                $accountsList = [$selectedAccount];
                 $groupedData[$accountId] = $ledgerData->toArray();
             }
         } else {
             // All accounts view - group by account
             $accountIds = $ledgerData->pluck('account_id')->unique();
-            $accounts = DB::table('chart_of_accounts')
+            $accountsList = DB::table('chart_of_accounts')
                 ->whereIn('id', $accountIds)
                 ->where('comp_id', $compId)
                 ->where('location_id', $locationId)
                 ->orderBy('account_code')
                 ->get();
             
-            foreach ($accounts as $account) {
+            foreach ($accountsList as $account) {
                 $accountTransactions = $ledgerData->where('account_id', $account->id)->values();
                 $groupedData[$account->id] = $accountTransactions->toArray();
             }
@@ -378,7 +378,7 @@ class CurrencyLedgerController extends Controller
         $grandTotalDebit = 0;
         $grandTotalCredit = 0;
         
-        foreach ($accounts as $account) {
+        foreach ($accountsList as $account) {
             $accountTransactions = $groupedData[$account->id] ?? [];
             $accountDebit = (float) collect($accountTransactions)->sum('base_debit_amount');
             $accountCredit = (float) collect($accountTransactions)->sum('base_credit_amount');
@@ -401,7 +401,7 @@ class CurrencyLedgerController extends Controller
 
         return Inertia::render('Accounts/CurrencyLedger/Print', [
             'groupedData' => $groupedData,
-            'accounts' => $accounts,
+            'accounts' => $accountsList,
             'accountTotals' => $accountTotals,
             'account' => $selectedAccount,
             'company' => $company,
@@ -522,25 +522,25 @@ class CurrencyLedgerController extends Controller
 
         // Group data by account
         $groupedData = [];
-        $accounts = [];
+        $accountsList = [];
         
         if ($accountId) {
             // Single account view
             if ($account) {
-                $accounts = [$account];
+                $accountsList = [$account];
                 $groupedData[$accountId] = $ledgerData->toArray();
             }
         } else {
             // All accounts view - group by account
             $accountIds = $ledgerData->pluck('account_id')->unique();
-            $accounts = DB::table('chart_of_accounts')
+            $accountsList = DB::table('chart_of_accounts')
                 ->whereIn('id', $accountIds)
                 ->where('comp_id', $compId)
                 ->where('location_id', $locationId)
                 ->orderBy('account_code')
                 ->get();
             
-            foreach ($accounts as $accountData) {
+            foreach ($accountsList as $accountData) {
                 $accountTransactions = $ledgerData->where('account_id', $accountData->id)->values();
                 $groupedData[$accountData->id] = $accountTransactions->toArray();
             }
@@ -551,7 +551,7 @@ class CurrencyLedgerController extends Controller
         $grandTotalDebit = 0;
         $grandTotalCredit = 0;
         
-        foreach ($accounts as $accountData) {
+        foreach ($accountsList as $accountData) {
             $accountTransactions = $groupedData[$accountData->id] ?? [];
             $accountDebit = (float) collect($accountTransactions)->sum('base_debit_amount');
             $accountCredit = (float) collect($accountTransactions)->sum('base_credit_amount');
@@ -574,7 +574,7 @@ class CurrencyLedgerController extends Controller
         $csvContent .= "Date Range: " . ($fromDate ?: 'All') . " to " . ($toDate ?: 'All') . "\n";
         $csvContent .= "Generated: " . now()->format('Y-m-d H:i:s') . "\n\n";
 
-        foreach ($accounts as $accountData) {
+        foreach ($accountsList as $accountData) {
             $accountTransactions = $groupedData[$accountData->id] ?? [];
             $totals = $accountTotals[$accountData->id] ?? [];
             
@@ -619,7 +619,7 @@ class CurrencyLedgerController extends Controller
         }
 
         // Grand totals
-        if (count($accounts) > 1) {
+        if (count($accountsList) > 1) {
             $csvContent .= "GRAND TOTALS - ALL ACCOUNTS\n";
             $csvContent .= "Total Debit:," . $grandTotalDebit . "\n";
             $csvContent .= "Total Credit:," . $grandTotalCredit . "\n";
@@ -732,7 +732,7 @@ class CurrencyLedgerController extends Controller
 
         // Group data by account (same logic as print method)
         $groupedData = [];
-        $accounts = [];
+        $accountsList = [];
         $selectedAccount = null;
         
         if ($accountId) {
@@ -744,20 +744,20 @@ class CurrencyLedgerController extends Controller
                 ->first();
             
             if ($selectedAccount) {
-                $accounts = [$selectedAccount];
+                $accountsList = [$selectedAccount];
                 $groupedData[$accountId] = $ledgerData->toArray();
             }
         } else {
             // All accounts view - group by account
             $accountIds = $ledgerData->pluck('account_id')->unique();
-            $accounts = DB::table('chart_of_accounts')
+            $accountsList = DB::table('chart_of_accounts')
                 ->whereIn('id', $accountIds)
                 ->where('comp_id', $compId)
                 ->where('location_id', $locationId)
                 ->orderBy('account_code')
                 ->get();
             
-            foreach ($accounts as $account) {
+            foreach ($accountsList as $account) {
                 $accountTransactions = $ledgerData->where('account_id', $account->id)->values();
                 $groupedData[$account->id] = $accountTransactions->toArray();
             }
@@ -768,7 +768,7 @@ class CurrencyLedgerController extends Controller
         $grandTotalDebit = 0;
         $grandTotalCredit = 0;
         
-        foreach ($accounts as $account) {
+        foreach ($accountsList as $account) {
             $accountTransactions = $groupedData[$account->id] ?? [];
             $accountDebit = (float) collect($accountTransactions)->sum('base_debit_amount');
             $accountCredit = (float) collect($accountTransactions)->sum('base_credit_amount');
@@ -791,7 +791,7 @@ class CurrencyLedgerController extends Controller
 
         return Inertia::render('Accounts/CurrencyLedger/Print', [
             'groupedData' => $groupedData,
-            'accounts' => $accounts,
+            'accounts' => $accountsList,
             'accountTotals' => $accountTotals,
             'account' => $selectedAccount,
             'company' => $company,

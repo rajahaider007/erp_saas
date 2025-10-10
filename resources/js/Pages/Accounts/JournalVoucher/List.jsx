@@ -136,8 +136,8 @@ const JournalVoucherList = () => {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
   const [statusFilter, setStatusFilter] = useState(filters?.status || 'all');
-  const [fromDate, setFromDate] = useState(filters?.from_date || new Date().toISOString().split('T')[0]);
-  const [toDate, setToDate] = useState(filters?.to_date || new Date().toISOString().split('T')[0]);
+  const [fromDate, setFromDate] = useState(filters?.from_date || '');
+  const [toDate, setToDate] = useState(filters?.to_date || '');
   const [selectedVouchers, setSelectedVouchers] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
   const [sortConfig, setSortConfig] = useState({

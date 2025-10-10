@@ -4,7 +4,7 @@ import AppLayout from '../../Layouts/AppLayout';
 import { Shield, Search, Calendar, Filter, Eye, AlertTriangle, User, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import CustomDatePicker from '../../Components/DatePicker/DatePicker';
 
-export default function SecurityLogs({ logs, users, filters }) {
+export default function SecurityLogs({ logs = { data: [] }, users = [], filters = {} }) {
     const [search, setSearch] = useState(filters.search || '');
     const [eventType, setEventType] = useState(filters.event_type || '');
     const [riskLevel, setRiskLevel] = useState(filters.risk_level || '');
@@ -112,9 +112,9 @@ export default function SecurityLogs({ logs, users, filters }) {
                     </div>
                 </div>
 
-                {/* Filters */}
-                <div className="filters-bar">
-                    <div className="filter-group">
+                {/* Professional Filters */}
+                <div className="professional-filters-container">
+                    <div className="filters-row">
                         {/* Search */}
                         <div className="search-container">
                             <Search className="search-icon" size={20} />
@@ -129,72 +129,85 @@ export default function SecurityLogs({ logs, users, filters }) {
                         </div>
 
                         {/* Event Type Filter */}
-                        <select
-                            className="filter-select"
-                            value={eventType}
-                            onChange={(e) => setEventType(e.target.value)}
-                        >
-                            <option value="">All Events</option>
-                            <option value="LOGIN">Login</option>
-                            <option value="LOGOUT">Logout</option>
-                            <option value="FAILED_LOGIN">Failed Login</option>
-                            <option value="PASSWORD_CHANGE">Password Change</option>
-                            <option value="PERMISSION_DENIED">Permission Denied</option>
-                            <option value="SUSPICIOUS_ACTIVITY">Suspicious Activity</option>
-                        </select>
+                        <div className="filter-group">
+                            <label className="filter-label">Event Type</label>
+                            <select
+                                className="professional-select"
+                                value={eventType}
+                                onChange={(e) => setEventType(e.target.value)}
+                            >
+                                <option value="">🔍 All Events</option>
+                                <option value="LOGIN">🔐 Login</option>
+                                <option value="LOGOUT">🚪 Logout</option>
+                                <option value="FAILED_LOGIN">❌ Failed Login</option>
+                                <option value="PASSWORD_CHANGE">🔑 Password Change</option>
+                                <option value="PERMISSION_DENIED">🚫 Permission Denied</option>
+                                <option value="SUSPICIOUS_ACTIVITY">⚠️ Suspicious Activity</option>
+                            </select>
+                        </div>
 
                         {/* Risk Level Filter */}
-                        <select
-                            className="filter-select"
-                            value={riskLevel}
-                            onChange={(e) => setRiskLevel(e.target.value)}
-                        >
-                            <option value="">All Risk Levels</option>
-                            <option value="LOW">Low Risk</option>
-                            <option value="MEDIUM">Medium Risk</option>
-                            <option value="HIGH">High Risk</option>
-                            <option value="CRITICAL">Critical</option>
-                        </select>
+                        <div className="filter-group">
+                            <label className="filter-label">Risk Level</label>
+                            <select
+                                className="professional-select"
+                                value={riskLevel}
+                                onChange={(e) => setRiskLevel(e.target.value)}
+                            >
+                                <option value="">🎯 All Risk Levels</option>
+                                <option value="LOW">🟢 Low Risk</option>
+                                <option value="MEDIUM">🟡 Medium Risk</option>
+                                <option value="HIGH">🟠 High Risk</option>
+                                <option value="CRITICAL">🔴 Critical</option>
+                            </select>
+                        </div>
 
                         {/* User Filter */}
-                        <select
-                            className="filter-select"
-                            value={userId}
-                            onChange={(e) => setUserId(e.target.value)}
-                        >
-                            <option value="">All Users</option>
-                            {users.map(user => (
-                                <option key={user.id} value={user.id}>{user.name}</option>
-                            ))}
-                        </select>
-
-                        {/* Date Range */}
-                        <div className="date-range-container">
-                            <CustomDatePicker
-                                selected={fromDate}
-                                onChange={setFromDate}
-                                placeholderText="From Date"
-                                className="date-input"
-                            />
-                            <span className="date-separator">to</span>
-                            <CustomDatePicker
-                                selected={toDate}
-                                onChange={setToDate}
-                                placeholderText="To Date"
-                                className="date-input"
-                            />
+                        <div className="filter-group">
+                            <label className="filter-label">User</label>
+                            <select
+                                className="professional-select"
+                                value={userId}
+                                onChange={(e) => setUserId(e.target.value)}
+                            >
+                                <option value="">👥 All Users</option>
+                                {users && users.length > 0 && users.map(user => (
+                                    <option key={user.id} value={user.id}>{user.name}</option>
+                                ))}
+                            </select>
                         </div>
-                    </div>
 
-                    <div className="view-controls">
-                        <button onClick={handleFilter} className="btn btn-primary btn-sm">
-                            <Filter size={16} />
-                            Apply
-                        </button>
-                        <button onClick={handleReset} className="btn btn-secondary btn-sm">
-                            <Calendar size={16} />
-                            Reset
-                        </button>
+                        {/* Date Range Filter */}
+                        <div className="filter-group">
+                            <label className="filter-label">Date Range</label>
+                            <div className="date-range-wrapper">
+                                <CustomDatePicker
+                                    selected={fromDate}
+                                    onChange={setFromDate}
+                                    placeholderText="From Date"
+                                    className="professional-date-input"
+                                />
+                                <span className="date-separator">to</span>
+                                <CustomDatePicker
+                                    selected={toDate}
+                                    onChange={setToDate}
+                                    placeholderText="To Date"
+                                    className="professional-date-input"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="filter-actions">
+                            <button onClick={handleFilter} className="btn-primary-professional">
+                                <Filter size={18} />
+                                <span>Apply Filters</span>
+                            </button>
+                            <button onClick={handleReset} className="btn-secondary-professional">
+                                <Calendar size={18} />
+                                <span>Reset</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -214,7 +227,7 @@ export default function SecurityLogs({ logs, users, filters }) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {logs.data.map((log) => (
+                                {logs && logs.data && logs.data.length > 0 ? logs.data.map((log) => (
                                     <tr key={log.id} className="table-row">
                                         <td>
                                             <div className="flex items-center gap-2">
@@ -277,9 +290,9 @@ export default function SecurityLogs({ logs, users, filters }) {
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
+                                )) : null}
 
-                                {logs.data.length === 0 && (
+                                {(!logs || !logs.data || logs.data.length === 0) && (
                                     <tr>
                                         <td colSpan="7" className="text-center py-12">
                                             <div className="empty-state">
@@ -295,7 +308,7 @@ export default function SecurityLogs({ logs, users, filters }) {
                     </div>
 
                     {/* Pagination */}
-                    {logs.last_page > 1 && (
+                    {logs && logs.last_page && logs.last_page > 1 && (
                         <div className="pagination-container">
                             <div className="pagination-info">
                                 <p className="text-sm text-gray-600">

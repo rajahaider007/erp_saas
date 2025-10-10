@@ -65,11 +65,11 @@ class JournalVoucherController extends Controller
 
         // Apply date filters
         if ($fromDate) {
-            $query->whereDate('voucher_date', '>=', $fromDate);
+            $query->where('voucher_date', '>=', $fromDate . ' 00:00:00');
         }
 
         if ($toDate) {
-            $query->whereDate('voucher_date', '<=', $toDate);
+            $query->where('voucher_date', '<=', $toDate . ' 23:59:59');
         }
 
         // Apply sorting
@@ -909,11 +909,11 @@ class JournalVoucherController extends Controller
 
         // Apply date filters
         if ($fromDate) {
-            $query->whereDate('voucher_date', '>=', $fromDate);
+            $query->where('voucher_date', '>=', $fromDate . ' 00:00:00');
         }
 
         if ($toDate) {
-            $query->whereDate('voucher_date', '<=', $toDate);
+            $query->where('voucher_date', '<=', $toDate . ' 23:59:59');
         }
 
         // Apply sorting
@@ -993,11 +993,11 @@ class JournalVoucherController extends Controller
 
         // Apply date filters
         if ($fromDate) {
-            $query->whereDate('voucher_date', '>=', $fromDate);
+            $query->where('voucher_date', '>=', $fromDate . ' 00:00:00');
         }
 
         if ($toDate) {
-            $query->whereDate('voucher_date', '<=', $toDate);
+            $query->where('voucher_date', '<=', $toDate . ' 23:59:59');
         }
 
         // Apply sorting
@@ -1085,11 +1085,11 @@ class JournalVoucherController extends Controller
 
         // Apply date filters
         if ($fromDate) {
-            $query->whereDate('voucher_date', '>=', $fromDate);
+            $query->where('voucher_date', '>=', $fromDate . ' 00:00:00');
         }
 
         if ($toDate) {
-            $query->whereDate('voucher_date', '<=', $toDate);
+            $query->where('voucher_date', '<=', $toDate . ' 23:59:59');
         }
 
         // Apply sorting
@@ -1125,6 +1125,59 @@ class JournalVoucherController extends Controller
         return response($html)
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'attachment; filename="journal_vouchers_' . date('Y-m-d_His') . '.pdf"');
+    }
+
+    /**
+     * Post a single journal voucher (change status from Draft to Posted)
+     */
+    public function post(Request $request, $id)
+    {
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+        
+        if (!$compId || !$locationId) {
+            return redirect()->back()->with('error', 'User authentication information is required.');
+        }
+
+        try {
+            $voucher = DB::table('transactions')
+                ->where('id', $id)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->where('voucher_type', 'Journal')
+                ->first();
+
+            if (!$voucher) {
+                return redirect()->back()->with('error', 'Journal voucher not found.');
+            }
+
+            if ($voucher->status !== 'Draft') {
+                return redirect()->back()->with('error', "Voucher {$voucher->voucher_number} is not in Draft status and cannot be posted.");
+            }
+
+            // Update voucher status to Posted
+            DB::table('transactions')
+                ->where('id', $id)
+                ->update([
+                    'status' => 'Posted',
+                    'posted_at' => now(),
+                    'posted_by' => auth()->id(),
+                    'updated_at' => now()
+                ]);
+
+            return redirect()->route('accounts.journal-voucher.index')
+                           ->with('success', "Journal voucher {$voucher->voucher_number} posted successfully!");
+
+        } catch (\Exception $e) {
+            Log::error('Error posting journal voucher', [
+                'error' => $e->getMessage(),
+                'voucher_id' => $id,
+                'comp_id' => $compId,
+                'location_id' => $locationId
+            ]);
+
+            return redirect()->back()->with('error', 'An error occurred while posting the voucher. Please try again.');
+        }
     }
 
     /**

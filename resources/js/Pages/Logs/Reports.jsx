@@ -86,56 +86,65 @@ export default function Reports({
                     </div>
                 </div>
 
-                {/* Filters */}
-                <div className="filters-bar">
-                    <div className="filter-group">
-                        {/* Report Type */}
-                        <select
-                            className="filter-select"
-                            value={reportType}
-                            onChange={(e) => setReportType(e.target.value)}
-                        >
-                            <option value="overview">Overview Report</option>
-                            <option value="activity">Activity Report</option>
-                            <option value="security">Security Report</option>
-                            <option value="user">User Activity Report</option>
-                        </select>
-
-                        {/* Date Range */}
-                        <div className="date-range-container">
-                            <CustomDatePicker
-                                selected={fromDate}
-                                onChange={setFromDate}
-                                placeholderText="From Date"
-                                className="date-input"
-                            />
-                            <span className="date-separator">to</span>
-                            <CustomDatePicker
-                                selected={toDate}
-                                onChange={setToDate}
-                                placeholderText="To Date"
-                                className="date-input"
-                            />
+                {/* Professional Filters */}
+                <div className="professional-filters-container">
+                    <div className="filters-row">
+                        {/* Report Type Filter */}
+                        <div className="filter-group">
+                            <label className="filter-label">Report Type</label>
+                            <select
+                                className="professional-select"
+                                value={reportType}
+                                onChange={(e) => setReportType(e.target.value)}
+                            >
+                                <option value="overview">📊 Overview Report</option>
+                                <option value="activity">📈 Activity Report</option>
+                                <option value="security">🔒 Security Report</option>
+                                <option value="user">👥 User Activity Report</option>
+                            </select>
                         </div>
-                    </div>
 
-                    <div className="view-controls">
-                        <button onClick={handleFilter} className="btn btn-primary btn-sm">
-                            <Filter size={16} />
-                            Apply
-                        </button>
-                        <button onClick={handleReset} className="btn btn-secondary btn-sm">
-                            <Calendar size={16} />
-                            Reset
-                        </button>
-                        <div className="export-buttons">
-                            <button onClick={() => handleExport('PDF')} className="btn btn-success btn-sm">
-                                <Download size={16} />
-                                PDF
+                        {/* Date Range Filter */}
+                        <div className="filter-group">
+                            <label className="filter-label">Date Range</label>
+                            <div className="date-range-wrapper">
+                                <CustomDatePicker
+                                    selected={fromDate}
+                                    onChange={setFromDate}
+                                    placeholderText="From Date"
+                                    className="professional-date-input"
+                                />
+                                <span className="date-separator">to</span>
+                                <CustomDatePicker
+                                    selected={toDate}
+                                    onChange={setToDate}
+                                    placeholderText="To Date"
+                                    className="professional-date-input"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="filter-actions">
+                            <button onClick={handleFilter} className="btn-primary-professional">
+                                <Filter size={18} />
+                                <span>Apply Filters</span>
                             </button>
-                            <button onClick={() => handleExport('Excel')} className="btn btn-success btn-sm">
-                                <Download size={16} />
-                                Excel
+                            <button onClick={handleReset} className="btn-secondary-professional">
+                                <Calendar size={18} />
+                                <span>Reset</span>
+                            </button>
+                        </div>
+
+                        {/* Export Actions */}
+                        <div className="export-actions">
+                            <button onClick={() => handleExport('PDF')} className="btn-export-professional pdf">
+                                <Download size={18} />
+                                <span>Export PDF</span>
+                            </button>
+                            <button onClick={() => handleExport('Excel')} className="btn-export-professional excel">
+                                <Download size={18} />
+                                <span>Export Excel</span>
                             </button>
                         </div>
                     </div>

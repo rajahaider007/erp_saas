@@ -107,7 +107,7 @@ export default function ActivityLogs({ logs, users, filters }) {
 
                 {/* Filters */}
                 <div className="filters-bar">
-                    <div className="filter-group">
+                    <div className="filters-row">
                         {/* Search */}
                         <div className="search-container">
                             <Search className="search-icon" size={20} />
@@ -123,9 +123,10 @@ export default function ActivityLogs({ logs, users, filters }) {
 
                         {/* Module Filter */}
                         <select
-                            className="filter-select"
+                            className="filter-select custom-select"
                             value={module}
                             onChange={(e) => setModule(e.target.value)}
+                            style={{color: '#F1F5F9', backgroundColor: 'rgba(30, 41, 59, 0.8)', border: '2px solid rgba(148, 163, 184, 0.3)', borderRadius: '12px', padding: '0.875rem 1rem', fontSize: '0.875rem', fontWeight: '500', cursor: 'pointer', width: '100%', display: 'block', boxSizing: 'border-box'}}
                         >
                             <option value="">All Modules</option>
                             <option value="Accounts">Accounts</option>
@@ -135,9 +136,10 @@ export default function ActivityLogs({ logs, users, filters }) {
 
                         {/* Action Filter */}
                         <select
-                            className="filter-select"
+                            className="filter-select custom-select"
                             value={action}
                             onChange={(e) => setAction(e.target.value)}
+                            style={{color: '#F1F5F9', backgroundColor: 'rgba(30, 41, 59, 0.8)', border: '2px solid rgba(148, 163, 184, 0.3)', borderRadius: '12px', padding: '0.875rem 1rem', fontSize: '0.875rem', fontWeight: '500', cursor: 'pointer', width: '100%', display: 'block', boxSizing: 'border-box'}}
                         >
                             <option value="">All Actions</option>
                             <option value="CREATE">CREATE</option>
@@ -151,26 +153,27 @@ export default function ActivityLogs({ logs, users, filters }) {
 
                         {/* User Filter */}
                         <select
-                            className="filter-select"
+                            className="filter-select custom-select"
                             value={userId}
                             onChange={(e) => setUserId(e.target.value)}
+                            style={{color: '#F1F5F9', backgroundColor: 'rgba(30, 41, 59, 0.8)', border: '2px solid rgba(148, 163, 184, 0.3)', borderRadius: '12px', padding: '0.875rem 1rem', fontSize: '0.875rem', fontWeight: '500', cursor: 'pointer', width: '100%', display: 'block', boxSizing: 'border-box'}}
                         >
                             <option value="">All Users</option>
                             {users.map(user => (
                                 <option key={user.id} value={user.id}>{user.name}</option>
                             ))}
                         </select>
-                    </div>
 
-                    <div className="view-controls">
-                        <button onClick={handleFilter} className="btn btn-primary btn-sm">
-                            <Filter size={16} />
-                            Apply
-                        </button>
-                        <button onClick={handleReset} className="btn btn-secondary btn-sm">
-                            <RotateCcw size={16} />
-                            Reset
-                        </button>
+                        <div className="view-controls">
+                            <button onClick={handleFilter} className="btn btn-primary btn-sm">
+                                <Filter size={16} />
+                                Apply
+                            </button>
+                            <button onClick={handleReset} className="btn btn-secondary btn-sm">
+                                <RotateCcw size={16} />
+                                Reset
+                            </button>
+                        </div>
                     </div>
                 </div>
 

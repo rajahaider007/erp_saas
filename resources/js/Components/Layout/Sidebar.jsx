@@ -652,29 +652,7 @@ const Sidebar = () => {
             </div>
             <div className="my-6 border-t border-gray-200 dark:border-gray-700" />
 
-            {/* Settings */}
-            <div className="space-y-1 relative">
-              <Link
-                href="/erp/settings"
-                className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${url.startsWith('/erp/settings')
-                  ? 'bg-blue-100 text-blue-900 dark:bg-blue-900/20 dark:text-blue-100'
-                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white'
-                  }`}
-              >
-                <Settings className={`${sidebarCollapsed ? 'h-5 w-5' : 'h-4 w-4'} flex-shrink-0 group-hover:scale-110 transition-transform`} />
-                {!sidebarCollapsed && (
-                  <span className="ml-3 truncate">Settings</span>
-                )}
-              </Link>
-
-              {/* Tooltip for settings when collapsed */}
-              {sidebarCollapsed && (
-                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                  Settings
-                  <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-r-4 border-r-gray-900 border-t-2 border-b-2 border-t-transparent border-b-transparent"></div>
-                </div>
-              )}
-            </div>
+            
           </nav>
 
           {/* Footer */}
