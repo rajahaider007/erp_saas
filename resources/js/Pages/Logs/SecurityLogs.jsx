@@ -96,17 +96,17 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], filters 
                             </div>
                         </div>
                         <div className="header-actions">
-                            <Link href={route('logs.activity')} className="btn btn-secondary btn-sm">
+                            <Link href={route('logs.activity')} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <Clock size={16} />
-                                Activity Logs
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Activity Logs</span>
                             </Link>
-                            <Link href={route('logs.deleted-items')} className="btn btn-secondary btn-sm">
+                            <Link href={route('logs.deleted-items')} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <AlertTriangle size={16} />
-                                Deleted Items
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Deleted Items</span>
                             </Link>
-                            <Link href={route('logs.reports')} className="btn btn-primary btn-sm">
+                            <Link href={route('logs.reports')} className="btn btn-primary btn-sm" style={{color: 'white', fontWeight: '600'}}>
                                 <Calendar size={16} />
-                                Reports
+                                <span style={{color: 'white', fontWeight: '600'}}>Reports</span>
                             </Link>
                         </div>
                     </div>
@@ -199,13 +199,13 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], filters 
 
                         {/* Action Buttons */}
                         <div className="filter-actions">
-                            <button onClick={handleFilter} className="btn-primary-professional">
+                            <button onClick={handleFilter} className="btn-primary-professional" style={{color: 'white', fontWeight: '600'}}>
                                 <Filter size={18} />
-                                <span>Apply Filters</span>
+                                <span style={{color: 'white', fontWeight: '600'}}>Apply Filters</span>
                             </button>
-                            <button onClick={handleReset} className="btn-secondary-professional">
+                            <button onClick={handleReset} className="btn-secondary-professional" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <Calendar size={18} />
-                                <span>Reset</span>
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Reset</span>
                             </button>
                         </div>
                     </div>
@@ -256,12 +256,18 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], filters 
                                             </div>
                                         </td>
                                         <td>
-                                            <span className={`px-3 py-1 rounded-lg text-sm font-semibold border ${getEventBadgeClass(log.event_type)}`}>
+                                            <span 
+                                                className={`px-3 py-1 rounded-lg text-sm font-semibold border ${getEventBadgeClass(log.event_type)}`}
+                                                style={{color: 'inherit', fontWeight: '600'}}
+                                            >
                                                 {log.event_type}
                                             </span>
                                         </td>
                                         <td>
-                                            <span className={`px-3 py-1 rounded-lg text-sm font-semibold border ${getRiskBadgeClass(log.risk_level)}`}>
+                                            <span 
+                                                className={`px-3 py-1 rounded-lg text-sm font-semibold border ${getRiskBadgeClass(log.risk_level)}`}
+                                                style={{color: 'inherit', fontWeight: '600'}}
+                                            >
                                                 {log.risk_level}
                                             </span>
                                         </td>
@@ -282,10 +288,12 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], filters 
                                             <div className="flex justify-center">
                                                 <Link
                                                     href={route('logs.details', log.id)}
-                                                    className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                                                    className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                                                     title="View Details"
+                                                    style={{color: '#2563eb', fontWeight: '500', fontSize: '0.75rem'}}
                                                 >
-                                                    <Eye size={16} />
+                                                    <Eye size={14} />
+                                                    <span style={{color: '#2563eb', fontWeight: '500', fontSize: '0.75rem'}}>View</span>
                                                 </Link>
                                             </div>
                                         </td>

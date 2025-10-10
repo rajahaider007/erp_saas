@@ -47,8 +47,11 @@ class LogController extends Controller
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('al.description', 'like', "%{$search}%")
+                  ->orWhere('al.module_name', 'like', "%{$search}%")
+                  ->orWhere('al.action_type', 'like', "%{$search}%")
                   ->orWhere('al.table_name', 'like', "%{$search}%")
-                  ->orWhere('u.name', 'like', "%{$search}%");
+                  ->orWhere('u.fname', 'like', "%{$search}%")
+                  ->orWhere('u.lname', 'like', "%{$search}%");
             });
         }
 
@@ -390,6 +393,147 @@ class LogController extends Controller
                 'to_date' => $toDate
             ]
         ]);
+    }
+
+    /**
+     * Export logs data to Excel or PDF
+     */
+    public function export(Request $request)
+    {
+        $reportType = $request->input('report_type', 'overview');
+        $fromDate = $request->input('from_date', now()->subDays(30)->format('Y-m-d'));
+        $toDate = $request->input('to_date', now()->format('Y-m-d'));
+        $format = $request->input('format', 'excel');
+        
+        $companyId = session('user_comp_id');
+        
+        try {
+            if ($format === 'excel') {
+                return $this->exportToExcel($reportType, $fromDate, $toDate, $companyId);
+            } elseif ($format === 'pdf') {
+                return $this->exportToPDF($reportType, $fromDate, $toDate, $companyId);
+            } else {
+                return response()->json(['error' => 'Invalid format'], 400);
+            }
+        } catch (\Exception $e) {
+            Log::error('Export failed: ' . $e->getMessage());
+            return response()->json(['error' => 'Export failed'], 500);
+        }
+    }
+
+    /**
+     * Export to Excel format
+     */
+    private function exportToExcel($reportType, $fromDate, $toDate, $companyId)
+    {
+        // Create a simple CSV export for now (can be enhanced with PhpSpreadsheet later)
+        $filename = "logs_report_{$reportType}_{$fromDate}_to_{$toDate}.csv";
+        
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($reportType, $fromDate, $toDate, $companyId) {
+            $file = fopen('php://output', 'w');
+            
+            if ($reportType === 'activity' || $reportType === 'overview') {
+                // Activity logs export
+                fputcsv($file, ['Date', 'User', 'Module', 'Action', 'Description', 'IP Address']);
+                
+                $logs = DB::table('tbl_audit_logs as al')
+                    ->leftJoin('tbl_users as u', 'al.user_id', '=', 'u.id')
+                    ->select(
+                        'al.created_at',
+                        DB::raw("CONCAT(COALESCE(u.fname, 'System'), ' ', COALESCE(u.mname, ''), ' ', COALESCE(u.lname, '')) as user_name"),
+                        'al.module_name',
+                        'al.action_type',
+                        'al.description',
+                        'al.ip_address'
+                    )
+                    ->where('al.company_id', $companyId)
+                    ->whereBetween('al.created_at', [$fromDate, $toDate])
+                    ->orderBy('al.created_at', 'desc')
+                    ->get();
+
+                foreach ($logs as $log) {
+                    fputcsv($file, [
+                        $log->created_at,
+                        $log->user_name,
+                        $log->module_name,
+                        $log->action_type,
+                        $log->description,
+                        $log->ip_address
+                    ]);
+                }
+            } elseif ($reportType === 'security') {
+                // Security logs export
+                fputcsv($file, ['Date', 'User', 'Event Type', 'Risk Level', 'Description', 'IP Address']);
+                
+                $logs = DB::table('tbl_security_logs as sl')
+                    ->leftJoin('tbl_users as u', 'sl.user_id', '=', 'u.id')
+                    ->select(
+                        'sl.created_at',
+                        DB::raw("CONCAT(u.fname, ' ', COALESCE(u.mname, ''), ' ', u.lname) as user_name"),
+                        'sl.event_type',
+                        'sl.risk_level',
+                        'sl.description',
+                        'sl.ip_address'
+                    )
+                    ->where('u.comp_id', $companyId)
+                    ->whereBetween('sl.created_at', [$fromDate, $toDate])
+                    ->orderBy('sl.created_at', 'desc')
+                    ->get();
+
+                foreach ($logs as $log) {
+                    fputcsv($file, [
+                        $log->created_at,
+                        $log->user_name,
+                        $log->event_type,
+                        $log->risk_level,
+                        $log->description,
+                        $log->ip_address
+                    ]);
+                }
+            }
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export to PDF format
+     */
+    private function exportToPDF($reportType, $fromDate, $toDate, $companyId)
+    {
+        // For now, return a simple text response
+        // In a real implementation, you would use a PDF library like DomPDF or TCPDF
+        $data = "Log Report - {$reportType}\n";
+        $data .= "Period: {$fromDate} to {$toDate}\n";
+        $data .= "Generated: " . now()->format('Y-m-d H:i:s') . "\n\n";
+        
+        if ($reportType === 'activity' || $reportType === 'overview') {
+            $count = DB::table('tbl_audit_logs')
+                ->where('company_id', $companyId)
+                ->whereBetween('created_at', [$fromDate, $toDate])
+                ->count();
+            $data .= "Total Activity Logs: {$count}\n";
+        } elseif ($reportType === 'security') {
+            $count = DB::table('tbl_security_logs as sl')
+                ->leftJoin('tbl_users as u', 'sl.user_id', '=', 'u.id')
+                ->where('u.comp_id', $companyId)
+                ->whereBetween('sl.created_at', [$fromDate, $toDate])
+                ->count();
+            $data .= "Total Security Events: {$count}\n";
+        }
+
+        $filename = "logs_report_{$reportType}_{$fromDate}_to_{$toDate}.txt";
+        
+        return response($data)
+            ->header('Content-Type', 'text/plain')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 }
 

@@ -72,9 +72,9 @@ export default function DeletedItems({ deletedItems, filters }) {
                             </div>
                         </div>
                         <div className="header-right">
-                            <Link href={route('logs.activity')} className="btn-secondary-professional">
+                            <Link href={route('logs.activity')} className="btn-secondary-professional" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <Calendar size={16} />
-                                Activity Logs
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Activity Logs</span>
                             </Link>
                         </div>
                     </div>
@@ -144,13 +144,13 @@ export default function DeletedItems({ deletedItems, filters }) {
                         </div>
 
                         <div className="filter-actions">
-                            <button onClick={handleFilter} className="btn-primary-professional">
+                            <button onClick={handleFilter} className="btn-primary-professional" style={{color: 'white', fontWeight: '600'}}>
                                 <Search size={16} />
-                                Search
+                                <span style={{color: 'white', fontWeight: '600'}}>Search</span>
                             </button>
-                            <button onClick={() => router.get(route('logs.deleted-items'))} className="btn-secondary-professional">
+                            <button onClick={() => router.get(route('logs.deleted-items'))} className="btn-secondary-professional" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <RotateCcw size={16} />
-                                Reset
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Reset</span>
                             </button>
                         </div>
                     </div>

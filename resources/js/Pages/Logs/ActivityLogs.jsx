@@ -89,17 +89,17 @@ export default function ActivityLogs({ logs, users, filters }) {
                             </div>
                         </div>
                         <div className="header-actions">
-                            <Link href={route('logs.deleted-items')} className="btn btn-secondary btn-sm">
+                            <Link href={route('logs.deleted-items')} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <RotateCcw size={16} />
-                                Deleted Items
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Deleted Items</span>
                             </Link>
-                            <Link href={route('logs.security')} className="btn btn-secondary btn-sm">
+                            <Link href={route('logs.security')} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <Shield size={16} />
-                                Security Logs
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Security Logs</span>
                             </Link>
-                            <Link href={route('logs.reports')} className="btn btn-primary btn-sm">
+                            <Link href={route('logs.reports')} className="btn btn-primary btn-sm" style={{color: 'white', fontWeight: '600'}}>
                                 <Download size={16} />
-                                Reports
+                                <span style={{color: 'white', fontWeight: '600'}}>Reports</span>
                             </Link>
                         </div>
                     </div>
@@ -165,13 +165,13 @@ export default function ActivityLogs({ logs, users, filters }) {
                         </select>
 
                         <div className="view-controls">
-                            <button onClick={handleFilter} className="btn btn-primary btn-sm">
+                            <button onClick={handleFilter} className="btn btn-primary btn-sm" style={{color: 'white', fontWeight: '600'}}>
                                 <Filter size={16} />
-                                Apply
+                                <span style={{color: 'white', fontWeight: '600'}}>Apply</span>
                             </button>
-                            <button onClick={handleReset} className="btn btn-secondary btn-sm">
+                            <button onClick={handleReset} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <RotateCcw size={16} />
-                                Reset
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Reset</span>
                             </button>
                         </div>
                     </div>
@@ -222,12 +222,18 @@ export default function ActivityLogs({ logs, users, filters }) {
                                             </div>
                                         </td>
                                         <td>
-                                            <span className="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 text-sm font-semibold border border-blue-200">
+                                            <span 
+                                                className="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 text-sm font-semibold border border-blue-200"
+                                                style={{color: '#1d4ed8', fontWeight: '600'}}
+                                            >
                                                 {log.module_name}
                                             </span>
                                         </td>
                                         <td>
-                                            <span className={`px-3 py-1 rounded-lg text-sm font-semibold border ${getActionBadgeClass(log.action_type)}`}>
+                                            <span 
+                                                className={`px-3 py-1 rounded-lg text-sm font-semibold border ${getActionBadgeClass(log.action_type)}`}
+                                                style={{color: 'inherit', fontWeight: '600'}}
+                                            >
                                                 {log.action_type}
                                             </span>
                                         </td>
@@ -248,10 +254,12 @@ export default function ActivityLogs({ logs, users, filters }) {
                                             <div className="flex justify-center">
                                                 <Link
                                                     href={route('logs.details', log.id)}
-                                                    className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                                                    className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                                                     title="View Details"
+                                                    style={{color: '#2563eb', fontWeight: '500', fontSize: '0.75rem'}}
                                                 >
-                                                    <Eye size={16} />
+                                                    <Eye size={14} />
+                                                    <span style={{color: '#2563eb', fontWeight: '500', fontSize: '0.75rem'}}>View</span>
                                                 </Link>
                                             </div>
                                         </td>

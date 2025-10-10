@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Accounts;
 
 use App\Http\Controllers\Controller;
 use App\Services\AuditLogService;
+use App\Services\RecoveryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -349,6 +350,7 @@ class JournalVoucherController extends Controller
                     'error' => $auditException->getMessage()
                 ]);
             }
+
 
             return redirect()->route('accounts.journal-voucher.index')
                            ->with('success', 'Journal voucher created successfully!');
@@ -764,6 +766,7 @@ class JournalVoucherController extends Controller
                     'error' => $auditException->getMessage()
                 ]);
             }
+
 
             return redirect()->route('accounts.journal-voucher.index')
                            ->with('success', 'Journal voucher updated successfully!');
@@ -1447,5 +1450,218 @@ class JournalVoucherController extends Controller
             'entries' => $entries,
             'company' => $company
         ]);
+    }
+
+    /**
+     * Delete a journal voucher
+     * 
+     * Error Handling Strategy:
+     * - Only draft vouchers can be deleted
+     * - All errors are logged with full details for developers
+     * - User-friendly messages are shown to the user
+     * - Audit trail is created for all deletions
+     */
+    public function destroy(Request $request, $id)
+    {
+        Log::info('=== JOURNAL VOUCHER DESTROY METHOD CALLED ===', ['voucher_id' => $id]);
+        
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+        $userId = $request->input('user_id') ?? $request->session()->get('user_id');
+        
+        if (!$compId || !$locationId || !$userId) {
+            Log::warning('Missing authentication information for journal voucher delete', [
+                'comp_id' => $compId,
+                'location_id' => $locationId,
+                'user_id' => $userId,
+                'voucher_id' => $id
+            ]);
+            return redirect()->back()->with('error', 'User authentication information is required.');
+        }
+
+        try {
+            // Find the voucher
+            $voucher = DB::table('transactions')
+                ->where('id', $id)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->where('voucher_type', 'Journal')
+                ->first();
+
+            if (!$voucher) {
+                Log::warning('Journal voucher not found for deletion', [
+                    'voucher_id' => $id,
+                    'comp_id' => $compId,
+                    'location_id' => $locationId
+                ]);
+                return redirect()->back()->with('error', 'Journal voucher not found.');
+            }
+
+            // Only draft vouchers can be deleted
+            if ($voucher->status !== 'Draft') {
+                Log::warning('Attempted to delete non-draft journal voucher', [
+                    'voucher_id' => $id,
+                    'voucher_number' => $voucher->voucher_number,
+                    'status' => $voucher->status,
+                    'user_id' => $userId
+                ]);
+                return redirect()->back()->with('error', 'Only draft vouchers can be deleted. This voucher has status: ' . $voucher->status);
+            }
+
+            $voucherNumber = $voucher->voucher_number;
+            
+            // Store old data for audit log
+            $oldData = [
+                'voucher_number' => $voucher->voucher_number,
+                'voucher_date' => $voucher->voucher_date,
+                'voucher_type' => $voucher->voucher_type,
+                'reference_number' => $voucher->reference_number,
+                'description' => $voucher->description,
+                'status' => $voucher->status,
+                'total_debit' => $voucher->total_debit,
+                'total_credit' => $voucher->total_credit,
+                'currency_code' => $voucher->currency_code,
+                'comp_id' => $voucher->comp_id,
+                'location_id' => $voucher->location_id,
+                'created_by' => $voucher->created_by,
+                'created_at' => $voucher->created_at
+            ];
+
+            // Get transaction entries for recovery
+            $transactionEntries = DB::table('transaction_entries')
+                ->where('transaction_id', $id)
+                ->get()
+                ->toArray();
+
+            // Get attachments for recovery
+            $attachments = DB::table('voucher_attachments')
+                ->where('voucher_id', $id)
+                ->get()
+                ->toArray();
+
+            // Prepare related data for recovery
+            $relatedData = [
+                'transaction_entries' => $transactionEntries,
+                'voucher_attachments' => $attachments
+            ];
+
+            // Save for recovery before deletion
+            try {
+                $recoveryId = RecoveryService::saveForRecovery(
+                    'transactions',
+                    $id,
+                    (array) $voucher,
+                    $relatedData,
+                    $voucherNumber,
+                    'Manual deletion from Journal Voucher list'
+                );
+                
+                Log::info('Journal voucher saved for recovery', [
+                    'voucher_id' => $id,
+                    'voucher_number' => $voucherNumber,
+                    'recovery_id' => $recoveryId
+                ]);
+            } catch (\Exception $recoveryException) {
+                Log::warning('Failed to save journal voucher for recovery', [
+                    'voucher_id' => $id,
+                    'voucher_number' => $voucherNumber,
+                    'error' => $recoveryException->getMessage()
+                ]);
+                // Continue with deletion even if recovery fails
+            }
+
+            DB::beginTransaction();
+
+            Log::info('Deleting journal voucher entries', [
+                'voucher_id' => $id,
+                'voucher_number' => $voucherNumber
+            ]);
+
+            // Delete transaction entries first (foreign key constraint)
+            $entriesDeleted = DB::table('transaction_entries')
+                ->where('transaction_id', $id)
+                ->delete();
+
+            Log::info('Journal voucher entries deleted', [
+                'voucher_id' => $id,
+                'entries_deleted' => $entriesDeleted
+            ]);
+
+            // Delete attachments
+            $attachmentsDeleted = DB::table('voucher_attachments')
+                ->where('voucher_id', $id)
+                ->delete();
+
+            Log::info('Journal voucher attachments deleted', [
+                'voucher_id' => $id,
+                'attachments_deleted' => $attachmentsDeleted
+            ]);
+
+            // Delete the transaction
+            DB::table('transactions')
+                ->where('id', $id)
+                ->delete();
+
+            Log::info('Journal voucher deleted successfully', [
+                'voucher_id' => $id,
+                'voucher_number' => $voucherNumber
+            ]);
+
+            DB::commit();
+
+            // Create audit log for the journal voucher deletion
+            try {
+                AuditLogService::logJournalVoucher('DELETE', $id, [], $oldData);
+                Log::info('Audit log created for journal voucher deletion', [
+                    'voucher_id' => $id,
+                    'voucher_number' => $voucherNumber
+                ]);
+            } catch (\Exception $auditException) {
+                // Don't fail the main operation if audit logging fails
+                Log::warning('Failed to create audit log for journal voucher deletion', [
+                    'voucher_id' => $id,
+                    'voucher_number' => $voucherNumber,
+                    'error' => $auditException->getMessage()
+                ]);
+            }
+
+
+            return redirect()->route('accounts.journal-voucher.index')
+                           ->with('success', "Journal voucher {$voucherNumber} deleted successfully!");
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            DB::rollback();
+            
+            // Log detailed error for developers
+            Log::error('Database error deleting journal voucher', [
+                'error' => $e->getMessage(),
+                'sql' => $e->getSql(),
+                'bindings' => $e->getBindings(),
+                'trace' => $e->getTraceAsString(),
+                'voucher_id' => $id,
+                'user_id' => $userId,
+                'comp_id' => $compId,
+                'location_id' => $locationId
+            ]);
+            
+            // Return user-friendly error message
+            return redirect()->back()->with('error', 'There was a problem deleting the journal voucher. Please try again or contact support.');
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            // Log detailed error for developers
+            Log::error('Error deleting journal voucher', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'voucher_id' => $id,
+                'user_id' => $userId,
+                'comp_id' => $compId,
+                'location_id' => $locationId
+            ]);
+            
+            // Return user-friendly error message
+            return redirect()->back()->with('error', 'Something went wrong while deleting the journal voucher. Please try again or contact support if the problem persists.');
+        }
     }
 }

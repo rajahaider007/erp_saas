@@ -456,4 +456,5 @@ Route::prefix('system/logs')->name('logs.')->middleware('web.auth')->group(funct
     
     // Reports & Analytics
     Route::get('/reports', [LogController::class, 'reports'])->name('reports');
+    Route::get('/export', [LogController::class, 'export'])->name('export');
 });

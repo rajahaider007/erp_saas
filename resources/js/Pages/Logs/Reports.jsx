@@ -46,8 +46,25 @@ export default function Reports({
 
     const handleExport = (format) => {
         console.log(`Exporting ${reportType} report as ${format}`);
-        // Implementation for export functionality
-        alert(`Exporting ${reportType} report as ${format}...`);
+        
+        // Create export URL with current filters
+        const exportUrl = route('logs.export', {
+            report_type: reportType,
+            from_date: fromDate ? fromDate.toISOString().split('T')[0] : '',
+            to_date: toDate ? toDate.toISOString().split('T')[0] : '',
+            format: format.toLowerCase()
+        });
+        
+        // Create a temporary link and trigger download
+        const link = document.createElement('a');
+        link.href = exportUrl;
+        link.download = `${reportType}_report_${new Date().toISOString().split('T')[0]}.${format.toLowerCase()}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Show success message
+        alert(`${format} report exported successfully!`);
     };
 
     return (
@@ -70,17 +87,17 @@ export default function Reports({
                             </div>
                         </div>
                         <div className="header-actions">
-                            <Link href={route('logs.activity')} className="btn btn-secondary btn-sm">
+                            <Link href={route('logs.activity')} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <Activity size={16} />
-                                Activity Logs
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Activity Logs</span>
                             </Link>
-                            <Link href={route('logs.deleted-items')} className="btn btn-secondary btn-sm">
+                            <Link href={route('logs.deleted-items')} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <AlertTriangle size={16} />
-                                Deleted Items
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Deleted Items</span>
                             </Link>
-                            <Link href={route('logs.security')} className="btn btn-secondary btn-sm">
+                            <Link href={route('logs.security')} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <Shield size={16} />
-                                Security Logs
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Security Logs</span>
                             </Link>
                         </div>
                     </div>
@@ -126,25 +143,25 @@ export default function Reports({
 
                         {/* Action Buttons */}
                         <div className="filter-actions">
-                            <button onClick={handleFilter} className="btn-primary-professional">
+                            <button onClick={handleFilter} className="btn-primary-professional" style={{color: 'white', fontWeight: '600'}}>
                                 <Filter size={18} />
-                                <span>Apply Filters</span>
+                                <span style={{color: 'white', fontWeight: '600'}}>Apply Filters</span>
                             </button>
-                            <button onClick={handleReset} className="btn-secondary-professional">
+                            <button onClick={handleReset} className="btn-secondary-professional" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <Calendar size={18} />
-                                <span>Reset</span>
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Reset</span>
                             </button>
                         </div>
 
                         {/* Export Actions */}
                         <div className="export-actions">
-                            <button onClick={() => handleExport('PDF')} className="btn-export-professional pdf">
+                            <button onClick={() => handleExport('PDF')} className="btn-export-professional pdf" style={{color: 'white', fontWeight: '600'}}>
                                 <Download size={18} />
-                                <span>Export PDF</span>
+                                <span style={{color: 'white', fontWeight: '600'}}>Export PDF</span>
                             </button>
-                            <button onClick={() => handleExport('Excel')} className="btn-export-professional excel">
+                            <button onClick={() => handleExport('Excel')} className="btn-export-professional excel" style={{color: 'white', fontWeight: '600'}}>
                                 <Download size={18} />
-                                <span>Export Excel</span>
+                                <span style={{color: 'white', fontWeight: '600'}}>Export Excel</span>
                             </button>
                         </div>
                     </div>
