@@ -57,36 +57,22 @@ export default function DeletedItems({ deletedItems, filters }) {
             <Head title="Deleted Items Recovery" />
 
             <div className="form-theme-system min-h-screen p-6">
-                {/* Header */}
-                <div className="manager-header">
-                    <div className="header-main">
-                        <div className="title-section">
-                            <h1 className="page-title">
-                                <Trash2 className="title-icon" size={32} />
-                                Deleted Items Recovery
-                            </h1>
-                            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-                                <div className="flex items-center gap-3">
-                                    <AlertTriangle size={20} className="text-yellow-600" />
-                                    <div>
-                                        <p className="text-sm font-semibold text-yellow-800">
-                                            Items are automatically deleted after 90 days
-                                        </p>
-                                        <p className="text-xs text-yellow-700 mt-1">
-                                            Restore important data before expiry to prevent permanent loss
-                                        </p>
-                                    </div>
+                {/* Professional Header */}
+                <div className="recovery-header">
+                    <div className="header-content">
+                        <div className="header-left">
+                            <div className="page-title-section">
+                                <div className="title-icon-wrapper">
+                                    <Trash2 size={32} className="title-icon" />
                                 </div>
-                            </div>
-                            <div className="stats-summary mt-4">
-                                <div className="stat-item">
-                                    <Trash2 size={16} />
-                                    <span>Total: {deletedItems.total} items</span>
+                                <div className="title-text">
+                                    <h1 className="page-title">Deleted Items Recovery</h1>
+                                    <p className="page-subtitle">Restore and manage deleted system data</p>
                                 </div>
                             </div>
                         </div>
-                        <div className="header-actions">
-                            <Link href={route('logs.activity')} className="btn btn-secondary btn-sm">
+                        <div className="header-right">
+                            <Link href={route('logs.activity')} className="btn-secondary-professional">
                                 <Calendar size={16} />
                                 Activity Logs
                             </Link>
@@ -94,154 +80,185 @@ export default function DeletedItems({ deletedItems, filters }) {
                     </div>
                 </div>
 
-                {/* Filters */}
-                <div className="filters-bar">
-                    <div className="filter-group">
-                        <div className="search-container">
-                            <Search className="search-icon" size={20} />
-                            <input
-                                type="text"
-                                className="search-input"
-                                placeholder="Search deleted items..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleFilter()}
-                            />
+                {/* Professional Warning Card */}
+                <div className="warning-card">
+                    <div className="warning-content">
+                        <div className="warning-icon">
+                            <AlertTriangle size={24} />
                         </div>
-
-                        <select
-                            className="filter-select"
-                            value={table}
-                            onChange={(e) => setTable(e.target.value)}
-                        >
-                            <option value="">All Types</option>
-                            <option value="transactions">Journal Vouchers</option>
-                            <option value="tbl_chart_of_accounts">Chart of Accounts</option>
-                            <option value="tbl_users">Users</option>
-                        </select>
-                    </div>
-
-                    <div className="view-controls">
-                        <button onClick={handleFilter} className="btn btn-primary btn-sm">
-                            <Search size={16} />
-                            Search
-                        </button>
-                        <button onClick={() => router.get(route('logs.deleted-items'))} className="btn btn-secondary btn-sm">
-                            <RotateCcw size={16} />
-                            Reset
-                        </button>
+                        <div className="warning-text">
+                            <h3 className="warning-title">Automatic Deletion Notice</h3>
+                            <p className="warning-description">
+                                Items are automatically deleted after 90 days. Restore important data before expiry to prevent permanent loss.
+                            </p>
+                        </div>
+                        <div className="warning-badge">
+                            <span className="badge-critical">Critical</span>
+                        </div>
                     </div>
                 </div>
 
-                {/* Deleted Items Grid */}
-                <div className="main-content">
-                    <div className="p-6">
-                        <div className="grid grid-cols-1 gap-4">
-                            {deletedItems.data.map((item) => (
-                                <div
-                                    key={item.id}
-                                    className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl transition-all duration-300 hover:border-blue-300"
-                                >
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex-1">
-                                            {/* Item Identifier */}
-                                            <div className="flex items-center gap-3 mb-3">
-                                                <div className="p-2 bg-red-100 rounded-lg">
-                                                    <Trash2 size={20} className="text-red-600" />
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-lg font-bold text-gray-800">
-                                                        {item.record_identifier || `Record #${item.original_id}`}
-                                                    </h3>
-                                                    <p className="text-sm text-gray-500">
-                                                        Type: {item.original_table}
-                                                    </p>
-                                                </div>
-                                            </div>
+                {/* Stats Summary */}
+                <div className="stats-overview">
+                    <div className="stat-card">
+                        <div className="stat-icon">
+                            <Trash2 size={20} />
+                        </div>
+                        <div className="stat-info">
+                            <div className="stat-value">{deletedItems.total}</div>
+                            <div className="stat-label">Total Items</div>
+                        </div>
+                    </div>
+                </div>
 
-                                            {/* Deletion Info */}
-                                            <div className="grid grid-cols-2 gap-4 mt-4">
-                                                <div className="flex items-center gap-2">
-                                                    <User size={14} className="text-gray-400" />
-                                                    <div>
-                                                        <p className="text-xs text-gray-500">Deleted By</p>
-                                                        <p className="text-sm font-semibold text-gray-700">
-                                                            {item.deleted_by_name}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center gap-2">
-                                                    <Clock size={14} className="text-gray-400" />
-                                                    <div>
-                                                        <p className="text-xs text-gray-500">Deleted On</p>
-                                                        <p className="text-sm font-semibold text-gray-700">
-                                                            {new Date(item.deleted_at).toLocaleString()}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Delete Reason */}
-                                            {item.delete_reason && (
-                                                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                                                    <p className="text-xs text-gray-500">Reason for Deletion</p>
-                                                    <p className="text-sm text-gray-700 mt-1">
-                                                        {item.delete_reason}
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Recovery Info & Actions */}
-                                        <div className="ml-6 text-right">
-                                            <div className="mb-4">
-                                                <p className="text-xs text-gray-500 mb-1">Recovery Expires In</p>
-                                                <p className={`text-2xl font-bold ${getDaysRemainingClass(item.days_remaining)}`}>
-                                                    {item.days_remaining} days
-                                                </p>
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                    {new Date(item.recovery_expires_at).toLocaleDateString()}
-                                                </p>
-                                            </div>
-
-                                            <div className="flex flex-col gap-2">
-                                                <button
-                                                    onClick={() => handleRestore(item.id)}
-                                                    disabled={restoring === item.id}
-                                                    className="btn btn-primary btn-sm"
-                                                >
-                                                    {restoring === item.id ? (
-                                                        <>
-                                                            <div className="loading-spinner" style={{width: 16, height: 16}}></div>
-                                                            Restoring...
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <RotateCcw size={16} />
-                                                            Restore
-                                                        </>
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-
-                            {deletedItems.data.length === 0 && (
-                                <div className="text-center py-16">
-                                    <div className="empty-state">
-                                        <Trash2 size={48} className="empty-icon" />
-                                        <p className="text-gray-500 mt-4 text-lg font-semibold">No deleted items found</p>
-                                        <p className="text-sm text-gray-400 mt-2">All clear! No items waiting for recovery.</p>
-                                    </div>
-                                </div>
-                            )}
+                {/* Professional Filters */}
+                <div className="professional-filters-container">
+                    <div className="filters-row">
+                        <div className="filter-group">
+                            <label className="filter-label">🔍 Search Items</label>
+                            <div className="search-container">
+                                <Search className="search-icon" size={20} />
+                                <input
+                                    type="text"
+                                    className="professional-search-input"
+                                    placeholder="Search deleted items..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleFilter()}
+                                />
+                            </div>
                         </div>
 
-                        {/* Pagination */}
-                        {deletedItems.last_page > 1 && (
+                        <div className="filter-group">
+                            <label className="filter-label">📋 Filter by Type</label>
+                            <select
+                                className="professional-select"
+                                value={table}
+                                onChange={(e) => setTable(e.target.value)}
+                            >
+                                <option value="">📊 All Types</option>
+                                <option value="transactions">📝 Journal Vouchers</option>
+                                <option value="tbl_chart_of_accounts">📈 Chart of Accounts</option>
+                                <option value="tbl_users">👥 Users</option>
+                            </select>
+                        </div>
+
+                        <div className="filter-actions">
+                            <button onClick={handleFilter} className="btn-primary-professional">
+                                <Search size={16} />
+                                Search
+                            </button>
+                            <button onClick={() => router.get(route('logs.deleted-items'))} className="btn-secondary-professional">
+                                <RotateCcw size={16} />
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Professional Deleted Items Grid */}
+                <div className="main-content">
+                    <div className="deleted-items-grid">
+                        {deletedItems.data.map((item) => (
+                            <div key={item.id} className="deleted-item-card">
+                                <div className="item-header">
+                                    <div className="item-icon">
+                                        <Trash2 size={24} />
+                                    </div>
+                                    <div className="item-info">
+                                        <h3 className="item-title">
+                                            {item.record_identifier || `Record #${item.original_id}`}
+                                        </h3>
+                                        <p className="item-type">
+                                            📋 {item.original_table}
+                                        </p>
+                                    </div>
+                                    <div className="item-status">
+                                        <span className={`status-badge ${getDaysRemainingClass(item.days_remaining).includes('red') ? 'critical' : getDaysRemainingClass(item.days_remaining).includes('yellow') ? 'warning' : 'safe'}`}>
+                                            {item.days_remaining} days left
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="item-details">
+                                    <div className="detail-grid">
+                                        <div className="detail-item">
+                                            <div className="detail-icon">
+                                                <User size={16} />
+                                            </div>
+                                            <div className="detail-content">
+                                                <div className="detail-label">Deleted By</div>
+                                                <div className="detail-value">{item.deleted_by_name}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="detail-item">
+                                            <div className="detail-icon">
+                                                <Clock size={16} />
+                                            </div>
+                                            <div className="detail-content">
+                                                <div className="detail-label">Deleted On</div>
+                                                <div className="detail-value">
+                                                    {new Date(item.deleted_at).toLocaleString()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {item.delete_reason && (
+                                        <div className="reason-section">
+                                            <div className="reason-label">📝 Reason for Deletion</div>
+                                            <div className="reason-text">{item.delete_reason}</div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="item-actions">
+                                    <div className="recovery-info">
+                                        <div className="recovery-label">⏰ Recovery Expires</div>
+                                        <div className="recovery-date">
+                                            {new Date(item.recovery_expires_at).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => handleRestore(item.id)}
+                                        disabled={restoring === item.id}
+                                        className="btn-restore"
+                                    >
+                                        {restoring === item.id ? (
+                                            <>
+                                                <div className="loading-spinner" style={{width: 16, height: 16}}></div>
+                                                Restoring...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <RotateCcw size={16} />
+                                                Restore Item
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+
+                        {deletedItems.data.length === 0 && (
+                            <div className="empty-state-container">
+                                <div className="empty-state">
+                                    <div className="empty-icon">
+                                        <Trash2 size={64} />
+                                    </div>
+                                    <div className="empty-title">No Deleted Items</div>
+                                    <div className="empty-description">All clear! No items waiting for recovery.</div>
+                                    <div className="empty-badge">
+                                        <span className="badge-success">🛡️ System Clean</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Pagination */}
+                    {deletedItems.last_page > 1 && (
                             <div className="pagination-container mt-6">
                                 <div className="pagination-info">
                                     <p className="results-info">
@@ -294,8 +311,7 @@ export default function DeletedItems({ deletedItems, filters }) {
                                     </button>
                                 </div>
                             </div>
-                        )}
-                    </div>
+                    )}
                 </div>
             </div>
         </AppLayout>

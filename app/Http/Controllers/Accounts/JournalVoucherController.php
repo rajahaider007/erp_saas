@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Accounts;
 
 use App\Http\Controllers\Controller;
+use App\Services\AuditLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -321,6 +322,33 @@ class JournalVoucherController extends Controller
                 'total_credit' => $totalBaseCredit,
                 'entries_count' => count($request->entries)
             ]);
+
+            // Create audit log for the journal voucher creation
+            try {
+                $voucherData = [
+                    'voucher_number' => $voucherNumber,
+                    'voucher_date' => $request->voucher_date,
+                    'voucher_type' => 'Journal',
+                    'reference_number' => $request->reference_number,
+                    'description' => $request->description,
+                    'status' => 'Draft',
+                    'total_debit' => $totalBaseDebit,
+                    'total_credit' => $totalBaseCredit,
+                    'currency_code' => $company->default_currency_code ?? 'PKR',
+                    'comp_id' => $compId,
+                    'location_id' => $locationId,
+                    'created_by' => $userId
+                ];
+                
+                AuditLogService::logJournalVoucher('CREATE', $transactionId, $voucherData);
+                Log::info('Audit log created for journal voucher creation', ['transaction_id' => $transactionId]);
+            } catch (\Exception $auditException) {
+                // Don't fail the main operation if audit logging fails
+                Log::warning('Failed to create audit log for journal voucher creation', [
+                    'transaction_id' => $transactionId,
+                    'error' => $auditException->getMessage()
+                ]);
+            }
 
             return redirect()->route('accounts.journal-voucher.index')
                            ->with('success', 'Journal voucher created successfully!');
@@ -702,6 +730,40 @@ class JournalVoucherController extends Controller
             }
 
             DB::commit();
+
+            // Create audit log for the journal voucher update
+            try {
+                $voucherData = [
+                    'voucher_number' => $voucher->voucher_number,
+                    'voucher_date' => $request->voucher_date,
+                    'voucher_type' => 'Journal',
+                    'reference_number' => $request->reference_number,
+                    'description' => $request->description,
+                    'status' => 'Draft',
+                    'total_debit' => $totalBaseDebit,
+                    'total_credit' => $totalBaseCredit,
+                    'currency_code' => $company->default_currency_code ?? 'PKR',
+                    'comp_id' => $compId,
+                    'location_id' => $locationId
+                ];
+                
+                $oldData = [
+                    'voucher_date' => $voucher->voucher_date,
+                    'reference_number' => $voucher->reference_number,
+                    'description' => $voucher->description,
+                    'total_debit' => $voucher->total_debit,
+                    'total_credit' => $voucher->total_credit
+                ];
+                
+                AuditLogService::logJournalVoucher('UPDATE', $id, $voucherData, $oldData);
+                Log::info('Audit log created for journal voucher update', ['transaction_id' => $id]);
+            } catch (\Exception $auditException) {
+                // Don't fail the main operation if audit logging fails
+                Log::warning('Failed to create audit log for journal voucher update', [
+                    'transaction_id' => $id,
+                    'error' => $auditException->getMessage()
+                ]);
+            }
 
             return redirect()->route('accounts.journal-voucher.index')
                            ->with('success', 'Journal voucher updated successfully!');
@@ -1164,6 +1226,40 @@ class JournalVoucherController extends Controller
                     'posted_by' => auth()->id(),
                     'updated_at' => now()
                 ]);
+
+            // Create audit log for the journal voucher posting
+            try {
+                $voucherData = [
+                    'voucher_number' => $voucher->voucher_number,
+                    'voucher_date' => $voucher->voucher_date,
+                    'voucher_type' => 'Journal',
+                    'reference_number' => $voucher->reference_number,
+                    'description' => $voucher->description,
+                    'status' => 'Posted',
+                    'total_debit' => $voucher->total_debit,
+                    'total_credit' => $voucher->total_credit,
+                    'currency_code' => $voucher->currency_code,
+                    'comp_id' => $compId,
+                    'location_id' => $locationId,
+                    'posted_at' => now(),
+                    'posted_by' => auth()->id()
+                ];
+                
+                $oldData = [
+                    'status' => 'Draft',
+                    'posted_at' => null,
+                    'posted_by' => null
+                ];
+                
+                AuditLogService::logJournalVoucher('POST', $id, $voucherData, $oldData);
+                Log::info('Audit log created for journal voucher posting', ['transaction_id' => $id]);
+            } catch (\Exception $auditException) {
+                // Don't fail the main operation if audit logging fails
+                Log::warning('Failed to create audit log for journal voucher posting', [
+                    'transaction_id' => $id,
+                    'error' => $auditException->getMessage()
+                ]);
+            }
 
             return redirect()->route('accounts.journal-voucher.index')
                            ->with('success', "Journal voucher {$voucher->voucher_number} posted successfully!");

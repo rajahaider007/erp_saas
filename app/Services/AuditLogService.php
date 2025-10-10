@@ -45,8 +45,9 @@ class AuditLogService
             // Calculate changed fields
             $changedFields = self::getChangedFields($oldData, $newData);
             
+            // Insert into tbl_audit_logs (main audit trail)
             DB::table('tbl_audit_logs')->insert([
-                'user_id' => Auth::id(),
+                'user_id' => Auth::id() ?? session('user_id'), // Fallback to session
                 'company_id' => session('user_comp_id'),
                 'location_id' => session('user_location_id'),
                 'module_name' => $module,
@@ -217,11 +218,12 @@ class AuditLogService
             ->leftJoin('tbl_users as u', 'al.user_id', '=', 'u.id')
             ->select(
                 'al.*',
-                'u.name as user_name',
+                DB::raw("CONCAT(u.fname, ' ', COALESCE(u.mname, ''), ' ', u.lname) as user_name"),
                 'u.email as user_email'
             )
             ->where('al.table_name', $table)
             ->where('al.record_id', $recordId)
+            ->where('al.company_id', session('user_comp_id')) // Company filtering
             ->orderBy('al.created_at', 'desc')
             ->get();
     }
@@ -233,6 +235,7 @@ class AuditLogService
     {
         return DB::table('tbl_audit_logs')
             ->where('user_id', $userId)
+            ->where('company_id', session('user_comp_id')) // Company filtering
             ->orderBy('created_at', 'desc')
             ->limit($limit)
             ->get();
@@ -254,6 +257,7 @@ class AuditLogService
                 DB::raw('COUNT(DISTINCT user_id) as unique_users')
             )
             ->whereBetween('created_at', [$fromDate, $toDate])
+            ->where('company_id', session('user_comp_id')) // Company filtering
             ->groupBy('module_name', 'action_type');
         
         if ($module) {

@@ -7,6 +7,7 @@ use App\Services\RecoveryService;
 use App\Services\SecurityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class LogController extends Controller
@@ -24,14 +25,23 @@ class LogController extends Controller
         $toDate = $request->input('to_date');
         $perPage = $request->input('per_page', 25);
 
+        $companyId = session('user_comp_id');
+        
+        // Debug logging
+        Log::info('Activity Logs Query', [
+            'company_id' => $companyId,
+            'total_logs_in_db' => DB::table('tbl_audit_logs')->count(),
+            'logs_for_company' => DB::table('tbl_audit_logs')->where('company_id', $companyId)->count()
+        ]);
+
         $query = DB::table('tbl_audit_logs as al')
             ->leftJoin('tbl_users as u', 'al.user_id', '=', 'u.id')
             ->select(
                 'al.*',
-                DB::raw("CONCAT(u.fname, ' ', COALESCE(u.mname, ''), ' ', u.lname) as user_name"),
+                DB::raw("CONCAT(COALESCE(u.fname, 'System'), ' ', COALESCE(u.mname, ''), ' ', COALESCE(u.lname, '')) as user_name"),
                 'u.email as user_email'
             )
-            ->where('al.company_id', session('user_comp_id'));
+            ->where('al.company_id', $companyId);
 
         // Apply filters
         if ($search) {
@@ -109,7 +119,8 @@ class LogController extends Controller
                 DB::raw('DATEDIFF(r.recovery_expires_at, NOW()) as days_remaining')
             )
             ->where('r.status', 'DELETED')
-            ->where('r.recovery_expires_at', '>', now());
+            ->where('r.recovery_expires_at', '>', now())
+            ->where('u.comp_id', session('user_comp_id')); // Company filtering via user
 
         if ($table) {
             $query->where('r.original_table', $table);
@@ -171,6 +182,7 @@ class LogController extends Controller
                 'u.email as user_email'
             )
             ->where('al.id', $id)
+            ->where('al.company_id', session('user_comp_id')) // Company filtering
             ->first();
 
         if (!$log) {
@@ -203,6 +215,7 @@ class LogController extends Controller
             )
             ->where('al.table_name', $table)
             ->where('al.record_id', $recordId)
+            ->where('al.company_id', session('user_comp_id')) // Company filtering
             ->orderBy('al.created_at', 'asc')
             ->get();
 
@@ -230,7 +243,8 @@ class LogController extends Controller
                 'sl.*',
                 DB::raw("CONCAT(u.fname, ' ', COALESCE(u.mname, ''), ' ', u.lname) as user_name"),
                 'u.email as user_email'
-            );
+            )
+            ->where('u.comp_id', session('user_comp_id')); // Company filtering via user
 
         if ($eventType) {
             $query->where('sl.event_type', $eventType);
@@ -280,6 +294,7 @@ class LogController extends Controller
                 DB::raw('COUNT(*) as total')
             )
             ->whereBetween('created_at', [$fromDate, $toDate])
+            ->where('company_id', session('user_comp_id')) // Company filtering
             ->groupBy('module_name', 'action_type')
             ->get();
 
@@ -293,29 +308,83 @@ class LogController extends Controller
                 DB::raw('COUNT(*) as total_actions')
             )
             ->whereBetween('al.created_at', [$fromDate, $toDate])
+            ->where('al.company_id', session('user_comp_id')) // Company filtering
             ->groupBy('al.user_id', 'u.fname', 'u.mname', 'u.lname', 'u.email')
             ->orderBy('total_actions', 'desc')
             ->limit(10)
             ->get();
 
         // Security incidents
-        $securityIncidents = DB::table('tbl_security_logs')
-            ->where('event_status', 'FAILED')
-            ->whereBetween('created_at', [$fromDate, $toDate])
+        $securityIncidents = DB::table('tbl_security_logs as sl')
+            ->leftJoin('tbl_users as u', 'sl.user_id', '=', 'u.id')
+            ->where('sl.event_status', 'FAILED')
+            ->whereBetween('sl.created_at', [$fromDate, $toDate])
+            ->where('u.comp_id', session('user_comp_id')) // Company filtering via user
             ->count();
 
         // Deleted items count
-        $deletedItemsCount = DB::table('tbl_deleted_data_recovery')
-            ->where('status', 'DELETED')
+        $deletedItemsCount = DB::table('tbl_deleted_data_recovery as r')
+            ->leftJoin('tbl_users as u', 'r.deleted_by', '=', 'u.id')
+            ->where('r.status', 'DELETED')
+            ->where('u.comp_id', session('user_comp_id')) // Company filtering via user
             ->count();
 
+        // Calculate activity statistics
+        $activityStats = [
+            'total' => $activityByModule->sum('total'),
+            'today' => DB::table('tbl_audit_logs')
+                ->where('company_id', session('user_comp_id'))
+                ->whereDate('created_at', today())
+                ->count(),
+            'this_week' => DB::table('tbl_audit_logs')
+                ->where('company_id', session('user_comp_id'))
+                ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+                ->count(),
+            'this_month' => DB::table('tbl_audit_logs')
+                ->where('company_id', session('user_comp_id'))
+                ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+                ->count(),
+            'module_breakdown' => $activityByModule->map(function($item) {
+                return [
+                    'module_name' => $item->module_name,
+                    'total_actions' => $item->total
+                ];
+            })->toArray()
+        ];
+
+        // Calculate security statistics
+        $securityStats = [
+            'failed_logins' => DB::table('tbl_security_logs as sl')
+                ->leftJoin('tbl_users as u', 'sl.user_id', '=', 'u.id')
+                ->where('u.comp_id', session('user_comp_id'))
+                ->where('sl.event_type', 'LOGIN_FAILED')
+                ->whereBetween('sl.created_at', [$fromDate, $toDate])
+                ->count(),
+            'suspicious_activities' => DB::table('tbl_security_logs as sl')
+                ->leftJoin('tbl_users as u', 'sl.user_id', '=', 'u.id')
+                ->where('u.comp_id', session('user_comp_id'))
+                ->where('sl.risk_level', 'HIGH')
+                ->whereBetween('sl.created_at', [$fromDate, $toDate])
+                ->count(),
+            'permission_denied' => DB::table('tbl_security_logs as sl')
+                ->leftJoin('tbl_users as u', 'sl.user_id', '=', 'u.id')
+                ->where('u.comp_id', session('user_comp_id'))
+                ->where('sl.event_type', 'PERMISSION_DENIED')
+                ->whereBetween('sl.created_at', [$fromDate, $toDate])
+                ->count(),
+            'critical_events' => DB::table('tbl_security_logs as sl')
+                ->leftJoin('tbl_users as u', 'sl.user_id', '=', 'u.id')
+                ->where('u.comp_id', session('user_comp_id'))
+                ->where('sl.risk_level', 'CRITICAL')
+                ->whereBetween('sl.created_at', [$fromDate, $toDate])
+                ->count()
+        ];
+
         return Inertia::render('Logs/Reports', [
-            'stats' => [
-                'activity_by_module' => $activityByModule,
-                'top_users' => $topUsers,
-                'security_incidents' => $securityIncidents,
-                'deleted_items_count' => $deletedItemsCount
-            ],
+            'activityStats' => $activityStats,
+            'securityStats' => $securityStats,
+            'topUsers' => $topUsers,
+            'securityIncidents' => [],
             'filters' => [
                 'from_date' => $fromDate,
                 'to_date' => $toDate
