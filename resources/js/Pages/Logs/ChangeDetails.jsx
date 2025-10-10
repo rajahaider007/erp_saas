@@ -50,7 +50,7 @@ export default function ChangeDetails({ log }) {
         <AppLayout>
             <Head title="Change Details" />
 
-            <div className="form-theme-system min-h-screen p-6">
+            <div className="form-theme-system change-details-container min-h-screen p-6">
                 {/* Header */}
                 <div className="manager-header">
                     <div className="header-content">
