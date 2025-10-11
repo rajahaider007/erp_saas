@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\AuditLogService;
 use App\Services\RecoveryService;
 use App\Services\SecurityLogService;
+use App\Helpers\CompanyHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -25,7 +26,12 @@ class LogController extends Controller
         $toDate = $request->input('to_date');
         $perPage = $request->input('per_page', 25);
 
-        $companyId = session('user_comp_id');
+        // For parent companies, allow company/location selection
+        // For customer companies, use their session company/location
+        $isParentCompany = CompanyHelper::isCurrentCompanyParent();
+        
+        $companyId = $request->input('comp_id') ?? session('user_comp_id');
+        $locationId = $request->input('location_id') ?? session('user_location_id');
         
         // Debug logging
         Log::info('Activity Logs Query', [
@@ -79,9 +85,29 @@ class LogController extends Controller
             ->orderBy('al.created_at', 'desc')
             ->paginate($perPage);
 
-        // Get all users for filter
+        // Get companies and locations for parent companies only
+        $companies = [];
+        $locations = [];
+        
+        if ($isParentCompany) {
+            $companies = DB::table('companies')
+                ->where('status', true)
+                ->orderBy('company_name')
+                ->get(['id', 'company_name']);
+            
+            // If company is selected, get its locations
+            if ($companyId) {
+                $locations = DB::table('locations')
+                    ->where('company_id', $companyId)
+                    ->where('status', 'Active')
+                    ->orderBy('location_name')
+                    ->get(['id', 'location_name']);
+            }
+        }
+
+        // Get all users for filter (filter by company)
         $users = DB::table('tbl_users')
-            ->where('comp_id', session('user_comp_id'))
+            ->where('comp_id', $companyId)
             ->select(
                 'id',
                 DB::raw("CONCAT(fname, ' ', COALESCE(mname, ''), ' ', lname) as name"),
@@ -92,6 +118,9 @@ class LogController extends Controller
         return Inertia::render('Logs/ActivityLogs', [
             'logs' => $logs,
             'users' => $users,
+            'companies' => $companies,
+            'locations' => $locations,
+            'isParentCompany' => $isParentCompany,
             'filters' => [
                 'search' => $search,
                 'module' => $module,
@@ -99,7 +128,9 @@ class LogController extends Controller
                 'user_id' => $userId,
                 'from_date' => $fromDate,
                 'to_date' => $toDate,
-                'per_page' => $perPage
+                'per_page' => $perPage,
+                'comp_id' => $companyId,
+                'location_id' => $locationId
             ]
         ]);
     }
@@ -240,6 +271,13 @@ class LogController extends Controller
         $toDate = $request->input('to_date');
         $perPage = $request->input('per_page', 25);
 
+        // For parent companies, allow company/location selection
+        // For customer companies, use their session company/location
+        $isParentCompany = CompanyHelper::isCurrentCompanyParent();
+        
+        $companyId = $request->input('comp_id') ?? session('user_comp_id');
+        $locationId = $request->input('location_id') ?? session('user_location_id');
+
         $query = DB::table('tbl_security_logs as sl')
             ->leftJoin('tbl_users as u', 'sl.user_id', '=', 'u.id')
             ->select(
@@ -247,7 +285,7 @@ class LogController extends Controller
                 DB::raw("CONCAT(u.fname, ' ', COALESCE(u.mname, ''), ' ', u.lname) as user_name"),
                 'u.email as user_email'
             )
-            ->where('u.comp_id', session('user_comp_id')); // Company filtering via user
+            ->where('u.comp_id', $companyId); // Company filtering via user
 
         if ($eventType) {
             $query->where('sl.event_type', $eventType);
@@ -269,14 +307,39 @@ class LogController extends Controller
             ->orderBy('sl.created_at', 'desc')
             ->paginate($perPage);
 
+        // Get companies and locations for parent companies only
+        $companies = [];
+        $locations = [];
+        
+        if ($isParentCompany) {
+            $companies = DB::table('companies')
+                ->where('status', true)
+                ->orderBy('company_name')
+                ->get(['id', 'company_name']);
+            
+            // If company is selected, get its locations
+            if ($companyId) {
+                $locations = DB::table('locations')
+                    ->where('company_id', $companyId)
+                    ->where('status', 'Active')
+                    ->orderBy('location_name')
+                    ->get(['id', 'location_name']);
+            }
+        }
+
         return Inertia::render('Logs/SecurityLogs', [
             'logs' => $logs,
+            'companies' => $companies,
+            'locations' => $locations,
+            'isParentCompany' => $isParentCompany,
             'filters' => [
                 'event_type' => $eventType,
                 'risk_level' => $riskLevel,
                 'from_date' => $fromDate,
                 'to_date' => $toDate,
-                'per_page' => $perPage
+                'per_page' => $perPage,
+                'comp_id' => $companyId,
+                'location_id' => $locationId
             ]
         ]);
     }

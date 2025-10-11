@@ -5,6 +5,7 @@ namespace App\Http\Controllers\system;
 use App\Http\Controllers\Controller;
 use App\Models\Location;
 use App\Models\Company;
+use App\Helpers\CompanyHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
@@ -12,6 +13,16 @@ use Inertia\Inertia;
 
 class LocationController extends Controller
 {
+    /**
+     * Check if current user's company can access locations module
+     */
+    private function checkAccess()
+    {
+        if (!CompanyHelper::canManageParentSettings()) {
+            abort(403, 'Access Denied: Only parent companies can manage locations.');
+        }
+    }
+
     private function rules($id = null): array
     {
         return [
@@ -36,6 +47,12 @@ class LocationController extends Controller
 
     public function index(Request $request)
     {
+        // Only parent companies can access Locations module
+        if (!CompanyHelper::canManageParentSettings()) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Access Denied: Only parent companies can manage locations.');
+        }
+
         $query = Location::with('company');
 
         if ($request->filled('search')) {
@@ -65,6 +82,8 @@ class LocationController extends Controller
 
     public function create()
     {
+        $this->checkAccess();
+        
         return Inertia::render('system/Locations/create', [
             'location' => null,
             'companies' => Company::where('status', true)->orderBy('company_name')->get(['id', 'company_name']),
@@ -75,6 +94,8 @@ class LocationController extends Controller
 
     public function store(Request $request)
     {
+        $this->checkAccess();
+        
         $validated = $request->validate($this->rules());
 
         if (!isset($validated['sort_order']) || $validated['sort_order'] === 0) {
@@ -89,6 +110,8 @@ class LocationController extends Controller
 
     public function edit(Location $location)
     {
+        $this->checkAccess();
+        
         return Inertia::render('system/Locations/create', [
             'location' => $location,
             'companies' => Company::where('status', true)->orderBy('company_name')->get(['id', 'company_name']),
@@ -99,6 +122,8 @@ class LocationController extends Controller
 
     public function update(Request $request, Location $location)
     {
+        $this->checkAccess();
+        
         $validated = $request->validate($this->rules($location->id));
         
         $validated['status'] = filter_var($validated['status'] ?? $location->status, FILTER_VALIDATE_BOOLEAN);
@@ -109,6 +134,8 @@ class LocationController extends Controller
 
     public function destroy(Location $location)
     {
+        $this->checkAccess();
+        
         $name = $location->location_name;
         $location->delete();
         return redirect()->back()->with('success', 'Location "'.$name.'" deleted.');
@@ -116,6 +143,8 @@ class LocationController extends Controller
 
     public function bulkUpdateStatus(Request $request)
     {
+        $this->checkAccess();
+        
         $request->validate([
             'ids' => 'required|array|min:1',
             'ids.*' => 'exists:locations,id',
@@ -134,6 +163,8 @@ class LocationController extends Controller
 
     public function bulkDestroy(Request $request)
     {
+        $this->checkAccess();
+        
         $request->validate([
             'ids' => 'required|array|min:1',
             'ids.*' => 'exists:locations,id'
@@ -150,6 +181,8 @@ class LocationController extends Controller
 
     public function updateSortOrder(Request $request)
     {
+        $this->checkAccess();
+        
         $request->validate([
             'locations' => 'required|array|min:1',
             'locations.*.id' => 'required|exists:locations,id',

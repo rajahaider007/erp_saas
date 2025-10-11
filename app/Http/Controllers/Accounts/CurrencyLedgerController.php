@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Accounts;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\CompanyHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -15,13 +16,20 @@ class CurrencyLedgerController extends Controller
      */
     public function index(Request $request): Response
     {
-        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
-        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+        // For parent companies, allow company/location selection
+        // For customer companies, use their session company/location
+        $isParentCompany = CompanyHelper::isCurrentCompanyParent();
+        
+        $compId = $request->input('comp_id') ?? ($request->input('user_comp_id') ?? $request->session()->get('user_comp_id'));
+        $locationId = $request->input('location_id') ?? ($request->input('user_location_id') ?? $request->session()->get('user_location_id'));
         
         if (!$compId || !$locationId) {
             return Inertia::render('Accounts/CurrencyLedger/Report', [
                 'ledgerData' => [],
                 'accounts' => [],
+                'companies' => [],
+                'locations' => [],
+                'isParentCompany' => $isParentCompany,
                 'filters' => [],
                 'error' => 'Company and Location information is required.'
             ]);
@@ -37,6 +45,26 @@ class CurrencyLedgerController extends Controller
         $status = $request->input('status', 'Posted');
         $minAmount = $request->input('min_amount');
         $maxAmount = $request->input('max_amount');
+
+        // Get companies and locations for parent companies only
+        $companies = [];
+        $locations = [];
+        
+        if ($isParentCompany) {
+            $companies = DB::table('companies')
+                ->where('status', true)
+                ->orderBy('company_name')
+                ->get(['id', 'company_name']);
+            
+            // If company is selected, get its locations
+            if ($compId) {
+                $locations = DB::table('locations')
+                    ->where('company_id', $compId)
+                    ->where('status', 'Active')
+                    ->orderBy('location_name')
+                    ->get(['id', 'location_name']);
+            }
+        }
 
         // Get only level 3 child accounts (transaction accounts) for dropdown
         $accounts = DB::table('chart_of_accounts')
@@ -193,6 +221,9 @@ class CurrencyLedgerController extends Controller
             'company' => $company,
             'totalDebit' => $grandTotalDebit,
             'totalCredit' => $grandTotalCredit,
+            'companies' => $companies,
+            'locations' => $locations,
+            'isParentCompany' => $isParentCompany,
             'filters' => [
                 'account_id' => $accountId,
                 'from_date' => $fromDate,
@@ -202,7 +233,9 @@ class CurrencyLedgerController extends Controller
                 'voucher_type' => $voucherType,
                 'status' => $status,
                 'min_amount' => $minAmount,
-                'max_amount' => $maxAmount
+                'max_amount' => $maxAmount,
+                'comp_id' => $compId,
+                'location_id' => $locationId
             ]
         ]);
     }
@@ -212,6 +245,8 @@ class CurrencyLedgerController extends Controller
      */
     public function search(Request $request): Response
     {
+        $isParentCompany = CompanyHelper::isCurrentCompanyParent();
+        
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
@@ -219,8 +254,28 @@ class CurrencyLedgerController extends Controller
             return Inertia::render('Accounts/CurrencyLedger/Search', [
                 'accounts' => [],
                 'currencies' => [],
+                'companies' => [],
+                'locations' => [],
+                'isParentCompany' => $isParentCompany,
                 'error' => 'Company and Location information is required.'
             ]);
+        }
+
+        // Get companies and locations for parent companies only
+        $companies = [];
+        $locations = [];
+        
+        if ($isParentCompany) {
+            $companies = DB::table('companies')
+                ->where('status', true)
+                ->orderBy('company_name')
+                ->get(['id', 'company_name']);
+            
+            $locations = DB::table('locations')
+                ->where('company_id', $compId)
+                ->where('status', 'Active')
+                ->orderBy('location_name')
+                ->get(['id', 'location_name']);
         }
 
         // Get only level 3 child accounts (transaction accounts) for dropdown
@@ -239,7 +294,10 @@ class CurrencyLedgerController extends Controller
 
         return Inertia::render('Accounts/CurrencyLedger/Search', [
             'accounts' => $accounts,
-            'currencies' => $currencies
+            'currencies' => $currencies,
+            'companies' => $companies,
+            'locations' => $locations,
+            'isParentCompany' => $isParentCompany
         ]);
     }
 

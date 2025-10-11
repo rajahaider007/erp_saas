@@ -4,6 +4,7 @@ namespace App\Http\Controllers\system;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Helpers\CompanyHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -27,9 +28,14 @@ class CompanyController extends Controller
             'country',
             'industry',
             'status',
+            'parent_comp',
             'created_at',
             'updated_at'
         ]);
+
+        // Apply company filter based on parent/customer company
+        // Parent companies see all companies, customer companies see only their own
+        $query = CompanyHelper::applyCompanyFilter($query);
 
         // Search functionality
         if ($request->filled('search')) {
@@ -65,6 +71,7 @@ class CompanyController extends Controller
         return Inertia::render('system/Companies/List', [
             'companies' => $companies,
             'filters' => $request->only(['search', 'status', 'country', 'sort_by', 'sort_direction', 'per_page']),
+            'isParentCompany' => CompanyHelper::isCurrentCompanyParent(),
             'pageTitle' => 'Companies Management'
         ]);
     }
@@ -80,6 +87,8 @@ class CompanyController extends Controller
             
         return Inertia::render('system/Companies/Create', [
             'packages' => $packages,
+            'isParentCompany' => CompanyHelper::isCurrentCompanyParent(),
+            'restrictedFields' => CompanyHelper::getRestrictedFieldsForCustomer(),
             'pageTitle' => 'Register New Company'
         ]);
     }
@@ -91,6 +100,13 @@ class CompanyController extends Controller
     {
         $validated = $request->validate($this->validationRules());
 
+        // Customer companies cannot set restricted fields
+        if (CompanyHelper::isCurrentCompanyCustomer()) {
+            foreach (CompanyHelper::getRestrictedFieldsForCustomer() as $field) {
+                unset($validated[$field]);
+            }
+        }
+
         // Generate company code if not provided
         if (empty($validated['company_code'])) {
             $validated['company_code'] = strtoupper(substr($validated['company_name'], 0, 3)) . rand(1000, 9999);
@@ -101,13 +117,15 @@ class CompanyController extends Controller
             $validated['logo'] = $request->file('logo')->store('companies/logos', 'public');
         }
 
-        // Set default license dates if not provided
-        if (!isset($validated['license_start_date'])) {
-            $validated['license_start_date'] = now();
-        }
-        
-        if (!isset($validated['license_end_date'])) {
-            $validated['license_end_date'] = now()->addYear();
+        // Set default license dates if not provided (only for parent companies)
+        if (CompanyHelper::isCurrentCompanyParent()) {
+            if (!isset($validated['license_start_date'])) {
+                $validated['license_start_date'] = now();
+            }
+            
+            if (!isset($validated['license_end_date'])) {
+                $validated['license_end_date'] = now()->addYear();
+            }
         }
 
         // Set created_by
@@ -145,6 +163,8 @@ class CompanyController extends Controller
         return Inertia::render('system/Companies/Create', [
             'company' => $company,
             'packages' => $packages,
+            'isParentCompany' => CompanyHelper::isCurrentCompanyParent(),
+            'restrictedFields' => CompanyHelper::getRestrictedFieldsForCustomer(),
             'pageTitle' => 'Edit Company: ' . $company->company_name
         ]);
     }
@@ -155,6 +175,19 @@ class CompanyController extends Controller
     public function update(Request $request, Company $company)
     {
         $validated = $request->validate($this->validationRules($company->id));
+
+        // Customer companies cannot update restricted fields
+        if (CompanyHelper::isCurrentCompanyCustomer()) {
+            foreach (CompanyHelper::getRestrictedFieldsForCustomer() as $field) {
+                unset($validated[$field]);
+            }
+            
+            // Also ensure customer companies can only edit their own company
+            if ($company->id != session('user_comp_id')) {
+                return redirect()->back()
+                    ->with('error', 'You do not have permission to edit this company.');
+            }
+        }
 
         // Handle file upload
         if ($request->hasFile('logo')) {
@@ -329,6 +362,8 @@ class CompanyController extends Controller
      */
     private function validationRules($companyId = null)
     {
+        $isParent = CompanyHelper::isCurrentCompanyParent();
+        
         return [
             'company_name' => 'required|string|max:255',
             'company_code' => 'nullable|string|max:50|unique:companies,company_code,' . $companyId,
@@ -355,11 +390,15 @@ class CompanyController extends Controller
             'employee_count' => 'nullable|integer|min:0',
             'annual_revenue' => 'nullable|numeric|min:0',
             'currency' => 'nullable|string|max:10',
+            'default_currency_code' => 'nullable|string|max:10',
             'fiscal_year_start' => 'nullable|string|max:10',
-            'license_number' => 'nullable|string|max:100',
-            'license_start_date' => 'required|date',
-            'license_end_date' => 'required|date|after:license_start_date',
-            'package_id' => 'required|exists:packages,id',
+            // Restricted fields - only validate for parent companies
+            'license_number' => $isParent ? 'nullable|string|max:100' : 'sometimes',
+            'license_start_date' => $isParent ? 'required|date' : 'sometimes',
+            'license_end_date' => $isParent ? 'required|date|after:license_start_date' : 'sometimes',
+            'package_id' => $isParent ? 'required|exists:packages,id' : 'sometimes',
+            'parent_comp' => $isParent ? 'nullable|string|max:10' : 'sometimes',
+            // Common fields
             'compliance_certifications' => 'nullable|array',
             'legal_notes' => 'nullable|string|max:1000',
             'bank_name' => 'nullable|string|max:255',

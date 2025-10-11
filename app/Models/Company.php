@@ -57,6 +57,8 @@ class Company extends Model
         'status',
         'auto_voucher_numbering',
         'package_id',
+        'parent_comp',
+        'default_currency_code',
         'settings',
         'features',
         'created_by',
@@ -118,6 +120,39 @@ class Company extends Model
     public function scopeActiveSubscription($query)
     {
         return $query->where('status', true);
+    }
+
+    /**
+     * Scope a query to only include parent companies.
+     */
+    public function scopeParent($query)
+    {
+        return $query->where('parent_comp', 'Yes');
+    }
+
+    /**
+     * Scope a query to only include customer companies (non-parent).
+     */
+    public function scopeCustomer($query)
+    {
+        return $query->where('parent_comp', '!=', 'Yes')
+                    ->orWhereNull('parent_comp');
+    }
+
+    /**
+     * Check if this company is a parent company.
+     */
+    public function isParentCompany(): bool
+    {
+        return $this->parent_comp === 'Yes';
+    }
+
+    /**
+     * Check if this company is a customer company.
+     */
+    public function isCustomerCompany(): bool
+    {
+        return !$this->isParentCompany();
     }
 
     /**

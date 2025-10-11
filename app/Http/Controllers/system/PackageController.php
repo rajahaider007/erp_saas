@@ -4,6 +4,7 @@ namespace App\Http\Controllers\system;
 
 use App\Http\Controllers\Controller;
 use App\Models\Package;
+use App\Helpers\CompanyHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
@@ -11,6 +12,16 @@ use Inertia\Inertia;
 
 class PackageController extends Controller
 {
+    /**
+     * Check if current user's company can access packages module
+     */
+    private function checkAccess()
+    {
+        if (!CompanyHelper::canManageParentSettings()) {
+            abort(403, 'Access Denied: Only parent companies can manage packages.');
+        }
+    }
+
     private function rules($id = null): array
     {
         return [
@@ -25,6 +36,8 @@ class PackageController extends Controller
 
     public function index(Request $request)
     {
+        $this->checkAccess();
+        
         $query = Package::query();
 
         if ($request->filled('search')) {
@@ -45,6 +58,8 @@ class PackageController extends Controller
 
     public function create()
     {
+        $this->checkAccess();
+        
         return Inertia::render('system/Packages/add', [
             'menus' => \App\Models\Menu::with(['module', 'section'])->where('status', true)->orderBy('menu_name')->get(['id', 'menu_name', 'module_id', 'section_id']),
             'pageTitle' => 'Add Package',
@@ -54,6 +69,8 @@ class PackageController extends Controller
 
     public function store(Request $request)
     {
+        $this->checkAccess();
+        
         $validated = $request->validate([
             ...$this->rules(),
             'menu_features' => 'sometimes|array',
@@ -82,6 +99,8 @@ class PackageController extends Controller
 
     public function edit(Package $package)
     {
+        $this->checkAccess();
+        
         $packageFeatures = $package->features()->pluck('is_enabled', 'menu_id')->toArray();
         
         return Inertia::render('system/Packages/edit', [
@@ -95,6 +114,8 @@ class PackageController extends Controller
 
     public function update(Request $request, Package $package)
     {
+        $this->checkAccess();
+        
         $validated = $request->validate([
             ...$this->rules($package->id),
             'menu_features' => 'sometimes|array',
@@ -120,6 +141,8 @@ class PackageController extends Controller
 
     public function destroy(Package $package)
     {
+        $this->checkAccess();
+        
         $name = $package->package_name;
         $package->delete();
         return redirect()->back()->with('success', 'Package "'.$name.'" deleted.');
@@ -127,6 +150,8 @@ class PackageController extends Controller
 
     public function bulkUpdateStatus(Request $request)
     {
+        $this->checkAccess();
+        
         $request->validate([
             'ids' => 'required|array|min:1',
             'ids.*' => 'exists:packages,id',
@@ -145,6 +170,8 @@ class PackageController extends Controller
 
     public function bulkDestroy(Request $request)
     {
+        $this->checkAccess();
+        
         $request->validate([
             'ids' => 'required|array|min:1',
             'ids.*' => 'exists:packages,id'
@@ -161,6 +188,8 @@ class PackageController extends Controller
 
     public function updateSortOrder(Request $request)
     {
+        $this->checkAccess();
+        
         $request->validate([
             'packages' => 'required|array|min:1',
             'packages.*.id' => 'required|exists:packages,id',

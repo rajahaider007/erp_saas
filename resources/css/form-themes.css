@@ -304,6 +304,57 @@
     padding-left: 3.5rem;
 }
 
+/* Fix for select elements with input-with-icon class */
+.input-with-icon.form-select,
+.input-with-icon select {
+    width: 100% !important;
+    padding-left: 4rem !important; /* Increased padding for better icon spacing */
+    padding-right: 3.5rem !important; /* Add space for dropdown arrow */
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    background-image: none !important; /* Remove default arrow */
+}
+
+/* Ensure icon doesn't overlap with select text */
+.input-wrapper .input-with-icon.form-select,
+.input-wrapper .input-with-icon select {
+    position: relative;
+}
+
+.input-wrapper .input-icon {
+    z-index: 10 !important;
+    pointer-events: none !important;
+}
+
+/* Fix for dark theme select with icons */
+.form-theme-2 .input-with-icon.form-select,
+.form-theme-2 .input-with-icon select {
+    color: #F1F5F9 !important;
+    background: rgba(30, 41, 59, 0.8) !important;
+    background-image: none !important;
+}
+
+/* Override any inline styles for select with icons */
+select.input-with-icon[style] {
+    padding-left: 4rem !important; /* Increased padding for better icon spacing */
+    padding-right: 3.5rem !important;
+    background-image: none !important;
+}
+
+/* Ensure proper spacing for select options */
+.input-with-icon.form-select option,
+.input-with-icon select option {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+}
+
+/* Fix for any select element with width fill-available */
+select.input-with-icon[style*="width"] {
+    padding-left: 3.5rem !important;
+    padding-right: 3.5rem !important;
+}
+
 .input-icon {
     position: absolute;
     left: 1.25rem;
@@ -369,9 +420,26 @@
 
  .form-select {
      appearance: none;
+     -webkit-appearance: none;
+     -moz-appearance: none;
      cursor: pointer;
      padding-right: 3.5rem;
+     width: -webkit-fill-available !important;
  }
+
+/* Force full width for all form selects - Highest priority */
+select[class*="form-select"],
+select.form-select,
+.form-select,
+select.input-with-icon.form-select,
+.form-select.input-with-icon,
+select[class*="input-with-icon"] {
+    width: -webkit-fill-available !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 !important;
+}
 
 .form-select option {
     padding: 0.75rem;
@@ -3306,10 +3374,211 @@ textarea::placeholder {
      }
  }
 
- .animate-shake {
-     animation: shake 0.5s ease-in-out;
- }
+.animate-shake {
+    animation: shake 0.5s ease-in-out;
+}
 
- .animate-slideIn {
-     animation: slideIn 0.3s ease-out;
- }
+.animate-slideIn {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Modern Filters Container */
+.modern-filters-container {
+    margin-top: 1.5rem;
+    background: var(--glass-bg);
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid var(--glass-border);
+}
+
+.filters-toolbar {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.search-section {
+    display: flex;
+    gap: 0.75rem;
+    flex: 1;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 160px;
+}
+
+.filter-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.reset-btn {
+    padding: 0.75rem;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* FINAL OVERRIDE - Force full width for all selects and remove ALL arrows */
+select {
+    width: -webkit-fill-available !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background-image: none !important;
+    background-repeat: no-repeat !important;
+    background-position: unset !important;
+    background-size: unset !important;
+}
+
+select.form-select,
+select[class*="form-select"],
+select.input-with-icon,
+select[class*="input-with-icon"] {
+    width: -webkit-fill-available !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background-image: none !important;
+    background-repeat: no-repeat !important;
+    background-position: unset !important;
+    background-size: unset !important;
+}
+
+/* Nuclear option - remove ALL possible arrows from ALL select elements */
+select,
+select *,
+select:before,
+select:after,
+select::before,
+select::after {
+    background-image: none !important;
+}
+
+/* Remove arrows from filter-select and any other select classes */
+.filter-select,
+.filter-select:before,
+.filter-select:after,
+.filter-select::before,
+.filter-select::after {
+    background-image: none !important;
+}
+
+.reset-btn:hover {
+    background: var(--error);
+    color: white;
+    border-color: var(--error);
+    transform: translateY(-2px);
+}
+
+/* CRITICAL: Ensure proper spacing between icons and text in ALL select elements */
+.form-select.input-with-icon,
+select.input-with-icon,
+.input-with-icon.form-select,
+.input-with-icon select,
+select[class*="input-with-icon"],
+.form-select[class*="input-with-icon"] {
+    padding-left: 4rem !important; /* Increased padding for better icon spacing */
+
+}
+
+/* Additional specificity for input-wrapper selects */
+.input-wrapper .form-select.input-with-icon,
+.input-wrapper select.input-with-icon,
+.input-wrapper .input-with-icon.form-select,
+.input-wrapper .input-with-icon select {
+    padding-left: 4rem !important;
+}
+
+/* CRITICAL: Prevent select overflow from containers */
+.input-group {
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+}
+
+.input-wrapper {
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Ensure select elements never overflow their containers */
+.form-select,
+select,
+.form-select.input-with-icon,
+select.input-with-icon,
+.input-with-icon.form-select,
+.input-with-icon select {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+/* Specific container containment rules */
+.input-group .input-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+.input-wrapper .form-select,
+.input-wrapper select,
+.input-wrapper .input-with-icon,
+.input-wrapper .form-select.input-with-icon,
+.input-wrapper select.input-with-icon {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+/* Additional responsive containment rules */
+@media (max-width: 768px) {
+    .input-group,
+    .input-wrapper,
+    .form-select,
+    select {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+    }
+}
+
+/* Force containment for all nested elements */
+.input-group *,
+.input-wrapper * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}

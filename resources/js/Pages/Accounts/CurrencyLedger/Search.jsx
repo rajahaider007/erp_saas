@@ -19,13 +19,16 @@ import {
 import App from '../../App.jsx';
 
 const CurrencyLedgerSearch = () => {
-  const { accounts = [], currencies = [], flash } = usePage().props;
+  const { accounts = [], currencies = [], companies = [], locations = [], isParentCompany = false, flash } = usePage().props;
   
   // Get current date in YYYY-MM-DD format
   const getCurrentDate = () => {
     return new Date().toISOString().split('T')[0];
   };
 
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [availableLocations, setAvailableLocations] = useState(locations);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [fromDate, setFromDate] = useState(getCurrentDate());
   const [toDate, setToDate] = useState(getCurrentDate());
@@ -35,9 +38,42 @@ const CurrencyLedgerSearch = () => {
   const [maxAmount, setMaxAmount] = useState('');
   const [selectedCurrency, setSelectedCurrency] = useState(null);
 
+  // Handle company selection and fetch locations
+  const handleCompanyChange = async (selectedOption) => {
+    setSelectedCompany(selectedOption);
+    setSelectedLocation(null);
+    setAvailableLocations([]);
+    
+    if (selectedOption) {
+      try {
+        const response = await fetch(`/system/locations/by-company/${selectedOption.value}`);
+        const data = await response.json();
+        setAvailableLocations(data.data || []);
+      } catch (error) {
+        console.error('Error fetching locations:', error);
+      }
+    }
+  };
+
   // Load initial values from URL parameters
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
+    
+    if (urlParams.has('comp_id') && companies.length > 0) {
+      const compId = urlParams.get('comp_id');
+      const company = companies.find(c => c.id.toString() === compId);
+      if (company) {
+        setSelectedCompany({ value: company.id, label: company.company_name });
+      }
+    }
+    
+    if (urlParams.has('location_id') && locations.length > 0) {
+      const locId = urlParams.get('location_id');
+      const location = locations.find(l => l.id.toString() === locId);
+      if (location) {
+        setSelectedLocation({ value: location.id, label: location.location_name });
+      }
+    }
     
     if (urlParams.has('account_id')) {
       const accountId = urlParams.get('account_id');
@@ -82,6 +118,8 @@ const CurrencyLedgerSearch = () => {
 
   const handleGenerateReport = () => {
     const params = new URLSearchParams();
+    if (selectedCompany) params.set('comp_id', selectedCompany.value);
+    if (selectedLocation) params.set('location_id', selectedLocation.value);
     if (selectedAccount) params.set('account_id', selectedAccount.value);
     if (fromDate) params.set('from_date', fromDate);
     if (toDate) params.set('to_date', toDate);
@@ -95,6 +133,9 @@ const CurrencyLedgerSearch = () => {
   };
 
   const handleReset = () => {
+    setSelectedCompany(null);
+    setSelectedLocation(null);
+    setAvailableLocations([]);
     setSelectedAccount(null);
     setFromDate('');
     setToDate('');
@@ -106,6 +147,16 @@ const CurrencyLedgerSearch = () => {
   };
 
   // Prepare options for Select2
+  const companyOptions = companies.map(company => ({
+    value: company.id,
+    label: company.company_name
+  }));
+
+  const locationOptions = availableLocations.map(location => ({
+    value: location.id,
+    label: location.location_name
+  }));
+
   const accountOptions = [
     { value: '', label: 'All Accounts (Consolidated Report)' },
     ...accounts.map(account => ({
@@ -278,6 +329,57 @@ const CurrencyLedgerSearch = () => {
 
               {/* Filters Grid */}
               <div className="grid grid-cols-1 gap-6">
+                {/* Company Selection - Only for Parent Companies */}
+                {isParentCompany && (
+                  <>
+                    <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
+                        <Database size={16} />
+                        Company Selection
+                      </label>
+                      <Select
+                        options={companyOptions}
+                        value={selectedCompany}
+                        onChange={handleCompanyChange}
+                        styles={customSelectStyles}
+                        placeholder="Select a company..."
+                        isClearable
+                        isSearchable
+                        className="react-select-container"
+                        classNamePrefix="react-select"
+                      />
+                      <p className="text-xs text-gray-400 mt-2">
+                        Select a company to filter data
+                      </p>
+                    </div>
+
+                    {/* Location Selection - Only shown after company selection */}
+                    {selectedCompany && (
+                      <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
+                          <Database size={16} />
+                          Location Selection
+                        </label>
+                        <Select
+                          options={locationOptions}
+                          value={selectedLocation}
+                          onChange={setSelectedLocation}
+                          styles={customSelectStyles}
+                          placeholder="Select a location..."
+                          isClearable
+                          isSearchable
+                          className="react-select-container"
+                          classNamePrefix="react-select"
+                          isDisabled={!selectedCompany}
+                        />
+                        <p className="text-xs text-gray-400 mt-2">
+                          Select a location within the selected company
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}
+
                 {/* Account Selection with Select2 */}
                 <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                   <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">

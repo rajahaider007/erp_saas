@@ -392,6 +392,20 @@ Route::prefix('system/users')->name('system.users.')->middleware('web.auth')->gr
     Route::get('/departments/by-location/{location}', [UserController::class, 'getDepartmentsByLocation'])->name('departments.by-location');
 });
 
+// Code Configuration Routes
+Route::prefix('system/code-configurations')->name('code-configurations.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\system\CodeConfigurationController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\system\CodeConfigurationController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\system\CodeConfigurationController::class, 'store'])->name('store');
+    Route::get('/{codeConfiguration}', [App\Http\Controllers\system\CodeConfigurationController::class, 'show'])->name('show');
+    Route::get('/{codeConfiguration}/edit', [App\Http\Controllers\system\CodeConfigurationController::class, 'edit'])->name('edit');
+    Route::put('/{codeConfiguration}', [App\Http\Controllers\system\CodeConfigurationController::class, 'update'])->name('update');
+    Route::patch('/{codeConfiguration}', [App\Http\Controllers\system\CodeConfigurationController::class, 'update'])->name('update');
+    Route::delete('/{codeConfiguration}', [App\Http\Controllers\system\CodeConfigurationController::class, 'destroy'])->name('destroy');
+    // API
+    Route::get('/api/locations-by-company', [App\Http\Controllers\system\CodeConfigurationController::class, 'getLocationsByCompany'])->name('locations-by-company');
+});
+
 // Reports Routes
 Route::prefix('accounts/reports')->name('accounts.reports.')->middleware('web.auth')->group(function () {
     // General Ledger Report Routes

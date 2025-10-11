@@ -1290,10 +1290,7 @@ class JournalVoucherController extends Controller
         $voucherIds = $request->input('ids', []);
         
         if (empty($voucherIds)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No vouchers selected for posting.'
-            ], 400);
+            return redirect()->back()->with('error', 'No vouchers selected for posting.');
         }
 
         try {
@@ -1340,12 +1337,7 @@ class JournalVoucherController extends Controller
                 $message .= " " . count($errors) . " voucher(s) could not be posted.";
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-                'posted_count' => $postedCount,
-                'errors' => $errors
-            ]);
+            return redirect()->back()->with('success', $message);
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -1357,10 +1349,7 @@ class JournalVoucherController extends Controller
                 'location_id' => $locationId
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while posting vouchers. Please try again.'
-            ], 500);
+            return redirect()->back()->with('error', 'An error occurred while posting vouchers. Please try again.');
         }
     }
 

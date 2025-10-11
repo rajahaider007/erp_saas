@@ -4,7 +4,10 @@ import AppLayout from '../../Layouts/AppLayout';
 import { Shield, Search, Calendar, Filter, Eye, AlertTriangle, User, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import CustomDatePicker from '../../Components/DatePicker/DatePicker';
 
-export default function SecurityLogs({ logs = { data: [] }, users = [], filters = {} }) {
+export default function SecurityLogs({ logs = { data: [] }, users = [], companies = [], locations = [], isParentCompany = false, filters = {} }) {
+    const [selectedCompany, setSelectedCompany] = useState(null);
+    const [selectedLocation, setSelectedLocation] = useState(null);
+    const [availableLocations, setAvailableLocations] = useState(locations);
     const [search, setSearch] = useState(filters.search || '');
     const [eventType, setEventType] = useState(filters.event_type || '');
     const [riskLevel, setRiskLevel] = useState(filters.risk_level || '');
@@ -13,8 +16,27 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], filters 
     const [toDate, setToDate] = useState(filters.to_date ? new Date(filters.to_date) : null);
     const [perPage, setPerPage] = useState(filters.per_page || 25);
 
+    // Handle company selection and fetch locations
+    const handleCompanyChange = async (selectedOption) => {
+        setSelectedCompany(selectedOption);
+        setSelectedLocation(null);
+        setAvailableLocations([]);
+        
+        if (selectedOption) {
+            try {
+                const response = await fetch(`/system/locations/by-company/${selectedOption.value}`);
+                const data = await response.json();
+                setAvailableLocations(data.data || []);
+            } catch (error) {
+                console.error('Error fetching locations:', error);
+            }
+        }
+    };
+
     const handleFilter = () => {
         console.log('Applying security filters:', {
+            comp_id: selectedCompany?.value,
+            location_id: selectedLocation?.value,
             search,
             event_type: eventType,
             risk_level: riskLevel,
@@ -25,6 +47,8 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], filters 
         });
         
         router.get(route('logs.security'), {
+            comp_id: selectedCompany?.value,
+            location_id: selectedLocation?.value,
             search,
             event_type: eventType,
             risk_level: riskLevel,
@@ -40,6 +64,9 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], filters 
 
     const handleReset = () => {
         console.log('Resetting security filters');
+        setSelectedCompany(null);
+        setSelectedLocation(null);
+        setAvailableLocations([]);
         setSearch('');
         setEventType('');
         setRiskLevel('');
@@ -115,6 +142,42 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], filters 
                 {/* Professional Filters */}
                 <div className="professional-filters-container">
                     <div className="filters-row">
+                        {/* Company Filter - Only for Parent Companies */}
+                        {isParentCompany && (
+                            <select
+                                className="filter-select custom-select"
+                                value={selectedCompany?.value || ''}
+                                onChange={(e) => {
+                                    const company = companies.find(c => c.id.toString() === e.target.value);
+                                    handleCompanyChange(company ? { value: company.id, label: company.company_name } : null);
+                                }}
+                                style={{color: '#F1F5F9', backgroundColor: 'rgba(30, 41, 59, 0.8)', border: '2px solid rgba(148, 163, 184, 0.3)', borderRadius: '12px', padding: '0.875rem 1rem', fontSize: '0.875rem', fontWeight: '500', cursor: 'pointer', width: '100%', display: 'block', boxSizing: 'border-box'}}
+                            >
+                                <option value="">All Companies</option>
+                                {companies.map(company => (
+                                    <option key={company.id} value={company.id}>{company.company_name}</option>
+                                ))}
+                            </select>
+                        )}
+
+                        {/* Location Filter - Only shown after company selection */}
+                        {isParentCompany && selectedCompany && (
+                            <select
+                                className="filter-select custom-select"
+                                value={selectedLocation?.value || ''}
+                                onChange={(e) => {
+                                    const location = availableLocations.find(l => l.id.toString() === e.target.value);
+                                    setSelectedLocation(location ? { value: location.id, label: location.location_name } : null);
+                                }}
+                                style={{color: '#F1F5F9', backgroundColor: 'rgba(30, 41, 59, 0.8)', border: '2px solid rgba(148, 163, 184, 0.3)', borderRadius: '12px', padding: '0.875rem 1rem', fontSize: '0.875rem', fontWeight: '500', cursor: 'pointer', width: '100%', display: 'block', boxSizing: 'border-box'}}
+                            >
+                                <option value="">All Locations</option>
+                                {availableLocations.map(location => (
+                                    <option key={location.id} value={location.id}>{location.location_name}</option>
+                                ))}
+                            </select>
+                        )}
+
                         {/* Search */}
                         <div className="search-container">
                             <Search className="search-icon" size={20} />

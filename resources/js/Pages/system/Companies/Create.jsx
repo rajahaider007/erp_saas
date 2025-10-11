@@ -63,7 +63,7 @@ const Breadcrumbs = ({ items }) => {
 
 // Company Form Component (Unified for Create and Edit)
 const CreateCompanyForm = () => {
-  const { errors: pageErrors, flash, company, currencies } = usePage().props;
+  const { errors: pageErrors, flash, company, currencies, isParentCompany, restrictedFields } = usePage().props;
   const isEdit = !!company;
   
   const companyFields = [
@@ -315,6 +315,14 @@ const CreateCompanyForm = () => {
       })) || []
     },
     {
+      name: 'license_number',
+      label: 'License Number',
+      type: 'text',
+      placeholder: 'Enter license number',
+      icon: Shield,
+      required: false
+    },
+    {
       name: 'license_start_date',
       label: 'License Start Date',
       type: 'date',
@@ -330,7 +338,24 @@ const CreateCompanyForm = () => {
       icon: Calendar,
       required: true
     },
+    {
+      name: 'parent_comp',
+      label: 'Parent Company',
+      type: 'select',
+      placeholder: 'Is this a parent company?',
+      icon: Building2,
+      required: false,
+      options: [
+        { value: 'Yes', label: 'Yes - Parent Company' },
+        { value: 'No', label: 'No - Customer Company' }
+      ]
+    },
   ];
+
+  // Filter out restricted fields for customer companies
+  const filteredFields = isParentCompany 
+    ? companyFields 
+    : companyFields.filter(field => !(restrictedFields || []).includes(field.name));
 
   // State for debugging and tracking
   const [errors, setErrors] = useState({});
@@ -479,7 +504,7 @@ const CreateCompanyForm = () => {
       <GeneralizedForm
         title={isEdit ? "Edit Company" : "Register New Company"}
         subtitle={isEdit ? "Update company information and settings" : "Complete the company registration form with all required information"}
-        fields={companyFields}
+        fields={filteredFields}
         onSubmit={handleCompanySubmit}
         submitText={isEdit ? "Update Company" : "Register Company"}
         resetText="Clear Form"
@@ -511,8 +536,10 @@ const CreateCompanyForm = () => {
           logo: null,
           status: company?.status ?? true,
           package_id: company?.package_id || '',
+          license_number: company?.license_number || '',
           license_start_date: formatDateForInput(company?.license_start_date),
           license_end_date: formatDateForInput(company?.license_end_date),
+          parent_comp: company?.parent_comp || 'No',
         }}
         showReset={true}
       />
