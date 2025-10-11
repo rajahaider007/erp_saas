@@ -3672,3 +3672,229 @@ div[style*="z-index: 999999"] {
     max-width: 100% !important;
     min-width: 100% !important;
 }
+
+/* SweetAlert2 Dark Theme Styles */
+.swal-dark-theme {
+    background: rgba(30, 41, 59, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(148, 163, 184, 0.3) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+.swal-dark-title {
+    color: #F1F5F9 !important;
+    font-weight: 700 !important;
+    font-size: 1.25rem !important;
+}
+
+.swal-dark-content {
+    color: #CBD5E1 !important;
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+}
+
+.swal-dark-confirm {
+    background: linear-gradient(135deg, #3B82F6, #2563EB) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.swal-dark-confirm:hover {
+    background: linear-gradient(135deg, #2563EB, #1D4ED8) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4) !important;
+}
+
+.swal-dark-cancel {
+    background: rgba(107, 114, 128, 0.8) !important;
+    color: #F1F5F9 !important;
+    border: 1px solid rgba(148, 163, 184, 0.3) !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.swal-dark-cancel:hover {
+    background: rgba(107, 114, 128, 1) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3) !important;
+}
+
+/* SweetAlert2 Icon Colors for Dark Theme */
+.swal2-icon.swal2-success {
+    border-color: #10B981 !important;
+    color: #10B981 !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-ring {
+    border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-fix {
+    background-color: rgba(30, 41, 59, 0.95) !important;
+}
+
+.swal2-icon.swal2-error {
+    border-color: #EF4444 !important;
+    color: #EF4444 !important;
+}
+
+.swal2-icon.swal2-warning {
+    border-color: #F59E0B !important;
+    color: #F59E0B !important;
+}
+
+.swal2-icon.swal2-info {
+    border-color: #3B82F6 !important;
+    color: #3B82F6 !important;
+}
+
+/* SweetAlert2 Progress Steps for Dark Theme */
+.swal2-progress-steps .swal2-progress-step {
+    background: #3B82F6 !important;
+    color: white !important;
+}
+
+.swal2-progress-steps .swal2-progress-step.swal2-active-progress-step {
+    background: #2563EB !important;
+}
+
+.swal2-progress-steps .swal2-progress-step-line {
+    background: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* SweetAlert2 Timer Progress Bar for Dark Theme */
+.swal2-timer-progress-bar {
+    background: linear-gradient(90deg, #3B82F6, #2563EB) !important;
+}
+
+/* SweetAlert2 Input for Dark Theme */
+.swal2-input {
+    background: rgba(30, 41, 59, 0.8) !important;
+    color: #F1F5F9 !important;
+    border: 2px solid rgba(148, 163, 184, 0.3) !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+}
+
+.swal2-input:focus {
+    border-color: #3B82F6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* SweetAlert2 Select for Dark Theme */
+.swal2-select {
+    background: rgba(30, 41, 59, 0.8) !important;
+    color: #F1F5F9 !important;
+    border: 2px solid rgba(148, 163, 184, 0.3) !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+}
+
+.swal2-select:focus {
+    border-color: #3B82F6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* SweetAlert2 Textarea for Dark Theme */
+.swal2-textarea {
+    background: rgba(30, 41, 59, 0.8) !important;
+    color: #F1F5F9 !important;
+    border: 2px solid rgba(148, 163, 184, 0.3) !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+}
+
+.swal2-textarea:focus {
+    border-color: #3B82F6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* SweetAlert2 Range for Dark Theme */
+.swal2-range {
+    background: rgba(30, 41, 59, 0.8) !important;
+}
+
+.swal2-range input {
+    background: #3B82F6 !important;
+}
+
+.swal2-range output {
+    color: #F1F5F9 !important;
+}
+
+/* SweetAlert2 File Input for Dark Theme */
+.swal2-file {
+    background: rgba(30, 41, 59, 0.8) !important;
+    color: #F1F5F9 !important;
+    border: 2px solid rgba(148, 163, 184, 0.3) !important;
+    border-radius: 8px !important;
+}
+
+/* SweetAlert2 Validation Message for Dark Theme */
+.swal2-validation-message {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #EF4444 !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+}
+
+/* SweetAlert2 Close Button for Dark Theme */
+.swal2-close {
+    color: #CBD5E1 !important;
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    transition: all 0.3s !important;
+}
+
+.swal2-close:hover {
+    color: #F1F5F9 !important;
+    transform: scale(1.1) !important;
+}
+
+/* SweetAlert2 Footer for Dark Theme */
+.swal2-footer {
+    color: #94A3B8 !important;
+    border-top: 1px solid rgba(148, 163, 184, 0.3) !important;
+    padding-top: 1rem !important;
+    margin-top: 1rem !important;
+}
+
+/* SweetAlert2 HTML Container for Dark Theme */
+.swal2-html-container {
+    color: #CBD5E1 !important;
+}
+
+.swal2-html-container p {
+    color: #CBD5E1 !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.swal2-html-container strong {
+    color: #F1F5F9 !important;
+    font-weight: 600 !important;
+}
+
+/* SweetAlert2 Actions Container for Dark Theme */
+.swal2-actions {
+    gap: 0.75rem !important;
+}
+
+/* SweetAlert2 Loading for Dark Theme */
+.swal2-loader {
+    border-color: rgba(59, 130, 246, 0.3) !important;
+    border-top-color: #3B82F6 !important;
+}

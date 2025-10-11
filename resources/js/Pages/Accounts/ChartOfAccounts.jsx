@@ -463,7 +463,16 @@ const ChartOfAccounts = () => {
             title: 'Success!',
             text: 'Account has been added successfully.',
             confirmButtonColor: '#3B82F6',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'OK',
+            background: 'rgba(30, 41, 59, 0.95)',
+            color: '#F1F5F9',
+            backdrop: 'rgba(0, 0, 0, 0.8)',
+            customClass: {
+              popup: 'swal-dark-theme',
+              title: 'swal-dark-title',
+              content: 'swal-dark-content',
+              confirmButton: 'swal-dark-confirm'
+            }
           });
         } else {
           await Swal.fire({
@@ -471,7 +480,16 @@ const ChartOfAccounts = () => {
             title: 'Updated!',
             text: 'Account has been updated successfully.',
             confirmButtonColor: '#3B82F6',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'OK',
+            background: 'rgba(30, 41, 59, 0.95)',
+            color: '#F1F5F9',
+            backdrop: 'rgba(0, 0, 0, 0.8)',
+            customClass: {
+              popup: 'swal-dark-theme',
+              title: 'swal-dark-title',
+              content: 'swal-dark-content',
+              confirmButton: 'swal-dark-confirm'
+            }
           });
         }
 
@@ -505,7 +523,16 @@ const ChartOfAccounts = () => {
           title: 'Validation Error!',
           text: 'Please check the form data and try again.',
           confirmButtonColor: '#EF4444',
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
+          background: 'rgba(30, 41, 59, 0.95)',
+          color: '#F1F5F9',
+          backdrop: 'rgba(0, 0, 0, 0.8)',
+          customClass: {
+            popup: 'swal-dark-theme',
+            title: 'swal-dark-title',
+            content: 'swal-dark-content',
+            confirmButton: 'swal-dark-confirm'
+          }
         });
       } else {
         await Swal.fire({
@@ -513,7 +540,16 @@ const ChartOfAccounts = () => {
           title: 'Error!',
           text: error.message || 'Something went wrong. Please try again.',
           confirmButtonColor: '#EF4444',
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
+          background: 'rgba(30, 41, 59, 0.95)',
+          color: '#F1F5F9',
+          backdrop: 'rgba(0, 0, 0, 0.8)',
+          customClass: {
+            popup: 'swal-dark-theme',
+            title: 'swal-dark-title',
+            content: 'swal-dark-content',
+            confirmButton: 'swal-dark-confirm'
+          }
         });
       }
     } finally {
@@ -531,7 +567,16 @@ const ChartOfAccounts = () => {
           title: 'Cannot Delete!',
           text: 'Main account categories (Level 1) cannot be deleted. These are fundamental accounting categories.',
           confirmButtonColor: '#EF4444',
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
+          background: 'rgba(30, 41, 59, 0.95)',
+          color: '#F1F5F9',
+          backdrop: 'rgba(0, 0, 0, 0.8)',
+          customClass: {
+            popup: 'swal-dark-theme',
+            title: 'swal-dark-title',
+            content: 'swal-dark-content',
+            confirmButton: 'swal-dark-confirm'
+          }
         });
         return;
       }
@@ -559,7 +604,16 @@ const ChartOfAccounts = () => {
             </div>
           `,
           confirmButtonColor: '#3B82F6',
-          confirmButtonText: 'I Understand'
+          confirmButtonText: 'I Understand',
+          background: 'rgba(30, 41, 59, 0.95)',
+          color: '#F1F5F9',
+          backdrop: 'rgba(0, 0, 0, 0.8)',
+          customClass: {
+            popup: 'swal-dark-theme',
+            title: 'swal-dark-title',
+            content: 'swal-dark-content',
+            confirmButton: 'swal-dark-confirm'
+          }
         });
         return;
       }
@@ -573,7 +627,17 @@ const ChartOfAccounts = () => {
         confirmButtonColor: '#EF4444',
         cancelButtonColor: '#6B7280',
         confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel'
+        cancelButtonText: 'Cancel',
+        background: 'rgba(30, 41, 59, 0.95)',
+        color: '#F1F5F9',
+        backdrop: 'rgba(0, 0, 0, 0.8)',
+        customClass: {
+          popup: 'swal-dark-theme',
+          title: 'swal-dark-title',
+          content: 'swal-dark-content',
+          confirmButton: 'swal-dark-confirm',
+          cancelButton: 'swal-dark-cancel'
+        }
       });
 
       if (result.isConfirmed) {
@@ -606,7 +670,16 @@ const ChartOfAccounts = () => {
             title: 'Deleted!',
             text: 'Account has been deleted successfully.',
             confirmButtonColor: '#3B82F6',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'OK',
+            background: 'rgba(30, 41, 59, 0.95)',
+            color: '#F1F5F9',
+            backdrop: 'rgba(0, 0, 0, 0.8)',
+            customClass: {
+              popup: 'swal-dark-theme',
+              title: 'swal-dark-title',
+              content: 'swal-dark-content',
+              confirmButton: 'swal-dark-confirm'
+            }
           });
 
           // Update local state optimistically instead of page reload
@@ -624,7 +697,16 @@ const ChartOfAccounts = () => {
         title: 'Error!',
         text: error.message || 'Something went wrong. Please try again.',
         confirmButtonColor: '#EF4444',
-        confirmButtonText: 'OK'
+        confirmButtonText: 'OK',
+        background: 'rgba(30, 41, 59, 0.95)',
+        color: '#F1F5F9',
+        backdrop: 'rgba(0, 0, 0, 0.8)',
+        customClass: {
+          popup: 'swal-dark-theme',
+          title: 'swal-dark-title',
+          content: 'swal-dark-content',
+          confirmButton: 'swal-dark-confirm'
+        }
       });
     }
   };
