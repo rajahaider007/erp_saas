@@ -261,12 +261,8 @@ class UserController extends Controller
      */
     public function updateRights(Request $request, User $user)
     {
-        \Log::info('updateRights called for user: ' . $user->id);
-        \Log::info('User rights data received:', $request->user_rights);
-        
         try {
             $this->updateUserRights($user, $request->user_rights);
-            \Log::info('User rights updated successfully for user: ' . $user->id);
             
             return redirect()->route('system.users.rights', $user)
                 ->with('success', 'User rights updated successfully!');
@@ -410,19 +406,13 @@ class UserController extends Controller
      */
     private function updateUserRights(User $user, array $userRights)
     {
-        \Log::info('updateUserRights called with data:', $userRights);
-        
         // Delete existing rights
         $user->rights()->delete();
-        \Log::info('Existing rights deleted for user: ' . $user->id);
 
         // Create new rights
         foreach ($userRights as $rightData) {
-            \Log::info('Processing right data:', $rightData);
-            
             // Check if this is an array with menu_id key (from our form)
             if (is_array($rightData) && isset($rightData['menu_id'])) {
-                \Log::info('Creating right for menu_id: ' . $rightData['menu_id']);
                 
                 \App\Models\UserRight::create([
                     'user_id' => $user->id,
@@ -436,7 +426,6 @@ class UserController extends Controller
             // Check if this is an array with menu_id as key (alternative format)
             elseif (is_array($rightData) && isset($rightData['can_view'])) {
                 $menuId = array_search($rightData, $userRights);
-                \Log::info('Creating right for menu_id (alt format): ' . $menuId);
                 
                 \App\Models\UserRight::create([
                     'user_id' => $user->id,
@@ -446,12 +435,8 @@ class UserController extends Controller
                     'can_edit' => $rightData['can_edit'] ?? false,
                     'can_delete' => $rightData['can_delete'] ?? false,
                 ]);
-            } else {
-                \Log::warning('Skipping invalid right data:', $rightData);
             }
         }
-        
-        \Log::info('User rights update completed for user: ' . $user->id);
     }
 
     /**

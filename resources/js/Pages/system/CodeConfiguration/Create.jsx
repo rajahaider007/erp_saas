@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Code, Home, List, Plus, Edit, Building2, MapPin } from 'lucide-react';
-import App from "../../App.jsx";
 import GeneralizedForm from '../../../Components/GeneralizedForm';
+import PermissionAwareForm, { PermissionButton } from '../../../Components/PermissionAwareForm';
+import { usePermissions } from '../../../hooks/usePermissions';
+import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
 
 const Breadcrumbs = ({ items }) => (
@@ -22,123 +24,197 @@ const Breadcrumbs = ({ items }) => (
       ))}
     </nav>
     <div className="breadcrumbs-description">
-      {usePage().props?.configuration ? 'Update code configuration settings' : 'Create a new code configuration for account coding'}
+      {usePage().props?.configuration ? 'Update code configuration' : 'Create a new code configuration'}
     </div>
   </div>
 );
 
 const CodeConfigurationForm = () => {
   const { configuration, companies, locations, codeTypes } = usePage().props;
+  
+  // Debug logging
+  // console.log('CodeConfigurationForm Debug:', { companies: companies.length, locations: locations.length, codeTypes: codeTypes.length });
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
   const [requestStatus, setRequestStatus] = useState('');
-  const [filteredLocations, setFilteredLocations] = useState(locations || []);
+  const [filteredLocations, setFilteredLocations] = useState([]);
+  const [loadingLocations, setLoadingLocations] = useState(false);
+  const [accounts, setAccounts] = useState([]);
+  const [loadingAccounts, setLoadingAccounts] = useState(false);
+  const [currentCompanyId, setCurrentCompanyId] = useState('');
+
+  // Debug logging for accounts state changes
+  useEffect(() => {
+
+  }, [accounts, loadingAccounts]);
 
   const isEditMode = !!configuration;
 
-  const handleCompanyChange = (companyId, formData, setFormData) => {
-    setFormData({ ...formData, company_id: companyId, location_id: '' });
+  // Handle initial data loading
+  useEffect(() => {
+    if (isEditMode && configuration?.company_id) {
+      // Set initial company ID
+      setCurrentCompanyId(configuration.company_id);
+
+      // Set initial locations from props if available
+      if (locations && locations.length > 0) {
+        const filtered = locations.filter(loc => loc.company_id == configuration.company_id);
+        
+        // If current location is not in filtered list, add it to ensure it's available
+        if (configuration.location_id) {
+          const currentLocation = locations.find(loc => loc.id == configuration.location_id);
+          if (currentLocation && !filtered.find(loc => loc.id == currentLocation.id)) {
+            filtered.push(currentLocation);
+          }
+        }
+        
+        setFilteredLocations(filtered);
+      }
+    } else if (!isEditMode && locations && locations.length > 0) {
+      // In create mode, show all locations initially
+      setFilteredLocations(locations);
+    }
+  }, [isEditMode, configuration, locations]);
+
+  const handleCompanyChange = (companyId) => {
+
+
+    // Store current company ID
+    setCurrentCompanyId(companyId);
+
+    // Reset location field when company changes
+    const locationSelect = document.querySelector('select[name="location_id"]');
+    if (locationSelect) {
+      locationSelect.value = '';
+    }
+
+    // Reset account field
+    const accountSelect = document.querySelector('select[name="account_id"]');
+    if (accountSelect) accountSelect.value = '';
+    setAccounts([]);
+
     if (companyId) {
+      // Filter locations by company ID from the original locations array
       const filtered = locations.filter(loc => loc.company_id == companyId);
       setFilteredLocations(filtered);
     } else {
-      setFilteredLocations(locations);
+      // If no company selected, show all locations
+      setFilteredLocations(locations || []);
     }
   };
+
+  const handleLocationChange = (locationId) => {
+
+    // Use the stored company ID
+    const actualCompanyId = currentCompanyId;
+
+
+    // Reset account field
+    const accountSelect = document.querySelector('select[name="account_id"]');
+    if (accountSelect) accountSelect.value = '';
+    setAccounts([]);
+
+    if (actualCompanyId && locationId) {
+
+      const url = `/system/chart-of-accounts/accounts-by-company-location?company_id=${actualCompanyId}&location_id=${locationId}`;
+
+
+      // Load all accounts (Level 2 and Level 3)
+      setLoadingAccounts(true);
+      fetch(url)
+        .then(response => {
+
+          return response.json();
+        })
+        .then(data => {
+
+          setAccounts(data.data || []);
+          setLoadingAccounts(false);
+        })
+        .catch(error => {
+          setAccounts([]);
+          setLoadingAccounts(false);
+        });
+    } else {
+    }
+  };
+
+  // Map options for form fields
+  const companyOptions = companies.map(c => ({ value: c.id, label: c.name }));
+  const locationOptions = loadingLocations 
+    ? [{ value: '', label: 'Loading locations...' }]
+    : filteredLocations.map(l => {
+        return { value: l.id, label: l.name };
+      });
+  const accountOptions = loadingAccounts 
+    ? [{ value: '', label: 'Loading accounts...' }]
+    : accounts.map(acc => ({ 
+        value: acc.id, 
+        label: `${acc.account_code} - ${acc.account_name} (Level ${acc.account_level})` 
+      }));
+  const codeTypeOptions = codeTypes.map(t => ({ value: t.value, label: t.label }));
+  
+
+  // Define initial data before fields array
+  const initialData = isEditMode ? {
+    company_id: configuration.company_id || '',
+    location_id: configuration.location_id || '',
+    account_id: configuration.level2_account_id || configuration.level3_account_id || '',
+    code_type: configuration.code_type,
+    is_active: configuration.is_active
+  } : {
+    company_id: '',
+    location_id: '',
+    account_id: '',
+    code_type: '',
+    is_active: true
+  };
+
 
   const fields = [
     { 
       name: 'company_id', 
       label: 'Company', 
       type: 'select', 
-      required: false, 
-      options: [
-        { value: '', label: 'All Companies (Parent Level)' },
-        ...companies.map(c => ({ value: c.id, label: c.name }))
-      ],
+      required: true, 
+      options: companyOptions,
       icon: Building2,
-      onChange: handleCompanyChange
+      onChange: handleCompanyChange,
+      searchable: true
     },
     { 
       name: 'location_id', 
       label: 'Location', 
       type: 'select', 
+      required: true, 
+      options: locationOptions,
+      icon: MapPin,
+      disabled: loadingLocations,
+      onChange: handleLocationChange,
+      searchable: true
+    },
+    { 
+      name: 'account_id', 
+      label: 'Account Code (Level 2 or Level 3)', 
+      type: 'select', 
       required: false, 
-      options: [
-        { value: '', label: 'All Locations' },
-        ...filteredLocations.map(l => ({ value: l.id, label: l.name }))
-      ],
-      icon: MapPin
+      options: accountOptions,
+      icon: Code,
+      disabled: loadingAccounts,
+      searchable: true
     },
     { 
       name: 'code_type', 
       label: 'Code Type', 
       type: 'select', 
       required: true, 
-      options: codeTypes.map(t => ({ value: t.value, label: t.label })),
-      icon: Code
-    },
-    { 
-      name: 'code_name', 
-      label: 'Code Name', 
-      type: 'text', 
-      required: true, 
-      placeholder: 'Enter display name (e.g., Customer Code)', 
-      icon: Code 
-    },
-    { 
-      name: 'account_level', 
-      label: 'Account Level', 
-      type: 'select', 
-      required: true, 
-      options: [
-        { value: 2, label: 'Level 2 - Sub Account' },
-        { value: 3, label: 'Level 3 - Detail Account' }
-      ]
-    },
-    { 
-      name: 'prefix', 
-      label: 'Code Prefix', 
-      type: 'text', 
-      required: false, 
-      placeholder: 'e.g., CUST, BANK, VEND (optional)'
-    },
-    { 
-      name: 'separator', 
-      label: 'Separator', 
-      type: 'text', 
-      required: false, 
-      placeholder: 'e.g., - or / (default: -)',
-      maxLength: 5
-    },
-    { 
-      name: 'number_length', 
-      label: 'Number Length', 
-      type: 'number', 
-      required: true, 
-      min: 1,
-      max: 10,
-      placeholder: 'Number of digits (e.g., 4 for 0001)'
-    },
-    { 
-      name: 'next_number', 
-      label: 'Next Number', 
-      type: 'number', 
-      required: true, 
-      min: 1,
-      placeholder: 'Starting number (e.g., 1)'
-    },
-    { 
-      name: 'description', 
-      label: 'Description', 
-      type: 'textarea', 
-      required: false, 
-      placeholder: 'Describe the purpose of this code configuration',
-      rows: 3
+      options: codeTypeOptions,
+      icon: Code,
+      searchable: true
     },
     { 
       name: 'is_active', 
-      label: 'Active', 
+      label: 'Status', 
       type: 'toggle', 
       required: false 
     },
@@ -157,22 +233,16 @@ const CodeConfigurationForm = () => {
     setRequestStatus('Sending request...');
 
     const newErrors = {};
+    if (!submittedFormData.company_id || !submittedFormData.company_id.trim()) {
+      newErrors.company_id = 'Company is required';
+    }
+    if (!submittedFormData.location_id || !submittedFormData.location_id.trim()) {
+      newErrors.location_id = 'Location is required';
+    }
     if (!submittedFormData.code_type || !submittedFormData.code_type.trim()) {
       newErrors.code_type = 'Code type is required';
     }
-    if (!submittedFormData.code_name || !submittedFormData.code_name.trim()) {
-      newErrors.code_name = 'Code name is required';
-    }
-    if (!submittedFormData.account_level) {
-      newErrors.account_level = 'Account level is required';
-    }
-    if (!submittedFormData.number_length || submittedFormData.number_length < 1) {
-      newErrors.number_length = 'Number length must be at least 1';
-    }
-    if (!submittedFormData.next_number || submittedFormData.next_number < 1) {
-      newErrors.next_number = 'Next number must be at least 1';
-    }
-    
+
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
       setAlert({ type: 'error', message: 'Please correct the errors below and try again.' });
@@ -182,7 +252,6 @@ const CodeConfigurationForm = () => {
 
     const submitData = {
       ...submittedFormData,
-      separator: submittedFormData.separator || '-',
       _method: isEditMode ? 'put' : 'post'
     };
 
@@ -190,14 +259,14 @@ const CodeConfigurationForm = () => {
     const method = isEditMode ? 'post' : 'post';
 
     router[method](url, submitData, {
-      onSuccess: () => { 
-        setRequestStatus('Success'); 
-        setAlert({ type: 'success', message: `Code configuration ${isEditMode ? 'updated' : 'created'} successfully!` }); 
+      onSuccess: () => {
+        setRequestStatus('Success');
+        setAlert({ type: 'success', message: `Code configuration ${isEditMode ? 'updated' : 'created'} successfully!` });
       },
-      onError: (errs) => { 
-        setErrors(errs); 
-        setAlert({ type: 'error', message: `Failed to ${isEditMode ? 'update' : 'create'} code configuration. Please check the errors below.` }); 
-        setRequestStatus('Server validation failed'); 
+      onError: (errs) => {
+        setErrors(errs);
+        setAlert({ type: 'error', message: `Failed to ${isEditMode ? 'update' : 'create'} code configuration. Please check the errors below.` });
+        setRequestStatus('Server validation failed');
       }
     });
   };
@@ -207,32 +276,6 @@ const CodeConfigurationForm = () => {
     { label: 'Code Configurations', icon: List, href: '/system/code-configurations' },
     { label: isEditMode ? 'Edit Configuration' : 'Add Configuration', icon: isEditMode ? Edit : Plus, href: null },
   ];
-
-  const initialData = isEditMode ? {
-    company_id: configuration.company_id || '',
-    location_id: configuration.location_id || '',
-    code_type: configuration.code_type,
-    code_name: configuration.code_name,
-    account_level: configuration.account_level,
-    prefix: configuration.prefix || '',
-    separator: configuration.separator || '-',
-    number_length: configuration.number_length,
-    next_number: configuration.next_number,
-    description: configuration.description || '',
-    is_active: configuration.is_active
-  } : {
-    company_id: '', 
-    location_id: '', 
-    code_type: '', 
-    code_name: '', 
-    account_level: 2, 
-    prefix: '', 
-    separator: '-', 
-    number_length: 4, 
-    next_number: 1, 
-    description: '', 
-    is_active: true 
-  };
 
   return (
     <div>
@@ -251,43 +294,40 @@ const CodeConfigurationForm = () => {
           </div>
         </div>
       )}
-      <div className="rounded-xl shadow-lg form-container border-slate-200">
-        <div className="p-6">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-              <Code className="w-7 h-7 text-blue-600" />
-              {isEditMode ? `Edit Configuration: ${configuration.code_name}` : 'Add Code Configuration'}
-            </h1>
-            <p className="text-gray-600">
-              {isEditMode ? 'Update code configuration details and settings' : 'Create a new code configuration for account coding structure'}
-            </p>
-          </div>
-
-          <GeneralizedForm
-            title=""
-            subtitle=""
-            fields={fields}
-            onSubmit={handleSubmit}
-            submitText={isEditMode ? "Update Configuration" : "Create Configuration"}
-            resetText={isEditMode ? "Reset Changes" : "Clear Form"}
-            initialData={initialData}
-            showReset={true}
-          />
-        </div>
-      </div>
+      <GeneralizedForm
+        title={isEditMode ? "Edit Code Configuration" : "Add Code Configuration"}
+        subtitle={isEditMode ? "Update code configuration details" : "Create a new code configuration"}
+        fields={fields}
+        onSubmit={handleSubmit}
+        submitText={isEditMode ? "Update Configuration" : "Create Configuration"}
+        resetText="Clear Form"
+        initialData={initialData}
+        showReset={true}
+      />
     </div>
   );
 };
 
-const Create = () => (
-  <App>
-    <div className="rounded-xl shadow-lg form-container border-slate-200">
-      <div className="p-6">
-        <CodeConfigurationForm />
+const Create = () => {
+  const { canAdd } = usePermissions();
+
+  return (
+    <App>
+      {/* Main Content Card */}
+      <div className="rounded-xl shadow-lg form-container border-slate-200">
+        <div className="p-6">
+          <PermissionAwareForm
+            requiredPermission="can_add"
+            route="/system/code-configurations"
+            fallbackMessage="You don't have permission to create code configurations. Please contact your administrator."
+          >
+            <CodeConfigurationForm />
+          </PermissionAwareForm>
+        </div>
       </div>
-    </div>
-  </App>
-);
+    </App>
+  );
+};
 
 export default Create;
 

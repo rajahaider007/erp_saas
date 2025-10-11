@@ -3520,13 +3520,13 @@ select[class*="input-with-icon"],
 
 /* CRITICAL: Prevent select overflow from containers */
 .input-group {
-    overflow: hidden !important;
+    overflow: visible !important;
     box-sizing: border-box !important;
     width: 100% !important;
 }
 
 .input-wrapper {
-    overflow: hidden !important;
+    overflow: visible !important;
     box-sizing: border-box !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -3542,14 +3542,14 @@ select.input-with-icon,
     max-width: 100% !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
+    overflow: visible !important;
 }
 
 /* Specific container containment rules */
 .input-group .input-wrapper {
     width: 100% !important;
     max-width: 100% !important;
-    overflow: hidden !important;
+    overflow: visible !important;
 }
 
 .input-wrapper .form-select,
@@ -3560,7 +3560,7 @@ select.input-with-icon,
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
+    overflow: visible !important;
 }
 
 /* Additional responsive containment rules */
@@ -3572,7 +3572,7 @@ select.input-with-icon,
         width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
-        overflow: hidden !important;
+        overflow: visible !important;
     }
 }
 
@@ -3581,4 +3581,94 @@ select.input-with-icon,
 .input-wrapper * {
     max-width: 100% !important;
     box-sizing: border-box !important;
+}
+
+/* Allow SearchableSelect dropdown to overflow */
+.input-wrapper .relative {
+    overflow: visible !important;
+}
+
+/* Ensure SearchableSelect dropdowns are visible */
+.input-wrapper [class*="absolute"][class*="z-"] {
+    overflow: visible !important;
+    position: absolute !important;
+}
+
+/* Fix for searchable select dropdowns */
+.input-wrapper[style*="overflow: visible"] {
+    overflow: visible !important;
+    position: relative !important;
+}
+
+.input-group .input-wrapper {
+    overflow: visible !important;
+    position: relative !important;
+}
+
+/* Ensure SearchableSelect dropdown appears above everything */
+.input-wrapper .relative[style*="z-index"] {
+    z-index: 1000 !important;
+}
+
+.input-wrapper .relative[style*="z-index"] > div[style*="z-index"] {
+    z-index: 9999 !important;
+    position: absolute !important;
+}
+
+/* Force dropdown to appear above all form elements */
+.input-group .input-wrapper .relative > div[class*="absolute"] {
+    z-index: 999999 !important;
+    position: absolute !important;
+    background: var(--surface) !important;
+    box-shadow: var(--shadow-hover) !important;
+    width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    min-width: 100% !important;
+    border: 2px solid var(--border) !important;
+    border-radius: 16px !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* Ensure SearchableSelect container has proper stacking context */
+.input-group .input-wrapper .relative[style*="z-index"] {
+    z-index: 999999 !important;
+    position: relative !important;
+    isolation: isolate !important;
+}
+
+/* Force dropdown above ALL elements including search inputs */
+div[style*="z-index: 999999"] {
+    z-index: 999999 !important;
+    position: absolute !important;
+}
+
+/* Override any conflicting z-index on form elements */
+.input-group .input-wrapper input,
+.input-group .input-wrapper .form-input,
+.input-group .input-wrapper .form-select {
+    z-index: auto !important;
+    position: relative !important;
+}
+
+/* Ensure all selects take full width */
+.input-group .input-wrapper .form-select,
+.input-group .input-wrapper .relative {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Force SearchableSelect to take full width */
+.input-group .input-wrapper .relative[style*="width: 100%"] {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Override any width constraints on form elements */
+.form-select,
+.input-wrapper .form-select,
+.input-group .form-select {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
 }

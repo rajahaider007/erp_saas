@@ -4,12 +4,14 @@ import {
   Home, List, Plus, Edit, Lock, Shield, Globe, 
   Clock, DollarSign, Palette, Eye, EyeOff
 } from 'lucide-react';
-import DynamicUserForm from '../../../Components/DynamicUserForm';
+import GeneralizedForm from '../../../Components/GeneralizedForm';
+import PermissionAwareForm, { PermissionButton } from '../../../Components/PermissionAwareForm';
+import { usePermissions } from '../../../hooks/usePermissions';
 import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
 
 // Professional Breadcrumbs Component
-const Breadcrumbs = ({ items, isEdit }) => {
+const Breadcrumbs = ({ items }) => {
   return (
     <div className="breadcrumbs-themed">
       <nav className="breadcrumbs">
@@ -57,7 +59,7 @@ const Breadcrumbs = ({ items, isEdit }) => {
       </nav>
 
       <div className="breadcrumbs-description">
-        {isEdit ? 'Update user information and settings' : 'Register a new user in the system'}
+        {usePage().props.user ? 'Update user information and settings' : 'Register a new user in the system'}
       </div>
     </div>
   );
@@ -361,6 +363,13 @@ const UserRegistrationForm = () => {
     }
   };
 
+  const handleReset = () => {
+    setErrors({});
+    setAlert(null);
+    setRequestStatus('');
+  };
+
+  // Breadcrumb items configuration
   const breadcrumbItems = [
     {
       label: 'Dashboard',
@@ -387,7 +396,7 @@ const UserRegistrationForm = () => {
   return (
     <div>
       {/* Professional Breadcrumbs */}
-      <Breadcrumbs items={breadcrumbItems} isEdit={isEdit} />
+      <Breadcrumbs items={breadcrumbItems} />
 
       {/* Alert Messages */}
       {alert && (
@@ -414,42 +423,56 @@ const UserRegistrationForm = () => {
         </div>
       )}
 
-      {/* User Registration Form */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {isEdit ? "Edit User" : "Register New User"}
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            {isEdit ? "Update user information and settings" : "Complete the user registration form with all required information"}
-          </p>
-        </div>
-        
-        <DynamicUserForm
-          isEdit={isEdit}
-          user={user}
-          companies={companies}
-          initialLocations={locations}
-          initialDepartments={departments}
-          availableMenus={usePage().props.availableMenus || []}
-          userRights={usePage().props.userRights || {}}
-          onSubmit={handleUserSubmit}
-          submitText={isEdit ? "Update User" : "Register User"}
-          resetText="Clear Form"
-        />
-      </div>
+      {/* User Form */}
+      <GeneralizedForm
+        title={isEdit ? "Edit User" : "Register New User"}
+        subtitle={isEdit ? "Update user information and settings" : "Complete the user registration form with all required information"}
+        fields={userFields}
+        onSubmit={handleUserSubmit}
+        submitText={isEdit ? "Update User" : "Register User"}
+        resetText="Clear Form"
+        initialData={{ 
+          fname: user?.fname || '',
+          mname: user?.mname || '',
+          lname: user?.lname || '',
+          email: user?.email || '',
+          phone: user?.phone || '',
+          loginid: user?.loginid || '',
+          pincode: user?.pincode || '',
+          comp_id: user?.comp_id || '',
+          location_id: user?.location_id || '',
+          dept_id: user?.dept_id || '',
+          password: '',
+          password_confirmation: '',
+          role: user?.role || 'user',
+          status: user?.status || 'active',
+          timezone: user?.timezone || 'UTC',
+          language: user?.language || 'en',
+          currency: user?.currency || 'USD',
+          theme: user?.theme || 'light'
+        }}
+        showReset={true}
+      />
     </div>
   );
 };
 
 // Main Create Component
 const Create = () => {
+  const { canAdd } = usePermissions();
+  
   return (
     <App>
       {/* Main Content Card */}
-      <div className="rounded-xl shadow-lg form-container border-slate-200 form-theme-2">
+      <div className="rounded-xl shadow-lg form-container border-slate-200">
         <div className="p-6">
-          <UserRegistrationForm />
+          <PermissionAwareForm
+            requiredPermission="can_add"
+            route="/system/users"
+            fallbackMessage="You don't have permission to create users. Please contact your administrator."
+          >
+            <UserRegistrationForm />
+          </PermissionAwareForm>
         </div>
       </div>
     </App>

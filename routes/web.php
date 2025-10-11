@@ -406,6 +406,13 @@ Route::prefix('system/code-configurations')->name('code-configurations.')->middl
     Route::get('/api/locations-by-company', [App\Http\Controllers\system\CodeConfigurationController::class, 'getLocationsByCompany'])->name('locations-by-company');
 });
 
+// Chart of Accounts API Routes
+Route::prefix('system/chart-of-accounts')->name('chart-of-accounts.')->middleware('web.auth')->group(function () {
+    Route::get('/level2-accounts', [App\Http\Controllers\system\ChartOfAccountController::class, 'getLevel2Accounts'])->name('level2-accounts');
+    Route::get('/level3-accounts', [App\Http\Controllers\system\ChartOfAccountController::class, 'getLevel3Accounts'])->name('level3-accounts');
+    Route::get('/accounts-by-company-location', [App\Http\Controllers\system\ChartOfAccountController::class, 'getAccountsForCompanyLocation'])->name('accounts-by-company-location');
+});
+
 // Reports Routes
 Route::prefix('accounts/reports')->name('accounts.reports.')->middleware('web.auth')->group(function () {
     // General Ledger Report Routes

@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\CodeConfiguration;
 use App\Models\Company;
 use App\Models\Location;
+use App\Models\ChartOfAccount;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Services\AuditLogService;
 use App\Helpers\CompanyHelper;
 
@@ -107,7 +109,7 @@ class CodeConfigurationController extends Controller
             return redirect()->route('dashboard')->with('error', 'Access denied. This feature is only available for parent companies.');
         }
 
-        $query = CodeConfiguration::with(['company', 'location', 'creator', 'updater']);
+        $query = CodeConfiguration::with(['company', 'location', 'level2Account', 'level3Account', 'creator', 'updater']);
 
         // Filter by company
         if ($request->filled('company_id')) {
@@ -133,10 +135,7 @@ class CodeConfigurationController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('code_name', 'like', "%{$search}%")
-                  ->orWhere('code_type', 'like', "%{$search}%")
-                  ->orWhere('prefix', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                $q->where('code_type', 'like', "%{$search}%");
             });
         }
 
@@ -205,16 +204,10 @@ class CodeConfigurationController extends Controller
         }
 
         $validated = $request->validate([
-            'company_id' => 'nullable|exists:companies,id',
-            'location_id' => 'nullable|exists:locations,id',
+            'company_id' => 'required|exists:companies,id',
+            'location_id' => 'required|exists:locations,id',
+            'account_id' => 'nullable|exists:chart_of_accounts,id',
             'code_type' => 'required|string|max:50',
-            'code_name' => 'required|string|max:100',
-            'account_level' => 'required|integer|in:2,3',
-            'prefix' => 'nullable|string|max:10',
-            'next_number' => 'required|integer|min:1',
-            'number_length' => 'required|integer|min:1|max:10',
-            'separator' => 'nullable|string|max:5',
-            'description' => 'nullable|string',
             'is_active' => 'boolean',
         ]);
 
@@ -230,8 +223,31 @@ class CodeConfigurationController extends Controller
             ]);
         }
 
+        // Determine if account is Level 2 or Level 3 and set accordingly
+        if (isset($validated['account_id'])) {
+            $account = ChartOfAccount::find($validated['account_id']);
+            if ($account) {
+                if ($account->account_level == 2) {
+                    $validated['level2_account_id'] = $validated['account_id'];
+                    $validated['level3_account_id'] = null;
+                } elseif ($account->account_level == 3) {
+                    $validated['level2_account_id'] = null;
+                    $validated['level3_account_id'] = $validated['account_id'];
+                }
+            }
+        }
+        
+        // Remove account_id from validated data as it's not a column in the table
+        unset($validated['account_id']);
+
         $validated['created_by'] = Auth::id();
-        $validated['separator'] = $validated['separator'] ?? '-';
+        
+        // Set default values for optional fields
+        $validated['code_name'] = $validated['code_name'] ?? $validated['code_type'];
+        $validated['separator'] = '-';
+        $validated['number_length'] = 4;
+        $validated['next_number'] = 1;
+        $validated['account_level'] = 2;
 
         $configuration = CodeConfiguration::create($validated);
 
@@ -259,7 +275,7 @@ class CodeConfigurationController extends Controller
             return redirect()->route('dashboard')->with('error', 'Access denied. This feature is only available for parent companies.');
         }
 
-        $codeConfiguration->load(['company', 'location', 'creator', 'updater']);
+        $codeConfiguration->load(['company', 'location', 'level2Account', 'level3Account', 'creator', 'updater']);
 
         return Inertia::render('system/CodeConfiguration/Show', [
             'configuration' => $codeConfiguration,
@@ -306,16 +322,10 @@ class CodeConfigurationController extends Controller
         }
 
         $validated = $request->validate([
-            'company_id' => 'nullable|exists:companies,id',
-            'location_id' => 'nullable|exists:locations,id',
+            'company_id' => 'required|exists:companies,id',
+            'location_id' => 'required|exists:locations,id',
+            'account_id' => 'nullable|exists:chart_of_accounts,id',
             'code_type' => 'required|string|max:50',
-            'code_name' => 'required|string|max:100',
-            'account_level' => 'required|integer|in:2,3',
-            'prefix' => 'nullable|string|max:10',
-            'next_number' => 'required|integer|min:1',
-            'number_length' => 'required|integer|min:1|max:10',
-            'separator' => 'nullable|string|max:5',
-            'description' => 'nullable|string',
             'is_active' => 'boolean',
         ]);
 
@@ -332,8 +342,32 @@ class CodeConfigurationController extends Controller
             ]);
         }
 
+        // Determine if account is Level 2 or Level 3 and set accordingly
+        if (isset($validated['account_id'])) {
+            $account = ChartOfAccount::find($validated['account_id']);
+            if ($account) {
+                if ($account->account_level == 2) {
+                    $validated['level2_account_id'] = $validated['account_id'];
+                    $validated['level3_account_id'] = null;
+                } elseif ($account->account_level == 3) {
+                    $validated['level2_account_id'] = null;
+                    $validated['level3_account_id'] = $validated['account_id'];
+                }
+            }
+        }
+        
+        // Remove account_id from validated data as it's not a column in the table
+        unset($validated['account_id']);
+
         $oldData = $codeConfiguration->toArray();
         $validated['updated_by'] = Auth::id();
+        
+        // Preserve existing values for fields not in the form
+        $validated['code_name'] = $codeConfiguration->code_name ?? $validated['code_type'];
+        $validated['separator'] = $codeConfiguration->separator ?? '-';
+        $validated['number_length'] = $codeConfiguration->number_length ?? 4;
+        $validated['next_number'] = $codeConfiguration->next_number ?? 1;
+        $validated['account_level'] = $codeConfiguration->account_level ?? 2;
 
         $codeConfiguration->update($validated);
 

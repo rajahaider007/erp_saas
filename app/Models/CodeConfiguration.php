@@ -12,6 +12,8 @@ class CodeConfiguration extends Model
     protected $fillable = [
         'company_id',
         'location_id',
+        'level2_account_id',
+        'level3_account_id',
         'code_type',
         'code_name',
         'account_level',
@@ -46,6 +48,22 @@ class CodeConfiguration extends Model
     public function location()
     {
         return $this->belongsTo(Location::class);
+    }
+
+    /**
+     * Get the Level 2 account.
+     */
+    public function level2Account()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'level2_account_id');
+    }
+
+    /**
+     * Get the Level 3 account.
+     */
+    public function level3Account()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'level3_account_id');
     }
 
     /**

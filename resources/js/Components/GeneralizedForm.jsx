@@ -4,6 +4,7 @@ import {
   Search, Calendar, Clock, ChevronDown, Mail, Lock, Shield,
   Type, Folder, Image, ToggleLeft, ToggleRight
 } from 'lucide-react';
+import Select2 from './Select2';
 
 // Generalized Form Component
 const GeneralizedForm = ({
@@ -217,6 +218,25 @@ const GeneralizedForm = ({
         );
 
       case 'select':
+      // Use Select2 for searchable fields, regular select for others
+      if (field.searchable) {
+        return (
+          <div className="input-group" key={field.name}>
+            <label className="input-label">{field.label}</label>
+            <div className="input-wrapper" style={{ overflow: 'visible', position: 'relative' }}>
+              <Select2
+                options={field.options || []}
+                value={fieldValue}
+                onChange={(value) => handleInputChange(field.name, value, field)}
+                placeholder={field.placeholder || `Select ${field.label}`}
+                disabled={field.disabled || false}
+                searchable={true}
+              />
+            </div>
+          </div>
+        );
+      }
+        
         return (
           <div className="input-group" key={field.name}>
             <label className="input-label">{field.label}</label>

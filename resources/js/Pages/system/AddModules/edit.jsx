@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Type, Folder, List, Image as ImageIcon } from 'lucide-react';
+import GeneralizedForm from '../../../Components/GeneralizedForm';
+import PermissionAwareForm, { PermissionButton } from '../../../Components/PermissionAwareForm';
+import { usePermissions } from '../../../hooks/usePermissions';
 import { router, usePage } from '@inertiajs/react';
 import App from "../../App.jsx";
-import GeneralizedForm from '../../../Components/GeneralizedForm';
 
 const EditModuleForm = () => {
   const { module: moduleProp, errors: pageErrors, flash } = usePage().props;
@@ -60,11 +62,20 @@ const EditModuleForm = () => {
 };
 
 const Edit = () => {
+  const { canEdit } = usePermissions();
+  
   return (
     <App>
+      {/* Main Content Card */}
       <div className="rounded-xl shadow-lg form-container border-slate-200">
         <div className="p-6">
-          <EditModuleForm />
+          <PermissionAwareForm
+            requiredPermission="can_edit"
+            route="/modules"
+            fallbackMessage="You don't have permission to edit modules. Please contact your administrator."
+          >
+            <EditModuleForm />
+          </PermissionAwareForm>
         </div>
       </div>
     </App>

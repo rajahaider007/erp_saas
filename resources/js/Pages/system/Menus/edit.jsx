@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import App from "../../App.jsx";
 import GeneralizedForm from '../../../Components/GeneralizedForm';
+import PermissionAwareForm, { PermissionButton } from '../../../Components/PermissionAwareForm';
+import { usePermissions } from '../../../hooks/usePermissions';
+import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
 
 const EditMenuForm = () => {
@@ -51,15 +53,26 @@ const EditMenuForm = () => {
   );
 };
 
-const Edit = () => (
-  <App>
-    <div className="rounded-xl shadow-lg form-container border-slate-200">
-      <div className="p-6">
-        <EditMenuForm />
+const Edit = () => {
+  const { canEdit } = usePermissions();
+  
+  return (
+    <App>
+      {/* Main Content Card */}
+      <div className="rounded-xl shadow-lg form-container border-slate-200">
+        <div className="p-6">
+          <PermissionAwareForm
+            requiredPermission="can_edit"
+            route="/system/menus"
+            fallbackMessage="You don't have permission to edit menus. Please contact your administrator."
+          >
+            <EditMenuForm />
+          </PermissionAwareForm>
+        </div>
       </div>
-    </div>
-  </App>
-);
+    </App>
+  );
+};
 
 export default Edit;
 

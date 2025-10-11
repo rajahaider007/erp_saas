@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Type, Home, List, Plus, Settings, Layers, CheckSquare, Square } from 'lucide-react';
-import App from "../../App.jsx";
+import { Type, Home, List, Plus, Edit as EditIcon, Settings, Layers, CheckSquare, Square, Package } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
+import PermissionAwareForm, { PermissionButton } from '../../../Components/PermissionAwareForm';
+import { usePermissions } from '../../../hooks/usePermissions';
+import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
 
 const Breadcrumbs = ({ items }) => (
@@ -251,14 +253,25 @@ const EditPackageForm = () => {
   );
 };
 
-const Edit = () => (
-  <App>
-    <div className="rounded-xl shadow-lg form-container border-slate-200">
-      <div className="p-6">
-        <EditPackageForm />
+const Edit = () => {
+  const { canEdit } = usePermissions();
+  
+  return (
+    <App>
+      {/* Main Content Card */}
+      <div className="rounded-xl shadow-lg form-container border-slate-200">
+        <div className="p-6">
+          <PermissionAwareForm
+            requiredPermission="can_edit"
+            route="/system/packages"
+            fallbackMessage="You don't have permission to edit packages. Please contact your administrator."
+          >
+            <EditPackageForm />
+          </PermissionAwareForm>
+        </div>
       </div>
-    </div>
-  </App>
-);
+    </App>
+  );
+};
 
 export default Edit;
