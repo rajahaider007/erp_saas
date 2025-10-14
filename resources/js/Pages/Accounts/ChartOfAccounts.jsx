@@ -439,7 +439,9 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
 
     try {
       // Auto-detect properties based on hierarchy
-      const level = selectedAccount ? selectedAccount.account_level + 1 : 1;
+      const level = modalMode === 'edit' 
+        ? (selectedAccount ? selectedAccount.account_level : 1)  // For edits, use existing level
+        : (selectedAccount ? selectedAccount.account_level + 1 : 1);  // For new accounts, use parent level + 1
       const autoDetectedProperties = getAccountProperties(formData.parent_account_id, level);
 
       // Prepare data with only required fields for backend
