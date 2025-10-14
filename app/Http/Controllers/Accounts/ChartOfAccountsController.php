@@ -109,6 +109,11 @@ class ChartOfAccountsController extends Controller
             ]);
 
             if ($validator->fails()) {
+                Log::error('Chart of Account validation failed', [
+                    'errors' => $validator->errors()->toArray(),
+                    'request_data' => $request->all()
+                ]);
+                
                 return response()->json([
                     'success' => false,
                     'message' => 'Validation failed.',
@@ -192,7 +197,7 @@ class ChartOfAccountsController extends Controller
 
             // Validate the request
             $validator = Validator::make($request->all(), [
-                'account_code' => 'required|string|max:255|unique:chart_of_accounts,account_code,' . $id,
+                'account_code' => 'required|string|max:255|unique:chart_of_accounts,account_code,' . $id . ',id',
                 'account_name' => 'required|string|max:255',
                 'account_type' => 'required|in:Assets,Liabilities,Equity,Revenue,Expenses',
                 'parent_account_id' => 'nullable|exists:chart_of_accounts,id',

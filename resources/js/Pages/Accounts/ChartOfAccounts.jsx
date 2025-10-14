@@ -80,7 +80,18 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
       acc.parent_account_id === parentId &&
       acc.account_level === 2
     );
-    const nextNumber = existingAccountsInDB.length + 1;
+    
+    // Get the highest existing number to avoid duplicates
+    let nextNumber = 1;
+    if (existingAccountsInDB.length > 0) {
+      const existingNumbers = existingAccountsInDB.map(acc => {
+        const code = acc.account_code;
+        const numberPart = code.substring(1, 5); // Get positions 1-4 (4 digits)
+        return parseInt(numberPart) || 0;
+      });
+      nextNumber = Math.max(...existingNumbers) + 1;
+    }
+    
     // Build: 1 + 0001 + 0000000000 = 100010000000000
     const firstDigit = parentCode.charAt(0); // "1"
     const result = firstDigit + nextNumber.toString().padStart(4, '0') + '0000000000';
@@ -534,6 +545,12 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
         
         closeModal();
       } else {
+        // If it's a validation error, throw it with the response data
+        if (result.errors) {
+          const validationError = new Error('Validation failed');
+          validationError.response = result;
+          throw validationError;
+        }
         throw new Error(result.message || 'Operation failed');
       }
 
@@ -541,11 +558,19 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
       console.error('Error:', error);
 
       // Check if it's a validation error
-      if (error.message && error.message.includes('Validation failed')) {
+      if (error.message && error.message.includes('Validation failed') && error.response) {
+        let errorMessage = 'Please check the form data and try again.';
+        
+        // Try to extract specific validation errors from the response
+        if (error.response && error.response.errors) {
+          const errorDetails = Object.values(error.response.errors).flat().join(', ');
+          errorMessage = `Validation errors: ${errorDetails}`;
+        }
+        
         await Swal.fire({
           icon: 'error',
           title: 'Validation Error!',
-          text: 'Please check the form data and try again.',
+          text: errorMessage,
           confirmButtonColor: '#EF4444',
           confirmButtonText: 'OK',
           background: 'rgba(30, 41, 59, 0.95)',
@@ -776,7 +801,7 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {account.account_name}
                     </span>
-                    {account.short_code && (
+                    {account.short_code && account.short_code !== 'NULL' && account.short_code.trim() !== '' && (
                       <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full">
                         {account.short_code}
                       </span>
@@ -961,9 +986,6 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
                   </div>
 
                   <div className="flex items-center space-x-4">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {category.accounts.length} accounts
-                    </span>
                     {isExpanded ? (
                       <ChevronDown className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                     ) : (
