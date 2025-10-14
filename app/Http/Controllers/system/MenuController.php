@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\system;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\CheckUserPermissions;
 use App\Models\Menu;
 use App\Models\Module;
 use App\Models\Section;
@@ -12,6 +13,7 @@ use Inertia\Inertia;
 
 class MenuController extends Controller
 {
+    use CheckUserPermissions;
     private function rules($id = null): array
     {
         return [
@@ -30,6 +32,8 @@ class MenuController extends Controller
 
     public function index(Request $request)
     {
+        // Check if user has permission to can_view
+        $this->requirePermission($request, null, 'can_view');
         $query = Menu::with(['module','section']);
         if ($request->filled('module_id')) $query->where('module_id', $request->module_id);
         if ($request->filled('section_id')) $query->where('section_id', $request->section_id);
@@ -49,6 +53,8 @@ class MenuController extends Controller
 
     public function create()
     {
+        // Check if user has permission to can_add
+        $this->requirePermission($request, null, 'can_add');
         return Inertia::render('system/Menus/add', [
             'modules' => Module::orderBy('module_name')->get(['id','module_name'])
         ]);
@@ -56,6 +62,8 @@ class MenuController extends Controller
 
     public function store(Request $request)
     {
+        // Check if user has permission to can_add
+        $this->requirePermission($request, null, 'can_add');
         $validated = $request->validate($this->rules());
         $validated['status'] = filter_var($validated['status'] ?? true, FILTER_VALIDATE_BOOLEAN);
         if (!isset($validated['sort_order']) || $validated['sort_order'] === 0) {
@@ -67,6 +75,8 @@ class MenuController extends Controller
 
     public function edit(Menu $menu)
     {
+        // Check if user has permission to can_edit
+        $this->requirePermission($request, null, 'can_edit');
         return Inertia::render('system/Menus/edit', [
             'menu' => $menu->load(['module','section']),
             'modules' => Module::orderBy('module_name')->get(['id','module_name'])
@@ -75,6 +85,8 @@ class MenuController extends Controller
 
     public function update(Request $request, Menu $menu)
     {
+        // Check if user has permission to can_edit
+        $this->requirePermission($request, null, 'can_edit');
         $validated = $request->validate($this->rules($menu->id));
         $validated['status'] = filter_var($validated['status'] ?? $menu->status, FILTER_VALIDATE_BOOLEAN);
         $menu->update($validated);
@@ -83,6 +95,8 @@ class MenuController extends Controller
 
     public function destroy(Menu $menu)
     {
+        // Check if user has permission to can_delete
+        $this->requirePermission($request, null, 'can_delete');
         $name = $menu->menu_name;
         $menu->delete();
         return redirect()->back()->with('success', 'Menu "'.$name.'" deleted.');

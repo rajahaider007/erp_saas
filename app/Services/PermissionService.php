@@ -24,7 +24,7 @@ class PermissionService
         }
 
         // Get menu by feature name (could be route name, menu name, or slug)
-        $menu = Menu::where('route_name', $feature)
+        $menu = Menu::where('route', $feature)
             ->orWhere('menu_name', $feature)
             ->orWhere('slug', $feature)
             ->first();
@@ -92,7 +92,7 @@ class PermissionService
                 ->where('is_enabled', true)
                 ->with('menu')
                 ->get()
-                ->pluck('menu.route_name')
+                ->pluck('menu.route')
                 ->filter()
                 ->toArray();
         }
@@ -104,7 +104,7 @@ class PermissionService
             ->toArray();
 
         $userFeatures = Menu::whereIn('id', $userMenuIds)
-            ->pluck('route_name')
+            ->pluck('route')
             ->filter()
             ->toArray();
 

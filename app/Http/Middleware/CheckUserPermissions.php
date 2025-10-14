@@ -46,7 +46,7 @@ class CheckUserPermissions
         if ($requiredFeature) {
             // Get menu ID by route name or menu name
             $menu = DB::table('menus')
-                ->where('route_name', $requiredFeature)
+                ->where('route', $requiredFeature)
                 ->orWhere('menu_name', $requiredFeature)
                 ->first();
 

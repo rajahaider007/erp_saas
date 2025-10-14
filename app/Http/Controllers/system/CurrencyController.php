@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\system;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\CheckUserPermissions;
 use App\Models\Currency;
 use App\Models\CurrencyExchangeRateHistory;
 use App\Services\ExchangeRateService;
@@ -11,11 +12,14 @@ use Inertia\Inertia;
 
 class CurrencyController extends Controller
 {
+    use CheckUserPermissions;
     /**
      * Display a listing of the currencies.
      */
     public function index()
     {
+        // Check if user has permission to can_view
+        $this->requirePermission($request, null, 'can_view');
         $currencies = Currency::ordered()
             ->paginate(50);
 
@@ -72,6 +76,8 @@ class CurrencyController extends Controller
      */
     public function create()
     {
+        // Check if user has permission to can_add
+        $this->requirePermission($request, null, 'can_add');
         return Inertia::render('system/Currencies/Create');
     }
 
@@ -80,6 +86,8 @@ class CurrencyController extends Controller
      */
     public function store(Request $request)
     {
+        // Check if user has permission to can_add
+        $this->requirePermission($request, null, 'can_add');
         $validated = $request->validate([
             'code' => 'required|string|max:3|unique:currencies,code',
             'name' => 'required|string|max:255',
@@ -107,6 +115,8 @@ class CurrencyController extends Controller
      */
     public function show(Currency $currency)
     {
+        // Check if user has permission to can_view
+        $this->requirePermission($request, null, 'can_view');
         return Inertia::render('system/Currencies/Show', [
             'currency' => $currency
         ]);
@@ -117,6 +127,8 @@ class CurrencyController extends Controller
      */
     public function edit(Currency $currency)
     {
+        // Check if user has permission to can_edit
+        $this->requirePermission($request, null, 'can_edit');
         return Inertia::render('system/Currencies/Edit', [
             'currency' => $currency
         ]);
@@ -127,6 +139,8 @@ class CurrencyController extends Controller
      */
     public function update(Request $request, Currency $currency)
     {
+        // Check if user has permission to can_edit
+        $this->requirePermission($request, null, 'can_edit');
         $validated = $request->validate([
             'code' => 'required|string|max:3|unique:currencies,code,' . $currency->id,
             'name' => 'required|string|max:255',
@@ -156,6 +170,8 @@ class CurrencyController extends Controller
      */
     public function destroy(Currency $currency)
     {
+        // Check if user has permission to can_delete
+        $this->requirePermission($request, null, 'can_delete');
         // Prevent deletion of base currency
         if ($currency->is_base_currency) {
             return back()->with('error', 'Cannot delete base currency.');

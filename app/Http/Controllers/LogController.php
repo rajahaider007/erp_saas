@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
+use App\Http\Traits\CheckUserPermissions;
 use App\Services\AuditLogService;
 use App\Services\RecoveryService;
 use App\Services\SecurityLogService;
@@ -13,6 +15,7 @@ use Inertia\Inertia;
 
 class LogController extends Controller
 {
+    use CheckUserPermissions;
     /**
      * Display activity logs
      */

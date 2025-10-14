@@ -1399,7 +1399,7 @@ CREATE TABLE `tbl_user_activity_logs` (
   `company_id` int(10) UNSIGNED DEFAULT NULL,
   `session_id` varchar(255) DEFAULT NULL,
   `url` varchar(500) DEFAULT NULL,
-  `route_name` varchar(255) DEFAULT NULL,
+  `route` varchar(255) DEFAULT NULL,
   `method` varchar(10) DEFAULT NULL,
   `controller` varchar(255) DEFAULT NULL,
   `action` varchar(255) DEFAULT NULL,
@@ -1871,7 +1871,7 @@ ALTER TABLE `tbl_user_activity_logs`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_user` (`user_id`),
   ADD KEY `idx_session` (`session_id`),
-  ADD KEY `idx_route` (`route_name`),
+  ADD KEY `idx_route` (`route`),
   ADD KEY `idx_created` (`created_at`);
 
 --

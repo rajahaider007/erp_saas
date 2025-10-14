@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\system;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\CheckUserPermissions;
 use App\Models\Package;
 use App\Helpers\CompanyHelper;
 use Illuminate\Http\Request;
@@ -12,6 +13,7 @@ use Inertia\Inertia;
 
 class PackageController extends Controller
 {
+    use CheckUserPermissions;
     /**
      * Check if current user's company can access packages module
      */
@@ -36,6 +38,8 @@ class PackageController extends Controller
 
     public function index(Request $request)
     {
+        // Check if user has permission to can_view
+        $this->requirePermission($request, null, 'can_view');
         $this->checkAccess();
         
         $query = Package::query();
@@ -58,6 +62,8 @@ class PackageController extends Controller
 
     public function create()
     {
+        // Check if user has permission to can_add
+        $this->requirePermission($request, null, 'can_add');
         $this->checkAccess();
         
         return Inertia::render('system/Packages/add', [
@@ -69,6 +75,8 @@ class PackageController extends Controller
 
     public function store(Request $request)
     {
+        // Check if user has permission to can_add
+        $this->requirePermission($request, null, 'can_add');
         $this->checkAccess();
         
         $validated = $request->validate([
@@ -99,6 +107,8 @@ class PackageController extends Controller
 
     public function edit(Package $package)
     {
+        // Check if user has permission to can_edit
+        $this->requirePermission($request, null, 'can_edit');
         $this->checkAccess();
         
         $packageFeatures = $package->features()->pluck('is_enabled', 'menu_id')->toArray();
@@ -114,6 +124,8 @@ class PackageController extends Controller
 
     public function update(Request $request, Package $package)
     {
+        // Check if user has permission to can_edit
+        $this->requirePermission($request, null, 'can_edit');
         $this->checkAccess();
         
         $validated = $request->validate([
@@ -141,6 +153,8 @@ class PackageController extends Controller
 
     public function destroy(Package $package)
     {
+        // Check if user has permission to can_delete
+        $this->requirePermission($request, null, 'can_delete');
         $this->checkAccess();
         
         $name = $package->package_name;

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\system;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\CheckUserPermissions;
 use App\Models\Company;
 use App\Helpers\CompanyHelper;
 use Illuminate\Http\Request;
@@ -13,11 +14,14 @@ use Illuminate\Support\Str;
 
 class CompanyController extends Controller
 {
+    use CheckUserPermissions;
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        // Check if user has permission to view companies
+        $this->requirePermission($request, null, 'can_view');
         // Optimized query - only select columns needed for the list view
         $query = Company::select([
             'id',
@@ -79,8 +83,10 @@ class CompanyController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
+        // Check if user has permission to create companies
+        $this->requirePermission($request, null, 'can_add');
         $packages = \App\Models\Package::where('status', true)
             ->orderBy('sort_order')
             ->get(['id', 'package_name']);
@@ -98,6 +104,8 @@ class CompanyController extends Controller
      */
     public function store(Request $request)
     {
+        // Check if user has permission to create companies
+        $this->requirePermission($request, null, 'can_add');
         $validated = $request->validate($this->validationRules());
 
         // Customer companies cannot set restricted fields
@@ -174,6 +182,8 @@ class CompanyController extends Controller
      */
     public function update(Request $request, Company $company)
     {
+        // Check if user has permission to edit companies
+        $this->requirePermission($request, null, 'can_edit');
         $validated = $request->validate($this->validationRules($company->id));
 
         // Customer companies cannot update restricted fields
@@ -211,8 +221,10 @@ class CompanyController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Company $company)
+    public function destroy(Request $request, Company $company)
     {
+        // Check if user has permission to delete companies
+        $this->requirePermission($request, null, 'can_delete');
         try {
             $companyName = $company->company_name;
             

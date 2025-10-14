@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\system;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\CheckUserPermissions;
 use App\Models\User;
 use App\Models\Company;
 use App\Models\Location;
@@ -15,11 +16,14 @@ use Inertia\Response;
 
 class UserController extends Controller
 {
+    use CheckUserPermissions;
     /**
      * Display a listing of users.
      */
     public function index(Request $request)
     {
+        // Check if user has permission to view users
+        $this->requirePermission($request, null, 'can_view');
         // Optimized query - only select columns needed for the list view
         $query = User::with(['company', 'location', 'department'])->select([
             'id',
@@ -115,6 +119,8 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        // Check if user has permission to add users
+        $this->requirePermission($request, null, 'can_add');
         $validator = Validator::make($request->all(), [
             'fname' => 'required|string|max:100',
             'mname' => 'nullable|string|max:100',
@@ -280,6 +286,8 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        // Check if user has permission to edit users
+        $this->requirePermission($request, null, 'can_edit');
         $validator = Validator::make($request->all(), [
             'fname' => 'required|string|max:100',
             'mname' => 'nullable|string|max:100',
@@ -337,8 +345,10 @@ class UserController extends Controller
     /**
      * Remove the specified user from storage.
      */
-    public function destroy(User $user)
+    public function destroy(Request $request, User $user)
     {
+        // Check if user has permission to delete users
+        $this->requirePermission($request, null, 'can_delete');
         $user->delete();
 
         return redirect()->route('system.users.index')

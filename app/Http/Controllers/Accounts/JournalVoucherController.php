@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Accounts;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\CheckUserPermissions;
 use App\Services\AuditLogService;
 use App\Services\RecoveryService;
 use Illuminate\Http\Request;
@@ -12,11 +13,14 @@ use Inertia\Inertia;
 
 class JournalVoucherController extends Controller
 {
+    use CheckUserPermissions;
     /**
      * Display a listing of journal vouchers
      */
     public function index(Request $request)
     {
+        // Check if user has permission to can_view
+        $this->requirePermission($request, null, 'can_view');
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
@@ -102,6 +106,8 @@ class JournalVoucherController extends Controller
      */
     public function create(Request $request)
     {
+        // Check if user has permission to can_add
+        $this->requirePermission($request, null, 'can_add');
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
@@ -154,6 +160,8 @@ class JournalVoucherController extends Controller
      */
     public function store(Request $request)
     {
+        // Check if user has permission to can_add
+        $this->requirePermission($request, null, 'can_add');
         Log::info('=== JOURNAL VOUCHER STORE METHOD CALLED ===');
         Log::info('Request data:', $request->all());
         
@@ -396,6 +404,8 @@ class JournalVoucherController extends Controller
      */
     public function show(Request $request, $id)
     {
+        // Check if user has permission to can_view
+        $this->requirePermission($request, null, 'can_view');
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
@@ -441,6 +451,8 @@ class JournalVoucherController extends Controller
      */
     public function edit(Request $request, $id)
     {
+        // Check if user has permission to can_edit
+        $this->requirePermission($request, null, 'can_edit');
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
@@ -606,6 +618,8 @@ class JournalVoucherController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // Check if user has permission to can_edit
+        $this->requirePermission($request, null, 'can_edit');
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
@@ -1453,6 +1467,8 @@ class JournalVoucherController extends Controller
      */
     public function destroy(Request $request, $id)
     {
+        // Check if user has permission to can_delete
+        $this->requirePermission($request, null, 'can_delete');
         Log::info('=== JOURNAL VOUCHER DESTROY METHOD CALLED ===', ['voucher_id' => $id]);
         
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');

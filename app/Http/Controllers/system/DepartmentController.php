@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\system;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\CheckUserPermissions;
 use App\Models\Department;
 use App\Models\Company;
 use App\Models\Location;
@@ -13,6 +14,7 @@ use Inertia\Inertia;
 
 class DepartmentController extends Controller
 {
+    use CheckUserPermissions;
     private function rules($id = null): array
     {
         return [
@@ -35,6 +37,8 @@ class DepartmentController extends Controller
 
     public function index(Request $request)
     {
+        // Check if user has permission to view departments
+        $this->requirePermission($request, null, 'can_view');
         $query = Department::with(['company', 'location']);
 
         if ($request->filled('search')) {
@@ -66,8 +70,10 @@ class DepartmentController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        // Check if user has permission to create departments
+        $this->requirePermission($request, null, 'can_add');
         return Inertia::render('system/Departments/create', [
             'department' => null,
             'companies' => Company::where('status', true)->orderBy('company_name')->get(['id', 'company_name']),
@@ -79,6 +85,8 @@ class DepartmentController extends Controller
 
     public function store(Request $request)
     {
+        // Check if user has permission to create departments
+        $this->requirePermission($request, null, 'can_add');
         $validated = $request->validate($this->rules());
 
         if (!isset($validated['sort_order']) || $validated['sort_order'] === 0) {
@@ -104,6 +112,8 @@ class DepartmentController extends Controller
 
     public function update(Request $request, Department $department)
     {
+        // Check if user has permission to edit departments
+        $this->requirePermission($request, null, 'can_edit');
         $validated = $request->validate($this->rules($department->id));
         
         $validated['status'] = filter_var($validated['status'] ?? $department->status, FILTER_VALIDATE_BOOLEAN);
@@ -112,8 +122,10 @@ class DepartmentController extends Controller
         return redirect()->route('system.departments.index')->with('success', 'Department updated.');
     }
 
-    public function destroy(Department $department)
+    public function destroy(Request $request, Department $department)
     {
+        // Check if user has permission to delete departments
+        $this->requirePermission($request, null, 'can_delete');
         $name = $department->department_name;
         $department->delete();
         return redirect()->back()->with('success', 'Department "'.$name.'" deleted.');

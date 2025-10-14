@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Accounts;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\CheckUserPermissions;
 use App\Models\ChartOfAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,8 +13,12 @@ use Inertia\Inertia;
 
 class ChartOfAccountsController extends Controller
 {
+    use CheckUserPermissions;
     public function index(Request $request)
     {
+        // Check if user has permission to view chart of accounts
+        $this->requirePermission($request, null, 'can_view');
+        
         $userId = auth()->id();
         
         // Debug: Log the user ID
@@ -75,6 +80,9 @@ class ChartOfAccountsController extends Controller
      */
     public function store(Request $request)
     {
+        // Check if user has permission to add chart of accounts
+        $this->requirePermission($request, null, 'can_add');
+        
         try {
             // Get user information
             $userId = auth()->id();
@@ -169,6 +177,9 @@ class ChartOfAccountsController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // Check if user has permission to edit chart of accounts
+        $this->requirePermission($request, null, 'can_edit');
+        
         try {
             // Get user information
             $userId = auth()->id();
@@ -262,6 +273,9 @@ class ChartOfAccountsController extends Controller
      */
     public function destroy(Request $request, $id)
     {
+        // Check if user has permission to delete chart of accounts
+        $this->requirePermission($request, null, 'can_delete');
+        
         try {
             // Get user information
             $userId = auth()->id();

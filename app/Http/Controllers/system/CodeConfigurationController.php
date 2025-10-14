@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\system;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\CheckUserPermissions;
 use App\Models\CodeConfiguration;
 use App\Models\Company;
 use App\Models\Location;
@@ -16,6 +17,7 @@ use App\Helpers\CompanyHelper;
 
 class CodeConfigurationController extends Controller
 {
+    use CheckUserPermissions;
     protected $auditLogService;
 
     public function __construct(AuditLogService $auditLogService)
@@ -104,6 +106,8 @@ class CodeConfigurationController extends Controller
      */
     public function index(Request $request)
     {
+        // Check if user has permission to can_view
+        $this->requirePermission($request, null, 'can_view');
         // Only parent companies can access code configuration
         if (!CompanyHelper::isCurrentCompanyParent()) {
             return redirect()->route('dashboard')->with('error', 'Access denied. This feature is only available for parent companies.');
@@ -170,6 +174,8 @@ class CodeConfigurationController extends Controller
      */
     public function create()
     {
+        // Check if user has permission to can_add
+        $this->requirePermission($request, null, 'can_add');
         // Only parent companies can access code configuration
         if (!CompanyHelper::isCurrentCompanyParent()) {
             return redirect()->route('dashboard')->with('error', 'Access denied. This feature is only available for parent companies.');
@@ -198,6 +204,8 @@ class CodeConfigurationController extends Controller
      */
     public function store(Request $request)
     {
+        // Check if user has permission to can_add
+        $this->requirePermission($request, null, 'can_add');
         // Only parent companies can access code configuration
         if (!CompanyHelper::isCurrentCompanyParent()) {
             return redirect()->route('dashboard')->with('error', 'Access denied. This feature is only available for parent companies.');
@@ -270,6 +278,8 @@ class CodeConfigurationController extends Controller
      */
     public function show(CodeConfiguration $codeConfiguration)
     {
+        // Check if user has permission to can_view
+        $this->requirePermission($request, null, 'can_view');
         // Only parent companies can access code configuration
         if (!CompanyHelper::isCurrentCompanyParent()) {
             return redirect()->route('dashboard')->with('error', 'Access denied. This feature is only available for parent companies.');
@@ -287,6 +297,8 @@ class CodeConfigurationController extends Controller
      */
     public function edit(CodeConfiguration $codeConfiguration)
     {
+        // Check if user has permission to can_edit
+        $this->requirePermission($request, null, 'can_edit');
         // Only parent companies can access code configuration
         if (!CompanyHelper::isCurrentCompanyParent()) {
             return redirect()->route('dashboard')->with('error', 'Access denied. This feature is only available for parent companies.');
@@ -316,6 +328,8 @@ class CodeConfigurationController extends Controller
      */
     public function update(Request $request, CodeConfiguration $codeConfiguration)
     {
+        // Check if user has permission to can_edit
+        $this->requirePermission($request, null, 'can_edit');
         // Only parent companies can access code configuration
         if (!CompanyHelper::isCurrentCompanyParent()) {
             return redirect()->route('dashboard')->with('error', 'Access denied. This feature is only available for parent companies.');
@@ -390,6 +404,8 @@ class CodeConfigurationController extends Controller
      */
     public function destroy(CodeConfiguration $codeConfiguration)
     {
+        // Check if user has permission to can_delete
+        $this->requirePermission($request, null, 'can_delete');
         // Only parent companies can access code configuration
         if (!CompanyHelper::isCurrentCompanyParent()) {
             return redirect()->route('dashboard')->with('error', 'Access denied. This feature is only available for parent companies.');

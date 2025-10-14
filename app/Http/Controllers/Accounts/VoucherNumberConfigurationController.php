@@ -3,14 +3,18 @@
 namespace App\Http\Controllers\Accounts;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\CheckUserPermissions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class VoucherNumberConfigurationController extends Controller
 {
+    use CheckUserPermissions;
     public function index(Request $request)
     {
+        // Check if user has permission to can_view
+        $this->requirePermission($request, null, 'can_view');
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
@@ -52,11 +56,15 @@ class VoucherNumberConfigurationController extends Controller
 
     public function create(Request $request)
     {
+        // Check if user has permission to can_add
+        $this->requirePermission($request, null, 'can_add');
         return Inertia::render('Accounts/VoucherNumberConfiguration/create');
     }
 
     public function store(Request $request)
     {
+        // Check if user has permission to can_add
+        $this->requirePermission($request, null, 'can_add');
         $request->validate([
             'voucher_type' => 'required|string|max:255',
             'prefix' => 'required|string|max:10',
@@ -106,6 +114,8 @@ class VoucherNumberConfigurationController extends Controller
 
     public function edit(Request $request, $id)
     {
+        // Check if user has permission to can_edit
+        $this->requirePermission($request, null, 'can_edit');
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
 
@@ -133,6 +143,8 @@ class VoucherNumberConfigurationController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Check if user has permission to can_edit
+        $this->requirePermission($request, null, 'can_edit');
         $request->validate([
             'voucher_type' => 'required|string|max:255',
             'prefix' => 'required|string|max:10',
@@ -177,6 +189,8 @@ class VoucherNumberConfigurationController extends Controller
 
     public function show(Request $request, $id)
     {
+        // Check if user has permission to can_view
+        $this->requirePermission($request, null, 'can_view');
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
 

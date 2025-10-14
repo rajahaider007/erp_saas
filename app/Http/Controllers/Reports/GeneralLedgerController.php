@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\CheckUserPermissions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
@@ -11,11 +12,14 @@ use Carbon\Carbon;
 
 class GeneralLedgerController extends Controller
 {
+    use CheckUserPermissions;
     /**
      * Display the General Ledger report page
      */
     public function index()
     {
+        // Check if user has permission to can_view
+        $this->requirePermission($request, null, 'can_view');
         return Inertia::render('Reports/GeneralLedger/Index');
     }
 

@@ -13,12 +13,20 @@ class Kernel extends HttpKernel
      */
     protected $middlewareGroups = [
         'web' => [
-
             \App\Http\Middleware\TrackUserActivity::class,
         ],
 
         'api' => [
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
+    ];
+
+    /**
+     * The application's route middleware.
+     *
+     * @var array
+     */
+    protected $routeMiddleware = [
+        'check.permission' => \App\Http\Middleware\CheckPermission::class,
     ];
 }

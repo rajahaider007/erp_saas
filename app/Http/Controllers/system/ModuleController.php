@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\system;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\CheckUserPermissions;
 use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -13,6 +14,7 @@ use Inertia\Inertia;
 
 class ModuleController extends Controller
 {
+    use CheckUserPermissions;
     /**
      * Get validation rules for module
      */
@@ -143,6 +145,8 @@ class ModuleController extends Controller
      */
     public function index(Request $request)
     {
+        // Check if user has permission to view modules
+        $this->requirePermission($request, null, 'can_view');
         $query = Module::query();
 
         // Search functionality
@@ -202,8 +206,10 @@ class ModuleController extends Controller
     /**
      * Show the form for creating a new module
      */
-    public function create()
+    public function create(Request $request)
     {
+        // Check if user has permission to create modules
+        $this->requirePermission($request, null, 'can_add');
         return Inertia::render('system/AddModules/add');
     }
 
@@ -212,6 +218,8 @@ class ModuleController extends Controller
      */
     public function store(Request $request)
     {
+        // Check if user has permission to create modules
+        $this->requirePermission($request, null, 'can_add');
         try {
             $validated = $this->validateModuleData($request);
 
@@ -257,6 +265,8 @@ class ModuleController extends Controller
      */
     public function show(Module $module)
     {
+        // Check if user has permission to can_view
+        $this->requirePermission($request, null, 'can_view');
         // Add image URL
         if ($module->image) {
             $module->image_url = Storage::disk('public')->url($module->image);
@@ -272,6 +282,8 @@ class ModuleController extends Controller
      */
     public function edit(Module $module)
     {
+        // Check if user has permission to can_edit
+        $this->requirePermission($request, null, 'can_edit');
         // Add image URL
         if ($module->image) {
             $module->image_url = Storage::disk('public')->url($module->image);
@@ -287,6 +299,8 @@ class ModuleController extends Controller
      */
     public function update(Request $request, Module $module)
     {
+        // Check if user has permission to edit modules
+        $this->requirePermission($request, null, 'can_edit');
         try {
             $validated = $this->validateModuleData($request, $module->id);
 
@@ -330,8 +344,10 @@ class ModuleController extends Controller
     /**
      * Remove the specified module
      */
-    public function destroy(Module $module)
+    public function destroy(Request $request, Module $module)
     {
+        // Check if user has permission to delete modules
+        $this->requirePermission($request, null, 'can_delete');
         try {
             $moduleName = $module->module_name;
             

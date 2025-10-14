@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\system;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\CheckUserPermissions;
 use App\Models\Location;
 use App\Models\Company;
 use App\Helpers\CompanyHelper;
@@ -13,6 +14,7 @@ use Inertia\Inertia;
 
 class LocationController extends Controller
 {
+    use CheckUserPermissions;
     /**
      * Check if current user's company can access locations module
      */
@@ -47,6 +49,8 @@ class LocationController extends Controller
 
     public function index(Request $request)
     {
+        // Check if user has permission to view locations
+        $this->requirePermission($request, null, 'can_view');
         // Only parent companies can access Locations module
         if (!CompanyHelper::canManageParentSettings()) {
             return redirect()->route('dashboard')
@@ -80,8 +84,10 @@ class LocationController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        // Check if user has permission to create locations
+        $this->requirePermission($request, null, 'can_add');
         $this->checkAccess();
         
         return Inertia::render('system/Locations/create', [
@@ -94,6 +100,8 @@ class LocationController extends Controller
 
     public function store(Request $request)
     {
+        // Check if user has permission to create locations
+        $this->requirePermission($request, null, 'can_add');
         $this->checkAccess();
         
         $validated = $request->validate($this->rules());
@@ -122,6 +130,8 @@ class LocationController extends Controller
 
     public function update(Request $request, Location $location)
     {
+        // Check if user has permission to edit locations
+        $this->requirePermission($request, null, 'can_edit');
         $this->checkAccess();
         
         $validated = $request->validate($this->rules($location->id));
@@ -132,8 +142,10 @@ class LocationController extends Controller
         return redirect()->route('system.locations.index')->with('success', 'Location updated.');
     }
 
-    public function destroy(Location $location)
+    public function destroy(Request $request, Location $location)
     {
+        // Check if user has permission to delete locations
+        $this->requirePermission($request, null, 'can_delete');
         $this->checkAccess();
         
         $name = $location->location_name;
