@@ -8,8 +8,10 @@ use App\Models\User;
 use App\Models\Company;
 use App\Models\Location;
 use App\Models\Department;
+use App\Services\AuditLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -121,53 +123,84 @@ class UserController extends Controller
     {
         // Check if user has permission to add users
         $this->requirePermission($request, null, 'can_add');
-        $validator = Validator::make($request->all(), [
-            'fname' => 'required|string|max:100',
-            'mname' => 'nullable|string|max:100',
-            'lname' => 'required|string|max:100',
-            'email' => 'required|string|email|max:255|unique:tbl_users,email',
-            'phone' => 'nullable|string|max:20',
-            'loginid' => 'required|string|max:255|unique:tbl_users,loginid',
-            'pincode' => 'nullable|string|max:10',
-            'comp_id' => 'nullable|exists:companies,id',
-            'location_id' => 'nullable|exists:locations,id',
-            'dept_id' => 'nullable|exists:departments,id',
-            'password' => 'required|string|min:8|confirmed',
-            'status' => 'required|in:active,inactive,suspended,pending',
-            'timezone' => 'nullable|string|max:50',
-            'language' => 'nullable|string|max:10',
-            'currency' => 'nullable|string|max:10',
-            'theme' => 'nullable|in:light,dark,system',
-        ]);
+        Log::info('=== USER STORE METHOD CALLED ===');
+        Log::info('Request data:', $request->except(['password', 'password_confirmation']));
+        
+        try {
+            $validator = Validator::make($request->all(), [
+                'fname' => 'required|string|max:100',
+                'mname' => 'nullable|string|max:100',
+                'lname' => 'required|string|max:100',
+                'email' => 'required|string|email|max:255|unique:tbl_users,email',
+                'phone' => 'nullable|string|max:20',
+                'loginid' => 'required|string|max:255|unique:tbl_users,loginid',
+                'pincode' => 'nullable|string|max:10',
+                'comp_id' => 'nullable|exists:companies,id',
+                'location_id' => 'nullable|exists:locations,id',
+                'dept_id' => 'nullable|exists:departments,id',
+                'password' => 'required|string|min:8|confirmed',
+                'status' => 'required|in:active,inactive,suspended,pending',
+                'timezone' => 'nullable|string|max:50',
+                'language' => 'nullable|string|max:10',
+                'currency' => 'nullable|string|max:10',
+                'theme' => 'nullable|in:light,dark,system',
+            ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            if ($validator->fails()) {
+                Log::warning('User validation failed', [
+                    'errors' => $validator->errors(),
+                    'request_data' => $request->except(['password', 'password_confirmation'])
+                ]);
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            $userData = [
+                'fname' => $request->fname,
+                'mname' => $request->mname,
+                'lname' => $request->lname,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'loginid' => $request->loginid,
+                'pincode' => $request->pincode,
+                'comp_id' => $request->comp_id,
+                'location_id' => $request->location_id,
+                'dept_id' => $request->dept_id,
+                'password' => Hash::make($request->password),
+                'status' => $request->status,
+                'timezone' => $request->timezone ?? 'UTC',
+                'language' => $request->language ?? 'en',
+                'currency' => $request->currency ?? 'USD',
+                'theme' => $request->theme ?? 'system',
+                'created_by' => auth()->user()->loginid ?? 'system',
+            ];
+
+            $user = User::create($userData);
+
+            // Create audit log for the user creation
+            try {
+                AuditLogService::logUser('CREATE', $user->id, $user->toArray());
+                Log::info('Audit log created for user creation', ['user_id' => $user->id]);
+            } catch (\Exception $auditException) {
+                Log::warning('Failed to create audit log for user creation', [
+                    'user_id' => $user->id,
+                    'error' => $auditException->getMessage()
+                ]);
+            }
+
+            return redirect()->route('system.users.index')
+                ->with('success', 'User created successfully!');
+                
+        } catch (\Exception $e) {
+            Log::error('Error creating user', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->except(['password', 'password_confirmation'])
+            ]);
+            
+            return redirect()->back()->with('error', 'Something went wrong while creating the user. Please try again.');
         }
-
-        $user = User::create([
-            'fname' => $request->fname,
-            'mname' => $request->mname,
-            'lname' => $request->lname,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'loginid' => $request->loginid,
-            'pincode' => $request->pincode,
-            'comp_id' => $request->comp_id,
-            'location_id' => $request->location_id,
-            'dept_id' => $request->dept_id,
-            'password' => Hash::make($request->password),
-            'status' => $request->status,
-            'timezone' => $request->timezone ?? 'UTC',
-            'language' => $request->language ?? 'en',
-            'currency' => $request->currency ?? 'USD',
-            'theme' => $request->theme ?? 'system',
-            'created_by' => auth()->user()->loginid ?? 'system',
-        ]);
-
-        return redirect()->route('system.users.index')
-            ->with('success', 'User created successfully!');
     }
 
     /**
@@ -288,58 +321,92 @@ class UserController extends Controller
     {
         // Check if user has permission to edit users
         $this->requirePermission($request, null, 'can_edit');
-        $validator = Validator::make($request->all(), [
-            'fname' => 'required|string|max:100',
-            'mname' => 'nullable|string|max:100',
-            'lname' => 'required|string|max:100',
-            'email' => 'required|string|email|max:255|unique:tbl_users,email,' . $user->id,
-            'phone' => 'nullable|string|max:20',
-            'loginid' => 'required|string|max:255|unique:tbl_users,loginid,' . $user->id,
-            'pincode' => 'nullable|string|max:10',
-            'comp_id' => 'nullable|exists:companies,id',
-            'location_id' => 'nullable|exists:locations,id',
-            'dept_id' => 'nullable|exists:departments,id',
-            'password' => 'nullable|string|min:8|confirmed',
-            'status' => 'required|in:active,inactive,suspended,pending',
-            'timezone' => 'nullable|string|max:50',
-            'language' => 'nullable|string|max:10',
-            'currency' => 'nullable|string|max:10',
-            'theme' => 'nullable|in:light,dark,system',
-        ]);
+        Log::info('=== USER UPDATE METHOD CALLED ===', ['user_id' => $user->id]);
+        Log::info('Request data:', $request->except(['password', 'password_confirmation']));
+        
+        try {
+            $validator = Validator::make($request->all(), [
+                'fname' => 'required|string|max:100',
+                'mname' => 'nullable|string|max:100',
+                'lname' => 'required|string|max:100',
+                'email' => 'required|string|email|max:255|unique:tbl_users,email,' . $user->id,
+                'phone' => 'nullable|string|max:20',
+                'loginid' => 'required|string|max:255|unique:tbl_users,loginid,' . $user->id,
+                'pincode' => 'nullable|string|max:10',
+                'comp_id' => 'nullable|exists:companies,id',
+                'location_id' => 'nullable|exists:locations,id',
+                'dept_id' => 'nullable|exists:departments,id',
+                'password' => 'nullable|string|min:8|confirmed',
+                'status' => 'required|in:active,inactive,suspended,pending',
+                'timezone' => 'nullable|string|max:50',
+                'language' => 'nullable|string|max:10',
+                'currency' => 'nullable|string|max:10',
+                'theme' => 'nullable|in:light,dark,system',
+            ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            if ($validator->fails()) {
+                Log::warning('User update validation failed', [
+                    'errors' => $validator->errors(),
+                    'user_id' => $user->id,
+                    'request_data' => $request->except(['password', 'password_confirmation'])
+                ]);
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            // Store old data for audit log
+            $oldData = $user->toArray();
+
+            $updateData = [
+                'fname' => $request->fname,
+                'mname' => $request->mname,
+                'lname' => $request->lname,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'loginid' => $request->loginid,
+                'pincode' => $request->pincode,
+                'comp_id' => $request->comp_id,
+                'location_id' => $request->location_id,
+                'dept_id' => $request->dept_id,
+                'status' => $request->status,
+                'timezone' => $request->timezone ?? 'UTC',
+                'language' => $request->language ?? 'en',
+                'currency' => $request->currency ?? 'USD',
+                'theme' => $request->theme ?? 'system',
+                'updated_by' => auth()->user()->loginid ?? 'system',
+            ];
+
+            if ($request->filled('password')) {
+                $updateData['password'] = Hash::make($request->password);
+            }
+
+            $user->update($updateData);
+
+            // Create audit log for the user update
+            try {
+                AuditLogService::logUser('UPDATE', $user->id, $user->fresh()->toArray(), $oldData);
+                Log::info('Audit log created for user update', ['user_id' => $user->id]);
+            } catch (\Exception $auditException) {
+                Log::warning('Failed to create audit log for user update', [
+                    'user_id' => $user->id,
+                    'error' => $auditException->getMessage()
+                ]);
+            }
+
+            return redirect()->route('system.users.edit', $user)
+                ->with('success', 'User updated successfully!');
+                
+        } catch (\Exception $e) {
+            Log::error('Error updating user', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => $user->id,
+                'request_data' => $request->except(['password', 'password_confirmation'])
+            ]);
+            
+            return redirect()->back()->with('error', 'Something went wrong while updating the user. Please try again.');
         }
-
-        $updateData = [
-            'fname' => $request->fname,
-            'mname' => $request->mname,
-            'lname' => $request->lname,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'loginid' => $request->loginid,
-            'pincode' => $request->pincode,
-            'comp_id' => $request->comp_id,
-            'location_id' => $request->location_id,
-            'dept_id' => $request->dept_id,
-            'status' => $request->status,
-            'timezone' => $request->timezone ?? 'UTC',
-            'language' => $request->language ?? 'en',
-            'currency' => $request->currency ?? 'USD',
-            'theme' => $request->theme ?? 'system',
-            'updated_by' => auth()->user()->loginid ?? 'system',
-        ];
-
-        if ($request->filled('password')) {
-            $updateData['password'] = Hash::make($request->password);
-        }
-
-        $user->update($updateData);
-
-        return redirect()->route('system.users.edit', $user)
-            ->with('success', 'User updated successfully!');
     }
 
     /**
@@ -349,10 +416,37 @@ class UserController extends Controller
     {
         // Check if user has permission to delete users
         $this->requirePermission($request, null, 'can_delete');
-        $user->delete();
+        Log::info('=== USER DESTROY METHOD CALLED ===', ['user_id' => $user->id]);
+        
+        try {
+            // Store old data for audit log
+            $oldData = $user->toArray();
+            
+            $user->delete();
 
-        return redirect()->route('system.users.index')
-            ->with('success', 'User deleted successfully!');
+            // Create audit log for the user deletion
+            try {
+                AuditLogService::logUser('DELETE', $user->id, [], $oldData);
+                Log::info('Audit log created for user deletion', ['user_id' => $user->id]);
+            } catch (\Exception $auditException) {
+                Log::warning('Failed to create audit log for user deletion', [
+                    'user_id' => $user->id,
+                    'error' => $auditException->getMessage()
+                ]);
+            }
+
+            return redirect()->route('system.users.index')
+                ->with('success', 'User deleted successfully!');
+                
+        } catch (\Exception $e) {
+            Log::error('Error deleting user', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => $user->id
+            ]);
+            
+            return redirect()->back()->with('error', 'Something went wrong while deleting the user. Please try again.');
+        }
     }
 
     /**

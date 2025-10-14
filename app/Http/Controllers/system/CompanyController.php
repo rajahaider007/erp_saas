@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\CheckUserPermissions;
 use App\Models\Company;
 use App\Helpers\CompanyHelper;
+use App\Services\AuditLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -106,44 +107,74 @@ class CompanyController extends Controller
     {
         // Check if user has permission to create companies
         $this->requirePermission($request, null, 'can_add');
-        $validated = $request->validate($this->validationRules());
+        Log::info('=== COMPANY STORE METHOD CALLED ===');
+        Log::info('Request data:', $request->all());
+        
+        try {
+            $validated = $request->validate($this->validationRules());
 
-        // Customer companies cannot set restricted fields
-        if (CompanyHelper::isCurrentCompanyCustomer()) {
-            foreach (CompanyHelper::getRestrictedFieldsForCustomer() as $field) {
-                unset($validated[$field]);
+            // Customer companies cannot set restricted fields
+            if (CompanyHelper::isCurrentCompanyCustomer()) {
+                foreach (CompanyHelper::getRestrictedFieldsForCustomer() as $field) {
+                    unset($validated[$field]);
+                }
             }
-        }
 
-        // Generate company code if not provided
-        if (empty($validated['company_code'])) {
-            $validated['company_code'] = strtoupper(substr($validated['company_name'], 0, 3)) . rand(1000, 9999);
-        }
-
-        // Handle file upload
-        if ($request->hasFile('logo')) {
-            $validated['logo'] = $request->file('logo')->store('companies/logos', 'public');
-        }
-
-        // Set default license dates if not provided (only for parent companies)
-        if (CompanyHelper::isCurrentCompanyParent()) {
-            if (!isset($validated['license_start_date'])) {
-                $validated['license_start_date'] = now();
+            // Generate company code if not provided
+            if (empty($validated['company_code'])) {
+                $validated['company_code'] = strtoupper(substr($validated['company_name'], 0, 3)) . rand(1000, 9999);
             }
+
+            // Handle file upload
+            if ($request->hasFile('logo')) {
+                $validated['logo'] = $request->file('logo')->store('companies/logos', 'public');
+            }
+
+            // Set default license dates if not provided (only for parent companies)
+            if (CompanyHelper::isCurrentCompanyParent()) {
+                if (!isset($validated['license_start_date'])) {
+                    $validated['license_start_date'] = now();
+                }
+                
+                if (!isset($validated['license_end_date'])) {
+                    $validated['license_end_date'] = now()->addYear();
+                }
+            }
+
+            // Set created_by
+            $validated['created_by'] = auth()->id();
+
+            $company = Company::create($validated);
+
+            // Create audit log for the company creation
+            try {
+                AuditLogService::logCompany('CREATE', $company->id, $company->toArray());
+                Log::info('Audit log created for company creation', ['company_id' => $company->id]);
+            } catch (\Exception $auditException) {
+                Log::warning('Failed to create audit log for company creation', [
+                    'company_id' => $company->id,
+                    'error' => $auditException->getMessage()
+                ]);
+            }
+
+            return redirect()->route('system.companies.index')
+                            ->with('success', 'Company "' . $company->company_name . '" registered successfully!');
+                            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Company validation failed', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Error creating company', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
             
-            if (!isset($validated['license_end_date'])) {
-                $validated['license_end_date'] = now()->addYear();
-            }
+            return redirect()->back()->with('error', 'Something went wrong while creating the company. Please try again.');
         }
-
-        // Set created_by
-        $validated['created_by'] = auth()->id();
-
-        $company = Company::create($validated);
-
-
-        return redirect()->route('system.companies.index')
-                        ->with('success', 'Company "' . $company->company_name . '" registered successfully!');
     }
 
     /**
@@ -184,38 +215,73 @@ class CompanyController extends Controller
     {
         // Check if user has permission to edit companies
         $this->requirePermission($request, null, 'can_edit');
-        $validated = $request->validate($this->validationRules($company->id));
+        Log::info('=== COMPANY UPDATE METHOD CALLED ===', ['company_id' => $company->id]);
+        Log::info('Request data:', $request->all());
+        
+        try {
+            $validated = $request->validate($this->validationRules($company->id));
 
-        // Customer companies cannot update restricted fields
-        if (CompanyHelper::isCurrentCompanyCustomer()) {
-            foreach (CompanyHelper::getRestrictedFieldsForCustomer() as $field) {
-                unset($validated[$field]);
+            // Customer companies cannot update restricted fields
+            if (CompanyHelper::isCurrentCompanyCustomer()) {
+                foreach (CompanyHelper::getRestrictedFieldsForCustomer() as $field) {
+                    unset($validated[$field]);
+                }
+                
+                // Also ensure customer companies can only edit their own company
+                if ($company->id != session('user_comp_id')) {
+                    return redirect()->back()
+                        ->with('error', 'You do not have permission to edit this company.');
+                }
             }
+
+            // Store old data for audit log
+            $oldData = $company->toArray();
+
+            // Handle file upload
+            if ($request->hasFile('logo')) {
+                // Delete old logo if exists
+                if ($company->logo && Storage::disk('public')->exists($company->logo)) {
+                    Storage::disk('public')->delete($company->logo);
+                }
+                $validated['logo'] = $request->file('logo')->store('companies/logos', 'public');
+            }
+
+            // Set updated_by
+            $validated['updated_by'] = auth()->id();
+
+            $company->update($validated);
+
+            // Create audit log for the company update
+            try {
+                AuditLogService::logCompany('UPDATE', $company->id, $company->fresh()->toArray(), $oldData);
+                Log::info('Audit log created for company update', ['company_id' => $company->id]);
+            } catch (\Exception $auditException) {
+                Log::warning('Failed to create audit log for company update', [
+                    'company_id' => $company->id,
+                    'error' => $auditException->getMessage()
+                ]);
+            }
+
+            return redirect()->route('system.companies.index')
+                            ->with('success', 'Company "' . $company->company_name . '" updated successfully!');
+                            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Company update validation failed', [
+                'errors' => $e->errors(),
+                'company_id' => $company->id,
+                'request_data' => $request->all()
+            ]);
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Error updating company', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'company_id' => $company->id,
+                'request_data' => $request->all()
+            ]);
             
-            // Also ensure customer companies can only edit their own company
-            if ($company->id != session('user_comp_id')) {
-                return redirect()->back()
-                    ->with('error', 'You do not have permission to edit this company.');
-            }
+            return redirect()->back()->with('error', 'Something went wrong while updating the company. Please try again.');
         }
-
-        // Handle file upload
-        if ($request->hasFile('logo')) {
-            // Delete old logo if exists
-            if ($company->logo && Storage::disk('public')->exists($company->logo)) {
-                Storage::disk('public')->delete($company->logo);
-            }
-            $validated['logo'] = $request->file('logo')->store('companies/logos', 'public');
-        }
-
-        // Set updated_by
-        $validated['updated_by'] = auth()->id();
-
-        $company->update($validated);
-
-
-        return redirect()->route('system.companies.index')
-                        ->with('success', 'Company "' . $company->company_name . '" updated successfully!');
     }
 
     /**
@@ -225,8 +291,13 @@ class CompanyController extends Controller
     {
         // Check if user has permission to delete companies
         $this->requirePermission($request, null, 'can_delete');
+        Log::info('=== COMPANY DESTROY METHOD CALLED ===', ['company_id' => $company->id]);
+        
         try {
             $companyName = $company->company_name;
+            
+            // Store old data for audit log
+            $oldData = $company->toArray();
             
             // Delete associated logo
             if ($company->logo && Storage::disk('public')->exists($company->logo)) {
@@ -234,6 +305,17 @@ class CompanyController extends Controller
             }
 
             $company->delete();
+
+            // Create audit log for the company deletion
+            try {
+                AuditLogService::logCompany('DELETE', $company->id, [], $oldData);
+                Log::info('Audit log created for company deletion', ['company_id' => $company->id]);
+            } catch (\Exception $auditException) {
+                Log::warning('Failed to create audit log for company deletion', [
+                    'company_id' => $company->id,
+                    'error' => $auditException->getMessage()
+                ]);
+            }
 
             return redirect()->route('system.companies.index')
                            ->with('success', 'Company "' . $companyName . '" deleted successfully!');

@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Accounts;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\CheckUserPermissions;
 use App\Helpers\CompanyHelper;
+use App\Services\AuditLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,6 +20,9 @@ class CurrencyLedgerController extends Controller
      */
     public function index(Request $request): Response
     {
+        Log::info('=== CURRENCY LEDGER INDEX METHOD CALLED ===');
+        Log::info('Request data:', $request->all());
+        
         // For parent companies, allow company/location selection
         // For customer companies, use their session company/location
         $isParentCompany = CompanyHelper::isCurrentCompanyParent();
@@ -215,6 +220,35 @@ class CurrencyLedgerController extends Controller
 
         // Get company details
         $company = DB::table('companies')->where('id', $compId)->first();
+
+        // Log report generation
+        try {
+            $reportData = [
+                'report_type' => 'Currency Ledger Report',
+                'report_name' => 'Currency Ledger',
+                'account_id' => $accountId,
+                'from_date' => $fromDate,
+                'to_date' => $toDate,
+                'currency_code' => $currencyCode,
+                'voucher_type' => $voucherType,
+                'status' => $status,
+                'total_accounts' => count($accountsList),
+                'total_transactions' => $ledgerData->count(),
+                'grand_total_debit' => $grandTotalDebit,
+                'grand_total_credit' => $grandTotalCredit,
+                'comp_id' => $compId,
+                'location_id' => $locationId
+            ];
+            
+            AuditLogService::logReport('VIEW', null, $reportData);
+            Log::info('Currency Ledger report generated successfully', $reportData);
+        } catch (\Exception $auditException) {
+            Log::warning('Failed to create audit log for currency ledger report', [
+                'error' => $auditException->getMessage(),
+                'comp_id' => $compId,
+                'location_id' => $locationId
+            ]);
+        }
 
         return Inertia::render('Accounts/CurrencyLedger/Report', [
             'groupedData' => $groupedData,
@@ -488,6 +522,9 @@ class CurrencyLedgerController extends Controller
      */
     public function exportExcel(Request $request)
     {
+        Log::info('=== CURRENCY LEDGER EXPORT EXCEL METHOD CALLED ===');
+        Log::info('Request data:', $request->all());
+        
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
@@ -689,6 +726,35 @@ class CurrencyLedgerController extends Controller
         }
 
         $filename = 'currency_ledger_' . ($account ? $account->account_code : 'all') . '_' . now()->format('Y_m_d_H_i_s') . '.csv';
+
+        // Log export activity
+        try {
+            $exportData = [
+                'report_type' => 'Currency Ledger Export',
+                'report_name' => 'Currency Ledger Excel Export',
+                'export_format' => 'CSV/Excel',
+                'filename' => $filename,
+                'account_id' => $accountId,
+                'from_date' => $fromDate,
+                'to_date' => $toDate,
+                'total_accounts' => count($accountsList),
+                'total_transactions' => $ledgerData->count(),
+                'grand_total_debit' => $grandTotalDebit,
+                'grand_total_credit' => $grandTotalCredit,
+                'comp_id' => $compId,
+                'location_id' => $locationId
+            ];
+            
+            AuditLogService::logReport('EXPORT', null, $exportData);
+            Log::info('Currency Ledger Excel export completed successfully', $exportData);
+        } catch (\Exception $auditException) {
+            Log::warning('Failed to create audit log for currency ledger export', [
+                'error' => $auditException->getMessage(),
+                'filename' => $filename,
+                'comp_id' => $compId,
+                'location_id' => $locationId
+            ]);
+        }
 
         return response($csvContent)
             ->header('Content-Type', 'text/csv')

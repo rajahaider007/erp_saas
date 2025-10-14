@@ -14,6 +14,7 @@ use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cookie;
+use App\Services\AuditLogService;
 
 class LoginController extends Controller
 {
@@ -30,6 +31,9 @@ class LoginController extends Controller
      */
     public function login(Request $request)
     {
+        Log::info('=== LOGIN ATTEMPT STARTED ===');
+        Log::info('Login request data:', $request->except(['password']));
+        
         try {
         
             $validated = $request->validate([
@@ -42,6 +46,27 @@ class LoginController extends Controller
 
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 $seconds = RateLimiter::availableIn($key);
+                
+                // Log rate limiting
+                try {
+                    AuditLogService::logAuthentication('LOGIN_RATE_LIMITED', null, [
+                        'email' => $validated['email'],
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->header('User-Agent'),
+                        'seconds_remaining' => $seconds,
+                        'attempts' => 5
+                    ]);
+                    Log::warning('Login rate limited', [
+                        'email' => $validated['email'],
+                        'ip' => $request->ip(),
+                        'seconds_remaining' => $seconds
+                    ]);
+                } catch (\Exception $auditException) {
+                    Log::warning('Failed to create audit log for rate limiting', [
+                        'error' => $auditException->getMessage()
+                    ]);
+                }
+                
                 return back()->withErrors([
                     'email' => "Too many attempts. Try again in {$seconds} seconds."
                 ]);
@@ -57,12 +82,52 @@ class LoginController extends Controller
 
             if (!$user) {
                 RateLimiter::hit($key);
+                
+                // Log failed login attempt - user not found
+                try {
+                    AuditLogService::logAuthentication('LOGIN_FAILED', null, [
+                        'email' => $validated['email'],
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->header('User-Agent'),
+                        'reason' => 'User not found',
+                        'attempt_count' => RateLimiter::attempts($key)
+                    ]);
+                    Log::warning('Login failed - user not found', [
+                        'email' => $validated['email'],
+                        'ip' => $request->ip()
+                    ]);
+                } catch (\Exception $auditException) {
+                    Log::warning('Failed to create audit log for failed login', [
+                        'error' => $auditException->getMessage()
+                    ]);
+                }
+                
                 return back()->withErrors([
                     'email' => 'These credentials do not match our records.'
                 ]);
             }
 
             if ($user->locked_until && Carbon::parse($user->locked_until)->isFuture()) {
+                // Log account locked attempt
+                try {
+                    AuditLogService::logAuthentication('LOGIN_FAILED', $user->id, [
+                        'email' => $validated['email'],
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->header('User-Agent'),
+                        'reason' => 'Account locked',
+                        'locked_until' => $user->locked_until
+                    ]);
+                    Log::warning('Login failed - account locked', [
+                        'user_id' => $user->id,
+                        'email' => $validated['email'],
+                        'locked_until' => $user->locked_until
+                    ]);
+                } catch (\Exception $auditException) {
+                    Log::warning('Failed to create audit log for locked account', [
+                        'error' => $auditException->getMessage()
+                    ]);
+                }
+                
                 return back()->withErrors([
                     'email' => 'Account is temporarily locked. Please try again later.'
                 ]);
@@ -71,6 +136,27 @@ class LoginController extends Controller
             if (!Hash::check($validated['password'], $user->password)) {
                 $this->handleFailedLogin($user->id);
                 RateLimiter::hit($key);
+                
+                // Log failed login attempt - wrong password
+                try {
+                    AuditLogService::logAuthentication('LOGIN_FAILED', $user->id, [
+                        'email' => $validated['email'],
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->header('User-Agent'),
+                        'reason' => 'Wrong password',
+                        'attempt_count' => RateLimiter::attempts($key)
+                    ]);
+                    Log::warning('Login failed - wrong password', [
+                        'user_id' => $user->id,
+                        'email' => $validated['email'],
+                        'ip' => $request->ip()
+                    ]);
+                } catch (\Exception $auditException) {
+                    Log::warning('Failed to create audit log for wrong password', [
+                        'error' => $auditException->getMessage()
+                    ]);
+                }
+                
                 return back()->withErrors([
                     'password' => 'The provided password is incorrect.'
                 ]);
@@ -120,6 +206,31 @@ class LoginController extends Controller
             $request->session()->put('user_comp_id', $user->comp_id);
             $request->session()->put('user_location_id', $user->location_id);
             $this->logLoginHistory($user->id, $request);
+
+            // Log successful login
+            try {
+                AuditLogService::logAuthentication('LOGIN_SUCCESS', $user->id, [
+                    'email' => $validated['email'],
+                    'login_id' => $user->loginid,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->header('User-Agent'),
+                    'remember_me' => $validated['remember_me'] ?? false,
+                    'session_id' => Session::getId(),
+                    'comp_id' => $user->comp_id,
+                    'location_id' => $user->location_id,
+                    'last_login_at' => $user->last_login_at
+                ]);
+                Log::info('Login successful', [
+                    'user_id' => $user->id,
+                    'email' => $validated['email'],
+                    'ip' => $request->ip()
+                ]);
+            } catch (\Exception $auditException) {
+                Log::warning('Failed to create audit log for successful login', [
+                    'user_id' => $user->id,
+                    'error' => $auditException->getMessage()
+                ]);
+            }
 
             // Set remember me cookie
             if ($rememberToken) {
@@ -264,8 +375,13 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
+        Log::info('=== LOGOUT ATTEMPT STARTED ===');
+        
         try {
             $token = $request->session()->get('auth_token');
+            $userId = $request->session()->get('user_id');
+            $compId = $request->session()->get('user_comp_id');
+            $locationId = $request->session()->get('user_location_id');
 
             if ($token) {
                 $hashedToken = hash('sha256', $token);
@@ -280,8 +396,29 @@ class LoginController extends Controller
                     ]);
             }
 
+            // Log logout
+            try {
+                AuditLogService::logAuthentication('LOGOUT', $userId, [
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->header('User-Agent'),
+                    'session_id' => $request->session()->getId(),
+                    'comp_id' => $compId,
+                    'location_id' => $locationId,
+                    'logout_time' => Carbon::now()
+                ]);
+                Log::info('Logout successful', [
+                    'user_id' => $userId,
+                    'ip' => $request->ip()
+                ]);
+            } catch (\Exception $auditException) {
+                Log::warning('Failed to create audit log for logout', [
+                    'user_id' => $userId,
+                    'error' => $auditException->getMessage()
+                ]);
+            }
+
             // Clear session
-            $request->session()->forget(['auth_token', 'user_id']);
+            $request->session()->forget(['auth_token', 'user_id', 'user_comp_id', 'user_location_id']);
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 

@@ -7,8 +7,10 @@ use App\Http\Traits\CheckUserPermissions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use App\Services\AuditLogService;
 
 class GeneralLedgerController extends Controller
 {
@@ -28,6 +30,8 @@ class GeneralLedgerController extends Controller
      */
     public function getData(Request $request)
     {
+        Log::info('=== GENERAL LEDGER REPORT REQUEST STARTED ===');
+        
         $filters = $request->validate([
             'date_from' => 'nullable|date',
             'date_to' => 'nullable|date',
@@ -58,6 +62,39 @@ class GeneralLedgerController extends Controller
         try {
             $reportData = $this->generateReportData($filters);
             
+            // Log report generation
+            try {
+                $userId = session('user_id');
+                $compId = session('user_comp_id');
+                $locationId = session('user_location_id');
+                
+                $reportDataForLog = [
+                    'report_type' => 'General Ledger Report',
+                    'report_name' => 'General Ledger',
+                    'date_from' => $filters['date_from'],
+                    'date_to' => $filters['date_to'],
+                    'account_codes_count' => count($filters['account_codes'] ?? []),
+                    'account_types_count' => count($filters['account_types'] ?? []),
+                    'currency' => $filters['currency'],
+                    'include_zero_balances' => $filters['include_zero_balances'],
+                    'show_details' => $filters['show_details'],
+                    'group_by' => $filters['group_by'],
+                    'sort_by' => $filters['sort_by'],
+                    'sort_order' => $filters['sort_order'],
+                    'total_records' => count($reportData),
+                    'comp_id' => $compId,
+                    'location_id' => $locationId
+                ];
+                
+                AuditLogService::logReport('VIEW', null, $reportDataForLog);
+                Log::info('General Ledger report generated successfully', $reportDataForLog);
+            } catch (\Exception $auditException) {
+                Log::warning('Failed to create audit log for general ledger report', [
+                    'error' => $auditException->getMessage(),
+                    'filters' => $filters
+                ]);
+            }
+            
             return response()->json([
                 'success' => true,
                 'report' => $reportData,
@@ -65,7 +102,11 @@ class GeneralLedgerController extends Controller
                 'generated_at' => now()->toISOString()
             ]);
         } catch (\Exception $e) {
-            \Log::error('General Ledger Report Error: ' . $e->getMessage());
+            Log::error('General Ledger Report Error: ' . $e->getMessage(), [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'filters' => $filters
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Error generating report: ' . $e->getMessage()
@@ -204,20 +245,60 @@ class GeneralLedgerController extends Controller
      */
     public function exportPDF(Request $request)
     {
-        $filters = $request->input('filters', []);
-        $visibleColumns = $request->input('visibleColumns', []);
+        Log::info('=== GENERAL LEDGER PDF EXPORT STARTED ===');
         
-        // Generate report data
-        $reportData = $this->generateReportData($filters);
-        
-        // Create PDF using a PDF library (e.g., DomPDF, TCPDF, etc.)
-        // This is a placeholder - you'll need to implement actual PDF generation
-        $pdf = $this->generatePDF($reportData, $filters, $visibleColumns);
-        
-        return response($pdf, 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="General_Ledger_Report.pdf"'
-        ]);
+        try {
+            $filters = $request->input('filters', []);
+            $visibleColumns = $request->input('visibleColumns', []);
+            
+            // Generate report data
+            $reportData = $this->generateReportData($filters);
+            
+            // Log PDF export
+            try {
+                $userId = session('user_id');
+                $compId = session('user_comp_id');
+                $locationId = session('user_location_id');
+                
+                $exportData = [
+                    'report_type' => 'General Ledger Report',
+                    'export_format' => 'PDF',
+                    'date_from' => $filters['date_from'] ?? null,
+                    'date_to' => $filters['date_to'] ?? null,
+                    'total_records' => count($reportData),
+                    'visible_columns' => $visibleColumns,
+                    'comp_id' => $compId,
+                    'location_id' => $locationId
+                ];
+                
+                AuditLogService::logReport('EXPORT', null, $exportData);
+                Log::info('General Ledger PDF export successful', $exportData);
+            } catch (\Exception $auditException) {
+                Log::warning('Failed to create audit log for PDF export', [
+                    'error' => $auditException->getMessage()
+                ]);
+            }
+            
+            // Create PDF using a PDF library (e.g., DomPDF, TCPDF, etc.)
+            // This is a placeholder - you'll need to implement actual PDF generation
+            $pdf = $this->generatePDF($reportData, $filters, $visibleColumns);
+            
+            return response($pdf, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="General_Ledger_Report.pdf"'
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('General Ledger PDF export error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error exporting PDF: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -225,20 +306,60 @@ class GeneralLedgerController extends Controller
      */
     public function exportExcel(Request $request)
     {
-        $filters = $request->input('filters', []);
-        $visibleColumns = $request->input('visibleColumns', []);
+        Log::info('=== GENERAL LEDGER EXCEL EXPORT STARTED ===');
         
-        // Generate report data
-        $reportData = $this->generateReportData($filters);
-        
-        // Create Excel file using a library like PhpSpreadsheet
-        // This is a placeholder - you'll need to implement actual Excel generation
-        $excel = $this->generateExcel($reportData, $filters, $visibleColumns);
-        
-        return response($excel, 200, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => 'attachment; filename="General_Ledger_Report.xlsx"'
-        ]);
+        try {
+            $filters = $request->input('filters', []);
+            $visibleColumns = $request->input('visibleColumns', []);
+            
+            // Generate report data
+            $reportData = $this->generateReportData($filters);
+            
+            // Log Excel export
+            try {
+                $userId = session('user_id');
+                $compId = session('user_comp_id');
+                $locationId = session('user_location_id');
+                
+                $exportData = [
+                    'report_type' => 'General Ledger Report',
+                    'export_format' => 'Excel',
+                    'date_from' => $filters['date_from'] ?? null,
+                    'date_to' => $filters['date_to'] ?? null,
+                    'total_records' => count($reportData),
+                    'visible_columns' => $visibleColumns,
+                    'comp_id' => $compId,
+                    'location_id' => $locationId
+                ];
+                
+                AuditLogService::logReport('EXPORT', null, $exportData);
+                Log::info('General Ledger Excel export successful', $exportData);
+            } catch (\Exception $auditException) {
+                Log::warning('Failed to create audit log for Excel export', [
+                    'error' => $auditException->getMessage()
+                ]);
+            }
+            
+            // Create Excel file using a library like PhpSpreadsheet
+            // This is a placeholder - you'll need to implement actual Excel generation
+            $excel = $this->generateExcel($reportData, $filters, $visibleColumns);
+            
+            return response($excel, 200, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="General_Ledger_Report.xlsx"'
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('General Ledger Excel export error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error exporting Excel: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -246,19 +367,59 @@ class GeneralLedgerController extends Controller
      */
     public function exportCSV(Request $request)
     {
-        $filters = $request->input('filters', []);
-        $visibleColumns = $request->input('visibleColumns', []);
+        Log::info('=== GENERAL LEDGER CSV EXPORT STARTED ===');
         
-        // Generate report data
-        $reportData = $this->generateReportData($filters);
-        
-        // Create CSV
-        $csv = $this->generateCSV($reportData, $filters, $visibleColumns);
-        
-        return response($csv, 200, [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="General_Ledger_Report.csv"'
-        ]);
+        try {
+            $filters = $request->input('filters', []);
+            $visibleColumns = $request->input('visibleColumns', []);
+            
+            // Generate report data
+            $reportData = $this->generateReportData($filters);
+            
+            // Log CSV export
+            try {
+                $userId = session('user_id');
+                $compId = session('user_comp_id');
+                $locationId = session('user_location_id');
+                
+                $exportData = [
+                    'report_type' => 'General Ledger Report',
+                    'export_format' => 'CSV',
+                    'date_from' => $filters['date_from'] ?? null,
+                    'date_to' => $filters['date_to'] ?? null,
+                    'total_records' => count($reportData),
+                    'visible_columns' => $visibleColumns,
+                    'comp_id' => $compId,
+                    'location_id' => $locationId
+                ];
+                
+                AuditLogService::logReport('EXPORT', null, $exportData);
+                Log::info('General Ledger CSV export successful', $exportData);
+            } catch (\Exception $auditException) {
+                Log::warning('Failed to create audit log for CSV export', [
+                    'error' => $auditException->getMessage()
+                ]);
+            }
+            
+            // Create CSV
+            $csv = $this->generateCSV($reportData, $filters, $visibleColumns);
+            
+            return response($csv, 200, [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="General_Ledger_Report.csv"'
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('General Ledger CSV export error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error exporting CSV: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

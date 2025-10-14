@@ -28,10 +28,48 @@ const Select2 = ({
   const containerRef = useRef(null);
   const searchInputRef = useRef(null);
   const optionsListRef = useRef(null);
+  const scrollTimeoutRef = useRef(null);
+  const lastScrollPosition = useRef({ x: 0, y: 0 });
+
+  // Function to scroll to highlighted item
+  const scrollToHighlightedItem = (index) => {
+    if (optionsListRef.current) {
+      const container = optionsListRef.current;
+      const options = container.children;
+      if (options && options[index]) {
+        const optionElement = options[index];
+        const containerRect = container.getBoundingClientRect();
+        const optionRect = optionElement.getBoundingClientRect();
+        
+        // Check if option is visible
+        const isVisible = optionRect.top >= containerRect.top && 
+                         optionRect.bottom <= containerRect.bottom;
+        
+        if (!isVisible) {
+          optionElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'nearest'
+          });
+        }
+      }
+    }
+  };
   
   // Generate unique ID if not provided
   const componentId = useRef(id || `select2-${Math.random().toString(36).substr(2, 9)}`);
   const uniqueId = componentId.current;
+
+  // Reset scroll position when dropdown opens
+  useEffect(() => {
+    if (isOpen && optionsListRef.current) {
+      setTimeout(() => {
+        if (optionsListRef.current) {
+          optionsListRef.current.scrollTop = 0;
+        }
+      }, 50);
+    }
+  }, [isOpen]);
 
   // Filter options based on search term
   const filteredOptions = options.filter(option => {
@@ -50,7 +88,7 @@ const Select2 = ({
     }
   }, [value, multiple]);
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside and handle scroll/resize
   useEffect(() => {
     const handleClickOutside = (event) => {
       // Don't close if clicking on the dropdown portal
@@ -72,26 +110,115 @@ const Select2 = ({
       }
     };
 
+    const handleScrollResize = () => {
+      if (isOpen && containerRef.current) {
+        // Clear existing timeout
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
+        
+        // Debounce scroll events to prevent excessive recalculations
+        scrollTimeoutRef.current = setTimeout(() => {
+          if (!isOpen || !containerRef.current) return;
+          
+          const rect = containerRef.current.getBoundingClientRect();
+          const viewportHeight = window.innerHeight;
+          const viewportWidth = window.innerWidth;
+          const dropdownHeight = 240;
+          const gap = 4;
+          const padding = 8;
+          
+          // Check if position actually needs to be updated
+          const currentScrollX = window.scrollX;
+          const currentScrollY = window.scrollY;
+          const scrollDelta = Math.abs(currentScrollX - lastScrollPosition.current.x) + 
+                             Math.abs(currentScrollY - lastScrollPosition.current.y);
+          
+          // Only update if scroll delta is significant (more than 5px)
+          if (scrollDelta < 5) return;
+          
+          lastScrollPosition.current = { x: currentScrollX, y: currentScrollY };
+          
+          const spaceBelow = viewportHeight - rect.bottom;
+          const spaceAbove = rect.top;
+          const shouldPositionAbove = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+          
+          let top, left, width;
+          
+          if (shouldPositionAbove) {
+            top = Math.max(padding, rect.top + window.scrollY - dropdownHeight - gap);
+          } else {
+            top = Math.min(viewportHeight - dropdownHeight - padding, rect.bottom + window.scrollY + gap);
+          }
+          
+          left = Math.max(padding, Math.min(rect.left + window.scrollX, viewportWidth - rect.width - padding));
+          width = Math.min(rect.width, viewportWidth - (padding * 2));
+          width = Math.max(width, 200);
+          
+          setDropdownPosition({ top, left, width });
+        }, 16); // ~60fps debouncing
+      }
+    };
+
     // Use click instead of mousedown to avoid interfering with input focus
     document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
+    window.addEventListener('scroll', handleScrollResize, { passive: true, capture: true });
+    window.addEventListener('resize', handleScrollResize, { passive: true });
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      window.removeEventListener('scroll', handleScrollResize, true);
+      window.removeEventListener('resize', handleScrollResize);
+      
+      // Clear any pending scroll timeout
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [isOpen]);
 
   // Reset highlighted index when dropdown opens
   useEffect(() => {
     if (isOpen) {
       setHighlightedIndex(-1);
       
-      // Calculate dropdown position
+      // Calculate dropdown position with improved positioning logic
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        const position = {
-          top: rect.bottom + window.scrollY + 4, // Add small gap below the select field
-          left: rect.left + window.scrollX,
-          width: rect.width
-        };
-        // console.log('Dropdown position calculated:', position);
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        const dropdownHeight = 240; // Approximate dropdown height
+        const gap = 4;
+        const padding = 8; // Minimum padding from viewport edges
+        
+        // Calculate if dropdown should appear above or below
+        const spaceBelow = viewportHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        const shouldPositionAbove = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+        
+        // Calculate position
+        let top, left, width;
+        
+        if (shouldPositionAbove) {
+          // Position above the input
+          top = Math.max(padding, rect.top + window.scrollY - dropdownHeight - gap);
+        } else {
+          // Position below the input (default)
+          top = Math.min(viewportHeight - dropdownHeight - padding, rect.bottom + window.scrollY + gap);
+        }
+        
+        // Ensure dropdown doesn't go off-screen horizontally
+        left = Math.max(padding, Math.min(rect.left + window.scrollX, viewportWidth - rect.width - padding));
+        width = Math.min(rect.width, viewportWidth - (padding * 2));
+        
+        // Ensure minimum width
+        width = Math.max(width, 200);
+        
+        const position = { top, left, width };
         setDropdownPosition(position);
+        
+        // Initialize scroll position tracking
+        lastScrollPosition.current = { x: window.scrollX, y: window.scrollY };
       }
     }
   }, [isOpen]);
@@ -177,6 +304,41 @@ const Select2 = ({
       }
     }
     
+    // Handle arrow keys for navigation when dropdown is open
+    if (isOpen && !searchable) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (filteredOptions.length > 0) {
+          setHighlightedIndex(prev => {
+            const nextIndex = prev + 1;
+            const newIndex = nextIndex < filteredOptions.length ? nextIndex : 0;
+            
+            // Scroll to highlight the item
+            setTimeout(() => {
+              scrollToHighlightedItem(newIndex);
+            }, 0);
+            
+            return newIndex;
+          });
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (filteredOptions.length > 0) {
+          setHighlightedIndex(prev => {
+            const prevIndex = prev - 1;
+            const newIndex = prevIndex >= 0 ? prevIndex : filteredOptions.length - 1;
+            
+            // Scroll to highlight the item
+            setTimeout(() => {
+              scrollToHighlightedItem(newIndex);
+            }, 0);
+            
+            return newIndex;
+          });
+        }
+      }
+    }
+    
     // Handle Escape key to close dropdown
     if (e.key === 'Escape') {
       setIsOpen(false);
@@ -254,8 +416,7 @@ const Select2 = ({
   // Dropdown component to be rendered in portal
   const DropdownComponent = () => (
     <div 
-      ref={optionsListRef}
-      className="fixed rounded-lg shadow-lg"
+      className="fixed rounded-lg shadow-lg select2-dropdown-fixed"
       data-portal-dropdown="true"
       style={{
         position: 'fixed',
@@ -265,10 +426,18 @@ const Select2 = ({
         backgroundColor: 'var(--surface)',
         border: '2px solid var(--border)',
         color: 'var(--text-primary)',
-        zIndex: 99999,
+        zIndex: 999999, // Increased z-index to ensure it's on top
         boxShadow: 'var(--shadow-hover)',
         borderRadius: '16px',
-        backdropFilter: 'blur(10px)'
+        backdropFilter: 'blur(10px)',
+        maxHeight: '240px', // Ensure consistent height
+        overflow: 'hidden', // Keep hidden to prevent container from expanding
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '60px', // Ensure minimum height for visibility
+        pointerEvents: 'auto', // Ensure mouse events work properly
+        transform: 'translateZ(0)', // Force hardware acceleration
+        willChange: 'transform, opacity' // Optimize for animations
       }}
     >
       {/* Search Input */}
@@ -300,7 +469,14 @@ const Select2 = ({
                   if (filteredOptions.length > 0) {
                     setHighlightedIndex(prev => {
                       const nextIndex = prev + 1;
-                      return nextIndex < filteredOptions.length ? nextIndex : 0;
+                      const newIndex = nextIndex < filteredOptions.length ? nextIndex : 0;
+                      
+                      // Scroll to highlight the item
+                      setTimeout(() => {
+                        scrollToHighlightedItem(newIndex);
+                      }, 0);
+                      
+                      return newIndex;
                     });
                   }
                 } else if (e.key === 'ArrowUp') {
@@ -308,7 +484,14 @@ const Select2 = ({
                   if (filteredOptions.length > 0) {
                     setHighlightedIndex(prev => {
                       const prevIndex = prev - 1;
-                      return prevIndex >= 0 ? prevIndex : filteredOptions.length - 1;
+                      const newIndex = prevIndex >= 0 ? prevIndex : filteredOptions.length - 1;
+                      
+                      // Scroll to highlight the item
+                      setTimeout(() => {
+                        scrollToHighlightedItem(newIndex);
+                      }, 0);
+                      
+                      return newIndex;
                     });
                   }
                 } else if (e.key === 'Enter') {
@@ -342,7 +525,37 @@ const Select2 = ({
       )}
 
       {/* Options List */}
-      <div className="max-h-60 overflow-y-auto">
+      <div 
+        ref={optionsListRef}
+        className="overflow-y-auto select2-dropdown-scroll"
+        style={{
+          maxHeight: '200px', // Reduced to account for search input
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          scrollBehavior: 'smooth',
+          WebkitOverflowScrolling: 'touch', // Enable momentum scrolling on iOS
+          scrollbarWidth: 'thin', // Firefox
+          scrollbarColor: 'var(--border) transparent', // Firefox
+          flex: '1', // Take remaining space
+          minHeight: '40px' // Ensure minimum scrollable area
+        }}
+        onWheel={(e) => {
+          // Prevent scroll from bubbling up to parent elements
+          e.stopPropagation();
+          
+          // Ensure smooth scrolling with mouse wheel
+          const container = e.currentTarget;
+          const scrollAmount = e.deltaY * 0.5; // Reduce scroll speed for better control
+          container.scrollTop += scrollAmount;
+          
+          // Prevent default browser scrolling
+          e.preventDefault();
+        }}
+        onScroll={(e) => {
+          // Ensure scroll events are handled properly
+          e.stopPropagation();
+        }}
+      >
         {filteredOptions.length > 0 ? (
           filteredOptions.map((option, index) => {
               const optionValue = typeof option === 'string' ? option : option.value;
@@ -413,7 +626,7 @@ const Select2 = ({
   );
 
   return (
-    <div ref={containerRef} className={`relative ${className}`} style={{ position: 'relative', zIndex: 1, overflow: 'visible' }}>
+    <div ref={containerRef} className={`select2-container-fixed ${className}`} style={{ position: 'relative', zIndex: 1, overflow: 'visible' }}>
       {/* Main Select Button */}
       <div
         className={`

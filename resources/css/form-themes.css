@@ -1,24 +1,116 @@
- /* Base Theme Variables */
- .form-theme-1 {
-     --primary-color: #3B82F6;
-     --primary-hover: #2563EB;
-     --primary-light: #DBEAFE;
-     --secondary-color: #64748B;
-     --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-     --surface: rgba(255, 255, 255, 0.95);
-     --surface-hover: rgba(255, 255, 255, 1);
-     --text-primary: #1E293B;
-     --text-secondary: #64748B;
-     --border: rgba(148, 163, 184, 0.3);
-     --border-focus: var(--primary-color);
-     --success: #10B981;
-     --warning: #F59E0B;
-     --error: #EF4444;
-     --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-     --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
-     --glass-bg: rgba(255, 255, 255, 0.1);
-     --glass-border: rgba(255, 255, 255, 0.2);
- }
+/* Base Theme Variables */
+.form-theme-1 {
+    --primary-color: #3B82F6;
+    --primary-hover: #2563EB;
+    --primary-light: #DBEAFE;
+    --secondary-color: #64748B;
+    --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --surface: rgba(255, 255, 255, 0.95);
+    --surface-hover: rgba(255, 255, 255, 1);
+    --text-primary: #1E293B;
+    --text-secondary: #64748B;
+    --border: rgba(148, 163, 184, 0.3);
+    --border-focus: var(--primary-color);
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+}
+
+/* Select2 Position Fixed Utilities */
+.select2-dropdown-fixed {
+    position: fixed !important;
+    z-index: 999999 !important;
+    transform: translateZ(0);
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    isolation: isolate;
+    contain: layout style paint;
+    -webkit-transform: translateZ(0);
+    -moz-transform: translateZ(0);
+    -ms-transform: translateZ(0);
+    -o-transform: translateZ(0);
+}
+
+/* Position Fixed Container */
+.select2-container-fixed {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+}
+
+/* Position Fixed Portal */
+.select2-portal-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 999998;
+}
+
+.select2-portal-fixed > * {
+    pointer-events: auto;
+}
+
+/* Select2 Dropdown Scrollbar Styling */
+.select2-dropdown-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    transition: scrollbar-color 0.3s ease;
+}
+
+.select2-dropdown-scroll:hover {
+    scrollbar-color: var(--primary-color) transparent;
+}
+
+.select2-dropdown-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.select2-dropdown-scroll::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    margin: 4px 0;
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+}
+
+.select2-dropdown-scroll:hover::-webkit-scrollbar-track {
+    opacity: 0.6;
+}
+
+.select2-dropdown-scroll::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    border: 1px solid var(--surface);
+    opacity: 0.6;
+    min-height: 20px;
+}
+
+.select2-dropdown-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    opacity: 1;
+    transform: scale(1.05);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    outline: none;
+}
+
+.select2-dropdown-scroll::-webkit-scrollbar-thumb:active {
+    background: var(--primary-hover);
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border: 2px solid var(--primary-hover);
+    outline: none;
+}
 
  .form-theme-2 {
      --primary-color: #8B5CF6;
@@ -1734,24 +1826,53 @@ textarea::placeholder {
      color: #9ca3af;
  }
 
- /* Responsive Design */
- @media (max-width: 640px) {
-     .breadcrumbs {
-         font-size: 0.75rem;
-     }
+/* Responsive Design */
+@media (max-width: 640px) {
+    .breadcrumbs {
+        font-size: 0.75rem;
+    }
 
-     .breadcrumb-icon {
-         width: 0.875rem;
-         height: 0.875rem;
-         margin-right: 0.25rem;
-     }
+    .breadcrumb-icon {
+        width: 0.875rem;
+        height: 0.875rem;
+        margin-right: 0.25rem;
+    }
 
-     .breadcrumb-separator {
-         width: 0.875rem;
-         height: 0.875rem;
-         margin: 0 0.25rem;
-     }
- }
+    .breadcrumb-separator {
+        width: 0.875rem;
+        height: 0.875rem;
+        margin: 0 0.25rem;
+    }
+}
+
+/* Select2 Custom Scrollbar Styles */
+.select2-dropdown-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.select2-dropdown-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.select2-dropdown-scroll::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+}
+
+.select2-dropdown-scroll::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+.select2-dropdown-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+.select2-dropdown-scroll::-webkit-scrollbar-thumb:active {
+    background: var(--primary-color);
+}
 
  /* Themed Breadcrumbs */
  .breadcrumbs-themed {

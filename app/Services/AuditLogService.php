@@ -266,5 +266,407 @@ class AuditLogService
         
         return $query->get();
     }
+    
+    // ==================== ACCOUNTS MODULE LOGGING METHODS ====================
+    
+    /**
+     * Log currency ledger operation
+     */
+    public static function logCurrencyLedger(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'Accounts',
+            'currency_ledgers',
+            $recordId,
+            $oldData,
+            $data,
+            "Currency Ledger {$action}: " . ($data['currency_code'] ?? '') . " - " . ($data['account_name'] ?? '')
+        );
+    }
+    
+    /**
+     * Log general ledger operation
+     */
+    public static function logGeneralLedger(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'Accounts',
+            'general_ledgers',
+            $recordId,
+            $oldData,
+            $data,
+            "General Ledger {$action}: " . ($data['account_code'] ?? '') . " - " . ($data['account_name'] ?? '')
+        );
+    }
+    
+    /**
+     * Log voucher number configuration operation
+     */
+    public static function logVoucherNumberConfiguration(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'Accounts',
+            'voucher_number_configurations',
+            $recordId,
+            $oldData,
+            $data,
+            "Voucher Number Configuration {$action}: " . ($data['voucher_type'] ?? '') . " - " . ($data['prefix'] ?? '')
+        );
+    }
+    
+    // ==================== SYSTEM MODULE LOGGING METHODS ====================
+    
+    /**
+     * Log company operation
+     */
+    public static function logCompany(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'System',
+            'companies',
+            $recordId,
+            $oldData,
+            $data,
+            "Company {$action}: " . ($data['company_name'] ?? '')
+        );
+    }
+    
+    /**
+     * Log currency operation
+     */
+    public static function logCurrency(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'System',
+            'currencies',
+            $recordId,
+            $oldData,
+            $data,
+            "Currency {$action}: " . ($data['name'] ?? '') . " (" . ($data['code'] ?? '') . ")"
+        );
+    }
+    
+    /**
+     * Log department operation
+     */
+    public static function logDepartment(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'System',
+            'departments',
+            $recordId,
+            $oldData,
+            $data,
+            "Department {$action}: " . ($data['name'] ?? '')
+        );
+    }
+    
+    /**
+     * Log location operation
+     */
+    public static function logLocation(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'System',
+            'locations',
+            $recordId,
+            $oldData,
+            $data,
+            "Location {$action}: " . ($data['name'] ?? '')
+        );
+    }
+    
+    /**
+     * Log menu operation
+     */
+    public static function logMenu(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'System',
+            'menus',
+            $recordId,
+            $oldData,
+            $data,
+            "Menu {$action}: " . ($data['menu_name'] ?? '')
+        );
+    }
+    
+    /**
+     * Log module operation
+     */
+    public static function logModule(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'System',
+            'modules',
+            $recordId,
+            $oldData,
+            $data,
+            "Module {$action}: " . ($data['module_name'] ?? '')
+        );
+    }
+    
+    /**
+     * Log package operation
+     */
+    public static function logPackage(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'System',
+            'packages',
+            $recordId,
+            $oldData,
+            $data,
+            "Package {$action}: " . ($data['package_name'] ?? '')
+        );
+    }
+    
+    /**
+     * Log package feature operation
+     */
+    public static function logPackageFeature(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'System',
+            'package_features',
+            $recordId,
+            $oldData,
+            $data,
+            "Package Feature {$action}: " . ($data['feature_name'] ?? '')
+        );
+    }
+    
+    /**
+     * Log section operation
+     */
+    public static function logSection(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'System',
+            'sections',
+            $recordId,
+            $oldData,
+            $data,
+            "Section {$action}: " . ($data['section_name'] ?? '')
+        );
+    }
+    
+    /**
+     * Log role operation
+     */
+    public static function logRole(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'System',
+            'roles',
+            $recordId,
+            $oldData,
+            $data,
+            "Role {$action}: " . ($data['role_name'] ?? '')
+        );
+    }
+    
+    /**
+     * Log role feature operation
+     */
+    public static function logRoleFeature(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'System',
+            'role_features',
+            $recordId,
+            $oldData,
+            $data,
+            "Role Feature {$action}: Role " . ($data['role_id'] ?? '') . " - Feature " . ($data['feature_id'] ?? '')
+        );
+    }
+    
+    /**
+     * Log code configuration operation
+     */
+    public static function logCodeConfiguration(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'System',
+            'code_configurations',
+            $recordId,
+            $oldData,
+            $data,
+            "Code Configuration {$action}: " . ($data['configuration_name'] ?? '')
+        );
+    }
+    
+    // ==================== AUTHENTICATION MODULE LOGGING METHODS ====================
+    
+    /**
+     * Log authentication operation
+     */
+    public static function logAuthentication(
+        string $action,
+        ?int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        $filteredData = self::filterSensitiveData($data);
+        $filteredOldData = $oldData ? self::filterSensitiveData($oldData) : null;
+        
+        return self::log(
+            $action,
+            'Authentication',
+            'tbl_users',
+            $recordId,
+            $filteredOldData,
+            $filteredData,
+            "Authentication {$action}: " . ($data['email'] ?? '')
+        );
+    }
+    
+    /**
+     * Log profile operation
+     */
+    public static function logProfile(
+        string $action,
+        int $userId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        $filteredData = self::filterSensitiveData($data);
+        $filteredOldData = $oldData ? self::filterSensitiveData($oldData) : null;
+        
+        $fullName = trim(
+            ($data['fname'] ?? '') . ' ' . 
+            ($data['mname'] ?? '') . ' ' . 
+            ($data['lname'] ?? '')
+        );
+        
+        return self::log(
+            $action,
+            'Authentication',
+            'tbl_users',
+            $userId,
+            $filteredOldData,
+            $filteredData,
+            "Profile {$action}: " . $fullName
+        );
+    }
+    
+    // ==================== REPORTS MODULE LOGGING METHODS ====================
+    
+    /**
+     * Log report generation
+     */
+    public static function logReport(
+        string $action,
+        ?int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'Reports',
+            'reports',
+            $recordId,
+            $oldData,
+            $data,
+            "Report {$action}: " . ($data['report_name'] ?? '') . " - " . ($data['report_type'] ?? '')
+        );
+    }
+    
+    // ==================== ATTACHMENT MODULE LOGGING METHODS ====================
+    
+    /**
+     * Log attachment operation
+     */
+    public static function logAttachment(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'Attachment',
+            'attachments',
+            $recordId,
+            $oldData,
+            $data,
+            "Attachment {$action}: " . ($data['original_name'] ?? '') . " (" . ($data['file_type'] ?? '') . ")"
+        );
+    }
 }
 
