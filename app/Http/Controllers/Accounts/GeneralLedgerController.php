@@ -62,11 +62,12 @@ class GeneralLedgerController extends Controller
             }
         }
 
-        // Get only level 3 child accounts (transaction accounts) for dropdown
+        // Get only level 4 transactional accounts for dropdown
         $accounts = DB::table('chart_of_accounts')
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->where('account_level', 3)
+            ->where('account_level', 4)
+            ->where('is_transactional', true)
             ->orderBy('account_code')
             ->get();
 
@@ -264,11 +265,12 @@ class GeneralLedgerController extends Controller
                 ->get(['id', 'location_name']);
         }
 
-        // Get only level 3 child accounts (transaction accounts) for dropdown
+        // Get only level 4 transactional accounts for dropdown
         $accounts = DB::table('chart_of_accounts')
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->where('account_level', 3)
+            ->where('account_level', 4)
+            ->where('is_transactional', true)
             ->orderBy('account_code')
             ->get();
 

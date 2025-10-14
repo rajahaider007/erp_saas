@@ -810,7 +810,7 @@ class JournalVoucherController extends Controller
     }
 
     /**
-     * Get transactional accounts (level 3) for journal entries
+     * Get transactional accounts (level 4) for journal entries
      */
     private function getTransactionalAccounts($compId, $locationId)
     {
@@ -818,7 +818,8 @@ class JournalVoucherController extends Controller
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
             ->where('status', 'Active')
-            ->where('account_level', 3) // Only transactional accounts
+            ->where('account_level', 4) // Only transactional accounts (Level 4)
+            ->where('is_transactional', true) // Additional check for transactional accounts
             ->orderBy('account_code')
             ->get();
     }

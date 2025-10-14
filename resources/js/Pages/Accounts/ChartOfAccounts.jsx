@@ -63,51 +63,77 @@ const ChartOfAccounts = () => {
   }, []);
 
   // Generate account code based on hierarchy (sequential, not random)
-  const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
-    if (level === 1) {
-      // Level 1: 100000000000000, 200000000000000, etc.
-      const typeCodes = {
-        'Assets': '100000000000000',
-        'Liabilities': '200000000000000',
-        'Equity': '300000000000000',
-        'Revenue': '400000000000000',
-        'Expenses': '500000000000000'
-      };
-      return typeCodes[formData.account_type] || '100000000000000';
-    } else if (level === 2) {
-      const existingAccountsInDB = accounts.filter(acc =>
-        acc.parent_account_id === parentId &&
-        acc.account_level === 2
-      );
-      const nextNumber = existingAccountsInDB.length + 1;
-      // Build: 5 + 000 + 4 + 0000000000 = 500040000000000
-      const firstDigit = parentCode.charAt(0); // "5"
-      const result = firstDigit + '000' + nextNumber + '0000000000';
-      return result;
-    } else if (level === 3) {
-      // Level 3: Use parent's full code as base and append sequential number
-      // For example: if parent is 500010000000000, child should be 500010000000001
-      const baseCode = parentCode.substring(0, 10);
-      // Find next sequential number for this specific parent
-      const existingAccounts = accounts.filter(acc =>
-        acc.parent_account_id === parentId &&
-        acc.account_level === 3
-      );
-
-      // Get the highest existing number to avoid duplicates
-      let nextNumber = 1;
-      if (existingAccounts.length > 0) {
-        const existingNumbers = existingAccounts.map(acc => {
-          const code = acc.account_code;
-          const numberPart = code.substring(10, 15); // Get the last 5 digits
-          return parseInt(numberPart) || 0;
-        });
-        nextNumber = Math.max(...existingNumbers) + 1;
-      }
-      return baseCode + nextNumber.toString().padStart(5, '0');
+ // Generate account code based on hierarchy (sequential, not random)
+const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
+  if (level === 1) {
+    // Level 1: 100000000000000, 200000000000000, etc.
+    const typeCodes = {
+      'Assets': '100000000000000',
+      'Liabilities': '200000000000000',
+      'Equity': '300000000000000',
+      'Revenue': '400000000000000',
+      'Expenses': '500000000000000'
+    };
+    return typeCodes[formData.account_type] || '100000000000000';
+  } else if (level === 2) {
+    const existingAccountsInDB = accounts.filter(acc =>
+      acc.parent_account_id === parentId &&
+      acc.account_level === 2
+    );
+    const nextNumber = existingAccountsInDB.length + 1;
+    // Build: 1 + 0001 + 0000000000 = 100010000000000
+    const firstDigit = parentCode.charAt(0); // "1"
+    const result = firstDigit + nextNumber.toString().padStart(4, '0') + '0000000000';
+    return result;
+  } else if (level === 3) {
+    // Level 3: Parent is Level 2 (e.g., 100010000000000)
+    // Child should be: 100010001000000 (7 base + 2 sequence + 6 zeros)
+    const baseCode = parentCode.substring(0, 7); // Get first 7 digits (1000100)
+    
+    // Find next sequential number for this specific parent
+    const existingAccounts = accounts.filter(acc =>
+      acc.parent_account_id === parentId &&
+      acc.account_level === 3
+    );
+    
+    // Get the highest existing number to avoid duplicates
+    let nextNumber = 1;
+    if (existingAccounts.length > 0) {
+      const existingNumbers = existingAccounts.map(acc => {
+        const code = acc.account_code;
+        const numberPart = code.substring(7, 9); // Get positions 7-8 (2 digits)
+        return parseInt(numberPart) || 0;
+      });
+      nextNumber = Math.max(...existingNumbers) + 1;
     }
-    return '';
-  };
+    
+    return baseCode + nextNumber.toString().padStart(2, '0') + '000000';
+  } else if (level === 4) {
+    // Level 4: Parent is Level 3 (e.g., 100010001000000)
+    // Child should be: 100010001000001
+    const baseCode = parentCode.substring(0, 12); // Get first 12 digits (100010001000)
+    
+    // Find next sequential number for this specific parent
+    const existingAccounts = accounts.filter(acc =>
+      acc.parent_account_id === parentId &&
+      acc.account_level === 4
+    );
+    
+    // Get the highest existing number to avoid duplicates
+    let nextNumber = 1;
+    if (existingAccounts.length > 0) {
+      const existingNumbers = existingAccounts.map(acc => {
+        const code = acc.account_code;
+        const numberPart = code.substring(12, 15); // Get the last 3 digits (positions 12-14)
+        return parseInt(numberPart) || 0;
+      });
+      nextNumber = Math.max(...existingNumbers) + 1;
+    }
+    
+    return baseCode + nextNumber.toString().padStart(3, '0');
+  }
+  return '';
+};
 
   // Auto-detect account properties (system will handle this automatically)
   const getAccountProperties = (parentCode = '', level = 1) => {
@@ -116,9 +142,7 @@ const ChartOfAccounts = () => {
 
     // System will automatically detect these properties based on hierarchy
     return {
-      is_parent: level < 3,
-      is_child: level > 1,
-      is_transactional: level === 3,
+      is_transactional: level === 4,
       comp_id: user?.comp_id || 1, // Get from logged-in user
       location_id: user?.location_id || 1 // Get from logged-in user
     };
@@ -757,12 +781,12 @@ const ChartOfAccounts = () => {
                         {account.short_code}
                       </span>
                     )}
-                    {account.account_level === 3 && (
+                    {account.account_level === 4 && (
                       <span className="px-2 py-1 text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full">
                         Transactional
                       </span>
                     )}
-                    {account.account_level < 3 && (
+                    {account.account_level < 4 && (
                       <span className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full">
                         Parent
                       </span>
@@ -791,7 +815,7 @@ const ChartOfAccounts = () => {
               >
                 <Trash2 className="h-4 w-4" />
               </button>
-              {account.account_level < 3 && (
+              {account.account_level < 4 && (
                 <button
                   onClick={() => openModal('add', null, account)}
                   className="p-2 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors duration-200"
@@ -1092,8 +1116,7 @@ const ChartOfAccounts = () => {
                 <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
                   <p>• <strong>Account Type:</strong> Automatically inherited from parent account</p>
                   <p>• <strong>Company & Location:</strong> Auto-detected from current user session</p>
-                  <p>• <strong>Parent/Child Status:</strong> Auto-determined by hierarchy level</p>
-                  <p>• <strong>Transactional Status:</strong> Auto-determined (Level 3 accounts only)</p>
+                  <p>• <strong>Transactional Status:</strong> Auto-determined (Level 4 accounts only)</p>
                 </div>
               </div>
 

@@ -100,9 +100,9 @@ class ChartOfAccountsController extends Controller
             $validator = Validator::make($request->all(), [
                 'account_code' => 'required|string|max:255|unique:chart_of_accounts,account_code',
                 'account_name' => 'required|string|max:255',
-                'account_type' => 'required|in:Parent,Transactional',
+                'account_type' => 'required|in:Assets,Liabilities,Equity,Revenue,Expenses',
                 'parent_account_id' => 'nullable|exists:chart_of_accounts,id',
-                'account_level' => 'required|integer|min:1|max:3',
+                'account_level' => 'required|integer|min:1|max:4',
                 'currency' => 'nullable|string|max:10',
                 'short_code' => 'nullable|string|max:50',
                 'status' => 'required|in:Active,Inactive'
@@ -194,9 +194,9 @@ class ChartOfAccountsController extends Controller
             $validator = Validator::make($request->all(), [
                 'account_code' => 'required|string|max:255|unique:chart_of_accounts,account_code,' . $id,
                 'account_name' => 'required|string|max:255',
-                'account_type' => 'required|in:Parent,Transactional',
+                'account_type' => 'required|in:Assets,Liabilities,Equity,Revenue,Expenses',
                 'parent_account_id' => 'nullable|exists:chart_of_accounts,id',
-                'account_level' => 'required|integer|min:1|max:3',
+                'account_level' => 'required|integer|min:1|max:4',
                 'currency' => 'nullable|string|max:10',
                 'short_code' => 'nullable|string|max:50',
                 'status' => 'required|in:Active,Inactive'

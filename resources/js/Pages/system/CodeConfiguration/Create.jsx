@@ -159,7 +159,7 @@ const CodeConfigurationForm = () => {
   const initialData = isEditMode ? {
     company_id: configuration.company_id || '',
     location_id: configuration.location_id || '',
-    account_id: configuration.level2_account_id || configuration.level3_account_id || '',
+    account_id: configuration.level2_account_id || configuration.level3_account_id || configuration.level4_account_id || '',
     code_type: configuration.code_type,
     is_active: configuration.is_active
   } : {
@@ -195,7 +195,7 @@ const CodeConfigurationForm = () => {
     },
     { 
       name: 'account_id', 
-      label: 'Account Code (Level 2 or Level 3)', 
+      label: 'Account Code (Level 2, 3, or 4)', 
       type: 'select', 
       required: false, 
       options: accountOptions,

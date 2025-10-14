@@ -14,6 +14,7 @@ class CodeConfiguration extends Model
         'location_id',
         'level2_account_id',
         'level3_account_id',
+        'level4_account_id',
         'code_type',
         'code_name',
         'account_level',
@@ -64,6 +65,14 @@ class CodeConfiguration extends Model
     public function level3Account()
     {
         return $this->belongsTo(ChartOfAccount::class, 'level3_account_id');
+    }
+
+    /**
+     * Get the Level 4 account.
+     */
+    public function level4Account()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'level4_account_id');
     }
 
     /**

@@ -17,6 +17,7 @@ class ChartOfAccount extends Model
         'account_type',
         'parent_account_id',
         'account_level',
+        'is_transactional',
         'currency',
         'status',
         'short_code',
@@ -27,6 +28,7 @@ class ChartOfAccount extends Model
     protected $casts = [
         'account_level' => 'integer',
         'parent_account_id' => 'integer',
+        'is_transactional' => 'boolean',
         'comp_id' => 'integer',
         'location_id' => 'integer',
     ];
@@ -104,13 +106,13 @@ class ChartOfAccount extends Model
     }
 
     /**
-     * Get accounts for a specific company and location (Level 2 and Level 3 only)
+     * Get accounts for a specific company and location (Level 2, 3, and 4)
      */
     public static function getAccountsForCompanyLocation($companyId, $locationId)
     {
         return static::where('comp_id', $companyId)
                     ->where('location_id', $locationId)
-                    ->whereIn('account_level', [2, 3])
+                    ->whereIn('account_level', [2, 3, 4])
                     ->active()
                     ->orderBy('account_level')
                     ->orderBy('account_name');
@@ -129,7 +131,7 @@ class ChartOfAccount extends Model
     }
 
     /**
-     * Get Level 3 accounts (detail accounts) for a specific Level 2 account
+     * Get Level 3 accounts (sub-parent accounts) for a specific Level 2 account
      */
     public static function getLevel3AccountsForParent($parentAccountId, $companyId, $locationId)
     {
@@ -139,5 +141,60 @@ class ChartOfAccount extends Model
                     ->where('account_level', 3)
                     ->active()
                     ->orderBy('account_name');
+    }
+
+    /**
+     * Get Level 4 accounts (transactional accounts) for a specific Level 3 account
+     */
+    public static function getLevel4AccountsForParent($parentAccountId, $companyId, $locationId)
+    {
+        return static::where('parent_account_id', $parentAccountId)
+                    ->where('comp_id', $companyId)
+                    ->where('location_id', $locationId)
+                    ->where('account_level', 4)
+                    ->active()
+                    ->orderBy('account_name');
+    }
+
+    /**
+     * Get all transactional accounts (Level 4) for a company and location
+     */
+    public static function getTransactionalAccounts($companyId, $locationId)
+    {
+        return static::where('comp_id', $companyId)
+                    ->where('location_id', $locationId)
+                    ->where('account_level', 4)
+                    ->where('is_transactional', true)
+                    ->active()
+                    ->orderBy('account_name');
+    }
+
+    /**
+     * Get accounts that support children (Level 1, 2, and 3)
+     */
+    public static function getParentAccounts($companyId, $locationId)
+    {
+        return static::where('comp_id', $companyId)
+                    ->where('location_id', $locationId)
+                    ->whereIn('account_level', [1, 2, 3])
+                    ->active()
+                    ->orderBy('account_level')
+                    ->orderBy('account_name');
+    }
+
+    /**
+     * Scope for transactional accounts only
+     */
+    public function scopeTransactional($query)
+    {
+        return $query->where('is_transactional', true);
+    }
+
+    /**
+     * Scope for parent accounts only (Levels 1, 2, and 3)
+     */
+    public function scopeParent($query)
+    {
+        return $query->whereIn('account_level', [1, 2, 3]);
     }
 }
