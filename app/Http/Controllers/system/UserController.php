@@ -218,8 +218,41 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified user.
      */
-    public function edit(User $user)
+    public function edit(Request $request, User $user)
     {
+        // Debug: Log session and request data
+        $routeName = $request->route() ? $request->route()->getName() : 'system.users.edit';
+        Log::info('=== USER EDIT METHOD DEBUG ===', [
+            'session_user_id' => session('user_id'),
+            'session_user_comp_id' => session('user_comp_id'),
+            'session_user_location_id' => session('user_location_id'),
+            'request_user_id' => $request->input('user_id'),
+            'route_name' => $routeName,
+            'target_user_id' => $user->id
+        ]);
+        
+        // Check if user has permission to edit users
+        Log::info('About to check permission for user edit', [
+            'auth_check' => auth()->check(),
+            'auth_user_id' => auth()->user() ? auth()->user()->id : null,
+            'session_user_id' => session('user_id'),
+            'route_name' => $routeName
+        ]);
+        
+        try {
+            $this->requirePermission($request, null, 'can_edit');
+            Log::info('Permission check passed for user edit');
+        } catch (\Exception $e) {
+            Log::error('Permission check failed for user edit', [
+                'error' => $e->getMessage(),
+                'auth_check' => auth()->check(),
+                'auth_user_id' => auth()->user() ? auth()->user()->id : null,
+                'session_user_id' => session('user_id'),
+                'route_name' => $routeName
+            ]);
+            throw $e;
+        }
+        
         // Load user with relationships
         $user->load(['company', 'location', 'department']);
         
@@ -259,11 +292,7 @@ class UserController extends Controller
             'user' => $user,
             'companies' => $companies,
             'locations' => $locations,
-            'departments' => $departments,
-            'availableMenus' => $availableMenus,
-            'userRights' => $userRights,
-            'showRights' => request('showRights', false),
-            'pageTitle' => 'Edit User'
+            'departments' => $departments
         ]);
     }
 

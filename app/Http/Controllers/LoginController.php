@@ -240,7 +240,7 @@ class LoginController extends Controller
             'email' => $user->email,
             'loginid' => $user->loginid,
             'role' => $user->role,
-            'permissions' => json_decode($user->permissions, true),
+            'permissions' => is_string($user->permissions) ? json_decode($user->permissions, true) : $user->permissions,
             'timezone' => $user->timezone,
             'language' => $user->language,
             'currency' => $user->currency,

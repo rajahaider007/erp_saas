@@ -76,7 +76,8 @@ const Header = () => {
   const [navigationItems, setNavigationItems] = React.useState([]);
 
   // Get modules from props at component level
-  const { modules } = usePage().props;
+  const { availableModules } = usePage().props;
+  const modules = availableModules;
 
   // Build header navigation based on user permissions
   React.useEffect(() => {
@@ -84,14 +85,14 @@ const Header = () => {
       const navItems = [
         {
           name: 'Dashboard',
-          href: '/dashboard',
+          href: '/system/dashboard',
           icon: Home,
-          current: url === '/dashboard'
+          current: url === '/system/dashboard'
         }
       ];
 
       // Add ERP Modules link if user has access
-      if (canView('/erp-modules')) {
+      if (canView('/system/AddModules')) {
         navItems.push({
           name: 'Modules',
           href: '/erp-modules',
@@ -487,7 +488,7 @@ const Header = () => {
             )}
 
             {/* Logo */}
-            <Link href="/dashboard" className="flex items-center space-x-2 notranslate">
+            <Link href="/system/dashboard" className="flex items-center space-x-2 notranslate">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-sm">
                 ERP
               </div>

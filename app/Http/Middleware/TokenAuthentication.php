@@ -78,7 +78,7 @@ class TokenAuthentication
                 'authenticated_user' => $user,
                 'user_id' => $user->id,
                 'user_role' => $user->role,
-                'user_permissions' => json_decode($user->permissions, true) ?? []
+                'user_permissions' => (is_string($user->permissions) ? json_decode($user->permissions, true) : $user->permissions) ?? []
             ]);
 
             return $next($request);

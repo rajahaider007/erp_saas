@@ -72,7 +72,7 @@ class SectionController extends Controller
         return redirect()->route('system.sections.index')->with('success', 'Section "'.$section->section_name.'" created.');
     }
 
-    public function edit(Section $section)
+    public function edit(Request $request, Section $section)
     {
         // Check if user has permission to can_edit
         $this->requirePermission($request, null, 'can_edit');

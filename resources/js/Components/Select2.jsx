@@ -117,45 +117,49 @@ const Select2 = ({
           clearTimeout(scrollTimeoutRef.current);
         }
         
-        // Debounce scroll events to prevent excessive recalculations
+        // Use requestAnimationFrame for smooth updates
         scrollTimeoutRef.current = setTimeout(() => {
           if (!isOpen || !containerRef.current) return;
           
-          const rect = containerRef.current.getBoundingClientRect();
-          const viewportHeight = window.innerHeight;
-          const viewportWidth = window.innerWidth;
-          const dropdownHeight = 240;
-          const gap = 4;
-          const padding = 8;
-          
-          // Check if position actually needs to be updated
-          const currentScrollX = window.scrollX;
-          const currentScrollY = window.scrollY;
-          const scrollDelta = Math.abs(currentScrollX - lastScrollPosition.current.x) + 
-                             Math.abs(currentScrollY - lastScrollPosition.current.y);
-          
-          // Only update if scroll delta is significant (more than 5px)
-          if (scrollDelta < 5) return;
-          
-          lastScrollPosition.current = { x: currentScrollX, y: currentScrollY };
-          
-          const spaceBelow = viewportHeight - rect.bottom;
-          const spaceAbove = rect.top;
-          const shouldPositionAbove = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
-          
-          let top, left, width;
-          
-          if (shouldPositionAbove) {
-            top = Math.max(padding, rect.top + window.scrollY - dropdownHeight - gap);
-          } else {
-            top = Math.min(viewportHeight - dropdownHeight - padding, rect.bottom + window.scrollY + gap);
-          }
-          
-          left = Math.max(padding, Math.min(rect.left + window.scrollX, viewportWidth - rect.width - padding));
-          width = Math.min(rect.width, viewportWidth - (padding * 2));
-          width = Math.max(width, 200);
-          
-          setDropdownPosition({ top, left, width });
+          requestAnimationFrame(() => {
+            if (!isOpen || !containerRef.current) return;
+            
+            const rect = containerRef.current.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const viewportWidth = window.innerWidth;
+            const dropdownHeight = 240;
+            const gap = 4;
+            const padding = 8;
+            
+            // Check if position actually needs to be updated
+            const currentScrollX = window.scrollX;
+            const currentScrollY = window.scrollY;
+            const scrollDelta = Math.abs(currentScrollX - lastScrollPosition.current.x) + 
+                               Math.abs(currentScrollY - lastScrollPosition.current.y);
+            
+            // Only update if scroll delta is significant (more than 10px)
+            if (scrollDelta < 10) return;
+            
+            lastScrollPosition.current = { x: currentScrollX, y: currentScrollY };
+            
+            const spaceBelow = viewportHeight - rect.bottom;
+            const spaceAbove = rect.top;
+            const shouldPositionAbove = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+            
+            let top, left, width;
+            
+            if (shouldPositionAbove) {
+              top = Math.max(padding, rect.top + window.scrollY - dropdownHeight - gap);
+            } else {
+              top = Math.min(viewportHeight - dropdownHeight - padding, rect.bottom + window.scrollY + gap);
+            }
+            
+            left = Math.max(padding, Math.min(rect.left + window.scrollX, viewportWidth - rect.width - padding));
+            width = Math.min(rect.width, viewportWidth - (padding * 2));
+            width = Math.max(width, 200);
+            
+            setDropdownPosition({ top, left, width });
+          });
         }, 16); // ~60fps debouncing
       }
     };
@@ -177,10 +181,27 @@ const Select2 = ({
     };
   }, [isOpen]);
 
-  // Reset highlighted index when dropdown opens
+  // Reset highlighted index when dropdown opens and highlight selected option
   useEffect(() => {
     if (isOpen) {
-      setHighlightedIndex(-1);
+      // Find the currently selected option and highlight it
+      const selectedIndex = filteredOptions.findIndex(option => {
+        const optionValue = typeof option === 'string' ? option : option.value;
+        if (multiple) {
+          return selectedValues.includes(optionValue);
+        } else {
+          return value === optionValue;
+        }
+      });
+      
+      setHighlightedIndex(selectedIndex >= 0 ? selectedIndex : -1);
+      
+      // Scroll to selected option if it exists
+      if (selectedIndex >= 0) {
+        setTimeout(() => {
+          scrollToHighlightedItem(selectedIndex);
+        }, 100);
+      }
       
       // Calculate dropdown position with improved positioning logic
       if (containerRef.current) {
@@ -420,9 +441,9 @@ const Select2 = ({
       data-portal-dropdown="true"
       style={{
         position: 'fixed',
-        top: dropdownPosition.top,
-        left: dropdownPosition.left,
-        width: dropdownPosition.width,
+        top: `${dropdownPosition.top}px`,
+        left: `${dropdownPosition.left}px`,
+        width: `${dropdownPosition.width}px`,
         backgroundColor: 'var(--surface)',
         border: '2px solid var(--border)',
         color: 'var(--text-primary)',
@@ -437,7 +458,8 @@ const Select2 = ({
         minHeight: '60px', // Ensure minimum height for visibility
         pointerEvents: 'auto', // Ensure mouse events work properly
         transform: 'translateZ(0)', // Force hardware acceleration
-        willChange: 'transform, opacity' // Optimize for animations
+        willChange: 'transform, opacity', // Optimize for animations
+        transition: 'none' // Disable transitions to prevent jumping
       }}
     >
       {/* Search Input */}
@@ -532,27 +554,18 @@ const Select2 = ({
           maxHeight: '200px', // Reduced to account for search input
           overflowY: 'auto',
           overflowX: 'hidden',
-          scrollBehavior: 'smooth',
+          scrollBehavior: 'auto', // Use auto instead of smooth to prevent jumping
           WebkitOverflowScrolling: 'touch', // Enable momentum scrolling on iOS
           scrollbarWidth: 'thin', // Firefox
           scrollbarColor: 'var(--border) transparent', // Firefox
           flex: '1', // Take remaining space
-          minHeight: '40px' // Ensure minimum scrollable area
+          minHeight: '40px', // Ensure minimum scrollable area
+          overscrollBehavior: 'contain' // Prevent scroll chaining
         }}
         onWheel={(e) => {
-          // Prevent scroll from bubbling up to parent elements
           e.stopPropagation();
-          
-          // Ensure smooth scrolling with mouse wheel
-          const container = e.currentTarget;
-          const scrollAmount = e.deltaY * 0.5; // Reduce scroll speed for better control
-          container.scrollTop += scrollAmount;
-          
-          // Prevent default browser scrolling
-          e.preventDefault();
         }}
         onScroll={(e) => {
-          // Ensure scroll events are handled properly
           e.stopPropagation();
         }}
       >
@@ -578,8 +591,11 @@ const Select2 = ({
                     border: isOptionSelected ? '1px solid var(--primary-color)' : '1px solid transparent',
                     transition: 'all 0.2s ease'
                   }}
-                  onClick={() => handleSelect(option)}
-                  onMouseEnter={() => setHighlightedIndex(index)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSelect(option);
+                  }}
                 >
                   <div>
                     <div className="font-medium text-sm" style={{ 
@@ -683,9 +699,18 @@ const Select2 = ({
                 )}
               </div>
             ) : (
-              <span style={{ 
-                color: getDisplayValue() ? 'var(--text-primary)' : 'var(--text-secondary)' 
-              }}>
+              <span 
+                style={{ 
+                  color: getDisplayValue() ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  display: 'block',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '100%',
+                  lineHeight: '1.5'
+                }}
+                title={getDisplayValue() || placeholder} // Show full text on hover
+              >
                 {getDisplayValue() || placeholder}
               </span>
             )}

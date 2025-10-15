@@ -78,7 +78,7 @@ class PackageFeatureController extends Controller
         }
     }
 
-    public function edit(Package $package)
+    public function edit(Request $request, Package $package)
     {
         // Check if user has permission to can_edit
         $this->requirePermission($request, null, 'can_edit');

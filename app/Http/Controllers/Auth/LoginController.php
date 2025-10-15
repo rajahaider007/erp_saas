@@ -201,6 +201,10 @@ class LoginController extends Controller
                 ->where('id', $user->id)
                 ->update($updateData);
 
+            // Create User model instance and login with Laravel's auth system
+            $userModel = \App\Models\User::find($user->id);
+            auth()->login($userModel, $validated['remember_me'] ?? false);
+            
             $request->session()->put('auth_token', $token);
             $request->session()->put('user_id', $user->id);
             $request->session()->put('user_comp_id', $user->comp_id);
@@ -464,7 +468,7 @@ class LoginController extends Controller
                 'email' => $user->email,
                 'loginid' => $user->loginid,
                 'role' => $user->role,
-                'permissions' => json_decode($user->permissions, true),
+                'permissions' => is_string($user->permissions) ? json_decode($user->permissions, true) : $user->permissions,
                 'timezone' => $user->timezone ?? 'UTC',
                 'language' => $user->language ?? 'en',
                 'currency' => $user->currency ?? 'USD',

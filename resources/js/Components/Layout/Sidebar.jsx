@@ -144,7 +144,8 @@ const Sidebar = () => {
   const [loadingModuleData, setLoadingModuleData] = React.useState(false);
 
   // Get props at component level
-  const { availableMenus, auth, modules } = usePage().props;
+  const { availableMenus, auth, availableModules } = usePage().props;
+  const modules = availableModules;
   const user = auth?.user;
 
   // Function to detect if we're in a module-specific URL
@@ -190,16 +191,10 @@ const Sidebar = () => {
           const moduleName = getCurrentModuleName(url);
           return `/${moduleName}`;
         }
-        return '/dashboard';
+        return '/system/dashboard';
       };
 
       const navItems = [
-        {
-          name: 'ERP Modules',
-          href: '/erp-modules',
-          icon: Package,
-          current: url === '/erp-modules'
-        },
         {
           name: 'Dashboard',
           href: getDashboardHref(),
@@ -209,7 +204,7 @@ const Sidebar = () => {
       ];
 
       // Add ERP Modules link if user has access
-      if (canView('/erp-modules')) {
+      if (canView('/system/AddModules')) {
         navItems.push({
           name: 'ERP Modules',
           href: '/erp-modules',

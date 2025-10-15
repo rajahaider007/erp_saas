@@ -116,7 +116,7 @@ class LocationController extends Controller
         return redirect()->route('system.locations.index')->with('success', 'Location "'.$location->location_name.'" created.');
     }
 
-    public function edit(Location $location)
+    public function edit(Request $request, Location $location)
     {
         $this->checkAccess();
         

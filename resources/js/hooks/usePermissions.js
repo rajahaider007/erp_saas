@@ -9,12 +9,14 @@ export const usePermissions = () => {
   const { auth, userRights, availableMenus } = usePage().props;
   
   
+  
   // Create a map of menu permissions for quick lookup
   const menuPermissions = useMemo(() => {
     const permissions = {};
     
-    if (userRights && Array.isArray(userRights)) {
-      userRights.forEach(right => {
+    if (userRights && typeof userRights === 'object') {
+      // userRights is an object, not an array
+      Object.values(userRights).forEach(right => {
         permissions[right.menu_id] = {
           can_view: right.can_view || false,
           can_add: right.can_add || false,
@@ -23,7 +25,6 @@ export const usePermissions = () => {
         };
       });
     }
-    
     return permissions;
   }, [userRights]);
 
@@ -38,6 +39,7 @@ export const usePermissions = () => {
         }
       });
     }
+    
     
     return permissions;
   }, [availableMenus, menuPermissions]);
@@ -54,6 +56,8 @@ export const usePermissions = () => {
       const menu = availableMenus?.find(m => m.route === menuId);
       if (menu) {
         menuId = menu.id;
+      } else {
+        return false;
       }
     }
     

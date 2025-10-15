@@ -125,7 +125,7 @@ class CurrencyController extends Controller
     /**
      * Show the form for editing the specified currency.
      */
-    public function edit(Currency $currency)
+    public function edit(Request $request, Currency $currency)
     {
         // Check if user has permission to can_edit
         $this->requirePermission($request, null, 'can_edit');

@@ -7,20 +7,41 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use App\Services\AuthLogger;
 
 class WebAuthentication
 {
     public function handle(Request $request, Closure $next)
     {
+        AuthLogger::logAuthEvent('Authentication check started', [
+            'url' => $request->url(),
+            'method' => $request->method(),
+            'session_id' => session()->getId(),
+            'user_id_session' => session('user_id')
+        ]);
+
         $user = $this->getAuthenticatedUser($request);
 
         if (!$user) {
+            AuthLogger::logAuthEvent('Authentication failed - no user found', [
+                'url' => $request->url(),
+                'session_id' => session()->getId(),
+                'user_id_session' => session('user_id'),
+                'auth_check' => auth()->check()
+            ]);
+            
             // For web requests, always redirect to login
             if ($request->expectsJson() || $request->header('X-Inertia')) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
             return redirect()->route('login')->with('error', 'Please log in to access this resource.');
         }
+
+        AuthLogger::logUserAuth('User authenticated successfully', $user->id, [
+            'user_role' => $user->role,
+            'user_status' => $user->status,
+            'url' => $request->url()
+        ]);
 
         // ... locked account check ...
 
@@ -29,7 +50,12 @@ class WebAuthentication
         
         // Convert user object to array to avoid stdClass issues
         $userArray = (array) $user;
-        $permissions = json_decode($user->permissions, true);
+        
+        // Handle permissions - they might be an array (from Eloquent) or JSON string (from DB query)
+        $permissions = $user->permissions;
+        if (is_string($permissions)) {
+            $permissions = json_decode($permissions, true);
+        }
         if (!is_array($permissions)) {
             $permissions = [];
         }
@@ -54,15 +80,19 @@ class WebAuthentication
     private function getAuthenticatedUser($request)
     {
         try {
-            // 1. Check for user ID in session
+            // 1. First try Laravel's built-in auth system
+            if (auth()->check()) {
+                return auth()->user();
+            }
+
+            // 2. Fallback: Check for user ID in session
             $userId = $request->session()->get('user_id');
             if (!$userId) {
                 return null;
             }
 
-            // 2. Retrieve user by ID
-            return DB::table('tbl_users')
-                ->where('id', $userId)
+            // 3. Retrieve user by ID using Eloquent model
+            return \App\Models\User::where('id', $userId)
                 ->where('status', 'active')
                 ->first();
 

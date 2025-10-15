@@ -73,7 +73,7 @@ class MenuController extends Controller
         return redirect()->route('system.menus.index')->with('success', 'Menu "'.$menu->menu_name.'" created.');
     }
 
-    public function edit(Menu $menu)
+    public function edit(Request $request, Menu $menu)
     {
         // Check if user has permission to can_edit
         $this->requirePermission($request, null, 'can_edit');

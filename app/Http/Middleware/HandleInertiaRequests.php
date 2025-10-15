@@ -37,7 +37,7 @@ class HandleInertiaRequests extends Middleware
         $userId = $request->session()->get('user_id');
         
         if ($userId) {
-            $user = DB::table('tbl_users')->where('id', $userId)->where('status', 'active')->first();
+            $user = \App\Models\User::where('id', $userId)->where('status', 'active')->first();
         }
         
         // If no user is authenticated, return minimal shared data

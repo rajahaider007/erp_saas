@@ -263,7 +263,7 @@ class ModuleController extends Controller
     /**
      * Display the specified module
      */
-    public function show(Module $module)
+    public function show(Request $request, Module $module)
     {
         // Check if user has permission to can_view
         $this->requirePermission($request, null, 'can_view');
@@ -280,7 +280,7 @@ class ModuleController extends Controller
     /**
      * Show the form for editing the specified module
      */
-    public function edit(Module $module)
+    public function edit(Request $request, Module $module)
     {
         // Check if user has permission to can_edit
         $this->requirePermission($request, null, 'can_edit');

@@ -70,6 +70,26 @@ const CodeConfigurationForm = () => {
         
         setFilteredLocations(filtered);
       }
+
+      // Load accounts for the existing company and location
+      if (configuration.company_id && configuration.location_id) {
+        const url = `/system/chart-of-accounts/accounts-by-company-location?company_id=${configuration.company_id}&location_id=${configuration.location_id}`;
+        
+        console.log('Loading accounts for edit mode:', { company_id: configuration.company_id, location_id: configuration.location_id, url });
+        setLoadingAccounts(true);
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+            console.log('Accounts loaded for edit mode:', data.data);
+            setAccounts(data.data || []);
+            setLoadingAccounts(false);
+          })
+          .catch(error => {
+            console.error('Failed to load accounts:', error);
+            setAccounts([]);
+            setLoadingAccounts(false);
+          });
+      }
     } else if (!isEditMode && locations && locations.length > 0) {
       // In create mode, show all locations initially
       setFilteredLocations(locations);
@@ -233,13 +253,13 @@ const CodeConfigurationForm = () => {
     setRequestStatus('Sending request...');
 
     const newErrors = {};
-    if (!submittedFormData.company_id || !submittedFormData.company_id.trim()) {
+    if (!submittedFormData.company_id || (typeof submittedFormData.company_id === 'string' && !submittedFormData.company_id.trim())) {
       newErrors.company_id = 'Company is required';
     }
-    if (!submittedFormData.location_id || !submittedFormData.location_id.trim()) {
+    if (!submittedFormData.location_id || (typeof submittedFormData.location_id === 'string' && !submittedFormData.location_id.trim())) {
       newErrors.location_id = 'Location is required';
     }
-    if (!submittedFormData.code_type || !submittedFormData.code_type.trim()) {
+    if (!submittedFormData.code_type || (typeof submittedFormData.code_type === 'string' && !submittedFormData.code_type.trim())) {
       newErrors.code_type = 'Code type is required';
     }
 

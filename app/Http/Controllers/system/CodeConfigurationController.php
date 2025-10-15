@@ -172,7 +172,7 @@ class CodeConfigurationController extends Controller
     /**
      * Show the form for creating a new code configuration.
      */
-    public function create()
+    public function create(Request $request)
     {
         // Check if user has permission to can_add
         $this->requirePermission($request, null, 'can_add');
@@ -192,10 +192,37 @@ class CodeConfigurationController extends Controller
         // Available code types
         $codeTypes = $this->getCodeTypes();
 
+        // Get account codes (Level 3 and 4 only) for the first company and location
+        $accountCodes = [];
+        if ($companies->isNotEmpty() && $locations->isNotEmpty()) {
+            $firstCompany = $companies->first();
+            $firstLocation = $locations->where('company_id', $firstCompany->id)->first();
+            
+            if ($firstLocation) {
+                $accountCodes = \App\Models\ChartOfAccount::where('comp_id', $firstCompany->id)
+                    ->where('location_id', $firstLocation->id)
+                    ->whereIn('account_level', [3, 4])
+                    ->where('status', 'Active')
+                    ->orderBy('account_level')
+                    ->orderBy('account_name')
+                    ->get(['id', 'account_code', 'account_name', 'account_level'])
+                    ->map(function($account) {
+                        return [
+                            'value' => $account->id,
+                            'label' => $account->account_code . ' - ' . $account->account_name,
+                            'account_code' => $account->account_code,
+                            'account_name' => $account->account_name,
+                            'account_level' => $account->account_level
+                        ];
+                    });
+            }
+        }
+
         return Inertia::render('system/CodeConfiguration/Create', [
             'companies' => $companies,
             'locations' => $locations,
             'codeTypes' => $codeTypes,
+            'accountCodes' => $accountCodes,
         ]);
     }
 
@@ -248,7 +275,18 @@ class CodeConfigurationController extends Controller
         // Remove account_id from validated data as it's not a column in the table
         unset($validated['account_id']);
 
-        $validated['created_by'] = Auth::id();
+        // Get the authenticated user ID from session (since we use session-based auth)
+        $userId = session('user_id');
+        
+        // Verify the user exists in the database
+        if ($userId) {
+            $userExists = \App\Models\User::where('id', $userId)->exists();
+            if (!$userExists) {
+                $userId = null; // Set to null if user doesn't exist
+            }
+        }
+        
+        $validated['created_by'] = $userId;
         
         // Set default values for optional fields
         $validated['code_name'] = $validated['code_name'] ?? $validated['code_type'];
@@ -261,8 +299,9 @@ class CodeConfigurationController extends Controller
 
         // Log the activity
         $this->auditLogService->log(
-            'code_configuration',
             'create',
+            'System',
+            'code_configurations',
             $configuration->id,
             null,
             $validated,
@@ -276,7 +315,7 @@ class CodeConfigurationController extends Controller
     /**
      * Display the specified code configuration.
      */
-    public function show(CodeConfiguration $codeConfiguration)
+    public function show(Request $request, CodeConfiguration $codeConfiguration)
     {
         // Check if user has permission to can_view
         $this->requirePermission($request, null, 'can_view');
@@ -295,7 +334,7 @@ class CodeConfigurationController extends Controller
     /**
      * Show the form for editing the specified code configuration.
      */
-    public function edit(CodeConfiguration $codeConfiguration)
+    public function edit(Request $request, CodeConfiguration $codeConfiguration)
     {
         // Check if user has permission to can_edit
         $this->requirePermission($request, null, 'can_edit');
@@ -315,11 +354,33 @@ class CodeConfigurationController extends Controller
         // Available code types
         $codeTypes = $this->getCodeTypes();
 
+        // Get account codes (Level 3 and 4 only) for the configuration's company and location
+        $accountCodes = [];
+        if ($codeConfiguration->company_id && $codeConfiguration->location_id) {
+            $accountCodes = \App\Models\ChartOfAccount::where('comp_id', $codeConfiguration->company_id)
+                ->where('location_id', $codeConfiguration->location_id)
+                ->whereIn('account_level', [3, 4])
+                ->where('status', 'Active')
+                ->orderBy('account_level')
+                ->orderBy('account_name')
+                ->get(['id', 'account_code', 'account_name', 'account_level'])
+                ->map(function($account) {
+                    return [
+                        'value' => $account->id,
+                        'label' => $account->account_code . ' - ' . $account->account_name,
+                        'account_code' => $account->account_code,
+                        'account_name' => $account->account_name,
+                        'account_level' => $account->account_level
+                    ];
+                });
+        }
+
         return Inertia::render('system/CodeConfiguration/Edit', [
             'configuration' => $codeConfiguration,
             'companies' => $companies,
             'locations' => $locations,
             'codeTypes' => $codeTypes,
+            'accountCodes' => $accountCodes,
         ]);
     }
 
@@ -374,7 +435,18 @@ class CodeConfigurationController extends Controller
         unset($validated['account_id']);
 
         $oldData = $codeConfiguration->toArray();
-        $validated['updated_by'] = Auth::id();
+        // Get the authenticated user ID from session (since we use session-based auth)
+        $userId = session('user_id');
+        
+        // Verify the user exists in the database
+        if ($userId) {
+            $userExists = \App\Models\User::where('id', $userId)->exists();
+            if (!$userExists) {
+                $userId = null; // Set to null if user doesn't exist
+            }
+        }
+        
+        $validated['updated_by'] = $userId;
         
         // Preserve existing values for fields not in the form
         $validated['code_name'] = $codeConfiguration->code_name ?? $validated['code_type'];
@@ -387,8 +459,9 @@ class CodeConfigurationController extends Controller
 
         // Log the activity
         $this->auditLogService->log(
-            'code_configuration',
             'update',
+            'System',
+            'code_configurations',
             $codeConfiguration->id,
             $oldData,
             $validated,
@@ -402,7 +475,7 @@ class CodeConfigurationController extends Controller
     /**
      * Remove the specified code configuration.
      */
-    public function destroy(CodeConfiguration $codeConfiguration)
+    public function destroy(Request $request, CodeConfiguration $codeConfiguration)
     {
         // Check if user has permission to can_delete
         $this->requirePermission($request, null, 'can_delete');
@@ -413,14 +486,16 @@ class CodeConfigurationController extends Controller
 
         $oldData = $codeConfiguration->toArray();
         $configName = $codeConfiguration->code_name;
+        $recordId = $codeConfiguration->id; // Get ID before deletion
 
         $codeConfiguration->delete();
 
         // Log the activity
         $this->auditLogService->log(
-            'code_configuration',
             'delete',
-            $codeConfiguration->id,
+            'System',
+            'code_configurations',
+            $recordId,
             $oldData,
             null,
             'Code configuration deleted: ' . $configName

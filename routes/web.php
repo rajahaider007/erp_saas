@@ -66,7 +66,7 @@ Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/dashboard', function (Request $request) {
-    return Inertia::render('dashboard/index');
+    return redirect('/system/dashboard');
 })->middleware('web.auth')->name('dashboard');
 
 // Modules page - ERP modules selection
@@ -260,6 +260,11 @@ Route::get('/system/dashboard', [App\Http\Controllers\DashboardController::class
 
 // Dynamic Module Dashboards
 Route::get('/{module}/dashboard', [App\Http\Controllers\DashboardController::class, 'moduleDashboard'])->middleware('web.auth')->name('module.dashboard');
+
+// Debug route
+Route::get('/debug-permissions', function () {
+    return Inertia::render('DebugPermissions');
+})->middleware('web.auth');
 
 // System Module Management Routes (ADD MISSING EDIT ROUTE)
 Route::get('/system/AddModules', [ModuleController::class, 'index'])->middleware('web.auth')->name('system.add_modules');

@@ -64,7 +64,12 @@ class ChartOfAccountController extends Controller
             'location_id' => 'required|exists:locations,id',
         ]);
 
-        $accounts = ChartOfAccount::getAccountsForCompanyLocation($request->company_id, $request->location_id)
+        $accounts = ChartOfAccount::where('comp_id', $request->company_id)
+            ->where('location_id', $request->location_id)
+            ->whereIn('account_level', [3, 4])
+            ->where('status', 'Active')
+            ->orderBy('account_level')
+            ->orderBy('account_name')
             ->get(['id', 'account_code', 'account_name', 'account_type', 'account_level', 'parent_account_id']);
 
         return response()->json(['data' => $accounts]);

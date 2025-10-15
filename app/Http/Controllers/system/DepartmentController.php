@@ -99,7 +99,7 @@ class DepartmentController extends Controller
         return redirect()->route('system.departments.index')->with('success', 'Department "'.$department->department_name.'" created.');
     }
 
-    public function edit(Department $department)
+    public function edit(Request $request, Department $department)
     {
         return Inertia::render('system/Departments/create', [
             'department' => $department,

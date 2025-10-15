@@ -105,7 +105,7 @@ class PackageController extends Controller
         return redirect()->route('system.packages.index')->with('success', 'Package "'.$package->package_name.'" created.');
     }
 
-    public function edit(Package $package)
+    public function edit(Request $request, Package $package)
     {
         // Check if user has permission to can_edit
         $this->requirePermission($request, null, 'can_edit');

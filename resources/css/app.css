@@ -11,6 +11,57 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Select2 Scroll Fix */
+.select2-dropdown-scroll {
+  scroll-behavior: auto !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.select2-dropdown-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.select2-dropdown-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.select2-dropdown-scroll::-webkit-scrollbar-thumb {
+  background: var(--border, #e5e7eb);
+  border-radius: 3px;
+}
+
+.select2-dropdown-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary, #6b7280);
+}
+
+/* Select2 Text Truncation Fix */
+.select2-container-fixed .form-select {
+  height: 48px !important; /* Fixed height for consistency */
+  min-height: 48px !important;
+  max-height: 48px !important;
+  overflow: hidden !important;
+}
+
+.select2-container-fixed .form-select > div {
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.select2-container-fixed .form-select .flex-1 {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Ensure dropdown options show full text */
+.select2-dropdown-fixed .select2-dropdown-scroll > div {
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
 /* Change Details Page - Fix Text Visibility */
 .change-details-container .bg-white {
     background-color: #ffffff !important;

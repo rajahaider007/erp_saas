@@ -71,7 +71,7 @@ const Edit = () => {
         <div className="p-6">
           <PermissionAwareForm
             requiredPermission="can_edit"
-            route="/modules"
+            route="/system/AddModules"
             fallbackMessage="You don't have permission to edit modules. Please contact your administrator."
           >
             <EditModuleForm />
