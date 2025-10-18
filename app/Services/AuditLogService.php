@@ -654,7 +654,7 @@ class AuditLogService
      */
     public static function logAttachment(
         string $action,
-        int $recordId,
+        ?int $recordId,
         array $data,
         ?array $oldData = null
     ): bool {

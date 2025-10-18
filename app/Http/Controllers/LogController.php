@@ -25,8 +25,10 @@ class LogController extends Controller
         $module = $request->input('module');
         $action = $request->input('action');
         $userId = $request->input('user_id');
-        $fromDate = $request->input('from_date');
-        $toDate = $request->input('to_date');
+        
+        // Set default to current date range if no dates provided (last 7 days to today)
+        $fromDate = $request->input('from_date', now()->subDays(7)->format('Y-m-d'));
+        $toDate = $request->input('to_date', now()->format('Y-m-d'));
         $perPage = $request->input('per_page', 25);
 
         // For parent companies, allow company/location selection
@@ -35,6 +37,11 @@ class LogController extends Controller
         
         $companyId = $request->input('comp_id') ?? session('user_comp_id');
         $locationId = $request->input('location_id') ?? session('user_location_id');
+        
+        // Ensure company filtering is enforced - only show data for selected company
+        if (!$companyId) {
+            $companyId = session('user_comp_id');
+        }
         
         // Debug logging
         Log::info('Activity Logs Query', [
@@ -270,8 +277,10 @@ class LogController extends Controller
     {
         $eventType = $request->input('event_type');
         $riskLevel = $request->input('risk_level');
-        $fromDate = $request->input('from_date');
-        $toDate = $request->input('to_date');
+        
+        // Set default to current date range if no dates provided (last 7 days to today)
+        $fromDate = $request->input('from_date', now()->subDays(7)->format('Y-m-d'));
+        $toDate = $request->input('to_date', now()->format('Y-m-d'));
         $perPage = $request->input('per_page', 25);
 
         // For parent companies, allow company/location selection
@@ -280,6 +289,11 @@ class LogController extends Controller
         
         $companyId = $request->input('comp_id') ?? session('user_comp_id');
         $locationId = $request->input('location_id') ?? session('user_location_id');
+        
+        // Ensure company filtering is enforced - only show data for selected company
+        if (!$companyId) {
+            $companyId = session('user_comp_id');
+        }
 
         $query = DB::table('tbl_security_logs as sl')
             ->leftJoin('tbl_users as u', 'sl.user_id', '=', 'u.id')
@@ -352,8 +366,12 @@ class LogController extends Controller
      */
     public function reports(Request $request)
     {
-        $fromDate = $request->input('from_date', now()->subDays(30)->format('Y-m-d'));
+        // Set default to current date range if no dates provided (last 7 days to today)
+        $fromDate = $request->input('from_date', now()->subDays(7)->format('Y-m-d'));
         $toDate = $request->input('to_date', now()->format('Y-m-d'));
+        
+        // Ensure company filtering is enforced
+        $companyId = session('user_comp_id');
 
         // Activity summary by module
         $activityByModule = DB::table('tbl_audit_logs')

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Services\AuditLogService;
+use App\Services\StorageService;
 
 class AttachmentController extends Controller
 {
@@ -19,14 +20,48 @@ class AttachmentController extends Controller
         Log::info('=== ATTACHMENT UPLOAD STARTED ===');
         
         try {
-            $request->validate([
-                'attachments.*' => 'required|file|max:300|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif'
-            ]);
+            // Handle both multiple files (attachments.*) and single file (attachment)
+            if ($request->hasFile('attachments')) {
+                $request->validate([
+                    'attachments.*' => 'required|file|max:300|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif'
+                ]);
+            } elseif ($request->hasFile('attachment')) {
+                $request->validate([
+                    'attachment' => 'required|file|max:300|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No files provided'
+                ], 422);
+            }
 
             $uploadedAttachments = [];
             $userId = session('user_id');
             $compId = session('user_comp_id');
             $locationId = session('user_location_id');
+
+            // Check storage limits before processing files
+            $filesToCheck = [];
+            if ($request->hasFile('attachments')) {
+                $filesToCheck = $request->file('attachments');
+            } elseif ($request->hasFile('attachment')) {
+                $filesToCheck = [$request->file('attachment')];
+            }
+
+            foreach ($filesToCheck as $file) {
+                $uploadCheck = StorageService::canUploadFile($compId, $file->getSize());
+                if (!$uploadCheck['can_upload']) {
+                    $storageInfo = $uploadCheck['current_usage'];
+                    $warningMessage = StorageService::getStorageWarningMessage($compId);
+                    
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Storage limit exceeded. ' . $warningMessage,
+                        'storage_info' => $storageInfo
+                    ], 413); // 413 Payload Too Large
+                }
+            }
 
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
@@ -71,6 +106,49 @@ class AttachmentController extends Controller
                         ]);
                     }
                 }
+            } elseif ($request->hasFile('attachment')) {
+                // Handle single file upload (for entry attachments)
+                $file = $request->file('attachment');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('public/voucher-attachments', $filename);
+                
+                $attachmentData = [
+                    'id' => $filename, // Use filename as ID for now
+                    'filename' => $filename,
+                    'original_name' => $file->getClientOriginalName(),
+                    'path' => $path,
+                    'size' => $file->getSize(),
+                    'mime_type' => $file->getMimeType(),
+                    'url' => url('storage/voucher-attachments/' . $filename)
+                ];
+                
+                $uploadedAttachments[] = $attachmentData;
+                
+                // Log file upload
+                try {
+                    AuditLogService::logAttachment('UPLOAD', null, [
+                        'filename' => $filename,
+                        'original_name' => $file->getClientOriginalName(),
+                        'file_size' => $file->getSize(),
+                        'mime_type' => $file->getMimeType(),
+                        'storage_path' => $path,
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->header('User-Agent'),
+                        'comp_id' => $compId,
+                        'location_id' => $locationId
+                    ]);
+                    Log::info('Single file uploaded successfully', [
+                        'filename' => $filename,
+                        'original_name' => $file->getClientOriginalName(),
+                        'size' => $file->getSize(),
+                        'user_id' => $userId
+                    ]);
+                } catch (\Exception $auditException) {
+                    Log::warning('Failed to create audit log for single file upload', [
+                        'filename' => $filename,
+                        'error' => $auditException->getMessage()
+                    ]);
+                }
             }
 
             return response()->json([
@@ -81,7 +159,7 @@ class AttachmentController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::warning('Attachment upload validation failed', [
                 'errors' => $e->errors(),
-                'files_count' => $request->hasFile('attachments') ? count($request->file('attachments')) : 0
+                'files_count' => $request->hasFile('attachments') ? count($request->file('attachments')) : ($request->hasFile('attachment') ? 1 : 0)
             ]);
             return response()->json([
                 'success' => false,
@@ -91,7 +169,7 @@ class AttachmentController extends Controller
             Log::error('Error uploading attachments', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'files_count' => $request->hasFile('attachments') ? count($request->file('attachments')) : 0
+                'files_count' => $request->hasFile('attachments') ? count($request->file('attachments')) : ($request->hasFile('attachment') ? 1 : 0)
             ]);
             return response()->json([
                 'success' => false,
@@ -307,6 +385,74 @@ class AttachmentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error listing attachments: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get storage usage for a company
+     */
+    public function getStorageUsage(Request $request, $companyId)
+    {
+        try {
+            // Check if user has access to this company
+            $userCompId = session('user_comp_id');
+            if ($userCompId != $companyId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access to company storage data'
+                ], 403);
+            }
+
+            $storageInfo = StorageService::getCompanyStorageUsage($companyId);
+            
+            return response()->json([
+                'success' => true,
+                'data' => $storageInfo
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting storage usage', [
+                'company_id' => $companyId,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving storage information'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get detailed storage breakdown for a company
+     */
+    public function getStorageBreakdown(Request $request, $companyId)
+    {
+        try {
+            // Check if user has access to this company
+            $userCompId = session('user_comp_id');
+            if ($userCompId != $companyId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access to company storage data'
+                ], 403);
+            }
+
+            $breakdown = StorageService::getStorageBreakdown($companyId);
+            
+            return response()->json([
+                'success' => true,
+                'data' => $breakdown
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting storage breakdown', [
+                'company_id' => $companyId,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving storage breakdown'
             ], 500);
         }
     }

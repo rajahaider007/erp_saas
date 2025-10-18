@@ -12,8 +12,8 @@ export default function ActivityLogs({ logs, users, companies = [], locations = 
     const [module, setModule] = useState(filters.module || '');
     const [action, setAction] = useState(filters.action || '');
     const [userId, setUserId] = useState(filters.user_id || '');
-    const [fromDate, setFromDate] = useState(filters.from_date ? new Date(filters.from_date) : null);
-    const [toDate, setToDate] = useState(filters.to_date ? new Date(filters.to_date) : null);
+    const [fromDate, setFromDate] = useState(filters.from_date ? new Date(filters.from_date) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+    const [toDate, setToDate] = useState(filters.to_date ? new Date(filters.to_date) : new Date());
     const [perPage, setPerPage] = useState(filters.per_page || 25);
 
     // Handle company selection and fetch locations
@@ -71,8 +71,8 @@ export default function ActivityLogs({ logs, users, companies = [], locations = 
         setModule('');
         setAction('');
         setUserId('');
-        setFromDate(null);
-        setToDate(null);
+        setFromDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+        setToDate(new Date());
         setPerPage(25);
         
         router.get(route('logs.activity'), {}, {
@@ -137,38 +137,42 @@ export default function ActivityLogs({ logs, users, companies = [], locations = 
                     <div className="filters-row">
                         {/* Company Filter - Only for Parent Companies */}
                         {isParentCompany && (
-                            <select
-                                className="filter-select custom-select"
-                                value={selectedCompany?.value || ''}
-                                onChange={(e) => {
-                                    const company = companies.find(c => c.id.toString() === e.target.value);
-                                    handleCompanyChange(company ? { value: company.id, label: company.company_name } : null);
-                                }}
-                                style={{color: '#F1F5F9', backgroundColor: 'rgba(30, 41, 59, 0.8)', border: '2px solid rgba(148, 163, 184, 0.3)', borderRadius: '12px', padding: '0.875rem 1rem', fontSize: '0.875rem', fontWeight: '500', cursor: 'pointer', width: '100%', display: 'block', boxSizing: 'border-box'}}
-                            >
-                                <option value="">All Companies</option>
-                                {companies.map(company => (
-                                    <option key={company.id} value={company.id}>{company.company_name}</option>
-                                ))}
-                            </select>
+                            <div className="filter-group">
+                                <label className="filter-label">Company</label>
+                                <select
+                                    className="filter-select"
+                                    value={selectedCompany?.value || ''}
+                                    onChange={(e) => {
+                                        const company = companies.find(c => c.id.toString() === e.target.value);
+                                        handleCompanyChange(company ? { value: company.id, label: company.company_name } : null);
+                                    }}
+                                >
+                                    <option value="">All Companies</option>
+                                    {companies.map(company => (
+                                        <option key={company.id} value={company.id}>{company.company_name}</option>
+                                    ))}
+                                </select>
+                            </div>
                         )}
 
                         {/* Location Filter - Only shown after company selection */}
                         {isParentCompany && selectedCompany && (
-                            <select
-                                className="filter-select custom-select"
-                                value={selectedLocation?.value || ''}
-                                onChange={(e) => {
-                                    const location = availableLocations.find(l => l.id.toString() === e.target.value);
-                                    setSelectedLocation(location ? { value: location.id, label: location.location_name } : null);
-                                }}
-                                style={{color: '#F1F5F9', backgroundColor: 'rgba(30, 41, 59, 0.8)', border: '2px solid rgba(148, 163, 184, 0.3)', borderRadius: '12px', padding: '0.875rem 1rem', fontSize: '0.875rem', fontWeight: '500', cursor: 'pointer', width: '100%', display: 'block', boxSizing: 'border-box'}}
-                            >
-                                <option value="">All Locations</option>
-                                {availableLocations.map(location => (
-                                    <option key={location.id} value={location.id}>{location.location_name}</option>
-                                ))}
-                            </select>
+                            <div className="filter-group">
+                                <label className="filter-label">Location</label>
+                                <select
+                                    className="filter-select"
+                                    value={selectedLocation?.value || ''}
+                                    onChange={(e) => {
+                                        const location = availableLocations.find(l => l.id.toString() === e.target.value);
+                                        setSelectedLocation(location ? { value: location.id, label: location.location_name } : null);
+                                    }}
+                                >
+                                    <option value="">All Locations</option>
+                                    {availableLocations.map(location => (
+                                        <option key={location.id} value={location.id}>{location.location_name}</option>
+                                    ))}
+                                </select>
+                            </div>
                         )}
 
                         {/* Search */}
@@ -185,56 +189,84 @@ export default function ActivityLogs({ logs, users, companies = [], locations = 
                         </div>
 
                         {/* Module Filter */}
-                        <select
-                            className="filter-select custom-select"
-                            value={module}
-                            onChange={(e) => setModule(e.target.value)}
-                            style={{color: '#F1F5F9', backgroundColor: 'rgba(30, 41, 59, 0.8)', border: '2px solid rgba(148, 163, 184, 0.3)', borderRadius: '12px', padding: '0.875rem 1rem', fontSize: '0.875rem', fontWeight: '500', cursor: 'pointer', width: '100%', display: 'block', boxSizing: 'border-box'}}
-                        >
-                            <option value="">All Modules</option>
-                            <option value="Accounts">Accounts</option>
-                            <option value="System">System</option>
-                            <option value="Recovery">Recovery</option>
-                        </select>
+                        <div className="filter-group">
+                            <label className="filter-label">Module</label>
+                            <select
+                                className="filter-select"
+                                value={module}
+                                onChange={(e) => setModule(e.target.value)}
+                            >
+                                <option value="">All Modules</option>
+                                <option value="Accounts">Accounts</option>
+                                <option value="System">System</option>
+                                <option value="Recovery">Recovery</option>
+                            </select>
+                        </div>
 
                         {/* Action Filter */}
-                        <select
-                            className="filter-select custom-select"
-                            value={action}
-                            onChange={(e) => setAction(e.target.value)}
-                            style={{color: '#F1F5F9', backgroundColor: 'rgba(30, 41, 59, 0.8)', border: '2px solid rgba(148, 163, 184, 0.3)', borderRadius: '12px', padding: '0.875rem 1rem', fontSize: '0.875rem', fontWeight: '500', cursor: 'pointer', width: '100%', display: 'block', boxSizing: 'border-box'}}
-                        >
-                            <option value="">All Actions</option>
-                            <option value="CREATE">CREATE</option>
-                            <option value="UPDATE">UPDATE</option>
-                            <option value="DELETE">DELETE</option>
-                            <option value="POST">POST</option>
-                            <option value="UNPOST">UNPOST</option>
-                            <option value="APPROVE">APPROVE</option>
-                            <option value="REJECT">REJECT</option>
-                        </select>
+                        <div className="filter-group">
+                            <label className="filter-label">Action</label>
+                            <select
+                                className="filter-select"
+                                value={action}
+                                onChange={(e) => setAction(e.target.value)}
+                            >
+                                <option value="">All Actions</option>
+                                <option value="CREATE">CREATE</option>
+                                <option value="UPDATE">UPDATE</option>
+                                <option value="DELETE">DELETE</option>
+                                <option value="POST">POST</option>
+                                <option value="UNPOST">UNPOST</option>
+                                <option value="APPROVE">APPROVE</option>
+                                <option value="REJECT">REJECT</option>
+                            </select>
+                        </div>
 
                         {/* User Filter */}
-                        <select
-                            className="filter-select custom-select"
-                            value={userId}
-                            onChange={(e) => setUserId(e.target.value)}
-                            style={{color: '#F1F5F9', backgroundColor: 'rgba(30, 41, 59, 0.8)', border: '2px solid rgba(148, 163, 184, 0.3)', borderRadius: '12px', padding: '0.875rem 1rem', fontSize: '0.875rem', fontWeight: '500', cursor: 'pointer', width: '100%', display: 'block', boxSizing: 'border-box'}}
-                        >
-                            <option value="">All Users</option>
-                            {users.map(user => (
-                                <option key={user.id} value={user.id}>{user.name}</option>
-                            ))}
-                        </select>
+                        <div className="filter-group">
+                            <label className="filter-label">User</label>
+                            <select
+                                className="filter-select"
+                                value={userId}
+                                onChange={(e) => setUserId(e.target.value)}
+                            >
+                                <option value="">All Users</option>
+                                {users.map(user => (
+                                    <option key={user.id} value={user.id}>{user.name}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* From Date Filter */}
+                        <div className="date-filter-container">
+                            <label className="date-filter-label">From Date</label>
+                            <input
+                                type="date"
+                                className="date-filter-input"
+                                value={fromDate ? fromDate.toISOString().split('T')[0] : ''}
+                                onChange={(e) => setFromDate(e.target.value ? new Date(e.target.value) : null)}
+                            />
+                        </div>
+
+                        {/* To Date Filter */}
+                        <div className="date-filter-container">
+                            <label className="date-filter-label">To Date</label>
+                            <input
+                                type="date"
+                                className="date-filter-input"
+                                value={toDate ? toDate.toISOString().split('T')[0] : ''}
+                                onChange={(e) => setToDate(e.target.value ? new Date(e.target.value) : null)}
+                            />
+                        </div>
 
                         <div className="view-controls">
-                            <button onClick={handleFilter} className="btn btn-primary btn-sm" style={{color: 'white', fontWeight: '600'}}>
+                            <button onClick={handleFilter} className="btn btn-primary">
                                 <Filter size={16} />
-                                <span style={{color: 'white', fontWeight: '600'}}>Apply</span>
+                                <span>Apply</span>
                             </button>
-                            <button onClick={handleReset} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
+                            <button onClick={handleReset} className="btn btn-secondary">
                                 <RotateCcw size={16} />
-                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Reset</span>
+                                <span>Reset</span>
                             </button>
                         </div>
                     </div>

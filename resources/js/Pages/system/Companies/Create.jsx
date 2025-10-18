@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, Globe, Mail, Phone, MapPin, Calendar, CreditCard, Shield, FileText, Plus, Home, List, Edit, Package, Users } from 'lucide-react';
+import { Building2, Globe, Mail, Phone, MapPin, Calendar, CreditCard, Shield, FileText, Plus, Home, List, Edit, Package, Users, HardDrive } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import PermissionAwareForm, { PermissionButton } from '../../../Components/PermissionAwareForm';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -349,6 +349,19 @@ const CreateCompanyForm = () => {
         { value: 'Yes', label: 'Yes - Parent Company' },
         { value: 'No', label: 'No - Customer Company' }
       ]
+    },
+    
+    // Storage Settings
+    {
+      name: 'attachment_storage_limit_mb',
+      label: 'Attachment Storage Limit (MB)',
+      type: 'number',
+      placeholder: 'Enter storage limit in MB (e.g., 1000)',
+      icon: HardDrive,
+      required: false,
+      min: 1,
+      max: 10000,
+      help: 'Maximum storage space for attachments in megabytes'
     },
   ];
 

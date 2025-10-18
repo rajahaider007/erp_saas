@@ -182,6 +182,19 @@ Route::prefix('api/exchange-rate')->middleware('web.auth')->group(function () {
 // Attachment Upload API Routes
 Route::prefix('api')->middleware('web.auth')->group(function () {
     Route::post('/upload-attachments', [App\Http\Controllers\AttachmentController::class, 'uploadAttachments']);
+    Route::get('/storage-usage/{companyId}', [App\Http\Controllers\AttachmentController::class, 'getStorageUsage']);
+    Route::get('/storage-breakdown/{companyId}', [App\Http\Controllers\AttachmentController::class, 'getStorageBreakdown']);
+});
+
+// Attachment Manager Routes
+Route::prefix('system/attachment-manager')->name('system.attachment-manager.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\system\AttachmentManagerController::class, 'index'])->name('index');
+});
+
+// Attachment Manager API Routes
+Route::prefix('api/attachment-manager')->middleware('web.auth')->group(function () {
+    Route::get('/attachments', [App\Http\Controllers\system\AttachmentManagerController::class, 'getAttachments']);
+    Route::post('/delete', [App\Http\Controllers\system\AttachmentManagerController::class, 'deleteAttachments']);
 });
 
 // Journal Voucher API Routes

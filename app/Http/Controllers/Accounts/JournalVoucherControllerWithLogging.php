@@ -36,7 +36,7 @@ public function store(Request $request)
             'description' => 'nullable|string|max:250',
             'reference_number' => 'nullable|string|max:100',
             'entries' => 'required|array|min:2',
-            'entries.*.account_id' => 'required|integer|exists:chart_of_accounts,id,account_level,3',
+            'entries.*.account_id' => 'required|integer|exists:chart_of_accounts,id,account_level,4',
             'entries.*.description' => 'nullable|string|max:500',
             'entries.*.debit_amount' => 'nullable|numeric|min:0',
             'entries.*.credit_amount' => 'nullable|numeric|min:0',

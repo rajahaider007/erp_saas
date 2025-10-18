@@ -11,8 +11,8 @@ export default function Reports({
     securityIncidents, 
     filters 
 }) {
-    const [fromDate, setFromDate] = useState(filters.from_date ? new Date(filters.from_date) : null);
-    const [toDate, setToDate] = useState(filters.to_date ? new Date(filters.to_date) : null);
+    const [fromDate, setFromDate] = useState(filters.from_date ? new Date(filters.from_date) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+    const [toDate, setToDate] = useState(filters.to_date ? new Date(filters.to_date) : new Date());
     const [reportType, setReportType] = useState(filters.report_type || 'overview');
 
     const handleFilter = () => {
@@ -34,8 +34,8 @@ export default function Reports({
 
     const handleReset = () => {
         console.log('Resetting report filters');
-        setFromDate(null);
-        setToDate(null);
+        setFromDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+        setToDate(new Date());
         setReportType('overview');
         
         router.get(route('logs.reports'), {}, {

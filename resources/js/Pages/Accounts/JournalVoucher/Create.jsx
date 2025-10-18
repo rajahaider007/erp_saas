@@ -19,6 +19,7 @@ import App from '../../App.jsx';
 import FloatingCurrencyWidget from '../../../Components/FloatingCurrencyWidget';
 import Select2 from '../../../Components/Select2';
 import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
+import StorageWarning from '../../../Components/StorageWarning';
 
 // Breadcrumbs Component
 const Breadcrumbs = ({ items }) => {
@@ -71,7 +72,8 @@ const JournalVoucherCreate = () => {
       currency_code: entry.currency_code || company?.default_currency_code || 'PKR',
       exchange_rate: entry.exchange_rate || 1.0,
       base_debit_amount: entry.base_debit_amount && entry.base_debit_amount !== '' ? parseFloat(entry.base_debit_amount) : null,
-      base_credit_amount: entry.base_credit_amount && entry.base_credit_amount !== '' ? parseFloat(entry.base_credit_amount) : null
+      base_credit_amount: entry.base_credit_amount && entry.base_credit_amount !== '' ? parseFloat(entry.base_credit_amount) : null,
+      attachment: entry.attachment || null
     })) : [
       { 
         account_id: null, 
@@ -81,7 +83,8 @@ const JournalVoucherCreate = () => {
         currency_code: company?.default_currency_code || 'PKR',
         exchange_rate: 1.0,
         base_debit_amount: null, 
-        base_credit_amount: null 
+        base_credit_amount: null,
+        attachment: null
       },
       { 
         account_id: null, 
@@ -91,7 +94,8 @@ const JournalVoucherCreate = () => {
         currency_code: company?.default_currency_code || 'PKR',
         exchange_rate: 1.0,
         base_debit_amount: null, 
-        base_credit_amount: null 
+        base_credit_amount: null,
+        attachment: null
       }
     ]
   });
@@ -218,12 +222,14 @@ const JournalVoucherCreate = () => {
 
   // Handle attachment upload
   const handleAttachmentUpload = async (files) => {
+    console.log('Starting file upload process:', files);
     const maxSize = 300 * 1024; // 300KB
     const validFiles = [];
     const invalidFiles = [];
 
     // Validate files
     for (let file of files) {
+      console.log('Validating file:', file.name, 'Size:', file.size, 'Type:', file.type);
       if (file.size > maxSize) {
         invalidFiles.push(`${file.name} (${(file.size / 1024).toFixed(1)}KB - exceeds 300KB limit)`);
       } else {
@@ -236,7 +242,12 @@ const JournalVoucherCreate = () => {
       return;
     }
 
-    if (validFiles.length === 0) return;
+    if (validFiles.length === 0) {
+      console.log('No valid files to upload');
+      return;
+    }
+
+    console.log('Valid files to upload:', validFiles);
 
     setUploadingAttachments(true);
     try {
@@ -249,20 +260,30 @@ const JournalVoucherCreate = () => {
         method: 'POST',
         body: formData,
         headers: {
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+          'Accept': 'application/json'
         }
       });
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Upload response:', data);
         setAttachments(prev => {
           const currentAttachments = Array.isArray(prev) ? prev : [];
           const newAttachments = Array.isArray(data.attachments) ? data.attachments : [];
           return [...currentAttachments, ...newAttachments];
         });
-        setAlert({ type: 'success', message: `${validFiles.length} attachment(s) uploaded successfully` });
+                        setAlert({ type: 'success', message: `${validFiles.length} attachment(s) uploaded successfully` });
+                        
+                        // Clear the file input
+                        const fileInput = document.getElementById('attachment-upload');
+                        if (fileInput) {
+                          fileInput.value = '';
+                        }
       } else {
-        setAlert({ type: 'error', message: 'Failed to upload attachments' });
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        console.error('Upload failed:', errorData);
+        setAlert({ type: 'error', message: errorData.message || 'Failed to upload attachments' });
       }
     } catch (error) {
       setAlert({ type: 'error', message: 'Error uploading attachments: ' + error.message });
@@ -277,6 +298,97 @@ const JournalVoucherCreate = () => {
       if (!Array.isArray(prev)) return [];
       return prev.filter(att => att && att.id !== attachmentId);
     });
+  };
+
+  // Handle entry attachment upload
+  const handleEntryAttachmentUpload = async (entryIndex, files) => {
+    console.log('Starting entry attachment upload for entry:', entryIndex, files);
+    const maxSize = 300 * 1024; // 300KB
+    const validFiles = [];
+    const invalidFiles = [];
+
+    // Validate files
+    for (let file of files) {
+      console.log('Validating file:', file.name, 'Size:', file.size, 'Type:', file.type);
+      if (file.size > maxSize) {
+        invalidFiles.push(`${file.name} (${(file.size / 1024).toFixed(1)}KB - exceeds 300KB limit)`);
+      } else {
+        validFiles.push(file);
+      }
+    }
+
+    if (invalidFiles.length > 0) {
+      setAlert({ type: 'error', message: `Files too large: ${invalidFiles.join(', ')}` });
+      return;
+    }
+
+    if (validFiles.length === 0) {
+      console.log('No valid files to upload');
+      return;
+    }
+
+    // Only allow one file per entry
+    if (validFiles.length > 1) {
+      setAlert({ type: 'error', message: 'Only one attachment per entry is allowed' });
+      return;
+    }
+
+    console.log('Valid file to upload:', validFiles[0]);
+
+    try {
+      const formData = new FormData();
+      formData.append('attachment', validFiles[0]);
+
+      const response = await fetch('/api/upload-attachments', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Entry upload response:', data);
+        
+        // Update the specific entry with the attachment
+        setFormData(prev => ({
+          ...prev,
+          entries: prev.entries.map((entry, index) => 
+            index === entryIndex 
+              ? { ...entry, attachment: data.attachments && data.attachments[0] ? data.attachments[0] : null }
+              : entry
+          )
+        }));
+        
+        setAlert({ type: 'success', message: 'Attachment uploaded successfully for this entry' });
+        
+        // Clear the file input
+        const fileInput = document.getElementById(`entry-attachment-${entryIndex}`);
+        if (fileInput) {
+          fileInput.value = '';
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        console.error('Entry upload failed:', errorData);
+        setAlert({ type: 'error', message: errorData.message || 'Failed to upload attachment' });
+      }
+    } catch (error) {
+      setAlert({ type: 'error', message: 'Error uploading attachment: ' + error.message });
+    }
+  };
+
+  // Remove entry attachment
+  const removeEntryAttachment = (entryIndex) => {
+    setFormData(prev => ({
+      ...prev,
+      entries: prev.entries.map((entry, index) => 
+        index === entryIndex 
+          ? { ...entry, attachment: null }
+          : entry
+      )
+    }));
   };
 
   // Format file size
@@ -386,7 +498,8 @@ const JournalVoucherCreate = () => {
         currency_code: formData.base_currency_code,
         exchange_rate: 1.0,
         base_debit_amount: null, 
-        base_credit_amount: null 
+        base_credit_amount: null,
+        attachment: null
       }]
     }));
   };
@@ -508,7 +621,8 @@ const JournalVoucherCreate = () => {
           exchange_rate: entry.exchange_rate ? parseFloat(entry.exchange_rate) : 1.0,
           currency_code: entry.currency_code || formData.base_currency_code,
           base_debit_amount: entry.base_debit_amount !== null && entry.base_debit_amount !== '' ? parseFloat(entry.base_debit_amount) : null,
-          base_credit_amount: entry.base_credit_amount !== null && entry.base_credit_amount !== '' ? parseFloat(entry.base_credit_amount) : null
+          base_credit_amount: entry.base_credit_amount !== null && entry.base_credit_amount !== '' ? parseFloat(entry.base_credit_amount) : null,
+          attachment_id: entry.attachment ? entry.attachment.id : null
         })),
         attachments: Array.isArray(attachments) && attachments.length > 0 ? attachments.map(att => att.id) : null
       };
@@ -570,6 +684,14 @@ const JournalVoucherCreate = () => {
       <div>
         {/* Breadcrumbs */}
         <Breadcrumbs items={breadcrumbItems} />
+
+        {/* Storage Warning */}
+        {company && (
+          <StorageWarning 
+            companyId={company.id} 
+            showDetails={false}
+          />
+        )}
 
         {/* Alert Messages */}
         {alert && (
@@ -754,6 +876,13 @@ const JournalVoucherCreate = () => {
                               </div>
                             )}
                           </label>
+                        </div>
+                        
+                        {/* Media type information */}
+                        <div className="mt-2">
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            <strong>Supported formats:</strong> PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG, GIF
+                          </span>
                         </div>
 
                         {/* Display uploaded attachments */}
@@ -1021,6 +1150,83 @@ const JournalVoucherCreate = () => {
                             tabIndex={10 + (index * 6) + 6}
                             className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                           />
+                        </div>
+
+                        {/* Entry Attachment Section */}
+                        <div className="md:col-span-4">
+                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Attachment (Optional)
+                          </label>
+                          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-3">
+                            <input
+                              type="file"
+                              onChange={(e) => handleEntryAttachmentUpload(index, Array.from(e.target.files))}
+                              className="hidden"
+                              id={`entry-attachment-${index}`}
+                              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
+                            />
+                            <label
+                              htmlFor={`entry-attachment-${index}`}
+                              className="cursor-pointer flex flex-col items-center justify-center py-2"
+                            >
+                              {entry.attachment ? (
+                                <div className="flex items-center justify-between w-full">
+                                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                                    <div className="p-1 bg-blue-100 dark:bg-blue-900/30 rounded flex-shrink-0">
+                                      <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                      </svg>
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{entry.attachment.original_name}</p>
+                                      <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(entry.attachment.size)}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-1 flex-shrink-0">
+                                    <a
+                                      href={entry.attachment.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="p-1 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-colors"
+                                      title="View file"
+                                    >
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                      </svg>
+                                    </a>
+                                    <button
+                                      type="button"
+                                      onClick={() => removeEntryAttachment(index)}
+                                      className="p-1 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
+                                      title="Remove file"
+                                    >
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col items-center gap-2">
+                                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                                    <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                  </div>
+                                  <div className="text-center">
+                                    <p className="text-xs font-medium text-gray-900 dark:text-gray-100">Click to upload attachment</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Max 300KB - One file per entry</p>
+                                  </div>
+                                </div>
+                              )}
+                            </label>
+                          </div>
+                          <div className="mt-1">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              <strong>Supported:</strong> PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG, GIF
+                            </span>
+                          </div>
                         </div>
                       </div>
 

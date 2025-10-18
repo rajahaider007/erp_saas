@@ -12,8 +12,8 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
     const [eventType, setEventType] = useState(filters.event_type || '');
     const [riskLevel, setRiskLevel] = useState(filters.risk_level || '');
     const [userId, setUserId] = useState(filters.user_id || '');
-    const [fromDate, setFromDate] = useState(filters.from_date ? new Date(filters.from_date) : null);
-    const [toDate, setToDate] = useState(filters.to_date ? new Date(filters.to_date) : null);
+    const [fromDate, setFromDate] = useState(filters.from_date ? new Date(filters.from_date) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+    const [toDate, setToDate] = useState(filters.to_date ? new Date(filters.to_date) : new Date());
     const [perPage, setPerPage] = useState(filters.per_page || 25);
 
     // Handle company selection and fetch locations
@@ -71,8 +71,8 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
         setEventType('');
         setRiskLevel('');
         setUserId('');
-        setFromDate(null);
-        setToDate(null);
+        setFromDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+        setToDate(new Date());
         setPerPage(25);
         
         router.get(route('logs.security'), {}, {

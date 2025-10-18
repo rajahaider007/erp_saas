@@ -503,6 +503,7 @@ class CompanyController extends Controller
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB max
             'brand_color_primary' => 'nullable|string|max:7',
             'brand_color_secondary' => 'nullable|string|max:7',
+            'attachment_storage_limit_mb' => 'nullable|integer|min:1|max:10000',
             'status' => 'required|boolean',
             'settings' => 'nullable|array',
             'features' => 'nullable|array'
