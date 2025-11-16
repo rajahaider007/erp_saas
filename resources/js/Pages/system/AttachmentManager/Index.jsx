@@ -15,14 +15,10 @@ import {
   List,
   Settings,
   File,
-  Image,
-  FileImage,
-  FilePdf,
-  FileSpreadsheet,
   CheckCircle,
   X
 } from 'lucide-react';
-import App from "../../../App.jsx";
+import App from "../../App.jsx";
 import StorageWarning from "../../../Components/StorageWarning";
 import { router, usePage } from '@inertiajs/react';
 

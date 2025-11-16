@@ -29,7 +29,8 @@ import {
 } from 'lucide-react';
 
 const Header = () => {
-  const { auth, company, url, userRights, availableMenus } = usePage().props;
+  const { props, url } = usePage();
+  const { auth, company, userRights, availableMenus } = props;
   const user = auth?.user;
   
   const { canView } = usePermissions();
@@ -76,8 +77,12 @@ const Header = () => {
   const [navigationItems, setNavigationItems] = React.useState([]);
 
   // Get modules from props at component level
-  const { availableModules } = usePage().props;
+  const { availableModules } = props;
   const modules = availableModules;
+
+  // State for current module data
+  const [currentModuleData, setCurrentModuleData] = React.useState(null);
+  const [loadingModuleData, setLoadingModuleData] = React.useState(false);
 
   // Build header navigation based on user permissions
   React.useEffect(() => {
@@ -132,46 +137,123 @@ const Header = () => {
            path[0] !== '';
   };
 
-  // Load dynamic header menus from availableMenus - only show system menus when not in a specific module
+  // Function to get current module name from URL
+  const getCurrentModuleName = (url) => {
+    if (!url) return null;
+    const path = url.replace(/^\/+/, '').split('/');
+    return path[0];
+  };
+
+  // Load current module data from session
   React.useEffect(() => {
-    if (availableMenus && availableMenus.length > 0 && !isModuleUrl(url)) {
-      // For super admin, show all menus without permission check
-      let systemMenus;
-      if (user?.role === 'super_admin') {
-        systemMenus = availableMenus;
-      } else {
-        // For other users, check permissions
-        systemMenus = availableMenus.filter(menu => {
-          const canViewMenu = canView(menu.id);
-          return canViewMenu;
-        });
+    const loadCurrentModuleData = async () => {
+      if (!isModuleUrl(url)) {
+        setCurrentModuleData(null);
+        return;
       }
-      
-      if (systemMenus.length > 0) {
-        const systemGroup = {
-          name: 'System',
-          href: '#',
-          icon: Settings,
-          children: systemMenus.map(menu => ({
-            name: menu.menu_name,
-            href: menu.route || '#',
-            icon: iconFromName(menu.icon),
-          }))
-        };
+
+      setLoadingModuleData(true);
+      try {
+        const response = await fetch('/get-current-module');
+        const data = await response.json();
         
-        setNavigationItems(prev => {
-          // Keep existing navigation items and add system group
-          const existingItems = prev.filter(i => i.name !== 'System');
-          return [...existingItems, systemGroup];
-        });
+        if (data.success && data.data) {
+          setCurrentModuleData(data.data);
+        } else {
+          setCurrentModuleData(null);
+        }
+      } catch (error) {
+        console.error('Failed to load module data:', error);
+        setCurrentModuleData(null);
+      } finally {
+        setLoadingModuleData(false);
       }
-    } else if (isModuleUrl(url)) {
-      // When in a module, remove system group from navigation
-      setNavigationItems(prev => {
-        return prev.filter(i => i.name !== 'System');
+    };
+
+    loadCurrentModuleData();
+  }, [url]);
+
+  // Update navigation when current module data changes
+  React.useEffect(() => {
+    if (!currentModuleData || !currentModuleData.module) return;
+
+    // Build sections and menus from current module data
+    const sectionsToAdd = (currentModuleData.sections || [])
+      .filter(section => {
+        if (!section || !section.section_name) return false;
+        if (user?.role === 'super_admin') return true;
+        return canView(`/${currentModuleData.module.folder_name}/${section.slug || ''}`);
+      })
+      .map(section => ({
+        name: section.section_name,
+        href: section.slug ? `/${currentModuleData.module.folder_name}/${section.slug}` : `/${currentModuleData.module.folder_name}`,
+        icon: Layers,
+        children: (section.menus || [])
+          .filter(menu => {
+            if (!menu || !menu.menu_name) return false;
+            if (user?.role === 'super_admin') return true;
+            return canView(menu.id);
+          })
+          .map(menu => ({
+            name: menu.menu_name,
+            href: (menu.route && menu.route !== 'undefined' && menu.route !== 'null') ? menu.route : '#',
+            icon: iconFromName(menu.icon)
+          }))
+      }))
+      .filter(section => section.children.length > 0);
+
+    setNavigationItems(prev => {
+      // Remove any existing sections from this module and add new ones
+      const existingItems = prev.filter(item => 
+        !currentModuleData.sections.some(section => section.section_name === item.name)
+      );
+      return [...existingItems, ...sectionsToAdd];
+    });
+  }, [currentModuleData, canView, user?.role]);
+
+  // Build navigation from availableMenus (filtered by module) - as fallback
+  React.useEffect(() => {
+    if (!availableMenus || availableMenus.length === 0) return;
+
+    // Get current module from URL
+    const currentModule = getCurrentModuleName(url);
+    if (!currentModule) return;
+
+    // Filter menus by current module
+    const moduleMenus = availableMenus.filter(menu => 
+      menu.folder_name === currentModule
+    );
+
+    // Group menus by section
+    const sectionsMap = {};
+    moduleMenus.forEach(menu => {
+      const sectionName = menu.section_name || 'General';
+      if (!sectionsMap[sectionName]) {
+        sectionsMap[sectionName] = {
+          name: sectionName,
+          icon: Layers,
+          children: []
+        };
+      }
+      sectionsMap[sectionName].children.push({
+        name: menu.menu_name,
+        href: menu.route || '#',
+        icon: iconFromName(menu.icon)
       });
-    }
-  }, [url, canView, availableMenus, user?.role]);
+    });
+
+    // Convert to array and filter out empty sections
+    const sectionsToAdd = Object.values(sectionsMap)
+      .filter(section => section.children.length > 0);
+
+    setNavigationItems(prev => {
+      // Remove any existing sections from this module and add new ones
+      const existingItems = prev.filter(item => 
+        !sectionsToAdd.some(section => section.name === item.name)
+      );
+      return [...existingItems, ...sectionsToAdd];
+    });
+  }, [availableMenus, url, canView, user?.role]);
 
   // Function to get module icon based on folder name
   const getModuleIcon = (folderName) => {
