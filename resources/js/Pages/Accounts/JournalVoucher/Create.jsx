@@ -296,6 +296,11 @@ const JournalVoucherCreate = () => {
   const removeAttachment = (attachmentId) => {
     setAttachments(prev => {
       if (!Array.isArray(prev)) return [];
+      // Handle both object attachments and string filenames
+      if (typeof attachmentId === 'string' && !prev.some(att => att.id === attachmentId)) {
+        // If attachmentId is a filename, filter by filename
+        return prev.filter(att => att !== attachmentId && att.original_name !== attachmentId);
+      }
       return prev.filter(att => att && att.id !== attachmentId);
     });
   };
@@ -611,6 +616,11 @@ const JournalVoucherCreate = () => {
     
 
     try {
+      // Debug: Log attachment state before submission
+      console.log('Attachments state before submission:', attachments);
+      console.log('Is array?', Array.isArray(attachments));
+      console.log('Length:', attachments?.length);
+      
       const submitData = {
         ...formData,
         entries: formData.entries.map(entry => ({
@@ -624,8 +634,10 @@ const JournalVoucherCreate = () => {
           base_credit_amount: entry.base_credit_amount !== null && entry.base_credit_amount !== '' ? parseFloat(entry.base_credit_amount) : null,
           attachment_id: entry.attachment ? entry.attachment.id : null
         })),
-        attachments: Array.isArray(attachments) && attachments.length > 0 ? attachments.map(att => att.id) : null
+        attachments: Array.isArray(attachments) && attachments.length > 0 ? attachments.map(att => att.id || att) : []
       };
+      
+      console.log('Submit data attachments:', submitData.attachments);
 
 
       if (isEdit) {
@@ -889,8 +901,8 @@ const JournalVoucherCreate = () => {
                         {Array.isArray(attachments) && attachments.length > 0 && (
                           <div className="space-y-2">
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Uploaded Files:</h4>
-                            {attachments.map((attachment) => (
-                              <div key={attachment.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            {attachments.map((attachment, idx) => (
+                              <div key={attachment.id || attachment.original_name || attachment || idx} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                 <div className="flex items-center gap-2 min-w-0 flex-1">
                                   <div className="p-1 bg-blue-100 dark:bg-blue-900/30 rounded flex-shrink-0">
                                     <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -898,13 +910,13 @@ const JournalVoucherCreate = () => {
                                     </svg>
                                   </div>
                                   <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{attachment.original_name}</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(attachment.size)}</p>
+                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{attachment.original_name || attachment}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{attachment.size ? formatFileSize(attachment.size) : ''}</p>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1 flex-shrink-0">
                                   <a
-                                    href={attachment.url}
+                                    href={attachment.url || `/storage/voucher-attachments/${attachment}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="p-1 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-colors"
@@ -917,7 +929,7 @@ const JournalVoucherCreate = () => {
                                   </a>
                                   <button
                                     type="button"
-                                    onClick={() => removeAttachment(attachment.id)}
+                                    onClick={() => removeAttachment(attachment.id || attachment)}
                                     className="p-1 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
                                     title="Remove file"
                                   >

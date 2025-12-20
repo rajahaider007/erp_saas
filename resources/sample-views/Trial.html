@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trial Balance Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .report-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .report-header {
+            text-align: center;
+            padding: 30px 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+        }
+
+        .company-location {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .report-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            display: inline-block;
+        }
+
+        .report-info {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 40px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-group {
+            display: flex;
+            gap: 30px;
+        }
+
+        .info-item {
+            display: flex;
+            gap: 10px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .info-value {
+            color: #212529;
+        }
+
+        .report-body {
+            padding: 20px 40px;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .report-table thead {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .report-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            border: 1px solid #1a252f;
+        }
+
+        .report-table th.number-col {
+            text-align: right;
+            width: 150px;
+        }
+
+        .report-table td {
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+
+        .report-table td.number-col {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+
+        /* Level Styling */
+        .level-1 {
+            background: #f8f9fa;
+            font-weight: 700;
+            font-size: 14px;
+            color: #1a1a1a;
+        }
+
+        .level-1 td:first-child {
+            padding-left: 12px;
+        }
+
+        .level-2 {
+            background: #ffffff;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .level-2 td:first-child {
+            padding-left: 30px;
+        }
+
+        .level-3 {
+            background: #ffffff;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .level-3 td:first-child {
+            padding-left: 50px;
+        }
+
+        .level-4 {
+            background: #ffffff;
+            color: #6c757d;
+        }
+
+        .level-4 td:first-child {
+            padding-left: 70px;
+        }
+
+        .level-4:hover {
+            background: #f8f9fa;
+        }
+
+        .account-code {
+            font-family: 'Courier New', monospace;
+            color: #6c757d;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .badge-parent {
+            background: #3498db;
+            color: white;
+        }
+
+        .badge-cash {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .badge-trans {
+            background: #27ae60;
+            color: white;
+        }
+
+        .total-row {
+            background: #2c3e50;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .total-row td {
+            padding: 15px 12px;
+            border-color: #1a252f;
+        }
+
+        .grand-total-row {
+            background: #1a252f;
+            color: white;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .grand-total-row td {
+            padding: 18px 12px;
+            border: 2px solid #0d1117;
+        }
+
+        .report-footer {
+            padding: 20px 40px;
+            border-top: 2px solid #e0e0e0;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: #6c757d;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            padding: 20px 40px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .action-buttons {
+                display: none;
+            }
+
+            .report-container {
+                box-shadow: none;
+            }
+        }
+
+        .amount-debit {
+            color: #000;
+        }
+
+        .amount-credit {
+            color: #000;
+        }
+
+        .zero-amount {
+            color: #95a5a6;
+        }
+
+        .collapsible-icon {
+            cursor: pointer;
+            display: inline-block;
+            width: 16px;
+            text-align: center;
+            margin-right: 5px;
+            color: #3498db;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="window.print()">🖨️ Print Report</button>
+            <button class="btn btn-success" onclick="exportToExcel()">📊 Export to Excel</button>
+            <button class="btn btn-secondary" onclick="exportToPDF()">📄 Export to PDF</button>
+        </div>
+
+        <!-- Report Header -->
+        <div class="report-header">
+            <div class="company-name">ACME CORPORATION</div>
+            <div class="company-location">New York, United States</div>
+            <div class="report-title">TRIAL BALANCE REPORT</div>
+        </div>
+
+        <!-- Report Info -->
+        <div class="report-info">
+            <div class="info-group">
+                <div class="info-item">
+                    <span class="info-label">PERIOD:</span>
+                    <span class="info-value">Jan 01, 2025 to Dec 20, 2025</span>
+                </div>
+            </div>
+            <div class="info-group">
+                <div class="info-item">
+                    <span class="info-label">REPORT DATE:</span>
+                    <span class="info-value">December 20, 2025</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Body -->
+        <div class="report-body">
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>ACCOUNT</th>
+                        <th class="number-col">DEBIT</th>
+                        <th class="number-col">CREDIT</th>
+                        <th class="number-col">BALANCE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Level 1: Assets -->
+                    <tr class="level-1">
+                        <td>
+                            <span class="collapsible-icon">▼</span>
+                            <span class="account-code">100000000000000</span>
+                            <strong>Assets</strong>
+                            <span class="badge badge-parent">Parent</span>
+                        </td>
+                        <td class="number-col">546,572.24</td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">546,572.24</td>
+                    </tr>
+
+                    <!-- Level 2: Current Assets -->
+                    <tr class="level-2">
+                        <td>
+                            <span class="collapsible-icon">▼</span>
+                            <span class="account-code">100010000000000</span>
+                            Current Assets
+                            <span class="badge badge-parent">Parent</span>
+                        </td>
+                        <td class="number-col">546,572.24</td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">546,572.24</td>
+                    </tr>
+
+                    <!-- Level 3: Cash Account -->
+                    <tr class="level-3">
+                        <td>
+                            <span class="collapsible-icon">▼</span>
+                            <span class="account-code">100010001000000</span>
+                            Cash Account / Cash In Hand
+                            <span class="badge badge-cash">CASH</span>
+                            <span class="badge badge-parent">Parent</span>
+                        </td>
+                        <td class="number-col">546,572.24</td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">546,572.24</td>
+                    </tr>
+
+                    <!-- Level 4: Cash in Hands (Transactional) -->
+                    <tr class="level-4">
+                        <td>
+                            <span class="account-code">100010001000001</span>
+                            Cash in Hands
+                            <span class="badge badge-cash">CIH</span>
+                            <span class="badge badge-trans">Transactional</span>
+                        </td>
+                        <td class="number-col">546,572.24</td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">546,572.24</td>
+                    </tr>
+
+                    <!-- Level 4: Petty Cash -->
+                    <tr class="level-4">
+                        <td>
+                            <span class="account-code">100010001000002</span>
+                            Petty Cash
+                            <span class="badge badge-trans">Transactional</span>
+                        </td>
+                        <td class="number-col">25,000.00</td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">25,000.00</td>
+                    </tr>
+
+                    <!-- Level 3: Bank Accounts -->
+                    <tr class="level-3">
+                        <td>
+                            <span class="collapsible-icon">▼</span>
+                            <span class="account-code">100010002000000</span>
+                            Bank Accounts
+                            <span class="badge badge-parent">Parent</span>
+                        </td>
+                        <td class="number-col">850,000.00</td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">850,000.00</td>
+                    </tr>
+
+                    <!-- Level 4: Bank Account - ABC Bank -->
+                    <tr class="level-4">
+                        <td>
+                            <span class="account-code">100010002000001</span>
+                            ABC Bank - Current Account
+                            <span class="badge badge-trans">Transactional</span>
+                        </td>
+                        <td class="number-col">500,000.00</td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">500,000.00</td>
+                    </tr>
+
+                    <!-- Level 4: Bank Account - XYZ Bank -->
+                    <tr class="level-4">
+                        <td>
+                            <span class="account-code">100010002000002</span>
+                            XYZ Bank - Savings Account
+                            <span class="badge badge-trans">Transactional</span>
+                        </td>
+                        <td class="number-col">350,000.00</td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">350,000.00</td>
+                    </tr>
+
+                    <!-- Level 3: Accounts Receivable -->
+                    <tr class="level-3">
+                        <td>
+                            <span class="collapsible-icon">▼</span>
+                            <span class="account-code">100010003000000</span>
+                            Accounts Receivable
+                            <span class="badge badge-parent">Parent</span>
+                        </td>
+                        <td class="number-col">125,000.00</td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">125,000.00</td>
+                    </tr>
+
+                    <!-- Level 4: Customer A -->
+                    <tr class="level-4">
+                        <td>
+                            <span class="account-code">100010003000001</span>
+                            Customer A - Trade Receivables
+                            <span class="badge badge-trans">Transactional</span>
+                        </td>
+                        <td class="number-col">75,000.00</td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">75,000.00</td>
+                    </tr>
+
+                    <!-- Level 4: Customer B -->
+                    <tr class="level-4">
+                        <td>
+                            <span class="account-code">100010003000002</span>
+                            Customer B - Trade Receivables
+                            <span class="badge badge-trans">Transactional</span>
+                        </td>
+                        <td class="number-col">50,000.00</td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">50,000.00</td>
+                    </tr>
+
+                    <!-- Level 1: Liabilities -->
+                    <tr class="level-1">
+                        <td>
+                            <span class="collapsible-icon">▼</span>
+                            <span class="account-code">200000000000000</span>
+                            <strong>Liabilities</strong>
+                            <span class="badge badge-parent">Parent</span>
+                        </td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">425,000.00</td>
+                        <td class="number-col">-425,000.00</td>
+                    </tr>
+
+                    <!-- Level 2: Current Liabilities -->
+                    <tr class="level-2">
+                        <td>
+                            <span class="collapsible-icon">▼</span>
+                            <span class="account-code">200010000000000</span>
+                            Current Liabilities
+                            <span class="badge badge-parent">Parent</span>
+                        </td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">425,000.00</td>
+                        <td class="number-col">-425,000.00</td>
+                    </tr>
+
+                    <!-- Level 3: Accounts Payable -->
+                    <tr class="level-3">
+                        <td>
+                            <span class="collapsible-icon">▼</span>
+                            <span class="account-code">200010001000000</span>
+                            Accounts Payable
+                            <span class="badge badge-parent">Parent</span>
+                        </td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">425,000.00</td>
+                        <td class="number-col">-425,000.00</td>
+                    </tr>
+
+                    <!-- Level 4: Vendor A -->
+                    <tr class="level-4">
+                        <td>
+                            <span class="account-code">200010001000001</span>
+                            Vendor A - Trade Payables
+                            <span class="badge badge-trans">Transactional</span>
+                        </td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">250,000.00</td>
+                        <td class="number-col">-250,000.00</td>
+                    </tr>
+
+                    <!-- Level 4: Vendor B -->
+                    <tr class="level-4">
+                        <td>
+                            <span class="account-code">200010001000002</span>
+                            Vendor B - Trade Payables
+                            <span class="badge badge-trans">Transactional</span>
+                        </td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">175,000.00</td>
+                        <td class="number-col">-175,000.00</td>
+                    </tr>
+
+                    <!-- Level 1: Revenue -->
+                    <tr class="level-1">
+                        <td>
+                            <span class="collapsible-icon">▼</span>
+                            <span class="account-code">400000000000000</span>
+                            <strong>Revenue</strong>
+                            <span class="badge badge-parent">Parent</span>
+                        </td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">546,572.24</td>
+                        <td class="number-col">-546,572.24</td>
+                    </tr>
+
+                    <!-- Level 2: Sales Revenue -->
+                    <tr class="level-2">
+                        <td>
+                            <span class="collapsible-icon">▼</span>
+                            <span class="account-code">400010000000000</span>
+                            Sales Revenue
+                            <span class="badge badge-parent">Parent</span>
+                        </td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">546,572.24</td>
+                        <td class="number-col">-546,572.24</td>
+                    </tr>
+
+                    <!-- Level 3: Product Sales -->
+                    <tr class="level-3">
+                        <td>
+                            <span class="collapsible-icon">▼</span>
+                            <span class="account-code">400010001000000</span>
+                            Product Sales
+                            <span class="badge badge-parent">Parent</span>
+                        </td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">546,572.24</td>
+                        <td class="number-col">-546,572.24</td>
+                    </tr>
+
+                    <!-- Level 4: Product A Sales -->
+                    <tr class="level-4">
+                        <td>
+                            <span class="account-code">400010001000001</span>
+                            Product A - Sales
+                            <span class="badge badge-trans">Transactional</span>
+                        </td>
+                        <td class="number-col zero-amount">0.00</td>
+                        <td class="number-col">546,572.24</td>
+                        <td class="number-col">-546,572.24</td>
+                    </tr>
+
+                    <!-- Grand Total Row -->
+                    <tr class="grand-total-row">
+                        <td><strong>GRAND TOTAL</strong></td>
+                        <td class="number-col"><strong>2,093,144.48</strong></td>
+                        <td class="number-col"><strong>1,396,572.24</strong></td>
+                        <td class="number-col"><strong>0.00</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Report Footer -->
+        <div class="report-footer">
+            <div>Trial Balance Report | Generated by ERP System</div>
+            <div>Printed on: December 20, 2025, 3:31 PM</div>
+            <div>Page 1 of 1</div>
+        </div>
+    </div>
+
+    <script>
+        function exportToExcel() {
+            alert('Export to Excel functionality will be implemented with backend integration');
+        }
+
+        function exportToPDF() {
+            window.print();
+        }
+
+        // Collapsible functionality
+        document.querySelectorAll('.collapsible-icon').forEach(icon => {
+            icon.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const row = this.closest('tr');
+                const level = Array.from(row.classList).find(c => c.startsWith('level-'));
+                const currentLevel = parseInt(level.split('-')[1]);
+                
+                // Toggle icon
+                this.textContent = this.textContent === '▼' ? '▶' : '▼';
+                
+                // Toggle child rows
+                let nextRow = row.nextElementSibling;
+                while (nextRow) {
+                    const nextLevel = Array.from(nextRow.classList).find(c => c.startsWith('level-'));
+                    if (nextLevel) {
+                        const nextLevelNum = parseInt(nextLevel.split('-')[1]);
+                        if (nextLevelNum <= currentLevel) break;
+                        if (nextLevelNum === currentLevel + 1) {
+                            nextRow.style.display = nextRow.style.display === 'none' ? '' : 'none';
+                        }
+                    }
+                    nextRow = nextRow.nextElementSibling;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

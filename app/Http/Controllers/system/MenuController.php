@@ -9,6 +9,7 @@ use App\Models\Module;
 use App\Models\Section;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class MenuController extends Controller
@@ -51,7 +52,7 @@ class MenuController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
         // Check if user has permission to can_add
         $this->requirePermission($request, null, 'can_add');
@@ -93,7 +94,7 @@ class MenuController extends Controller
         return redirect()->route('system.menus.index')->with('success', 'Menu updated.');
     }
 
-    public function destroy(Menu $menu)
+    public function destroy(Request $request, Menu $menu)
     {
         // Check if user has permission to can_delete
         $this->requirePermission($request, null, 'can_delete');
@@ -139,7 +140,7 @@ class MenuController extends Controller
             $action = $request->status ? 'activated' : 'deactivated';
             return redirect()->back()->with('success', "$count menu(s) $action successfully!");
         } catch (\Exception $e) {
-            \Log::error('Menus bulk status failed: '.$e->getMessage());
+            Log::error('Menus bulk status failed: '.$e->getMessage());
             return redirect()->back()->with('error', 'Failed to update menus status.');
         }
     }
@@ -155,7 +156,7 @@ class MenuController extends Controller
             $count = Menu::whereIn('id', $request->ids)->delete();
             return redirect()->back()->with('success', "$count menu(s) deleted successfully!");
         } catch (\Exception $e) {
-            \Log::error('Menus bulk delete failed: '.$e->getMessage());
+            Log::error('Menus bulk delete failed: '.$e->getMessage());
             return redirect()->back()->with('error', 'Failed to delete menus.');
         }
     }
@@ -201,7 +202,7 @@ class MenuController extends Controller
 
             return response()->stream($callback, 200, $headers);
         } catch (\Exception $e) {
-            \Log::error('Menus CSV export failed: '.$e->getMessage());
+            Log::error('Menus CSV export failed: '.$e->getMessage());
             return redirect()->back()->with('error', 'Failed to export menus.');
         }
     }

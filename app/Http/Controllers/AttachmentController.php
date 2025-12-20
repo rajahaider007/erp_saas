@@ -7,6 +7,8 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Arr;
 use App\Services\AuditLogService;
 use App\Services\StorageService;
 
@@ -159,17 +161,17 @@ class AttachmentController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::warning('Attachment upload validation failed', [
                 'errors' => $e->errors(),
-                'files_count' => $request->hasFile('attachments') ? count($request->file('attachments')) : ($request->hasFile('attachment') ? 1 : 0)
+                'files_count' => $request->hasFile('attachments') ? count((array)$request->file('attachments')) : ($request->hasFile('attachment') ? 1 : 0)
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Validation failed: ' . implode(', ', array_flatten($e->errors()))
+                'message' => 'Validation failed: ' . implode(', ', Arr::flatten($e->errors()))
             ], 422);
         } catch (\Exception $e) {
             Log::error('Error uploading attachments', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'files_count' => $request->hasFile('attachments') ? count($request->file('attachments')) : ($request->hasFile('attachment') ? 1 : 0)
+                'files_count' => $request->hasFile('attachments') ? count((array)$request->file('attachments')) : ($request->hasFile('attachment') ? 1 : 0)
             ]);
             return response()->json([
                 'success' => false,
@@ -314,7 +316,7 @@ class AttachmentController extends Controller
             }
 
             // Get voucher to verify access
-            $voucher = \DB::table('transactions')
+            $voucher = DB::table('transactions')
                 ->where('id', $voucherId)
                 ->where('comp_id', $request->input('user_comp_id'))
                 ->where('location_id', $request->input('user_location_id'))

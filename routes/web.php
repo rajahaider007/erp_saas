@@ -147,6 +147,15 @@ Route::prefix('accounts/general-ledger')->name('accounts.general-ledger.')->midd
     Route::get('/export-pdf', [App\Http\Controllers\Accounts\GeneralLedgerController::class, 'exportPDF'])->name('export-pdf');
 });
 
+// Trial Balance Routes
+Route::prefix('accounts/trial-balance')->name('accounts.trial-balance.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\Accounts\TrialBalanceController::class, 'search'])->name('search');
+    Route::get('/report', [App\Http\Controllers\Accounts\TrialBalanceController::class, 'index'])->name('report');
+    Route::get('/print', [App\Http\Controllers\Accounts\TrialBalanceController::class, 'print'])->name('print');
+    Route::get('/export-excel', [App\Http\Controllers\Accounts\TrialBalanceController::class, 'exportExcel'])->name('export-excel');
+    Route::get('/export-pdf', [App\Http\Controllers\Accounts\TrialBalanceController::class, 'exportPDF'])->name('export-pdf');
+});
+
 
 // Exchange Rate API Routes
 Route::prefix('api/exchange-rate')->middleware('web.auth')->group(function () {
@@ -186,6 +195,16 @@ Route::prefix('api')->middleware('web.auth')->group(function () {
     Route::get('/storage-breakdown/{companyId}', [App\Http\Controllers\AttachmentController::class, 'getStorageBreakdown']);
 });
 
+// Voucher Attachments Routes - MUST BE BEFORE OTHER ROUTES
+Route::prefix('storage/voucher-attachments')->middleware('web.auth')->group(function () {
+    Route::get('/{filename}', [App\Http\Controllers\AttachmentController::class, 'serveVoucherAttachment'])->where('filename', '.*');
+});
+
+Route::prefix('attachments')->middleware('web.auth')->group(function () {
+    Route::get('/download/{filename}', [App\Http\Controllers\AttachmentController::class, 'downloadVoucherAttachment']);
+    Route::get('/list/{voucherId}', [App\Http\Controllers\AttachmentController::class, 'listVoucherAttachments']);
+});
+
 // Attachment Manager Routes
 Route::prefix('system/attachment-manager')->name('system.attachment-manager.')->middleware('web.auth')->group(function () {
     Route::get('/', [App\Http\Controllers\system\AttachmentManagerController::class, 'index'])->name('index');
@@ -205,17 +224,6 @@ Route::prefix('api/journal-voucher')->middleware('web.auth')->group(function () 
     Route::put('/{id}', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'update']);
     Route::delete('/{id}', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'destroy']);
     Route::post('/{id}/post', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'post']);
-});
-
-
-// Voucher Attachments Routes
-Route::prefix('storage/voucher-attachments')->middleware('web.auth')->group(function () {
-    Route::get('/{filename}', [App\Http\Controllers\AttachmentController::class, 'serveVoucherAttachment']);
-});
-
-Route::prefix('attachments')->middleware('web.auth')->group(function () {
-    Route::get('/download/{filename}', [App\Http\Controllers\AttachmentController::class, 'downloadVoucherAttachment']);
-    Route::get('/list/{voucherId}', [App\Http\Controllers\AttachmentController::class, 'listVoucherAttachments']);
 });
 
 Route::post('/generate-voucher', [App\Http\Controllers\TestController::class, 'generateVoucher']);
