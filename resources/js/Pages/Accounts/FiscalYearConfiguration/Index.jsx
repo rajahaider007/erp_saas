@@ -14,7 +14,7 @@ import {
 import { useLayout } from '@/Contexts/LayoutContext';
 import App from '../../App.jsx';
 
-export default function FiscalYearConfiguration() {
+function PageContent() {
   const { 
     company, 
     fiscalYears = [], 
@@ -68,8 +68,7 @@ export default function FiscalYearConfiguration() {
   };
 
   return (
-    <App title="Fiscal Year Configuration">
-      <div className="p-4 md:p-8 max-w-7xl mx-auto">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className={`text-3xl font-bold mb-2 flex items-center gap-2 ${
@@ -382,6 +381,13 @@ export default function FiscalYearConfiguration() {
           </div>
         </div>
       </div>
+    );
+}
+
+export default function FiscalYearConfiguration() {
+  return (
+    <App title="Fiscal Year Configuration">
+      <PageContent />
     </App>
   );
 }
