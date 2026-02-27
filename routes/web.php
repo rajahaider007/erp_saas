@@ -491,6 +491,18 @@ Route::prefix('accounts/reports')->name('accounts.reports.')->middleware('web.au
         Route::post('/export/excel', [App\Http\Controllers\Reports\GeneralLedgerController::class, 'exportExcel'])->name('export.excel');
         Route::post('/export/csv', [App\Http\Controllers\Reports\GeneralLedgerController::class, 'exportCSV'])->name('export.csv');
     });
+
+    // Chart of Account Report Routes
+    Route::prefix('chart-of-account')->name('chart-of-account.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Reports\ChartOfAccountReportController::class, 'search'])->name('search');
+        Route::get('/report', [App\Http\Controllers\Reports\ChartOfAccountReportController::class, 'index'])->name('report');
+    });
+
+    // Cash Book Report Routes
+    Route::prefix('cash-book')->name('cash-book.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Reports\CashBookReportController::class, 'search'])->name('search');
+        Route::get('/report', [App\Http\Controllers\Reports\CashBookReportController::class, 'index'])->name('report');
+    });
 });
 
 // Currencies Management Routes
