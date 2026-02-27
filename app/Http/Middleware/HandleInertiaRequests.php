@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use App\Models\Currency;
+use App\Helpers\FiscalYearHelper;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
@@ -223,7 +224,11 @@ class HandleInertiaRequests extends Middleware
             'company' => $company,
             'currencies' => $currencies,
         ];
-        
+
+        // Add fiscal year if user has a company
+        if ($user && $user->comp_id) {
+            $sharedData['fiscalYear'] = FiscalYearHelper::getCurrentFiscalYear($user->comp_id);
+        }
         
         return $sharedData;
     }

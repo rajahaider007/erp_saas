@@ -163,6 +163,32 @@ Route::prefix('accounts/fiscal-year-configuration')->name('accounts.fiscal-year-
     Route::post('/update-period-status', [App\Http\Controllers\Accounts\FiscalYearConfigurationController::class, 'updatePeriodStatus'])->name('update-period-status');
 });
 
+// Chart of Account Code Configuration Routes
+Route::prefix('accounts/code-configuration')->name('accounts.code-configuration.')->middleware('web.auth')->group(function () {
+    // Generalized account code configuration
+    Route::get('/', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'index'])->name('index');
+    Route::post('/', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'store'])->name('store');
+    Route::put('/{id}', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'update'])->name('update');
+    Route::delete('/{id}', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'destroy'])->name('destroy');
+    
+    // Bank Account Configuration
+    Route::get('/bank', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'bankConfiguration'])->name('bank.show');
+    Route::post('/bank', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'storeBankCode'])->name('bank.store');
+    
+    // Cash Account Configuration
+    Route::get('/cash', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'cashConfiguration'])->name('cash.show');
+    Route::post('/cash', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'storeCashCode'])->name('cash.store');
+    
+    // Configuration Requirements
+    Route::get('/requirements', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'getConfigurationRequirements'])->name('requirements');
+});
+
+// Chart of Account Code Configuration API Routes
+Route::prefix('api/code-configuration')->middleware('web.auth')->group(function () {
+    Route::get('/level3-accounts', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'getLevel3Accounts']);
+    Route::get('/level4-codes/{level3AccountId}', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'getLevel4Codes']);
+});
+
 // Balance Sheet Routes
 Route::prefix('accounts/balance-sheet')->name('accounts.balance-sheet.')->middleware('web.auth')->group(function () {
     Route::get('/', [App\Http\Controllers\Accounts\BalanceSheetController::class, 'index'])->name('index');

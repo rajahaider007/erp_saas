@@ -32,17 +32,26 @@ class AccountsModuleSeeder extends Seeder
             $moduleId = $accountsModule->id;
         }
 
-        // Create Reports section for Accounts module
-        $reportsSectionId = DB::table('sections')->insertGetId([
-            'module_id' => $moduleId,
-            'section_name' => 'Reports',
-            'slug' => Str::slug('Reports'),
-            'status' => 1,
-            'sort_order' => 1,
-            'created_at' => $now,
-            'updated_at' => $now,
-            'deleted_at' => null,
-        ]);
+        // Check if Reports section exists, if not create it
+        $reportsSection = DB::table('sections')
+            ->where('module_id', $moduleId)
+            ->where('section_name', 'Reports')
+            ->first();
+        
+        if (!$reportsSection) {
+            $reportsSectionId = DB::table('sections')->insertGetId([
+                'module_id' => $moduleId,
+                'section_name' => 'Reports',
+                'slug' => Str::slug('Reports'),
+                'status' => 1,
+                'sort_order' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+                'deleted_at' => null,
+            ]);
+        } else {
+            $reportsSectionId = $reportsSection->id;
+        }
 
         // Create Reports menus for Accounts module
         $reportsMenus = [
@@ -168,7 +177,18 @@ class AccountsModuleSeeder extends Seeder
             ]
         ];
 
-        DB::table('menus')->insert($reportsMenus);
+        // Insert reports menus if they don't exist
+        foreach ($reportsMenus as $menu) {
+            $exists = DB::table('menus')
+                ->where('module_id', $menu['module_id'])
+                ->where('menu_name', $menu['menu_name'])
+                ->where('route', $menu['route'])
+                ->exists();
+            
+            if (!$exists) {
+                DB::table('menus')->insert($menu);
+            }
+        }
 
         // Also create other sections for Accounts module if they don't exist
         $this->createAccountsSections($moduleId, $now);
@@ -176,31 +196,49 @@ class AccountsModuleSeeder extends Seeder
 
     private function createAccountsSections($moduleId, $now)
     {
-        // Create Chart of Accounts section
-        $chartSectionId = DB::table('sections')->insertGetId([
-            'module_id' => $moduleId,
-            'section_name' => 'Chart of Accounts',
-            'slug' => Str::slug('Chart of Accounts'),
-            'status' => 1,
-            'sort_order' => 2,
-            'created_at' => $now,
-            'updated_at' => $now,
-            'deleted_at' => null,
-        ]);
+        // Check if Chart of Accounts section exists, if not create it
+        $chartSection = DB::table('sections')
+            ->where('module_id', $moduleId)
+            ->where('section_name', 'Chart of Accounts')
+            ->first();
+        
+        if (!$chartSection) {
+            $chartSectionId = DB::table('sections')->insertGetId([
+                'module_id' => $moduleId,
+                'section_name' => 'Chart of Accounts',
+                'slug' => Str::slug('Chart of Accounts'),
+                'status' => 1,
+                'sort_order' => 2,
+                'created_at' => $now,
+                'updated_at' => $now,
+                'deleted_at' => null,
+            ]);
+        } else {
+            $chartSectionId = $chartSection->id;
+        }
 
-        // Create Journal Entries section
-        $journalSectionId = DB::table('sections')->insertGetId([
-            'module_id' => $moduleId,
-            'section_name' => 'Journal Entries',
-            'slug' => Str::slug('Journal Entries'),
-            'status' => 1,
-            'sort_order' => 3,
-            'created_at' => $now,
-            'updated_at' => $now,
-            'deleted_at' => null,
-        ]);
+        // Check if Journal Entries section exists, if not create it
+        $journalSection = DB::table('sections')
+            ->where('module_id', $moduleId)
+            ->where('section_name', 'Journal Entries')
+            ->first();
+        
+        if (!$journalSection) {
+            $journalSectionId = DB::table('sections')->insertGetId([
+                'module_id' => $moduleId,
+                'section_name' => 'Journal Entries',
+                'slug' => Str::slug('Journal Entries'),
+                'status' => 1,
+                'sort_order' => 3,
+                'created_at' => $now,
+                'updated_at' => $now,
+                'deleted_at' => null,
+            ]);
+        } else {
+            $journalSectionId = $journalSection->id;
+        }
 
-        // Create Chart of Accounts menus
+        // Create Chart of Accounts menus (check for existing first)
         $chartMenus = [
             [
                 'module_id' => $moduleId,
@@ -227,6 +265,19 @@ class AccountsModuleSeeder extends Seeder
                 'deleted_at' => null,
             ]
         ];
+
+        // Insert chart menus if they don't exist
+        foreach ($chartMenus as $menu) {
+            $exists = DB::table('menus')
+                ->where('module_id', $menu['module_id'])
+                ->where('menu_name', $menu['menu_name'])
+                ->where('route', $menu['route'])
+                ->exists();
+            
+            if (!$exists) {
+                DB::table('menus')->insert($menu);
+            }
+        }
 
         // Create Journal Entries menus
         $journalMenus = [
@@ -256,7 +307,17 @@ class AccountsModuleSeeder extends Seeder
             ]
         ];
 
-        DB::table('menus')->insert($chartMenus);
-        DB::table('menus')->insert($journalMenus);
+        // Insert journal menus if they don't exist
+        foreach ($journalMenus as $menu) {
+            $exists = DB::table('menus')
+                ->where('module_id', $menu['module_id'])
+                ->where('menu_name', $menu['menu_name'])
+                ->where('route', $menu['route'])
+                ->exists();
+            
+            if (!$exists) {
+                DB::table('menus')->insert($menu);
+            }
+        }
     }
 }
