@@ -18,7 +18,7 @@ import {
 import App from '../../App.jsx';
 
 const JournalVoucherShow = () => {
-  const { voucher, entries = [], flash } = usePage().props;
+  const { voucher, entries = [], flash, currentPeriod = null } = usePage().props;
   const [alert, setAlert] = useState(null);
 
   // Handle flash messages
@@ -207,6 +207,39 @@ const JournalVoucherShow = () => {
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium">{alert.message}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Period Status Alert */}
+        {currentPeriod && (
+          <div className={`p-4 rounded-lg border ${
+            currentPeriod.status === 'Open' 
+              ? 'bg-green-50 border-green-200 text-green-800'
+              : currentPeriod.status === 'Locked'
+              ? 'bg-yellow-50 border-yellow-200 text-yellow-800'
+              : 'bg-red-50 border-red-200 text-red-800'
+          }`}>
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 mt-0.5">
+                {currentPeriod.status === 'Open' && <CheckCircle className="h-5 w-5" />}
+                {currentPeriod.status === 'Locked' && <AlertCircle className="h-5 w-5" />}
+                {currentPeriod.status === 'Closed' && <AlertCircle className="h-5 w-5" />}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold mb-1">
+                  Accounting Period: {currentPeriod.period_name} (FY {currentPeriod.fiscal_year})
+                </h3>
+                <p className="text-sm mb-2">
+                  <strong>Status:</strong> {currentPeriod.status}
+                  {currentPeriod.is_adjustment_period && ' (Adjustment Period)'}
+                </p>
+                <p className="text-xs">
+                  {currentPeriod.status === 'Open' && 'This period is active. You can create and post new transactions.'}
+                  {currentPeriod.status === 'Locked' && 'This period is under review. You cannot post new transactions, but existing entries can be modified.'}
+                  {currentPeriod.status === 'Closed' && 'This period is permanently closed. No transactions can be posted or modified without administrator intervention.'}
+                </p>
               </div>
             </div>
           </div>

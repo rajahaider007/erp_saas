@@ -54,7 +54,7 @@ const Breadcrumbs = ({ items }) => {
 };
 
 const JournalVoucherCreate = () => {
-  const { accounts = [], voucher = null, entries = [], flash, currencies = [], company = null, preview_voucher_number = null, attachments: initialAttachments = [] } = usePage().props;
+  const { accounts = [], voucher = null, entries = [], flash, currencies = [], company = null, preview_voucher_number = null, attachments: initialAttachments = [], currentPeriod = null } = usePage().props;
   const isEdit = !!voucher;
   const autoVoucherNumbering = true; // Always auto-generate voucher numbers
   
@@ -718,6 +718,39 @@ const JournalVoucherCreate = () => {
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium">{alert.message}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Period Status Alert */}
+        {currentPeriod && (
+          <div className={`mb-4 p-4 rounded-lg border ${
+            currentPeriod.status === 'Open' 
+              ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300'
+              : currentPeriod.status === 'Locked'
+              ? 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-300'
+              : 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300'
+          }`}>
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 mt-0.5">
+                {currentPeriod.status === 'Open' && <CheckCircle className="h-5 w-5" />}
+                {currentPeriod.status === 'Locked' && <AlertCircle className="h-5 w-5" />}
+                {currentPeriod.status === 'Closed' && <X className="h-5 w-5" />}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold mb-1">
+                  Accounting Period: {currentPeriod.period_name} (FY {currentPeriod.fiscal_year})
+                </h3>
+                <p className="text-sm mb-2">
+                  <strong>Status:</strong> {currentPeriod.status}
+                  {currentPeriod.is_adjustment_period && ' (Adjustment Period)'}
+                </p>
+                <p className="text-xs">
+                  {currentPeriod.status === 'Open' && 'This period is active. You can create and post new transactions.'}
+                  {currentPeriod.status === 'Locked' && 'This period is under review. You cannot post new transactions, but you can modify existing entries.'}
+                  {currentPeriod.status === 'Closed' && 'This period is permanently closed. No transactions can be posted or modified without administrator intervention.'}
+                </p>
               </div>
             </div>
           </div>

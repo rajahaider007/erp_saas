@@ -148,12 +148,30 @@ class JournalVoucherController extends Controller
         
         // Get current fiscal year
         $currentFiscalYear = FiscalYearHelper::getCurrentFiscalYear($compId);
+        
+        // Get current period information
+        $todayDate = date('Y-m-d');
+        $currentPeriod = FiscalYearHelper::getFiscalPeriod($todayDate, $compId);
+        
+        $currentPeriodInfo = null;
+        if ($currentPeriod) {
+            $currentPeriodInfo = [
+                'id' => $currentPeriod->id,
+                'period_name' => $currentPeriod->period_name,
+                'status' => $currentPeriod->status,
+                'is_adjustment_period' => $currentPeriod->is_adjustment_period,
+                'start_date' => $currentPeriod->start_date,
+                'end_date' => $currentPeriod->end_date,
+                'fiscal_year' => $currentPeriod->fiscal_year
+            ];
+        }
 
         return Inertia::render('Accounts/JournalVoucher/Create', [
             'accounts' => $accounts,
             'currencies' => $currencies,
             'company' => $company,
             'fiscalYear' => $currentFiscalYear,
+            'currentPeriod' => $currentPeriodInfo,
             'preview_voucher_number' => $previewVoucherNumber
         ]);
     }
@@ -257,9 +275,14 @@ class JournalVoucherController extends Controller
             return redirect()->back()->withErrors(['voucher_date' => "No accounting period found for date {$request->voucher_date}. Please configure fiscal year periods."]);
         }
 
-        // Verify period is open
-        if ($fiscalPeriod->status !== 'Open') {
-            return redirect()->back()->withErrors(['voucher_date' => "The accounting period is {$fiscalPeriod->status}. Transactions cannot be posted to this period."]);
+        // Verify period is open (or is an adjustment period)
+        if ($fiscalPeriod->status !== 'Open' && !$fiscalPeriod->is_adjustment_period) {
+            return redirect()->back()->withErrors(['voucher_date' => "The accounting period is {$fiscalPeriod->status}. Transactions cannot be posted to {$fiscalPeriod->status} periods. Only 'Open' or 'Adjustment' periods allow new transactions."]);
+        }
+
+        // Prevent posting to closed periods
+        if ($fiscalPeriod->status === 'Closed') {
+            return redirect()->back()->withErrors(['voucher_date' => "The accounting period is permanently Closed. No transactions can be posted to closed periods. Please contact your administrator if you need to reopen this period."]);
         }
 
         DB::beginTransaction();
@@ -468,7 +491,8 @@ class JournalVoucherController extends Controller
 
         return Inertia::render('Accounts/JournalVoucher/Show', [
             'voucher' => $voucher,
-            'entries' => $entries
+            'entries' => $entries,
+            'currentPeriod' => $this->getPeriodInfoForDate($voucher->voucher_date, $compId)
         ]);
     }
 
@@ -635,7 +659,8 @@ class JournalVoucherController extends Controller
             'accounts' => $accounts,
             'currencies' => $currencies,
             'company' => $company,
-            'attachments' => $attachments
+            'attachments' => $attachments,
+            'currentPeriod' => $this->getPeriodInfoForDate($voucher->voucher_date, $compId)
         ]);
     }
 
@@ -684,6 +709,22 @@ class JournalVoucherController extends Controller
 
         if ($voucher->status !== 'Draft') {
             return redirect()->back()->with('error', 'Only draft vouchers can be edited');
+        }
+
+        // Check period status for locked/closed periods
+        $fiscalPeriod = FiscalYearHelper::getFiscalPeriod($request->voucher_date, $compId);
+        
+        if ($fiscalPeriod) {
+            // Prevent modifications to closed periods
+            if ($fiscalPeriod->status === 'Closed') {
+                return redirect()->back()->with('error', "The accounting period is permanently Closed. No modifications are allowed to transactions in closed periods. Please contact your administrator if you need to reopen this period.");
+            }
+            
+            // Locked periods allow modifications to existing entries (inform user if helpful)
+            if ($fiscalPeriod->status === 'Locked' && !$fiscalPeriod->is_adjustment_period) {
+                // Note: We allow this but the user should understand they're modifying an entry in a locked period
+                // This is acceptable per requirements: "Locked: no new transactions but existing entries can be modified"
+            }
         }
 
         // Validate double entry principle in base currency
@@ -1697,5 +1738,27 @@ class JournalVoucherController extends Controller
             // Return user-friendly error message
             return redirect()->back()->with('error', 'Something went wrong while deleting the journal voucher. Please try again or contact support if the problem persists.');
         }
+    }
+
+    /**
+     * Get period information for a specific date
+     */
+    private function getPeriodInfoForDate($date, $compId)
+    {
+        $period = FiscalYearHelper::getFiscalPeriod($date, $compId);
+        
+        if (!$period) {
+            return null;
+        }
+        
+        return [
+            'id' => $period->id,
+            'period_name' => $period->period_name,
+            'status' => $period->status,
+            'is_adjustment_period' => $period->is_adjustment_period,
+            'start_date' => $period->start_date,
+            'end_date' => $period->end_date,
+            'fiscal_year' => $period->fiscal_year
+        ];
     }
 }

@@ -55,24 +55,21 @@ function ReportContent() {
 
   if (error) {
     return (
-      <App title="Income Statement">
-        <div className="p-8 max-w-6xl mx-auto">
-          <div className={`p-4 border rounded-lg flex items-center gap-2 ${
-            theme === 'dark'
-              ? 'bg-red-900/20 border-red-700 text-red-300'
-              : 'bg-red-50 border-red-200 text-red-800'
-          }`}>
-            <AlertCircle className="w-5 h-5" />
-            {error}
-          </div>
+      <div className="p-8 max-w-6xl mx-auto">
+        <div className={`p-4 border rounded-lg flex items-center gap-2 ${
+          theme === 'dark'
+            ? 'bg-red-900/20 border-red-700 text-red-300'
+            : 'bg-red-50 border-red-200 text-red-800'
+        }`}>
+          <AlertCircle className="w-5 h-5" />
+          {error}
         </div>
-      </App>
+      </div>
     );
   }
 
   return (
-    <App title="Income Statement">
-      <div className="p-4 md:p-8 max-w-6xl mx-auto">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className={`text-3xl font-bold mb-2 flex items-center gap-2 ${
@@ -361,6 +358,13 @@ function ReportContent() {
           </div>
         )}
       </div>
+    );
+}
+
+export default function IncomeStatementReport() {
+  return (
+    <App title="Income Statement">
+      <ReportContent />
     </App>
   );
 }

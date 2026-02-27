@@ -131,7 +131,8 @@ class BalanceSheetController extends Controller
 
         // Get all transactional accounts
         $accounts = DB::table('chart_of_accounts as coa')
-            ->leftJoin('transactions as t', 'coa.id', '=', 't.account_id')
+            ->leftJoin('transaction_entries as te', 'coa.id', '=', 'te.account_id')
+            ->leftJoin('transactions as t', 'te.transaction_id', '=', 't.id')
             ->where('coa.comp_id', $compId)
             ->where('coa.location_id', $locationId)
             ->where('coa.account_level', 4)
@@ -141,8 +142,8 @@ class BalanceSheetController extends Controller
                 'coa.account_code',
                 'coa.account_name',
                 'coa.account_type',
-                DB::raw('COALESCE(SUM(t.base_debit_amount), 0) as debit_total'),
-                DB::raw('COALESCE(SUM(t.base_credit_amount), 0) as credit_total')
+                DB::raw('COALESCE(SUM(te.base_debit_amount), 0) as debit_total'),
+                DB::raw('COALESCE(SUM(te.base_credit_amount), 0) as credit_total')
             )
             ->where(function($q) use ($asAtDate, $fiscalYear) {
                 $q->whereNull('t.id')
