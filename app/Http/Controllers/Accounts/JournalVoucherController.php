@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\CheckUserPermissions;
 use App\Services\AuditLogService;
 use App\Services\RecoveryService;
+use App\Helpers\FiscalYearHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -85,10 +86,14 @@ class JournalVoucherController extends Controller
         $journalVouchers = $query->paginate($perPage);
 
         $accounts = $this->getTransactionalAccounts($compId, $locationId);
+        
+        // Get current fiscal year
+        $currentFiscalYear = FiscalYearHelper::getCurrentFiscalYear($compId);
 
         return Inertia::render('Accounts/JournalVoucher/List', [
             'journalVouchers' => $journalVouchers,
             'accounts' => $accounts,
+            'fiscalYear' => $currentFiscalYear,
             'filters' => [
                 'search' => $search,
                 'status' => $status,
@@ -140,11 +145,15 @@ class JournalVoucherController extends Controller
 
         // Generate preview voucher number for display
         $previewVoucherNumber = $this->generatePreviewVoucherNumber($compId, $locationId, 'Journal');
+        
+        // Get current fiscal year
+        $currentFiscalYear = FiscalYearHelper::getCurrentFiscalYear($compId);
 
         return Inertia::render('Accounts/JournalVoucher/Create', [
             'accounts' => $accounts,
             'currencies' => $currencies,
             'company' => $company,
+            'fiscalYear' => $currentFiscalYear,
             'preview_voucher_number' => $previewVoucherNumber
         ]);
     }
@@ -240,6 +249,18 @@ class JournalVoucherController extends Controller
         // Auto-generate voucher number
         $voucherNumber = $this->generateVoucherNumber($compId, $locationId, 'Journal');
         
+        // Get fiscal year and period from voucher date
+        $fiscalYear = FiscalYearHelper::getFiscalYear($request->voucher_date, $compId);
+        $fiscalPeriod = FiscalYearHelper::getFiscalPeriod($request->voucher_date, $compId);
+        
+        if (!$fiscalPeriod) {
+            return redirect()->back()->withErrors(['voucher_date' => "No accounting period found for date {$request->voucher_date}. Please configure fiscal year periods."]);
+        }
+
+        // Verify period is open
+        if ($fiscalPeriod->status !== 'Open') {
+            return redirect()->back()->withErrors(['voucher_date' => "The accounting period is {$fiscalPeriod->status}. Transactions cannot be posted to this period."]);
+        }
 
         DB::beginTransaction();
         
@@ -250,6 +271,8 @@ class JournalVoucherController extends Controller
             Log::info('Creating transaction record...', [
                 'voucher_number' => $voucherNumber,
                 'voucher_date' => $request->voucher_date,
+                'fiscal_year' => $fiscalYear,
+                'period_id' => $fiscalPeriod->id,
                 'total_debit' => $totalBaseDebit,
                 'total_credit' => $totalBaseCredit,
                 'comp_id' => $compId,
@@ -270,7 +293,8 @@ class JournalVoucherController extends Controller
                 'exchange_rate' => 1.0,
                 'base_currency_total' => $totalBaseDebit,
                 'attachments' => json_encode($request->attachments ?? []),
-                'period_id' => 1, // Default period - should be calculated based on date
+                'period_id' => $fiscalPeriod->id,
+                'fiscal_year' => $fiscalYear,
                 'comp_id' => $compId,
                 'location_id' => $locationId,
                 'created_by' => $userId,

@@ -156,6 +156,22 @@ Route::prefix('accounts/trial-balance')->name('accounts.trial-balance.')->middle
     Route::get('/export-pdf', [App\Http\Controllers\Accounts\TrialBalanceController::class, 'exportPDF'])->name('export-pdf');
 });
 
+// Fiscal Year Configuration Routes
+Route::prefix('accounts/fiscal-year-configuration')->name('accounts.fiscal-year-configuration.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\Accounts\FiscalYearConfigurationController::class, 'index'])->name('index');
+    Route::post('/create-year', [App\Http\Controllers\Accounts\FiscalYearConfigurationController::class, 'createYear'])->name('create-year');
+    Route::post('/update-period-status', [App\Http\Controllers\Accounts\FiscalYearConfigurationController::class, 'updatePeriodStatus'])->name('update-period-status');
+});
+
+// Balance Sheet Routes
+Route::prefix('accounts/balance-sheet')->name('accounts.balance-sheet.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\Accounts\BalanceSheetController::class, 'index'])->name('index');
+});
+
+// Income Statement Routes
+Route::prefix('accounts/income-statement')->name('accounts.income-statement.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\Accounts\IncomeStatementController::class, 'index'])->name('index');
+});
 
 // Exchange Rate API Routes
 Route::prefix('api/exchange-rate')->middleware('web.auth')->group(function () {

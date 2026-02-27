@@ -584,6 +584,11 @@ const Header = () => {
               <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
                 {company?.company_name || 'ERP Enterprise'}
               </span>
+              {props?.fiscalYear && (
+                <span className="ml-4 inline-block px-3 py-1 text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 rounded-full">
+                  FY {props.fiscalYear}
+                </span>
+              )}
             </div>
 
             {/* Navigation Menu (when header as sidebar is enabled) */}
