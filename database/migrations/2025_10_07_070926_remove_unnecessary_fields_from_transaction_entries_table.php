@@ -11,14 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('transaction_entries', function (Blueprint $table) {
-            // Remove unnecessary fields that are not needed for transaction entries
-            $table->dropColumn([
-                'cost_center_id',
-                'project_id', 
-                'department_id'
-            ]);
-        });
+        if (!Schema::hasTable('transaction_entries')) {
+            return;
+        }
+
+        // Attempt to drop columns - if they don't exist, the error will be caught
+        try {
+            Schema::table('transaction_entries', function (Blueprint $table) {
+                $table->dropColumn([
+                    'cost_center_id',
+                    'project_id', 
+                    'department_id'
+                ]);
+            });
+        } catch (\Throwable $e) {
+            // Columns might not exist - that's OK
+        }
     }
 
     /**

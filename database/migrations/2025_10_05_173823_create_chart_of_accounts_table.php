@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if table already exists
+        if (Schema::hasTable('chart_of_accounts')) {
+            return;
+        }
+
         Schema::create('chart_of_accounts', function (Blueprint $table) {
             $table->id();
             $table->string('account_code', 15)->unique();
@@ -48,6 +53,21 @@ return new class extends Migration
             
             $table->foreign('parent_account_id')->references('id')->on('chart_of_accounts')->onDelete('cascade');
         });
+
+        // If transaction_entries already exists (for example when adding the
+        // chart table to an existing database), ensure that the foreign key
+        // pointing to this table is created. This complements the logic in the
+        // transaction entries migration which only adds the constraint when the
+        // chart table already existed.
+        if (Schema::hasTable('transaction_entries')) {
+            try {
+                Schema::table('transaction_entries', function (Blueprint $table) {
+                    $table->foreign('account_id')->references('id')->on('chart_of_accounts');
+                });
+            } catch (\Throwable $e) {
+                // Foreign key might already exist or transaction_entries might be missing columns
+            }
+        }
     }
 
     /**

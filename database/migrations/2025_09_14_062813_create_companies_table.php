@@ -53,7 +53,7 @@ return new class extends Migration
             // Legal and Compliance
             $table->string('license_number')->nullable();
             $table->date('license_expiry')->nullable();
-            $table->json('compliance_certifications')->nullable();
+            $table->longText('compliance_certifications')->nullable(); // JSON stored as text for compatibility
             $table->text('legal_notes')->nullable();
             
             // Financial Information
@@ -70,10 +70,14 @@ return new class extends Migration
             
             // System Settings
             $table->boolean('status')->default(true);
+            // Accounting defaults added. These fields were previously added via separate
+            // migrations, now inline for fresh installs.
+            $table->boolean('accounting_vno_auto')->default(true);
+            $table->string('base_currency', 3)->default('USD');
             $table->enum('subscription_status', ['active', 'trial', 'expired', 'suspended'])->default('trial');
             $table->date('subscription_expiry')->nullable();
-            $table->json('settings')->nullable(); // Company-specific settings
-            $table->json('features')->nullable(); // Enabled features/modules
+            $table->longText('settings')->nullable(); // Company-specific settings (JSON stored as text for compatibility)
+            $table->longText('features')->nullable(); // Enabled features/modules (JSON stored as text for compatibility)
             
             // Audit and Tracking
             $table->unsignedBigInteger('created_by')->nullable();

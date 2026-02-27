@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if table already exists (created by earlier migration)
+        if (Schema::hasTable('chart_of_accounts')) {
+            return;
+        }
+
         Schema::create('chart_of_accounts', function (Blueprint $table) {
             $table->id();
             $table->string('account_code', 15)->unique();

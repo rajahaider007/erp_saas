@@ -30,13 +30,26 @@ class CreateTransactionEntriesTable extends Migration
 
             // Foreign key constraints
             $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
-            $table->foreign('account_id')->references('id')->on('chart_of_accounts');
+            // chart_of_accounts migration runs later than this one, so only add
+            // the FK when the referenced table actually exists. We create the
+            // table here and then add the constraint in a second step below.
             
             // Indexes for performance
             $table->index('transaction_id');
             $table->index('account_id');
             $table->index(['comp_id', 'location_id']);
         });
+
+        // add the account_id foreign key if the chart_of_accounts table is
+        // already available (e.g. when running migrations against an
+        // existing database). If the table is created later in the sequence
+        // the constraint will be added in its own migration and there's no
+        // harm in this step being skipped.
+        if (Schema::hasTable('chart_of_accounts')) {
+            Schema::table('transaction_entries', function (Blueprint $table) {
+                $table->foreign('account_id')->references('id')->on('chart_of_accounts');
+            });
+        }
     }
 
     /**

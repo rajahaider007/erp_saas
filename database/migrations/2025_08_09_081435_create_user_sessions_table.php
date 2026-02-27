@@ -11,13 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if tables already exist
+        if (Schema::hasTable('user_sessions')) {
+            return;
+        }
+
         Schema::create('user_sessions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('session_id')->index();
+            $table->string('session_id', 191)->index(); // Reduced to 191 for index compatibility
             $table->ipAddress('ip_address');
             $table->text('user_agent')->nullable();
-            $table->json('device_info')->nullable();
+            $table->longText('device_info')->nullable(); // JSON stored as text for compatibility
             $table->boolean('is_active')->default(true)->index();
             $table->timestamp('last_activity')->nullable()->index();
             $table->timestamp('expires_at')->nullable()->index();
@@ -36,9 +41,15 @@ return new class extends Migration
 
         // Add remember_token and device_info columns to users table
         Schema::table('tbl_users', function (Blueprint $table) {
-            $table->string('remember_token', 100)->nullable()->after('token');
-            $table->json('device_info')->nullable()->after('session_id');
-             $table->timestamp('last_activity')->nullable()->index();
+            if (!Schema::hasColumn('tbl_users', 'remember_token')) {
+                $table->string('remember_token', 100)->nullable()->after('token');
+            }
+            if (!Schema::hasColumn('tbl_users', 'device_info')) {
+                $table->longText('device_info')->nullable()->after('session_id'); // JSON stored as text for compatibility
+            }
+            if (!Schema::hasColumn('tbl_users', 'last_activity')) {
+                $table->timestamp('last_activity')->nullable()->index();
+            }
         });
     }
 

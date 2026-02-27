@@ -11,26 +11,31 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if tbl_users already exists
+        if (Schema::hasTable('tbl_users')) {
+            return;
+        }
+
         Schema::create('tbl_users', function (Blueprint $table) {
             $table->id();
             $table->string('fname', 100);
             $table->string('mname', 100)->nullable();
             $table->string('lname', 100);
-            $table->string('email')->unique();
+            $table->string('email', 191)->unique(); // Reduced for index
             $table->string('phone', 20)->nullable();
-            $table->string('loginid')->unique();
+            $table->string('loginid', 191)->unique(); // Reduced for index
             $table->string('pincode', 10)->nullable();
             $table->unsignedBigInteger('comp_id')->nullable();
             $table->unsignedBigInteger('location_id')->nullable();
             $table->unsignedBigInteger('dept_id')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('token')->nullable();
+            $table->string('token', 191)->nullable(); // Reduced for consistency
             
             // Additional columns for international standards
             $table->enum('status', ['active', 'inactive', 'suspended', 'pending'])->default('active');
             $table->enum('role', ['super_admin', 'admin', 'manager', 'user'])->default('admin');
-            $table->json('permissions')->nullable();
+            $table->longText('permissions')->nullable(); // JSON stored as text for compatibility
             $table->string('avatar')->nullable();
             $table->string('timezone', 50)->default('UTC');
             $table->string('language', 10)->default('en');
@@ -41,14 +46,14 @@ return new class extends Migration
             $table->integer('failed_login_attempts')->default(0);
             $table->timestamp('locked_until')->nullable();
             $table->boolean('two_factor_enabled')->default(false);
-            $table->string('two_factor_secret')->nullable();
-            $table->json('recovery_codes')->nullable();
-            $table->string('session_id')->nullable();
+            $table->string('two_factor_secret', 191)->nullable(); // Reduced for consistency
+            $table->longText('recovery_codes')->nullable(); // JSON stored as text for compatibility
+            $table->string('session_id', 191)->nullable(); // Reduced for consistency
             $table->boolean('force_password_change')->default(false);
             $table->timestamp('password_changed_at')->nullable();
-            $table->json('login_history')->nullable();
-            $table->string('created_by')->nullable();
-            $table->string('updated_by')->nullable();
+            $table->longText('login_history')->nullable(); // JSON stored as text for compatibility
+            $table->string('created_by', 191)->nullable(); // Reduced for consistency
+            $table->string('updated_by', 191)->nullable(); // Reduced for consistency
             $table->timestamps();
             $table->softDeletes();
             

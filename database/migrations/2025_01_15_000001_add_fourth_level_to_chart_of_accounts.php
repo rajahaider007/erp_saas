@@ -12,15 +12,21 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Guard against chart_of_accounts not existing yet
+        if (!Schema::hasTable('chart_of_accounts')) {
+            return;
+        }
+
         // First, update existing Level 3 accounts to Level 4
         DB::statement("UPDATE chart_of_accounts SET account_level = 4 WHERE account_level = 3");
         
-        // Add new column to track if account is transactional
+        // Add new column to track if account is transactional if it doesn't exist
         Schema::table('chart_of_accounts', function (Blueprint $table) {
-            $table->boolean('is_transactional')->default(false)->after('account_level');
-            
-            // Add index for better performance
-            $table->index(['is_transactional']);
+            if (!Schema::hasColumn('chart_of_accounts', 'is_transactional')) {
+                $table->boolean('is_transactional')->default(false)->after('account_level');
+                // Add index for better performance
+                $table->index(['is_transactional']);
+            }
         });
         
         // Update existing accounts based on their level

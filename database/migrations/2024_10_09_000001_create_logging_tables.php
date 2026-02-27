@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip creation if tables already exist (from SQL dump or previous run)
+        if (Schema::hasTable('tbl_audit_logs')) {
+            return;
+        }
+
         // 1. Audit Logs - Main audit trail
         Schema::create('tbl_audit_logs', function (Blueprint $table) {
             $table->id();
@@ -21,9 +26,9 @@ return new class extends Migration
             $table->string('table_name', 100)->nullable();
             $table->unsignedBigInteger('record_id')->nullable();
             $table->enum('action_type', ['CREATE', 'READ', 'UPDATE', 'DELETE', 'POST', 'UNPOST', 'APPROVE', 'REJECT', 'IMPORT', 'EXPORT']);
-            $table->json('old_values')->nullable();
-            $table->json('new_values')->nullable();
-            $table->json('changed_fields')->nullable();
+            $table->longText('old_values')->nullable(); // JSON stored as text for compatibility
+            $table->longText('new_values')->nullable(); // JSON stored as text for compatibility
+            $table->longText('changed_fields')->nullable(); // JSON stored as text for compatibility
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->string('session_id', 255)->nullable();
@@ -43,9 +48,9 @@ return new class extends Migration
             $table->id();
             $table->string('original_table', 100);
             $table->unsignedBigInteger('original_id');
-            $table->string('record_identifier', 255)->nullable();
-            $table->json('data_snapshot');
-            $table->json('related_data')->nullable();
+            $table->string('record_identifier', 191)->nullable(); // Reduced to 191 for index compatibility
+            $table->longText('data_snapshot'); // JSON stored as text for compatibility
+            $table->longText('related_data')->nullable(); // JSON stored as text for compatibility
             $table->unsignedBigInteger('deleted_by');
             $table->timestamp('deleted_at')->useCurrent();
             $table->string('delete_reason', 500)->nullable();
@@ -68,7 +73,7 @@ return new class extends Migration
             $table->id();
             $table->string('table_name', 100);
             $table->unsignedBigInteger('record_id');
-            $table->string('record_identifier', 255)->nullable();
+            $table->string('record_identifier', 191)->nullable(); // Reduced to 191 for index compatibility
             $table->string('field_name', 100);
             $table->text('old_value')->nullable();
             $table->text('new_value')->nullable();
@@ -91,13 +96,13 @@ return new class extends Migration
         Schema::create('tbl_security_logs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
-            $table->string('username', 255)->nullable();
+            $table->string('username', 191)->nullable(); // Reduced to 191 for compatibility
             $table->string('event_type', 100);
             $table->enum('event_status', ['SUCCESS', 'FAILED', 'BLOCKED', 'WARNING']);
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->string('location_info', 255)->nullable();
-            $table->json('additional_data')->nullable();
+            $table->longText('additional_data')->nullable(); // JSON stored as text for compatibility
             $table->enum('risk_level', ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])->default('LOW');
             $table->timestamp('created_at')->useCurrent();
             
@@ -114,13 +119,13 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedInteger('company_id')->nullable();
-            $table->string('session_id', 255)->nullable();
+            $table->string('session_id', 191)->nullable(); // Reduced to 191 for compatibility
             $table->string('url', 500)->nullable();
-            $table->string('route_name', 255)->nullable();
+            $table->string('route_name', 191)->nullable(); // Reduced to 191 for compatibility
             $table->string('method', 10)->nullable();
             $table->string('controller', 255)->nullable();
             $table->string('action', 255)->nullable();
-            $table->json('parameters')->nullable();
+            $table->longText('parameters')->nullable(); // JSON stored as text for compatibility
             $table->integer('response_status')->nullable();
             $table->integer('execution_time')->nullable()->comment('in milliseconds');
             $table->integer('memory_usage')->nullable()->comment('in bytes');
@@ -139,9 +144,9 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedInteger('company_id')->nullable();
-            $table->string('report_name', 255);
+            $table->string('report_name', 191); // Reduced to 191 for index compatibility
             $table->string('report_type', 100)->nullable();
-            $table->json('parameters')->nullable();
+            $table->longText('parameters')->nullable(); // JSON stored as text for compatibility
             $table->date('date_range_from')->nullable();
             $table->date('date_range_to')->nullable();
             $table->string('export_format', 20)->nullable();
