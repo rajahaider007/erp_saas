@@ -17,6 +17,7 @@ class BalanceSheetController extends Controller
 
     /**
      * Display Balance Sheet (Statement of Financial Position - IAS 1)
+     * International Standard Format - Horizontal Layout
      */
     public function index(Request $request): Response
     {
@@ -38,14 +39,14 @@ class BalanceSheetController extends Controller
         // Get fiscal year for as at date
         $fiscalYear = FiscalYearHelper::getFiscalYear($asAtDate, $compId);
 
-        // Build balance sheet data
-        $balanceSheetData = $this->buildBalanceSheet($compId, $locationId, $asAtDate, $fiscalYear, $company);
+        // Build balance sheet data with hierarchical structure
+        $balanceSheetData = $this->buildHierarchicalBalanceSheet($compId, $locationId, $asAtDate, $fiscalYear);
 
         // Get comparative data if requested
         $comparativeData = null;
         if ($comparativeDate) {
             $comparativeFiscalYear = FiscalYearHelper::getFiscalYear($comparativeDate, $compId);
-            $comparativeData = $this->buildBalanceSheet($compId, $locationId, $comparativeDate, $comparativeFiscalYear, $company);
+            $comparativeData = $this->buildHierarchicalBalanceSheet($compId, $locationId, $comparativeDate, $comparativeFiscalYear);
         }
 
         return Inertia::render('Accounts/BalanceSheet/Report', [
@@ -58,81 +59,33 @@ class BalanceSheetController extends Controller
             'currencyCode' => $company->default_currency_code ?? 'PKR'
         ]);
     }
-
+    
     /**
-     * Build balance sheet structure according to IAS 1
-     * Structure:
-     * - ASSETS
-     *   - Current Assets
-     *     - Account 1
-     *     - Account 2
-     *   - Non-Current Assets
-     *     - Account 3
-     * - LIABILITIES
-     *   - Current Liabilities
-     *   - Non-Current Liabilities
-     * - EQUITY
-     *   - Share Capital
-     *   - Retained Earnings
-     *   - Reserves
+     * Get Level 4 account details for a specific Level 3 account (drill-down)
      */
-    private function buildBalanceSheet($compId, $locationId, $asAtDate, $fiscalYear, $company)
+    public function getLevel4Details(Request $request)
     {
-        $balanceSheet = [
-            'assets' => [
-                'current' => [
-                    'label' => 'Current Assets',
-                    'accounts' => [],
-                    'total' => 0,
-                    'code_range' => ['100010000000000', '100999999999999'] // Assets - Current
-                ],
-                'non_current' => [
-                    'label' => 'Non-Current Assets',
-                    'accounts' => [],
-                    'total' => 0,
-                    'code_range' => ['101010000000000', '199999999999999'] // Assets - Non-Current
-                ]
-            ],
-            'liabilities' => [
-                'current' => [
-                    'label' => 'Current Liabilities',
-                    'accounts' => [],
-                    'total' => 0,
-                    'code_range' => ['200010000000000', '200999999999999']
-                ],
-                'non_current' => [
-                    'label' => 'Non-Current Liabilities',
-                    'accounts' => [],
-                    'total' => 0,
-                    'code_range' => ['201010000000000', '299999999999999']
-                ]
-            ],
-            'equity' => [
-                'share_capital' => [
-                    'label' => 'Share Capital',
-                    'accounts' => [],
-                    'total' => 0,
-                    'code_range' => ['300010000000000', '300099999999999']
-                ],
-                'reserves' => [
-                    'label' => 'Reserves',
-                    'accounts' => [],
-                    'total' => 0,
-                    'code_range' => ['300100000000000', '300199999999999']
-                ],
-                'retained_earnings' => [
-                    'label' => 'Retained Earnings / Accumulated Results',
-                    'accounts' => [],
-                    'total' => 0,
-                    'code_range' => ['300200000000000', '300999999999999']
-                ]
-            ]
-        ];
-
-        // Get all transactional accounts
-        $accounts = DB::table('chart_of_accounts as coa')
-            ->leftJoin('transaction_entries as te', 'coa.id', '=', 'te.account_id')
-            ->leftJoin('transactions as t', 'te.transaction_id', '=', 't.id')
+        $level3AccountId = $request->input('level3_account_id');
+        $compId = $request->input('comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('location_id') ?? $request->session()->get('user_location_id');
+        $asAtDate = $request->input('as_at_date', now()->toDateString());
+        
+        $fiscalYear = FiscalYearHelper::getFiscalYear($asAtDate, $compId);
+        
+        // Get Level 4 accounts under this Level 3
+        $level4Accounts = DB::table('chart_of_accounts as coa')
+            ->leftJoin('transaction_entries as te', function($join) use ($asAtDate, $fiscalYear) {
+                $join->on('coa.id', '=', 'te.account_id')
+                    ->whereExists(function($query) use ($asAtDate, $fiscalYear) {
+                        $query->select(DB::raw(1))
+                            ->from('transactions as t')
+                            ->whereColumn('t.id', 'te.transaction_id')
+                            ->where('t.fiscal_year', '<=', $fiscalYear)
+                            ->where('t.voucher_date', '<=', $asAtDate)
+                            ->where('t.status', 'Posted');
+                    });
+            })
+            ->where('coa.parent_account_id', $level3AccountId)
             ->where('coa.comp_id', $compId)
             ->where('coa.location_id', $locationId)
             ->where('coa.account_level', 4)
@@ -145,100 +98,210 @@ class BalanceSheetController extends Controller
                 DB::raw('COALESCE(SUM(te.base_debit_amount), 0) as debit_total'),
                 DB::raw('COALESCE(SUM(te.base_credit_amount), 0) as credit_total')
             )
-            ->where(function($q) use ($asAtDate, $fiscalYear) {
-                $q->whereNull('t.id')
-                  ->orWhere(function($subq) use ($asAtDate, $fiscalYear) {
-                      $subq->where('t.fiscal_year', '<=', $fiscalYear)
-                           ->where('t.voucher_date', '<=', $asAtDate)
-                           ->where('t.status', 'Posted');
-                  });
-            })
             ->groupBy('coa.id', 'coa.account_code', 'coa.account_name', 'coa.account_type')
             ->orderBy('coa.account_code')
             ->get();
-
-        // Distribute accounts to balance sheet sections
-        foreach ($accounts as $account) {
+            
+        $accounts = $level4Accounts->map(function($account) {
             $balance = $this->calculateAccountBalance($account);
-
-            if ($balance == 0) {
-                continue; // Skip zero-balance accounts
-            }
-
-            $accountData = [
+            return [
+                'id' => $account->id,
                 'code' => $account->account_code,
                 'name' => $account->account_name,
                 'type' => $account->account_type,
+                'debit' => (float) $account->debit_total,
+                'credit' => (float) $account->credit_total,
                 'balance' => $balance
             ];
+        })->filter(function($account) {
+            // Show accounts with non-zero balances or transactions
+            return abs($account['balance']) > 0.01 || $account['debit'] > 0 || $account['credit'] > 0;
+        })->values();
+        
+        return response()->json(['accounts' => $accounts]);
+    }
 
-            // Determine account section based on code ranges and type
-            if (in_array($account->account_type, ['Asset', 'Current Asset', 'Fixed Asset', 'Investment', 'Tangible Asset', 'Intangible Asset'])) {
-                if (in_array($account->account_type, ['Current Asset'])) {
-                    $balanceSheet['assets']['current']['accounts'][] = $accountData;
-                    $balanceSheet['assets']['current']['total'] += $balance;
-                } else {
-                    $balanceSheet['assets']['non_current']['accounts'][] = $accountData;
-                    $balanceSheet['assets']['non_current']['total'] += $balance;
+    /**
+     * Build hierarchical balance sheet structure according to International Standards
+     * Shows Level 1 (Categories), Level 2 (Groups), Level 3 (Sub-groups)
+     * Level 4 accounts are aggregated into Level 3
+     */
+    private function buildHierarchicalBalanceSheet($compId, $locationId, $asAtDate, $fiscalYear)
+    {
+        // Get Level 1 accounts (Assets, Liabilities, Equity)
+        $level1Accounts = DB::table('chart_of_accounts')
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('account_level', 1)
+            ->whereIn('account_type', ['Assets', 'Liabilities', 'Equity'])
+            ->orderBy('account_code')
+            ->get();
+            
+        $structure = [
+            'assets' => null,
+            'liabilities' => null,
+            'equity' => null,
+            'totalAssets' => 0,
+            'totalLiabilities' => 0,
+            'totalEquity' => 0,
+        ];
+        
+        foreach ($level1Accounts as $level1) {
+            $level1Data = [
+                'id' => $level1->id,
+                'code' => $level1->account_code,
+                'name' => $level1->account_name,
+                'type' => $level1->account_type,
+                'level' => 1,
+                'children' => [],
+                'total' => 0
+            ];
+            
+            // Get Level 2 accounts
+            $level2Accounts = DB::table('chart_of_accounts')
+                ->where('parent_account_id', $level1->id)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->where('account_level', 2)
+                ->orderBy('account_code')
+                ->get();
+                
+            foreach ($level2Accounts as $level2) {
+                $level2Data = [
+                    'id' => $level2->id,
+                    'code' => $level2->account_code,
+                    'name' => $level2->account_name,
+                    'type' => $level2->account_type,
+                    'level' => 2,
+                    'children' => [],
+                    'total' => 0
+                ];
+                
+                // Get Level 3 accounts
+                $level3Accounts = DB::table('chart_of_accounts')
+                    ->where('parent_account_id', $level2->id)
+                    ->where('comp_id', $compId)
+                    ->where('location_id', $locationId)
+                    ->where('account_level', 3)
+                    ->orderBy('account_code')
+                    ->get();
+                    
+                foreach ($level3Accounts as $level3) {
+                    // Calculate total balance for this Level 3 (sum of all Level 4 children)
+                    $level3Balance = $this->calculateLevel3Balance($level3->id, $compId, $locationId, $asAtDate, $fiscalYear);
+                    
+                    if (abs($level3Balance) < 0.01) {
+                        continue; // Skip zero-balance Level 3 accounts
+                    }
+                    
+                    $level3Data = [
+                        'id' => $level3->id,
+                        'code' => $level3->account_code,
+                        'name' => $level3->account_name,
+                        'type' => $level3->account_type,
+                        'level' => 3,
+                        'balance' => $level3Balance,
+                        'has_children' => true
+                    ];
+                    
+                    $level2Data['children'][] = $level3Data;
+                    $level2Data['total'] += $level3Balance;
                 }
-            } elseif (in_array($account->account_type, ['Liability', 'Current Liability', 'Long Term Liability', 'Payable'])) {
-                if (in_array($account->account_type, ['Current Liability'])) {
-                    $balanceSheet['liabilities']['current']['accounts'][] = $accountData;
-                    $balanceSheet['liabilities']['current']['total'] += $balance;
-                } else {
-                    $balanceSheet['liabilities']['non_current']['accounts'][] = $accountData;
-                    $balanceSheet['liabilities']['non_current']['total'] += $balance;
-                }
-            } elseif (in_array($account->account_type, ['Equity', 'Share Capital', 'Reserve', 'Retained Earnings'])) {
-                if ($account->account_type === 'Share Capital') {
-                    $balanceSheet['equity']['share_capital']['accounts'][] = $accountData;
-                    $balanceSheet['equity']['share_capital']['total'] += $balance;
-                } elseif ($account->account_type === 'Reserve') {
-                    $balanceSheet['equity']['reserves']['accounts'][] = $accountData;
-                    $balanceSheet['equity']['reserves']['total'] += $balance;
-                } else {
-                    $balanceSheet['equity']['retained_earnings']['accounts'][] = $accountData;
-                    $balanceSheet['equity']['retained_earnings']['total'] += $balance;
+                
+                if (count($level2Data['children']) > 0) {
+                    $level1Data['children'][] = $level2Data;
+                    $level1Data['total'] += $level2Data['total'];
                 }
             }
+            
+            // Assign to appropriate category
+            if ($level1->account_type === 'Assets') {
+                $structure['assets'] = $level1Data;
+                $structure['totalAssets'] = $level1Data['total'];
+            } elseif ($level1->account_type === 'Liabilities') {
+                $structure['liabilities'] = $level1Data;
+                $structure['totalLiabilities'] = $level1Data['total'];
+            } elseif ($level1->account_type === 'Equity') {
+                $structure['equity'] = $level1Data;
+                $structure['totalEquity'] = $level1Data['total'];
+            }
         }
-
-        // Calculate totals
-        $totalAssets = $balanceSheet['assets']['current']['total'] + $balanceSheet['assets']['non_current']['total'];
-        $totalLiabilities = $balanceSheet['liabilities']['current']['total'] + $balanceSheet['liabilities']['non_current']['total'];
-        $totalEquity = $balanceSheet['equity']['share_capital']['total'] + 
-                       $balanceSheet['equity']['reserves']['total'] + 
-                       $balanceSheet['equity']['retained_earnings']['total'];
-
-        return [
-            'assets' => $balanceSheet['assets'],
-            'liabilities' => $balanceSheet['liabilities'],
-            'equity' => $balanceSheet['equity'],
-            'totalAssets' => $totalAssets,
-            'totalLiabilities' => $totalLiabilities,
-            'totalEquity' => $totalEquity,
-            'totalLiabilitiesAndEquity' => $totalLiabilities + $totalEquity,
-            'balancingCheck' => $totalAssets - ($totalLiabilities + $totalEquity) // Should be 0
-        ];
+        
+        $structure['totalLiabilitiesAndEquity'] = $structure['totalLiabilities'] + $structure['totalEquity'];
+        $structure['balancingCheck'] = $structure['totalAssets'] - $structure['totalLiabilitiesAndEquity'];
+        
+        return $structure;
+    }
+    
+    /**
+     * Calculate total balance for a Level 3 account (sum of all Level 4 children)
+     */
+    private function calculateLevel3Balance($level3Id, $compId, $locationId, $asAtDate, $fiscalYear)
+    {
+        $level4Accounts = DB::table('chart_of_accounts as coa')
+            ->leftJoin('transaction_entries as te', function($join) use ($asAtDate, $fiscalYear) {
+                $join->on('coa.id', '=', 'te.account_id')
+                    ->whereExists(function($query) use ($asAtDate, $fiscalYear) {
+                        $query->select(DB::raw(1))
+                            ->from('transactions as t')
+                            ->whereColumn('t.id', 'te.transaction_id')
+                            ->where('t.fiscal_year', '<=', $fiscalYear)
+                            ->where('t.voucher_date', '<=', $asAtDate)
+                            ->where('t.status', 'Posted');
+                    });
+            })
+            ->where('coa.parent_account_id', $level3Id)
+            ->where('coa.comp_id', $compId)
+            ->where('coa.location_id', $locationId)
+            ->where('coa.account_level', 4)
+            ->where('coa.is_transactional', true)
+            ->select(
+                'coa.id',
+                'coa.account_type',
+                DB::raw('COALESCE(SUM(te.base_debit_amount), 0) as debit_total'),
+                DB::raw('COALESCE(SUM(te.base_credit_amount), 0) as credit_total')
+            )
+            ->groupBy('coa.id', 'coa.account_type')
+            ->get();
+            
+        $totalBalance = 0;
+        foreach ($level4Accounts as $account) {
+            $totalBalance += $this->calculateAccountBalance($account);
+        }
+        
+        return $totalBalance;
     }
 
     /**
      * Calculate account balance based on debit/credit
-     * Assets and Expenses: Debit - Credit
-     * Liabilities, Equity, Revenue: Credit - Debit
+     * Assets: Debit - Credit (positive debit balance)
+     * Liabilities & Equity: Credit - Debit (positive credit balance)
      */
     private function calculateAccountBalance($account)
     {
-        $debit = $account->debit_total ?? 0;
-        $credit = $account->credit_total ?? 0;
+        $debit = (float) ($account->debit_total ?? 0);
+        $credit = (float) ($account->credit_total ?? 0);
 
-        // Balance sheet accounts
-        if (in_array($account->account_type, ['Asset', 'Current Asset', 'Fixed Asset', 'Investment', 'Tangible Asset', 'Intangible Asset'])) {
+        // Check account type - database stores as 'Assets', 'Liabilities', 'Equity'
+        $accountType = $account->account_type;
+        
+        // Assets: Normal debit balance (Debit - Credit)
+        if ($accountType === 'Assets' || 
+            stripos($accountType, 'asset') !== false) {
             return $debit - $credit;
-        } elseif (in_array($account->account_type, ['Liability', 'Current Liability', 'Long Term Liability', 'Payable', 'Equity', 'Share Capital', 'Reserve', 'Retained Earnings'])) {
+        }
+        
+        // Liabilities & Equity: Normal credit balance (Credit - Debit) 
+        if ($accountType === 'Liabilities' || 
+            $accountType === 'Equity' ||
+            stripos($accountType, 'liability') !== false ||
+            stripos($accountType, 'equity') !== false ||
+            stripos($accountType, 'capital') !== false ||
+            stripos($accountType, 'payable') !== false) {
             return $credit - $debit;
         }
 
+        // Default to asset behavior (Debit - Credit)
         return $debit - $credit;
     }
 }

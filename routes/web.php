@@ -75,9 +75,7 @@ Route::get('/erp-modules', function (Request $request) {
 })->middleware('web.auth')->name('erp.modules');
 
 // Accounts Module Routes
-Route::get('/accounts', function (Request $request) {
-    return Inertia::render('Modules/Accounts/index');
-})->middleware('web.auth')->name('accounts');
+Route::get('/accounts', [App\Http\Controllers\Accounts\AccountsDashboardController::class, 'index'])->middleware('web.auth')->name('accounts');
 
 Route::get('/accounts/chart-of-accounts', [App\Http\Controllers\Accounts\ChartOfAccountsController::class, 'index'])->middleware('web.auth')->name('accounts.chart-of-accounts');
 
@@ -215,6 +213,7 @@ Route::prefix('api/code-configuration')->middleware('web.auth')->group(function 
 // Balance Sheet Routes
 Route::prefix('accounts/balance-sheet')->name('accounts.balance-sheet.')->middleware('web.auth')->group(function () {
     Route::get('/', [App\Http\Controllers\Accounts\BalanceSheetController::class, 'index'])->name('index');
+    Route::get('/level4-details', [App\Http\Controllers\Accounts\BalanceSheetController::class, 'getLevel4Details'])->name('level4-details');
 });
 
 // Income Statement Routes
