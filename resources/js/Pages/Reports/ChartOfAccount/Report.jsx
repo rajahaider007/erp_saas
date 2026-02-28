@@ -25,7 +25,7 @@ const ChartOfAccountReport = () => {
   const [filters, setFilters] = useState({
     level: initialFilters?.level || 'all',
     account_type: initialFilters?.account_type || '',
-    status: initialFilters?.status || 'Active',
+    status: initialFilters?.status || '',
     hide_zero: initialFilters?.hide_zero || false,
     sort_by: initialFilters?.sort_by || 'code',
   });
@@ -47,15 +47,16 @@ const ChartOfAccountReport = () => {
   // Account types
   const accountTypes = [
     { value: '', label: 'All Types' },
-    { value: 'Asset', label: 'Assets' },
-    { value: 'Liability', label: 'Liabilities' },
+    { value: 'Assets', label: 'Assets' },
+    { value: 'Liabilities', label: 'Liabilities' },
     { value: 'Equity', label: 'Equity' },
     { value: 'Revenue', label: 'Revenue' },
-    { value: 'Expense', label: 'Expenses' },
+    { value: 'Expenses', label: 'Expenses' },
   ];
 
   // Account statuses
   const statusOptions = [
+    { value: '', label: 'All Statuses' },
     { value: 'Active', label: 'Active' },
     { value: 'Inactive', label: 'Inactive' },
   ];
@@ -81,17 +82,56 @@ const ChartOfAccountReport = () => {
         params.append(key, filters[key]);
       }
     });
+    
+    // Include search term if present
+    if (searchTerm) {
+      params.append('search', searchTerm);
+    }
 
     router.get(route('accounts.reports.chart-of-account.report'), Object.fromEntries(params), {
       onFinish: () => setLoading(false)
     });
   };
 
+  const handleExportExcel = () => {
+    const params = new URLSearchParams();
+    
+    Object.keys(filters).forEach(key => {
+      if (filters[key] !== '' && filters[key] !== false) {
+        params.append(key, filters[key]);
+      }
+    });
+    
+    if (searchTerm) {
+      params.append('search', searchTerm);
+    }
+    params.append('export', 'excel');
+    
+    window.location.href = route('accounts.reports.chart-of-account.report') + '?' + params.toString();
+  };
+
+  const handleExportCSV = () => {
+    const params = new URLSearchParams();
+    
+    Object.keys(filters).forEach(key => {
+      if (filters[key] !== '' && filters[key] !== false) {
+        params.append(key, filters[key]);
+      }
+    });
+    
+    if (searchTerm) {
+      params.append('search', searchTerm);
+    }
+    params.append('export', 'csv');
+    
+    window.location.href = route('accounts.reports.chart-of-account.report') + '?' + params.toString();
+  };
+
   const handleResetFilters = () => {
     setFilters({
       level: 'all',
       account_type: '',
-      status: 'Active',
+      status: '',
       hide_zero: false,
       sort_by: 'code',
     });
@@ -112,6 +152,16 @@ const ChartOfAccountReport = () => {
     return status === 'Active' 
       ? 'inline-block px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm rounded-full'
       : 'inline-block px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-sm rounded-full';
+  };
+
+  const getLevelColor = (level) => {
+    const colors = {
+      1: { color: '#fbbf24', fontWeight: 'bold', fontSize: '16px' },           // Level 1: Gold/Amber - Main Categories
+      2: { color: '#10b981', fontWeight: '600', fontSize: '14px' },           // Level 2: Emerald Green - Categories
+      3: { color: '#38bdf8', fontWeight: '500', fontSize: '14px' },           // Level 3: Sky Blue - Subcategories
+      4: { color: '#a78bfa', fontWeight: '400', fontSize: '14px' },           // Level 4: Purple - Transactional
+    };
+    return colors[level] || { color: '#a78bfa' };
   };
 
   const formatCurrency = (value) => {
@@ -208,15 +258,11 @@ const ChartOfAccountReport = () => {
                   <ChevronDown size={16} />
                 </button>
                 <div className="dropdown-menu bg-slate-700 border-slate-600">
-                  <button className="text-white hover:bg-slate-600">
+                  <button className="text-white hover:bg-slate-600" onClick={handleExportExcel}>
                     <FileSpreadsheet size={16} />
                     Export as Excel
                   </button>
-                  <button className="text-white hover:bg-slate-600">
-                    <FileBarChart size={16} />
-                    Export as PDF
-                  </button>
-                  <button className="text-white hover:bg-slate-600">
+                  <button className="text-white hover:bg-slate-600" onClick={handleExportCSV}>
                     <FileText size={16} />
                     Export as CSV
                   </button>
@@ -407,55 +453,7 @@ const ChartOfAccountReport = () => {
               )}
             </div>
 
-            {/* Totals Summary */}
-            {totals && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="bg-slate-800 rounded-lg border border-slate-700 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-400">Total Debits</p>
-                      <p className="text-2xl font-bold text-blue-400">
-                        {formatCurrency(totals.total_debit)}
-                      </p>
-                    </div>
-                    <TrendingUp className="w-8 h-8 text-blue-600" />
-                  </div>
-                </div>
-                <div className="bg-slate-800 rounded-lg border border-slate-700 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-400">Total Credits</p>
-                      <p className="text-2xl font-bold text-red-400">
-                        {formatCurrency(totals.total_credit)}
-                      </p>
-                    </div>
-                    <TrendingUp className="w-8 h-8 text-red-600 transform rotate-180" />
-                  </div>
-                </div>
-                <div className="bg-slate-800 rounded-lg border border-slate-700 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-400">Total Accounts</p>
-                      <p className="text-2xl font-bold text-white">
-                        {filteredData.length}
-                      </p>
-                    </div>
-                    <List className="w-8 h-8 text-gray-600" />
-                  </div>
-                </div>
-                <div className="bg-gradient-to-br from-green-900 to-green-800 rounded-lg border border-green-700 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-green-200">Total Balance</p>
-                      <p className="text-2xl font-bold text-green-100">
-                        {formatCurrency(totals.total_balance)}
-                      </p>
-                    </div>
-                    <DollarSign className="w-8 h-8 text-green-600" />
-                  </div>
-                </div>
-              </div>
-            )}
+
 
             {/* Chart of Accounts Table */}
             {filteredData.length === 0 ? (
@@ -469,14 +467,10 @@ const ChartOfAccountReport = () => {
                 <table className="data-table bg-slate-800 text-white">
                   <thead>
                     <tr>
-                      <th style={{width: '12%'}}>Code</th>
-                      <th style={{width: '25%'}}>Name</th>
-                      <th style={{width: '10%'}}>Type</th>
-                      <th style={{width: '8%'}}>Status</th>
-                      <th style={{width: '11%'}} className="text-right">Opening</th>
-                      <th style={{width: '11%'}} className="text-right">Debit</th>
-                      <th style={{width: '11%'}} className="text-right">Credit</th>
-                      <th style={{width: '12%'}} className="text-right">Balance</th>
+                      <th style={{width: '20%'}}>Code</th>
+                      <th style={{width: '50%'}}>Name</th>
+                      <th style={{width: '15%'}}>Type</th>
+                      <th style={{width: '15%'}}>Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -488,15 +482,13 @@ const ChartOfAccountReport = () => {
                         <td className="font-mono text-blue-300">
                           {account.account_code}
                         </td>
-                        <td>
-                          <div style={{ paddingLeft: `${account.level_indent || 0}px` }}>
-                            {account.account_name}
-                          </div>
+                        <td style={getLevelColor(account.account_level)}>
+                          {account.account_name}
                         </td>
                         <td>
                           <span className={`text-xs font-semibold px-2 py-1 rounded ${
-                            account.account_type === 'Asset' ? 'bg-blue-900 text-blue-200' :
-                            account.account_type === 'Liability' ? 'bg-red-900 text-red-200' :
+                            account.account_type === 'Assets' ? 'bg-blue-900 text-blue-200' :
+                            account.account_type === 'Liabilities' ? 'bg-red-900 text-red-200' :
                             account.account_type === 'Equity' ? 'bg-green-900 text-green-200' :
                             account.account_type === 'Revenue' ? 'bg-purple-900 text-purple-200' :
                             'bg-orange-900 text-orange-200'
@@ -507,20 +499,6 @@ const ChartOfAccountReport = () => {
                         <td>
                           <span className={getStatusBadge(account.status)}>
                             {account.status}
-                          </span>
-                        </td>
-                        <td className="text-right text-gray-300 font-mono">
-                          {formatCurrency(account.opening_balance)}
-                        </td>
-                        <td className="text-right text-blue-400 font-mono">
-                          {formatCurrency(account.total_debit)}
-                        </td>
-                        <td className="text-right text-red-400 font-mono">
-                          {formatCurrency(account.total_credit)}
-                        </td>
-                        <td className="text-right font-mono font-semibold">
-                          <span className={account.current_balance >= 0 ? 'text-green-400' : 'text-red-400'}>
-                            {formatCurrency(account.current_balance)}
                           </span>
                         </td>
                       </tr>

@@ -101,12 +101,20 @@ class ChartOfAccountReportController extends Controller
         // Get filters
         $accountLevel = $request->input('level', 'all'); // all, 1, 2, 3, 4
         $accountType = $request->input('account_type', ''); // Asset, Liability, Equity, Revenue, Expense
-        $status = $request->input('status', 'Active'); // Active, Inactive
+        $status = $request->input('status', ''); // Active, Inactive, or empty for all
         $hideZero = $request->input('hide_zero', '0') === '1';
         $sortBy = $request->input('sort_by', 'code'); // code, name, balance
+        $export = $request->input('export', null); // excel, csv
 
         // Get company info
         $company = DB::table('companies')->where('id', $compId)->first();
+
+        // Handle export requests
+        if ($export === 'excel') {
+            return $this->exportExcel($compId, $locationId, $accountType, $status, $hideZero, $sortBy, $company);
+        } elseif ($export === 'csv') {
+            return $this->exportCSV($compId, $locationId, $accountType, $status, $hideZero, $sortBy, $company);
+        }
 
         // Route to appropriate method based on level selection
         if ($accountLevel === 'all') {
@@ -450,5 +458,101 @@ class ChartOfAccountReportController extends Controller
         }
         
         return $transformed;
+    }
+
+    /**
+     * Export Chart of Account data to Excel
+     */
+    private function exportExcel($compId, $locationId, $accountType, $status, $hideZero, $sortBy, $company)
+    {
+        // Get all accounts
+        $query = DB::table('chart_of_accounts')
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId);
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        if ($accountType) {
+            $query->where('account_type', $accountType);
+        }
+
+        $accounts = $query->orderBy('account_level', 'asc')
+            ->orderBy('account_code', 'asc')
+            ->get();
+
+        // Create Excel file
+        $fileName = 'chart_of_accounts_' . date('YmdHis') . '.csv';
+        $handle = fopen('php://memory', 'w');
+
+        // Add header
+        fputcsv($handle, ['Code', 'Name', 'Type', 'Status', 'Level']);
+
+        // Add data rows
+        foreach ($accounts as $account) {
+            fputcsv($handle, [
+                $account->account_code,
+                $account->account_name,
+                $account->account_type,
+                $account->status,
+                $account->account_level
+            ]);
+        }
+
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return response($csv)->header('Content-Type', 'application/vnd.ms-excel')
+            ->header('Content-Disposition', "attachment; filename=\"$fileName\"");
+    }
+
+    /**
+     * Export Chart of Account data to CSV
+     */
+    private function exportCSV($compId, $locationId, $accountType, $status, $hideZero, $sortBy, $company)
+    {
+        // Get all accounts
+        $query = DB::table('chart_of_accounts')
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId);
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        if ($accountType) {
+            $query->where('account_type', $accountType);
+        }
+
+        $accounts = $query->orderBy('account_level', 'asc')
+            ->orderBy('account_code', 'asc')
+            ->get();
+
+        // Create CSV file
+        $fileName = 'chart_of_accounts_' . date('YmdHis') . '.csv';
+        $handle = fopen('php://memory', 'w');
+
+        // Add header
+        fputcsv($handle, ['Code', 'Name', 'Type', 'Status', 'Level']);
+
+        // Add data rows
+        foreach ($accounts as $account) {
+            fputcsv($handle, [
+                $account->account_code,
+                $account->account_name,
+                $account->account_type,
+                $account->status,
+                $account->account_level
+            ]);
+        }
+
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return response($csv)->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', "attachment; filename=\"$fileName\"");
     }
 }
