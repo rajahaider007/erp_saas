@@ -152,11 +152,8 @@ class ChartOfAccountReportController extends Controller
         // Calculate current balance for each account
         $accountBalances = $this->getAccountBalances($accounts);
 
-        // Build hierarchical structure
+        // Build account data array - now includes ALL accounts
         $chartData = [];
-        $currentLevel1 = null;
-        $currentLevel2 = null;
-        $currentLevel3 = null;
 
         foreach ($accounts as $account) {
             // Skip if hiding zero balance accounts
@@ -183,42 +180,12 @@ class ChartOfAccountReportController extends Controller
                 'level_indent' => ($account->account_level - 1) * 20, // For visual indentation in UI
             ];
 
-            // Group by level
-            if ($account->account_level == 1) {
-                if ($currentLevel1) {
-                    $chartData[] = $currentLevel1;
-                }
-                $currentLevel1 = [
-                    'account' => $accountItem,
-                    'children' => []
-                ];
-            } elseif ($account->account_level == 2 && $currentLevel1) {
-                $currentLevel2 = [
-                    'account' => $accountItem,
-                    'children' => []
-                ];
-                $currentLevel1['children'][] = $currentLevel2;
-            } elseif ($account->account_level == 3 && $currentLevel2) {
-                $currentLevel3 = [
-                    'account' => $accountItem,
-                    'children' => []
-                ];
-                $currentLevel2['children'][] = $currentLevel3;
-            } elseif ($account->account_level == 4 && $currentLevel3) {
-                $currentLevel3['children'][] = $accountItem;
-            } elseif ($account->account_level == 1) {
-                // Top level account
-                $chartData[] = $accountItem;
-            }
+            // Add all accounts directly to the array
+            $chartData[] = $accountItem;
         }
 
-        // Add last level 1 account
-        if ($currentLevel1) {
-            $chartData[] = $currentLevel1;
-        }
-
-        // Transform hierarchical structure for easier rendering
-        $transformedData = $this->transformHierarchicalData($chartData);
+        // No need for complex transformation - data is already flat
+        $transformedData = $chartData;
 
         // Apply sorting
         switch ($sortBy) {

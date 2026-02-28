@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Head, usePage, router, Link } from '@inertiajs/react';
-import AppLayout from '@/Layouts/AppLayout';
 import {
   FileText, Download, Filter, Eye, EyeOff, Calendar, 
   Building, MapPin, Settings, Search, RefreshCw, 
   ChevronDown, ChevronUp, Printer, FileSpreadsheet,
   FileBarChart, Columns, Settings2, BarChart3, TrendingUp,
-  AlertCircle
+  AlertCircle, Database, DollarSign, List
 } from 'lucide-react';
+import App from '../../App.jsx';
 
 /**
  * Chart of Account Report Component
@@ -108,28 +108,26 @@ const ChartOfAccountReport = () => {
     setExpandedRows(newExpanded);
   };
 
-  const getAccountTypeColor = (type) => {
-    const colors = {
-      'Asset': 'bg-blue-50 border-l-4 border-blue-500',
-      'Liability': 'bg-red-50 border-l-4 border-red-500',
-      'Equity': 'bg-green-50 border-l-4 border-green-500',
-      'Revenue': 'bg-purple-50 border-l-4 border-purple-500',
-      'Expense': 'bg-orange-50 border-l-4 border-orange-500',
-    };
-    return colors[type] || 'bg-gray-50 border-l-4 border-gray-300';
-  };
-
   const getStatusBadge = (status) => {
     return status === 'Active' 
-      ? 'inline-block px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full'
-      : 'inline-block px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full';
+      ? 'inline-block px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm rounded-full'
+      : 'inline-block px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-sm rounded-full';
   };
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
+      minimumFractionDigits: 2,
     }).format(value || 0);
+  };
+
+  const handleBackToFilters = () => {
+    router.get(route('accounts.reports.chart-of-account.search'));
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   // Filter data based on search term
@@ -140,298 +138,415 @@ const ChartOfAccountReport = () => {
 
   if (error) {
     return (
-      <AppLayout>
-        <Head title="Chart of Accounts Report" />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <div className="flex items-center gap-3 text-red-800">
-              <AlertCircle className="w-5 h-5" />
-              <div>
-                <h3 className="font-semibold">Error</h3>
-                <p>{error}</p>
+      <App>
+        <div className="reports-container">
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+              <div className="flex items-center gap-3 text-red-800 dark:text-red-300">
+                <AlertCircle className="w-5 h-5" />
+                <div>
+                  <h3 className="font-semibold">Error</h3>
+                  <p>{error}</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </AppLayout>
+      </App>
     );
   }
 
   return (
-    <AppLayout>
-      <Head title="Chart of Accounts Report" />
-      
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <App>
+      <div className="reports-container">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Chart of Accounts Report</h1>
-            {company && (
-              <p className="text-gray-600 text-sm mt-2">
-                {company.company_name}
-              </p>
-            )}
-          </div>
-          <button
-            onClick={() => window.print()}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            <Printer className="w-4 h-4" />
-            Print
-          </button>
-        </div>
-
-        {/* Filter Panel */}
-        <div className="bg-white rounded-lg border border-gray-200 mb-6">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50"
-          >
-            <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-gray-600" />
-              <span className="font-semibold text-gray-700">Filters</span>
-            </div>
-            {showFilters ? (
-              <ChevronUp className="w-5 h-5 text-gray-600" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-gray-600" />
-            )}
-          </button>
-
-          {showFilters && (
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {/* Level Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Account Level
-                  </label>
-                  <select
-                    value={filters.level}
-                    onChange={(e) => handleFilterChange('level', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {levels.map(level => (
-                      <option key={level.value} value={level.value}>
-                        {level.label}
-                      </option>
-                    ))}
-                  </select>
+        <div className="report-header">
+          <div className="report-header-main">
+            <div className="report-title-section">
+              <h1 className="report-title">
+                <FileText className="report-title-icon" />
+                Chart of Accounts Report
+              </h1>
+              <div className="report-stats-summary">
+                <div className="report-stat-item">
+                  <List size={16} />
+                  <span>{filteredData?.length || 0} Accounts</span>
                 </div>
-
-                {/* Account Type Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Account Type
-                  </label>
-                  <select
-                    value={filters.account_type}
-                    onChange={(e) => handleFilterChange('account_type', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {accountTypes.map(type => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Status Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status
-                  </label>
-                  <select
-                    value={filters.status}
-                    onChange={(e) => handleFilterChange('status', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {statusOptions.map(status => (
-                      <option key={status.value} value={status.value}>
-                        {status.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Sort By */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sort By
-                  </label>
-                  <select
-                    value={filters.sort_by}
-                    onChange={(e) => handleFilterChange('sort_by', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {sortOptions.map(sort => (
-                      <option key={sort.value} value={sort.value}>
-                        {sort.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Hide Zero Balances */}
-                <div className="flex items-end">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={filters.hide_zero}
-                      onChange={(e) => handleFilterChange('hide_zero', e.target.checked)}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Hide Zero Balances</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Search */}
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Search
-                </label>
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by code or name..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Filter Actions */}
-              <div className="mt-4 flex gap-2">
-                <button
-                  onClick={handleApplyFilters}
-                  disabled={loading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {loading ? 'Applying...' : 'Apply Filters'}
-                </button>
-                <button
-                  onClick={handleResetFilters}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Totals Summary */}
-        {totals && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <p className="text-sm text-gray-600">Total Debits</p>
-              <p className="text-2xl font-bold text-blue-600">
-                {formatCurrency(totals.total_debit)}
-              </p>
-            </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <p className="text-sm text-gray-600">Total Credits</p>
-              <p className="text-2xl font-bold text-red-600">
-                {formatCurrency(totals.total_credit)}
-              </p>
-            </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <p className="text-sm text-gray-600">Total Accounts</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {filteredData.length}
-              </p>
-            </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <p className="text-sm text-gray-600">Total Balance</p>
-              <p className="text-2xl font-bold text-green-600">
-                {formatCurrency(totals.total_balance)}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Chart of Accounts Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left font-semibold text-gray-700">Code</th>
-                  <th className="px-6 py-3 text-left font-semibold text-gray-700">Name</th>
-                  <th className="px-6 py-3 text-left font-semibold text-gray-700">Type</th>
-                  <th className="px-6 py-3 text-left font-semibold text-gray-700">Status</th>
-                  <th className="px-6 py-3 text-right font-semibold text-gray-700">Opening</th>
-                  <th className="px-6 py-3 text-right font-semibold text-gray-700">Debit</th>
-                  <th className="px-6 py-3 text-right font-semibold text-gray-700">Credit</th>
-                  <th className="px-6 py-3 text-right font-semibold text-gray-700">Balance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredData.length === 0 ? (
-                  <tr>
-                    <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
-                      No accounts found matching the criteria
-                    </td>
-                  </tr>
-                ) : (
-                  filteredData.map((account, index) => (
-                    <tr
-                      key={account.id}
-                      className={`border-b border-gray-200 hover:bg-gray-50 ${getAccountTypeColor(account.account_type)}`}
-                    >
-                      <td className="px-6 py-3 font-mono text-gray-900">
-                        {account.account_code}
-                      </td>
-                      <td className="px-6 py-3 text-gray-900">
-                        <div style={{ paddingLeft: `${account.level_indent || 0}px` }}>
-                          {account.account_name}
-                        </div>
-                      </td>
-                      <td className="px-6 py-3 text-gray-600">
-                        <span className="text-xs font-semibold px-2 py-1 bg-gray-200 text-gray-800 rounded">
-                          {account.account_type}
-                        </span>
-                      </td>
-                      <td className="px-6 py-3">
-                        <span className={getStatusBadge(account.status)}>
-                          {account.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-3 text-right text-gray-900 font-mono">
-                        {formatCurrency(account.opening_balance)}
-                      </td>
-                      <td className="px-6 py-3 text-right text-blue-600 font-mono">
-                        {formatCurrency(account.total_debit)}
-                      </td>
-                      <td className="px-6 py-3 text-right text-red-600 font-mono">
-                        {formatCurrency(account.total_credit)}
-                      </td>
-                      <td className="px-6 py-3 text-right font-mono font-semibold">
-                        <span className={account.current_balance >= 0 ? 'text-green-600' : 'text-red-600'}>
-                          {formatCurrency(account.current_balance)}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                {company && (
+                  <div className="report-stat-item">
+                    <Building size={16} />
+                    <span>{company.company_name}</span>
+                  </div>
                 )}
-              </tbody>
-            </table>
+              </div>
+            </div>
+
+            <div className="report-header-actions">
+              <button
+                className="report-btn"
+                onClick={handleBackToFilters}
+                title="Back to Filters"
+              >
+                <Filter size={20} />
+                Change Filters
+              </button>
+
+              <button
+                className="report-btn"
+                onClick={handlePrint}
+                title="Print Report"
+              >
+                <Printer size={20} />
+                Print
+              </button>
+
+              {/* Export Dropdown */}
+              <div className="dropdown">
+                <button className="report-btn dropdown-toggle">
+                  <Download size={20} />
+                  Export
+                  <ChevronDown size={16} />
+                </button>
+                <div className="dropdown-menu bg-slate-700 border-slate-600">
+                  <button className="text-white hover:bg-slate-600">
+                    <FileSpreadsheet size={16} />
+                    Export as Excel
+                  </button>
+                  <button className="text-white hover:bg-slate-600">
+                    <FileBarChart size={16} />
+                    Export as PDF
+                  </button>
+                  <button className="text-white hover:bg-slate-600">
+                    <FileText size={16} />
+                    Export as CSV
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* IFRS Compliance Notes */}
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-900 mb-2">IFRS Compliance Notes</h3>
-          <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-            <li>Chart follows IAS 1 - Presentation of Financial Statements</li>
-            <li>Account hierarchy supports segment reporting requirements (IFRS 8)</li>
-            <li>Account levels track balance sheet and income statement items</li>
-            <li>All transactions are recorded using double-entry principle</li>
-          </ul>
+        {/* Applied Filters Display */}
+        <div className="applied-filters-container">
+          <div className="applied-filters-title">Applied Filters:</div>
+          <div className="applied-filters-list">
+            {filters.level && (
+              <div className="filter-badge">
+                <span className="filter-badge-label">Level:</span>
+                <span className="filter-badge-value">{filters.level === 'all' ? 'All Levels' : `Level ${filters.level}`}</span>
+              </div>
+            )}
+            {filters.account_type && (
+              <div className="filter-badge">
+                <span className="filter-badge-label">Type:</span>
+                <span className="filter-badge-value">{filters.account_type}</span>
+              </div>
+            )}
+            {filters.status && (
+              <div className="filter-badge">
+                <span className="filter-badge-label">Status:</span>
+                <span className="filter-badge-value">{filters.status}</span>
+              </div>
+            )}
+            {filters.hide_zero && (
+              <div className="filter-badge">
+                <span className="filter-badge-label">View:</span>
+                <span className="filter-badge-value">Hide Zero Balances</span>
+              </div>
+            )}
+            {filters.sort_by && (
+              <div className="filter-badge">
+                <span className="filter-badge-label">Sort:</span>
+                <span className="filter-badge-value">By {filters.sort_by}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="report-content">
+          <div className="data-table-container">
+            {/* Advanced Filters Panel */}
+            <div className="bg-slate-800 rounded-lg border border-slate-700 mb-6">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="w-full flex items-center justify-between px-6 py-4 hover:bg-slate-700 transition-colors text-white"
+              >
+                <div className="flex items-center gap-2">
+                  <Filter className="w-5 h-5 text-blue-400" />
+                  <span className="font-semibold">Advanced Filters</span>
+                </div>
+                {showFilters ? (
+                  <ChevronUp className="w-5 h-5 text-gray-400" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                )}
+              </button>
+
+              {showFilters && (
+                <div className="px-6 py-4 border-t border-slate-700 bg-slate-750">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {/* Level Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Account Level
+                      </label>
+                      <select
+                        value={filters.level}
+                        onChange={(e) => handleFilterChange('level', e.target.value)}
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {levels.map(level => (
+                          <option key={level.value} value={level.value}>
+                            {level.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Account Type Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Account Type
+                      </label>
+                      <select
+                        value={filters.account_type}
+                        onChange={(e) => handleFilterChange('account_type', e.target.value)}
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {accountTypes.map(type => (
+                          <option key={type.value} value={type.value}>
+                            {type.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Status Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Status
+                      </label>
+                      <select
+                        value={filters.status}
+                        onChange={(e) => handleFilterChange('status', e.target.value)}
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {statusOptions.map(status => (
+                          <option key={status.value} value={status.value}>
+                            {status.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Sort By */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Sort By
+                      </label>
+                      <select
+                        value={filters.sort_by}
+                        onChange={(e) => handleFilterChange('sort_by', e.target.value)}
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {sortOptions.map(sort => (
+                          <option key={sort.value} value={sort.value}>
+                            {sort.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Hide Zero Balances */}
+                    <div className="flex items-end">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={filters.hide_zero}
+                          onChange={(e) => handleFilterChange('hide_zero', e.target.checked)}
+                          className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-300">Hide Zero Balances</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Search */}
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <Search className="inline-block w-4 h-4 mr-1" />
+                      Search Accounts
+                    </label>
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Search by code or name..."
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+                    />
+                  </div>
+
+                  {/* Filter Actions */}
+                  <div className="mt-4 flex gap-2">
+                    <button
+                      onClick={handleApplyFilters}
+                      disabled={loading}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                    >
+                      {loading ? 'Applying...' : 'Apply Filters'}
+                    </button>
+                    <button
+                      onClick={handleResetFilters}
+                      className="px-4 py-2 bg-slate-600 text-gray-200 rounded-lg hover:bg-slate-500 transition-colors"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Totals Summary */}
+            {totals && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-slate-800 rounded-lg border border-slate-700 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-400">Total Debits</p>
+                      <p className="text-2xl font-bold text-blue-400">
+                        {formatCurrency(totals.total_debit)}
+                      </p>
+                    </div>
+                    <TrendingUp className="w-8 h-8 text-blue-600" />
+                  </div>
+                </div>
+                <div className="bg-slate-800 rounded-lg border border-slate-700 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-400">Total Credits</p>
+                      <p className="text-2xl font-bold text-red-400">
+                        {formatCurrency(totals.total_credit)}
+                      </p>
+                    </div>
+                    <TrendingUp className="w-8 h-8 text-red-600 transform rotate-180" />
+                  </div>
+                </div>
+                <div className="bg-slate-800 rounded-lg border border-slate-700 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-400">Total Accounts</p>
+                      <p className="text-2xl font-bold text-white">
+                        {filteredData.length}
+                      </p>
+                    </div>
+                    <List className="w-8 h-8 text-gray-600" />
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-green-900 to-green-800 rounded-lg border border-green-700 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-green-200">Total Balance</p>
+                      <p className="text-2xl font-bold text-green-100">
+                        {formatCurrency(totals.total_balance)}
+                      </p>
+                    </div>
+                    <DollarSign className="w-8 h-8 text-green-600" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Chart of Accounts Table */}
+            {filteredData.length === 0 ? (
+              <div className="empty-state">
+                <Database className="empty-icon" />
+                <h3>No accounts found</h3>
+                <p>No accounts match the selected criteria</p>
+              </div>
+            ) : (
+              <div className="table-wrapper">
+                <table className="data-table bg-slate-800 text-white">
+                  <thead>
+                    <tr>
+                      <th style={{width: '12%'}}>Code</th>
+                      <th style={{width: '25%'}}>Name</th>
+                      <th style={{width: '10%'}}>Type</th>
+                      <th style={{width: '8%'}}>Status</th>
+                      <th style={{width: '11%'}} className="text-right">Opening</th>
+                      <th style={{width: '11%'}} className="text-right">Debit</th>
+                      <th style={{width: '11%'}} className="text-right">Credit</th>
+                      <th style={{width: '12%'}} className="text-right">Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredData.map((account, index) => (
+                      <tr
+                        key={account.id}
+                        className="hover:bg-slate-700 text-white border-b border-slate-700"
+                      >
+                        <td className="font-mono text-blue-300">
+                          {account.account_code}
+                        </td>
+                        <td>
+                          <div style={{ paddingLeft: `${account.level_indent || 0}px` }}>
+                            {account.account_name}
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`text-xs font-semibold px-2 py-1 rounded ${
+                            account.account_type === 'Asset' ? 'bg-blue-900 text-blue-200' :
+                            account.account_type === 'Liability' ? 'bg-red-900 text-red-200' :
+                            account.account_type === 'Equity' ? 'bg-green-900 text-green-200' :
+                            account.account_type === 'Revenue' ? 'bg-purple-900 text-purple-200' :
+                            'bg-orange-900 text-orange-200'
+                          }`}>
+                            {account.account_type}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={getStatusBadge(account.status)}>
+                            {account.status}
+                          </span>
+                        </td>
+                        <td className="text-right text-gray-300 font-mono">
+                          {formatCurrency(account.opening_balance)}
+                        </td>
+                        <td className="text-right text-blue-400 font-mono">
+                          {formatCurrency(account.total_debit)}
+                        </td>
+                        <td className="text-right text-red-400 font-mono">
+                          {formatCurrency(account.total_credit)}
+                        </td>
+                        <td className="text-right font-mono font-semibold">
+                          <span className={account.current_balance >= 0 ? 'text-green-400' : 'text-red-400'}>
+                            {formatCurrency(account.current_balance)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* IFRS Compliance Notes */}
+            <div className="mt-6 bg-blue-900 text-white rounded-lg border border-blue-800 p-4">
+              <h3 className="font-semibold mb-2 text-blue-200">
+                <FileText className="inline-block w-5 h-5 mr-2" />
+                IFRS Compliance Notes
+              </h3>
+              <ul className="text-sm space-y-1 list-disc list-inside text-blue-300">
+                <li>Chart follows IAS 1 - Presentation of Financial Statements</li>
+                <li>Account hierarchy supports segment reporting requirements (IFRS 8)</li>
+                <li>Account levels track balance sheet and income statement items</li>
+                <li>All transactions are recorded using double-entry principle</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
-    </AppLayout>
+    </App>
   );
 };
 

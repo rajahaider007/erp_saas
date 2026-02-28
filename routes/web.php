@@ -138,6 +138,29 @@ Route::prefix('accounts/journal-voucher')->name('accounts.journal-voucher.')->mi
     Route::post('/bulk-post', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'bulkPost'])->name('bulk-post');
 });
 
+// Opening Voucher Routes
+Route::prefix('accounts/opening-voucher')->name('accounts.opening-voucher.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'store'])->name('store');
+    Route::get('/{id}', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'show'])->name('show');
+    Route::get('/{id}/edit', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'update'])->name('update');
+    // Print routes
+    Route::get('/{id}/print-summary', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'printSummary'])->name('print-summary');
+    Route::get('/{id}/print-detailed', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'printDetailed'])->name('print-detailed');
+    // Post route
+    Route::post('/{id}/post', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'post'])->name('post');
+    // Delete route
+    Route::delete('/{id}', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'destroy'])->name('destroy');
+    // Export routes
+    Route::get('/export-csv', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'exportCsv'])->name('export-csv');
+    Route::get('/export-excel', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'exportExcel'])->name('export-excel');
+    Route::get('/export-pdf', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'exportPdf'])->name('export-pdf');
+    // Bulk actions
+    Route::post('/bulk-post', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'bulkPost'])->name('bulk-post');
+});
+
 // General Ledger Routes
 Route::prefix('accounts/general-ledger')->name('accounts.general-ledger.')->middleware('web.auth')->group(function () {
     Route::get('/', [App\Http\Controllers\Accounts\GeneralLedgerController::class, 'search'])->name('search');
