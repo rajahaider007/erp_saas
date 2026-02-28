@@ -8,7 +8,8 @@ use App\Helpers\CompanyHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Inertia\Response;
+use Inertia\Response as InertiaResponse;
+use Illuminate\Http\Response as HttpResponse;
 
 /**
  * Chart of Account Report Controller
@@ -25,9 +26,9 @@ class ChartOfAccountReportController extends Controller
     /**
      * Display Chart of Account report search/filter page
      * 
-     * @return Response
+     * @return InertiaResponse|HttpResponse
      */
-    public function search(Request $request): Response
+    public function search(Request $request): InertiaResponse
     {
         $isParentCompany = CompanyHelper::isCurrentCompanyParent();
 
@@ -76,9 +77,9 @@ class ChartOfAccountReportController extends Controller
      * Level 3: Account SubCategories
      * Level 4: Transactional Accounts
      * 
-     * @return Response
+     * @return InertiaResponse|HttpResponse
      */
-    public function index(Request $request): Response
+    public function index(Request $request): InertiaResponse|HttpResponse
     {
         $isParentCompany = CompanyHelper::isCurrentCompanyParent();
 
@@ -134,9 +135,9 @@ class ChartOfAccountReportController extends Controller
      * @param bool $hideZero
      * @param string $sortBy
      * @param object $company
-     * @return Response
+     * @return InertiaResponse|HttpResponse
      */
-    private function getAllLevelsReport($compId, $locationId, $accountType, $status, $hideZero, $sortBy, $company): Response
+    private function getAllLevelsReport($compId, $locationId, $accountType, $status, $hideZero, $sortBy, $company): InertiaResponse
     {
         // Get all accounts
         $query = DB::table('chart_of_accounts')
@@ -235,9 +236,9 @@ class ChartOfAccountReportController extends Controller
      * @param bool $hideZero
      * @param string $sortBy
      * @param object $company
-     * @return Response
+     * @return InertiaResponse|HttpResponse
      */
-    private function getSpecificLevelReport($compId, $locationId, $level, $accountType, $status, $hideZero, $sortBy, $company): Response
+    private function getSpecificLevelReport($compId, $locationId, $level, $accountType, $status, $hideZero, $sortBy, $company): InertiaResponse
     {
         // Get accounts for specific level
         $query = DB::table('chart_of_accounts')
@@ -463,7 +464,7 @@ class ChartOfAccountReportController extends Controller
     /**
      * Export Chart of Account data to Excel
      */
-    private function exportExcel($compId, $locationId, $accountType, $status, $hideZero, $sortBy, $company)
+    private function exportExcel($compId, $locationId, $accountType, $status, $hideZero, $sortBy, $company): HttpResponse
     {
         // Get all accounts
         $query = DB::table('chart_of_accounts')
@@ -511,7 +512,7 @@ class ChartOfAccountReportController extends Controller
     /**
      * Export Chart of Account data to CSV
      */
-    private function exportCSV($compId, $locationId, $accountType, $status, $hideZero, $sortBy, $company)
+    private function exportCSV($compId, $locationId, $accountType, $status, $hideZero, $sortBy, $company): HttpResponse
     {
         // Get all accounts
         $query = DB::table('chart_of_accounts')

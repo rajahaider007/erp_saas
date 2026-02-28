@@ -26,7 +26,6 @@ const ChartOfAccountReport = () => {
     level: initialFilters?.level || 'all',
     account_type: initialFilters?.account_type || '',
     status: initialFilters?.status || '',
-    hide_zero: initialFilters?.hide_zero || false,
     sort_by: initialFilters?.sort_by || 'code',
   });
 
@@ -34,6 +33,7 @@ const ChartOfAccountReport = () => {
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
+  const isPrintView = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('print_view') === '1';
 
   // Account levels
   const levels = [
@@ -73,20 +73,29 @@ const ChartOfAccountReport = () => {
     setFilters(newFilters);
   };
 
-  const handleApplyFilters = () => {
-    setLoading(true);
+  const buildReportParams = (includePrintView = false) => {
     const params = new URLSearchParams();
-    
+
     Object.keys(filters).forEach(key => {
       if (filters[key] !== '' && filters[key] !== false) {
         params.append(key, filters[key]);
       }
     });
-    
-    // Include search term if present
+
     if (searchTerm) {
       params.append('search', searchTerm);
     }
+
+    if (includePrintView) {
+      params.append('print_view', '1');
+    }
+
+    return params;
+  };
+
+  const handleApplyFilters = () => {
+    setLoading(true);
+    const params = buildReportParams();
 
     router.get(route('accounts.reports.chart-of-account.report'), Object.fromEntries(params), {
       onFinish: () => setLoading(false)
@@ -94,34 +103,14 @@ const ChartOfAccountReport = () => {
   };
 
   const handleExportExcel = () => {
-    const params = new URLSearchParams();
-    
-    Object.keys(filters).forEach(key => {
-      if (filters[key] !== '' && filters[key] !== false) {
-        params.append(key, filters[key]);
-      }
-    });
-    
-    if (searchTerm) {
-      params.append('search', searchTerm);
-    }
+    const params = buildReportParams();
     params.append('export', 'excel');
     
     window.location.href = route('accounts.reports.chart-of-account.report') + '?' + params.toString();
   };
 
   const handleExportCSV = () => {
-    const params = new URLSearchParams();
-    
-    Object.keys(filters).forEach(key => {
-      if (filters[key] !== '' && filters[key] !== false) {
-        params.append(key, filters[key]);
-      }
-    });
-    
-    if (searchTerm) {
-      params.append('search', searchTerm);
-    }
+    const params = buildReportParams();
     params.append('export', 'csv');
     
     window.location.href = route('accounts.reports.chart-of-account.report') + '?' + params.toString();
@@ -132,7 +121,6 @@ const ChartOfAccountReport = () => {
       level: 'all',
       account_type: '',
       status: '',
-      hide_zero: false,
       sort_by: 'code',
     });
     setSearchTerm('');
@@ -177,8 +165,56 @@ const ChartOfAccountReport = () => {
   };
 
   const handlePrint = () => {
-    window.print();
+    const params = buildReportParams(true);
+    window.location.href = route('accounts.reports.chart-of-account.report') + '?' + params.toString();
   };
+
+  useEffect(() => {
+    if (!isPrintView) {
+      return;
+    }
+
+    let returned = false;
+
+    const safeReturnToReport = () => {
+      if (returned) {
+        return;
+      }
+      returned = true;
+      const params = buildReportParams();
+      window.location.href = route('accounts.reports.chart-of-account.report') + (params.toString() ? `?${params.toString()}` : '');
+    };
+
+    const onAfterPrint = () => {
+      safeReturnToReport();
+    };
+
+    const triggerPrint = () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            window.print();
+            setTimeout(() => {
+              safeReturnToReport();
+            }, 700);
+          }, 500);
+        });
+      });
+    };
+
+    window.addEventListener('afterprint', onAfterPrint);
+
+    if (document.readyState === 'complete') {
+      triggerPrint();
+    } else {
+      window.addEventListener('load', triggerPrint, { once: true });
+    }
+
+    return () => {
+      window.removeEventListener('load', triggerPrint);
+      window.removeEventListener('afterprint', onAfterPrint);
+    };
+  }, [isPrintView]);
 
   // Filter data based on search term
   const filteredData = initialData.filter(account =>
@@ -203,6 +239,103 @@ const ChartOfAccountReport = () => {
           </div>
         </div>
       </App>
+    );
+  }
+
+  if (isPrintView) {
+    return (
+      <>
+        <Head title="Chart of Accounts Report - Print" />
+        <style>
+          {`@media print {
+            @page {
+              size: auto;
+              margin: 10mm;
+            }
+
+            html, body {
+              margin: 0 !important;
+              padding: 0 !important;
+              background: #ffffff !important;
+            }
+
+            .print-report-root {
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+
+            .print-table {
+              width: 100% !important;
+              border-collapse: collapse !important;
+              table-layout: fixed;
+              border: 1.5px solid #9ca3af !important;
+              color: #111827 !important;
+              background: #ffffff !important;
+              font-size: 12px;
+            }
+
+            .print-table thead {
+              display: table-header-group;
+            }
+
+            .print-table tr {
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+
+            .print-table th,
+            .print-table td {
+              border: 1px solid #9ca3af !important;
+              padding: 8px 10px !important;
+              color: #111827 !important;
+              background: #ffffff !important;
+              vertical-align: top;
+              box-sizing: border-box;
+              white-space: normal !important;
+              overflow-wrap: anywhere;
+              word-break: break-word;
+              hyphens: auto;
+            }
+
+            .print-table th {
+              font-weight: 700;
+            }
+          }`}
+        </style>
+
+        <div className="print-report-root">
+          {filteredData.length === 0 ? (
+            <p>No accounts found</p>
+          ) : (
+            <table className="print-table">
+              <colgroup>
+                <col style={{ width: '20%' }} />
+                <col style={{ width: '50%' }} />
+                <col style={{ width: '15%' }} />
+                <col style={{ width: '15%' }} />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredData.map((account) => (
+                  <tr key={account.id}>
+                    <td>{account.account_code}</td>
+                    <td>{account.account_name}</td>
+                    <td>{account.account_type}</td>
+                    <td>{account.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </>
     );
   }
 
@@ -292,12 +425,6 @@ const ChartOfAccountReport = () => {
               <div className="filter-badge">
                 <span className="filter-badge-label">Status:</span>
                 <span className="filter-badge-value">{filters.status}</span>
-              </div>
-            )}
-            {filters.hide_zero && (
-              <div className="filter-badge">
-                <span className="filter-badge-label">View:</span>
-                <span className="filter-badge-value">Hide Zero Balances</span>
               </div>
             )}
             {filters.sort_by && (
@@ -404,18 +531,6 @@ const ChartOfAccountReport = () => {
                       </select>
                     </div>
 
-                    {/* Hide Zero Balances */}
-                    <div className="flex items-end">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={filters.hide_zero}
-                          onChange={(e) => handleFilterChange('hide_zero', e.target.checked)}
-                          className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-gray-300">Hide Zero Balances</span>
-                      </label>
-                    </div>
                   </div>
 
                   {/* Search */}
