@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Head, usePage, router, Link } from '@inertiajs/react';
-import AppLayout from '../../../../Components/Layout/AppLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import {
   FileText, Download, Filter, Eye, EyeOff, Calendar, 
   Building, MapPin, Settings, Search, RefreshCw, 

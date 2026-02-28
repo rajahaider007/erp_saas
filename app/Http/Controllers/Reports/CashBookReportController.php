@@ -63,17 +63,17 @@ class CashBookReportController extends Controller
         }
 
         // Get Bank/Cash accounts for dropdown
+        // Fetch all children of "Cash Account / Cash In Hand" (code: 100010001000000)
         $cashAccounts = [];
         if ($compId && $locationId) {
             $cashAccounts = DB::table('chart_of_accounts')
                 ->where('comp_id', $compId)
                 ->where('location_id', $locationId)
                 ->where('status', 'Active')
-                ->whereIn('account_type', ['Asset']) // Bank and Cash are typically Assets
                 ->where('is_transactional', true)
                 ->where(function($q) {
-                    $q->where('account_name', 'like', '%Cash%')
-                      ->orWhere('account_name', 'like', '%Bank%');
+                    // Get accounts that start with 10001000100 (children of Cash Account code 100010001000000)
+                    $q->where('account_code', 'like', '10001000100%');
                 })
                 ->select('id', 'account_code', 'account_name')
                 ->orderBy('account_code')
@@ -132,22 +132,19 @@ class CashBookReportController extends Controller
         $company = DB::table('companies')->where('id', $compId)->first();
 
         // Get cash/bank accounts
+        // Fetch all children of "Cash Account / Cash In Hand" (code: 100010001000000)
         $cashAccountsQuery = DB::table('chart_of_accounts')
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
             ->where('status', 'Active')
-            ->where('is_transactional', true)
-            ->whereIn('account_type', ['Asset']); // Bank and Cash accounts
+            ->where('is_transactional', true);
 
         // Filter by account if specified
         if ($accountId) {
             $cashAccountsQuery->where('id', $accountId);
         } else {
-            // Get all cash and bank accounts
-            $cashAccountsQuery->where(function($q) {
-                $q->where('account_name', 'like', '%Cash%')
-                  ->orWhere('account_name', 'like', '%Bank%');
-            });
+            // Get all cash and bank accounts (children of code 100010001000000)
+            $cashAccountsQuery->where('account_code', 'like', '10001000100%');
         }
 
         $cashAccounts = $cashAccountsQuery->orderBy('account_code')->get();
@@ -202,15 +199,13 @@ class CashBookReportController extends Controller
         }
 
         // Get all available cash accounts for filter dropdown
+        // Fetch all children of "Cash Account / Cash In Hand" (code: 100010001000000)
         $availableCashAccounts = DB::table('chart_of_accounts')
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
             ->where('status', 'Active')
             ->where('is_transactional', true)
-            ->where(function($q) {
-                $q->where('account_name', 'like', '%Cash%')
-                  ->orWhere('account_name', 'like', '%Bank%');
-            })
+            ->where('account_code', 'like', '10001000100%')
             ->select('id', 'account_code', 'account_name')
             ->orderBy('account_code')
             ->get();

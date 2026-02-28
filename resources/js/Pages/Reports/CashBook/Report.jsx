@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
-import AppLayout from '../../../../Components/Layout/AppLayout';
 import {
   FileText, Download, Filter, Eye, EyeOff, Calendar, 
   Building, MapPin, Settings, Search, RefreshCw, 
   ChevronDown, ChevronUp, Printer, FileSpreadsheet,
   FileBarChart, Columns, Settings2, TrendingUp,
-  AlertCircle, CreditCard, ArrowDown, ArrowUp, DollarSign
+  AlertCircle, CreditCard, ArrowDown, ArrowUp, DollarSign, Database
 } from 'lucide-react';
+import App from '../../App.jsx';
 
 /**
  * Cash Book Report Component
@@ -21,7 +21,7 @@ import {
  */
 const CashBookReport = () => {
   const { auth, cashBookData: initialData, accounts, filters: initialFilters, totals, company, error } = usePage().props;
-  
+
   const [filters, setFilters] = useState({
     account_id: initialFilters?.account_id || '',
     from_date: initialFilters?.from_date || '',
@@ -70,6 +70,10 @@ const CashBookReport = () => {
     });
   };
 
+  const handleBackToFilters = () => {
+    router.get(route('accounts.reports.cash-book.search'));
+  };
+
   const toggleAccountExpansion = (accountId) => {
     const newExpanded = new Set(expandedAccounts);
     if (newExpanded.has(accountId)) {
@@ -96,368 +100,343 @@ const CashBookReport = () => {
     });
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   if (error) {
     return (
-      <AppLayout>
-        <Head title="Cash Book Report" />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <div className="flex items-center gap-3 text-red-800">
-              <AlertCircle className="w-5 h-5" />
-              <div>
-                <h3 className="font-semibold">Error</h3>
-                <p>{error}</p>
+      <App>
+        <div className="reports-container">
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+              <div className="flex items-center gap-3 text-red-800 dark:text-red-300">
+                <AlertCircle className="w-5 h-5" />
+                <div>
+                  <h3 className="font-semibold">Error</h3>
+                  <p>{error}</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </AppLayout>
+      </App>
     );
   }
 
   return (
-    <AppLayout>
-      <Head title="Cash Book Report" />
-      
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <App>
+      <div className="reports-container">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Cash Book Report</h1>
-            {company && (
-              <p className="text-gray-600 text-sm mt-2">
-                {company.company_name}
-              </p>
-            )}
-          </div>
-          <button
-            onClick={() => window.print()}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            <Printer className="w-4 h-4" />
-            Print
-          </button>
-        </div>
-
-        {/* Filter Panel */}
-        <div className="bg-white rounded-lg border border-gray-200 mb-6">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50"
-          >
-            <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-gray-600" />
-              <span className="font-semibold text-gray-700">Filters</span>
-            </div>
-            {showFilters ? (
-              <ChevronUp className="w-5 h-5 text-gray-600" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-gray-600" />
-            )}
-          </button>
-
-          {showFilters && (
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {/* Bank/Cash Account Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Bank/Cash Account
-                  </label>
-                  <select
-                    value={filters.account_id}
-                    onChange={(e) => handleFilterChange('account_id', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">All Accounts</option>
-                    {accounts && accounts.map(account => (
-                      <option key={account.id} value={account.id}>
-                        {account.account_code} - {account.account_name}
-                      </option>
-                    ))}
-                  </select>
+        <div className="report-header">
+          <div className="report-header-main">
+            <div className="report-title-section">
+              <h1 className="report-title">
+                <CreditCard className="report-title-icon" />
+                Cash Book Report
+              </h1>
+              <div className="report-stats-summary">
+                <div className="report-stat-item">
+                  <DollarSign size={16} />
+                  <span>{initialData?.length || 0} Accounts</span>
                 </div>
-
-                {/* From Date */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    From Date
-                  </label>
-                  <input
-                    type="date"
-                    value={filters.from_date}
-                    onChange={(e) => handleFilterChange('from_date', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                {/* To Date */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    To Date
-                  </label>
-                  <input
-                    type="date"
-                    value={filters.to_date}
-                    onChange={(e) => handleFilterChange('to_date', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                {/* View Type */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    View Type
-                  </label>
-                  <select
-                    value={filters.view_type}
-                    onChange={(e) => handleFilterChange('view_type', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {viewTypes.map(type => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Search */}
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Search
-                </label>
-                <input
-                  type="text"
-                  value={filters.search}
-                  onChange={(e) => handleFilterChange('search', e.target.value)}
-                  placeholder="Search by reference, description, or voucher number..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Filter Actions */}
-              <div className="mt-4 flex gap-2">
-                <button
-                  onClick={handleApplyFilters}
-                  disabled={loading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {loading ? 'Applying...' : 'Apply Filters'}
-                </button>
-                <button
-                  onClick={handleResetFilters}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Grand Totals Summary */}
-        {totals && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Opening Balance</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(totals.total_opening_balance)}
-                  </p>
-                </div>
-                <DollarSign className="w-8 h-8 text-gray-400" />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Total Receipts</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {formatCurrency(totals.total_receipts)}
-                  </p>
-                </div>
-                <ArrowDown className="w-8 h-8 text-green-400" />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Total Payments</p>
-                  <p className="text-2xl font-bold text-red-600">
-                    {formatCurrency(totals.total_payments)}
-                  </p>
-                </div>
-                <ArrowUp className="w-8 h-8 text-red-400" />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg border border-gray-200 p-4 bg-gradient-to-br from-blue-50 to-blue-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-blue-700 font-semibold">Closing Balance</p>
-                  <p className="text-2xl font-bold text-blue-900">
-                    {formatCurrency(totals.total_closing_balance)}
-                  </p>
-                </div>
-                <CreditCard className="w-8 h-8 text-blue-400" />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Cash Book Data by Account */}
-        <div className="space-y-6">
-          {initialData && initialData.length === 0 ? (
-            <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-              <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 text-lg">No cash or bank accounts found</p>
-            </div>
-          ) : (
-            initialData && initialData.map((accountData, index) => (
-              <div key={accountData.account_id} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                {/* Account Header */}
-                <button
-                  onClick={() => toggleAccountExpansion(accountData.account_id)}
-                  className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 border-b border-gray-200"
-                >
-                  <div className="flex items-center gap-4">
-                    <CreditCard className="w-5 h-5 text-blue-600" />
-                    <div className="text-left">
-                      <h3 className="font-semibold text-gray-900">
-                        {accountData.account_code} - {accountData.account_name}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Currency: {accountData.currency}
-                      </p>
-                    </div>
+                {company && (
+                  <div className="report-stat-item">
+                    <Building size={16} />
+                    <span>{company.company_name}</span>
                   </div>
-                  {expandedAccounts.has(accountData.account_id) ? (
-                    <ChevronUp className="w-5 h-5 text-gray-600" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-600" />
-                  )}
-                </button>
-
-                {expandedAccounts.has(accountData.account_id) && (
-                  <>
-                    {/* Account Summary */}
-                    <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div>
-                        <p className="text-xs text-gray-600 uppercase font-semibold">Opening Balance</p>
-                        <p className="text-lg font-bold text-gray-900">
-                          {formatCurrency(accountData.summary.opening_balance)}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600 uppercase font-semibold">Total Receipts</p>
-                        <p className="text-lg font-bold text-green-600">
-                          {formatCurrency(accountData.summary.total_receipts)}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600 uppercase font-semibold">Total Payments</p>
-                        <p className="text-lg font-bold text-red-600">
-                          {formatCurrency(accountData.summary.total_payments)}
-                        </p>
-                      </div>
-                      <div className="bg-blue-50 rounded p-2">
-                        <p className="text-xs text-blue-700 uppercase font-semibold">Closing Balance</p>
-                        <p className="text-lg font-bold text-blue-900">
-                          {formatCurrency(accountData.summary.closing_balance)}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Transactions Table */}
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead className="bg-gray-100 border-b border-gray-200">
-                          <tr>
-                            <th className="px-6 py-3 text-left font-semibold text-gray-700">Date</th>
-                            <th className="px-6 py-3 text-left font-semibold text-gray-700">Reference</th>
-                            <th className="px-6 py-3 text-left font-semibold text-gray-700">Description</th>
-                            <th className="px-6 py-3 text-right font-semibold text-gray-700">Receipt</th>
-                            <th className="px-6 py-3 text-right font-semibold text-gray-700">Payment</th>
-                            <th className="px-6 py-3 text-right font-semibold text-gray-700">Balance</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {accountData.transactions && accountData.transactions.length === 0 ? (
-                            <tr>
-                              <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                                No transactions found for this account
-                              </td>
-                            </tr>
-                          ) : (
-                            accountData.transactions && accountData.transactions.map((transaction, txIndex) => (
-                              <tr key={txIndex} className="border-b border-gray-200 hover:bg-gray-50">
-                                <td className="px-6 py-3 text-gray-900 font-mono">
-                                  {formatDate(transaction.voucher_date)}
-                                </td>
-                                <td className="px-6 py-3 text-gray-900 font-mono">
-                                  {transaction.voucher_number}
-                                </td>
-                                <td className="px-6 py-3 text-gray-700">
-                                  <div>
-                                    <p className="font-medium">{transaction.description}</p>
-                                    {transaction.reference_number && (
-                                      <p className="text-xs text-gray-600">Ref: {transaction.reference_number}</p>
-                                    )}
-                                  </div>
-                                </td>
-                                <td className="px-6 py-3 text-right font-mono">
-                                  {transaction.receipt > 0 ? (
-                                    <span className="text-green-600 font-semibold">
-                                      {formatCurrency(transaction.receipt)}
-                                    </span>
-                                  ) : (
-                                    <span className="text-gray-400">-</span>
-                                  )}
-                                </td>
-                                <td className="px-6 py-3 text-right font-mono">
-                                  {transaction.payment > 0 ? (
-                                    <span className="text-red-600 font-semibold">
-                                      {formatCurrency(transaction.payment)}
-                                    </span>
-                                  ) : (
-                                    <span className="text-gray-400">-</span>
-                                  )}
-                                </td>
-                                <td className="px-6 py-3 text-right font-mono font-semibold">
-                                  <span className={transaction.balance >= 0 ? 'text-green-600' : 'text-red-600'}>
-                                    {formatCurrency(transaction.balance)}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </>
                 )}
               </div>
-            ))
-          )}
+            </div>
+
+            <div className="report-header-actions">
+              <button
+                className="report-btn"
+                onClick={handleBackToFilters}
+                title="Back to Filters"
+              >
+                <Filter size={20} />
+                Change Filters
+              </button>
+
+              <button
+                className="report-btn"
+                onClick={handlePrint}
+                title="Print Report"
+              >
+                <Printer size={20} />
+                Print
+              </button>
+
+              {/* Export Dropdown */}
+              <div className="dropdown">
+                <button className="report-btn dropdown-toggle">
+                  <Download size={20} />
+                  Export
+                  <ChevronDown size={16} />
+                </button>
+                <div className="dropdown-menu bg-slate-700 border-slate-600">
+                  <button className="text-white hover:bg-slate-600">
+                    <FileSpreadsheet size={16} />
+                    Export as Excel
+                  </button>
+                  <button className="text-white hover:bg-slate-600">
+                    <FileBarChart size={16} />
+                    Export as PDF
+                  </button>
+                  <button className="text-white hover:bg-slate-600">
+                    <FileText size={16} />
+                    Export as CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* IAS 7 Compliance Notes */}
-        <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
-          <h3 className="font-semibold text-green-900 mb-2">IAS 7 - Cash Flow Compliance</h3>
-          <ul className="text-sm text-green-800 space-y-1 list-disc list-inside">
-            <li>Cash book tracks all cash and bank account movements</li>
-            <li>Provides basis for operating, investing, and financing activities segregation</li>
-            <li>Running balance maintained for bank reconciliation support</li>
-            <li>All transactions recorded on cash receipt/payment basis</li>
-          </ul>
+        {/* Applied Filters Display */}
+        <div className="applied-filters-container">
+          <div className="applied-filters-title">Applied Filters:</div>
+          <div className="applied-filters-list">
+            {filters.account_id ? (
+              <div className="filter-badge">
+                <span className="filter-badge-label">Account:</span>
+                <span className="filter-badge-value">Selected Account</span>
+              </div>
+            ) : (
+              <div className="filter-badge">
+                <span className="filter-badge-label">Scope:</span>
+                <span className="filter-badge-value">All Cash/Bank Accounts</span>
+              </div>
+            )}
+            {filters.from_date && (
+              <div className="filter-badge">
+                <span className="filter-badge-label">From:</span>
+                <span className="filter-badge-value">{filters.from_date}</span>
+              </div>
+            )}
+            {filters.to_date && (
+              <div className="filter-badge">
+                <span className="filter-badge-label">To:</span>
+                <span className="filter-badge-value">{filters.to_date}</span>
+              </div>
+            )}
+            {filters.view_type && (
+              <div className="filter-badge">
+                <span className="filter-badge-label">View:</span>
+                <span className="filter-badge-value">{filters.view_type}</span>
+              </div>
+            )}
+            {filters.search && (
+              <div className="filter-badge">
+                <span className="filter-badge-label">Search:</span>
+                <span className="filter-badge-value">{filters.search}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="report-content">
+          <div className="data-table-container">
+            {loading ? (
+              <div className="loading-state">
+                <div className="loading-spinner"></div>
+                <p>Loading cash book...</p>
+              </div>
+            ) : !initialData || initialData.length === 0 ? (
+              <div className="empty-state">
+                <Database className="empty-icon" />
+                <h3>No cash or bank accounts found</h3>
+                <p>No transactions available for the selected criteria</p>
+              </div>
+            ) : (
+              <>
+                {/* Grand Totals Summary */}
+                {totals && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-slate-800 rounded-lg border border-slate-700 p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-400">Opening Balance</p>
+                          <p className="text-2xl font-bold text-white">
+                            {formatCurrency(totals.total_opening_balance)}
+                          </p>
+                        </div>
+                        <DollarSign className="w-8 h-8 text-gray-600" />
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-800 rounded-lg border border-slate-700 p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-400">Total Receipts</p>
+                          <p className="text-2xl font-bold text-green-600">
+                            {formatCurrency(totals.total_receipts)}
+                          </p>
+                        </div>
+                        <ArrowDown className="w-8 h-8 text-green-400" />
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-800 rounded-lg border border-slate-700 p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-400">Total Payments</p>
+                          <p className="text-2xl font-bold text-red-600">
+                            {formatCurrency(totals.total_payments)}
+                          </p>
+                        </div>
+                        <ArrowUp className="w-8 h-8 text-red-400" />
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-blue-900 to-blue-800 rounded-lg border border-blue-700 p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-blue-200">Closing Balance</p>
+                          <p className="text-2xl font-bold text-blue-100">
+                            {formatCurrency(totals.total_closing_balance)}
+                          </p>
+                        </div>
+                        <CreditCard className="w-8 h-8 text-blue-600" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Cash Book Data by Account */}
+                <div className="space-y-8">
+                  {initialData.map((accountData) => (
+                    <div key={accountData.account_id} className="account-section">
+                      {/* Account Header */}
+                      <div className="account-header bg-blue-900 text-white p-4 rounded-t-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-xl font-bold">
+                              {accountData.account_code} - {accountData.account_name}
+                            </h3>
+                            <p className="text-sm opacity-80">Currency: {accountData.currency}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm">Opening Balance:</p>
+                            <p className="text-lg font-bold">{formatCurrency(accountData.summary.opening_balance)}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Account Summary Stats */}
+                      <div className="px-6 py-4 bg-slate-750 border-b border-slate-700 grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                          <p className="text-xs uppercase font-semibold text-gray-400">Opening Balance</p>
+                          <p className="text-lg font-bold text-white">
+                            {formatCurrency(accountData.summary.opening_balance)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs uppercase font-semibold text-gray-400">Total Receipts</p>
+                          <p className="text-lg font-bold text-green-600">
+                            {formatCurrency(accountData.summary.total_receipts)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs uppercase font-semibold text-gray-400">Total Payments</p>
+                          <p className="text-lg font-bold text-red-600">
+                            {formatCurrency(accountData.summary.total_payments)}
+                          </p>
+                        </div>
+                        <div className="bg-blue-900 rounded p-2">
+                          <p className="text-xs uppercase font-semibold text-blue-200">Closing Balance</p>
+                          <p className="text-lg font-bold text-blue-100">
+                            {formatCurrency(accountData.summary.closing_balance)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Transactions Table */}
+                      <div className="table-wrapper">
+                        <table className="data-table bg-slate-800 text-white">
+                          <thead>
+                            <tr>
+                              <th style={{width: '12%'}}>Date</th>
+                              <th style={{width: '15%'}}>Reference</th>
+                              <th style={{width: '35%'}}>Description</th>
+                              <th style={{width: '14%'}} className="text-right">Receipt</th>
+                              <th style={{width: '14%'}} className="text-right">Payment</th>
+                              <th style={{width: '14%'}} className="text-right">Balance</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {accountData.transactions && accountData.transactions.length === 0 ? (
+                              <tr>
+                                <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
+                                  No transactions found for this account
+                                </td>
+                              </tr>
+                            ) : (
+                              accountData.transactions && accountData.transactions.map((transaction, txIndex) => (
+                                <tr key={txIndex} className="hover:bg-slate-700 text-white">
+                                  <td>{formatDate(transaction.voucher_date)}</td>
+                                  <td>{transaction.voucher_number}</td>
+                                  <td>
+                                    <div>
+                                      <p className="font-medium">{transaction.description}</p>
+                                      {transaction.reference_number && (
+                                        <p className="text-xs text-gray-500">Ref: {transaction.reference_number}</p>
+                                      )}
+                                    </div>
+                                  </td>
+                                  <td className="text-right">
+                                    {transaction.receipt > 0 ? (
+                                      <span className="text-green-600 font-semibold">
+                                        {formatCurrency(transaction.receipt)}
+                                      </span>
+                                    ) : (
+                                      <span className="text-gray-700">-</span>
+                                    )}
+                                  </td>
+                                  <td className="text-right">
+                                    {transaction.payment > 0 ? (
+                                      <span className="text-red-600 font-semibold">
+                                        {formatCurrency(transaction.payment)}
+                                      </span>
+                                    ) : (
+                                      <span className="text-gray-700">-</span>
+                                    )}
+                                  </td>
+                                  <td className="text-right font-bold">
+                                    <span className={transaction.balance >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                      {formatCurrency(transaction.balance)}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* IAS 7 Compliance Notes */}
+                <div className="mt-6 bg-green-900 text-white rounded-lg border border-green-800 p-4">
+                  <h3 className="font-semibold mb-2 text-green-200">
+                    IAS 7 - Cash Flow Compliance
+                  </h3>
+                  <ul className="text-sm space-y-1 list-disc list-inside text-green-300">
+                    <li>Cash book tracks all cash and bank account movements</li>
+                    <li>Provides basis for operating, investing, and financing activities segregation</li>
+                    <li>Running balance maintained for bank reconciliation support</li>
+                    <li>All transactions recorded on cash receipt/payment basis</li>
+                  </ul>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </AppLayout>
+    </App>
   );
 };
 

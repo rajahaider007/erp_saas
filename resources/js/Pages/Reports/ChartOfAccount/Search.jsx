@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
-import AppLayout from '../../../../Components/Layout/AppLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import {
   Building, MapPin, Search, ChevronRight, FileText
 } from 'lucide-react';

@@ -73,6 +73,7 @@ const CreateVoucherNumberConfigurationForm = () => {
       required: true,
       options: [
         { value: 'Journal', label: 'Journal Voucher' },
+        { value: 'Opening', label: 'Opening Voucher' },
         { value: 'Payment', label: 'Payment Voucher' },
         { value: 'Receipt', label: 'Receipt Voucher' },
         { value: 'Purchase', label: 'Purchase Voucher' },
