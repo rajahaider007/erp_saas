@@ -10,8 +10,222 @@ import {
 } from 'lucide-react';
 import { useLayout } from '@/Contexts/LayoutContext';
 import App from '../../App.jsx';
+import Print from '../../Print.jsx';
 import axios from 'axios';
 import './print-styles.css';
+
+function PrintReportContent() {
+  const { 
+    company,
+    balanceSheetData,
+    asAtDate,
+    currencyCode,
+    error
+  } = usePage().props;
+
+  const [selectedDate, setSelectedDate] = useState(asAtDate);
+
+  if (error) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center', color: '#dc2626' }}>
+        <strong>Error:</strong> {error}
+      </div>
+    );
+  }
+
+  const formatCurrency = (value) => {
+    const absValue = Math.abs(value || 0);
+    const formatted = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(absValue);
+    
+    return value < 0 ? `(${formatted})` : formatted;
+  };
+
+  const renderPrintHierarchy = (data) => {
+    if (!data || !data.children || data.children.length === 0) {
+      return null;
+    }
+
+    return (
+      <div>
+        <div style={{ fontSize: '12pt', fontWeight: 'bold', textTransform: 'uppercase', borderBottom: '2px solid #000', padding: '5px 0', marginBottom: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span>{data.name}</span>
+            <span style={{ fontFamily: "'Courier New', monospace", textAlign: 'right' }}>{formatCurrency(data.total)}</span>
+          </div>
+        </div>
+
+        {data.children.map((level2, idx2) => (
+          <div key={idx2}>
+            <div style={{ fontSize: '10pt', fontWeight: '600', padding: '3px 0 3px 10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>{level2.name}</span>
+                <span style={{ fontFamily: "'Courier New', monospace", textAlign: 'right', minWidth: '120px' }}>{formatCurrency(level2.total)}</span>
+              </div>
+            </div>
+
+            {level2.children && level2.children.map((level3, idx3) => (
+              <div key={idx3} style={{ fontSize: '10pt', padding: '2px 0 2px 20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>{level3.name}</span>
+                  <span style={{ fontFamily: "'Courier New', monospace", textAlign: 'right', minWidth: '120px' }}>{formatCurrency(level3.balance)}</span>
+                </div>
+              </div>
+            ))}
+
+            <div style={{ fontSize: '10pt', fontWeight: '600', padding: '3px 0 3px 10px', borderTop: '1px solid #000', marginTop: '2px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Total {level2.name}</span>
+                <span style={{ fontFamily: "'Courier New', monospace", textAlign: 'right', minWidth: '120px' }}>{formatCurrency(level2.total)}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <style>
+        {`
+          .print-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #000;
+          }
+          .print-company-name {
+            font-size: 20pt;
+            font-weight: bold;
+            margin-bottom: 5px;
+          }
+          .print-report-title {
+            font-size: 12pt;
+            margin-bottom: 3px;
+          }
+          .print-report-info {
+            font-size: 10pt;
+          }
+          .print-content-grid {
+            display: table;
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+          }
+          .print-column-wrapper {
+            display: table-row;
+          }
+          .print-column {
+            display: table-cell;
+            width: 49%;
+            vertical-align: top;
+            padding: 15px;
+            border: 2px solid #000;
+          }
+          .print-column:first-child {
+            border-right: 1px solid #000;
+          }
+          .print-column-title {
+            font-size: 13pt;
+            font-weight: bold;
+            text-align: center;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #000;
+            text-transform: uppercase;
+          }
+          .print-section {
+            margin-bottom: 15px;
+          }
+          .print-grand-total {
+            font-size: 11pt;
+            font-weight: bold;
+            padding: 8px;
+            margin-top: 15px;
+            border: 2px solid #000;
+            background: #f0f0f0;
+          }
+          .print-footer {
+            text-align: center;
+            font-size: 9pt;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #000;
+          }
+          .print-footer p {
+            margin: 3px 0;
+          }
+        `}
+      </style>
+
+      <div className="print-header">
+        <div className="print-company-name">{company?.company_name}</div>
+        <div className="print-report-title">Balance Sheet as at {new Date(asAtDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+        <div className="print-report-info">Currency: {currencyCode}</div>
+      </div>
+
+      {balanceSheetData && (
+        <>
+          <div className="print-content-grid">
+            <div className="print-column-wrapper">
+              {/* LEFT: Capital & Liabilities */}
+              <div className="print-column">
+                <div className="print-column-title">Capital & Liabilities</div>
+                
+                {/* Equity */}
+                {balanceSheetData.equity && balanceSheetData.equity.children && balanceSheetData.equity.children.length > 0 && (
+                  <div className="print-section">
+                    {renderPrintHierarchy(balanceSheetData.equity)}
+                  </div>
+                )}
+                
+                {/* Liabilities */}
+                {balanceSheetData.liabilities && balanceSheetData.liabilities.children && balanceSheetData.liabilities.children.length > 0 && (
+                  <div className="print-section">
+                    {renderPrintHierarchy(balanceSheetData.liabilities)}
+                  </div>
+                )}
+                
+                <div className="print-grand-total">
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>TOTAL CAPITAL & LIABILITIES</span>
+                    <span style={{ fontFamily: "'Courier New', monospace" }}>{formatCurrency(balanceSheetData.totalLiabilitiesAndEquity)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* RIGHT: Assets */}
+              <div className="print-column">
+                <div className="print-column-title">Property & Assets</div>
+                
+                {balanceSheetData.assets && balanceSheetData.assets.children && balanceSheetData.assets.children.length > 0 && (
+                  <div className="print-section">
+                    {renderPrintHierarchy(balanceSheetData.assets)}
+                  </div>
+                )}
+                
+                <div className="print-grand-total">
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>TOTAL PROPERTY & ASSETS</span>
+                    <span style={{ fontFamily: "'Courier New', monospace" }}>{formatCurrency(balanceSheetData.totalAssets)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="print-footer">
+            <p>This report has been prepared in accordance with International Accounting Standards (IAS 1).</p>
+            <p>Generated on: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+          </div>
+        </>
+      )}
+    </>
+  );
+}
 
 function ReportContent() {
   const { 
@@ -21,7 +235,6 @@ function ReportContent() {
     currencyCode,
     error
   } = usePage().props;
-
   const { theme, primaryColor } = useLayout();
 
   const [selectedDate, setSelectedDate] = useState(asAtDate);
@@ -29,7 +242,6 @@ function ReportContent() {
   const [drillDownData, setDrillDownData] = useState(null);
   const [drillDownLoading, setDrillDownLoading] = useState(false);
   const [selectedLevel3, setSelectedLevel3] = useState(null);
-  const isPrintView = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('print_view') === '1';
 
   const handleGenerateReport = (e) => {
     e.preventDefault();
@@ -51,58 +263,8 @@ function ReportContent() {
       as_at_date: selectedDate,
       print_view: '1'
     });
-    window.location.href = `/accounts/balance-sheet?${params.toString()}`;
+    window.open(`/accounts/balance-sheet?${params.toString()}`, '_blank', 'width=1200,height=800');
   };
-
-  // Auto-print effect for print view
-  useEffect(() => {
-    if (!isPrintView) {
-      return;
-    }
-
-    let returned = false;
-
-    const safeReturnToReport = () => {
-      if (returned) {
-        return;
-      }
-      returned = true;
-      const params = new URLSearchParams({
-        as_at_date: selectedDate
-      });
-      window.location.href = `/accounts/balance-sheet?${params.toString()}`;
-    };
-
-    const onAfterPrint = () => {
-      safeReturnToReport();
-    };
-
-    const triggerPrint = () => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            window.print();
-            setTimeout(() => {
-              safeReturnToReport();
-            }, 700);
-          }, 500);
-        });
-      });
-    };
-
-    window.addEventListener('afterprint', onAfterPrint);
-
-    if (document.readyState === 'complete') {
-      triggerPrint();
-    } else {
-      window.addEventListener('load', triggerPrint, { once: true });
-    }
-
-    return () => {
-      window.removeEventListener('load', triggerPrint);
-      window.removeEventListener('afterprint', onAfterPrint);
-    };
-  }, [isPrintView, selectedDate]);
 
   const handleLevel3Click = async (level3Account) => {
     if (selectedLevel3 && selectedLevel3.id === level3Account.id) {
@@ -281,6 +443,56 @@ function ReportContent() {
     );
   };
 
+  // Render function for print view
+  const renderPrintHierarchy = (data) => {
+    if (!data || !data.children || data.children.length === 0) {
+      return null;
+    }
+
+    return (
+      <div>
+        {/* Level 1 Heading */}
+        <div className="level-1">
+          <div className="account-row">
+            <span className="uppercase">{data.name}</span>
+            <span className="amount">{formatCurrency(data.total)}</span>
+          </div>
+        </div>
+
+        {/* Level 2 and Level 3 Accounts */}
+        {data.children.map((level2, idx2) => (
+          <div key={idx2}>
+            {/* Level 2 */}
+            <div className="level-2">
+              <div className="account-row">
+                <span>{level2.name}</span>
+                <span className="amount">{formatCurrency(level2.total)}</span>
+              </div>
+            </div>
+
+            {/* Level 3 Accounts */}
+            {level2.children && level2.children.map((level3, idx3) => (
+              <div key={idx3} className="level-3">
+                <div className="account-row">
+                  <span>{level3.name}</span>
+                  <span className="amount">{formatCurrency(level3.balance)}</span>
+                </div>
+              </div>
+            ))}
+
+            {/* Level 2 Total */}
+            <div className="level-2-total">
+              <div className="account-row">
+                <span>Total {level2.name}</span>
+                <span className="amount">{formatCurrency(level2.total)}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   if (error) {
     return (
       <div className="p-8 max-w-6xl mx-auto">
@@ -296,206 +508,9 @@ function ReportContent() {
     );
   }
 
-  // Print View Rendering
-  if (isPrintView) {
-    return (
-      <>
-        <Head title="Balance Sheet - Print" />
-        <style>
-          {`
-            @page {
-              size: A4 landscape;
-              margin: 15mm 10mm;
-            }
-
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-
-            body {
-              font-family: Arial, sans-serif;
-              font-size: 10pt;
-              line-height: 1.3;
-              color: #000;
-              background: #fff;
-            }
-
-            .print-container {
-              width: 100%;
-              padding: 0;
-            }
-
-            .report-header {
-              text-align: center;
-              border-bottom: 3px solid #000;
-              padding-bottom: 5mm;
-              margin-bottom: 8mm;
-            }
-
-            .company-name {
-              font-size: 18pt;
-              font-weight: bold;
-              margin-bottom: 2mm;
-            }
-
-            .report-title {
-              font-size: 14pt;
-              font-weight: bold;
-              margin-bottom: 1mm;
-            }
-
-            .report-date {
-              font-size: 9pt;
-              color: #333;
-            }
-
-            .two-column-layout {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 15mm;
-            }
-
-            .column {
-              border: 2px solid #000;
-              padding: 5mm;
-            }
-
-            .column-header {
-              font-size: 14pt;
-              font-weight: bold;
-              text-align: center;
-              border-bottom: 2px solid #000;
-              padding-bottom: 3mm;
-              margin-bottom: 5mm;
-            }
-
-            .level-1 {
-              font-size: 12pt;
-              font-weight: bold;
-              color: #dc2626;
-              border-bottom: 2px solid #dc2626;
-              padding: 2mm 0;
-              margin-top: 3mm;
-            }
-
-            .level-2 {
-              font-size: 10pt;
-              font-weight: 600;
-              color: #16a34a;
-              padding: 1.5mm 0;
-              padding-left: 4mm;
-            }
-
-            .level-2-total {
-              font-size: 10pt;
-              font-weight: 600;
-              color: #16a34a;
-              border-top: 1px solid #16a34a;
-              padding: 1.5mm 0;
-              padding-left: 4mm;
-            }
-
-            .level-3 {
-              font-size: 9pt;
-              color: #000;
-              padding: 1mm 0;
-              padding-left: 8mm;
-            }
-
-            .account-row {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-            }
-
-            .amount {
-              font-family: 'Courier New', monospace;
-              text-align: right;
-            }
-
-            .grand-total {
-              font-size: 11pt;
-              font-weight: bold;
-              border: 2px solid #000;
-              background: #f5f5f5;
-              padding: 3mm;
-              margin-top: 5mm;
-            }
-
-            .footer {
-              text-align: center;
-              font-size: 8pt;
-              color: #666;
-              border-top: 1px solid #000;
-              padding-top: 3mm;
-              margin-top: 8mm;
-            }
-
-            @media print {
-              body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-            }
-          `}
-        </style>
-        
-        <div className="print-container">
-          {/* Header */}
-          <div className="report-header">
-            <div className="company-name">{company?.company_name}</div>
-            <div className="report-title">Balance Sheet (Statement of Financial Position)</div>
-            <div className="report-date">As at {new Date(asAtDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
-            <div className="report-date">Currency: {currencyCode}</div>
-          </div>
-
-          {balanceSheetData && (
-            <>
-              <div className="two-column-layout">
-                {/* LEFT: Capital & Liabilities */}
-                <div className="column">
-                  <div className="column-header">CAPITAL & LIABILITIES</div>
-                  
-                  {/* Equity */}
-                  {balanceSheetData.equity && renderPrintHierarchy(balanceSheetData.equity)}
-                  
-                  {/* Liabilities */}
-                  {balanceSheetData.liabilities && renderPrintHierarchy(balanceSheetData.liabilities)}
-                  
-                  <div className="grand-total">
-                    <div className="account-row">
-                      <span>TOTAL CAPITAL & LIABILITIES</span>
-                      <span className="amount">{formatCurrency(balanceSheetData.totalLiabilitiesAndEquity)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* RIGHT: Assets */}
-                <div className="column">
-                  <div className="column-header">PROPERTY & ASSETS</div>
-                  
-                  {balanceSheetData.assets && renderPrintHierarchy(balanceSheetData.assets)}
-                  
-                  <div className="grand-total">
-                    <div className="account-row">
-                      <span>TOTAL PROPERTY & ASSETS</span>
-                      <span className="amount">{formatCurrency(balanceSheetData.totalAssets)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="footer">
-                <p>This report has been prepared in accordance with International Accounting Standards (IAS 1).</p>
-                <p>Generated on: {new Date().toLocaleString()}</p>
-              </div>
-            </>
-          )}
-        </div>
-      </>
-    );
+  // This section is for print view rendering (never reaches here in practice)
+  if (false) {
+    return null;
   }
 
   return (
@@ -624,14 +639,14 @@ function ReportContent() {
 
           {/* Horizontal Two-Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* LEFT SIDE: CAPITAL & LIABILITIES */}
+            {/* LEFT SIDE: LIABILITIES */}
             <div className={`border-r-2 pr-8 ${
               theme === 'dark' ? 'border-gray-700' : 'border-gray-300'
             }`}>
               <h3 className={`text-xl font-bold mb-6 pb-2 border-b-2 text-center ${
                 theme === 'dark' ? 'border-orange-700 text-orange-400' : 'border-orange-500 text-orange-700'
               }`}>
-                CAPITAL & LIABILITIES
+                LIABILITIES
               </h3>
 
               {/* Equity */}
@@ -655,7 +670,7 @@ function ReportContent() {
                   : 'bg-orange-100 border-orange-600 text-orange-900'
               }`}>
                 <div className="flex justify-between items-center">
-                  <span>TOTAL CAPITAL & LIABILITIES</span>
+                  <span>TOTAL LIABILITIES</span>
                   <span className="font-mono">{formatCurrency(balanceSheetData.totalLiabilitiesAndEquity)}</span>
                 </div>
               </div>
@@ -666,7 +681,7 @@ function ReportContent() {
               <h3 className={`text-xl font-bold mb-6 pb-2 border-b-2 text-center ${
                 theme === 'dark' ? 'border-blue-700 text-blue-400' : 'border-blue-500 text-blue-700'
               }`}>
-                PROPERTY & ASSETS
+                ASSETS
               </h3>
 
               {/* Assets */}
@@ -683,7 +698,7 @@ function ReportContent() {
                   : 'bg-blue-100 border-blue-600 text-blue-900'
               }`}>
                 <div className="flex justify-between items-center">
-                  <span>TOTAL PROPERTY & ASSETS</span>
+                  <span>TOTAL ASSETS</span>
                   <span className="font-mono">{formatCurrency(balanceSheetData.totalAssets)}</span>
                 </div>
               </div>
@@ -718,6 +733,17 @@ function ReportContent() {
 }
 
 export default function BalanceSheetReport() {
+  const isPrintView = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('print_view') === '1';
+
+  if (isPrintView) {
+    // Use Print wrapper for print view (no system UI, no layout context needed)
+    return (
+      <Print title="Balance Sheet">
+        <PrintReportContent />
+      </Print>
+    );
+  }
+
   return (
     <App title="Balance Sheet">
       <ReportContent />

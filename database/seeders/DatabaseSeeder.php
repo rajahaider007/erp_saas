@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             SystemSeeder::class,
             UserRightsSeeder::class,
             ChartOfAccountsSeeder::class,
-            AccountsSeeder::class,
+            SampleJournalVoucherSeeder::class,
         ]);
     }
 }
