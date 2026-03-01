@@ -91,9 +91,6 @@ const CashVoucherCreate = () => {
       base_amount: (entry.base_debit_amount && parseFloat(entry.base_debit_amount) > 0)
         ? parseFloat(entry.base_debit_amount)
         : (entry.base_credit_amount && parseFloat(entry.base_credit_amount) > 0 ? parseFloat(entry.base_credit_amount) : null),
-      cheque_number: entry.cheque_number || '',
-      cheque_date: entry.cheque_date || '',
-      slip_number: entry.slip_number || '',
       attachment: entry.attachment || null
     })) : [
       { 
@@ -103,9 +100,6 @@ const CashVoucherCreate = () => {
         currency_code: company?.default_currency_code || 'PKR',
         exchange_rate: 1.0,
         base_amount: null,
-        cheque_number: '',
-        cheque_date: '',
-        slip_number: '',
         attachment: null
       }
     ]
@@ -502,9 +496,6 @@ const CashVoucherCreate = () => {
         currency_code: formData.base_currency_code,
         exchange_rate: 1.0,
         base_amount: null,
-        cheque_number: '',
-        cheque_date: '',
-        slip_number: '',
         attachment: null
       }]
     }));
@@ -637,9 +628,6 @@ const CashVoucherCreate = () => {
           exchange_rate: entry.exchange_rate ? parseFloat(entry.exchange_rate) : 1.0,
           currency_code: entry.currency_code || formData.base_currency_code,
           base_amount: entry.base_amount !== null && entry.base_amount !== '' ? parseFloat(entry.base_amount) : null,
-          cheque_number: entry.cheque_number || null,
-          cheque_date: entry.cheque_date || null,
-          slip_number: entry.slip_number || null,
           attachment_id: entry.attachment ? entry.attachment.id : null
         })),
         attachments: Array.isArray(attachments) && attachments.length > 0 ? attachments.map(att => att.id || att) : []
@@ -649,7 +637,7 @@ const CashVoucherCreate = () => {
 
 
       if (isEdit) {
-        router.put(`/accounts/Cash-voucher/${voucher.id}`, submitData, {
+        router.put(`/accounts/cash-voucher/${voucher.id}`, submitData, {
           onSuccess: () => {
             setAlert({ type: 'success', message: 'Cash voucher updated successfully!' });
             
@@ -667,7 +655,7 @@ const CashVoucherCreate = () => {
           }
         });
       } else {
-        router.post('/accounts/Cash-voucher', submitData, {
+        router.post('/accounts/cash-voucher', submitData, {
           onSuccess: () => {
             console.log('Form submitted successfully!');
             setAlert({ type: 'success', message: 'Cash voucher created successfully!' });
@@ -695,7 +683,7 @@ const CashVoucherCreate = () => {
 
   const breadcrumbItems = [
     { label: 'Dashboard', icon: Home, href: '/dashboard' },
-    { label: 'Cash Vouchers', icon: List, href: '/accounts/Cash-voucher' },
+    { label: 'Cash Vouchers', icon: List, href: '/accounts/cash-voucher' },
     { label: isEdit ? 'Edit Cash Voucher' : 'Create Cash Voucher', icon: FileText, href: null }
   ];
 
@@ -1218,46 +1206,7 @@ const CashVoucherCreate = () => {
                           )}
                         </div>
 
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Cheque No.
-                          </label>
-                          <input
-                            type="text"
-                            value={entry.cheque_number || ''}
-                            onChange={(e) => updateEntry(index, 'cheque_number', e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            placeholder="Cheque number"
-                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                          />
-                        </div>
 
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Cheque Date
-                          </label>
-                          <CustomDatePicker
-                            selected={entry.cheque_date ? new Date(entry.cheque_date) : null}
-                            onChange={(date) => updateEntry(index, 'cheque_date', date ? date.toISOString().split('T')[0] : '')}
-                            type="date"
-                            placeholder="Cheque date"
-                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Slip No.
-                          </label>
-                          <input
-                            type="text"
-                            value={entry.slip_number || ''}
-                            onChange={(e) => updateEntry(index, 'slip_number', e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            placeholder="Slip number"
-                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                          />
-                        </div>
 
                         <div className="md:col-span-4">
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -1442,7 +1391,7 @@ const CashVoucherCreate = () => {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => router.visit('/accounts/Cash-voucher')}
+                    onClick={() => router.visit('/accounts/cash-voucher')}
                     className="flex items-center gap-1.5 px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors"
                     tabIndex={-1}
                   >

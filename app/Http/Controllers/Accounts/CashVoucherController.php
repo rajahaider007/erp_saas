@@ -335,7 +335,7 @@ class CashVoucherController extends Controller
                 'voucher_date' => $request->voucher_date,
                 'voucher_type' => $request->voucher_sub_type,
                 'voucher_sub_type' => $request->voucher_sub_type,
-                'Cash_account_id' => $request->Cash_account_id,
+                'bank_account_id' => $request->Cash_account_id,
                 'reference_number' => $request->reference_number,
                 'description' => $request->description,
                 'status' => 'Draft',
@@ -478,7 +478,7 @@ class CashVoucherController extends Controller
             }
 
 
-            return redirect()->route('accounts.Cash-voucher.index')
+            return redirect()->route('accounts.cash-voucher.index')
                            ->with('success', 'Cash voucher created successfully!');
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -600,13 +600,13 @@ class CashVoucherController extends Controller
         }
 
         if ($voucher->status !== 'Draft') {
-            return redirect()->route('accounts.Cash-voucher.index')
+            return redirect()->route('accounts.cash-voucher.index')
                 ->with('error', 'Only draft vouchers can be edited');
         }
 
         $entries = DB::table('transaction_entries')
             ->where('transaction_id', $id)
-            ->where('account_id', '!=', $voucher->Cash_account_id)
+            ->where('account_id', '!=', $voucher->bank_account_id)
             ->orderBy('line_number')
             ->get();
 
@@ -850,7 +850,7 @@ class CashVoucherController extends Controller
                     'voucher_date' => $request->voucher_date,
                     'voucher_type' => $request->voucher_sub_type,
                     'voucher_sub_type' => $request->voucher_sub_type,
-                    'Cash_account_id' => $request->Cash_account_id,
+                    'bank_account_id' => $request->Cash_account_id,
                     'reference_number' => $request->reference_number,
                     'description' => $request->description,
                     'total_debit' => 0,
@@ -972,7 +972,7 @@ class CashVoucherController extends Controller
             }
 
 
-            return redirect()->route('accounts.Cash-voucher.index')
+return redirect()->route('accounts.cash-voucher.index')
                            ->with('success', 'Cash voucher updated successfully!');
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -1229,8 +1229,8 @@ class CashVoucherController extends Controller
     private function getDefaultVoucherPrefix($voucherType)
     {
         return match ($voucherType) {
-            'Cash Payment' => 'BPV',
-            'Cash Receipt' => 'BRV',
+            'Cash Payment' => 'CPV',
+            'Cash Receipt' => 'CRV',
             default => 'JV',
         };
     }
@@ -1563,7 +1563,7 @@ class CashVoucherController extends Controller
                 ]);
             }
 
-            return redirect()->route('accounts.Cash-voucher.index')
+            return redirect()->route('accounts.cash-voucher.index')
                            ->with('success', "Cash voucher {$voucher->voucher_number} posted successfully!");
 
         } catch (\Exception $e) {
@@ -1918,7 +1918,7 @@ class CashVoucherController extends Controller
             }
 
 
-            return redirect()->route('accounts.Cash-voucher.index')
+            return redirect()->route('accounts.cash-voucher.index')
                            ->with('success', "Cash voucher {$voucherNumber} deleted successfully!");
 
         } catch (\Illuminate\Database\QueryException $e) {

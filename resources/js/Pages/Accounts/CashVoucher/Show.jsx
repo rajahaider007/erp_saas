@@ -41,7 +41,7 @@ const CashVoucherShow = () => {
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Cash Voucher Not Found</h2>
             <p className="text-gray-600 mb-4">The Cash voucher you're looking for doesn't exist.</p>
             <button
-              onClick={() => router.visit('/accounts/Cash-voucher')}
+              onClick={() => router.visit('/accounts/cash-voucher')}
               className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -88,7 +88,7 @@ const CashVoucherShow = () => {
       setAlert({ type: 'error', message: 'Only draft vouchers can be edited' });
       return;
     }
-    router.visit(`/accounts/Cash-voucher/${voucher.id}/edit`);
+    router.visit(`/accounts/cash-voucher/${voucher.id}/edit`);
   };
 
   const handleDelete = () => {
@@ -98,7 +98,7 @@ const CashVoucherShow = () => {
     }
     
     if (confirm('Are you sure you want to delete this Cash voucher?')) {
-      router.delete(`/accounts/Cash-voucher/${voucher.id}`);
+      router.delete(`/accounts/cash-voucher/${voucher.id}`);
     }
   };
 
@@ -109,7 +109,7 @@ const CashVoucherShow = () => {
     }
     
     if (confirm('Are you sure you want to post this Cash voucher? This action cannot be undone.')) {
-      router.post(`/accounts/Cash-voucher/${voucher.id}/post`);
+      router.post(`/accounts/cash-voucher/${voucher.id}/post`);
     }
   };
 
@@ -124,7 +124,7 @@ const CashVoucherShow = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => router.visit('/accounts/Cash-voucher')}
+                onClick={() => router.visit('/accounts/cash-voucher')}
                 className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -142,14 +142,14 @@ const CashVoucherShow = () => {
                 </button>
                 <div className="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
                   <button
-                    onClick={() => window.open(`/accounts/Cash-voucher/${voucher.id}/print-summary`, '_blank')}
+                    onClick={() => window.open(`/accounts/cash-voucher/${voucher.id}/print-summary`, '_blank')}
                     className="w-full text-left px-4 py-2 hover:bg-gray-50 rounded-t-lg flex items-center"
                   >
                     <FileText className="h-4 w-4 mr-2" />
                     Print Summary
                   </button>
                   <button
-                    onClick={() => window.open(`/accounts/Cash-voucher/${voucher.id}/print-detailed`, '_blank')}
+                    onClick={() => window.open(`/accounts/cash-voucher/${voucher.id}/print-detailed`, '_blank')}
                     className="w-full text-left px-4 py-2 hover:bg-gray-50 rounded-b-lg flex items-center"
                   >
                     <FileText className="h-4 w-4 mr-2" />
