@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import { 
   Search, 
@@ -11,7 +11,8 @@ import {
   Printer,
   ChevronDown,
   ChevronRight,
-  BarChart3
+  BarChart3,
+  ArrowUp
 } from 'lucide-react';
 import App from '../../App.jsx';
 
@@ -28,6 +29,24 @@ const TrialBalanceReport = () => {
   const [loading, setLoading] = useState(false);
   const [collapsedLevels, setCollapsedLevels] = useState({});
   const [printOrientation, setPrintOrientation] = useState('portrait');
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  // Handle scroll to top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
 
   // Check if data is hierarchical or flat
   const isHierarchical = filters?.level === 'all';
@@ -61,6 +80,31 @@ const TrialBalanceReport = () => {
   const isCollapsed = (level, key) => {
     const collapseKey = `${level}-${key}`;
     return collapsedLevels[collapseKey] || false;
+  };
+
+  const expandAll = () => {
+    setCollapsedLevels({});
+  };
+
+  const collapseAll = () => {
+    const newCollapsedLevels = {};
+    if (trialBalanceData && Array.isArray(trialBalanceData)) {
+      trialBalanceData.forEach((level1, idx1) => {
+        newCollapsedLevels[`1-l1-${idx1}`] = true;
+        if (level1.children) {
+          Object.keys(level1.children).forEach((l2Key) => {
+            newCollapsedLevels[`2-l1-${idx1}-${l2Key}`] = true;
+            const l2 = level1.children[l2Key];
+            if (l2.children) {
+              Object.keys(l2.children).forEach((l3Key) => {
+                newCollapsedLevels[`3-l1-${idx1}-${l2Key}-${l3Key}`] = true;
+              });
+            }
+          });
+        }
+      });
+    }
+    setCollapsedLevels(newCollapsedLevels);
   };
 
   const handleExportExcel = () => {
@@ -308,21 +352,21 @@ const TrialBalanceReport = () => {
 
   return (
     <App>
-      <div className="reports-container">
+      <div className="advanced-module-manager form-theme-system reports-container">
         {/* Header */}
-        <div className="report-header">
-          <div className="report-header-main">
-            <div className="report-title-section">
-              <h1 className="report-title">
-                <BarChart3 className="report-title-icon" />
+        <div className="manager-header">
+          <div className="header-main">
+            <div className="title-section">
+              <h1 className="page-title">
+                <BarChart3 className="title-icon" />
                 Trial Balance Report
               </h1>
-              <div className="report-stats-summary">
-                <div className="report-stat-item">
+              <div className="stats-summary">
+                <div className="stat-item">
                   <FileText size={16} />
                   <span>{company?.company_name || 'N/A'}</span>
                 </div>
-                <div className="report-stat-item">
+                <div className="stat-item">
                   <Calendar size={16} />
                   <span>
                     {filters?.from_date ? formatDate(filters.from_date) : 'N/A'} - {filters?.to_date ? formatDate(filters.to_date) : 'N/A'}
@@ -331,39 +375,57 @@ const TrialBalanceReport = () => {
               </div>
             </div>
 
-            <div className="report-header-actions">
+            <div className="header-actions">
               <select 
                 value={printOrientation}
                 onChange={(e) => setPrintOrientation(e.target.value)}
-                className="text-sm px-3 py-1.5 bg-slate-700 text-white border border-slate-600 rounded mr-2"
+                className="form-control form-control-sm"
                 title="Print Orientation"
               >
                 <option value="portrait">Portrait</option>
                 <option value="landscape">Landscape</option>
               </select>
+              {isHierarchical && (
+                <>
+                  <button 
+                    className="btn btn-icon" 
+                    onClick={expandAll}
+                    title="Expand All"
+                  >
+                    <ChevronDown size={20} />
+                  </button>
+                  <button 
+                    className="btn btn-icon" 
+                    onClick={collapseAll}
+                    title="Collapse All"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </>
+              )}
               <button 
-                className="btn-icon-action" 
+                className="btn btn-icon" 
                 onClick={handleBackToFilters}
                 title="Back to Filters"
               >
                 <Filter size={20} />
               </button>
               <button 
-                className="btn-icon-action" 
+                className="btn btn-icon" 
                 onClick={handlePrint}
                 title="Print Report"
               >
                 <Printer size={20} />
               </button>
               <button 
-                className="btn-icon-action" 
+                className="btn btn-icon" 
                 onClick={handleExportExcel}
                 title="Export to CSV"
               >
                 <FileText size={20} />
               </button>
               <button 
-                className="btn-icon-action" 
+                className="btn btn-icon" 
                 onClick={handleExportXLSX}
                 title="Export to Excel (XLSX)"
               >
@@ -406,7 +468,7 @@ const TrialBalanceReport = () => {
                 <h3>No accounts found</h3>
                 <p>Try adjusting your filters to see results</p>
                 <button 
-                  className="btn-primary mt-4"
+                  className="btn btn-primary mt-4"
                   onClick={handleBackToFilters}
                 >
                   <Filter size={16} />
@@ -415,7 +477,7 @@ const TrialBalanceReport = () => {
               </div>
             ) : (
               <div className="trial-balance-table-container">
-                <table className="trial-balance-table">
+                <table className="data-table">
                   <thead>
                     <tr>
                       <th>ACCOUNT</th>
@@ -467,6 +529,18 @@ const TrialBalanceReport = () => {
             )}
           </div>
         </div>
+
+        {/* Scroll to Top Button */}
+        {showScrollTop && (
+          <button 
+            className="scroll-to-top-btn"
+            onClick={scrollToTop}
+            title="Scroll to Top"
+            aria-label="Scroll to top"
+          >
+            <ArrowUp size={20} />
+          </button>
+        )}
       </div>
 
       <style jsx>{`
@@ -474,50 +548,52 @@ const TrialBalanceReport = () => {
           overflow-x: auto;
         }
 
-        .trial-balance-table {
+        .data-table {
           width: 100%;
           border-collapse: collapse;
           margin-top: 20px;
-          background: white;
+          background: var(--bg-tertiary, #ffffff);
         }
 
-        .trial-balance-table thead {
-          background: #2c3e50;
-          color: white;
+        .data-table thead {
+          background: var(--bg-secondary, #2c3e50);
+          color: var(--text-primary, white);
         }
 
-        .trial-balance-table th {
+        .data-table th {
           padding: 12px;
           text-align: left;
           font-weight: 600;
           font-size: 13px;
-          border: 1px solid #1a252f;
+          border: 1px solid var(--border-color, #1a252f);
         }
 
-        .trial-balance-table th.number-col {
+        .data-table th.number-col {
           text-align: right;
           width: 150px;
         }
 
-        .trial-balance-table td {
+        .data-table td {
           padding: 10px 12px;
-          border: 1px solid #e0e0e0;
+          border: 1px solid var(--border-color-light, #334155);
           font-size: 13px;
+          background: transparent;
+          color: var(--text-secondary, #cbd5e1);
         }
 
-        .trial-balance-table td.number-col {
+        .data-table td.number-col {
           text-align: right;
           font-family: 'Courier New', monospace;
           font-weight: 500;
         }
 
-        /* Level Styling with different colors */
+        /* Level Styling with theme-aware colors */
         .level-1 {
-          background: #e3f2fd;
+          background: rgba(52, 152, 219, 0.08);
           font-weight: 700;
           font-size: 14px;
-          color: #1a1a1a;
-          border-bottom: 3px solid #1976d2;
+          color: var(--text-primary, #fff);
+          border-bottom: 3px solid rgba(52, 152, 219, 0.4);
         }
 
         .level-1 td:first-child {
@@ -525,10 +601,10 @@ const TrialBalanceReport = () => {
         }
 
         .level-2 {
-          background: #f3e5f5;
+          background: rgba(155, 89, 182, 0.06);
           font-weight: 600;
-          color: #2c3e50;
-          border-bottom: 2px dashed #9c27b0;
+          color: var(--text-secondary, #e2e8f0);
+          border-bottom: 2px dashed rgba(155, 89, 182, 0.3);
         }
 
         .level-2 td:first-child {
@@ -536,10 +612,10 @@ const TrialBalanceReport = () => {
         }
 
         .level-3 {
-          background: #fff3e0;
+          background: rgba(243, 156, 18, 0.06);
           font-weight: 500;
-          color: #495057;
-          border-bottom: 2px dashed #ff9800;
+          color: var(--text-light, #cbd5e1);
+          border-bottom: 2px dashed rgba(243, 156, 18, 0.3);
         }
 
         .level-3 td:first-child {
@@ -547,9 +623,9 @@ const TrialBalanceReport = () => {
         }
 
         .level-4 {
-          background: #e8f5e9;
-          color: #6c757d;
-          border-bottom: 1px dashed #4caf50;
+          background: rgba(46, 204, 113, 0.05);
+          color: var(--text-light, #cbd5e1);
+          border-bottom: 1px dashed rgba(46, 204, 113, 0.25);
         }
 
         .level-4 td:first-child {
@@ -558,7 +634,7 @@ const TrialBalanceReport = () => {
 
         .account-code {
           font-family: 'Courier New', monospace;
-          color: #6c757d;
+          color: #94a3b8;
           font-size: 12px;
           margin-right: 10px;
         }
@@ -573,42 +649,42 @@ const TrialBalanceReport = () => {
         }
 
         .badge-parent {
-          background: #3498db;
+          background: #3b82f6;
           color: white;
         }
 
         .badge-cash {
-          background: #95a5a6;
+          background: #8b5cf6;
           color: white;
         }
 
         .badge-trans {
-          background: #27ae60;
+          background: #10b981;
           color: white;
         }
 
         .grand-total-row {
-          background: #1a252f;
-          color: white;
+          background: rgba(0, 0, 0, 0.3);
+          color: var(--text-primary, #fff);
           font-weight: bold;
           font-size: 15px;
         }
 
         .grand-total-row td {
           padding: 18px 12px;
-          border: 2px solid #0d1117;
+          border: 2px solid rgba(100, 100, 120, 0.5);
         }
 
         .amount-debit {
-          color: #000;
+          color: #4ade80;
         }
 
         .amount-credit {
-          color: #000;
+          color: #f87171;
         }
 
         .zero-amount {
-          color: #95a5a6;
+          color: #9ca3af;
         }
 
         .collapsible-icon {
@@ -617,13 +693,72 @@ const TrialBalanceReport = () => {
           width: 16px;
           text-align: center;
           margin-right: 5px;
-          color: #3498db;
+          color: #60a5fa;
           font-weight: bold;
           user-select: none;
         }
 
         .collapsible-icon:hover {
-          color: #2980b9;
+          color: #93c5fd;
+        }
+
+        /* Form theme system adjustments */
+        .advanced-module-manager.form-theme-system .data-table {
+          background: var(--bg-table, #ffffff);
+        }
+
+        .advanced-module-manager.form-theme-system.dark .data-table {
+          background: var(--bg-dark-table, #1e293b);
+        }
+
+        .advanced-module-manager.form-theme-system.dark .data-table td {
+          color: var(--text-light, #e2e8f0);
+          border-color: var(--border-dark-table, #334155);
+        }
+
+        .advanced-module-manager.form-theme-system.dark .data-table thead {
+          background: var(--bg-dark-header, #0f172a);
+        }
+
+        /* Scroll to Top Button Styling */
+        .scroll-to-top-btn {
+          position: fixed;
+          bottom: 30px;
+          right: 30px;
+          width: 48px;
+          height: 48px;
+          border-radius: 8px;
+          background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+          color: white;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+          z-index: 100;
+          transition: all 0.3s ease;
+          padding: 0;
+        }
+
+        .scroll-to-top-btn:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4);
+          background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
+        }
+
+        .scroll-to-top-btn:active {
+          transform: translateY(-1px);
+        }
+
+        .advanced-module-manager.form-theme-system.dark .scroll-to-top-btn {
+          background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+          box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
+        }
+
+        .advanced-module-manager.form-theme-system.dark .scroll-to-top-btn:hover {
+          background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
+          box-shadow: 0 15px 35px rgba(124, 58, 237, 0.4);
         }
       `}</style>
     </App>
