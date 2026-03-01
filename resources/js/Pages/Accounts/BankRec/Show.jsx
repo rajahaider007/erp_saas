@@ -38,14 +38,14 @@ const BankVoucherShow = () => {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Journal Voucher Not Found</h2>
-            <p className="text-gray-600 mb-4">The journal voucher you're looking for doesn't exist.</p>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Bank Voucher Not Found</h2>
+            <p className="text-gray-600 mb-4">The bank voucher you're looking for doesn't exist.</p>
             <button
-              onClick={() => router.visit('/accounts/journal-voucher')}
+              onClick={() => router.visit('/accounts/bank-voucher')}
               className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Journal Vouchers
+              Back to Bank Vouchers
             </button>
           </div>
         </div>
@@ -88,7 +88,7 @@ const BankVoucherShow = () => {
       setAlert({ type: 'error', message: 'Only draft vouchers can be edited' });
       return;
     }
-    router.visit(`/accounts/journal-voucher/${voucher.id}/edit`);
+    router.visit(`/accounts/bank-voucher/${voucher.id}/edit`);
   };
 
   const handleDelete = () => {
@@ -97,8 +97,8 @@ const BankVoucherShow = () => {
       return;
     }
     
-    if (confirm('Are you sure you want to delete this journal voucher?')) {
-      router.delete(`/accounts/journal-voucher/${voucher.id}`);
+    if (confirm('Are you sure you want to delete this bank voucher?')) {
+      router.delete(`/accounts/bank-voucher/${voucher.id}`);
     }
   };
 
@@ -108,8 +108,8 @@ const BankVoucherShow = () => {
       return;
     }
     
-    if (confirm('Are you sure you want to post this journal voucher? This action cannot be undone.')) {
-      router.post(`/accounts/journal-voucher/${voucher.id}/post`);
+    if (confirm('Are you sure you want to post this bank voucher? This action cannot be undone.')) {
+      router.post(`/accounts/bank-voucher/${voucher.id}/post`);
     }
   };
 
@@ -124,14 +124,14 @@ const BankVoucherShow = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => router.visit('/accounts/journal-voucher')}
+                onClick={() => router.visit('/accounts/bank-voucher')}
                 className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Journal Voucher Details</h1>
-                <p className="text-gray-600 mt-1">View journal voucher information</p>
+                <h1 className="text-2xl font-bold text-gray-900">Bank Voucher Details</h1>
+                <p className="text-gray-600 mt-1">View bank voucher information</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
@@ -142,14 +142,14 @@ const BankVoucherShow = () => {
                 </button>
                 <div className="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
                   <button
-                    onClick={() => window.open(`/accounts/journal-voucher/${voucher.id}/print-summary`, '_blank')}
+                    onClick={() => window.open(`/accounts/bank-voucher/${voucher.id}/print-summary`, '_blank')}
                     className="w-full text-left px-4 py-2 hover:bg-gray-50 rounded-t-lg flex items-center"
                   >
                     <FileText className="h-4 w-4 mr-2" />
                     Print Summary
                   </button>
                   <button
-                    onClick={() => window.open(`/accounts/journal-voucher/${voucher.id}/print-detailed`, '_blank')}
+                    onClick={() => window.open(`/accounts/bank-voucher/${voucher.id}/print-detailed`, '_blank')}
                     className="w-full text-left px-4 py-2 hover:bg-gray-50 rounded-b-lg flex items-center"
                   >
                     <FileText className="h-4 w-4 mr-2" />
@@ -283,9 +283,9 @@ const BankVoucherShow = () => {
           </div>
         </div>
 
-        {/* Journal Entries */}
+        {/* Bank Entries */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Journal Entries</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Bank Entries</h2>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">

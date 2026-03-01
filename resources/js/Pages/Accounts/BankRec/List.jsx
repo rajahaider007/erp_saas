@@ -434,7 +434,7 @@ const BankVoucherList = () => {
 
   // Handle voucher actions
   const handleView = (voucher) => {
-    router.visit(`/accounts/journal-voucher/${voucher.id}`);
+    router.visit(`/accounts/bank-voucher/${voucher.id}`);
   };
 
   const handleEdit = (voucher) => {
@@ -446,7 +446,7 @@ const BankVoucherList = () => {
       });
       return;
     }
-    router.visit(`/accounts/journal-voucher/${voucher.id}/edit`);
+    router.visit(`/accounts/bank-voucher/${voucher.id}/edit`);
   };
 
   const handleDelete = (voucher) => {
@@ -468,7 +468,7 @@ const BankVoucherList = () => {
       cancelButtonText: 'Cancel',
       onConfirm: () => {
         setLoading(true);
-        router.delete(`/accounts/journal-voucher/${voucher.id}`, {
+        router.delete(`/accounts/bank-voucher/${voucher.id}`, {
           onFinish: () => setLoading(false)
         });
       }
@@ -494,7 +494,7 @@ const BankVoucherList = () => {
       cancelButtonText: 'Cancel',
       onConfirm: () => {
         setLoading(true);
-        router.post(`/accounts/journal-voucher/${voucher.id}/post`, {}, {
+        router.post(`/accounts/bank-voucher/${voucher.id}/post`, {}, {
           onFinish: () => setLoading(false)
         });
       }
@@ -514,7 +514,7 @@ const BankVoucherList = () => {
     if (action === 'delete') {
       CustomAlert.fire({
         title: 'Delete Selected Vouchers?',
-        text: `You are about to delete ${selectedVouchers.length} journal voucher(s). This action cannot be undone!`,
+        text: `You are about to delete ${selectedVouchers.length} bank voucher(s). This action cannot be undone!`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Yes, delete them!',
@@ -522,7 +522,7 @@ const BankVoucherList = () => {
         onConfirm: () => {
           setLoading(true);
           selectedVouchers.forEach(id => {
-            router.delete(`/accounts/journal-voucher/${id}`);
+            router.delete(`/accounts/bank-voucher/${id}`);
           });
           setSelectedVouchers([]);
           setLoading(false);
@@ -546,14 +546,14 @@ const BankVoucherList = () => {
 
       CustomAlert.fire({
         title: 'Post Selected Vouchers?',
-        text: `You are about to post ${selectedVouchers.length} journal voucher(s). This action cannot be undone!`,
+        text: `You are about to post ${selectedVouchers.length} bank voucher(s). This action cannot be undone!`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Yes, post them!',
         cancelButtonText: 'Cancel',
         onConfirm: () => {
           setLoading(true);
-          router.post('/accounts/journal-voucher/bulk-post', {
+          router.post('/accounts/bank-voucher/bulk-post', {
             ids: selectedVouchers
           }, {
             onSuccess: (page) => {
@@ -582,7 +582,7 @@ const BankVoucherList = () => {
   const exportToCSV = () => {
     CustomAlert.fire({
       title: 'Export to CSV',
-      text: 'Download all journal vouchers as CSV file?',
+      text: 'Download all bank vouchers as CSV file?',
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Yes, download!',
@@ -590,7 +590,7 @@ const BankVoucherList = () => {
       onConfirm: () => {
         // Build query parameters for current filters
         const params = new URLSearchParams(window.location.search);
-        const exportUrl = `/accounts/journal-voucher/export-csv?${params.toString()}`;
+        const exportUrl = `/accounts/bank-voucher/export-csv?${params.toString()}`;
         window.open(exportUrl, '_blank');
       }
     });
@@ -599,7 +599,7 @@ const BankVoucherList = () => {
   const exportToExcel = () => {
     CustomAlert.fire({
       title: 'Export to Excel',
-      text: 'Download all journal vouchers as Excel file?',
+      text: 'Download all bank vouchers as Excel file?',
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Yes, download!',
@@ -607,7 +607,7 @@ const BankVoucherList = () => {
       onConfirm: () => {
         // Build query parameters for current filters
         const params = new URLSearchParams(window.location.search);
-        const exportUrl = `/accounts/journal-voucher/export-excel?${params.toString()}`;
+        const exportUrl = `/accounts/bank-voucher/export-excel?${params.toString()}`;
         window.open(exportUrl, '_blank');
       }
     });
@@ -616,7 +616,7 @@ const BankVoucherList = () => {
   const exportToPDF = () => {
     CustomAlert.fire({
       title: 'Export to PDF',
-      text: 'Download all journal vouchers as PDF file?',
+      text: 'Download all bank vouchers as PDF file?',
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Yes, download!',
@@ -624,7 +624,7 @@ const BankVoucherList = () => {
       onConfirm: () => {
         // Build query parameters for current filters
         const params = new URLSearchParams(window.location.search);
-        const exportUrl = `/accounts/journal-voucher/export-pdf?${params.toString()}`;
+        const exportUrl = `/accounts/bank-voucher/export-pdf?${params.toString()}`;
         window.open(exportUrl, '_blank');
       }
     });
@@ -674,7 +674,7 @@ const BankVoucherList = () => {
             <div className="title-section">
               <h1 className="page-title">
                 <Database className="title-icon" />
-                {usePage().props?.pageTitle || 'Journal Vouchers'}
+                {usePage().props?.pageTitle || 'Bank Vouchers'}
               </h1>
               <div className="stats-summary">
                 <div className="stat-item">
@@ -725,9 +725,9 @@ const BankVoucherList = () => {
                 </div>
               </div>
 
-              <a href='/accounts/journal-voucher/create' className="btn btn-primary">
+              <a href='/accounts/bank-voucher/create' className="btn btn-primary">
                 <Plus size={20} />
-                Add Journal Voucher
+                Add Bank Voucher
               </a>
             </div>
           </div>
@@ -909,16 +909,16 @@ const BankVoucherList = () => {
             {loading ? (
               <div className="loading-state">
                 <div className="loading-spinner"></div>
-                <p>Loading journal vouchers...</p>
+                <p>Loading bank vouchers...</p>
               </div>
             ) : !paginatedVouchers?.data?.length ? (
               <div className="empty-state">
                 <Database className="empty-icon" />
-                <h3>No journal vouchers found</h3>
+                <h3>No bank vouchers found</h3>
                 <p>Try adjusting your filters or search criteria</p>
-                <a href="/accounts/journal-voucher/create" className="btn btn-primary">
+                <a href="/accounts/bank-voucher/create" className="btn btn-primary">
                   <Plus size={20} />
-                  Add Your First Journal Voucher
+                  Add Your First Bank Voucher
                 </a>
               </div>
             ) : (
@@ -1070,7 +1070,7 @@ const BankVoucherList = () => {
                                 <button
                                   className="action-btn print-summary"
                                   title="Print Summary"
-                                  onClick={() => window.open(`/accounts/journal-voucher/${voucher.id}/print-summary`, '_blank')}
+                                  onClick={() => window.open(`/accounts/bank-voucher/${voucher.id}/print-summary`, '_blank')}
                                 >
                                   <Printer size={16} />
                                 </button>
@@ -1079,7 +1079,7 @@ const BankVoucherList = () => {
                                 <button
                                   className="action-btn print-detailed"
                                   title="Print Detailed"
-                                  onClick={() => window.open(`/accounts/journal-voucher/${voucher.id}/print-detailed`, '_blank')}
+                                  onClick={() => window.open(`/accounts/bank-voucher/${voucher.id}/print-detailed`, '_blank')}
                                 >
                                   <Printer size={16} />
                                 </button>

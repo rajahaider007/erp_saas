@@ -54,47 +54,44 @@ const Breadcrumbs = ({ items }) => {
 };
 
 const BankVoucherCreate = () => {
-  const { accounts = [], voucher = null, entries = [], flash, currencies = [], company = null, preview_voucher_number = null, attachments: initialAttachments = [], currentPeriod = null } = usePage().props;
+  const { accounts = [], bankAccounts = [], voucher = null, entries = [], flash, currencies = [], company = null, preview_voucher_number = null, attachments: initialAttachments = [], currentPeriod = null } = usePage().props;
   const isEdit = !!voucher;
   const autoVoucherNumbering = true; // Always auto-generate voucher numbers
   
   const [formData, setFormData] = useState({
     voucher_date: voucher?.voucher_date || new Date().toISOString().split('T')[0],
     voucher_number: voucher?.voucher_number || preview_voucher_number || '',
+    voucher_sub_type: voucher?.voucher_sub_type || 'Bank Payment',
+    bank_account_id: voucher?.bank_account_id || '',
     description: voucher?.description || '',
     reference_number: voucher?.reference_number || '',
     base_currency_code: company?.default_currency_code || 'PKR',
     entries: entries.length > 0 ? entries.map(entry => ({
       account_id: entry.account_id,
       description: entry.description || '',
-      debit_amount: entry.debit_amount && entry.debit_amount !== '' ? parseFloat(entry.debit_amount) : null,
-      credit_amount: entry.credit_amount && entry.credit_amount !== '' ? parseFloat(entry.credit_amount) : null,
+      amount: (entry.debit_amount && parseFloat(entry.debit_amount) > 0)
+        ? parseFloat(entry.debit_amount)
+        : (entry.credit_amount && parseFloat(entry.credit_amount) > 0 ? parseFloat(entry.credit_amount) : null),
       currency_code: entry.currency_code || company?.default_currency_code || 'PKR',
       exchange_rate: entry.exchange_rate || 1.0,
-      base_debit_amount: entry.base_debit_amount && entry.base_debit_amount !== '' ? parseFloat(entry.base_debit_amount) : null,
-      base_credit_amount: entry.base_credit_amount && entry.base_credit_amount !== '' ? parseFloat(entry.base_credit_amount) : null,
+      base_amount: (entry.base_debit_amount && parseFloat(entry.base_debit_amount) > 0)
+        ? parseFloat(entry.base_debit_amount)
+        : (entry.base_credit_amount && parseFloat(entry.base_credit_amount) > 0 ? parseFloat(entry.base_credit_amount) : null),
+      cheque_number: entry.cheque_number || '',
+      cheque_date: entry.cheque_date || '',
+      slip_number: entry.slip_number || '',
       attachment: entry.attachment || null
     })) : [
       { 
         account_id: null, 
         description: '', 
-        debit_amount: null, 
-        credit_amount: null, 
+        amount: null,
         currency_code: company?.default_currency_code || 'PKR',
         exchange_rate: 1.0,
-        base_debit_amount: null, 
-        base_credit_amount: null,
-        attachment: null
-      },
-      { 
-        account_id: null, 
-        description: '', 
-        debit_amount: null, 
-        credit_amount: null, 
-        currency_code: company?.default_currency_code || 'PKR',
-        exchange_rate: 1.0,
-        base_debit_amount: null, 
-        base_credit_amount: null,
+        base_amount: null,
+        cheque_number: '',
+        cheque_date: '',
+        slip_number: '',
         attachment: null
       }
     ]
@@ -175,7 +172,7 @@ const BankVoucherCreate = () => {
     // Ctrl+S to submit
     if (e.ctrlKey && e.key === 's') {
       e.preventDefault();
-      if (!isSubmitting && isBalanced) {
+      if (!isSubmitting && isReadyToSubmit) {
         handleSubmit(e);
       }
     }
@@ -405,8 +402,8 @@ const BankVoucherCreate = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  // Calculate base currency amounts for specific entry
-  const calculateBaseAmountsForEntry = (amount, exchangeRate) => {
+  // Calculate base currency amount for specific entry
+  const calculateBaseAmountForEntry = (amount, exchangeRate) => {
     if (!amount || amount === '') return '';
     // Exchange rate is stored as base_currency/foreign_currency, so we need to invert it
     // If exchange rate is 0.00353 (PKR/USD), then 1 USD = 1/0.00353 = 283.286119 PKR
@@ -414,12 +411,10 @@ const BankVoucherCreate = () => {
     return baseAmount.toFixed(2);
   };
 
-  // Update entry with base currency amounts
-  const updateEntryWithBaseAmounts = (index, field, value) => {
-    const isDebit = field === 'debit_amount';
-    const baseField = isDebit ? 'base_debit_amount' : 'base_credit_amount';
+  // Update entry with base currency amount
+  const updateEntryWithBaseAmount = (index, field, value) => {
     const entry = formData.entries[index];
-    const baseAmount = calculateBaseAmountsForEntry(value, entry.exchange_rate);
+    const baseAmount = calculateBaseAmountForEntry(value, entry.exchange_rate);
     
     setFormData(prev => ({
       ...prev,
@@ -427,7 +422,7 @@ const BankVoucherCreate = () => {
         i === index ? { 
           ...entry, 
           [field]: value === '' ? null : value,
-          [baseField]: baseAmount === '' ? null : baseAmount
+          base_amount: baseAmount === '' ? null : baseAmount
         } : entry
       )
     }));
@@ -435,13 +430,7 @@ const BankVoucherCreate = () => {
 
   // Handle amount input events (onChange, onInput, onPaste)
   const handleAmountInput = (index, field, value) => {
-    updateEntryWithBaseAmounts(index, field, value);
-    
-    // Clear opposite field if this field has a value
-    if (value && parseFloat(value) > 0) {
-      const oppositeField = field === 'debit_amount' ? 'credit_amount' : 'debit_amount';
-      updateEntryWithBaseAmounts(index, oppositeField, null);
-    }
+    updateEntryWithBaseAmount(index, field, value);
   };
 
   // Handle paste events with delay to ensure value is processed
@@ -456,40 +445,28 @@ const BankVoucherCreate = () => {
     const newRate = parseFloat(value) || 0;
     updateEntry(index, 'exchange_rate', newRate);
     
-    // Recalculate base amounts when exchange rate changes
+    // Recalculate base amount when exchange rate changes
     const entry = formData.entries[index];
-    if (entry.debit_amount) {
-      updateEntryWithBaseAmounts(index, 'debit_amount', entry.debit_amount);
-    }
-    if (entry.credit_amount) {
-      updateEntryWithBaseAmounts(index, 'credit_amount', entry.credit_amount);
+    if (entry.amount) {
+      updateEntryWithBaseAmount(index, 'amount', entry.amount);
     }
   };
 
   // Calculate totals
   const calculateTotals = () => {
-    const totalDebit = formData.entries.reduce((sum, entry) => {
-      return sum + (parseFloat(entry.debit_amount) || 0);
-    }, 0);
-    
-    const totalCredit = formData.entries.reduce((sum, entry) => {
-      return sum + (parseFloat(entry.credit_amount) || 0);
+    const totalAmount = formData.entries.reduce((sum, entry) => {
+      return sum + (parseFloat(entry.amount) || 0);
     }, 0);
 
-    const totalBaseDebit = formData.entries.reduce((sum, entry) => {
-      return sum + (parseFloat(entry.base_debit_amount) || 0);
+    const totalBaseAmount = formData.entries.reduce((sum, entry) => {
+      return sum + (parseFloat(entry.base_amount) || 0);
     }, 0);
-    
-    const totalBaseCredit = formData.entries.reduce((sum, entry) => {
-      return sum + (parseFloat(entry.base_credit_amount) || 0);
-    }, 0);
-    
-    return { totalDebit, totalCredit, totalBaseDebit, totalBaseCredit };
+
+    return { totalAmount, totalBaseAmount };
   };
 
-  const { totalDebit, totalCredit, totalBaseDebit, totalBaseCredit } = calculateTotals();
-  const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01;
-  const isBaseBalanced = Math.abs(totalBaseDebit - totalBaseCredit) < 0.01;
+  const { totalAmount, totalBaseAmount } = calculateTotals();
+  const isReadyToSubmit = !!formData.bank_account_id && formData.entries.length >= 1 && totalBaseAmount > 0;
 
   // Add new entry
   const addEntry = () => {
@@ -498,12 +475,13 @@ const BankVoucherCreate = () => {
       entries: [...prev.entries, { 
         account_id: null, 
         description: '', 
-        debit_amount: null, 
-        credit_amount: null, 
+        amount: null,
         currency_code: formData.base_currency_code,
         exchange_rate: 1.0,
-        base_debit_amount: null, 
-        base_credit_amount: null,
+        base_amount: null,
+        cheque_number: '',
+        cheque_date: '',
+        slip_number: '',
         attachment: null
       }]
     }));
@@ -511,8 +489,8 @@ const BankVoucherCreate = () => {
 
   // Remove entry
   const removeEntry = (index) => {
-    if (formData.entries.length <= 2) {
-      setAlert({ type: 'error', message: 'At least 2 entries are required for double entry' });
+    if (formData.entries.length <= 1) {
+      setAlert({ type: 'error', message: 'At least 1 detail entry is required' });
       return;
     }
     
@@ -560,11 +538,16 @@ const BankVoucherCreate = () => {
 
     // Description is optional - no validation needed
 
-    console.log('Balance check:', { totalBaseDebit, totalBaseCredit, isBaseBalanced });
-    
-    if (!isBaseBalanced) {
-      newErrors.entries = 'Total debits must equal total credits in base currency';
-      console.log('Balance validation failed:', Math.abs(totalBaseDebit - totalBaseCredit));
+    if (!formData.voucher_sub_type) {
+      newErrors.voucher_sub_type = 'Voucher type is required';
+    }
+
+    if (!formData.bank_account_id) {
+      newErrors.bank_account_id = 'Bank account is required';
+    }
+
+    if (totalBaseAmount <= 0) {
+      newErrors.entries = 'At least one detail amount is required';
     }
 
     // Validate entries
@@ -586,19 +569,16 @@ const BankVoucherCreate = () => {
         console.log(`Entry ${index}: Invalid exchange_rate:`, entry.exchange_rate);
       }
       
-      const debit = parseFloat(entry.debit_amount) || 0;
-      const credit = parseFloat(entry.credit_amount) || 0;
+      const amount = parseFloat(entry.amount) || 0;
       
-      console.log(`Entry ${index} amounts:`, { debit, credit });
+      console.log(`Entry ${index} amount:`, { amount });
       
-      if (debit === 0 && credit === 0) {
-        newErrors[`entries.${index}.amount`] = 'Either debit or credit amount is required';
-        console.log(`Entry ${index}: Both amounts are zero`);
+      if (amount <= 0) {
+        newErrors[`entries.${index}.amount`] = 'Amount is required';
       }
       
-      if (debit > 0 && credit > 0) {
-        newErrors[`entries.${index}.amount`] = 'Cannot have both debit and credit amounts';
-        console.log(`Entry ${index}: Both amounts are non-zero`);
+      if (formData.bank_account_id && parseInt(entry.account_id) === parseInt(formData.bank_account_id)) {
+        newErrors[`entries.${index}.account_id`] = 'Detail account cannot be the selected bank account';
       }
     });
 
@@ -623,15 +603,17 @@ const BankVoucherCreate = () => {
       
       const submitData = {
         ...formData,
+        bank_account_id: formData.bank_account_id ? parseInt(formData.bank_account_id) : null,
         entries: formData.entries.map(entry => ({
           ...entry,
           account_id: entry.account_id ? parseInt(entry.account_id) : null,
-          debit_amount: entry.debit_amount !== null && entry.debit_amount !== '' ? parseFloat(entry.debit_amount) : null,
-          credit_amount: entry.credit_amount !== null && entry.credit_amount !== '' ? parseFloat(entry.credit_amount) : null,
+          amount: entry.amount !== null && entry.amount !== '' ? parseFloat(entry.amount) : null,
           exchange_rate: entry.exchange_rate ? parseFloat(entry.exchange_rate) : 1.0,
           currency_code: entry.currency_code || formData.base_currency_code,
-          base_debit_amount: entry.base_debit_amount !== null && entry.base_debit_amount !== '' ? parseFloat(entry.base_debit_amount) : null,
-          base_credit_amount: entry.base_credit_amount !== null && entry.base_credit_amount !== '' ? parseFloat(entry.base_credit_amount) : null,
+          base_amount: entry.base_amount !== null && entry.base_amount !== '' ? parseFloat(entry.base_amount) : null,
+          cheque_number: entry.cheque_number || null,
+          cheque_date: entry.cheque_date || null,
+          slip_number: entry.slip_number || null,
           attachment_id: entry.attachment ? entry.attachment.id : null
         })),
         attachments: Array.isArray(attachments) && attachments.length > 0 ? attachments.map(att => att.id || att) : []
@@ -641,9 +623,9 @@ const BankVoucherCreate = () => {
 
 
       if (isEdit) {
-        router.put(`/accounts/journal-voucher/${voucher.id}`, submitData, {
+        router.put(`/accounts/bank-voucher/${voucher.id}`, submitData, {
           onSuccess: () => {
-            setAlert({ type: 'success', message: 'Journal voucher updated successfully!' });
+            setAlert({ type: 'success', message: 'Bank voucher updated successfully!' });
             
             // Don't redirect automatically - let user see the success message
             // setTimeout(() => {
@@ -659,10 +641,10 @@ const BankVoucherCreate = () => {
           }
         });
       } else {
-        router.post('/accounts/journal-voucher', submitData, {
+        router.post('/accounts/bank-voucher', submitData, {
           onSuccess: () => {
             console.log('Form submitted successfully!');
-            setAlert({ type: 'success', message: 'Journal voucher created successfully!' });
+            setAlert({ type: 'success', message: 'Bank voucher created successfully!' });
             
             // Don't redirect automatically - let user see the success message
             // setTimeout(() => {
@@ -680,15 +662,15 @@ const BankVoucherCreate = () => {
         });
       }
     } catch (error) {
-      setAlert({ type: 'error', message: `An error occurred while ${isEdit ? 'updating' : 'creating'} the journal voucher` });
+      setAlert({ type: 'error', message: `An error occurred while ${isEdit ? 'updating' : 'creating'} the bank voucher` });
       setIsSubmitting(false);
     }
   };
 
   const breadcrumbItems = [
     { label: 'Dashboard', icon: Home, href: '/dashboard' },
-    { label: 'Journal Vouchers', icon: List, href: '/accounts/journal-voucher' },
-    { label: isEdit ? 'Edit Journal Voucher' : 'Create Journal Voucher', icon: FileText, href: null }
+    { label: 'Bank Vouchers', icon: List, href: '/accounts/bank-voucher' },
+    { label: isEdit ? 'Edit Bank Voucher' : 'Create Bank Voucher', icon: FileText, href: null }
   ];
 
   return (
@@ -763,10 +745,10 @@ const BankVoucherCreate = () => {
               {/* Form Header */}
               <div className="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
                 <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  {isEdit ? 'Edit Journal Voucher' : 'Create Journal Voucher'}
+                  {isEdit ? 'Edit Bank Voucher' : 'Create Bank Voucher'}
                 </h1>
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                  {isEdit ? 'Update journal voucher information' : 'Use Tab or Enter to navigate, Alt+A to add entry'}
+                  {isEdit ? 'Update bank voucher information' : 'Use Tab or Enter to navigate, Alt+A to add detail entry'}
                 </p>
               </div>
 
@@ -775,7 +757,7 @@ const BankVoucherCreate = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Voucher Details - Left Side */}
                   <div className="lg:col-span-2">
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3">Voucher Details</h3>
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3">Bank Voucher Master</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="voucher_date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -823,6 +805,49 @@ const BankVoucherCreate = () => {
                         )}
                         {errors.voucher_number && (
                           <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.voucher_number}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label htmlFor="voucher_sub_type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                          Voucher Type *
+                        </label>
+                        <select
+                          id="voucher_sub_type"
+                          name="voucher_sub_type"
+                          value={formData.voucher_sub_type}
+                          onChange={(e) => setFormData(prev => ({ ...prev, voucher_sub_type: e.target.value }))}
+                          className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                            errors.voucher_sub_type ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                          }`}
+                        >
+                          <option value="Bank Payment">Bank Payment</option>
+                          <option value="Bank Receipt">Bank Receipt</option>
+                        </select>
+                        {errors.voucher_sub_type && (
+                          <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.voucher_sub_type}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                          Bank Account *
+                        </label>
+                        <Select2
+                          options={bankAccounts.map(account => ({
+                            value: account.id,
+                            label: `${account.account_code} - ${account.account_name}`,
+                            subtext: account.account_type
+                          }))}
+                          value={formData.bank_account_id || ''}
+                          onChange={(selectedBankId) => setFormData(prev => ({ ...prev, bank_account_id: selectedBankId }))}
+                          placeholder="Search and select bank account..."
+                          name="bank_account_id"
+                          id="bank_account_id"
+                          error={errors.bank_account_id}
+                        />
+                        {errors.bank_account_id && (
+                          <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.bank_account_id}</p>
                         )}
                       </div>
 
@@ -982,10 +1007,10 @@ const BankVoucherCreate = () => {
               </div>
 
 
-              {/* Journal Entries Section - Full Width */}
+              {/* Bank Detail Entries Section - Full Width */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Journal Entries</h3>
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Bank Detail Entries</h3>
                   <button
                     type="button"
                     onClick={addEntry}
@@ -1009,7 +1034,7 @@ const BankVoucherCreate = () => {
                     <div key={index} className="border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-gray-50 dark:bg-gray-700/50">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300">Entry {index + 1}</h4>
-                        {formData.entries.length > 2 && (
+                        {formData.entries.length > 1 && (
                           <button
                             type="button"
                             onClick={() => removeEntry(index)}
@@ -1028,7 +1053,9 @@ const BankVoucherCreate = () => {
                             Account *
                           </label>
                           <Select2
-                            options={accounts.map(account => ({
+                            options={accounts
+                              .filter(account => parseInt(account.id) !== parseInt(formData.bank_account_id || 0))
+                              .map(account => ({
                               value: account.id,
                               label: `${account.account_code} - ${account.account_name}`,
                               subtext: account.account_type
@@ -1132,15 +1159,15 @@ const BankVoucherCreate = () => {
 
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Debit Amount ({entry.currency_code})
+                            Amount ({entry.currency_code}) *
                           </label>
                           <input
                             type="number"
                             step="0.01"
-                            value={entry.debit_amount || ''}
-                            onChange={(e) => handleAmountInput(index, 'debit_amount', e.target.value)}
-                            onInput={(e) => handleAmountInput(index, 'debit_amount', e.target.value)}
-                            onPaste={(e) => handlePaste(index, 'debit_amount', e)}
+                            value={entry.amount || ''}
+                            onChange={(e) => handleAmountInput(index, 'amount', e.target.value)}
+                            onInput={(e) => handleAmountInput(index, 'amount', e.target.value)}
+                            onPaste={(e) => handlePaste(index, 'amount', e)}
                             onKeyDown={handleKeyDown}
                             onFocus={(e) => e.target.select()}
                             placeholder="0.00"
@@ -1149,37 +1176,52 @@ const BankVoucherCreate = () => {
                               errors[`entries.${index}.amount`] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                             }`}
                           />
-                          {entry.debit_amount && entry.currency_code !== formData.base_currency_code && (
+                          {entry.amount && entry.currency_code !== formData.base_currency_code && (
                             <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                              Base: {entry.base_debit_amount} {formData.base_currency_code}
+                              Base: {entry.base_amount} {formData.base_currency_code}
                             </div>
                           )}
                         </div>
 
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Credit Amount ({entry.currency_code})
+                            Cheque No.
                           </label>
                           <input
-                            type="number"
-                            step="0.01"
-                            value={entry.credit_amount || ''}
-                            onChange={(e) => handleAmountInput(index, 'credit_amount', e.target.value)}
-                            onInput={(e) => handleAmountInput(index, 'credit_amount', e.target.value)}
-                            onPaste={(e) => handlePaste(index, 'credit_amount', e)}
+                            type="text"
+                            value={entry.cheque_number || ''}
+                            onChange={(e) => updateEntry(index, 'cheque_number', e.target.value)}
                             onKeyDown={handleKeyDown}
-                            onFocus={(e) => e.target.select()}
-                            placeholder="0.00"
-                            tabIndex={10 + (index * 6) + 5}
-                            className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                              errors[`entries.${index}.amount`] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                            }`}
+                            placeholder="Cheque number"
+                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                           />
-                          {entry.credit_amount && entry.currency_code !== formData.base_currency_code && (
-                            <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                              Base: {entry.base_credit_amount} {formData.base_currency_code}
-                            </div>
-                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Cheque Date
+                          </label>
+                          <CustomDatePicker
+                            selected={entry.cheque_date ? new Date(entry.cheque_date) : null}
+                            onChange={(date) => updateEntry(index, 'cheque_date', date ? date.toISOString().split('T')[0] : '')}
+                            type="date"
+                            placeholder="Cheque date"
+                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Slip No.
+                          </label>
+                          <input
+                            type="text"
+                            value={entry.slip_number || ''}
+                            onChange={(e) => updateEntry(index, 'slip_number', e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder="Slip number"
+                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                          />
                         </div>
 
                         <div className="md:col-span-4">
@@ -1292,33 +1334,23 @@ const BankVoucherCreate = () => {
                   </h4>
                   <div className="grid grid-cols-3 gap-3 text-center">
                     <div>
-                      <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Total Debit</span>
+                      <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Detail Total</span>
                       <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                        {totalBaseDebit.toFixed(2)} {formData.base_currency_code}
+                        {totalBaseAmount.toFixed(2)} {formData.base_currency_code}
                       </span>
                     </div>
                     <div>
-                      <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Total Credit</span>
+                      <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Voucher Type</span>
                       <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                        {totalBaseCredit.toFixed(2)} {formData.base_currency_code}
+                        {formData.voucher_sub_type}
                       </span>
                     </div>
-                    <div className={`rounded-lg px-2 py-1 ${
-                      isBaseBalanced
-                        ? 'bg-green-100 dark:bg-green-900/30'
-                        : 'bg-red-100 dark:bg-red-900/30'
-                    }`}>
-                      <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Balance</span>
+                    <div className="rounded-lg px-2 py-1 bg-green-100 dark:bg-green-900/30">
+                      <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Auto Bank Contra</span>
                       <div className="flex items-center justify-center gap-1.5">
-                        {isBaseBalanced ? (
-                          <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        ) : (
-                          <X className="h-4 w-4 text-red-600 dark:text-red-400" />
-                        )}
-                        <span className={`text-lg font-bold ${
-                          isBaseBalanced ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                        }`}>
-                          {Math.abs(totalBaseDebit - totalBaseCredit).toFixed(2)}
+                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <span className="text-lg font-bold text-green-600 dark:text-green-400">
+                          {totalBaseAmount.toFixed(2)}
                         </span>
                       </div>
                     </div>
@@ -1330,11 +1362,10 @@ const BankVoucherCreate = () => {
                   const currencyBreakdown = {};
                   formData.entries.forEach(entry => {
                     if (entry.currency_code && !currencyBreakdown[entry.currency_code]) {
-                      currencyBreakdown[entry.currency_code] = { debit: 0, credit: 0 };
+                      currencyBreakdown[entry.currency_code] = { amount: 0 };
                     }
                     if (entry.currency_code) {
-                      currencyBreakdown[entry.currency_code].debit += parseFloat(entry.debit_amount) || 0;
-                      currencyBreakdown[entry.currency_code].credit += parseFloat(entry.credit_amount) || 0;
+                      currencyBreakdown[entry.currency_code].amount += parseFloat(entry.amount) || 0;
                     }
                   });
 
@@ -1345,31 +1376,17 @@ const BankVoucherCreate = () => {
                       </h4>
                       <div className="space-y-2">
                         {Object.entries(currencyBreakdown).map(([currency, amounts]) => (
-                          <div key={currency} className="grid grid-cols-3 gap-3 text-center text-sm">
+                          <div key={currency} className="grid grid-cols-2 gap-3 text-center text-sm">
                             <div>
-                              <span className="block text-xs font-medium text-gray-600 dark:text-gray-400">Debit</span>
+                              <span className="block text-xs font-medium text-gray-600 dark:text-gray-400">Amount</span>
                               <span className="font-semibold text-gray-900 dark:text-gray-100">
-                                {amounts.debit.toFixed(2)} {currency}
+                                {amounts.amount.toFixed(2)} {currency}
                               </span>
                             </div>
-                            <div>
-                              <span className="block text-xs font-medium text-gray-600 dark:text-gray-400">Credit</span>
-                              <span className="font-semibold text-gray-900 dark:text-gray-100">
-                                {amounts.credit.toFixed(2)} {currency}
-                              </span>
-                            </div>
-                            <div className={`rounded px-2 py-1 ${
-                              Math.abs(amounts.debit - amounts.credit) < 0.01 
-                                ? 'bg-green-100 dark:bg-green-900/30' 
-                                : 'bg-red-100 dark:bg-red-900/30'
-                            }`}>
-                              <span className="block text-xs font-medium text-gray-600 dark:text-gray-400">Balance</span>
-                              <span className={`font-semibold ${
-                                Math.abs(amounts.debit - amounts.credit) < 0.01 
-                                  ? 'text-green-600 dark:text-green-400' 
-                                  : 'text-red-600 dark:text-red-400'
-                              }`}>
-                                {Math.abs(amounts.debit - amounts.credit).toFixed(2)}
+                            <div className="rounded px-2 py-1 bg-green-100 dark:bg-green-900/30">
+                              <span className="block text-xs font-medium text-gray-600 dark:text-gray-400">Auto Contra</span>
+                              <span className="font-semibold text-green-600 dark:text-green-400">
+                                {amounts.amount.toFixed(2)}
                               </span>
                             </div>
                           </div>
@@ -1390,7 +1407,7 @@ const BankVoucherCreate = () => {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => router.visit('/accounts/journal-voucher')}
+                    onClick={() => router.visit('/accounts/bank-voucher')}
                     className="flex items-center gap-1.5 px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors"
                     tabIndex={-1}
                   >
@@ -1399,7 +1416,7 @@ const BankVoucherCreate = () => {
                   </button>
                   <button
                     type="submit"
-                    disabled={isSubmitting || !isBalanced}
+                    disabled={isSubmitting || !isReadyToSubmit}
                     className="flex items-center gap-1.5 px-6 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? (

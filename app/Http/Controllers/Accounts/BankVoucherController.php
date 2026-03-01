@@ -10,6 +10,7 @@ use App\Helpers\FiscalYearHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 
 class BankVoucherController extends Controller
@@ -26,7 +27,8 @@ class BankVoucherController extends Controller
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
         if (!$compId || !$locationId) {
-            return Inertia::render('Accounts/BankVoucher/List', [
+            return Inertia::render('Accounts/BankRec/List', [
+                'pageTitle' => 'Bank Vouchers',
                 'BankVouchers' => [
                     'data' => [],
                     'total' => 0,
@@ -54,7 +56,7 @@ class BankVoucherController extends Controller
         $query = DB::table('transactions')
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->where('voucher_type', 'Journal');
+            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt']);
 
         // Apply search filter
         if ($search) {
@@ -90,7 +92,8 @@ class BankVoucherController extends Controller
         // Get current fiscal year
         $currentFiscalYear = FiscalYearHelper::getCurrentFiscalYear($compId);
 
-        return Inertia::render('Accounts/BankVoucher/List', [
+        return Inertia::render('Accounts/BankRec/List', [
+            'pageTitle' => 'Bank Vouchers',
             'BankVouchers' => $BankVouchers,
             'accounts' => $accounts,
             'fiscalYear' => $currentFiscalYear,
@@ -117,8 +120,10 @@ class BankVoucherController extends Controller
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
         if (!$compId || !$locationId) {
-            return Inertia::render('Accounts/BankVoucher/Create', [
+            return Inertia::render('Accounts/BankRec/Create', [
+                'pageTitle' => 'Create Bank Voucher',
                 'accounts' => [],
+                'bankAccounts' => [],
                 'currencies' => [],
                 'company' => null,
                 'error' => 'Company and Location information is required. Please contact administrator.'
@@ -142,9 +147,10 @@ class BankVoucherController extends Controller
             });
 
         $accounts = $this->getTransactionalAccounts($compId, $locationId);
+        $bankAccounts = $this->getBankAccounts($compId, $locationId);
 
         // Generate preview voucher number for display
-        $previewVoucherNumber = $this->generatePreviewVoucherNumber($compId, $locationId, 'Journal');
+        $previewVoucherNumber = $this->generatePreviewVoucherNumber($compId, $locationId, 'Bank Payment');
         
         // Get current fiscal year
         $currentFiscalYear = FiscalYearHelper::getCurrentFiscalYear($compId);
@@ -166,8 +172,10 @@ class BankVoucherController extends Controller
             ];
         }
 
-        return Inertia::render('Accounts/BankVoucher/Create', [
+        return Inertia::render('Accounts/BankRec/Create', [
+            'pageTitle' => 'Create Bank Voucher',
             'accounts' => $accounts,
+            'bankAccounts' => $bankAccounts,
             'currencies' => $currencies,
             'company' => $company,
             'fiscalYear' => $currentFiscalYear,
@@ -204,15 +212,19 @@ class BankVoucherController extends Controller
             // Validate request
             $validated = $request->validate([
             'voucher_date' => 'required|date',
+            'voucher_sub_type' => 'required|in:Bank Payment,Bank Receipt',
+            'bank_account_id' => 'required|integer|exists:chart_of_accounts,id,account_level,4',
             'description' => 'nullable|string|max:250',
             'reference_number' => 'nullable|string|max:100',
-            'entries' => 'required|array|min:2',
+            'entries' => 'required|array|min:1',
             'entries.*.account_id' => 'required|integer|exists:chart_of_accounts,id,account_level,4',
             'entries.*.description' => 'nullable|string|max:500',
-            'entries.*.debit_amount' => 'nullable|numeric|min:0',
-            'entries.*.credit_amount' => 'nullable|numeric|min:0',
+            'entries.*.amount' => 'required|numeric|min:0.01',
             'entries.*.currency_code' => 'required|string|max:3',
             'entries.*.exchange_rate' => 'required|numeric|min:0.000001',
+            'entries.*.cheque_number' => 'nullable|string|max:100',
+            'entries.*.cheque_date' => 'nullable|date',
+            'entries.*.slip_number' => 'nullable|string|max:100',
             'entries.*.attachment_id' => 'nullable|string',
             'attachments' => 'nullable|array',
             'attachments.*' => 'nullable|string'
@@ -231,26 +243,41 @@ class BankVoucherController extends Controller
             return redirect()->back()->withErrors($e->errors())->withInput();
         }
 
-        // Always auto-generate voucher number for Journal Vouchers
+        // Always auto-generate voucher number for Bank Vouchers
         $company = DB::table('companies')->where('id', $compId)->first();
+        $bankAccount = DB::table('chart_of_accounts')
+            ->where('id', $request->bank_account_id)
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('status', 'Active')
+            ->where('account_level', 4)
+            ->where('is_transactional', true)
+            ->first();
+
+        if (!$bankAccount) {
+            return redirect()->back()->withErrors(['bank_account_id' => 'Selected bank account is invalid.']);
+        }
 
         // Validate double entry principle in base currency
         $totalBaseDebit = 0;
         $totalBaseCredit = 0;
         
         foreach ($request->entries as $entry) {
-            $debit = $entry['debit_amount'] ?? 0;
-            $credit = $entry['credit_amount'] ?? 0;
+            if ((int) $entry['account_id'] === (int) $request->bank_account_id) {
+                return redirect()->back()->withErrors(['entries' => 'Detail account cannot be same as selected bank account']);
+            }
+
+            $amount = (float) ($entry['amount'] ?? 0);
             $exchangeRate = $entry['exchange_rate'] ?? 1.0;
-            
-            if ($debit > 0 && $credit > 0) {
-                return redirect()->back()->withErrors(['entries' => 'Each entry must be either debit or credit, not both']);
+
+            if ($amount <= 0) {
+                return redirect()->back()->withErrors(['entries' => 'Each entry must have amount greater than zero']);
             }
-            
-            if ($debit == 0 && $credit == 0) {
-                return redirect()->back()->withErrors(['entries' => 'Each entry must have either debit or credit amount']);
-            }
-            
+
+            $isBankPayment = $request->voucher_sub_type === 'Bank Payment';
+            $debit = $isBankPayment ? $amount : 0;
+            $credit = $isBankPayment ? 0 : $amount;
+
             // Convert to base currency
             // Exchange rate is stored as base_currency/foreign_currency, so we need to invert it
             $baseDebit = $debit * (1 / $exchangeRate);
@@ -260,12 +287,8 @@ class BankVoucherController extends Controller
             $totalBaseCredit += $baseCredit;
         }
         
-        if (abs($totalBaseDebit - $totalBaseCredit) > 0.01) {
-            return redirect()->back()->withErrors(['entries' => 'Total debits must equal total credits in base currency (Double Entry Principle)']);
-        }
-
         // Auto-generate voucher number
-        $voucherNumber = $this->generateVoucherNumber($compId, $locationId, 'Journal');
+        $voucherNumber = $this->generateVoucherNumber($compId, $locationId, $request->voucher_sub_type);
         
         // Get fiscal year and period from voucher date
         $fiscalYear = FiscalYearHelper::getFiscalYear($request->voucher_date, $compId);
@@ -306,7 +329,9 @@ class BankVoucherController extends Controller
             $transactionId = DB::table('transactions')->insertGetId([
                 'voucher_number' => $voucherNumber,
                 'voucher_date' => $request->voucher_date,
-                'voucher_type' => 'Journal',
+                'voucher_type' => $request->voucher_sub_type,
+                'voucher_sub_type' => $request->voucher_sub_type,
+                'bank_account_id' => $request->bank_account_id,
                 'reference_number' => $request->reference_number,
                 'description' => $request->description,
                 'status' => 'Draft',
@@ -329,9 +354,15 @@ class BankVoucherController extends Controller
 
             // Create transaction entries
             Log::info('Creating transaction entries...', ['entries_count' => count($request->entries)]);
+            $lineNumber = 1;
+            $bankDebitTotal = 0;
+            $bankCreditTotal = 0;
+
             foreach ($request->entries as $index => $entry) {
-                $debit = $entry['debit_amount'] ?? 0;
-                $credit = $entry['credit_amount'] ?? 0;
+                $amount = (float) ($entry['amount'] ?? 0);
+                $isBankPayment = $request->voucher_sub_type === 'Bank Payment';
+                $debit = $isBankPayment ? $amount : 0;
+                $credit = $isBankPayment ? 0 : $amount;
                 $exchangeRate = $entry['exchange_rate'] ?? 1.0;
                 
                 // Calculate base currency amounts
@@ -351,7 +382,7 @@ class BankVoucherController extends Controller
                 
                 DB::table('transaction_entries')->insert([
                     'transaction_id' => $transactionId,
-                    'line_number' => $index + 1,
+                    'line_number' => $lineNumber,
                     'account_id' => $entry['account_id'],
                     'description' => $entry['description'],
                     'debit_amount' => $debit,
@@ -360,15 +391,49 @@ class BankVoucherController extends Controller
                     'exchange_rate' => $exchangeRate,
                     'base_debit_amount' => $baseDebit,
                     'base_credit_amount' => $baseCredit,
+                    'cheque_number' => $entry['cheque_number'] ?? null,
+                    'cheque_date' => $entry['cheque_date'] ?? null,
+                    'slip_number' => $entry['slip_number'] ?? null,
                     'attachment_id' => $entry['attachment_id'] ?? null,
                     'comp_id' => $compId,
                     'location_id' => $locationId,
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
+
+                $lineNumber++;
+                $bankDebitTotal += $baseDebit;
+                $bankCreditTotal += $baseCredit;
                 
                 Log::info("Entry $index created successfully");
             }
+
+            // Auto contra bank entry (single bank line)
+            DB::table('transaction_entries')->insert([
+                'transaction_id' => $transactionId,
+                'line_number' => $lineNumber,
+                'account_id' => $request->bank_account_id,
+                'description' => 'Auto contra bank entry',
+                'debit_amount' => $bankCreditTotal,
+                'credit_amount' => $bankDebitTotal,
+                'currency_code' => $company->default_currency_code ?? 'PKR',
+                'exchange_rate' => 1,
+                'base_debit_amount' => $bankCreditTotal,
+                'base_credit_amount' => $bankDebitTotal,
+                'comp_id' => $compId,
+                'location_id' => $locationId,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            DB::table('transactions')
+                ->where('id', $transactionId)
+                ->update([
+                    'total_debit' => $bankDebitTotal,
+                    'total_credit' => $bankDebitTotal,
+                    'base_currency_total' => $bankDebitTotal,
+                    'updated_at' => now(),
+                ]);
 
             Log::info('All entries created, committing transaction...');
             DB::commit();
@@ -386,7 +451,7 @@ class BankVoucherController extends Controller
                 $voucherData = [
                     'voucher_number' => $voucherNumber,
                     'voucher_date' => $request->voucher_date,
-                    'voucher_type' => 'Journal',
+                    'voucher_type' => $request->voucher_sub_type,
                     'reference_number' => $request->reference_number,
                     'description' => $request->description,
                     'status' => 'Draft',
@@ -409,8 +474,8 @@ class BankVoucherController extends Controller
             }
 
 
-            return redirect()->route('accounts.journal-voucher.index')
-                           ->with('success', 'Journal voucher created successfully!');
+            return redirect()->route('accounts.bank-voucher.index')
+                           ->with('success', 'Bank voucher created successfully!');
 
         } catch (\Illuminate\Database\QueryException $e) {
             DB::rollback();
@@ -459,7 +524,8 @@ class BankVoucherController extends Controller
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
         if (!$compId || !$locationId) {
-            return Inertia::render('Accounts/BankVoucher/Show', [
+            return Inertia::render('Accounts/BankRec/Show', [
+                'pageTitle' => 'Bank Voucher Details',
                 'voucher' => null,
                 'entries' => [],
                 'error' => 'Company and Location information is required. Please contact administrator.'
@@ -470,7 +536,7 @@ class BankVoucherController extends Controller
             ->where('id', $id)
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->where('voucher_type', 'Journal')
+            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
             ->first();
 
         if (!$voucher) {
@@ -489,7 +555,8 @@ class BankVoucherController extends Controller
             ->orderBy('transaction_entries.line_number')
             ->get();
 
-        return Inertia::render('Accounts/BankVoucher/Show', [
+        return Inertia::render('Accounts/BankRec/Show', [
+            'pageTitle' => 'Bank Voucher Details',
             'voucher' => $voucher,
             'entries' => $entries,
             'currentPeriod' => $this->getPeriodInfoForDate($voucher->voucher_date, $compId)
@@ -507,8 +574,10 @@ class BankVoucherController extends Controller
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
         if (!$compId || !$locationId) {
-            return Inertia::render('Accounts/BankVoucher/Create', [
+            return Inertia::render('Accounts/BankRec/Create', [
+                'pageTitle' => 'Edit Bank Voucher',
                 'accounts' => [],
+                'bankAccounts' => [],
                 'voucher' => null,
                 'entries' => [],
                 'error' => 'Company and Location information is required. Please contact administrator.'
@@ -519,7 +588,7 @@ class BankVoucherController extends Controller
             ->where('id', $id)
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->where('voucher_type', 'Journal')
+            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
             ->first();
 
         if (!$voucher) {
@@ -527,16 +596,18 @@ class BankVoucherController extends Controller
         }
 
         if ($voucher->status !== 'Draft') {
-            return redirect()->route('accounts.journal-voucher.index')
+            return redirect()->route('accounts.bank-voucher.index')
                 ->with('error', 'Only draft vouchers can be edited');
         }
 
         $entries = DB::table('transaction_entries')
             ->where('transaction_id', $id)
+            ->where('account_id', '!=', $voucher->bank_account_id)
             ->orderBy('line_number')
             ->get();
 
         $accounts = $this->getTransactionalAccounts($compId, $locationId);
+        $bankAccounts = $this->getBankAccounts($compId, $locationId);
 
         // Load attachments
         $attachments = [];
@@ -653,10 +724,12 @@ class BankVoucherController extends Controller
                 ];
             });
 
-        return Inertia::render('Accounts/BankVoucher/Create', [
+        return Inertia::render('Accounts/BankRec/Create', [
+            'pageTitle' => 'Edit Bank Voucher',
             'voucher' => $voucher,
             'entries' => $entries,
             'accounts' => $accounts,
+            'bankAccounts' => $bankAccounts,
             'currencies' => $currencies,
             'company' => $company,
             'attachments' => $attachments,
@@ -681,15 +754,19 @@ class BankVoucherController extends Controller
         // Validate request
         $validated = $request->validate([
             'voucher_date' => 'required|date',
+            'voucher_sub_type' => 'required|in:Bank Payment,Bank Receipt',
+            'bank_account_id' => 'required|integer|exists:chart_of_accounts,id,account_level,4',
             'description' => 'nullable|string|max:250',
             'reference_number' => 'nullable|string|max:100',
-            'entries' => 'required|array|min:2',
+            'entries' => 'required|array|min:1',
             'entries.*.account_id' => 'required|integer|exists:chart_of_accounts,id,account_level,4',
             'entries.*.description' => 'nullable|string|max:500',
-            'entries.*.debit_amount' => 'nullable|numeric|min:0',
-            'entries.*.credit_amount' => 'nullable|numeric|min:0',
+            'entries.*.amount' => 'required|numeric|min:0.01',
             'entries.*.currency_code' => 'required|string|max:3',
             'entries.*.exchange_rate' => 'required|numeric|min:0.000001',
+            'entries.*.cheque_number' => 'nullable|string|max:100',
+            'entries.*.cheque_date' => 'nullable|date',
+            'entries.*.slip_number' => 'nullable|string|max:100',
             'entries.*.attachment_id' => 'nullable|string',
             'attachments' => 'nullable|array',
             'attachments.*' => 'nullable|string'
@@ -700,7 +777,7 @@ class BankVoucherController extends Controller
             ->where('id', $id)
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->where('voucher_type', 'Journal')
+            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
             ->first();
 
         if (!$voucher) {
@@ -732,17 +809,20 @@ class BankVoucherController extends Controller
         $totalBaseCredit = 0;
         
         foreach ($request->entries as $entry) {
-            $debit = $entry['debit_amount'] ?? 0;
-            $credit = $entry['credit_amount'] ?? 0;
+            if ((int) $entry['account_id'] === (int) $request->bank_account_id) {
+                return redirect()->back()->withErrors(['entries' => 'Detail account cannot be same as selected bank account']);
+            }
+
+            $amount = (float) ($entry['amount'] ?? 0);
             $exchangeRate = $entry['exchange_rate'] ?? 1.0;
-            
-            if ($debit > 0 && $credit > 0) {
-                return redirect()->back()->withErrors(['entries' => 'Each entry must be either debit or credit, not both']);
+
+            if ($amount <= 0) {
+                return redirect()->back()->withErrors(['entries' => 'Each entry must have amount greater than zero']);
             }
-            
-            if ($debit == 0 && $credit == 0) {
-                return redirect()->back()->withErrors(['entries' => 'Each entry must have either debit or credit amount']);
-            }
+
+            $isBankPayment = $request->voucher_sub_type === 'Bank Payment';
+            $debit = $isBankPayment ? $amount : 0;
+            $credit = $isBankPayment ? 0 : $amount;
             
             // Convert to base currency
             // Exchange rate is stored as base_currency/foreign_currency, so we need to invert it
@@ -753,10 +833,6 @@ class BankVoucherController extends Controller
             $totalBaseCredit += $baseCredit;
         }
         
-        if (abs($totalBaseDebit - $totalBaseCredit) > 0.01) {
-            return redirect()->back()->withErrors(['entries' => 'Total debits must equal total credits in base currency (Double Entry Principle)']);
-        }
-
         // Get company for base currency
         $company = DB::table('companies')->where('id', $compId)->first();
 
@@ -768,13 +844,16 @@ class BankVoucherController extends Controller
                 ->where('id', $id)
                 ->update([
                     'voucher_date' => $request->voucher_date,
+                    'voucher_type' => $request->voucher_sub_type,
+                    'voucher_sub_type' => $request->voucher_sub_type,
+                    'bank_account_id' => $request->bank_account_id,
                     'reference_number' => $request->reference_number,
                     'description' => $request->description,
-                    'total_debit' => $totalBaseDebit,
-                    'total_credit' => $totalBaseCredit,
+                    'total_debit' => 0,
+                    'total_credit' => 0,
                     'currency_code' => $company->default_currency_code ?? 'PKR',
                     'exchange_rate' => 1.0,
-                    'base_currency_total' => $totalBaseDebit,
+                    'base_currency_total' => 0,
                     'attachments' => json_encode($request->attachments ?? []),
                     'updated_at' => now()
                 ]);
@@ -785,9 +864,14 @@ class BankVoucherController extends Controller
                 ->delete();
 
             // Create new transaction entries
+            $lineNumber = 1;
+            $bankDebitTotal = 0;
+            $bankCreditTotal = 0;
             foreach ($request->entries as $index => $entry) {
-                $debit = $entry['debit_amount'] ?? 0;
-                $credit = $entry['credit_amount'] ?? 0;
+                $amount = (float) ($entry['amount'] ?? 0);
+                $isBankPayment = $request->voucher_sub_type === 'Bank Payment';
+                $debit = $isBankPayment ? $amount : 0;
+                $credit = $isBankPayment ? 0 : $amount;
                 $exchangeRate = $entry['exchange_rate'] ?? 1.0;
                 
                 // Calculate base currency amounts
@@ -797,7 +881,7 @@ class BankVoucherController extends Controller
                 
                 DB::table('transaction_entries')->insert([
                     'transaction_id' => $id,
-                    'line_number' => $index + 1,
+                    'line_number' => $lineNumber,
                     'account_id' => $entry['account_id'],
                     'description' => $entry['description'],
                     'debit_amount' => $debit,
@@ -806,13 +890,46 @@ class BankVoucherController extends Controller
                     'exchange_rate' => $exchangeRate,
                     'base_debit_amount' => $baseDebit,
                     'base_credit_amount' => $baseCredit,
+                    'cheque_number' => $entry['cheque_number'] ?? null,
+                    'cheque_date' => $entry['cheque_date'] ?? null,
+                    'slip_number' => $entry['slip_number'] ?? null,
                     'attachment_id' => $entry['attachment_id'] ?? null,
                     'comp_id' => $compId,
                     'location_id' => $locationId,
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
+
+                $lineNumber++;
+                $bankDebitTotal += $baseDebit;
+                $bankCreditTotal += $baseCredit;
             }
+
+            DB::table('transaction_entries')->insert([
+                'transaction_id' => $id,
+                'line_number' => $lineNumber,
+                'account_id' => $request->bank_account_id,
+                'description' => 'Auto contra bank entry',
+                'debit_amount' => $bankCreditTotal,
+                'credit_amount' => $bankDebitTotal,
+                'currency_code' => $company->default_currency_code ?? 'PKR',
+                'exchange_rate' => 1,
+                'base_debit_amount' => $bankCreditTotal,
+                'base_credit_amount' => $bankDebitTotal,
+                'comp_id' => $compId,
+                'location_id' => $locationId,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            DB::table('transactions')
+                ->where('id', $id)
+                ->update([
+                    'total_debit' => $bankDebitTotal,
+                    'total_credit' => $bankDebitTotal,
+                    'base_currency_total' => $bankDebitTotal,
+                    'updated_at' => now(),
+                ]);
 
             DB::commit();
 
@@ -821,7 +938,7 @@ class BankVoucherController extends Controller
                 $voucherData = [
                     'voucher_number' => $voucher->voucher_number,
                     'voucher_date' => $request->voucher_date,
-                    'voucher_type' => 'Journal',
+                    'voucher_type' => $request->voucher_sub_type,
                     'reference_number' => $request->reference_number,
                     'description' => $request->description,
                     'status' => 'Draft',
@@ -851,8 +968,8 @@ class BankVoucherController extends Controller
             }
 
 
-            return redirect()->route('accounts.journal-voucher.index')
-                           ->with('success', 'Journal voucher updated successfully!');
+            return redirect()->route('accounts.bank-voucher.index')
+                           ->with('success', 'Bank voucher updated successfully!');
 
         } catch (\Illuminate\Database\QueryException $e) {
             DB::rollback();
@@ -905,6 +1022,90 @@ class BankVoucherController extends Controller
             ->where('is_transactional', true) // Additional check for transactional accounts
             ->orderBy('account_code')
             ->get();
+    }
+
+    private function getBankAccounts($compId, $locationId)
+    {
+        $bankCodes = [];
+        $parentAccountIds = [];
+
+        $sourceTable = null;
+        if (Schema::hasTable('account_configuration')) {
+            $sourceTable = 'account_configuration';
+        } elseif (Schema::hasTable('account_configurations')) {
+            $sourceTable = 'account_configurations';
+        }
+
+        if ($sourceTable) {
+            $configQuery = DB::table($sourceTable);
+
+            if (Schema::hasColumn($sourceTable, 'comp_id')) {
+                $configQuery->where('comp_id', $compId);
+            } elseif (Schema::hasColumn($sourceTable, 'company_id')) {
+                $configQuery->where('company_id', $compId);
+            }
+
+            if (Schema::hasColumn($sourceTable, 'location_id')) {
+                $configQuery->where('location_id', $locationId);
+            }
+
+            if (Schema::hasColumn($sourceTable, 'is_active')) {
+                $configQuery->where('is_active', true);
+            }
+
+            if ($sourceTable === 'account_configurations' && Schema::hasColumn($sourceTable, 'config_type')) {
+                $configQuery->where('config_type', 'bank');
+            }
+
+            $configRows = $configQuery->get();
+
+            foreach ($configRows as $config) {
+                if (isset($config->bank_code) && !empty($config->bank_code)) {
+                    $bankCodes[] = trim((string) $config->bank_code);
+                }
+
+                if (isset($config->account_code) && !empty($config->account_code)) {
+                    $bankCodes[] = trim((string) $config->account_code);
+                }
+
+                if (isset($config->bank_account_id) && !empty($config->bank_account_id)) {
+                    $parentAccountIds[] = (int) $config->bank_account_id;
+                }
+
+                if (isset($config->account_id) && !empty($config->account_id)) {
+                    $parentAccountIds[] = (int) $config->account_id;
+                }
+            }
+        }
+
+        $bankCodes = array_values(array_unique(array_filter($bankCodes)));
+        $parentAccountIds = array_values(array_unique(array_filter($parentAccountIds)));
+
+        $query = DB::table('chart_of_accounts')
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('status', 'Active')
+            ->where('account_level', 4)
+            ->where('is_transactional', true)
+            ->whereIn(DB::raw('LOWER(account_type)'), ['asset', 'assets']);
+
+        if (!empty($bankCodes) || !empty($parentAccountIds)) {
+            $query->where(function ($childQuery) use ($bankCodes, $parentAccountIds) {
+                foreach ($bankCodes as $bankCode) {
+                    $escapedCode = addcslashes($bankCode, '%_');
+                    $childQuery->orWhere('account_code', 'like', $escapedCode . '%');
+                }
+
+                if (!empty($parentAccountIds)) {
+                    $childQuery->orWhereIn('parent_account_id', $parentAccountIds)
+                               ->orWhereIn('id', $parentAccountIds);
+                }
+            });
+        } else {
+            $query->whereRaw('1 = 0');
+        }
+
+        return $query->orderBy('account_code')->get();
     }
 
     /**
@@ -1040,7 +1241,7 @@ class BankVoucherController extends Controller
         $query = DB::table('transactions')
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->where('voucher_type', 'Journal');
+            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt']);
 
         // Apply search filter
         if ($search) {
@@ -1070,7 +1271,7 @@ class BankVoucherController extends Controller
 
         $vouchers = $query->get();
 
-        $filename = 'journal_vouchers_' . date('Y-m-d_His') . '.csv';
+        $filename = 'bank_vouchers_' . date('Y-m-d_His') . '.csv';
         
         $headers = [
             'Content-Type' => 'text/csv',
@@ -1124,7 +1325,7 @@ class BankVoucherController extends Controller
         $query = DB::table('transactions')
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->where('voucher_type', 'Journal');
+            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt']);
 
         // Apply search filter
         if ($search) {
@@ -1155,7 +1356,7 @@ class BankVoucherController extends Controller
         $vouchers = $query->get();
 
         // For now, use CSV format but with .xlsx extension (can be enhanced with PhpSpreadsheet later)
-        $filename = 'journal_vouchers_' . date('Y-m-d_His') . '.xlsx';
+        $filename = 'bank_vouchers_' . date('Y-m-d_His') . '.xlsx';
         
         $headers = [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -1216,7 +1417,7 @@ class BankVoucherController extends Controller
         $query = DB::table('transactions')
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->where('voucher_type', 'Journal');
+            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt']);
 
         // Apply search filter
         if ($search) {
@@ -1254,7 +1455,7 @@ class BankVoucherController extends Controller
             th { background-color: #4CAF50; color: white; }
         </style></head><body>';
         
-        $html .= '<h1>Journal Vouchers Report</h1>';
+        $html .= '<h1>Bank Vouchers Report</h1>';
         $html .= '<table><tr><th>ID</th><th>Voucher Number</th><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Status</th></tr>';
         
         foreach ($vouchers as $voucher) {
@@ -1273,7 +1474,7 @@ class BankVoucherController extends Controller
 
         return response($html)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="journal_vouchers_' . date('Y-m-d_His') . '.pdf"');
+            ->header('Content-Disposition', 'attachment; filename="bank_vouchers_' . date('Y-m-d_His') . '.pdf"');
     }
 
     /**
@@ -1293,7 +1494,7 @@ class BankVoucherController extends Controller
                 ->where('id', $id)
                 ->where('comp_id', $compId)
                 ->where('location_id', $locationId)
-                ->where('voucher_type', 'Journal')
+                ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
                 ->first();
 
             if (!$voucher) {
@@ -1319,7 +1520,7 @@ class BankVoucherController extends Controller
                 $voucherData = [
                     'voucher_number' => $voucher->voucher_number,
                     'voucher_date' => $voucher->voucher_date,
-                    'voucher_type' => 'Journal',
+                    'voucher_type' => $voucher->voucher_type,
                     'reference_number' => $voucher->reference_number,
                     'description' => $voucher->description,
                     'status' => 'Posted',
@@ -1348,8 +1549,8 @@ class BankVoucherController extends Controller
                 ]);
             }
 
-            return redirect()->route('accounts.journal-voucher.index')
-                           ->with('success', "Journal voucher {$voucher->voucher_number} posted successfully!");
+            return redirect()->route('accounts.bank-voucher.index')
+                           ->with('success', "Bank voucher {$voucher->voucher_number} posted successfully!");
 
         } catch (\Exception $e) {
             Log::error('Error posting journal voucher', [
@@ -1388,7 +1589,7 @@ class BankVoucherController extends Controller
                     ->where('id', $voucherId)
                     ->where('comp_id', $compId)
                     ->where('location_id', $locationId)
-                    ->where('voucher_type', 'Journal')
+                    ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
                     ->first();
 
                 if (!$voucher) {
@@ -1453,7 +1654,7 @@ class BankVoucherController extends Controller
             ->where('id', $id)
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->where('voucher_type', 'Journal')
+            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
             ->first();
 
         if (!$voucher) {
@@ -1474,7 +1675,8 @@ class BankVoucherController extends Controller
 
         $company = DB::table('companies')->where('id', $compId)->first();
 
-        return Inertia::render('Accounts/BankVoucher/PrintSummary', [
+        return Inertia::render('Accounts/BankRec/PrintSummary', [
+            'pageTitle' => 'Bank Voucher Print Summary',
             'voucher' => $voucher,
             'entries' => $entries,
             'company' => $company
@@ -1497,7 +1699,7 @@ class BankVoucherController extends Controller
             ->where('id', $id)
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->where('voucher_type', 'Journal')
+            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
             ->first();
 
         if (!$voucher) {
@@ -1518,7 +1720,8 @@ class BankVoucherController extends Controller
 
         $company = DB::table('companies')->where('id', $compId)->first();
 
-        return Inertia::render('Accounts/BankVoucher/PrintDetailed', [
+        return Inertia::render('Accounts/BankRec/PrintDetailed', [
+            'pageTitle' => 'Bank Voucher Print Detailed',
             'voucher' => $voucher,
             'entries' => $entries,
             'company' => $company
@@ -1560,7 +1763,7 @@ class BankVoucherController extends Controller
                 ->where('id', $id)
                 ->where('comp_id', $compId)
                 ->where('location_id', $locationId)
-                ->where('voucher_type', 'Journal')
+                ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
                 ->first();
 
             if (!$voucher) {
@@ -1701,8 +1904,8 @@ class BankVoucherController extends Controller
             }
 
 
-            return redirect()->route('accounts.journal-voucher.index')
-                           ->with('success', "Journal voucher {$voucherNumber} deleted successfully!");
+            return redirect()->route('accounts.bank-voucher.index')
+                           ->with('success', "Bank voucher {$voucherNumber} deleted successfully!");
 
         } catch (\Illuminate\Database\QueryException $e) {
             DB::rollback();

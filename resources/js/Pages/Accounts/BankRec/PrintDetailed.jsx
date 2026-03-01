@@ -37,7 +37,7 @@ const PrintDetailed = () => {
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Journal Voucher Detailed - {voucher?.voucher_number}</title>
+        <title>Bank Voucher Detailed - {voucher?.voucher_number}</title>
         <style>{`
           @page {
             size: A4;
@@ -367,7 +367,7 @@ const PrintDetailed = () => {
               {company?.email && <div>Email: {company.email} {company?.website && `| Web: ${company.website}`}</div>}
               {company?.tax_number && <div>Tax ID: {company.tax_number}</div>}
             </div>
-            <div className="voucher-title">Journal Voucher - Detailed Report</div>
+            <div className="voucher-title">Bank Voucher - Detailed Report</div>
           </div>
 
           {/* Voucher Information Grid */}
