@@ -98,16 +98,22 @@ class AccountsDashboardController extends Controller
         $yearStart = "{$currentYear}-01-01";
         $yearEnd = "{$currentYear}-12-31";
 
-        // Total Revenue (Credit entries in Revenue accounts - typically Level 1 account_code = 4)
+        // Total Revenue (Credit entries in Revenue accounts configured in account_configurations)
         // Revenue accounts have normal credit balance
         $totalRevenue = DB::table('transaction_entries as te')
             ->join('transactions as t', 'te.transaction_id', '=', 't.id')
             ->join('chart_of_accounts as coa', 'te.account_id', '=', 'coa.id')
+            ->join('account_configurations as ac', function($join) {
+                $join->on('coa.id', '=', 'ac.account_id');
+            })
             ->where('t.comp_id', $compId)
             ->where('t.location_id', $locationId)
+            ->where('ac.comp_id', $compId)
+            ->where('ac.location_id', $locationId)
+            ->where('ac.is_active', true)
+            ->whereIn('ac.config_type', ['sales', 'service_income', 'other_income'])
             ->where('t.status', 'Posted')
             ->whereBetween('t.voucher_date', [$yearStart, $yearEnd])
-            ->where('coa.account_code', 'LIKE', '4%') // Revenue accounts
             ->sum(DB::raw('te.credit_amount - te.debit_amount'));
 
         // Outstanding Invoices (Draft/Pending transactions)
@@ -127,15 +133,21 @@ class AccountsDashboardController extends Controller
             ->sum('total_debit');
 
         // Calculate Profit Margin
-        // Total Expenses (Debit entries in Expense accounts - typically Level 1 account_code = 5)
+        // Total Expenses (Debit entries in Expense accounts configured in account_configurations)
         $totalExpenses = DB::table('transaction_entries as te')
             ->join('transactions as t', 'te.transaction_id', '=', 't.id')
             ->join('chart_of_accounts as coa', 'te.account_id', '=', 'coa.id')
+            ->join('account_configurations as ac', function($join) {
+                $join->on('coa.id', '=', 'ac.account_id');
+            })
             ->where('t.comp_id', $compId)
             ->where('t.location_id', $locationId)
+            ->where('ac.comp_id', $compId)
+            ->where('ac.location_id', $locationId)
+            ->where('ac.is_active', true)
+            ->whereIn('ac.config_type', ['purchase', 'cost_of_goods_sold', 'salary_expense', 'rent_expense', 'utility_expense', 'depreciation_expense', 'interest_expense', 'other_expense'])
             ->where('t.status', 'Posted')
             ->whereBetween('t.voucher_date', [$yearStart, $yearEnd])
-            ->where('coa.account_code', 'LIKE', '5%') // Expense accounts
             ->sum(DB::raw('te.debit_amount - te.credit_amount'));
 
         // Calculate profit and margin
@@ -432,54 +444,79 @@ class AccountsDashboardController extends Controller
 
     /**
      * Account list by dashboard report type
+     * Uses account_configurations table for explicit account-to-function mapping
      */
     private function getAccountsByDashboardType(string $reportType, $compId, $locationId, $fromDate = null, $toDate = null)
     {
-        $query = $this->buildLevel4BalanceQuery($compId, $locationId, $fromDate, $toDate);
+        // Map report types to config_type(s)
+        $configTypeMap = [
+            'main-payable' => ['accounts_payable'],
+            'main-receivable' => ['accounts_receivable'],
+            'current-cash' => ['cash', 'petty_cash'],
+            'all-cash-codes' => ['cash', 'petty_cash', 'bank'],
+            'bank-balances' => ['bank'],
+        ];
 
-        $hasAny = function ($column, array $keywords) {
-            return function ($q) use ($column, $keywords) {
-                foreach ($keywords as $index => $keyword) {
-                    $method = $index === 0 ? 'whereRaw' : 'orWhereRaw';
-                    $q->{$method}("LOWER({$column}) LIKE ?", ['%' . strtolower($keyword) . '%']);
-                }
-            };
-        };
-
-        switch ($reportType) {
-            case 'main-payable':
-                $query->whereIn('coa.account_type', ['Liability', 'Liabilities'])
-                    ->where($hasAny('coa.account_name', ['payable', 'creditor', 'vendor payable', 'accounts payable']));
-                break;
-
-            case 'main-receivable':
-                $query->whereIn('coa.account_type', ['Asset', 'Assets'])
-                    ->where($hasAny('coa.account_name', ['receivable', 'debtor', 'accounts receivable', 'customer receivable']));
-                break;
-
-            case 'current-cash':
-                $query->whereIn('coa.account_type', ['Asset', 'Assets'])
-                    ->where($hasAny('coa.account_name', ['current cash', 'cash in hand', 'petty cash']))
-                    ->whereRaw('LOWER(coa.account_name) NOT LIKE ?', ['%bank%']);
-                break;
-
-            case 'all-cash-codes':
-                $query->whereIn('coa.account_type', ['Asset', 'Assets'])
-                    ->where($hasAny('coa.account_name', ['cash']))
-                    ->whereRaw('LOWER(coa.account_name) NOT LIKE ?', ['%bank%']);
-                break;
-
-            case 'bank-balances':
-                $query->whereIn('coa.account_type', ['Asset', 'Assets'])
-                    ->where($hasAny('coa.account_name', ['bank']));
-                break;
-
-            default:
-                $query->whereRaw('1 = 0');
-                break;
+        if (!array_key_exists($reportType, $configTypeMap)) {
+            // Return empty result for invalid report type
+            return DB::table('chart_of_accounts as coa')
+                ->where('coa.comp_id', $compId)
+                ->where('coa.location_id', $locationId)
+                ->whereRaw('1 = 0');
         }
 
-        return $query;
+        $configTypes = $configTypeMap[$reportType];
+
+        // Build query using account_configurations table
+        $openingBalanceExpression = Schema::hasColumn('chart_of_accounts', 'opening_balance')
+            ? 'COALESCE(coa.opening_balance, 0)'
+            : '0';
+
+        $movements = DB::table('transaction_entries as te')
+            ->join('transactions as t', 'te.transaction_id', '=', 't.id')
+            ->where('t.comp_id', $compId)
+            ->where('t.location_id', $locationId)
+            ->where('t.status', 'Posted');
+
+        if ($fromDate) {
+            $movements->whereDate('t.voucher_date', '>=', $fromDate);
+        }
+
+        if ($toDate) {
+            $movements->whereDate('t.voucher_date', '<=', $toDate);
+        }
+
+        $movements->groupBy('te.account_id')
+            ->select(
+                'te.account_id',
+                DB::raw('SUM(COALESCE(te.base_debit_amount, 0) - COALESCE(te.base_credit_amount, 0)) as movement_balance')
+            );
+
+        return DB::table('chart_of_accounts as coa')
+            ->join('account_configurations as ac', function ($join) {
+                $join->on('coa.id', '=', 'ac.account_id');
+            })
+            ->leftJoinSub($movements, 'mv', function ($join) {
+                $join->on('coa.id', '=', 'mv.account_id');
+            })
+            ->where('coa.comp_id', $compId)
+            ->where('coa.location_id', $locationId)
+            ->where('ac.comp_id', $compId)
+            ->where('ac.location_id', $locationId)
+            ->where('ac.is_active', true)
+            ->whereIn('ac.config_type', $configTypes)
+            ->where('coa.is_transactional', true)
+            ->where('coa.status', 'Active')
+            ->select(
+                'coa.id',
+                'coa.account_code',
+                'coa.account_name',
+                'coa.short_code',
+                'coa.account_type',
+                DB::raw($openingBalanceExpression . ' as opening_balance'),
+                DB::raw('COALESCE(mv.movement_balance, 0) as movement_balance'),
+                DB::raw('(' . $openingBalanceExpression . ' + COALESCE(mv.movement_balance, 0)) as closing_balance')
+            );
     }
 
     /**

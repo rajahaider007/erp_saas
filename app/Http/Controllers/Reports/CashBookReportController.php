@@ -62,21 +62,22 @@ class CashBookReportController extends Controller
                 ->get();
         }
 
-        // Get Bank/Cash accounts for dropdown
-        // Fetch all children of "Cash Account / Cash In Hand" (code: 100010001000000)
+        // Get Bank/Cash accounts for dropdown using account_configurations table
         $cashAccounts = [];
         if ($compId && $locationId) {
-            $cashAccounts = DB::table('chart_of_accounts')
-                ->where('comp_id', $compId)
-                ->where('location_id', $locationId)
-                ->where('status', 'Active')
-                ->where('is_transactional', true)
-                ->where(function($q) {
-                    // Get accounts that start with 10001000100 (children of Cash Account code 100010001000000)
-                    $q->where('account_code', 'like', '10001000100%');
-                })
-                ->select('id', 'account_code', 'account_name')
-                ->orderBy('account_code')
+            $cashAccounts = DB::table('chart_of_accounts as coa')
+                ->join('account_configurations as ac', 'coa.id', '=', 'ac.account_id')
+                ->where('coa.comp_id', $compId)
+                ->where('coa.location_id', $locationId)
+                ->where('coa.status', 'Active')
+                ->where('coa.is_transactional', true)
+                ->where('ac.comp_id', $compId)
+                ->where('ac.location_id', $locationId)
+                ->where('ac.is_active', true)
+                ->whereIn('ac.config_type', ['cash', 'bank', 'petty_cash'])
+                ->select('coa.id', 'coa.account_code', 'coa.account_name')
+                ->distinct()
+                ->orderBy('coa.account_code')
                 ->get();
         }
 
@@ -131,23 +132,28 @@ class CashBookReportController extends Controller
         // Get company info
         $company = DB::table('companies')->where('id', $compId)->first();
 
-        // Get cash/bank accounts
-        // Fetch all children of "Cash Account / Cash In Hand" (code: 100010001000000)
-        $cashAccountsQuery = DB::table('chart_of_accounts')
-            ->where('comp_id', $compId)
-            ->where('location_id', $locationId)
-            ->where('status', 'Active')
-            ->where('is_transactional', true);
+        // Get cash/bank accounts using account_configurations table
+        $cashAccountsQuery = DB::table('chart_of_accounts as coa')
+            ->join('account_configurations as ac', 'coa.id', '=', 'ac.account_id')
+            ->where('coa.comp_id', $compId)
+            ->where('coa.location_id', $locationId)
+            ->where('coa.status', 'Active')
+            ->where('coa.is_transactional', true)
+            ->where('ac.comp_id', $compId)
+            ->where('ac.location_id', $locationId)
+            ->where('ac.is_active', true)
+            ->whereIn('ac.config_type', ['cash', 'bank', 'petty_cash']);
 
         // Filter by account if specified
         if ($accountId) {
-            $cashAccountsQuery->where('id', $accountId);
-        } else {
-            // Get all cash and bank accounts (children of code 100010001000000)
-            $cashAccountsQuery->where('account_code', 'like', '10001000100%');
+            $cashAccountsQuery->where('coa.id', $accountId);
         }
 
-        $cashAccounts = $cashAccountsQuery->orderBy('account_code')->get();
+        $cashAccounts = $cashAccountsQuery
+            ->select('coa.id', 'coa.account_code', 'coa.account_name', 'coa.currency')
+            ->distinct()
+            ->orderBy('coa.account_code')
+            ->get();
 
         if ($cashAccounts->isEmpty()) {
             return Inertia::render('Reports/CashBook/Report', [
@@ -166,7 +172,6 @@ class CashBookReportController extends Controller
 
         // Build cash book data
         $cashBookData = [];
-        $totalOpeningBalance = 0;
         $totalReceipts = 0;
         $totalPayments = 0;
         $totalClosingBalance = 0;
@@ -187,27 +192,29 @@ class CashBookReportController extends Controller
                 'account_code' => $account->account_code,
                 'account_name' => $account->account_name,
                 'currency' => $account->currency,
-                'opening_balance' => (float) ($account->opening_balance ?? 0),
                 'transactions' => $accountData['transactions'],
                 'summary' => $accountData['summary'],
             ];
 
-            $totalOpeningBalance += (float) ($account->opening_balance ?? 0);
             $totalReceipts += $accountData['summary']['total_receipts'];
             $totalPayments += $accountData['summary']['total_payments'];
             $totalClosingBalance += $accountData['summary']['closing_balance'];
         }
 
-        // Get all available cash accounts for filter dropdown
-        // Fetch all children of "Cash Account / Cash In Hand" (code: 100010001000000)
-        $availableCashAccounts = DB::table('chart_of_accounts')
-            ->where('comp_id', $compId)
-            ->where('location_id', $locationId)
-            ->where('status', 'Active')
-            ->where('is_transactional', true)
-            ->where('account_code', 'like', '10001000100%')
-            ->select('id', 'account_code', 'account_name')
-            ->orderBy('account_code')
+        // Get all available cash accounts for filter dropdown using account_configurations
+        $availableCashAccounts = DB::table('chart_of_accounts as coa')
+            ->join('account_configurations as ac', 'coa.id', '=', 'ac.account_id')
+            ->where('coa.comp_id', $compId)
+            ->where('coa.location_id', $locationId)
+            ->where('coa.status', 'Active')
+            ->where('coa.is_transactional', true)
+            ->where('ac.comp_id', $compId)
+            ->where('ac.location_id', $locationId)
+            ->where('ac.is_active', true)
+            ->whereIn('ac.config_type', ['cash', 'bank', 'petty_cash'])
+            ->select('coa.id', 'coa.account_code', 'coa.account_name')
+            ->distinct()
+            ->orderBy('coa.account_code')
             ->get();
 
         return Inertia::render('Reports/CashBook/Report', [
@@ -221,7 +228,6 @@ class CashBookReportController extends Controller
                 'search' => $search,
             ],
             'totals' => [
-                'total_opening_balance' => (float) $totalOpeningBalance,
                 'total_receipts' => (float) $totalReceipts,
                 'total_payments' => (float) $totalPayments,
                 'total_closing_balance' => (float) $totalClosingBalance,
@@ -251,7 +257,26 @@ class CashBookReportController extends Controller
             ->where('location_id', $locationId)
             ->first();
 
-        $openingBalance = (float) ($account->opening_balance ?? 0);
+        // Calculate opening balance from transactions before the from_date
+        $openingBalance = 0;
+        if ($fromDate) {
+            $beforeFromDate = DB::table('transaction_entries as te')
+                ->join('transactions as t', 'te.transaction_id', '=', 't.id')
+                ->where('te.account_id', $accountId)
+                ->where('t.comp_id', $compId)
+                ->where('t.location_id', $locationId)
+                ->where('t.status', 'Posted')
+                ->where('t.voucher_date', '<', $fromDate)
+                ->select(
+                    DB::raw('COALESCE(SUM(te.base_debit_amount), 0) as total_debit'),
+                    DB::raw('COALESCE(SUM(te.base_credit_amount), 0) as total_credit')
+                )
+                ->first();
+            
+            if ($beforeFromDate) {
+                $openingBalance = (float)($beforeFromDate->total_debit - $beforeFromDate->total_credit);
+            }
+        }
 
         // Build query for transactions
         $query = DB::table('transaction_entries as te')

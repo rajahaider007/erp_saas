@@ -229,12 +229,18 @@ class IncomeStatementController extends Controller
             ]
         ];
 
-        // Get all revenue and expense accounts
+        // Get all revenue and expense accounts using account_configurations
         $accounts = DB::table('chart_of_accounts as coa')
+            ->join('account_configurations as ac', function($join) {
+                $join->on('coa.id', '=', 'ac.account_id');
+            })
             ->leftJoin('transaction_entries as te', 'coa.id', '=', 'te.account_id')
             ->leftJoin('transactions as t', 'te.transaction_id', '=', 't.id')
             ->where('coa.comp_id', $compId)
             ->where('coa.location_id', $locationId)
+            ->where('ac.comp_id', $compId)
+            ->where('ac.location_id', $locationId)
+            ->where('ac.is_active', true)
             ->where('coa.account_level', 4)
             ->where('coa.is_transactional', true)
             ->select(
@@ -242,6 +248,7 @@ class IncomeStatementController extends Controller
                 'coa.account_code',
                 'coa.account_name',
                 'coa.account_type',
+                'ac.config_type',
                 DB::raw('COALESCE(SUM(te.base_debit_amount), 0) as debit_total'),
                 DB::raw('COALESCE(SUM(te.base_credit_amount), 0) as credit_total')
             )
@@ -253,11 +260,11 @@ class IncomeStatementController extends Controller
                            ->where('t.status', 'Posted');
                   });
             })
-            ->groupBy('coa.id', 'coa.account_code', 'coa.account_name', 'coa.account_type')
+            ->groupBy('coa.id', 'coa.account_code', 'coa.account_name', 'coa.account_type', 'ac.config_type')
             ->orderBy('coa.account_code')
             ->get();
 
-        // Distribute accounts to income statement sections based on account name
+        // Distribute accounts to income statement sections based on config_type
         foreach ($accounts as $account) {
             // For income statement: Revenue is credit balance, Expenses are debit balance
             $balance = $this->calculateIncomeStatementBalance($account);
@@ -273,18 +280,16 @@ class IncomeStatementController extends Controller
                 'amount' => $balance
             ];
 
-            $accountNameLower = strtolower($account->account_name);
-
             // Classify Revenue accounts
             if ($account->account_type === 'Revenue') {
-                if (str_contains($accountNameLower, 'sales') || str_contains($accountNameLower, 'product')) {
+                if ($account->config_type === 'sales') {
                     $incomeStatement['revenue']['sales']['accounts'][] = $accountData;
                     $incomeStatement['revenue']['sales']['total'] += $balance;
-                } elseif (str_contains($accountNameLower, 'service') || str_contains($accountNameLower, 'consulting') || str_contains($accountNameLower, 'consultancy')) {
+                } elseif ($account->config_type === 'service_income') {
                     $incomeStatement['revenue']['services']['accounts'][] = $accountData;
                     $incomeStatement['revenue']['services']['total'] += $balance;
                 } else {
-                    // Classify as other operating revenue (commission, rental, subscription, etc.)
+                    // Classify as other operating revenue (other_income, etc.)
                     $incomeStatement['revenue']['other_operating']['accounts'][] = $accountData;
                     $incomeStatement['revenue']['other_operating']['total'] += $balance;
                 }
@@ -292,46 +297,25 @@ class IncomeStatementController extends Controller
             // Classify Expense accounts
             elseif ($account->account_type === 'Expenses') {
                 // Cost of Goods Sold
-                if (str_contains($accountNameLower, 'raw material') || str_contains($accountNameLower, 'purchase') || 
-                    str_contains($accountNameLower, 'freight inward') || str_contains($accountNameLower, 'packing material') ||
-                    str_contains($accountNameLower, 'factory wage') || str_contains($accountNameLower, 'factory rent') ||
-                    str_contains($accountNameLower, 'direct labor') || str_contains($accountNameLower, 'power and fuel') ||
-                    str_contains($accountNameLower, 'depreciation - factory')) {
+                if (in_array($account->config_type, ['purchase', 'cost_of_goods_sold'])) {
                     $incomeStatement['cost_of_goods_sold']['purchases']['accounts'][] = $accountData;
                     $incomeStatement['cost_of_goods_sold']['purchases']['total'] += $balance;
                 }
                 // Selling & Distribution Expenses
-                elseif (str_contains($accountNameLower, 'advertis') || str_contains($accountNameLower, 'sales commission') ||
-                        str_contains($accountNameLower, 'freight outward') || str_contains($accountNameLower, 'delivery') ||
-                        str_contains($accountNameLower, 'discount allowed') || str_contains($accountNameLower, 'promotion') ||
-                        str_contains($accountNameLower, 'sales staff') || str_contains($accountNameLower, 'showroom')) {
+                elseif (in_array($account->config_type, ['salary_expense', 'rent_expense', 'utility_expense'])) {
+                    // Map specific expense types to distribution (can be made more specific per config_type)
                     $incomeStatement['operating_expenses']['selling_distribution']['accounts'][] = $accountData;
                     $incomeStatement['operating_expenses']['selling_distribution']['total'] += $balance;
                 }
                 // Administrative Expenses
-                elseif (str_contains($accountNameLower, 'office salary') || str_contains($accountNameLower, 'office rent') ||
-                        str_contains($accountNameLower, 'utilities') || str_contains($accountNameLower, 'stationery') ||
-                        str_contains($accountNameLower, 'printing') || str_contains($accountNameLower, 'professional fee') ||
-                        str_contains($accountNameLower, 'travel') || str_contains($accountNameLower, 'it expense') ||
-                        str_contains($accountNameLower, 'repairs') || str_contains($accountNameLower, 'depreciation - office')) {
-                    $incomeStatement['operating_expenses']['administrative']['accounts'][] = $accountData;
-                    $incomeStatement['operating_expenses']['administrative']['total'] += $balance;
-                }
-                // Depreciation & Amortization
-                elseif (str_contains($accountNameLower, 'depreciation') || str_contains($accountNameLower, 'amortization')) {
+                elseif ($account->config_type === 'depreciation_expense') {
                     $incomeStatement['operating_expenses']['depreciation']['accounts'][] = $accountData;
                     $incomeStatement['operating_expenses']['depreciation']['total'] += $balance;
                 }
                 // Interest & Bank Charges (Financial Expenses)
-                elseif (str_contains($accountNameLower, 'interest expense') || str_contains($accountNameLower, 'bank charge') ||
-                        str_contains($accountNameLower, 'loan')) {
+                elseif ($account->config_type === 'interest_expense') {
                     $incomeStatement['finance_items']['interest_expense']['accounts'][] = $accountData;
                     $incomeStatement['finance_items']['interest_expense']['total'] += $balance;
-                }
-                // Tax Expense
-                elseif (str_contains($accountNameLower, 'tax') || str_contains($accountNameLower, 'provision')) {
-                    $incomeStatement['tax_and_profit']['tax_expense']['accounts'][] = $accountData;
-                    $incomeStatement['tax_and_profit']['tax_expense']['total'] += $balance;
                 }
                 // Other Expenses
                 else {
@@ -341,19 +325,26 @@ class IncomeStatementController extends Controller
             }
         }
 
-        // Also get non-transactional revenue accounts that might include interest, dividends, etc.
+        // Also get other revenue accounts (interest, dividends, etc.) using account_configurations
         $nonTransactionalRevenue = DB::table('chart_of_accounts as coa')
+            ->join('account_configurations as ac', function($join) {
+                $join->on('coa.id', '=', 'ac.account_id');
+            })
             ->leftJoin('transaction_entries as te', 'coa.id', '=', 'te.account_id')
             ->leftJoin('transactions as t', 'te.transaction_id', '=', 't.id')
             ->where('coa.comp_id', $compId)
             ->where('coa.location_id', $locationId)
+            ->where('ac.comp_id', $compId)
+            ->where('ac.location_id', $locationId)
+            ->where('ac.is_active', true)
             ->where('coa.account_type', 'Revenue')
-            ->where('coa.account_name', 'like', '%Interest%')
+            ->whereIn('ac.config_type', ['other_income'])
             ->select(
                 'coa.id',
                 'coa.account_code',
                 'coa.account_name',
                 'coa.account_type',
+                'ac.config_type',
                 DB::raw('COALESCE(SUM(te.base_debit_amount), 0) as debit_total'),
                 DB::raw('COALESCE(SUM(te.base_credit_amount), 0) as credit_total')
             )
@@ -365,7 +356,7 @@ class IncomeStatementController extends Controller
                            ->where('t.status', 'Posted');
                   });
             })
-            ->groupBy('coa.id', 'coa.account_code', 'coa.account_name', 'coa.account_type')
+            ->groupBy('coa.id', 'coa.account_code', 'coa.account_name', 'coa.account_type', 'ac.config_type')
             ->get();
 
         foreach ($nonTransactionalRevenue as $account) {
@@ -377,6 +368,7 @@ class IncomeStatementController extends Controller
                     'type' => $account->account_type,
                     'amount' => $balance
                 ];
+                // Classify other revenue as interest revenue (can be split further based on config_type if needed)
                 $incomeStatement['finance_items']['interest_revenue']['accounts'][] = $accountData;
                 $incomeStatement['finance_items']['interest_revenue']['total'] += $balance;
             }

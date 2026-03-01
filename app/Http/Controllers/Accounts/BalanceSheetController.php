@@ -291,10 +291,14 @@ class BalanceSheetController extends Controller
     
     /**
      * Calculate total balance for a Level 3 account (sum of all Level 4 children)
+     * Uses account_configurations table to filter only configured accounts
      */
     private function calculateLevel3Balance($level3Id, $compId, $locationId, $asAtDate, $fiscalYear)
     {
         $level4Accounts = DB::table('chart_of_accounts as coa')
+            ->join('account_configurations as ac', function($join) {
+                $join->on('coa.id', '=', 'ac.account_id');
+            })
             ->leftJoin('transaction_entries as te', function($join) use ($asAtDate, $fiscalYear) {
                 $join->on('coa.id', '=', 'te.account_id')
                     ->whereExists(function($query) use ($asAtDate, $fiscalYear) {
@@ -309,6 +313,9 @@ class BalanceSheetController extends Controller
             ->where('coa.parent_account_id', $level3Id)
             ->where('coa.comp_id', $compId)
             ->where('coa.location_id', $locationId)
+            ->where('ac.comp_id', $compId)
+            ->where('ac.location_id', $locationId)
+            ->where('ac.is_active', true)
             ->where('coa.account_level', 4)
             ->where('coa.is_transactional', true)
             ->select(
@@ -375,11 +382,15 @@ class BalanceSheetController extends Controller
      * Calculate Net Income (Profit/Loss) from Revenue and Expense accounts
      * Net Income = Total Revenue - Total Expenses
      * This represents Retained Earnings on the Balance Sheet
+     * Uses account_configurations table to filter only configured accounts
      */
     private function calculateNetIncome($compId, $locationId, $asAtDate, $fiscalYear)
     {
-        // Get all Revenue accounts (Level 4)
+        // Get all Revenue accounts (Level 4) using account_configurations
         $revenueAccounts = DB::table('chart_of_accounts as coa')
+            ->join('account_configurations as ac', function($join) {
+                $join->on('coa.id', '=', 'ac.account_id');
+            })
             ->leftJoin('transaction_entries as te', function($join) use ($asAtDate, $fiscalYear) {
                 $join->on('coa.id', '=', 'te.account_id')
                     ->whereExists(function($query) use ($asAtDate, $fiscalYear) {
@@ -393,6 +404,10 @@ class BalanceSheetController extends Controller
             })
             ->where('coa.comp_id', $compId)
             ->where('coa.location_id', $locationId)
+            ->where('ac.comp_id', $compId)
+            ->where('ac.location_id', $locationId)
+            ->where('ac.is_active', true)
+            ->whereIn('ac.config_type', ['sales', 'service_income', 'other_income'])
             ->where('coa.account_type', 'Revenue')
             ->where('coa.account_level', 4)
             ->where('coa.is_transactional', true)
@@ -405,8 +420,11 @@ class BalanceSheetController extends Controller
             ->groupBy('coa.id', 'coa.account_type')
             ->get();
 
-        // Get all Expense accounts (Level 4)
+        // Get all Expense accounts (Level 4) using account_configurations
         $expenseAccounts = DB::table('chart_of_accounts as coa')
+            ->join('account_configurations as ac', function($join) {
+                $join->on('coa.id', '=', 'ac.account_id');
+            })
             ->leftJoin('transaction_entries as te', function($join) use ($asAtDate, $fiscalYear) {
                 $join->on('coa.id', '=', 'te.account_id')
                     ->whereExists(function($query) use ($asAtDate, $fiscalYear) {
@@ -420,6 +438,10 @@ class BalanceSheetController extends Controller
             })
             ->where('coa.comp_id', $compId)
             ->where('coa.location_id', $locationId)
+            ->where('ac.comp_id', $compId)
+            ->where('ac.location_id', $locationId)
+            ->where('ac.is_active', true)
+            ->whereIn('ac.config_type', ['purchase', 'cost_of_goods_sold', 'salary_expense', 'rent_expense', 'utility_expense', 'depreciation_expense', 'interest_expense', 'other_expense'])
             ->whereIn('coa.account_type', ['Expenses', 'Expense'])
             ->where('coa.account_level', 4)
             ->where('coa.is_transactional', true)
