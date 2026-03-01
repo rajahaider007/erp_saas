@@ -75,9 +75,14 @@ class AccountConfiguration extends Model
             'inventory' => 'Inventory',
             'fixed_asset' => 'Fixed Asset',
             'intangible_asset' => 'Intangible Asset',
-            'investment' => 'Investment',
+            'short_term_investment' => 'Short Term Investment',
+            'long_term_investment' => 'Long Term Investment',
             'prepaid_expense' => 'Prepaid Expense',
             'input_tax' => 'Input Tax (VAT/GST Receivable)',
+            'security_deposit' => 'Security Deposit',
+            'employee_advance' => 'Employee Advance',
+            'deferred_tax_asset' => 'Deferred Tax Asset',
+            'other_asset' => 'Other Asset',
             
             // Liabilities
             'accounts_payable' => 'Accounts Payable',
@@ -85,7 +90,8 @@ class AccountConfiguration extends Model
             'short_term_loan' => 'Short Term Loan',
             'long_term_loan' => 'Long Term Loan',
             'tax_payable' => 'Tax Payable',
-            'output_tax' => 'Output Tax (VAT/GST Payable)',
+            'unearned_revenue' => 'Unearned Revenue',
+            'other_liability' => 'Other Liability',
             
             // Equity
             'capital' => 'Capital/Equity',
@@ -95,6 +101,7 @@ class AccountConfiguration extends Model
             // Income
             'sales' => 'Sales Revenue',
             'service_income' => 'Service Income',
+            'interest_income' => 'Interest Income',
             'other_income' => 'Other Income',
             
             // Expense
@@ -104,9 +111,18 @@ class AccountConfiguration extends Model
             'rent_expense' => 'Rent Expense',
             'utility_expense' => 'Utility Expense',
             'depreciation_expense' => 'Depreciation Expense',
+            'amortization_expense' => 'Amortization Expense',
             'interest_expense' => 'Interest Expense',
-            
-            // Other
+            'insurance_expense' => 'Insurance Expense',
+            'maintenance_expense' => 'Maintenance & Repair Expense',
+            'marketing_expense' => 'Marketing & Advertising Expense',
+            'travel_expense' => 'Travel Expense',
+            'office_expense' => 'Office Expense',
+            'other_expense' => 'Other Expense',
+
+            // Legacy aliases (kept for backward compatibility)
+            'output_tax' => 'Output Tax (VAT/GST Payable)',
+            'investment' => 'Investment',
             'other' => 'Other'
         ];
     }

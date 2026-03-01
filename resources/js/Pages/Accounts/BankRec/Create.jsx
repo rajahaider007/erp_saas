@@ -54,14 +54,28 @@ const Breadcrumbs = ({ items }) => {
 };
 
 const BankVoucherCreate = () => {
-  const { accounts = [], bankAccounts = [], voucher = null, entries = [], flash, currencies = [], company = null, preview_voucher_number = null, attachments: initialAttachments = [], currentPeriod = null } = usePage().props;
+  const { accounts = [], bankAccounts = [], voucher = null, entries = [], flash, currencies = [], company = null, preview_voucher_number = null, preview_voucher_numbers = {}, attachments: initialAttachments = [], currentPeriod = null } = usePage().props;
   const isEdit = !!voucher;
   const autoVoucherNumbering = true; // Always auto-generate voucher numbers
+  const getAutoVoucherNumberByType = (type) => {
+    if (type === 'Bank Payment') {
+      return preview_voucher_numbers?.['Bank Payment'] || 'BPV0001';
+    }
+
+    if (type === 'Bank Receipt') {
+      return preview_voucher_numbers?.['Bank Receipt'] || 'BRV0001';
+    }
+
+    return preview_voucher_number || '';
+  };
+
+  const defaultVoucherType = voucher?.voucher_sub_type || 'Bank Payment';
+  const defaultPreviewVoucherNumber = getAutoVoucherNumberByType(defaultVoucherType);
   
   const [formData, setFormData] = useState({
     voucher_date: voucher?.voucher_date || new Date().toISOString().split('T')[0],
-    voucher_number: voucher?.voucher_number || preview_voucher_number || '',
-    voucher_sub_type: voucher?.voucher_sub_type || 'Bank Payment',
+    voucher_number: voucher?.voucher_number || defaultPreviewVoucherNumber,
+    voucher_sub_type: defaultVoucherType,
     bank_account_id: voucher?.bank_account_id || '',
     description: voucher?.description || '',
     reference_number: voucher?.reference_number || '',
@@ -188,6 +202,15 @@ const BankVoucherCreate = () => {
       setTimeout(() => setAlert(null), 5000);
     }
   }, [flash]);
+
+  useEffect(() => {
+    if (!isEdit && autoVoucherNumbering) {
+      const nextVoucherNumber = getAutoVoucherNumberByType(formData.voucher_sub_type);
+      if (nextVoucherNumber && formData.voucher_number !== nextVoucherNumber) {
+        setFormData(prev => ({ ...prev, voucher_number: nextVoucherNumber }));
+      }
+    }
+  }, [formData.voucher_sub_type, isEdit]);
 
   // Fetch exchange rate from API for specific entry
   const fetchExchangeRateForEntry = async (entryIndex, currencyCode) => {
@@ -603,6 +626,9 @@ const BankVoucherCreate = () => {
       
       const submitData = {
         ...formData,
+        voucher_number: (!isEdit && autoVoucherNumbering)
+          ? getAutoVoucherNumberByType(formData.voucher_sub_type)
+          : formData.voucher_number,
         bank_account_id: formData.bank_account_id ? parseInt(formData.bank_account_id) : null,
         entries: formData.entries.map(entry => ({
           ...entry,
@@ -816,7 +842,16 @@ const BankVoucherCreate = () => {
                           id="voucher_sub_type"
                           name="voucher_sub_type"
                           value={formData.voucher_sub_type}
-                          onChange={(e) => setFormData(prev => ({ ...prev, voucher_sub_type: e.target.value }))}
+                          onChange={(e) => {
+                            const selectedType = e.target.value;
+                            setFormData(prev => ({
+                              ...prev,
+                              voucher_sub_type: selectedType,
+                              voucher_number: isEdit
+                                ? prev.voucher_number
+                                : getAutoVoucherNumberByType(selectedType)
+                            }));
+                          }}
                           className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                             errors.voucher_sub_type ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                           }`}

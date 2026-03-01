@@ -61,7 +61,9 @@ const Breadcrumbs = ({ items }) => {
 
 // Create/Edit Voucher Number Configuration Form Component
 const CreateVoucherNumberConfigurationForm = () => {
-  const { errors: pageErrors, flash, id, edit_mode, configuration } = usePage().props;
+  const { errors: pageErrors, flash, id, edit_mode, editMode, configuration } = usePage().props;
+  const configurationId = configuration?.id || id;
+  const isEdit = (edit_mode || editMode) && !!configurationId;
   
   const voucherFields = [
     {
@@ -76,6 +78,8 @@ const CreateVoucherNumberConfigurationForm = () => {
         { value: 'Opening', label: 'Opening Voucher' },
         { value: 'Payment', label: 'Payment Voucher' },
         { value: 'Receipt', label: 'Receipt Voucher' },
+        { value: 'Bank Payment', label: 'Bank Payment Voucher' },
+        { value: 'Bank Receipt', label: 'Bank Receipt Voucher' },
         { value: 'Purchase', label: 'Purchase Voucher' },
         { value: 'Sales', label: 'Sales Voucher' }
       ]
@@ -97,6 +101,15 @@ const CreateVoucherNumberConfigurationForm = () => {
       required: true,
       min: 1,
       max: 10
+    },
+    {
+      name: 'running_number',
+      label: 'Starting Number',
+      type: 'number',
+      placeholder: 'Enter starting number',
+      icon: Hash,
+      required: true,
+      min: 1
     },
     {
       name: 'reset_frequency',
@@ -171,6 +184,10 @@ const CreateVoucherNumberConfigurationForm = () => {
         newErrors.number_length = 'Number length must be at least 1';
       }
 
+      if (!submittedFormData.running_number || submittedFormData.running_number < 1) {
+        newErrors.running_number = 'Starting number must be at least 1';
+      }
+
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
         setAlert({
@@ -186,47 +203,51 @@ const CreateVoucherNumberConfigurationForm = () => {
       formDataToSend.append('voucher_type', submittedFormData.voucher_type || '');
       formDataToSend.append('prefix', submittedFormData.prefix || '');
       formDataToSend.append('number_length', submittedFormData.number_length || '4');
+      formDataToSend.append('running_number', submittedFormData.running_number || '1');
       formDataToSend.append('reset_frequency', submittedFormData.reset_frequency || 'Yearly');
       formDataToSend.append('is_active', submittedFormData.is_active ? '1' : '0');
 
       // Determine URL and method based on edit mode
-      const isEdit = edit_mode && id;
-      const url = isEdit ? `/accounts/voucher-number-configuration/${id}/edit` : '/accounts/voucher-number-configuration/create';
+      const url = isEdit
+        ? `/accounts/voucher-number-configuration/${configurationId}`
+        : '/accounts/voucher-number-configuration/create';
       
       if (isEdit) {
         formDataToSend.append('_method', 'PUT');
       }
 
-      // Make the request using Inertia
-      router.post(url, formDataToSend, {
-        forceFormData: true,
-        onStart: () => {
-          setRequestStatus('Request started');
-        },
-        onProgress: () => {
-          setRequestStatus('Uploading...');
-        },
-        onSuccess: (page) => {
-          setRequestStatus('Success');
-        },
-        onError: (errors) => {
-          console.log('Server validation errors:', errors);
-          setRequestStatus('Server validation failed');
-          setErrors(errors);
-        },
-        onFinish: () => {
-          setRequestStatus('Request finished');
-        }
+      // Make the request using Inertia and resolve/reject explicitly
+      return await new Promise((resolve, reject) => {
+        router.post(url, formDataToSend, {
+          forceFormData: true,
+          onStart: () => {
+            setRequestStatus('Request started');
+          },
+          onProgress: () => {
+            setRequestStatus('Uploading...');
+          },
+          onSuccess: () => {
+            setRequestStatus('Success');
+            resolve(true);
+          },
+          onError: (errors) => {
+            console.log('Server validation errors:', errors);
+            setRequestStatus('Server validation failed');
+            setErrors(errors);
+            reject(new Error('Validation failed'));
+          },
+          onFinish: () => {
+            setRequestStatus('Request finished');
+          }
+        });
       });
 
     } catch (error) {
       console.error('Form submission error:', error);
       setRequestStatus('Exception: ' + error.message);
+      throw error;
     }
   };
-
-  // Determine if we're in edit mode
-  const isEdit = edit_mode && id;
 
   // Breadcrumb items configuration
   const breadcrumbItems = [
@@ -265,12 +286,14 @@ const CreateVoucherNumberConfigurationForm = () => {
           voucher_type: configuration.voucher_type || '',
           prefix: configuration.prefix || '',
           number_length: configuration.number_length || 4,
+          running_number: configuration.running_number || 1,
           reset_frequency: configuration.reset_frequency || 'Yearly',
           is_active: configuration.is_active || true
         } : {
           voucher_type: '',
           prefix: '',
           number_length: 4,
+          running_number: 1,
           reset_frequency: 'Yearly',
           is_active: true
         }}

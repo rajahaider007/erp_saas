@@ -149,8 +149,11 @@ class BankVoucherController extends Controller
         $accounts = $this->getTransactionalAccounts($compId, $locationId);
         $bankAccounts = $this->getBankAccounts($compId, $locationId);
 
-        // Generate preview voucher number for display
-        $previewVoucherNumber = $this->generatePreviewVoucherNumber($compId, $locationId, 'Bank Payment');
+        // Generate preview voucher numbers for display
+        $previewVoucherNumbers = [
+            'Bank Payment' => $this->generatePreviewVoucherNumber($compId, $locationId, 'Bank Payment'),
+            'Bank Receipt' => $this->generatePreviewVoucherNumber($compId, $locationId, 'Bank Receipt'),
+        ];
         
         // Get current fiscal year
         $currentFiscalYear = FiscalYearHelper::getCurrentFiscalYear($compId);
@@ -180,7 +183,8 @@ class BankVoucherController extends Controller
             'company' => $company,
             'fiscalYear' => $currentFiscalYear,
             'currentPeriod' => $currentPeriodInfo,
-            'preview_voucher_number' => $previewVoucherNumber
+            'preview_voucher_number' => $previewVoucherNumbers['Bank Payment'],
+            'preview_voucher_numbers' => $previewVoucherNumbers
         ]);
     }
 
@@ -1122,7 +1126,7 @@ class BankVoucherController extends Controller
 
         if (!$config) {
             // Return default format if no config exists
-            return 'JV0001';
+            return $this->getDefaultVoucherPrefix($voucherType) . '0001';
         }
 
         $runningNumber = $config->running_number;
@@ -1166,10 +1170,11 @@ class BankVoucherController extends Controller
                 'comp_id' => $compId,
                 'location_id' => $locationId,
                 'voucher_type' => $voucherType,
-                'prefix' => 'JV',
+                'prefix' => $this->getDefaultVoucherPrefix($voucherType),
                 'number_length' => 4,
                 'running_number' => 1,
                 'reset_frequency' => 'Never',
+                'last_reset_date' => null,
                 'is_active' => true,
                 'created_by' => auth()->id() ?? 1,
                 'created_at' => now(),
@@ -1189,7 +1194,7 @@ class BankVoucherController extends Controller
 
         // Check if we need to reset the running number based on frequency
         $shouldReset = false;
-        $lastReset = $config->last_reset_date;
+        $lastReset = $config->last_reset_date ?? null;
         
         if ($resetFrequency === 'Monthly') {
             $shouldReset = !$lastReset || (now()->format('Y-m') !== date('Y-m', strtotime($lastReset)));
@@ -1219,6 +1224,15 @@ class BankVoucherController extends Controller
             ]);
 
         return $voucherNumber;
+    }
+
+    private function getDefaultVoucherPrefix($voucherType)
+    {
+        return match ($voucherType) {
+            'Bank Payment' => 'BPV',
+            'Bank Receipt' => 'BRV',
+            default => 'JV',
+        };
     }
 
     /**

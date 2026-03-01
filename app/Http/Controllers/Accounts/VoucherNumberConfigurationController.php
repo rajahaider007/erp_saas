@@ -74,7 +74,7 @@ class VoucherNumberConfigurationController extends Controller
             'voucher_type' => 'required|string|max:255',
             'prefix' => 'required|string|max:10',
             'number_length' => 'required|integer|min:1|max:10',
-            'running_number' => 'required|integer|min:1',
+            'running_number' => 'nullable|integer|min:1',
             'reset_frequency' => 'required|string|in:Never,Monthly,Yearly'
         ]);
 
@@ -106,7 +106,7 @@ class VoucherNumberConfigurationController extends Controller
                 'voucher_type' => $request->voucher_type,
                 'prefix' => $request->prefix,
                 'number_length' => $request->number_length,
-                'running_number' => $request->running_number,
+                'running_number' => (int) ($request->running_number ?? 1),
                 'reset_frequency' => $request->reset_frequency,
                 'is_active' => true,
                 'created_by' => auth()->id(),
@@ -120,7 +120,7 @@ class VoucherNumberConfigurationController extends Controller
                     'voucher_type' => $request->voucher_type,
                     'prefix' => $request->prefix,
                     'number_length' => $request->number_length,
-                    'running_number' => $request->running_number,
+                    'running_number' => (int) ($request->running_number ?? 1),
                     'reset_frequency' => $request->reset_frequency,
                     'is_active' => true,
                     'comp_id' => $compId,
@@ -178,7 +178,9 @@ class VoucherNumberConfigurationController extends Controller
 
         return Inertia::render('Accounts/VoucherNumberConfiguration/create', [
             'configuration' => $configuration,
-            'editMode' => true
+            'editMode' => true,
+            'edit_mode' => true,
+            'id' => $configuration->id
         ]);
     }
 
@@ -193,7 +195,7 @@ class VoucherNumberConfigurationController extends Controller
             'voucher_type' => 'required|string|max:255',
             'prefix' => 'required|string|max:10',
             'number_length' => 'required|integer|min:1|max:10',
-            'running_number' => 'required|integer|min:1',
+            'running_number' => 'nullable|integer|min:1',
             'reset_frequency' => 'required|string|in:Never,Monthly,Yearly'
         ]);
 
@@ -232,7 +234,7 @@ class VoucherNumberConfigurationController extends Controller
                     'voucher_type' => $request->voucher_type,
                     'prefix' => $request->prefix,
                     'number_length' => $request->number_length,
-                    'running_number' => $request->running_number,
+                    'running_number' => (int) ($request->running_number ?? 1),
                     'reset_frequency' => $request->reset_frequency,
                     'updated_at' => now()
                 ]);
@@ -243,7 +245,7 @@ class VoucherNumberConfigurationController extends Controller
                     'voucher_type' => $request->voucher_type,
                     'prefix' => $request->prefix,
                     'number_length' => $request->number_length,
-                    'running_number' => $request->running_number,
+                    'running_number' => (int) ($request->running_number ?? 1),
                     'reset_frequency' => $request->reset_frequency,
                     'comp_id' => $compId,
                     'location_id' => $locationId
