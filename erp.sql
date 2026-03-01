@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 28, 2026 at 09:56 AM
+-- Generation Time: Mar 01, 2026 at 04:02 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -38,7 +38,7 @@ CREATE TABLE `cache` (
 --
 
 INSERT INTO `cache` (`key`, `value`, `expiration`) VALUES
-('laravel-cache-active_currencies', 'a:100:{i:0;a:5:{s:5:\"value\";s:3:\"USD\";s:5:\"label\";s:28:\"United States Dollarss (USD)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:6:\"1.0000\";s:7:\"country\";s:13:\"United States\";}i:1;a:5:{s:5:\"value\";s:3:\"EUR\";s:5:\"label\";s:10:\"Euro (EUR)\";s:6:\"symbol\";s:3:\"€\";s:13:\"exchange_rate\";s:6:\"0.8540\";s:7:\"country\";s:14:\"European Union\";}i:2;a:5:{s:5:\"value\";s:3:\"GBP\";s:5:\"label\";s:28:\"British Pound Sterling (GBP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:6:\"0.7420\";s:7:\"country\";s:14:\"United Kingdom\";}i:3;a:5:{s:5:\"value\";s:3:\"JPY\";s:5:\"label\";s:18:\"Japanese Yen (JPY)\";s:6:\"symbol\";s:2:\"¥\";s:13:\"exchange_rate\";s:8:\"150.0200\";s:7:\"country\";s:5:\"Japan\";}i:4;a:5:{s:5:\"value\";s:3:\"CHF\";s:5:\"label\";s:17:\"Swiss Franc (CHF)\";s:6:\"symbol\";s:3:\"CHF\";s:13:\"exchange_rate\";s:6:\"0.7960\";s:7:\"country\";s:11:\"Switzerland\";}i:5;a:5:{s:5:\"value\";s:3:\"CAD\";s:5:\"label\";s:21:\"Canadian Dollar (CAD)\";s:6:\"symbol\";s:2:\"C$\";s:13:\"exchange_rate\";s:6:\"1.4000\";s:7:\"country\";s:6:\"Canada\";}i:6;a:5:{s:5:\"value\";s:3:\"AUD\";s:5:\"label\";s:23:\"Australian Dollar (AUD)\";s:6:\"symbol\";s:2:\"A$\";s:13:\"exchange_rate\";s:6:\"1.5100\";s:7:\"country\";s:9:\"Australia\";}i:7;a:5:{s:5:\"value\";s:3:\"NZD\";s:5:\"label\";s:24:\"New Zealand Dollar (NZD)\";s:6:\"symbol\";s:3:\"NZ$\";s:13:\"exchange_rate\";s:6:\"1.7100\";s:7:\"country\";s:11:\"New Zealand\";}i:8;a:5:{s:5:\"value\";s:3:\"CNY\";s:5:\"label\";s:18:\"Chinese Yuan (CNY)\";s:6:\"symbol\";s:2:\"¥\";s:13:\"exchange_rate\";s:6:\"7.1300\";s:7:\"country\";s:5:\"China\";}i:9;a:5:{s:5:\"value\";s:3:\"HKD\";s:5:\"label\";s:22:\"Hong Kong Dollar (HKD)\";s:6:\"symbol\";s:3:\"HK$\";s:13:\"exchange_rate\";s:6:\"7.7800\";s:7:\"country\";s:9:\"Hong Kong\";}i:10;a:5:{s:5:\"value\";s:3:\"SGD\";s:5:\"label\";s:22:\"Singapore Dollar (SGD)\";s:6:\"symbol\";s:2:\"S$\";s:13:\"exchange_rate\";s:6:\"1.2900\";s:7:\"country\";s:9:\"Singapore\";}i:11;a:5:{s:5:\"value\";s:3:\"KRW\";s:5:\"label\";s:22:\"South Korean Won (KRW)\";s:6:\"symbol\";s:3:\"₩\";s:13:\"exchange_rate\";s:9:\"1410.7200\";s:7:\"country\";s:11:\"South Korea\";}i:12;a:5:{s:5:\"value\";s:3:\"INR\";s:5:\"label\";s:18:\"Indian Rupee (INR)\";s:6:\"symbol\";s:3:\"₹\";s:13:\"exchange_rate\";s:7:\"88.7800\";s:7:\"country\";s:5:\"India\";}i:13;a:5:{s:5:\"value\";s:3:\"PKR\";s:5:\"label\";s:21:\"Pakistani Rupee (PKR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:8:\"283.2500\";s:7:\"country\";s:8:\"Pakistan\";}i:14;a:5:{s:5:\"value\";s:3:\"BDT\";s:5:\"label\";s:22:\"Bangladeshi Taka (BDT)\";s:6:\"symbol\";s:3:\"৳\";s:13:\"exchange_rate\";s:8:\"121.7500\";s:7:\"country\";s:10:\"Bangladesh\";}i:15;a:5:{s:5:\"value\";s:3:\"LKR\";s:5:\"label\";s:22:\"Sri Lankan Rupee (LKR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:8:\"302.3200\";s:7:\"country\";s:9:\"Sri Lanka\";}i:16;a:5:{s:5:\"value\";s:3:\"NPR\";s:5:\"label\";s:20:\"Nepalese Rupee (NPR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:8:\"142.0500\";s:7:\"country\";s:5:\"Nepal\";}i:17;a:5:{s:5:\"value\";s:3:\"THB\";s:5:\"label\";s:15:\"Thai Baht (THB)\";s:6:\"symbol\";s:3:\"฿\";s:13:\"exchange_rate\";s:7:\"32.4200\";s:7:\"country\";s:8:\"Thailand\";}i:18;a:5:{s:5:\"value\";s:3:\"MYR\";s:5:\"label\";s:23:\"Malaysian Ringgit (MYR)\";s:6:\"symbol\";s:2:\"RM\";s:13:\"exchange_rate\";s:6:\"4.2100\";s:7:\"country\";s:8:\"Malaysia\";}i:19;a:5:{s:5:\"value\";s:3:\"IDR\";s:5:\"label\";s:23:\"Indonesian Rupiah (IDR)\";s:6:\"symbol\";s:2:\"Rp\";s:13:\"exchange_rate\";s:10:\"16600.5900\";s:7:\"country\";s:9:\"Indonesia\";}i:20;a:5:{s:5:\"value\";s:3:\"PHP\";s:5:\"label\";s:21:\"Philippine Peso (PHP)\";s:6:\"symbol\";s:3:\"₱\";s:13:\"exchange_rate\";s:7:\"58.2800\";s:7:\"country\";s:11:\"Philippines\";}i:21;a:5:{s:5:\"value\";s:3:\"VND\";s:5:\"label\";s:21:\"Vietnamese Dong (VND)\";s:6:\"symbol\";s:3:\"₫\";s:13:\"exchange_rate\";s:10:\"26245.6700\";s:7:\"country\";s:7:\"Vietnam\";}i:22;a:5:{s:5:\"value\";s:3:\"AED\";s:5:\"label\";s:16:\"UAE Dirham (AED)\";s:6:\"symbol\";s:5:\"د.إ\";s:13:\"exchange_rate\";s:6:\"3.6700\";s:7:\"country\";s:20:\"United Arab Emirates\";}i:23;a:5:{s:5:\"value\";s:3:\"SAR\";s:5:\"label\";s:17:\"Saudi Riyal (SAR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:6:\"3.7500\";s:7:\"country\";s:12:\"Saudi Arabia\";}i:24;a:5:{s:5:\"value\";s:3:\"QAR\";s:5:\"label\";s:18:\"Qatari Riyal (QAR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:6:\"3.6400\";s:7:\"country\";s:5:\"Qatar\";}i:25;a:5:{s:5:\"value\";s:3:\"KWD\";s:5:\"label\";s:19:\"Kuwaiti Dinar (KWD)\";s:6:\"symbol\";s:5:\"د.ك\";s:13:\"exchange_rate\";s:6:\"0.3060\";s:7:\"country\";s:6:\"Kuwait\";}i:26;a:5:{s:5:\"value\";s:3:\"BHD\";s:5:\"label\";s:20:\"Bahraini Dinar (BHD)\";s:6:\"symbol\";s:5:\"د.ب\";s:13:\"exchange_rate\";s:6:\"0.3760\";s:7:\"country\";s:7:\"Bahrain\";}i:27;a:5:{s:5:\"value\";s:3:\"OMR\";s:5:\"label\";s:16:\"Omani Rial (OMR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:6:\"0.3840\";s:7:\"country\";s:4:\"Oman\";}i:28;a:5:{s:5:\"value\";s:3:\"JOD\";s:5:\"label\";s:21:\"Jordanian Dinar (JOD)\";s:6:\"symbol\";s:5:\"د.ا\";s:13:\"exchange_rate\";s:6:\"0.7090\";s:7:\"country\";s:6:\"Jordan\";}i:29;a:5:{s:5:\"value\";s:3:\"LBP\";s:5:\"label\";s:20:\"Lebanese Pound (LBP)\";s:6:\"symbol\";s:5:\"ل.ل\";s:13:\"exchange_rate\";s:10:\"89500.0000\";s:7:\"country\";s:7:\"Lebanon\";}i:30;a:5:{s:5:\"value\";s:3:\"EGP\";s:5:\"label\";s:20:\"Egyptian Pound (EGP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:7:\"47.6100\";s:7:\"country\";s:5:\"Egypt\";}i:31;a:5:{s:5:\"value\";s:3:\"ZAR\";s:5:\"label\";s:24:\"South African Rand (ZAR)\";s:6:\"symbol\";s:1:\"R\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:12:\"South Africa\";}i:32;a:5:{s:5:\"value\";s:3:\"NGN\";s:5:\"label\";s:20:\"Nigerian Naira (NGN)\";s:6:\"symbol\";s:3:\"₦\";s:13:\"exchange_rate\";s:9:\"1463.5500\";s:7:\"country\";s:7:\"Nigeria\";}i:33;a:5:{s:5:\"value\";s:3:\"KES\";s:5:\"label\";s:21:\"Kenyan Shilling (KES)\";s:6:\"symbol\";s:3:\"KSh\";s:13:\"exchange_rate\";s:8:\"129.1100\";s:7:\"country\";s:5:\"Kenya\";}i:34;a:5:{s:5:\"value\";s:3:\"GHS\";s:5:\"label\";s:19:\"Ghanaian Cedi (GHS)\";s:6:\"symbol\";s:3:\"₵\";s:13:\"exchange_rate\";s:7:\"12.6100\";s:7:\"country\";s:5:\"Ghana\";}i:35;a:5:{s:5:\"value\";s:3:\"SEK\";s:5:\"label\";s:19:\"Swedish Krona (SEK)\";s:6:\"symbol\";s:2:\"kr\";s:13:\"exchange_rate\";s:6:\"9.3800\";s:7:\"country\";s:6:\"Sweden\";}i:36;a:5:{s:5:\"value\";s:3:\"NOK\";s:5:\"label\";s:21:\"Norwegian Krone (NOK)\";s:6:\"symbol\";s:2:\"kr\";s:13:\"exchange_rate\";s:6:\"9.9300\";s:7:\"country\";s:6:\"Norway\";}i:37;a:5:{s:5:\"value\";s:3:\"DKK\";s:5:\"label\";s:18:\"Danish Krone (DKK)\";s:6:\"symbol\";s:2:\"kr\";s:13:\"exchange_rate\";s:6:\"6.3700\";s:7:\"country\";s:7:\"Denmark\";}i:38;a:5:{s:5:\"value\";s:3:\"PLN\";s:5:\"label\";s:18:\"Polish Zloty (PLN)\";s:6:\"symbol\";s:3:\"zł\";s:13:\"exchange_rate\";s:6:\"3.6300\";s:7:\"country\";s:6:\"Poland\";}i:39;a:5:{s:5:\"value\";s:3:\"CZK\";s:5:\"label\";s:18:\"Czech Koruna (CZK)\";s:6:\"symbol\";s:3:\"Kč\";s:13:\"exchange_rate\";s:7:\"20.7800\";s:7:\"country\";s:14:\"Czech Republic\";}i:40;a:5:{s:5:\"value\";s:3:\"HUF\";s:5:\"label\";s:22:\"Hungarian Forint (HUF)\";s:6:\"symbol\";s:2:\"Ft\";s:13:\"exchange_rate\";s:8:\"332.0100\";s:7:\"country\";s:7:\"Hungary\";}i:41;a:5:{s:5:\"value\";s:3:\"RON\";s:5:\"label\";s:18:\"Romanian Leu (RON)\";s:6:\"symbol\";s:3:\"lei\";s:13:\"exchange_rate\";s:6:\"4.3500\";s:7:\"country\";s:7:\"Romania\";}i:42;a:5:{s:5:\"value\";s:3:\"BGN\";s:5:\"label\";s:19:\"Bulgarian Lev (BGN)\";s:6:\"symbol\";s:4:\"лв\";s:13:\"exchange_rate\";s:6:\"1.6700\";s:7:\"country\";s:8:\"Bulgaria\";}i:43;a:5:{s:5:\"value\";s:3:\"HRK\";s:5:\"label\";s:19:\"Croatian Kuna (HRK)\";s:6:\"symbol\";s:2:\"kn\";s:13:\"exchange_rate\";s:6:\"6.4400\";s:7:\"country\";s:7:\"Croatia\";}i:44;a:5:{s:5:\"value\";s:3:\"RSD\";s:5:\"label\";s:19:\"Serbian Dinar (RSD)\";s:6:\"symbol\";s:6:\"дин\";s:13:\"exchange_rate\";s:8:\"100.1100\";s:7:\"country\";s:6:\"Serbia\";}i:45;a:5:{s:5:\"value\";s:3:\"BRL\";s:5:\"label\";s:20:\"Brazilian Real (BRL)\";s:6:\"symbol\";s:2:\"R$\";s:13:\"exchange_rate\";s:6:\"5.3400\";s:7:\"country\";s:6:\"Brazil\";}i:46;a:5:{s:5:\"value\";s:3:\"MXN\";s:5:\"label\";s:18:\"Mexican Peso (MXN)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:7:\"18.3700\";s:7:\"country\";s:6:\"Mexico\";}i:47;a:5:{s:5:\"value\";s:3:\"ARS\";s:5:\"label\";s:20:\"Argentine Peso (ARS)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:9:\"1429.7500\";s:7:\"country\";s:9:\"Argentina\";}i:48;a:5:{s:5:\"value\";s:3:\"CLP\";s:5:\"label\";s:18:\"Chilean Peso (CLP)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:8:\"963.9800\";s:7:\"country\";s:5:\"Chile\";}i:49;a:5:{s:5:\"value\";s:3:\"COP\";s:5:\"label\";s:20:\"Colombian Peso (COP)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:9:\"3867.9200\";s:7:\"country\";s:8:\"Colombia\";}i:50;a:5:{s:5:\"value\";s:3:\"PEN\";s:5:\"label\";s:18:\"Peruvian Sol (PEN)\";s:6:\"symbol\";s:2:\"S/\";s:13:\"exchange_rate\";s:6:\"3.4600\";s:7:\"country\";s:4:\"Peru\";}i:51;a:5:{s:5:\"value\";s:3:\"UYU\";s:5:\"label\";s:20:\"Uruguayan Peso (UYU)\";s:6:\"symbol\";s:2:\"$U\";s:13:\"exchange_rate\";s:7:\"39.9200\";s:7:\"country\";s:7:\"Uruguay\";}i:52;a:5:{s:5:\"value\";s:3:\"BOB\";s:5:\"label\";s:24:\"Bolivian Boliviano (BOB)\";s:6:\"symbol\";s:2:\"Bs\";s:13:\"exchange_rate\";s:6:\"6.9200\";s:7:\"country\";s:7:\"Bolivia\";}i:53;a:5:{s:5:\"value\";s:3:\"VES\";s:5:\"label\";s:25:\"Venezuelan Bolívar (VES)\";s:6:\"symbol\";s:4:\"Bs.S\";s:13:\"exchange_rate\";s:8:\"187.2900\";s:7:\"country\";s:9:\"Venezuela\";}i:54;a:5:{s:5:\"value\";s:3:\"RUB\";s:5:\"label\";s:19:\"Russian Ruble (RUB)\";s:6:\"symbol\";s:3:\"₽\";s:13:\"exchange_rate\";s:7:\"82.8900\";s:7:\"country\";s:6:\"Russia\";}i:55;a:5:{s:5:\"value\";s:3:\"TRY\";s:5:\"label\";s:18:\"Turkish Lira (TRY)\";s:6:\"symbol\";s:3:\"₺\";s:13:\"exchange_rate\";s:7:\"41.7000\";s:7:\"country\";s:6:\"Turkey\";}i:56;a:5:{s:5:\"value\";s:3:\"ILS\";s:5:\"label\";s:20:\"Israeli Shekel (ILS)\";s:6:\"symbol\";s:3:\"₪\";s:13:\"exchange_rate\";s:6:\"3.2800\";s:7:\"country\";s:6:\"Israel\";}i:57;a:5:{s:5:\"value\";s:3:\"UAH\";s:5:\"label\";s:23:\"Ukrainian Hryvnia (UAH)\";s:6:\"symbol\";s:3:\"₴\";s:13:\"exchange_rate\";s:7:\"41.3300\";s:7:\"country\";s:7:\"Ukraine\";}i:58;a:5:{s:5:\"value\";s:3:\"BYN\";s:5:\"label\";s:22:\"Belarusian Ruble (BYN)\";s:6:\"symbol\";s:2:\"Br\";s:13:\"exchange_rate\";s:6:\"3.2300\";s:7:\"country\";s:7:\"Belarus\";}i:59;a:5:{s:5:\"value\";s:3:\"KZT\";s:5:\"label\";s:23:\"Kazakhstani Tenge (KZT)\";s:6:\"symbol\";s:3:\"₸\";s:13:\"exchange_rate\";s:8:\"544.2300\";s:7:\"country\";s:10:\"Kazakhstan\";}i:60;a:5:{s:5:\"value\";s:3:\"UZS\";s:5:\"label\";s:21:\"Uzbekistani Som (UZS)\";s:6:\"symbol\";s:4:\"лв\";s:13:\"exchange_rate\";s:10:\"12078.6900\";s:7:\"country\";s:10:\"Uzbekistan\";}i:61;a:5:{s:5:\"value\";s:3:\"KGS\";s:5:\"label\";s:21:\"Kyrgyzstani Som (KGS)\";s:6:\"symbol\";s:4:\"лв\";s:13:\"exchange_rate\";s:7:\"87.3500\";s:7:\"country\";s:10:\"Kyrgyzstan\";}i:62;a:5:{s:5:\"value\";s:3:\"TJS\";s:5:\"label\";s:24:\"Tajikistani Somoni (TJS)\";s:6:\"symbol\";s:2:\"SM\";s:13:\"exchange_rate\";s:6:\"9.3800\";s:7:\"country\";s:10:\"Tajikistan\";}i:63;a:5:{s:5:\"value\";s:3:\"TMT\";s:5:\"label\";s:25:\"Turkmenistani Manat (TMT)\";s:6:\"symbol\";s:1:\"T\";s:13:\"exchange_rate\";s:6:\"3.5000\";s:7:\"country\";s:12:\"Turkmenistan\";}i:64;a:5:{s:5:\"value\";s:3:\"AFN\";s:5:\"label\";s:20:\"Afghan Afghani (AFN)\";s:6:\"symbol\";s:2:\"؋\";s:13:\"exchange_rate\";s:7:\"67.1500\";s:7:\"country\";s:11:\"Afghanistan\";}i:65;a:5:{s:5:\"value\";s:3:\"IRR\";s:5:\"label\";s:18:\"Iranian Rial (IRR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:10:\"42434.4900\";s:7:\"country\";s:4:\"Iran\";}i:66;a:5:{s:5:\"value\";s:3:\"IQD\";s:5:\"label\";s:17:\"Iraqi Dinar (IQD)\";s:6:\"symbol\";s:5:\"ع.د\";s:13:\"exchange_rate\";s:9:\"1309.3300\";s:7:\"country\";s:4:\"Iraq\";}i:67;a:5:{s:5:\"value\";s:3:\"SYP\";s:5:\"label\";s:18:\"Syrian Pound (SYP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:10:\"12890.1200\";s:7:\"country\";s:5:\"Syria\";}i:68;a:5:{s:5:\"value\";s:3:\"YER\";s:5:\"label\";s:17:\"Yemeni Rial (YER)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:8:\"239.0000\";s:7:\"country\";s:5:\"Yemen\";}i:69;a:5:{s:5:\"value\";s:3:\"SOS\";s:5:\"label\";s:21:\"Somali Shilling (SOS)\";s:6:\"symbol\";s:1:\"S\";s:13:\"exchange_rate\";s:8:\"571.3000\";s:7:\"country\";s:7:\"Somalia\";}i:70;a:5:{s:5:\"value\";s:3:\"ETB\";s:5:\"label\";s:20:\"Ethiopian Birr (ETB)\";s:6:\"symbol\";s:2:\"Br\";s:13:\"exchange_rate\";s:8:\"143.9200\";s:7:\"country\";s:8:\"Ethiopia\";}i:71;a:5:{s:5:\"value\";s:3:\"TZS\";s:5:\"label\";s:24:\"Tanzanian Shilling (TZS)\";s:6:\"symbol\";s:3:\"TSh\";s:13:\"exchange_rate\";s:9:\"2445.6500\";s:7:\"country\";s:8:\"Tanzania\";}i:72;a:5:{s:5:\"value\";s:3:\"UGX\";s:5:\"label\";s:22:\"Ugandan Shilling (UGX)\";s:6:\"symbol\";s:3:\"USh\";s:13:\"exchange_rate\";s:9:\"3430.1500\";s:7:\"country\";s:6:\"Uganda\";}i:73;a:5:{s:5:\"value\";s:3:\"RWF\";s:5:\"label\";s:19:\"Rwandan Franc (RWF)\";s:6:\"symbol\";s:2:\"RF\";s:13:\"exchange_rate\";s:9:\"1452.9700\";s:7:\"country\";s:6:\"Rwanda\";}i:74;a:5:{s:5:\"value\";s:3:\"BIF\";s:5:\"label\";s:21:\"Burundian Franc (BIF)\";s:6:\"symbol\";s:3:\"FBu\";s:13:\"exchange_rate\";s:9:\"2959.3900\";s:7:\"country\";s:7:\"Burundi\";}i:75;a:5:{s:5:\"value\";s:3:\"MWK\";s:5:\"label\";s:21:\"Malawian Kwacha (MWK)\";s:6:\"symbol\";s:2:\"MK\";s:13:\"exchange_rate\";s:9:\"1743.1500\";s:7:\"country\";s:6:\"Malawi\";}i:76;a:5:{s:5:\"value\";s:3:\"ZMW\";s:5:\"label\";s:20:\"Zambian Kwacha (ZMW)\";s:6:\"symbol\";s:2:\"ZK\";s:13:\"exchange_rate\";s:7:\"23.8200\";s:7:\"country\";s:6:\"Zambia\";}i:77;a:5:{s:5:\"value\";s:3:\"BWP\";s:5:\"label\";s:19:\"Botswana Pula (BWP)\";s:6:\"symbol\";s:1:\"P\";s:13:\"exchange_rate\";s:7:\"14.1500\";s:7:\"country\";s:8:\"Botswana\";}i:78;a:5:{s:5:\"value\";s:3:\"NAD\";s:5:\"label\";s:21:\"Namibian Dollar (NAD)\";s:6:\"symbol\";s:2:\"N$\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:7:\"Namibia\";}i:79;a:5:{s:5:\"value\";s:3:\"SZL\";s:5:\"label\";s:21:\"Swazi Lilangeni (SZL)\";s:6:\"symbol\";s:1:\"L\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:8:\"Eswatini\";}i:80;a:5:{s:5:\"value\";s:3:\"LSL\";s:5:\"label\";s:18:\"Lesotho Loti (LSL)\";s:6:\"symbol\";s:1:\"L\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:7:\"Lesotho\";}i:81;a:5:{s:5:\"value\";s:3:\"MUR\";s:5:\"label\";s:21:\"Mauritian Rupee (MUR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:7:\"45.3600\";s:7:\"country\";s:9:\"Mauritius\";}i:82;a:5:{s:5:\"value\";s:3:\"SCR\";s:5:\"label\";s:23:\"Seychellois Rupee (SCR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:7:\"14.6500\";s:7:\"country\";s:10:\"Seychelles\";}i:83;a:5:{s:5:\"value\";s:3:\"MAD\";s:5:\"label\";s:21:\"Moroccan Dirham (MAD)\";s:6:\"symbol\";s:6:\"د.م.\";s:13:\"exchange_rate\";s:6:\"9.1200\";s:7:\"country\";s:7:\"Morocco\";}i:84;a:5:{s:5:\"value\";s:3:\"TND\";s:5:\"label\";s:20:\"Tunisian Dinar (TND)\";s:6:\"symbol\";s:5:\"د.ت\";s:13:\"exchange_rate\";s:6:\"2.9100\";s:7:\"country\";s:7:\"Tunisia\";}i:85;a:5:{s:5:\"value\";s:3:\"DZD\";s:5:\"label\";s:20:\"Algerian Dinar (DZD)\";s:6:\"symbol\";s:5:\"د.ج\";s:13:\"exchange_rate\";s:8:\"129.2400\";s:7:\"country\";s:7:\"Algeria\";}i:86;a:5:{s:5:\"value\";s:3:\"LYD\";s:5:\"label\";s:18:\"Libyan Dinar (LYD)\";s:6:\"symbol\";s:5:\"ل.د\";s:13:\"exchange_rate\";s:6:\"5.3900\";s:7:\"country\";s:5:\"Libya\";}i:87;a:5:{s:5:\"value\";s:3:\"SDG\";s:5:\"label\";s:20:\"Sudanese Pound (SDG)\";s:6:\"symbol\";s:6:\"ج.س.\";s:13:\"exchange_rate\";s:8:\"454.3000\";s:7:\"country\";s:5:\"Sudan\";}i:88;a:5:{s:5:\"value\";s:3:\"SSP\";s:5:\"label\";s:26:\"South Sudanese Pound (SSP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:9:\"4722.1700\";s:7:\"country\";s:11:\"South Sudan\";}i:89;a:5:{s:5:\"value\";s:3:\"CDF\";s:5:\"label\";s:21:\"Congolese Franc (CDF)\";s:6:\"symbol\";s:2:\"FC\";s:13:\"exchange_rate\";s:9:\"2580.5500\";s:7:\"country\";s:28:\"Democratic Republic of Congo\";}i:90;a:5:{s:5:\"value\";s:3:\"XAF\";s:5:\"label\";s:31:\"Central African CFA Franc (XAF)\";s:6:\"symbol\";s:4:\"FCFA\";s:13:\"exchange_rate\";s:8:\"560.2800\";s:7:\"country\";s:24:\"Central African Republic\";}i:91;a:5:{s:5:\"value\";s:3:\"XOF\";s:5:\"label\";s:28:\"West African CFA Franc (XOF)\";s:6:\"symbol\";s:3:\"CFA\";s:13:\"exchange_rate\";s:8:\"560.2800\";s:7:\"country\";s:7:\"Senegal\";}i:92;a:5:{s:5:\"value\";s:3:\"GMD\";s:5:\"label\";s:20:\"Gambian Dalasi (GMD)\";s:6:\"symbol\";s:1:\"D\";s:13:\"exchange_rate\";s:7:\"73.4100\";s:7:\"country\";s:6:\"Gambia\";}i:93;a:5:{s:5:\"value\";s:3:\"GNF\";s:5:\"label\";s:19:\"Guinean Franc (GNF)\";s:6:\"symbol\";s:2:\"FG\";s:13:\"exchange_rate\";s:9:\"8692.7600\";s:7:\"country\";s:6:\"Guinea\";}i:94;a:5:{s:5:\"value\";s:3:\"SLL\";s:5:\"label\";s:26:\"Sierra Leonean Leone (SLL)\";s:6:\"symbol\";s:2:\"Le\";s:13:\"exchange_rate\";s:10:\"23337.0400\";s:7:\"country\";s:12:\"Sierra Leone\";}i:95;a:5:{s:5:\"value\";s:3:\"LRD\";s:5:\"label\";s:21:\"Liberian Dollar (LRD)\";s:6:\"symbol\";s:2:\"L$\";s:13:\"exchange_rate\";s:8:\"181.5600\";s:7:\"country\";s:7:\"Liberia\";}i:96;a:5:{s:5:\"value\";s:3:\"CVE\";s:5:\"label\";s:25:\"Cape Verdean Escudo (CVE)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:7:\"94.1800\";s:7:\"country\";s:10:\"Cape Verde\";}i:97;a:5:{s:5:\"value\";s:3:\"STN\";s:5:\"label\";s:36:\"São Tomé and Príncipe Dobra (STN)\";s:6:\"symbol\";s:2:\"Db\";s:13:\"exchange_rate\";s:7:\"20.9300\";s:7:\"country\";s:24:\"São Tomé and Príncipe\";}i:98;a:5:{s:5:\"value\";s:3:\"AOA\";s:5:\"label\";s:20:\"Angolan Kwanza (AOA)\";s:6:\"symbol\";s:2:\"Kz\";s:13:\"exchange_rate\";s:8:\"920.1900\";s:7:\"country\";s:6:\"Angola\";}i:99;a:5:{s:5:\"value\";s:3:\"ZWL\";s:5:\"label\";s:23:\"Zimbabwean Dollar (ZWL)\";s:6:\"symbol\";s:2:\"Z$\";s:13:\"exchange_rate\";s:7:\"26.6500\";s:7:\"country\";s:8:\"Zimbabwe\";}}', 1772271616);
+('laravel-cache-active_currencies', 'a:100:{i:0;a:5:{s:5:\"value\";s:3:\"USD\";s:5:\"label\";s:28:\"United States Dollarss (USD)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:6:\"1.0000\";s:7:\"country\";s:13:\"United States\";}i:1;a:5:{s:5:\"value\";s:3:\"EUR\";s:5:\"label\";s:10:\"Euro (EUR)\";s:6:\"symbol\";s:3:\"€\";s:13:\"exchange_rate\";s:6:\"0.8540\";s:7:\"country\";s:14:\"European Union\";}i:2;a:5:{s:5:\"value\";s:3:\"GBP\";s:5:\"label\";s:28:\"British Pound Sterling (GBP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:6:\"0.7420\";s:7:\"country\";s:14:\"United Kingdom\";}i:3;a:5:{s:5:\"value\";s:3:\"JPY\";s:5:\"label\";s:18:\"Japanese Yen (JPY)\";s:6:\"symbol\";s:2:\"¥\";s:13:\"exchange_rate\";s:8:\"150.0200\";s:7:\"country\";s:5:\"Japan\";}i:4;a:5:{s:5:\"value\";s:3:\"CHF\";s:5:\"label\";s:17:\"Swiss Franc (CHF)\";s:6:\"symbol\";s:3:\"CHF\";s:13:\"exchange_rate\";s:6:\"0.7960\";s:7:\"country\";s:11:\"Switzerland\";}i:5;a:5:{s:5:\"value\";s:3:\"CAD\";s:5:\"label\";s:21:\"Canadian Dollar (CAD)\";s:6:\"symbol\";s:2:\"C$\";s:13:\"exchange_rate\";s:6:\"1.4000\";s:7:\"country\";s:6:\"Canada\";}i:6;a:5:{s:5:\"value\";s:3:\"AUD\";s:5:\"label\";s:23:\"Australian Dollar (AUD)\";s:6:\"symbol\";s:2:\"A$\";s:13:\"exchange_rate\";s:6:\"1.5100\";s:7:\"country\";s:9:\"Australia\";}i:7;a:5:{s:5:\"value\";s:3:\"NZD\";s:5:\"label\";s:24:\"New Zealand Dollar (NZD)\";s:6:\"symbol\";s:3:\"NZ$\";s:13:\"exchange_rate\";s:6:\"1.7100\";s:7:\"country\";s:11:\"New Zealand\";}i:8;a:5:{s:5:\"value\";s:3:\"CNY\";s:5:\"label\";s:18:\"Chinese Yuan (CNY)\";s:6:\"symbol\";s:2:\"¥\";s:13:\"exchange_rate\";s:6:\"7.1300\";s:7:\"country\";s:5:\"China\";}i:9;a:5:{s:5:\"value\";s:3:\"HKD\";s:5:\"label\";s:22:\"Hong Kong Dollar (HKD)\";s:6:\"symbol\";s:3:\"HK$\";s:13:\"exchange_rate\";s:6:\"7.7800\";s:7:\"country\";s:9:\"Hong Kong\";}i:10;a:5:{s:5:\"value\";s:3:\"SGD\";s:5:\"label\";s:22:\"Singapore Dollar (SGD)\";s:6:\"symbol\";s:2:\"S$\";s:13:\"exchange_rate\";s:6:\"1.2900\";s:7:\"country\";s:9:\"Singapore\";}i:11;a:5:{s:5:\"value\";s:3:\"KRW\";s:5:\"label\";s:22:\"South Korean Won (KRW)\";s:6:\"symbol\";s:3:\"₩\";s:13:\"exchange_rate\";s:9:\"1410.7200\";s:7:\"country\";s:11:\"South Korea\";}i:12;a:5:{s:5:\"value\";s:3:\"INR\";s:5:\"label\";s:18:\"Indian Rupee (INR)\";s:6:\"symbol\";s:3:\"₹\";s:13:\"exchange_rate\";s:7:\"88.7800\";s:7:\"country\";s:5:\"India\";}i:13;a:5:{s:5:\"value\";s:3:\"PKR\";s:5:\"label\";s:21:\"Pakistani Rupee (PKR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:8:\"283.2500\";s:7:\"country\";s:8:\"Pakistan\";}i:14;a:5:{s:5:\"value\";s:3:\"BDT\";s:5:\"label\";s:22:\"Bangladeshi Taka (BDT)\";s:6:\"symbol\";s:3:\"৳\";s:13:\"exchange_rate\";s:8:\"121.7500\";s:7:\"country\";s:10:\"Bangladesh\";}i:15;a:5:{s:5:\"value\";s:3:\"LKR\";s:5:\"label\";s:22:\"Sri Lankan Rupee (LKR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:8:\"302.3200\";s:7:\"country\";s:9:\"Sri Lanka\";}i:16;a:5:{s:5:\"value\";s:3:\"NPR\";s:5:\"label\";s:20:\"Nepalese Rupee (NPR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:8:\"142.0500\";s:7:\"country\";s:5:\"Nepal\";}i:17;a:5:{s:5:\"value\";s:3:\"THB\";s:5:\"label\";s:15:\"Thai Baht (THB)\";s:6:\"symbol\";s:3:\"฿\";s:13:\"exchange_rate\";s:7:\"32.4200\";s:7:\"country\";s:8:\"Thailand\";}i:18;a:5:{s:5:\"value\";s:3:\"MYR\";s:5:\"label\";s:23:\"Malaysian Ringgit (MYR)\";s:6:\"symbol\";s:2:\"RM\";s:13:\"exchange_rate\";s:6:\"4.2100\";s:7:\"country\";s:8:\"Malaysia\";}i:19;a:5:{s:5:\"value\";s:3:\"IDR\";s:5:\"label\";s:23:\"Indonesian Rupiah (IDR)\";s:6:\"symbol\";s:2:\"Rp\";s:13:\"exchange_rate\";s:10:\"16600.5900\";s:7:\"country\";s:9:\"Indonesia\";}i:20;a:5:{s:5:\"value\";s:3:\"PHP\";s:5:\"label\";s:21:\"Philippine Peso (PHP)\";s:6:\"symbol\";s:3:\"₱\";s:13:\"exchange_rate\";s:7:\"58.2800\";s:7:\"country\";s:11:\"Philippines\";}i:21;a:5:{s:5:\"value\";s:3:\"VND\";s:5:\"label\";s:21:\"Vietnamese Dong (VND)\";s:6:\"symbol\";s:3:\"₫\";s:13:\"exchange_rate\";s:10:\"26245.6700\";s:7:\"country\";s:7:\"Vietnam\";}i:22;a:5:{s:5:\"value\";s:3:\"AED\";s:5:\"label\";s:16:\"UAE Dirham (AED)\";s:6:\"symbol\";s:5:\"د.إ\";s:13:\"exchange_rate\";s:6:\"3.6700\";s:7:\"country\";s:20:\"United Arab Emirates\";}i:23;a:5:{s:5:\"value\";s:3:\"SAR\";s:5:\"label\";s:17:\"Saudi Riyal (SAR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:6:\"3.7500\";s:7:\"country\";s:12:\"Saudi Arabia\";}i:24;a:5:{s:5:\"value\";s:3:\"QAR\";s:5:\"label\";s:18:\"Qatari Riyal (QAR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:6:\"3.6400\";s:7:\"country\";s:5:\"Qatar\";}i:25;a:5:{s:5:\"value\";s:3:\"KWD\";s:5:\"label\";s:19:\"Kuwaiti Dinar (KWD)\";s:6:\"symbol\";s:5:\"د.ك\";s:13:\"exchange_rate\";s:6:\"0.3060\";s:7:\"country\";s:6:\"Kuwait\";}i:26;a:5:{s:5:\"value\";s:3:\"BHD\";s:5:\"label\";s:20:\"Bahraini Dinar (BHD)\";s:6:\"symbol\";s:5:\"د.ب\";s:13:\"exchange_rate\";s:6:\"0.3760\";s:7:\"country\";s:7:\"Bahrain\";}i:27;a:5:{s:5:\"value\";s:3:\"OMR\";s:5:\"label\";s:16:\"Omani Rial (OMR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:6:\"0.3840\";s:7:\"country\";s:4:\"Oman\";}i:28;a:5:{s:5:\"value\";s:3:\"JOD\";s:5:\"label\";s:21:\"Jordanian Dinar (JOD)\";s:6:\"symbol\";s:5:\"د.ا\";s:13:\"exchange_rate\";s:6:\"0.7090\";s:7:\"country\";s:6:\"Jordan\";}i:29;a:5:{s:5:\"value\";s:3:\"LBP\";s:5:\"label\";s:20:\"Lebanese Pound (LBP)\";s:6:\"symbol\";s:5:\"ل.ل\";s:13:\"exchange_rate\";s:10:\"89500.0000\";s:7:\"country\";s:7:\"Lebanon\";}i:30;a:5:{s:5:\"value\";s:3:\"EGP\";s:5:\"label\";s:20:\"Egyptian Pound (EGP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:7:\"47.6100\";s:7:\"country\";s:5:\"Egypt\";}i:31;a:5:{s:5:\"value\";s:3:\"ZAR\";s:5:\"label\";s:24:\"South African Rand (ZAR)\";s:6:\"symbol\";s:1:\"R\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:12:\"South Africa\";}i:32;a:5:{s:5:\"value\";s:3:\"NGN\";s:5:\"label\";s:20:\"Nigerian Naira (NGN)\";s:6:\"symbol\";s:3:\"₦\";s:13:\"exchange_rate\";s:9:\"1463.5500\";s:7:\"country\";s:7:\"Nigeria\";}i:33;a:5:{s:5:\"value\";s:3:\"KES\";s:5:\"label\";s:21:\"Kenyan Shilling (KES)\";s:6:\"symbol\";s:3:\"KSh\";s:13:\"exchange_rate\";s:8:\"129.1100\";s:7:\"country\";s:5:\"Kenya\";}i:34;a:5:{s:5:\"value\";s:3:\"GHS\";s:5:\"label\";s:19:\"Ghanaian Cedi (GHS)\";s:6:\"symbol\";s:3:\"₵\";s:13:\"exchange_rate\";s:7:\"12.6100\";s:7:\"country\";s:5:\"Ghana\";}i:35;a:5:{s:5:\"value\";s:3:\"SEK\";s:5:\"label\";s:19:\"Swedish Krona (SEK)\";s:6:\"symbol\";s:2:\"kr\";s:13:\"exchange_rate\";s:6:\"9.3800\";s:7:\"country\";s:6:\"Sweden\";}i:36;a:5:{s:5:\"value\";s:3:\"NOK\";s:5:\"label\";s:21:\"Norwegian Krone (NOK)\";s:6:\"symbol\";s:2:\"kr\";s:13:\"exchange_rate\";s:6:\"9.9300\";s:7:\"country\";s:6:\"Norway\";}i:37;a:5:{s:5:\"value\";s:3:\"DKK\";s:5:\"label\";s:18:\"Danish Krone (DKK)\";s:6:\"symbol\";s:2:\"kr\";s:13:\"exchange_rate\";s:6:\"6.3700\";s:7:\"country\";s:7:\"Denmark\";}i:38;a:5:{s:5:\"value\";s:3:\"PLN\";s:5:\"label\";s:18:\"Polish Zloty (PLN)\";s:6:\"symbol\";s:3:\"zł\";s:13:\"exchange_rate\";s:6:\"3.6300\";s:7:\"country\";s:6:\"Poland\";}i:39;a:5:{s:5:\"value\";s:3:\"CZK\";s:5:\"label\";s:18:\"Czech Koruna (CZK)\";s:6:\"symbol\";s:3:\"Kč\";s:13:\"exchange_rate\";s:7:\"20.7800\";s:7:\"country\";s:14:\"Czech Republic\";}i:40;a:5:{s:5:\"value\";s:3:\"HUF\";s:5:\"label\";s:22:\"Hungarian Forint (HUF)\";s:6:\"symbol\";s:2:\"Ft\";s:13:\"exchange_rate\";s:8:\"332.0100\";s:7:\"country\";s:7:\"Hungary\";}i:41;a:5:{s:5:\"value\";s:3:\"RON\";s:5:\"label\";s:18:\"Romanian Leu (RON)\";s:6:\"symbol\";s:3:\"lei\";s:13:\"exchange_rate\";s:6:\"4.3500\";s:7:\"country\";s:7:\"Romania\";}i:42;a:5:{s:5:\"value\";s:3:\"BGN\";s:5:\"label\";s:19:\"Bulgarian Lev (BGN)\";s:6:\"symbol\";s:4:\"лв\";s:13:\"exchange_rate\";s:6:\"1.6700\";s:7:\"country\";s:8:\"Bulgaria\";}i:43;a:5:{s:5:\"value\";s:3:\"HRK\";s:5:\"label\";s:19:\"Croatian Kuna (HRK)\";s:6:\"symbol\";s:2:\"kn\";s:13:\"exchange_rate\";s:6:\"6.4400\";s:7:\"country\";s:7:\"Croatia\";}i:44;a:5:{s:5:\"value\";s:3:\"RSD\";s:5:\"label\";s:19:\"Serbian Dinar (RSD)\";s:6:\"symbol\";s:6:\"дин\";s:13:\"exchange_rate\";s:8:\"100.1100\";s:7:\"country\";s:6:\"Serbia\";}i:45;a:5:{s:5:\"value\";s:3:\"BRL\";s:5:\"label\";s:20:\"Brazilian Real (BRL)\";s:6:\"symbol\";s:2:\"R$\";s:13:\"exchange_rate\";s:6:\"5.3400\";s:7:\"country\";s:6:\"Brazil\";}i:46;a:5:{s:5:\"value\";s:3:\"MXN\";s:5:\"label\";s:18:\"Mexican Peso (MXN)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:7:\"18.3700\";s:7:\"country\";s:6:\"Mexico\";}i:47;a:5:{s:5:\"value\";s:3:\"ARS\";s:5:\"label\";s:20:\"Argentine Peso (ARS)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:9:\"1429.7500\";s:7:\"country\";s:9:\"Argentina\";}i:48;a:5:{s:5:\"value\";s:3:\"CLP\";s:5:\"label\";s:18:\"Chilean Peso (CLP)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:8:\"963.9800\";s:7:\"country\";s:5:\"Chile\";}i:49;a:5:{s:5:\"value\";s:3:\"COP\";s:5:\"label\";s:20:\"Colombian Peso (COP)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:9:\"3867.9200\";s:7:\"country\";s:8:\"Colombia\";}i:50;a:5:{s:5:\"value\";s:3:\"PEN\";s:5:\"label\";s:18:\"Peruvian Sol (PEN)\";s:6:\"symbol\";s:2:\"S/\";s:13:\"exchange_rate\";s:6:\"3.4600\";s:7:\"country\";s:4:\"Peru\";}i:51;a:5:{s:5:\"value\";s:3:\"UYU\";s:5:\"label\";s:20:\"Uruguayan Peso (UYU)\";s:6:\"symbol\";s:2:\"$U\";s:13:\"exchange_rate\";s:7:\"39.9200\";s:7:\"country\";s:7:\"Uruguay\";}i:52;a:5:{s:5:\"value\";s:3:\"BOB\";s:5:\"label\";s:24:\"Bolivian Boliviano (BOB)\";s:6:\"symbol\";s:2:\"Bs\";s:13:\"exchange_rate\";s:6:\"6.9200\";s:7:\"country\";s:7:\"Bolivia\";}i:53;a:5:{s:5:\"value\";s:3:\"VES\";s:5:\"label\";s:25:\"Venezuelan Bolívar (VES)\";s:6:\"symbol\";s:4:\"Bs.S\";s:13:\"exchange_rate\";s:8:\"187.2900\";s:7:\"country\";s:9:\"Venezuela\";}i:54;a:5:{s:5:\"value\";s:3:\"RUB\";s:5:\"label\";s:19:\"Russian Ruble (RUB)\";s:6:\"symbol\";s:3:\"₽\";s:13:\"exchange_rate\";s:7:\"82.8900\";s:7:\"country\";s:6:\"Russia\";}i:55;a:5:{s:5:\"value\";s:3:\"TRY\";s:5:\"label\";s:18:\"Turkish Lira (TRY)\";s:6:\"symbol\";s:3:\"₺\";s:13:\"exchange_rate\";s:7:\"41.7000\";s:7:\"country\";s:6:\"Turkey\";}i:56;a:5:{s:5:\"value\";s:3:\"ILS\";s:5:\"label\";s:20:\"Israeli Shekel (ILS)\";s:6:\"symbol\";s:3:\"₪\";s:13:\"exchange_rate\";s:6:\"3.2800\";s:7:\"country\";s:6:\"Israel\";}i:57;a:5:{s:5:\"value\";s:3:\"UAH\";s:5:\"label\";s:23:\"Ukrainian Hryvnia (UAH)\";s:6:\"symbol\";s:3:\"₴\";s:13:\"exchange_rate\";s:7:\"41.3300\";s:7:\"country\";s:7:\"Ukraine\";}i:58;a:5:{s:5:\"value\";s:3:\"BYN\";s:5:\"label\";s:22:\"Belarusian Ruble (BYN)\";s:6:\"symbol\";s:2:\"Br\";s:13:\"exchange_rate\";s:6:\"3.2300\";s:7:\"country\";s:7:\"Belarus\";}i:59;a:5:{s:5:\"value\";s:3:\"KZT\";s:5:\"label\";s:23:\"Kazakhstani Tenge (KZT)\";s:6:\"symbol\";s:3:\"₸\";s:13:\"exchange_rate\";s:8:\"544.2300\";s:7:\"country\";s:10:\"Kazakhstan\";}i:60;a:5:{s:5:\"value\";s:3:\"UZS\";s:5:\"label\";s:21:\"Uzbekistani Som (UZS)\";s:6:\"symbol\";s:4:\"лв\";s:13:\"exchange_rate\";s:10:\"12078.6900\";s:7:\"country\";s:10:\"Uzbekistan\";}i:61;a:5:{s:5:\"value\";s:3:\"KGS\";s:5:\"label\";s:21:\"Kyrgyzstani Som (KGS)\";s:6:\"symbol\";s:4:\"лв\";s:13:\"exchange_rate\";s:7:\"87.3500\";s:7:\"country\";s:10:\"Kyrgyzstan\";}i:62;a:5:{s:5:\"value\";s:3:\"TJS\";s:5:\"label\";s:24:\"Tajikistani Somoni (TJS)\";s:6:\"symbol\";s:2:\"SM\";s:13:\"exchange_rate\";s:6:\"9.3800\";s:7:\"country\";s:10:\"Tajikistan\";}i:63;a:5:{s:5:\"value\";s:3:\"TMT\";s:5:\"label\";s:25:\"Turkmenistani Manat (TMT)\";s:6:\"symbol\";s:1:\"T\";s:13:\"exchange_rate\";s:6:\"3.5000\";s:7:\"country\";s:12:\"Turkmenistan\";}i:64;a:5:{s:5:\"value\";s:3:\"AFN\";s:5:\"label\";s:20:\"Afghan Afghani (AFN)\";s:6:\"symbol\";s:2:\"؋\";s:13:\"exchange_rate\";s:7:\"67.1500\";s:7:\"country\";s:11:\"Afghanistan\";}i:65;a:5:{s:5:\"value\";s:3:\"IRR\";s:5:\"label\";s:18:\"Iranian Rial (IRR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:10:\"42434.4900\";s:7:\"country\";s:4:\"Iran\";}i:66;a:5:{s:5:\"value\";s:3:\"IQD\";s:5:\"label\";s:17:\"Iraqi Dinar (IQD)\";s:6:\"symbol\";s:5:\"ع.د\";s:13:\"exchange_rate\";s:9:\"1309.3300\";s:7:\"country\";s:4:\"Iraq\";}i:67;a:5:{s:5:\"value\";s:3:\"SYP\";s:5:\"label\";s:18:\"Syrian Pound (SYP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:10:\"12890.1200\";s:7:\"country\";s:5:\"Syria\";}i:68;a:5:{s:5:\"value\";s:3:\"YER\";s:5:\"label\";s:17:\"Yemeni Rial (YER)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:8:\"239.0000\";s:7:\"country\";s:5:\"Yemen\";}i:69;a:5:{s:5:\"value\";s:3:\"SOS\";s:5:\"label\";s:21:\"Somali Shilling (SOS)\";s:6:\"symbol\";s:1:\"S\";s:13:\"exchange_rate\";s:8:\"571.3000\";s:7:\"country\";s:7:\"Somalia\";}i:70;a:5:{s:5:\"value\";s:3:\"ETB\";s:5:\"label\";s:20:\"Ethiopian Birr (ETB)\";s:6:\"symbol\";s:2:\"Br\";s:13:\"exchange_rate\";s:8:\"143.9200\";s:7:\"country\";s:8:\"Ethiopia\";}i:71;a:5:{s:5:\"value\";s:3:\"TZS\";s:5:\"label\";s:24:\"Tanzanian Shilling (TZS)\";s:6:\"symbol\";s:3:\"TSh\";s:13:\"exchange_rate\";s:9:\"2445.6500\";s:7:\"country\";s:8:\"Tanzania\";}i:72;a:5:{s:5:\"value\";s:3:\"UGX\";s:5:\"label\";s:22:\"Ugandan Shilling (UGX)\";s:6:\"symbol\";s:3:\"USh\";s:13:\"exchange_rate\";s:9:\"3430.1500\";s:7:\"country\";s:6:\"Uganda\";}i:73;a:5:{s:5:\"value\";s:3:\"RWF\";s:5:\"label\";s:19:\"Rwandan Franc (RWF)\";s:6:\"symbol\";s:2:\"RF\";s:13:\"exchange_rate\";s:9:\"1452.9700\";s:7:\"country\";s:6:\"Rwanda\";}i:74;a:5:{s:5:\"value\";s:3:\"BIF\";s:5:\"label\";s:21:\"Burundian Franc (BIF)\";s:6:\"symbol\";s:3:\"FBu\";s:13:\"exchange_rate\";s:9:\"2959.3900\";s:7:\"country\";s:7:\"Burundi\";}i:75;a:5:{s:5:\"value\";s:3:\"MWK\";s:5:\"label\";s:21:\"Malawian Kwacha (MWK)\";s:6:\"symbol\";s:2:\"MK\";s:13:\"exchange_rate\";s:9:\"1743.1500\";s:7:\"country\";s:6:\"Malawi\";}i:76;a:5:{s:5:\"value\";s:3:\"ZMW\";s:5:\"label\";s:20:\"Zambian Kwacha (ZMW)\";s:6:\"symbol\";s:2:\"ZK\";s:13:\"exchange_rate\";s:7:\"23.8200\";s:7:\"country\";s:6:\"Zambia\";}i:77;a:5:{s:5:\"value\";s:3:\"BWP\";s:5:\"label\";s:19:\"Botswana Pula (BWP)\";s:6:\"symbol\";s:1:\"P\";s:13:\"exchange_rate\";s:7:\"14.1500\";s:7:\"country\";s:8:\"Botswana\";}i:78;a:5:{s:5:\"value\";s:3:\"NAD\";s:5:\"label\";s:21:\"Namibian Dollar (NAD)\";s:6:\"symbol\";s:2:\"N$\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:7:\"Namibia\";}i:79;a:5:{s:5:\"value\";s:3:\"SZL\";s:5:\"label\";s:21:\"Swazi Lilangeni (SZL)\";s:6:\"symbol\";s:1:\"L\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:8:\"Eswatini\";}i:80;a:5:{s:5:\"value\";s:3:\"LSL\";s:5:\"label\";s:18:\"Lesotho Loti (LSL)\";s:6:\"symbol\";s:1:\"L\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:7:\"Lesotho\";}i:81;a:5:{s:5:\"value\";s:3:\"MUR\";s:5:\"label\";s:21:\"Mauritian Rupee (MUR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:7:\"45.3600\";s:7:\"country\";s:9:\"Mauritius\";}i:82;a:5:{s:5:\"value\";s:3:\"SCR\";s:5:\"label\";s:23:\"Seychellois Rupee (SCR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:7:\"14.6500\";s:7:\"country\";s:10:\"Seychelles\";}i:83;a:5:{s:5:\"value\";s:3:\"MAD\";s:5:\"label\";s:21:\"Moroccan Dirham (MAD)\";s:6:\"symbol\";s:6:\"د.م.\";s:13:\"exchange_rate\";s:6:\"9.1200\";s:7:\"country\";s:7:\"Morocco\";}i:84;a:5:{s:5:\"value\";s:3:\"TND\";s:5:\"label\";s:20:\"Tunisian Dinar (TND)\";s:6:\"symbol\";s:5:\"د.ت\";s:13:\"exchange_rate\";s:6:\"2.9100\";s:7:\"country\";s:7:\"Tunisia\";}i:85;a:5:{s:5:\"value\";s:3:\"DZD\";s:5:\"label\";s:20:\"Algerian Dinar (DZD)\";s:6:\"symbol\";s:5:\"د.ج\";s:13:\"exchange_rate\";s:8:\"129.2400\";s:7:\"country\";s:7:\"Algeria\";}i:86;a:5:{s:5:\"value\";s:3:\"LYD\";s:5:\"label\";s:18:\"Libyan Dinar (LYD)\";s:6:\"symbol\";s:5:\"ل.د\";s:13:\"exchange_rate\";s:6:\"5.3900\";s:7:\"country\";s:5:\"Libya\";}i:87;a:5:{s:5:\"value\";s:3:\"SDG\";s:5:\"label\";s:20:\"Sudanese Pound (SDG)\";s:6:\"symbol\";s:6:\"ج.س.\";s:13:\"exchange_rate\";s:8:\"454.3000\";s:7:\"country\";s:5:\"Sudan\";}i:88;a:5:{s:5:\"value\";s:3:\"SSP\";s:5:\"label\";s:26:\"South Sudanese Pound (SSP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:9:\"4722.1700\";s:7:\"country\";s:11:\"South Sudan\";}i:89;a:5:{s:5:\"value\";s:3:\"CDF\";s:5:\"label\";s:21:\"Congolese Franc (CDF)\";s:6:\"symbol\";s:2:\"FC\";s:13:\"exchange_rate\";s:9:\"2580.5500\";s:7:\"country\";s:28:\"Democratic Republic of Congo\";}i:90;a:5:{s:5:\"value\";s:3:\"XAF\";s:5:\"label\";s:31:\"Central African CFA Franc (XAF)\";s:6:\"symbol\";s:4:\"FCFA\";s:13:\"exchange_rate\";s:8:\"560.2800\";s:7:\"country\";s:24:\"Central African Republic\";}i:91;a:5:{s:5:\"value\";s:3:\"XOF\";s:5:\"label\";s:28:\"West African CFA Franc (XOF)\";s:6:\"symbol\";s:3:\"CFA\";s:13:\"exchange_rate\";s:8:\"560.2800\";s:7:\"country\";s:7:\"Senegal\";}i:92;a:5:{s:5:\"value\";s:3:\"GMD\";s:5:\"label\";s:20:\"Gambian Dalasi (GMD)\";s:6:\"symbol\";s:1:\"D\";s:13:\"exchange_rate\";s:7:\"73.4100\";s:7:\"country\";s:6:\"Gambia\";}i:93;a:5:{s:5:\"value\";s:3:\"GNF\";s:5:\"label\";s:19:\"Guinean Franc (GNF)\";s:6:\"symbol\";s:2:\"FG\";s:13:\"exchange_rate\";s:9:\"8692.7600\";s:7:\"country\";s:6:\"Guinea\";}i:94;a:5:{s:5:\"value\";s:3:\"SLL\";s:5:\"label\";s:26:\"Sierra Leonean Leone (SLL)\";s:6:\"symbol\";s:2:\"Le\";s:13:\"exchange_rate\";s:10:\"23337.0400\";s:7:\"country\";s:12:\"Sierra Leone\";}i:95;a:5:{s:5:\"value\";s:3:\"LRD\";s:5:\"label\";s:21:\"Liberian Dollar (LRD)\";s:6:\"symbol\";s:2:\"L$\";s:13:\"exchange_rate\";s:8:\"181.5600\";s:7:\"country\";s:7:\"Liberia\";}i:96;a:5:{s:5:\"value\";s:3:\"CVE\";s:5:\"label\";s:25:\"Cape Verdean Escudo (CVE)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:7:\"94.1800\";s:7:\"country\";s:10:\"Cape Verde\";}i:97;a:5:{s:5:\"value\";s:3:\"STN\";s:5:\"label\";s:36:\"São Tomé and Príncipe Dobra (STN)\";s:6:\"symbol\";s:2:\"Db\";s:13:\"exchange_rate\";s:7:\"20.9300\";s:7:\"country\";s:24:\"São Tomé and Príncipe\";}i:98;a:5:{s:5:\"value\";s:3:\"AOA\";s:5:\"label\";s:20:\"Angolan Kwanza (AOA)\";s:6:\"symbol\";s:2:\"Kz\";s:13:\"exchange_rate\";s:8:\"920.1900\";s:7:\"country\";s:6:\"Angola\";}i:99;a:5:{s:5:\"value\";s:3:\"ZWL\";s:5:\"label\";s:23:\"Zimbabwean Dollar (ZWL)\";s:6:\"symbol\";s:2:\"Z$\";s:13:\"exchange_rate\";s:7:\"26.6500\";s:7:\"country\";s:8:\"Zimbabwe\";}}', 1772379632);
 
 -- --------------------------------------------------------
 
@@ -80,306 +80,372 @@ CREATE TABLE `chart_of_accounts` (
 --
 
 INSERT INTO `chart_of_accounts` (`id`, `account_code`, `account_name`, `account_type`, `parent_account_id`, `account_level`, `is_transactional`, `currency`, `status`, `created_at`, `updated_at`, `short_code`, `comp_id`, `location_id`) VALUES
-(1, '100000000000000', 'Assets', 'Assets', 0, 1, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(2, '100010000000000', 'Current Assets', 'Assets', 1, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(3, '100020000000000', 'Fixed Assets', 'Assets', 1, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(4, '100030000000000', 'Intangible Assets', 'Assets', 1, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(5, '100040000000000', 'Investments', 'Assets', 1, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(6, '100050000000000', 'Other Assets', 'Assets', 1, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(7, '100010001000000', 'Cash Account / Cash In Hand', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'CASH', 1, 1),
-(8, '100010002000000', 'Petty Cash Account', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PETTY', 1, 1),
-(9, '100010003000000', 'Bank Account', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'BANK', 1, 1),
-(10, '100010004000000', 'Accounts Receivable', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'AR', 1, 1),
-(11, '100010005000000', 'Inventory Account', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'INV', 1, 1),
-(12, '100010006000000', 'Prepaid Expenses', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PREP', 1, 1),
-(13, '100020001000000', 'Land Account', 'Assets', 3, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'LAND', 1, 1),
-(14, '100020002000000', 'Building Account', 'Assets', 3, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'BUILD', 1, 1),
-(15, '100020003000000', 'Machinery Account', 'Assets', 3, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'MACH', 1, 1),
-(16, '100020004000000', 'Furniture & Fixtures', 'Assets', 3, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FURN', 1, 1),
-(17, '100020005000000', 'Vehicle Account', 'Assets', 3, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'VEH', 1, 1),
-(18, '100030001000000', 'Goodwill Account', 'Assets', 4, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'GOOD', 1, 1),
-(19, '100030002000000', 'Software License Account', 'Assets', 4, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SOFT', 1, 1),
-(20, '100030003000000', 'Patents & Trademarks', 'Assets', 4, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PAT', 1, 1),
-(21, '100040001000000', 'Long-term Investment Account', 'Assets', 5, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'LTI', 1, 1),
-(22, '100040002000000', 'Short-term Investment Account', 'Assets', 5, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'STI', 1, 1),
-(23, '100050001000000', 'Deferred Tax Asset', 'Assets', 6, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DTA', 1, 1),
-(24, '100050002000000', 'Security Deposits', 'Assets', 6, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SEC', 1, 1),
-(25, '100050003000000', 'Employee Advances', 'Assets', 6, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'EMP', 1, 1),
-(26, '100010001000001', 'Cash in Hands', 'Assets', 7, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-16 05:28:01', 'CIH', 1, 1),
-(27, '100010002000001', 'Petty Cash', 'Assets', 8, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PC', 1, 1),
-(28, '100010003000001', 'HBL', 'Assets', 9, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:39:31', 'B-HBL', 1, 1),
-(29, '100010004000001', 'Accounts Receivable', 'Assets', 10, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'AR', 1, 1),
-(30, '100010005000001', 'Inventory', 'Assets', 11, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'INV', 1, 1),
-(31, '100010006000001', 'Prepaid Expenses', 'Assets', 12, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PREP', 1, 1),
-(32, '100020001000001', 'Land', 'Assets', 13, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'LAND', 1, 1),
-(33, '100020002000001', 'Buildings', 'Assets', 14, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'BUILD', 1, 1),
-(34, '100020003000001', 'Machinery', 'Assets', 15, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'MACH', 1, 1),
-(35, '100020004000001', 'Furniture and Fixtures', 'Assets', 16, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FURN', 1, 1),
-(36, '100020005000001', 'Vehicles', 'Assets', 17, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'VEH', 1, 1),
-(37, '100030001000001', 'Goodwill', 'Assets', 18, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'GOOD', 1, 1),
-(38, '100030002000001', 'Software Licenses', 'Assets', 19, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SOFT', 1, 1),
-(39, '100030003000001', 'Patents and Trademarks', 'Assets', 20, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PAT', 1, 1),
-(40, '100040001000001', 'Long-term Investments', 'Assets', 21, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'LTI', 1, 1),
-(41, '100040002000001', 'Short-term Investments', 'Assets', 22, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'STI', 1, 1),
-(42, '100050001000001', 'Deferred Tax Asset', 'Assets', 23, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DTA', 1, 1),
-(43, '100050002000001', 'Security Deposits', 'Assets', 24, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SEC', 1, 1),
-(44, '100050003000001', 'Employee Advances', 'Assets', 25, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'EMP', 1, 1),
-(45, '200000000000000', 'Liabilities', 'Liabilities', 0, 1, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(46, '200010000000000', 'Current Liabilities', 'Liabilities', 45, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(47, '200020000000000', 'Long-term Liabilities', 'Liabilities', 45, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(48, '200030000000000', 'Provisions', 'Liabilities', 45, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(49, '200040000000000', 'Deferred Liabilities', 'Liabilities', 45, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(50, '200010001000000', 'Accounts Payable Account', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'AP', 1, 1),
-(51, '200010002000000', 'Accrued Expenses Account', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ACC', 1, 1),
-(52, '200010003000000', 'Short-term Loan Account', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'STL', 1, 1),
-(53, '200010004000000', 'Tax Payable Account', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'TAX', 1, 1),
-(54, '200010005000000', 'Wages Payable Account', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'WAGE', 1, 1),
-(55, '200010006000000', 'Interest Payable Account', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'INT', 1, 1),
-(56, '200020001000000', 'Bank Loan Account', 'Liabilities', 47, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'BL', 1, 1),
-(57, '200020002000000', 'Lease Obligation Account', 'Liabilities', 47, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'LEASE', 1, 1),
-(58, '200020003000000', 'Bond Payable Account', 'Liabilities', 47, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'BOND', 1, 1),
-(59, '200020004000000', 'Mortgage Payable Account', 'Liabilities', 47, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'MORT', 1, 1),
-(60, '200030001000000', 'Provision for Income Tax', 'Liabilities', 48, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PROV', 1, 1),
-(61, '200030002000000', 'Provision for Bonus', 'Liabilities', 48, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'BONUS', 1, 1),
-(62, '200030003000000', 'Provision for Gratuity', 'Liabilities', 48, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'GRAT', 1, 1),
-(63, '200040001000000', 'Deferred Tax Liability', 'Liabilities', 49, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DTL', 1, 1),
-(64, '200040002000000', 'Deferred Revenue', 'Liabilities', 49, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DREV', 1, 1),
-(65, '200010001000001', 'Accounts Payable', 'Liabilities', 50, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'AP', 1, 1),
-(66, '200010002000001', 'Accrued Expenses', 'Liabilities', 51, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ACC', 1, 1),
-(67, '200010003000001', 'Short-term Loans', 'Liabilities', 52, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'STL', 1, 1),
-(68, '200010004000001', 'Taxes Payable', 'Liabilities', 53, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'TAX', 1, 1),
-(69, '200010005000001', 'Wages Payable', 'Liabilities', 54, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'WAGE', 1, 1),
-(70, '200010006000001', 'Interest Payable', 'Liabilities', 55, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'INT', 1, 1),
-(71, '200020001000001', 'Bank Loans', 'Liabilities', 56, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'BL', 1, 1),
-(72, '200020002000001', 'Lease Obligations', 'Liabilities', 57, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'LEASE', 1, 1),
-(73, '200020003000001', 'Bonds Payable', 'Liabilities', 58, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'BOND', 1, 1),
-(74, '200020004000001', 'Mortgage Payable', 'Liabilities', 59, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'MORT', 1, 1),
-(75, '200030001000001', 'Provision for Income Tax', 'Liabilities', 60, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PROV', 1, 1),
-(76, '200030002000001', 'Provision for Bonus', 'Liabilities', 61, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'BONUS', 1, 1),
-(77, '200030003000001', 'Provision for Gratuity', 'Liabilities', 62, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'GRAT', 1, 1),
-(78, '200040001000001', 'Deferred Tax Liability', 'Liabilities', 63, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DTL', 1, 1),
-(79, '200040002000001', 'Deferred Revenue', 'Liabilities', 64, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DREV', 1, 1),
-(80, '300000000000000', 'Equity', 'Equity', 0, 1, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(81, '300010000000000', 'Share Capital', 'Equity', 80, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(82, '300020000000000', 'Reserves and Surplus', 'Equity', 80, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(83, '300030000000000', 'Retained Earnings', 'Equity', 80, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(84, '300040000000000', 'Owner\'s / Partner\'s Capital', 'Equity', 80, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(85, '300050000000000', 'Drawings / Withdrawals', 'Equity', 80, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(86, '300060000000000', 'Other Comprehensive Income (OCI)', 'Equity', 80, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(87, '300010001000000', 'Authorized Share Capital Account', 'Equity', 81, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'AUTH', 1, 1),
-(88, '300010002000000', 'Issued Share Capital Account', 'Equity', 81, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ISSUE', 1, 1),
-(89, '300010003000000', 'Subscribed Share Capital Account', 'Equity', 81, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SUB', 1, 1),
-(90, '300010004000000', 'Paid-up Share Capital Account', 'Equity', 81, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PAID', 1, 1),
-(91, '300010005000000', 'Preference Share Capital Account', 'Equity', 81, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PREF', 1, 1),
-(92, '300010006000000', 'Ordinary Share Capital Account', 'Equity', 81, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ORD', 1, 1),
-(93, '300010007000000', 'Treasury Share Account', 'Equity', 81, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'TREAS', 1, 1),
-(94, '300020001000000', 'General Reserve Account', 'Equity', 82, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'GEN', 1, 1),
-(95, '300020002000000', 'Capital Reserve Account', 'Equity', 82, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'CAP', 1, 1),
-(96, '300020003000000', 'Revaluation Reserve Account', 'Equity', 82, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'REVAL', 1, 1),
-(97, '300020004000000', 'Share Premium Account', 'Equity', 82, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PREM', 1, 1),
-(98, '300020005000000', 'Statutory Reserve Account', 'Equity', 82, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'STAT', 1, 1),
-(99, '300020006000000', 'Investment Fluctuation Reserve', 'Equity', 82, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'INV', 1, 1),
-(100, '300020007000000', 'Foreign Currency Translation Reserve', 'Equity', 82, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FCTR', 1, 1),
-(101, '300030001000000', 'Opening Retained Earnings Account', 'Equity', 83, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'OPEN', 1, 1),
-(102, '300030002000000', 'Current Year Profit Account', 'Equity', 83, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'CUR', 1, 1),
-(103, '300030003000000', 'Prior Period Adjustments Account', 'Equity', 83, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PRIOR', 1, 1),
-(104, '300030004000000', 'Transferred to Reserves Account', 'Equity', 83, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'TRANS', 1, 1),
-(105, '300030005000000', 'Accumulated Profits Account', 'Equity', 83, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ACCUM', 1, 1),
-(106, '300040001000000', 'Owner\'s Capital Account', 'Equity', 84, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'OWN', 1, 1),
-(107, '300040002000000', 'Partner A Capital Account', 'Equity', 84, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PART1', 1, 1),
-(108, '300040003000000', 'Partner B Capital Account', 'Equity', 84, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PART2', 1, 1),
-(109, '300040004000000', 'Director Capital Account', 'Equity', 84, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DIR', 1, 1),
-(110, '300040005000000', 'Proprietor Capital Account', 'Equity', 84, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PROP', 1, 1),
-(111, '300050001000000', 'Owner Drawings Account', 'Equity', 85, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'OWN', 1, 1),
-(112, '300050002000000', 'Partner Drawings Account', 'Equity', 85, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PART', 1, 1),
-(113, '300050003000000', 'Director Drawings Account', 'Equity', 85, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DIR', 1, 1),
-(114, '300050004000000', 'Personal Expenses Account', 'Equity', 85, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PERS', 1, 1),
-(115, '300060001000000', 'Unrealized Gain on Investments Account', 'Equity', 86, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'UGI', 1, 1),
-(116, '300060002000000', 'Unrealized Loss on Investments Account', 'Equity', 86, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ULI', 1, 1),
-(117, '300060003000000', 'Fair Value Adjustment Account', 'Equity', 86, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FVA', 1, 1),
-(118, '300060004000000', 'Actuarial Gains/Losses on Pensions', 'Equity', 86, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ACT', 1, 1),
-(119, '300060005000000', 'Currency Translation Differences', 'Equity', 86, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'CTD', 1, 1),
-(120, '300010001000001', 'Authorized Share Capital', 'Equity', 87, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'AUTH', 1, 1),
-(121, '300010002000001', 'Issued Share Capital', 'Equity', 88, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ISSUE', 1, 1),
-(122, '300010003000001', 'Subscribed Share Capital', 'Equity', 89, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SUB', 1, 1),
-(123, '300010004000001', 'Paid-up Share Capital', 'Equity', 90, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PAID', 1, 1),
-(124, '300010005000001', 'Preference Share Capital', 'Equity', 91, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PREF', 1, 1),
-(125, '300010006000001', 'Ordinary Share Capital', 'Equity', 92, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ORD', 1, 1),
-(126, '300010007000001', 'Treasury Shares', 'Equity', 93, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'TREAS', 1, 1),
-(127, '300020001000001', 'General Reserve', 'Equity', 94, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'GEN', 1, 1),
-(128, '300020002000001', 'Capital Reserve', 'Equity', 95, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'CAP', 1, 1),
-(129, '300020003000001', 'Revaluation Reserve', 'Equity', 96, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'REVAL', 1, 1),
-(130, '300020004000001', 'Share Premium Account', 'Equity', 97, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PREM', 1, 1),
-(131, '300020005000001', 'Statutory Reserve', 'Equity', 98, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'STAT', 1, 1),
-(132, '300020006000001', 'Investment Fluctuation Reserve', 'Equity', 99, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'INV', 1, 1),
-(133, '300020007000001', 'Foreign Currency Translation Reserve', 'Equity', 100, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FCTR', 1, 1),
-(134, '300030001000001', 'Opening Retained Earnings', 'Equity', 101, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'OPEN', 1, 1),
-(135, '300030002000001', 'Current Year Profit', 'Equity', 102, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'CUR', 1, 1),
-(136, '300030003000001', 'Prior Period Adjustments', 'Equity', 103, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PRIOR', 1, 1),
-(137, '300030004000001', 'Transferred to Reserves', 'Equity', 104, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'TRANS', 1, 1),
-(138, '300030005000001', 'Accumulated Profits', 'Equity', 105, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ACCUM', 1, 1),
-(139, '300040001000001', 'Owner\'s Capital Account', 'Equity', 106, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'OWN', 1, 1),
-(140, '300040002000001', 'Partner A Capital Account', 'Equity', 107, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PART1', 1, 1),
-(141, '300040003000001', 'Partner B Capital Account', 'Equity', 108, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PART2', 1, 1),
-(142, '300040004000001', 'Director Capital Account', 'Equity', 109, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DIR', 1, 1),
-(143, '300040005000001', 'Proprietor Capital Account', 'Equity', 110, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PROP', 1, 1),
-(144, '300050001000001', 'Owner Drawings', 'Equity', 111, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'OWN', 1, 1),
-(145, '300050002000001', 'Partner Drawings', 'Equity', 112, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PART', 1, 1),
-(146, '300050003000001', 'Director Drawings', 'Equity', 113, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DIR', 1, 1),
-(147, '300050004000001', 'Personal Expenses (Non-Business)', 'Equity', 114, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PERS', 1, 1),
-(148, '300060001000001', 'Unrealized Gain on Investments', 'Equity', 115, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'UGI', 1, 1),
-(149, '300060002000001', 'Unrealized Loss on Investments', 'Equity', 116, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ULI', 1, 1),
-(150, '300060003000001', 'Fair Value Adjustment', 'Equity', 117, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FVA', 1, 1),
-(151, '300060004000001', 'Actuarial Gains / Losses on Pensions', 'Equity', 118, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ACT', 1, 1),
-(152, '300060005000001', 'Currency Translation Differences (OCI)', 'Equity', 119, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'CTD', 1, 1),
-(153, '400000000000000', 'Revenue', 'Revenue', 0, 1, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(154, '400010000000000', 'Operating Revenue', 'Revenue', 153, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(155, '400020000000000', 'Non-Operating Revenue', 'Revenue', 153, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(156, '400030000000000', 'Other Income', 'Revenue', 153, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(157, '400040000000000', 'Discounts & Rebates', 'Revenue', 153, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(158, '400010001000000', 'Sales Revenue Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SALES', 1, 1),
-(159, '400010002000000', 'Service Revenue Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SERV', 1, 1),
-(160, '400010003000000', 'Product Revenue Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PROD', 1, 1),
-(161, '400010004000000', 'Rental Income Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'RENT', 1, 1),
-(162, '400010005000000', 'Maintenance Revenue Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'MAINT', 1, 1),
-(163, '400010006000000', 'Subscription Revenue Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SUB', 1, 1),
-(164, '400010007000000', 'Commission Income Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'COMM', 1, 1),
-(165, '400010008000000', 'Consultancy Income Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'CONS', 1, 1),
-(166, '400020001000000', 'Interest Income Account', 'Revenue', 155, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'INT', 1, 1),
-(167, '400020002000000', 'Dividend Income Account', 'Revenue', 155, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DIV', 1, 1),
-(168, '400020003000000', 'Gain on Sale of Assets Account', 'Revenue', 155, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'GAIN', 1, 1),
-(169, '400020004000000', 'Foreign Exchange Gain Account', 'Revenue', 155, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FX', 1, 1),
-(170, '400020005000000', 'Investment Income Account', 'Revenue', 155, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'INV', 1, 1),
-(171, '400020006000000', 'Royalty Income Account', 'Revenue', 155, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ROY', 1, 1),
-(172, '400030001000000', 'Miscellaneous Income Account', 'Revenue', 156, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'MISC', 1, 1),
-(173, '400030002000000', 'Scrap Sales Account', 'Revenue', 156, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SCRAP', 1, 1),
-(174, '400030003000000', 'Insurance Claim Received Account', 'Revenue', 156, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'INS', 1, 1),
-(175, '400030004000000', 'Rebate Received Account', 'Revenue', 156, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'REB', 1, 1),
-(176, '400030005000000', 'Refunds & Adjustments Account', 'Revenue', 156, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'REF', 1, 1),
-(177, '400030006000000', 'Grant Income Account', 'Revenue', 156, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'GRANT', 1, 1),
-(178, '400040001000000', 'Sales Discounts Account', 'Revenue', 157, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DISC', 1, 1),
-(179, '400040002000000', 'Early Payment Discounts Account', 'Revenue', 157, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'EPD', 1, 1),
-(180, '400040003000000', 'Customer Rebates Account', 'Revenue', 157, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'CR', 1, 1),
-(181, '400040004000000', 'Trade Discounts Account', 'Revenue', 157, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'TD', 1, 1),
-(182, '400040005000000', 'Loyalty Program Discounts Account', 'Revenue', 157, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'LPD', 1, 1),
-(183, '400010001000001', 'Sales Revenue', 'Revenue', 158, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SALES', 1, 1),
-(184, '400010002000001', 'Service Revenue', 'Revenue', 159, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SERV', 1, 1),
-(185, '400010003000001', 'Product Revenue', 'Revenue', 160, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PROD', 1, 1),
-(186, '400010004000001', 'Rental Income', 'Revenue', 161, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'RENT', 1, 1),
-(187, '400010005000001', 'Maintenance Revenue', 'Revenue', 162, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'MAINT', 1, 1),
-(188, '400010006000001', 'Subscription Revenue', 'Revenue', 163, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SUB', 1, 1),
-(189, '400010007000001', 'Commission Income', 'Revenue', 164, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'COMM', 1, 1),
-(190, '400010008000001', 'Consultancy Income', 'Revenue', 165, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'CONS', 1, 1),
-(191, '400020001000001', 'Interest Income', 'Revenue', 166, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'INT', 1, 1),
-(192, '400020002000001', 'Dividend Income', 'Revenue', 167, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DIV', 1, 1),
-(193, '400020003000001', 'Gain on Sale of Assets', 'Revenue', 168, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'GAIN', 1, 1),
-(194, '400020004000001', 'Foreign Exchange Gain', 'Revenue', 169, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FX', 1, 1),
-(195, '400020005000001', 'Investment Income', 'Revenue', 170, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'INV', 1, 1),
-(196, '400020006000001', 'Royalty Income', 'Revenue', 171, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ROY', 1, 1),
-(197, '400030001000001', 'Miscellaneous Income', 'Revenue', 172, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'MISC', 1, 1),
-(198, '400030002000001', 'Scrap Sales', 'Revenue', 173, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SCRAP', 1, 1),
-(199, '400030003000001', 'Insurance Claim Received', 'Revenue', 174, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'INS', 1, 1),
-(200, '400030004000001', 'Rebate Received', 'Revenue', 175, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'REB', 1, 1),
-(201, '400030005000001', 'Refunds & Adjustments', 'Revenue', 176, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'REF', 1, 1),
-(202, '400030006000001', 'Grant Income', 'Revenue', 177, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'GRANT', 1, 1),
-(203, '400040001000001', 'Sales Discounts', 'Revenue', 178, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DISC', 1, 1),
-(204, '400040002000001', 'Early Payment Discounts', 'Revenue', 179, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'EPD', 1, 1),
-(205, '400040003000001', 'Customer Rebates', 'Revenue', 180, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'CR', 1, 1),
-(206, '400040004000001', 'Trade Discounts', 'Revenue', 181, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'TD', 1, 1),
-(207, '400040005000001', 'Loyalty Program Discounts', 'Revenue', 182, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'LPD', 1, 1),
-(208, '500000000000000', 'Expenses', 'Expenses', 0, 1, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(209, '500010000000000', 'Cost of Goods Sold', 'Expenses', 208, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(210, '500020000000000', 'Administrative Expenses', 'Expenses', 208, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(211, '500030000000000', 'Selling & Distribution Expenses', 'Expenses', 208, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(212, '500040000000000', 'Financial Expenses', 'Expenses', 208, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(213, '500050000000000', 'Other Expenses', 'Expenses', 208, 2, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'NULL', 1, 1),
-(214, '500010001000000', 'Raw Material Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'RAW', 1, 1),
-(215, '500010002000000', 'Purchase Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PUR', 1, 1),
-(216, '500010003000000', 'Purchase Returns Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PR', 1, 1),
-(217, '500010004000000', 'Freight Inward Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FR', 1, 1),
-(218, '500010005000000', 'Packing Materials Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PACK', 1, 1),
-(219, '500010006000000', 'Factory Wages Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FW', 1, 1),
-(220, '500010007000000', 'Factory Rent Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FR', 1, 1),
-(221, '500010008000000', 'Depreciation - Factory Equipment Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DFE', 1, 1),
-(222, '500010009000000', 'Power and Fuel Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PF', 1, 1),
-(223, '500010010000000', 'Direct Labor Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DL', 1, 1),
-(224, '500020001000000', 'Office Salaries Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'OS', 1, 1),
-(225, '500020002000000', 'Office Rent Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'OR', 1, 1),
-(226, '500020003000000', 'Utilities Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'UTIL', 1, 1),
-(227, '500020004000000', 'Stationery & Office Supplies Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'STN', 1, 1),
-(228, '500020005000000', 'Printing & Postage Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PP', 1, 1),
-(229, '500020006000000', 'IT & Internet Expenses Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'IT', 1, 1),
-(230, '500020007000000', 'Repairs & Maintenance Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'RM', 1, 1),
-(231, '500020008000000', 'Depreciation - Office Equipment Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DOE', 1, 1),
-(232, '500020009000000', 'Professional Fees Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PF', 1, 1),
-(233, '500020010000000', 'Travel & Conveyance Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'TC', 1, 1),
-(234, '500030001000000', 'Advertising & Promotion Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'AP', 1, 1),
-(235, '500030002000000', 'Sales Commission Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SC', 1, 1),
-(236, '500030003000000', 'Freight Outward Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FO', 1, 1),
-(237, '500030004000000', 'Delivery & Transportation Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DT', 1, 1),
-(238, '500030005000000', 'Sales Staff Salaries Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SSS', 1, 1),
-(239, '500030006000000', 'Showroom Expenses Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SE', 1, 1),
-(240, '500030007000000', 'Discount Allowed Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DA', 1, 1),
-(241, '500030008000000', 'Promotional Samples Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PS', 1, 1),
-(242, '500030009000000', 'After-Sales Service Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ASS', 1, 1),
-(243, '500030010000000', 'Trade Show Expenses Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'TSE', 1, 1),
-(244, '500040001000000', 'Bank Charges Account', 'Expenses', 212, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'BC', 1, 1),
-(245, '500040002000000', 'Interest Expense Account', 'Expenses', 212, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'IE', 1, 1),
-(246, '500040003000000', 'Loan Processing Fees Account', 'Expenses', 212, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'LPF', 1, 1),
-(247, '500040004000000', 'Foreign Exchange Loss Account', 'Expenses', 212, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FEL', 1, 1),
-(248, '500040005000000', 'Credit Card Fees Account', 'Expenses', 212, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'CCF', 1, 1),
-(249, '500040006000000', 'Bank Overdraft Interest Account', 'Expenses', 212, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'BOI', 1, 1),
-(250, '500050001000000', 'Bad Debts Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'BD', 1, 1),
-(251, '500050002000000', 'Depreciation - Other Assets Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DOA', 1, 1),
-(252, '500050003000000', 'Amortization Expense Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'AE', 1, 1),
-(253, '500050004000000', 'Loss on Sale of Assets Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'LSA', 1, 1),
-(254, '500050005000000', 'Donations & Contributions Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DC', 1, 1),
-(255, '500050006000000', 'Penalties & Fines Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PF', 1, 1),
-(256, '500050007000000', 'Staff Welfare Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SW', 1, 1),
-(257, '500050008000000', 'Training & Seminars Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'TS', 1, 1),
-(258, '500050009000000', 'Miscellaneous Expenses Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ME', 1, 1),
-(259, '500010001000001', 'Raw Material Consumed', 'Expenses', 214, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'RAW', 1, 1),
-(260, '500010002000001', 'Purchases', 'Expenses', 215, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PUR', 1, 1),
-(261, '500010003000001', 'Purchase Returns', 'Expenses', 216, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PR', 1, 1),
-(262, '500010004000001', 'Freight Inward', 'Expenses', 217, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FR', 1, 1),
-(263, '500010005000001', 'Packing Materials', 'Expenses', 218, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PACK', 1, 1),
-(264, '500010006000001', 'Factory Wages', 'Expenses', 219, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FW', 1, 1),
-(265, '500010007000001', 'Factory Rent', 'Expenses', 220, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FR', 1, 1),
-(266, '500010008000001', 'Depreciation - Factory Equipment', 'Expenses', 221, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DFE', 1, 1),
-(267, '500010009000001', 'Power and Fuel', 'Expenses', 222, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PF', 1, 1),
-(268, '500010010000001', 'Direct Labor', 'Expenses', 223, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DL', 1, 1),
-(269, '500020001000001', 'Office Salaries', 'Expenses', 224, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'OS', 1, 1),
-(270, '500020002000001', 'Office Rent', 'Expenses', 225, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'OR', 1, 1),
-(271, '500020003000001', 'Utilities', 'Expenses', 226, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'UTIL', 1, 1),
-(272, '500020004000001', 'Stationery & Office Supplies', 'Expenses', 227, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'STN', 1, 1),
-(273, '500020005000001', 'Printing & Postage', 'Expenses', 228, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PP', 1, 1),
-(274, '500020006000001', 'IT & Internet Expenses', 'Expenses', 229, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'IT', 1, 1),
-(275, '500020007000001', 'Repairs & Maintenance', 'Expenses', 230, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'RM', 1, 1),
-(276, '500020008000001', 'Depreciation - Office Equipment', 'Expenses', 231, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DOE', 1, 1),
-(277, '500020009000001', 'Professional Fees', 'Expenses', 232, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PF', 1, 1),
-(278, '500020010000001', 'Travel & Conveyance', 'Expenses', 233, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'TC', 1, 1),
-(279, '500030001000001', 'Advertising & Promotion', 'Expenses', 234, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ADV', 1, 1),
-(280, '500030002000001', 'Sales Commission', 'Expenses', 235, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SC', 1, 1),
-(281, '500030003000001', 'Freight Outward', 'Expenses', 236, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FO', 1, 1),
-(282, '500030004000001', 'Delivery & Transportation', 'Expenses', 237, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DT', 1, 1),
-(283, '500030005000001', 'Sales Staff Salaries', 'Expenses', 238, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SSS', 1, 1),
-(284, '500030006000001', 'Showroom Expenses', 'Expenses', 239, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'SE', 1, 1),
-(285, '500030007000001', 'Discount Allowed', 'Expenses', 240, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DA', 1, 1),
-(286, '500030008000001', 'Promotional Samples', 'Expenses', 241, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PS', 1, 1),
-(287, '500030009000001', 'After-Sales Service', 'Expenses', 242, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'ASS', 1, 1),
-(288, '500030010000001', 'Trade Show Expenses', 'Expenses', 243, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'TSE', 1, 1),
-(289, '500040001000001', 'Bank Charges', 'Expenses', 244, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'BC', 1, 1),
-(290, '500040002000001', 'Interest Expense', 'Expenses', 245, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'IE', 1, 1),
-(291, '500040003000001', 'Loan Processing Fees', 'Expenses', 246, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'LPF', 1, 1),
-(292, '500040004000001', 'Foreign Exchange Loss', 'Expenses', 247, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'FXL', 1, 1),
-(293, '500040005000001', 'Credit Card Fees', 'Expenses', 248, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'CCF', 1, 1),
-(294, '500040006000001', 'Bank Overdraft Interest', 'Expenses', 249, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'BOI', 1, 1),
-(295, '500050001000001', 'Bad Debts', 'Expenses', 250, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'BD', 1, 1),
-(296, '500050002000001', 'Depreciation - Other Assets', 'Expenses', 251, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DOA', 1, 1),
-(297, '500050003000001', 'Amortization Expense', 'Expenses', 252, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'AE', 1, 1),
-(298, '500050004000001', 'Loss on Sale of Assets', 'Expenses', 253, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'LSA', 1, 1),
-(299, '500050005000001', 'Donations & Contributions', 'Expenses', 254, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'DC', 1, 1),
-(300, '500050006000001', 'Penalties & Fines', 'Expenses', 255, 4, 1, 'USD', 'Active', '2025-10-14 10:12:21', '2025-10-14 10:12:21', 'PF', 1, 1);
+(1, '100000000000000', 'Assets', 'Assets', NULL, 1, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(2, '100010000000000', 'Current Assets', 'Assets', 1, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(3, '100020000000000', 'Fixed Assets', 'Assets', 1, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(4, '100030000000000', 'Intangible Assets', 'Assets', 1, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(5, '100040000000000', 'Investments', 'Assets', 1, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(6, '100050000000000', 'Other Assets', 'Assets', 1, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(7, '100010001000000', 'Cash Account / Cash In Hand', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CASH', 1, 1),
+(8, '100010002000000', 'Petty Cash Account', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PETTY', 1, 1),
+(9, '100010003000000', 'Bank Account', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'BANK', 1, 1),
+(10, '100010004000000', 'Accounts Receivable', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'AR', 1, 1),
+(11, '100010005000000', 'Inventory Account', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'INV', 1, 1),
+(12, '100010006000000', 'Prepaid Expenses', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PREP', 1, 1),
+(13, '100020001000000', 'Land Account', 'Assets', 3, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LAND', 1, 1),
+(14, '100020002000000', 'Building Account', 'Assets', 3, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'BUILD', 1, 1),
+(15, '100020003000000', 'Machinery Account', 'Assets', 3, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'MACH', 1, 1),
+(16, '100020004000000', 'Furniture & Fixtures', 'Assets', 3, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FURN', 1, 1),
+(17, '100020005000000', 'Vehicle Account', 'Assets', 3, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'VEH', 1, 1),
+(18, '100030001000000', 'Goodwill Account', 'Assets', 4, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'GOOD', 1, 1),
+(19, '100030002000000', 'Software License Account', 'Assets', 4, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SOFT', 1, 1),
+(20, '100030003000000', 'Patents & Trademarks', 'Assets', 4, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PAT', 1, 1),
+(21, '100040001000000', 'Long-term Investment Account', 'Assets', 5, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LTI', 1, 1),
+(22, '100040002000000', 'Short-term Investment Account', 'Assets', 5, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'STI', 1, 1),
+(23, '100050001000000', 'Deferred Tax Asset', 'Assets', 6, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DTA', 1, 1),
+(24, '100050002000000', 'Security Deposits', 'Assets', 6, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SEC', 1, 1),
+(25, '100050003000000', 'Employee Advances', 'Assets', 6, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'EMP', 1, 1),
+(26, '100010001000001', 'Cash in Hands', 'Assets', 7, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CIH', 1, 1),
+(27, '100010002000001', 'Petty Cash', 'Assets', 8, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PC', 1, 1),
+(28, '100010003000001', 'HBL', 'Assets', 9, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'B-HBL', 1, 1),
+(29, '100010004000001', 'Accounts Receivable', 'Assets', 10, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'AR', 1, 1),
+(30, '100010005000001', 'Inventory', 'Assets', 11, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'INV', 1, 1),
+(31, '100010006000001', 'Prepaid Expenses', 'Assets', 12, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PREP', 1, 1),
+(32, '100020001000001', 'Land', 'Assets', 13, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LAND', 1, 1),
+(33, '100020002000001', 'Buildings', 'Assets', 14, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'BUILD', 1, 1),
+(34, '100020003000001', 'Machinery', 'Assets', 15, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'MACH', 1, 1),
+(35, '100020004000001', 'Furniture and Fixtures', 'Assets', 16, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FURN', 1, 1),
+(36, '100020005000001', 'Vehicles', 'Assets', 17, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'VEH', 1, 1),
+(37, '100030001000001', 'Goodwill', 'Assets', 18, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'GOOD', 1, 1),
+(38, '100030002000001', 'Software Licenses', 'Assets', 19, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SOFT', 1, 1),
+(39, '100030003000001', 'Patents and Trademarks', 'Assets', 20, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PAT', 1, 1),
+(40, '100040001000001', 'Long-term Investments', 'Assets', 21, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LTI', 1, 1),
+(41, '100040002000001', 'Short-term Investments', 'Assets', 22, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'STI', 1, 1),
+(42, '100050001000001', 'Deferred Tax Asset', 'Assets', 23, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DTA', 1, 1),
+(43, '100050002000001', 'Security Deposits', 'Assets', 24, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SEC', 1, 1),
+(44, '100050003000001', 'Employee Advances', 'Assets', 25, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'EMP', 1, 1),
+(45, '200000000000000', 'Liabilities', 'Liabilities', NULL, 1, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(46, '200010000000000', 'Current Liabilities', 'Liabilities', 45, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(47, '200020000000000', 'Long-term Liabilities', 'Liabilities', 45, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(48, '200030000000000', 'Provisions', 'Liabilities', 45, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(49, '200040000000000', 'Deferred Liabilities', 'Liabilities', 45, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(50, '200010001000000', 'Accounts Payable Account', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'AP', 1, 1),
+(51, '200010002000000', 'Accrued Expenses Account', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ACC', 1, 1),
+(52, '200010003000000', 'Short-term Loan Account', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'STL', 1, 1),
+(53, '200010004000000', 'Tax Payable Account', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'TAX', 1, 1),
+(54, '200010005000000', 'Wages Payable Account', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'WAGE', 1, 1),
+(55, '200010006000000', 'Interest Payable Account', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'INT', 1, 1),
+(56, '200020001000000', 'Bank Loan Account', 'Liabilities', 47, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'BL', 1, 1),
+(57, '200020002000000', 'Lease Obligation Account', 'Liabilities', 47, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LEASE', 1, 1),
+(58, '200020003000000', 'Bond Payable Account', 'Liabilities', 47, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'BOND', 1, 1),
+(59, '200020004000000', 'Mortgage Payable Account', 'Liabilities', 47, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'MORT', 1, 1),
+(60, '200030001000000', 'Provision for Income Tax', 'Liabilities', 48, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PROV', 1, 1),
+(61, '200030002000000', 'Provision for Bonus', 'Liabilities', 48, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'BONUS', 1, 1),
+(62, '200030003000000', 'Provision for Gratuity', 'Liabilities', 48, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'GRAT', 1, 1),
+(63, '200040001000000', 'Deferred Tax Liability', 'Liabilities', 49, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DTL', 1, 1),
+(64, '200040002000000', 'Deferred Revenue', 'Liabilities', 49, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DREV', 1, 1),
+(65, '200010001000001', 'Accounts Payable', 'Liabilities', 50, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'AP', 1, 1),
+(66, '200010002000001', 'Accrued Expenses', 'Liabilities', 51, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ACC', 1, 1),
+(67, '200010003000001', 'Short-term Loans', 'Liabilities', 52, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'STL', 1, 1),
+(68, '200010004000001', 'Taxes Payable', 'Liabilities', 53, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'TAX', 1, 1),
+(69, '200010005000001', 'Wages Payable', 'Liabilities', 54, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'WAGE', 1, 1),
+(70, '200010006000001', 'Interest Payable', 'Liabilities', 55, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'INT', 1, 1),
+(71, '200020001000001', 'Bank Loans', 'Liabilities', 56, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'BL', 1, 1),
+(72, '200020002000001', 'Lease Obligations', 'Liabilities', 57, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LEASE', 1, 1),
+(73, '200020003000001', 'Bonds Payable', 'Liabilities', 58, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'BOND', 1, 1),
+(74, '200020004000001', 'Mortgage Payable', 'Liabilities', 59, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'MORT', 1, 1),
+(75, '200030001000001', 'Provision for Income Tax', 'Liabilities', 60, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PROV', 1, 1),
+(76, '200030002000001', 'Provision for Bonus', 'Liabilities', 61, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'BONUS', 1, 1),
+(77, '200030003000001', 'Provision for Gratuity', 'Liabilities', 62, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'GRAT', 1, 1),
+(78, '200040001000001', 'Deferred Tax Liability', 'Liabilities', 63, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DTL', 1, 1),
+(79, '200040002000001', 'Deferred Revenue', 'Liabilities', 64, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DREV', 1, 1),
+(80, '300000000000000', 'Equity', 'Equity', NULL, 1, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(81, '300010000000000', 'Share Capital', 'Equity', 80, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(82, '300020000000000', 'Reserves and Surplus', 'Equity', 80, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(83, '300030000000000', 'Retained Earnings', 'Equity', 80, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(84, '300040000000000', 'Owner\'s / Partner\'s Capital', 'Equity', 80, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(85, '300050000000000', 'Drawings / Withdrawals', 'Equity', 80, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(86, '300060000000000', 'Other Comprehensive Income (OCI)', 'Equity', 80, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(87, '300010001000000', 'Authorized Share Capital Account', 'Equity', 81, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'AUTH', 1, 1),
+(88, '300010002000000', 'Issued Share Capital Account', 'Equity', 81, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ISSUE', 1, 1),
+(89, '300010003000000', 'Subscribed Share Capital Account', 'Equity', 81, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SUB', 1, 1),
+(90, '300010004000000', 'Paid-up Share Capital Account', 'Equity', 81, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PAID', 1, 1),
+(91, '300010005000000', 'Preference Share Capital Account', 'Equity', 81, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PREF', 1, 1),
+(92, '300010006000000', 'Ordinary Share Capital Account', 'Equity', 81, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ORD', 1, 1),
+(93, '300010007000000', 'Treasury Share Account', 'Equity', 81, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'TREAS', 1, 1),
+(94, '300020001000000', 'General Reserve Account', 'Equity', 82, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'GEN', 1, 1),
+(95, '300020002000000', 'Capital Reserve Account', 'Equity', 82, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CAP', 1, 1),
+(96, '300020003000000', 'Revaluation Reserve Account', 'Equity', 82, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'REVAL', 1, 1),
+(97, '300020004000000', 'Share Premium Account', 'Equity', 82, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PREM', 1, 1),
+(98, '300020005000000', 'Statutory Reserve Account', 'Equity', 82, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'STAT', 1, 1),
+(99, '300020006000000', 'Investment Fluctuation Reserve', 'Equity', 82, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'INV', 1, 1),
+(100, '300020007000000', 'Foreign Currency Translation Reserve', 'Equity', 82, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FCTR', 1, 1),
+(101, '300030001000000', 'Opening Retained Earnings Account', 'Equity', 83, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'OPEN', 1, 1),
+(102, '300030002000000', 'Current Year Profit Account', 'Equity', 83, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CUR', 1, 1),
+(103, '300030003000000', 'Prior Period Adjustments Account', 'Equity', 83, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PRIOR', 1, 1),
+(104, '300030004000000', 'Transferred to Reserves Account', 'Equity', 83, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'TRANS', 1, 1),
+(105, '300030005000000', 'Accumulated Profits Account', 'Equity', 83, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ACCUM', 1, 1),
+(106, '300040001000000', 'Owner\'s Capital Account', 'Equity', 84, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'OWN', 1, 1),
+(107, '300040002000000', 'Partner A Capital Account', 'Equity', 84, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PART1', 1, 1),
+(108, '300040003000000', 'Partner B Capital Account', 'Equity', 84, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PART2', 1, 1),
+(109, '300040004000000', 'Director Capital Account', 'Equity', 84, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DIR', 1, 1),
+(110, '300040005000000', 'Proprietor Capital Account', 'Equity', 84, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PROP', 1, 1),
+(111, '300050001000000', 'Owner Drawings Account', 'Equity', 85, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'OWN', 1, 1),
+(112, '300050002000000', 'Partner Drawings Account', 'Equity', 85, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PART', 1, 1),
+(113, '300050003000000', 'Director Drawings Account', 'Equity', 85, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DIR', 1, 1),
+(114, '300050004000000', 'Personal Expenses Account', 'Equity', 85, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PERS', 1, 1),
+(115, '300060001000000', 'Unrealized Gain on Investments Account', 'Equity', 86, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'UGI', 1, 1),
+(116, '300060002000000', 'Unrealized Loss on Investments Account', 'Equity', 86, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ULI', 1, 1),
+(117, '300060003000000', 'Fair Value Adjustment Account', 'Equity', 86, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FVA', 1, 1),
+(118, '300060004000000', 'Actuarial Gains/Losses on Pensions', 'Equity', 86, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ACT', 1, 1),
+(119, '300060005000000', 'Currency Translation Differences', 'Equity', 86, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CTD', 1, 1),
+(120, '300010001000001', 'Authorized Share Capital', 'Equity', 87, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'AUTH', 1, 1),
+(121, '300010002000001', 'Issued Share Capital', 'Equity', 88, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ISSUE', 1, 1),
+(122, '300010003000001', 'Subscribed Share Capital', 'Equity', 89, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SUB', 1, 1),
+(123, '300010004000001', 'Paid-up Share Capital', 'Equity', 90, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PAID', 1, 1),
+(124, '300010005000001', 'Preference Share Capital', 'Equity', 91, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PREF', 1, 1),
+(125, '300010006000001', 'Ordinary Share Capital', 'Equity', 92, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ORD', 1, 1),
+(126, '300010007000001', 'Treasury Shares', 'Equity', 93, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'TREAS', 1, 1),
+(127, '300020001000001', 'General Reserve', 'Equity', 94, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'GEN', 1, 1),
+(128, '300020002000001', 'Capital Reserve', 'Equity', 95, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CAP', 1, 1),
+(129, '300020003000001', 'Revaluation Reserve', 'Equity', 96, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'REVAL', 1, 1),
+(130, '300020004000001', 'Share Premium Account', 'Equity', 97, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PREM', 1, 1),
+(131, '300020005000001', 'Statutory Reserve', 'Equity', 98, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'STAT', 1, 1),
+(132, '300020006000001', 'Investment Fluctuation Reserve', 'Equity', 99, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'INV', 1, 1),
+(133, '300020007000001', 'Foreign Currency Translation Reserve', 'Equity', 100, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FCTR', 1, 1),
+(134, '300030001000001', 'Opening Retained Earnings', 'Equity', 101, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'OPEN', 1, 1),
+(135, '300030002000001', 'Current Year Profit', 'Equity', 102, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CUR', 1, 1),
+(136, '300030003000001', 'Prior Period Adjustments', 'Equity', 103, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PRIOR', 1, 1),
+(137, '300030004000001', 'Transferred to Reserves', 'Equity', 104, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'TRANS', 1, 1),
+(138, '300030005000001', 'Accumulated Profits', 'Equity', 105, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ACCUM', 1, 1),
+(139, '300040001000001', 'Owner\'s Capital Account', 'Equity', 106, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'OWN', 1, 1),
+(140, '300040002000001', 'Partner A Capital Account', 'Equity', 107, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PART1', 1, 1),
+(141, '300040003000001', 'Partner B Capital Account', 'Equity', 108, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PART2', 1, 1),
+(142, '300040004000001', 'Director Capital Account', 'Equity', 109, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DIR', 1, 1),
+(143, '300040005000001', 'Proprietor Capital Account', 'Equity', 110, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PROP', 1, 1),
+(144, '300050001000001', 'Owner Drawings', 'Equity', 111, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'OWN', 1, 1),
+(145, '300050002000001', 'Partner Drawings', 'Equity', 112, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PART', 1, 1),
+(146, '300050003000001', 'Director Drawings', 'Equity', 113, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DIR', 1, 1),
+(147, '300050004000001', 'Personal Expenses (Non-Business)', 'Equity', 114, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PERS', 1, 1),
+(148, '300060001000001', 'Unrealized Gain on Investments', 'Equity', 115, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'UGI', 1, 1),
+(149, '300060002000001', 'Unrealized Loss on Investments', 'Equity', 116, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ULI', 1, 1),
+(150, '300060003000001', 'Fair Value Adjustment', 'Equity', 117, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FVA', 1, 1),
+(151, '300060004000001', 'Actuarial Gains / Losses on Pensions', 'Equity', 118, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ACT', 1, 1),
+(152, '300060005000001', 'Currency Translation Differences (OCI)', 'Equity', 119, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CTD', 1, 1),
+(153, '400000000000000', 'Revenue', 'Revenue', NULL, 1, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(154, '400010000000000', 'Operating Revenue', 'Revenue', 153, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(155, '400020000000000', 'Non-Operating Revenue', 'Revenue', 153, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(156, '400030000000000', 'Other Income', 'Revenue', 153, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(157, '400040000000000', 'Discounts & Rebates', 'Revenue', 153, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(158, '400010001000000', 'Sales Revenue Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SALES', 1, 1),
+(159, '400010002000000', 'Service Revenue Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SERV', 1, 1),
+(160, '400010003000000', 'Product Revenue Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PROD', 1, 1),
+(161, '400010004000000', 'Rental Income Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'RENT', 1, 1),
+(162, '400010005000000', 'Maintenance Revenue Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'MAINT', 1, 1),
+(163, '400010006000000', 'Subscription Revenue Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SUB', 1, 1),
+(164, '400010007000000', 'Commission Income Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'COMM', 1, 1),
+(165, '400010008000000', 'Consultancy Income Account', 'Revenue', 154, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CONS', 1, 1),
+(166, '400020001000000', 'Interest Income Account', 'Revenue', 155, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'INT', 1, 1),
+(167, '400020002000000', 'Dividend Income Account', 'Revenue', 155, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DIV', 1, 1),
+(168, '400020003000000', 'Gain on Sale of Assets Account', 'Revenue', 155, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'GAIN', 1, 1),
+(169, '400020004000000', 'Foreign Exchange Gain Account', 'Revenue', 155, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FX', 1, 1),
+(170, '400020005000000', 'Investment Income Account', 'Revenue', 155, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'INV', 1, 1),
+(171, '400020006000000', 'Royalty Income Account', 'Revenue', 155, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ROY', 1, 1),
+(172, '400030001000000', 'Miscellaneous Income Account', 'Revenue', 156, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'MISC', 1, 1),
+(173, '400030002000000', 'Scrap Sales Account', 'Revenue', 156, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SCRAP', 1, 1),
+(174, '400030003000000', 'Insurance Claim Received Account', 'Revenue', 156, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'INS', 1, 1),
+(175, '400030004000000', 'Rebate Received Account', 'Revenue', 156, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'REB', 1, 1),
+(176, '400030005000000', 'Refunds & Adjustments Account', 'Revenue', 156, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'REF', 1, 1),
+(177, '400030006000000', 'Grant Income Account', 'Revenue', 156, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'GRANT', 1, 1),
+(178, '400040001000000', 'Sales Discounts Account', 'Revenue', 157, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DISC', 1, 1),
+(179, '400040002000000', 'Early Payment Discounts Account', 'Revenue', 157, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'EPD', 1, 1),
+(180, '400040003000000', 'Customer Rebates Account', 'Revenue', 157, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CR', 1, 1),
+(181, '400040004000000', 'Trade Discounts Account', 'Revenue', 157, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'TD', 1, 1),
+(182, '400040005000000', 'Loyalty Program Discounts Account', 'Revenue', 157, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LPD', 1, 1),
+(183, '400010001000001', 'Sales Revenue', 'Revenue', 158, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SALES', 1, 1),
+(184, '400010002000001', 'Service Revenue', 'Revenue', 159, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SERV', 1, 1),
+(185, '400010003000001', 'Product Revenue', 'Revenue', 160, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PROD', 1, 1),
+(186, '400010004000001', 'Rental Income', 'Revenue', 161, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'RENT', 1, 1),
+(187, '400010005000001', 'Maintenance Revenue', 'Revenue', 162, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'MAINT', 1, 1),
+(188, '400010006000001', 'Subscription Revenue', 'Revenue', 163, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SUB', 1, 1),
+(189, '400010007000001', 'Commission Income', 'Revenue', 164, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'COMM', 1, 1),
+(190, '400010008000001', 'Consultancy Income', 'Revenue', 165, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CONS', 1, 1),
+(191, '400020001000001', 'Interest Income', 'Revenue', 166, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'INT', 1, 1),
+(192, '400020002000001', 'Dividend Income', 'Revenue', 167, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DIV', 1, 1),
+(193, '400020003000001', 'Gain on Sale of Assets', 'Revenue', 168, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'GAIN', 1, 1),
+(194, '400020004000001', 'Foreign Exchange Gain', 'Revenue', 169, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FX', 1, 1),
+(195, '400020005000001', 'Investment Income', 'Revenue', 170, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'INV', 1, 1),
+(196, '400020006000001', 'Royalty Income', 'Revenue', 171, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ROY', 1, 1),
+(197, '400030001000001', 'Miscellaneous Income', 'Revenue', 172, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'MISC', 1, 1),
+(198, '400030002000001', 'Scrap Sales', 'Revenue', 173, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SCRAP', 1, 1),
+(199, '400030003000001', 'Insurance Claim Received', 'Revenue', 174, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'INS', 1, 1),
+(200, '400030004000001', 'Rebate Received', 'Revenue', 175, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'REB', 1, 1),
+(201, '400030005000001', 'Refunds & Adjustments', 'Revenue', 176, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'REF', 1, 1),
+(202, '400030006000001', 'Grant Income', 'Revenue', 177, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'GRANT', 1, 1),
+(203, '400040001000001', 'Sales Discounts', 'Revenue', 178, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DISC', 1, 1),
+(204, '400040002000001', 'Early Payment Discounts', 'Revenue', 179, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'EPD', 1, 1),
+(205, '400040003000001', 'Customer Rebates', 'Revenue', 180, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CR', 1, 1),
+(206, '400040004000001', 'Trade Discounts', 'Revenue', 181, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'TD', 1, 1),
+(207, '400040005000001', 'Loyalty Program Discounts', 'Revenue', 182, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LPD', 1, 1),
+(208, '500000000000000', 'Expenses', 'Expenses', NULL, 1, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(209, '500010000000000', 'Cost of Goods Sold', 'Expenses', 208, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(210, '500020000000000', 'Administrative Expenses', 'Expenses', 208, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(211, '500030000000000', 'Selling & Distribution Expenses', 'Expenses', 208, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(212, '500040000000000', 'Financial Expenses', 'Expenses', 208, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(213, '500050000000000', 'Other Expenses', 'Expenses', 208, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(214, '500010001000000', 'Raw Material Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'RAW', 1, 1),
+(215, '500010002000000', 'Purchase Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PUR', 1, 1),
+(216, '500010003000000', 'Purchase Returns Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PR', 1, 1),
+(217, '500010004000000', 'Freight Inward Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FR', 1, 1),
+(218, '500010005000000', 'Packing Materials Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PACK', 1, 1),
+(219, '500010006000000', 'Factory Wages Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FW', 1, 1),
+(220, '500010007000000', 'Factory Rent Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FR', 1, 1),
+(221, '500010008000000', 'Depreciation - Factory Equipment Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DFE', 1, 1),
+(222, '500010009000000', 'Power and Fuel Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PF', 1, 1),
+(223, '500010010000000', 'Direct Labor Account', 'Expenses', 209, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DL', 1, 1),
+(224, '500020001000000', 'Office Salaries Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'OS', 1, 1),
+(225, '500020002000000', 'Office Rent Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'OR', 1, 1),
+(226, '500020003000000', 'Utilities Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'UTIL', 1, 1),
+(227, '500020004000000', 'Stationery & Office Supplies Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'STN', 1, 1),
+(228, '500020005000000', 'Printing & Postage Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PP', 1, 1),
+(229, '500020006000000', 'IT & Internet Expenses Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'IT', 1, 1),
+(230, '500020007000000', 'Repairs & Maintenance Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'RM', 1, 1),
+(231, '500020008000000', 'Depreciation - Office Equipment Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DOE', 1, 1),
+(232, '500020009000000', 'Professional Fees Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PF', 1, 1),
+(233, '500020010000000', 'Travel & Conveyance Account', 'Expenses', 210, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'TC', 1, 1),
+(234, '500030001000000', 'Advertising & Promotion Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'AP', 1, 1),
+(235, '500030002000000', 'Sales Commission Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SC', 1, 1),
+(236, '500030003000000', 'Freight Outward Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FO', 1, 1),
+(237, '500030004000000', 'Delivery & Transportation Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DT', 1, 1),
+(238, '500030005000000', 'Sales Staff Salaries Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SSS', 1, 1),
+(239, '500030006000000', 'Showroom Expenses Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SE', 1, 1),
+(240, '500030007000000', 'Discount Allowed Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DA', 1, 1),
+(241, '500030008000000', 'Promotional Samples Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PS', 1, 1),
+(242, '500030009000000', 'After-Sales Service Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ASS', 1, 1),
+(243, '500030010000000', 'Trade Show Expenses Account', 'Expenses', 211, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'TSE', 1, 1),
+(244, '500040001000000', 'Bank Charges Account', 'Expenses', 212, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'BC', 1, 1),
+(245, '500040002000000', 'Interest Expense Account', 'Expenses', 212, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'IE', 1, 1),
+(246, '500040003000000', 'Loan Processing Fees Account', 'Expenses', 212, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LPF', 1, 1),
+(247, '500040004000000', 'Foreign Exchange Loss Account', 'Expenses', 212, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FEL', 1, 1),
+(248, '500040005000000', 'Credit Card Fees Account', 'Expenses', 212, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CCF', 1, 1),
+(249, '500040006000000', 'Bank Overdraft Interest Account', 'Expenses', 212, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'BOI', 1, 1),
+(250, '500050001000000', 'Bad Debts Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'BD', 1, 1),
+(251, '500050002000000', 'Depreciation - Other Assets Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DOA', 1, 1),
+(252, '500050003000000', 'Amortization Expense Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'AE', 1, 1),
+(253, '500050004000000', 'Loss on Sale of Assets Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LSA', 1, 1),
+(254, '500050005000000', 'Donations & Contributions Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DC', 1, 1),
+(255, '500050006000000', 'Penalties & Fines Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PF', 1, 1),
+(256, '500050007000000', 'Staff Welfare Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SW', 1, 1),
+(257, '500050008000000', 'Training & Seminars Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'TS', 1, 1),
+(258, '500050009000000', 'Miscellaneous Expenses Account', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ME', 1, 1),
+(259, '500010001000001', 'Raw Material Consumed', 'Expenses', 214, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'RAW', 1, 1),
+(260, '500010002000001', 'Purchases', 'Expenses', 215, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PUR', 1, 1),
+(261, '500010003000001', 'Purchase Returns', 'Expenses', 216, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PR', 1, 1),
+(262, '500010004000001', 'Freight Inward', 'Expenses', 217, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FR', 1, 1),
+(263, '500010005000001', 'Packing Materials', 'Expenses', 218, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PACK', 1, 1),
+(264, '500010006000001', 'Factory Wages', 'Expenses', 219, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FW', 1, 1),
+(265, '500010007000001', 'Factory Rent', 'Expenses', 220, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FR', 1, 1),
+(266, '500010008000001', 'Depreciation - Factory Equipment', 'Expenses', 221, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DFE', 1, 1),
+(267, '500010009000001', 'Power and Fuel', 'Expenses', 222, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PF', 1, 1),
+(268, '500010010000001', 'Direct Labor', 'Expenses', 223, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DL', 1, 1),
+(269, '500020001000001', 'Office Salaries', 'Expenses', 224, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'OS', 1, 1),
+(270, '500020002000001', 'Office Rent', 'Expenses', 225, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'OR', 1, 1),
+(271, '500020003000001', 'Utilities', 'Expenses', 226, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'UTIL', 1, 1),
+(272, '500020004000001', 'Stationery & Office Supplies', 'Expenses', 227, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'STN', 1, 1),
+(273, '500020005000001', 'Printing & Postage', 'Expenses', 228, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PP', 1, 1),
+(274, '500020006000001', 'IT & Internet Expenses', 'Expenses', 229, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'IT', 1, 1),
+(275, '500020007000001', 'Repairs & Maintenance', 'Expenses', 230, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'RM', 1, 1),
+(276, '500020008000001', 'Depreciation - Office Equipment', 'Expenses', 231, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DOE', 1, 1),
+(277, '500020009000001', 'Professional Fees', 'Expenses', 232, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PF', 1, 1),
+(278, '500020010000001', 'Travel & Conveyance', 'Expenses', 233, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'TC', 1, 1),
+(279, '500030001000001', 'Advertising & Promotion', 'Expenses', 234, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ADV', 1, 1),
+(280, '500030002000001', 'Sales Commission', 'Expenses', 235, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SC', 1, 1),
+(281, '500030003000001', 'Freight Outward', 'Expenses', 236, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FO', 1, 1),
+(282, '500030004000001', 'Delivery & Transportation', 'Expenses', 237, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DT', 1, 1),
+(283, '500030005000001', 'Sales Staff Salaries', 'Expenses', 238, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SSS', 1, 1),
+(284, '500030006000001', 'Showroom Expenses', 'Expenses', 239, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SE', 1, 1),
+(285, '500030007000001', 'Discount Allowed', 'Expenses', 240, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DA', 1, 1),
+(286, '500030008000001', 'Promotional Samples', 'Expenses', 241, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PS', 1, 1),
+(287, '500030009000001', 'After-Sales Service', 'Expenses', 242, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ASS', 1, 1),
+(288, '500030010000001', 'Trade Show Expenses', 'Expenses', 243, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'TSE', 1, 1),
+(289, '500040001000001', 'Bank Charges', 'Expenses', 244, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'BC', 1, 1),
+(290, '500040002000001', 'Interest Expense', 'Expenses', 245, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'IE', 1, 1),
+(291, '500040003000001', 'Loan Processing Fees', 'Expenses', 246, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LPF', 1, 1),
+(292, '500040004000001', 'Foreign Exchange Loss', 'Expenses', 247, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FXL', 1, 1),
+(293, '500040005000001', 'Credit Card Fees', 'Expenses', 248, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CCF', 1, 1),
+(294, '500040006000001', 'Bank Overdraft Interest', 'Expenses', 249, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'BOI', 1, 1),
+(295, '500050001000001', 'Bad Debts', 'Expenses', 250, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'BD', 1, 1),
+(296, '500050002000001', 'Depreciation - Other Assets', 'Expenses', 251, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DOA', 1, 1),
+(297, '500050003000001', 'Amortization Expense', 'Expenses', 252, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'AE', 1, 1),
+(298, '500050004000001', 'Loss on Sale of Assets', 'Expenses', 253, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LSA', 1, 1),
+(299, '500050005000001', 'Donations & Contributions', 'Expenses', 254, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DC', 1, 1),
+(300, '500050006000001', 'Penalties & Fines', 'Expenses', 255, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'PF', 1, 1),
+(301, '100010007000000', 'Trade Receivables / Debtors', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DEB', 1, 1),
+(302, '100010008000000', 'Other Debtors', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ODEB', 1, 1),
+(303, '100010009000000', 'Allowance for Doubtful Debts', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ADD', 1, 1),
+(304, '100010007000001', 'Trade Receivables', 'Assets', 301, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DEB', 1, 1),
+(305, '100010008000001', 'Other Debtors', 'Assets', 302, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ODEB', 1, 1),
+(306, '100010009000001', 'Allowance for Doubtful Debts Reserve', 'Assets', 303, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ADD', 1, 1),
+(307, '100010010000000', 'Income Tax Receivable', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ITR', 1, 1),
+(308, '100010011000000', 'GST / VAT Receivable', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'GSTR', 1, 1),
+(309, '100010012000000', 'Sales Tax Receivable', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SATR', 1, 1),
+(310, '100010010000001', 'Income Tax Receivable', 'Assets', 307, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ITR', 1, 1),
+(311, '100010011000001', 'GST / VAT Receivable', 'Assets', 308, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'GSTR', 1, 1),
+(312, '100010012000001', 'Sales Tax Receivable', 'Assets', 309, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SATR', 1, 1),
+(313, '100010013000000', 'Loan Receivable', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LR', 1, 1),
+(314, '100010014000000', 'Lease Receivable', 'Assets', 2, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LEAR', 1, 1),
+(315, '100010013000001', 'Loan Receivable', 'Assets', 313, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LR', 1, 1),
+(316, '100010014000001', 'Lease Receivable', 'Assets', 314, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LEAR', 1, 1),
+(317, '100020006000000', 'Right-of-Use Assets', 'Assets', 3, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ROU', 1, 1),
+(318, '100020006000001', 'Right-of-Use Assets - Leased Property', 'Assets', 317, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ROULP', 1, 1),
+(319, '100020007000000', 'Accumulated Depreciation - ROU', 'Assets', 3, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ADROU', 1, 1),
+(320, '100020007000001', 'Accumulated Depreciation - ROU Assets', 'Assets', 319, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ADROU', 1, 1),
+(321, '100050004000000', 'Stock Investments / Equity Shares', 'Assets', 6, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'STOCK', 1, 1),
+(322, '100050004000001', 'Investment in Shares', 'Assets', 321, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SHARES', 1, 1),
+(323, '100050005000000', 'Assets Held for Sale', 'Assets', 6, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'AHS', 1, 1),
+(324, '100050005000001', 'Assets Held for Sale', 'Assets', 323, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'AHS', 1, 1),
+(325, '200010007000000', 'Trade Payables / Creditors', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CRED', 1, 1),
+(326, '200010008000000', 'Other Creditors', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'OCRED', 1, 1),
+(327, '200010007000001', 'Trade Payables', 'Liabilities', 325, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CRED', 1, 1),
+(328, '200010008000001', 'Other Creditors', 'Liabilities', 326, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'OCRED', 1, 1),
+(329, '200010009000000', 'Income Tax Payable', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ITP', 1, 1),
+(330, '200010010000000', 'GST / VAT Payable', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'GSTP', 1, 1),
+(331, '200010011000000', 'Sales Tax Payable', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SATP', 1, 1),
+(332, '200010009000001', 'Income Tax Payable', 'Liabilities', 329, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ITP', 1, 1),
+(333, '200010010000001', 'GST / VAT Payable', 'Liabilities', 330, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'GSTP', 1, 1),
+(334, '200010011000001', 'Sales Tax Payable', 'Liabilities', 331, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'SATP', 1, 1),
+(335, '200010012000000', 'Accrued Salaries Payable', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ASALP', 1, 1),
+(336, '200010013000000', 'Accrued Leave Liability', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ALL', 1, 1),
+(337, '200010014000000', 'Employee Benefits Receivable', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'EBR', 1, 1),
+(338, '200010012000001', 'Accrued Salaries Payable', 'Liabilities', 335, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ASALP', 1, 1);
+INSERT INTO `chart_of_accounts` (`id`, `account_code`, `account_name`, `account_type`, `parent_account_id`, `account_level`, `is_transactional`, `currency`, `status`, `created_at`, `updated_at`, `short_code`, `comp_id`, `location_id`) VALUES
+(339, '200010013000001', 'Accrued Leave Liability', 'Liabilities', 336, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ALL', 1, 1),
+(340, '200010014000001', 'Employee Benefits Receivable', 'Liabilities', 337, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'EBR', 1, 1),
+(341, '200010015000000', 'Advance from Customers', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ADVC', 1, 1),
+(342, '200010015000001', 'Advance from Customers', 'Liabilities', 341, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ADVC', 1, 1),
+(343, '200010016000000', 'Current Portion of Long-term Debt', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CPLD', 1, 1),
+(344, '200010016000001', 'Current Portion of Long-term Debt', 'Liabilities', 343, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CPLD', 1, 1),
+(345, '200020005000000', 'Lease Liability - Current', 'Liabilities', 46, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LLC', 1, 1),
+(346, '200020006000000', 'Lease Liability - Non-Current', 'Liabilities', 47, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LLNC', 1, 1),
+(347, '200020005000001', 'Lease Liability - Current', 'Liabilities', 345, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LLC', 1, 1),
+(348, '200020006000001', 'Lease Liability - Non-Current', 'Liabilities', 346, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LLNC', 1, 1),
+(349, '200030004000000', 'Employee Severance Obligation', 'Liabilities', 48, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ESO', 1, 1),
+(350, '200030005000000', 'Pension Obligation', 'Liabilities', 48, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'POBS', 1, 1),
+(351, '200030004000001', 'Employee Severance Obligation', 'Liabilities', 349, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'ESO', 1, 1),
+(352, '200030005000001', 'Pension Obligation', 'Liabilities', 350, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'POBS', 1, 1),
+(353, '500060000000000', 'Tax Expense', 'Expenses', 208, 2, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', NULL, 1, 1),
+(354, '500060001000000', 'Current Tax Expense', 'Expenses', 353, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CTE', 1, 1),
+(355, '500060002000000', 'Deferred Tax Expense', 'Expenses', 353, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DTE', 1, 1),
+(356, '500060001000001', 'Current Tax Expense', 'Expenses', 354, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'CTE', 1, 1),
+(357, '500060002000001', 'Deferred Tax Expense', 'Expenses', 355, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'DTE', 1, 1),
+(358, '500050010000000', 'Impairment Loss - Goodwill', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'IMG', 1, 1),
+(359, '500050011000000', 'Impairment Loss - Receivables', 'Expenses', 213, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'IMR', 1, 1),
+(360, '500050010000001', 'Impairment Loss - Goodwill', 'Expenses', 358, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'IMG', 1, 1),
+(361, '500050011000001', 'Impairment Loss - Receivables', 'Expenses', 359, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'IMR', 1, 1),
+(362, '500040007000000', 'Lease Interest Expense', 'Expenses', 212, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LIE', 1, 1),
+(363, '500040008000000', 'Finance Lease Interest', 'Expenses', 212, 3, 0, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FLI', 1, 1),
+(364, '500040007000001', 'Lease Interest Expense', 'Expenses', 362, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'LIE', 1, 1),
+(365, '500040008000001', 'Finance Lease Interest', 'Expenses', 363, 4, 1, 'USD', 'Active', '2025-10-14 05:12:21', '2025-10-14 05:12:21', 'FLI', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -393,7 +459,6 @@ CREATE TABLE `code_configurations` (
   `location_id` bigint(20) UNSIGNED DEFAULT NULL,
   `level2_account_id` bigint(20) UNSIGNED DEFAULT NULL,
   `level3_account_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `level4_account_id` bigint(20) UNSIGNED DEFAULT NULL,
   `code_type` varchar(50) NOT NULL,
   `code_name` varchar(100) DEFAULT NULL,
   `account_level` int(11) DEFAULT NULL,
@@ -408,13 +473,6 @@ CREATE TABLE `code_configurations` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `code_configurations`
---
-
-INSERT INTO `code_configurations` (`id`, `company_id`, `location_id`, `level2_account_id`, `level3_account_id`, `level4_account_id`, `code_type`, `code_name`, `account_level`, `prefix`, `next_number`, `number_length`, `separator`, `description`, `is_active`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
-(4, 1, 1, NULL, 7, NULL, 'cash', 'cash', 2, NULL, 1, 4, '-', NULL, 1, 1, 1, '2025-10-15 10:48:54', '2025-10-15 11:24:01');
 
 -- --------------------------------------------------------
 
@@ -629,176 +687,13 @@ CREATE TABLE `currency_exchange_rate_history` (
   `exchange_rate` decimal(20,6) NOT NULL,
   `previous_rate` decimal(20,6) DEFAULT NULL,
   `rate_change` decimal(10,6) DEFAULT NULL,
-  `source` varchar(255) NOT NULL DEFAULT 'manual',
-  `api_provider` varchar(255) DEFAULT NULL,
+  `source` varchar(191) NOT NULL DEFAULT 'manual',
+  `api_provider` varchar(191) DEFAULT NULL,
   `notes` text DEFAULT NULL,
   `effective_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `currency_exchange_rate_history`
---
-
-INSERT INTO `currency_exchange_rate_history` (`id`, `currency_id`, `exchange_rate`, `previous_rate`, `rate_change`, `source`, `api_provider`, `notes`, `effective_date`, `created_at`, `updated_at`) VALUES
-(1, 7, 1.515500, 1.515500, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(2, 43, 1.674800, 1.674800, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(3, 46, 5.342300, 5.342300, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(4, 6, 1.396100, 1.396100, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(5, 5, 0.797570, 0.797600, -0.003761, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(6, 9, 7.119500, 7.119500, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(7, 40, 20.815000, 20.815000, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(8, 38, 6.393800, 6.393800, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(9, 2, 0.856310, 0.856300, 0.001168, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(10, 3, 0.744560, 0.744600, -0.005372, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(11, 10, 7.783500, 7.783500, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(12, 41, 333.220000, 333.220000, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(13, 20, 16615.000000, 16615.000000, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(14, 59, 3.279200, 3.279200, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(15, 13, 88.780000, 88.780000, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(16, 4, 150.040000, 150.040000, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(17, 12, 1412.230000, 1412.230000, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(18, 47, 18.416700, 18.416700, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(19, 19, 4.215000, 4.215000, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(20, 37, 9.951200, 9.951200, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(21, 8, 1.717800, 1.717800, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(22, 21, 58.328000, 58.328000, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(23, 39, 3.641700, 3.641700, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(24, 42, 4.357300, 4.357300, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(25, 36, 9.409100, 9.409100, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:10', '2025-10-07 02:31:10', '2025-10-07 02:31:10'),
-(26, 11, 1.293400, 1.293400, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:11', '2025-10-07 02:31:11', '2025-10-07 02:31:11'),
-(27, 18, 32.425000, 32.425000, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:11', '2025-10-07 02:31:11', '2025-10-07 02:31:11'),
-(28, 58, 41.693000, 41.693000, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:11', '2025-10-07 02:31:11', '2025-10-07 02:31:11'),
-(29, 32, 17.248700, 17.248700, 0.000000, 'api', 'frankfurter', 'Automatically updated from frankfurter API', '2025-10-07 02:31:11', '2025-10-07 02:31:11', '2025-10-07 02:31:11'),
-(30, 7, 1.515500, 1.515500, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(31, 43, 1.674800, 1.674800, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(32, 46, 5.342300, 5.342300, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(33, 6, 1.396100, 1.396100, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(34, 5, 0.797570, 0.797600, -0.003761, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(35, 9, 7.119500, 7.119500, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(36, 40, 20.815000, 20.815000, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(37, 38, 6.393800, 6.393800, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(38, 2, 0.856310, 0.856300, 0.001168, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(39, 3, 0.744560, 0.744600, -0.005372, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(40, 10, 7.783500, 7.783500, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(41, 41, 333.220000, 333.220000, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(42, 20, 16615.000000, 16615.000000, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(43, 59, 3.279200, 3.279200, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(44, 13, 88.780000, 88.780000, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(45, 4, 150.040000, 150.040000, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(46, 12, 1412.230000, 1412.230000, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(47, 47, 18.416700, 18.416700, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(48, 19, 4.215000, 4.215000, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(49, 37, 9.951200, 9.951200, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(50, 8, 1.717800, 1.717800, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(51, 21, 58.328000, 58.328000, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(52, 39, 3.641700, 3.641700, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(53, 42, 4.357300, 4.357300, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(54, 36, 9.409100, 9.409100, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(55, 11, 1.293400, 1.293400, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(56, 18, 32.425000, 32.425000, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(57, 58, 41.693000, 41.693000, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(58, 32, 17.248700, 17.248700, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:31:38', '2025-10-07 02:31:38', '2025-10-07 02:31:38'),
-(59, 23, 3.670000, 3.670000, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(60, 67, 67.150000, 80.000000, -16.062500, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(61, 101, 920.190000, 650.000000, 41.567692, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(62, 48, 1429.750000, 100.000000, 1329.750000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(63, 7, 1.510000, 1.515500, -0.362917, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(64, 15, 121.750000, 85.000000, 43.235294, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(65, 43, 1.670000, 1.674800, -0.286601, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(66, 27, 0.376000, 0.380000, -1.052632, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(67, 77, 2959.390000, 2000.000000, 47.969500, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(68, 53, 6.920000, 6.900000, 0.289855, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(69, 46, 5.340000, 5.342300, -0.043053, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(70, 80, 14.150000, 11.000000, 28.636364, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(71, 61, 3.230000, 2.500000, 29.200000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(72, 6, 1.400000, 1.396100, 0.279350, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(73, 92, 2580.550000, 2000.000000, 29.027500, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(74, 5, 0.796000, 0.797600, -0.200602, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(75, 49, 963.980000, 800.000000, 20.497500, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(76, 9, 7.130000, 7.119500, 0.147482, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(77, 50, 3867.920000, 3800.000000, 1.787368, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(78, 99, 94.180000, 100.000000, -5.820000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(79, 40, 20.780000, 20.815000, -0.168148, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(80, 38, 6.370000, 6.393800, -0.372236, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(81, 88, 129.240000, 135.000000, -4.266667, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(82, 31, 47.610000, 15.700000, 203.248408, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(83, 73, 143.920000, 45.000000, 219.822222, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(84, 2, 0.854000, 0.856300, -0.268597, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(85, 3, 0.742000, 0.744600, -0.349181, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(86, 35, 12.610000, 6.000000, 110.166667, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(87, 95, 73.410000, 52.000000, 41.173077, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(88, 96, 8692.760000, 10200.000000, -14.776863, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(89, 10, 7.780000, 7.783500, -0.044967, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(90, 44, 6.440000, 6.400000, 0.625000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(91, 41, 332.010000, 333.220000, -0.363123, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(92, 20, 16600.590000, 16615.000000, -0.086729, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(93, 59, 3.280000, 3.279200, 0.024396, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(94, 13, 88.780000, 88.780000, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(95, 69, 1309.330000, 1460.000000, -10.319863, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(96, 68, 42434.490000, 42000.000000, 1.034500, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(97, 29, 0.709000, 0.710000, -0.140845, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(98, 4, 150.020000, 150.040000, -0.013330, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(99, 34, 129.110000, 110.000000, 17.372727, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(100, 64, 87.350000, 84.000000, 3.988095, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(101, 12, 1410.720000, 1412.230000, -0.106923, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(102, 26, 0.306000, 0.300000, 2.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(103, 62, 544.230000, 425.000000, 28.054118, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(104, 30, 89500.000000, 1500.000000, 5866.666667, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(105, 16, 302.320000, 200.000000, 51.160000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(106, 98, 181.560000, 160.000000, 13.475000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(107, 83, 17.200000, 14.500000, 18.620690, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(108, 89, 5.390000, 4.500000, 19.777778, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(109, 86, 9.120000, 9.000000, 1.333333, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(110, 84, 45.360000, 40.000000, 13.400000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(111, 78, 1743.150000, 800.000000, 117.893750, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(112, 47, 18.370000, 18.416700, -0.253574, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(113, 19, 4.210000, 4.215000, -0.118624, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(114, 81, 17.200000, 14.500000, 18.620690, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(115, 33, 1463.550000, 410.000000, 256.963415, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(116, 37, 9.930000, 9.951200, -0.213040, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(117, 17, 142.050000, 118.000000, 20.381356, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(118, 8, 1.710000, 1.717800, -0.454069, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(119, 28, 0.384000, 0.380000, 1.052632, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(120, 51, 3.460000, 3.700000, -6.486486, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(121, 21, 58.280000, 58.328000, -0.082293, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(122, 14, 283.250000, 160.000000, 77.031250, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(123, 39, 3.630000, 3.641700, -0.321279, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(124, 25, 3.640000, 3.640000, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(125, 42, 4.350000, 4.357300, -0.167535, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(126, 45, 100.110000, 100.000000, 0.110000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(127, 57, 82.890000, 75.000000, 10.520000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(128, 76, 1452.970000, 1000.000000, 45.297000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(129, 24, 3.750000, 3.750000, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(130, 85, 14.650000, 13.500000, 8.518519, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(131, 90, 454.300000, 55.000000, 726.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(132, 36, 9.380000, 9.409100, -0.309275, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(133, 11, 1.290000, 1.293400, -0.262873, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(134, 97, 23337.040000, 10200.000000, 128.794510, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(135, 72, 571.300000, 580.000000, -1.500000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(136, 91, 4722.170000, 300.000000, 1474.056667, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(137, 100, 20.930000, 22.000000, -4.863636, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(138, 70, 12890.120000, 2500.000000, 415.604800, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(139, 82, 17.200000, 14.500000, 18.620690, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(140, 18, 32.420000, 32.425000, -0.015420, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(141, 65, 9.380000, 11.000000, -14.727273, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(142, 66, 3.500000, 3.500000, 0.000000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(143, 87, 2.910000, 2.800000, 3.928571, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(144, 58, 41.700000, 41.693000, 0.016789, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(145, 74, 2445.650000, 2300.000000, 6.332609, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:05', '2025-10-07 02:33:05', '2025-10-07 02:33:05'),
-(146, 60, 41.330000, 27.000000, 53.074074, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:06', '2025-10-07 02:33:06', '2025-10-07 02:33:06'),
-(147, 75, 3430.150000, 3500.000000, -1.995714, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:06', '2025-10-07 02:33:06', '2025-10-07 02:33:06'),
-(148, 52, 39.920000, 44.000000, -9.272727, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:06', '2025-10-07 02:33:06', '2025-10-07 02:33:06'),
-(149, 63, 12078.690000, 10700.000000, 12.884953, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:06', '2025-10-07 02:33:06', '2025-10-07 02:33:06'),
-(150, 56, 187.290000, 4000000.000000, -99.995318, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:06', '2025-10-07 02:33:06', '2025-10-07 02:33:06'),
-(151, 22, 26245.670000, 23000.000000, 14.111609, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:06', '2025-10-07 02:33:06', '2025-10-07 02:33:06'),
-(152, 93, 560.280000, 550.000000, 1.869091, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:06', '2025-10-07 02:33:06', '2025-10-07 02:33:06'),
-(153, 94, 560.280000, 550.000000, 1.869091, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:06', '2025-10-07 02:33:06', '2025-10-07 02:33:06'),
-(154, 71, 239.000000, 250.000000, -4.400000, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:06', '2025-10-07 02:33:06', '2025-10-07 02:33:06'),
-(155, 32, 17.200000, 17.248700, -0.282340, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:06', '2025-10-07 02:33:06', '2025-10-07 02:33:06'),
-(156, 79, 23.820000, 18.000000, 32.333333, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:06', '2025-10-07 02:33:06', '2025-10-07 02:33:06'),
-(157, 102, 26.650000, 4000000.000000, -99.999334, 'api', 'auto', 'Automatically updated from auto API', '2025-10-07 02:33:06', '2025-10-07 02:33:06', '2025-10-07 02:33:06');
 
 -- --------------------------------------------------------
 
@@ -836,7 +731,7 @@ INSERT INTO `departments` (`id`, `company_id`, `location_id`, `department_name`,
 
 CREATE TABLE `failed_jobs` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `uuid` varchar(255) NOT NULL,
+  `uuid` varchar(191) NOT NULL,
   `connection` text NOT NULL,
   `queue` text NOT NULL,
   `payload` longtext NOT NULL,
@@ -908,7 +803,7 @@ INSERT INTO `fiscal_periods` (`id`, `comp_id`, `fiscal_year`, `period_number`, `
 
 CREATE TABLE `jobs` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `queue` varchar(255) NOT NULL,
+  `queue` varchar(191) NOT NULL,
   `payload` longtext NOT NULL,
   `attempts` tinyint(3) UNSIGNED NOT NULL,
   `reserved_at` int(10) UNSIGNED DEFAULT NULL,
@@ -923,8 +818,8 @@ CREATE TABLE `jobs` (
 --
 
 CREATE TABLE `job_batches` (
-  `id` varchar(255) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `id` varchar(191) NOT NULL,
+  `name` varchar(191) NOT NULL,
   `total_jobs` int(11) NOT NULL,
   `pending_jobs` int(11) NOT NULL,
   `failed_jobs` int(11) NOT NULL,
@@ -1017,7 +912,8 @@ INSERT INTO `menus` (`id`, `module_id`, `section_id`, `menu_name`, `route`, `ico
 (60, 2, 2, 'Bank Accounts', '/accounts/code-configuration/bank', 'Building2', 1, 11, '2026-02-27 05:07:36', '2026-02-27 05:07:36', NULL),
 (61, 2, 2, 'Cash Accounts', '/accounts/code-configuration/cash', 'Coins', 1, 12, '2026-02-27 05:07:36', '2026-02-27 05:07:36', NULL),
 (62, 2, 10, 'Chart Of Account Report', '/accounts/reports/chart-of-account', 'file-text', 1, 1, '2026-02-28 03:42:11', '2026-02-28 03:42:11', NULL),
-(63, 2, 10, 'Cash Book', '/accounts/reports/cash-book', 'file-text', 1, 2, '2026-02-28 03:43:05', '2026-02-28 03:43:05', NULL);
+(63, 2, 10, 'Cash Book', '/accounts/reports/cash-book', 'file-text', 1, 2, '2026-02-28 03:43:05', '2026-02-28 03:43:05', NULL),
+(64, 2, 2, 'Opening Voucher', '/accounts/opening-voucher', 'file-text', 1, 1, '2026-02-28 04:56:29', '2026-02-28 04:56:29', NULL);
 
 -- --------------------------------------------------------
 
@@ -1076,22 +972,25 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (48, '2025_10_05_185851_remove_unused_columns_from_chart_of_accounts_table', 24),
 (49, '2025_10_06_051133_create_chart_of_accounts_table', 25),
 (50, '2025_10_06_152140_add_journal_voucher_menu_to_accounts_module', 26),
-(51, '2025_10_07_024709_create_currency_exchange_rate_history_table', 26),
-(52, '2025_10_07_070926_remove_unnecessary_fields_from_transaction_entries_table', 27),
-(53, '2025_10_07_143456_make_description_nullable_in_transactions_table', 28),
-(55, '2025_10_07_143648_optimize_description_field_in_transactions_table', 29),
-(56, '0001_01_01_000002_create_jobs_table', 30),
-(57, '2025_10_07_165813_add_attachments_to_transactions_table', 31),
-(58, '2024_10_09_000001_create_logging_tables', 32),
-(59, '2024_10_11_000001_create_code_configurations_table', 33),
-(60, '2025_10_11_145248_add_account_fields_to_code_configurations_table', 34),
-(61, '2025_10_11_150000_make_code_configuration_fields_nullable', 35),
-(62, '2025_01_15_000001_add_fourth_level_to_chart_of_accounts', 36),
-(63, '2025_01_15_000002_add_level4_account_to_code_configurations', 36),
-(64, '2025_01_15_000003_create_temp_level3_mapping_table', 36),
-(65, '2025_10_17_162307_add_attachment_id_to_transaction_entries_table', 37),
-(66, '2025_10_17_162932_add_attachment_storage_limit_to_companies_table', 38),
-(67, '2026_02_27_000002_add_fiscal_year_to_transactions_table', 39);
+(68, '0001_01_01_000002_create_jobs_table', 27),
+(69, '2024_10_09_000001_create_logging_tables', 27),
+(70, '2024_10_11_000001_create_code_configurations_table', 27),
+(71, '2025_01_15_000001_add_fourth_level_to_chart_of_accounts', 27),
+(72, '2025_01_15_000002_add_level4_account_to_code_configurations', 27),
+(73, '2025_01_15_000003_create_temp_level3_mapping_table', 27),
+(74, '2025_10_07_024709_create_currency_exchange_rate_history_table', 27),
+(75, '2025_10_07_070926_remove_unnecessary_fields_from_transaction_entries_table', 27),
+(76, '2025_10_07_143456_make_description_nullable_in_transactions_table', 27),
+(77, '2025_10_07_143648_optimize_description_field_in_transactions_table', 27),
+(78, '2025_10_07_165813_add_attachments_to_transactions_table', 27),
+(79, '2025_10_11_145248_add_account_fields_to_code_configurations_table', 27),
+(80, '2025_10_11_150000_make_code_configuration_fields_nullable', 27),
+(81, '2025_10_17_162307_add_attachment_id_to_transaction_entries_table', 27),
+(82, '2025_10_17_162932_add_attachment_storage_limit_to_companies_table', 27),
+(83, '2026_03_01_000001_add_is_transactional_to_chart_of_accounts', 28),
+(84, '2026_02_27_000002_add_fiscal_year_to_transactions_table', 29),
+(85, '2026_02_27_000003_add_fiscal_year_income_statement_menus', 30),
+(86, '2026_02_27_000001_create_fiscal_periods_table', 31);
 
 -- --------------------------------------------------------
 
@@ -1226,36 +1125,35 @@ INSERT INTO `package_features` (`id`, `package_id`, `menu_id`, `is_enabled`, `cr
 (267, 2, 61, 1, '2026-02-28 03:43:55', '2026-02-28 03:43:55'),
 (268, 2, 62, 1, '2026-02-28 03:43:55', '2026-02-28 03:43:55'),
 (269, 2, 63, 1, '2026-02-28 03:43:55', '2026-02-28 03:43:55'),
-(270, 3, 1, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(271, 3, 2, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(272, 3, 3, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(273, 3, 4, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(274, 3, 5, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(275, 3, 6, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(276, 3, 7, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(277, 3, 8, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(278, 3, 9, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(279, 3, 12, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(280, 3, 13, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(281, 3, 14, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(282, 3, 34, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(283, 3, 35, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(284, 3, 36, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(285, 3, 37, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(286, 3, 38, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(287, 3, 39, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(288, 3, 40, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(289, 3, 41, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(290, 3, 42, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(291, 3, 43, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(292, 3, 44, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(293, 3, 57, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(294, 3, 58, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(295, 3, 59, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(296, 3, 60, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(297, 3, 61, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(298, 3, 62, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03'),
-(299, 3, 63, 1, '2026-02-28 03:44:03', '2026-02-28 03:44:03');
+(300, 3, 1, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(301, 3, 2, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(302, 3, 3, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(303, 3, 4, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(304, 3, 5, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(305, 3, 6, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(306, 3, 7, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(307, 3, 8, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(308, 3, 9, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(309, 3, 12, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(310, 3, 13, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(311, 3, 14, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(312, 3, 34, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(313, 3, 35, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(314, 3, 36, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(315, 3, 37, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(316, 3, 38, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(317, 3, 39, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(318, 3, 40, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(319, 3, 41, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(320, 3, 42, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(321, 3, 43, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(322, 3, 44, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(323, 3, 59, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(324, 3, 60, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(325, 3, 61, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(326, 3, 62, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(327, 3, 63, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40'),
+(328, 3, 64, 1, '2026-02-28 04:56:40', '2026-02-28 04:56:40');
 
 -- --------------------------------------------------------
 
@@ -1329,45 +1227,15 @@ CREATE TABLE `tbl_audit_logs` (
   `table_name` varchar(100) DEFAULT NULL,
   `record_id` bigint(20) UNSIGNED DEFAULT NULL,
   `action_type` enum('CREATE','READ','UPDATE','DELETE','POST','UNPOST','APPROVE','REJECT','IMPORT','EXPORT') NOT NULL,
-  `old_values` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`old_values`)),
-  `new_values` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`new_values`)),
-  `changed_fields` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`changed_fields`)),
+  `old_values` longtext DEFAULT NULL,
+  `new_values` longtext DEFAULT NULL,
+  `changed_fields` longtext DEFAULT NULL,
   `ip_address` varchar(45) DEFAULT NULL,
   `user_agent` text DEFAULT NULL,
   `session_id` varchar(255) DEFAULT NULL,
   `description` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `tbl_audit_logs`
---
-
-INSERT INTO `tbl_audit_logs` (`id`, `user_id`, `company_id`, `location_id`, `module_name`, `table_name`, `record_id`, `action_type`, `old_values`, `new_values`, `changed_fields`, `ip_address`, `user_agent`, `session_id`, `description`, `created_at`) VALUES
-(1, 1, 1, NULL, 'Test', 'test', NULL, 'CREATE', NULL, NULL, NULL, '127.0.0.1', NULL, NULL, 'Test log entry', '2025-10-09 08:31:41'),
-(2, NULL, 1, 1, 'Accounts', 'transactions', 5, 'UPDATE', '{\"voucher_date\":\"2025-10-10\",\"reference_number\":\"REF1\",\"description\":null,\"total_debit\":\"283286.12\",\"total_credit\":\"283286.12\"}', '{\"voucher_number\":\"JV0002\",\"voucher_date\":\"2025-10-10\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF1\",\"description\":null,\"status\":\"Draft\",\"total_debit\":283286.11898016994,\"total_credit\":283286.11898016994,\"currency_code\":\"PKR\",\"comp_id\":11,\"location_id\":1}', '{\"voucher_number\":{\"old\":null,\"new\":\"JV0002\"},\"voucher_type\":{\"old\":null,\"new\":\"Journal\"},\"status\":{\"old\":null,\"new\":\"Draft\"},\"total_debit\":{\"old\":\"283286.12\",\"new\":283286.11898016994},\"total_credit\":{\"old\":\"283286.12\",\"new\":283286.11898016994},\"currency_code\":{\"old\":null,\"new\":\"PKR\"},\"comp_id\":{\"old\":null,\"new\":11},\"location_id\":{\"old\":null,\"new\":1}}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'zTMr7xpyrJZO9tuSaP3UCjCLqJZRrzo4acVTs8mB', 'Journal Voucher UPDATE: JV0002', '2025-10-10 08:01:25'),
-(3, NULL, 1, 1, 'Accounts', 'transactions', 5, 'UPDATE', '{\"voucher_date\":\"2025-10-10\",\"reference_number\":\"REF1\",\"description\":null,\"total_debit\":\"283286.12\",\"total_credit\":\"283286.12\"}', '{\"voucher_number\":\"JV0002\",\"voucher_date\":\"2025-10-10\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF1\",\"description\":null,\"status\":\"Draft\",\"total_debit\":283286.11898016994,\"total_credit\":283286.11898016994,\"currency_code\":\"PKR\",\"comp_id\":11,\"location_id\":1}', '{\"voucher_number\":{\"old\":null,\"new\":\"JV0002\"},\"voucher_type\":{\"old\":null,\"new\":\"Journal\"},\"status\":{\"old\":null,\"new\":\"Draft\"},\"total_debit\":{\"old\":\"283286.12\",\"new\":283286.11898016994},\"total_credit\":{\"old\":\"283286.12\",\"new\":283286.11898016994},\"currency_code\":{\"old\":null,\"new\":\"PKR\"},\"comp_id\":{\"old\":null,\"new\":11},\"location_id\":{\"old\":null,\"new\":1}}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'zTMr7xpyrJZO9tuSaP3UCjCLqJZRrzo4acVTs8mB', 'Journal Voucher UPDATE: JV0002', '2025-10-10 08:29:44'),
-(4, 1, 1, 1, 'Accounts', 'transactions', 5, 'UPDATE', '{\"voucher_date\":\"2025-10-10\",\"reference_number\":\"REF1\",\"description\":null,\"total_debit\":\"283286.12\",\"total_credit\":\"283286.12\"}', '{\"voucher_number\":\"JV0002\",\"voucher_date\":\"2025-10-10\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF1\",\"description\":null,\"status\":\"Draft\",\"total_debit\":283286.11898016994,\"total_credit\":283286.11898016994,\"currency_code\":\"PKR\",\"comp_id\":11,\"location_id\":1}', '{\"voucher_number\":{\"old\":null,\"new\":\"JV0002\"},\"voucher_type\":{\"old\":null,\"new\":\"Journal\"},\"status\":{\"old\":null,\"new\":\"Draft\"},\"total_debit\":{\"old\":\"283286.12\",\"new\":283286.11898016994},\"total_credit\":{\"old\":\"283286.12\",\"new\":283286.11898016994},\"currency_code\":{\"old\":null,\"new\":\"PKR\"},\"comp_id\":{\"old\":null,\"new\":11},\"location_id\":{\"old\":null,\"new\":1}}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'zTMr7xpyrJZO9tuSaP3UCjCLqJZRrzo4acVTs8mB', 'Journal Voucher UPDATE: JV0002', '2025-10-10 08:39:13'),
-(5, 1, 1, 1, 'Accounts', 'transactions', 5, 'UPDATE', '{\"voucher_date\":\"2025-10-10\",\"reference_number\":\"REF1\",\"description\":null,\"total_debit\":\"283286.12\",\"total_credit\":\"283286.12\"}', '{\"voucher_number\":\"JV0002\",\"voucher_date\":\"2025-10-10\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF1\",\"description\":null,\"status\":\"Draft\",\"total_debit\":283286.11898016994,\"total_credit\":283286.11898016994,\"currency_code\":\"PKR\",\"comp_id\":11,\"location_id\":1}', '{\"voucher_number\":{\"old\":null,\"new\":\"JV0002\"},\"voucher_type\":{\"old\":null,\"new\":\"Journal\"},\"status\":{\"old\":null,\"new\":\"Draft\"},\"total_debit\":{\"old\":\"283286.12\",\"new\":283286.11898016994},\"total_credit\":{\"old\":\"283286.12\",\"new\":283286.11898016994},\"currency_code\":{\"old\":null,\"new\":\"PKR\"},\"comp_id\":{\"old\":null,\"new\":11},\"location_id\":{\"old\":null,\"new\":1}}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'zTMr7xpyrJZO9tuSaP3UCjCLqJZRrzo4acVTs8mB', 'Journal Voucher UPDATE: JV0002', '2025-10-10 11:24:02'),
-(6, 1, 1, 1, 'Accounts', 'transactions', 5, 'DELETE', '{\"voucher_number\":\"JV0002\",\"voucher_date\":\"2025-10-10\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF1\",\"description\":null,\"status\":\"Draft\",\"total_debit\":\"283286.12\",\"total_credit\":\"283286.12\",\"currency_code\":\"PKR\",\"comp_id\":11,\"location_id\":1,\"created_by\":1,\"created_at\":\"2025-10-10 12:55:04\"}', NULL, NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'zTMr7xpyrJZO9tuSaP3UCjCLqJZRrzo4acVTs8mB', 'Journal Voucher DELETE: ', '2025-10-10 11:32:21'),
-(7, 1, 1, 1, 'Accounts', 'transactions', 123, 'CREATE', NULL, '{\"voucher_number\":\"TEST001\",\"description\":\"Test voucher creation\"}', NULL, '127.0.0.1', 'Symfony', '7wWXWer65bk34jx9Y2FqUFMwGBFsaBDVwSBojXFv', 'Journal Voucher CREATE: TEST001', '2025-10-10 11:59:35'),
-(8, 1, 1, 1, 'Accounts', 'transactions', 123, 'UPDATE', '{\"voucher_number\":\"TEST001\",\"description\":\"Test voucher creation\"}', '{\"voucher_number\":\"TEST001\",\"description\":\"Updated test voucher\"}', '{\"description\":{\"old\":\"Test voucher creation\",\"new\":\"Updated test voucher\"}}', '127.0.0.1', 'Symfony', '7wWXWer65bk34jx9Y2FqUFMwGBFsaBDVwSBojXFv', 'Journal Voucher UPDATE: TEST001', '2025-10-10 11:59:35'),
-(9, 1, 1, 1, 'Accounts', 'transactions', 123, 'DELETE', '{\"voucher_number\":\"TEST001\",\"description\":\"Updated test voucher\"}', NULL, NULL, '127.0.0.1', 'Symfony', '7wWXWer65bk34jx9Y2FqUFMwGBFsaBDVwSBojXFv', 'Journal Voucher DELETE: ', '2025-10-10 11:59:35'),
-(10, 1, 1, 1, 'Accounts', 'transactions', 6, 'CREATE', NULL, '{\"voucher_number\":\"JV0003\",\"voucher_date\":\"2025-10-10\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF3\",\"description\":null,\"status\":\"Draft\",\"total_debit\":283286.11898016994,\"total_credit\":283286.11898016994,\"currency_code\":\"PKR\",\"comp_id\":1,\"location_id\":1,\"created_by\":1}', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'dmgZkGP7c5FlAi7A4uXexOcP3bC6NYUp0FOEm1s5', 'Journal Voucher CREATE: JV0003', '2025-10-10 12:13:29'),
-(11, 1, 1, 1, 'Accounts', 'transactions', 6, 'UPDATE', '{\"voucher_date\":\"2025-10-10\",\"reference_number\":\"REF3\",\"description\":null,\"total_debit\":\"283286.12\",\"total_credit\":\"283286.12\"}', '{\"voucher_number\":\"JV0003\",\"voucher_date\":\"2025-10-10\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF3\",\"description\":null,\"status\":\"Draft\",\"total_debit\":283286.11898016994,\"total_credit\":283286.11898016994,\"currency_code\":\"PKR\",\"comp_id\":1,\"location_id\":1}', '{\"voucher_number\":{\"old\":null,\"new\":\"JV0003\"},\"voucher_type\":{\"old\":null,\"new\":\"Journal\"},\"status\":{\"old\":null,\"new\":\"Draft\"},\"total_debit\":{\"old\":\"283286.12\",\"new\":283286.11898016994},\"total_credit\":{\"old\":\"283286.12\",\"new\":283286.11898016994},\"currency_code\":{\"old\":null,\"new\":\"PKR\"},\"comp_id\":{\"old\":null,\"new\":1},\"location_id\":{\"old\":null,\"new\":1}}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'dmgZkGP7c5FlAi7A4uXexOcP3bC6NYUp0FOEm1s5', 'Journal Voucher UPDATE: JV0003', '2025-10-10 12:17:10'),
-(12, 1, 1, 1, 'System', 'code_configurations', 4, 'CREATE', NULL, '{\"company_id\":1,\"location_id\":1,\"code_type\":\"cash\",\"is_active\":true,\"level2_account_id\":null,\"level3_account_id\":7,\"created_by\":1,\"code_name\":\"cash\",\"separator\":\"-\",\"number_length\":4,\"next_number\":1,\"account_level\":2}', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'c278TkaLldzCDrLetXGsdJRuh2Ql4rAdGITp5VGU', 'Code configuration created: cash', '2025-10-15 10:48:54'),
-(13, 1, 1, 1, 'System', 'code_configurations', 4, 'UPDATE', '{\"id\":4,\"company_id\":1,\"location_id\":1,\"level2_account_id\":null,\"level3_account_id\":7,\"level4_account_id\":null,\"code_type\":\"cash\",\"code_name\":\"cash\",\"account_level\":2,\"prefix\":null,\"next_number\":1,\"number_length\":4,\"separator\":\"-\",\"description\":null,\"is_active\":true,\"created_by\":1,\"updated_by\":null,\"created_at\":\"2025-10-15T15:48:54.000000Z\",\"updated_at\":\"2025-10-15T15:48:54.000000Z\"}', '{\"company_id\":1,\"location_id\":1,\"code_type\":\"cash\",\"is_active\":true,\"level2_account_id\":null,\"level3_account_id\":255,\"updated_by\":1,\"code_name\":\"cash\",\"separator\":\"-\",\"number_length\":4,\"next_number\":1,\"account_level\":2}', '{\"level3_account_id\":{\"old\":7,\"new\":255}}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'c278TkaLldzCDrLetXGsdJRuh2Ql4rAdGITp5VGU', 'Code configuration updated: cash', '2025-10-15 11:23:49'),
-(14, 1, 1, 1, 'System', 'code_configurations', 4, 'UPDATE', '{\"id\":4,\"company_id\":1,\"location_id\":1,\"level2_account_id\":null,\"level3_account_id\":255,\"level4_account_id\":null,\"code_type\":\"cash\",\"code_name\":\"cash\",\"account_level\":2,\"prefix\":null,\"next_number\":1,\"number_length\":4,\"separator\":\"-\",\"description\":null,\"is_active\":true,\"created_by\":1,\"updated_by\":1,\"created_at\":\"2025-10-15T15:48:54.000000Z\",\"updated_at\":\"2025-10-15T16:23:49.000000Z\"}', '{\"company_id\":1,\"location_id\":1,\"code_type\":\"cash\",\"is_active\":true,\"level2_account_id\":null,\"level3_account_id\":7,\"updated_by\":1,\"code_name\":\"cash\",\"separator\":\"-\",\"number_length\":4,\"next_number\":1,\"account_level\":2}', '{\"level3_account_id\":{\"old\":255,\"new\":7}}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'c278TkaLldzCDrLetXGsdJRuh2Ql4rAdGITp5VGU', 'Code configuration updated: cash', '2025-10-15 11:24:01'),
-(15, 1, 1, 1, 'Accounts', 'transactions', 7, 'CREATE', NULL, '{\"voucher_number\":\"JV0004\",\"voucher_date\":\"2025-10-17\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF4\",\"description\":null,\"status\":\"Draft\",\"total_debit\":566572.2379603399,\"total_credit\":566572.2379603399,\"currency_code\":\"PKR\",\"comp_id\":1,\"location_id\":1,\"created_by\":1}', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'LUFHcYLQKiu5DJ1qax52fDXUhVbEx9CQoGo4r9kX', 'Journal Voucher CREATE: JV0004', '2025-10-17 11:07:08'),
-(16, 1, 1, 1, 'Accounts', 'transactions', 7, 'UPDATE', '{\"voucher_date\":\"2025-10-17\",\"reference_number\":\"REF4\",\"description\":null,\"total_debit\":\"566572.24\",\"total_credit\":\"566572.24\"}', '{\"voucher_number\":\"JV0004\",\"voucher_date\":\"2025-10-17\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF4\",\"description\":null,\"status\":\"Draft\",\"total_debit\":566572.2379603399,\"total_credit\":566572.2379603399,\"currency_code\":\"PKR\",\"comp_id\":1,\"location_id\":1}', '{\"voucher_number\":{\"old\":null,\"new\":\"JV0004\"},\"voucher_type\":{\"old\":null,\"new\":\"Journal\"},\"status\":{\"old\":null,\"new\":\"Draft\"},\"total_debit\":{\"old\":\"566572.24\",\"new\":566572.2379603399},\"total_credit\":{\"old\":\"566572.24\",\"new\":566572.2379603399},\"currency_code\":{\"old\":null,\"new\":\"PKR\"},\"comp_id\":{\"old\":null,\"new\":1},\"location_id\":{\"old\":null,\"new\":1}}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'LUFHcYLQKiu5DJ1qax52fDXUhVbEx9CQoGo4r9kX', 'Journal Voucher UPDATE: JV0004', '2025-10-17 11:15:19'),
-(17, 1, 1, 1, 'Accounts', 'transactions', 7, 'UPDATE', '{\"voucher_date\":\"2025-10-17\",\"reference_number\":\"REF4\",\"description\":null,\"total_debit\":\"566572.24\",\"total_credit\":\"566572.24\"}', '{\"voucher_number\":\"JV0004\",\"voucher_date\":\"2025-10-17\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF4\",\"description\":null,\"status\":\"Draft\",\"total_debit\":566572.2379603399,\"total_credit\":566572.2379603399,\"currency_code\":\"PKR\",\"comp_id\":1,\"location_id\":1}', '{\"voucher_number\":{\"old\":null,\"new\":\"JV0004\"},\"voucher_type\":{\"old\":null,\"new\":\"Journal\"},\"status\":{\"old\":null,\"new\":\"Draft\"},\"total_debit\":{\"old\":\"566572.24\",\"new\":566572.2379603399},\"total_credit\":{\"old\":\"566572.24\",\"new\":566572.2379603399},\"currency_code\":{\"old\":null,\"new\":\"PKR\"},\"comp_id\":{\"old\":null,\"new\":1},\"location_id\":{\"old\":null,\"new\":1}}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'LUFHcYLQKiu5DJ1qax52fDXUhVbEx9CQoGo4r9kX', 'Journal Voucher UPDATE: JV0004', '2025-10-17 11:15:29'),
-(18, 1, 1, 1, 'Accounts', 'transactions', 7, 'UPDATE', '{\"voucher_date\":\"2025-10-17\",\"reference_number\":\"REF4\",\"description\":null,\"total_debit\":\"566572.24\",\"total_credit\":\"566572.24\"}', '{\"voucher_number\":\"JV0004\",\"voucher_date\":\"2025-10-17\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF4\",\"description\":null,\"status\":\"Draft\",\"total_debit\":566572.2379603399,\"total_credit\":566572.2379603399,\"currency_code\":\"PKR\",\"comp_id\":1,\"location_id\":1}', '{\"voucher_number\":{\"old\":null,\"new\":\"JV0004\"},\"voucher_type\":{\"old\":null,\"new\":\"Journal\"},\"status\":{\"old\":null,\"new\":\"Draft\"},\"total_debit\":{\"old\":\"566572.24\",\"new\":566572.2379603399},\"total_credit\":{\"old\":\"566572.24\",\"new\":566572.2379603399},\"currency_code\":{\"old\":null,\"new\":\"PKR\"},\"comp_id\":{\"old\":null,\"new\":1},\"location_id\":{\"old\":null,\"new\":1}}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'LUFHcYLQKiu5DJ1qax52fDXUhVbEx9CQoGo4r9kX', 'Journal Voucher UPDATE: JV0004', '2025-10-17 11:15:49'),
-(19, 1, 1, 1, 'Attachment', 'attachments', NULL, 'DELETE', NULL, '{\"deleted_count\":1,\"attachment_ids\":[\"1759848091_image_2025-10-07_194131235.png\"],\"comp_id\":1}', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'qdiKphHKEWVJF6l93k6Em4PWzfY13EoMLSXkCKwF', 'Attachment DELETE:  ()', '2025-11-16 09:08:22'),
-(20, 1, 1, 1, 'Accounts', 'transactions', 7, 'UPDATE', '{\"voucher_date\":\"2025-10-17\",\"reference_number\":\"REF4\",\"description\":null,\"total_debit\":\"566572.24\",\"total_credit\":\"566572.24\"}', '{\"voucher_number\":\"JV0004\",\"voucher_date\":\"2025-10-17\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF4\",\"description\":null,\"status\":\"Draft\",\"total_debit\":566572.2379603399,\"total_credit\":566572.2379603399,\"currency_code\":\"PKR\",\"comp_id\":1,\"location_id\":1}', '{\"voucher_number\":{\"old\":null,\"new\":\"JV0004\"},\"voucher_type\":{\"old\":null,\"new\":\"Journal\"},\"status\":{\"old\":null,\"new\":\"Draft\"},\"total_debit\":{\"old\":\"566572.24\",\"new\":566572.2379603399},\"total_credit\":{\"old\":\"566572.24\",\"new\":566572.2379603399},\"currency_code\":{\"old\":null,\"new\":\"PKR\"},\"comp_id\":{\"old\":null,\"new\":1},\"location_id\":{\"old\":null,\"new\":1}}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'qdiKphHKEWVJF6l93k6Em4PWzfY13EoMLSXkCKwF', 'Journal Voucher UPDATE: JV0004', '2025-11-16 09:11:12'),
-(21, 1, 1, 1, 'Accounts', 'transactions', 7, 'UPDATE', '{\"voucher_date\":\"2025-10-17\",\"reference_number\":\"REF4\",\"description\":null,\"total_debit\":\"566572.24\",\"total_credit\":\"566572.24\"}', '{\"voucher_number\":\"JV0004\",\"voucher_date\":\"2025-10-17\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF4\",\"description\":null,\"status\":\"Draft\",\"total_debit\":566572.2379603399,\"total_credit\":566572.2379603399,\"currency_code\":\"PKR\",\"comp_id\":1,\"location_id\":1}', '{\"voucher_number\":{\"old\":null,\"new\":\"JV0004\"},\"voucher_type\":{\"old\":null,\"new\":\"Journal\"},\"status\":{\"old\":null,\"new\":\"Draft\"},\"total_debit\":{\"old\":\"566572.24\",\"new\":566572.2379603399},\"total_credit\":{\"old\":\"566572.24\",\"new\":566572.2379603399},\"currency_code\":{\"old\":null,\"new\":\"PKR\"},\"comp_id\":{\"old\":null,\"new\":1},\"location_id\":{\"old\":null,\"new\":1}}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'qdiKphHKEWVJF6l93k6Em4PWzfY13EoMLSXkCKwF', 'Journal Voucher UPDATE: JV0004', '2025-11-16 09:11:22'),
-(22, 1, 1, 1, 'Accounts', 'transactions', 7, 'UPDATE', '{\"voucher_date\":\"2025-10-17\",\"reference_number\":\"REF4\",\"description\":null,\"total_debit\":\"566572.24\",\"total_credit\":\"566572.24\"}', '{\"voucher_number\":\"JV0004\",\"voucher_date\":\"2025-10-17\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF4\",\"description\":null,\"status\":\"Draft\",\"total_debit\":566572.2379603399,\"total_credit\":566572.2379603399,\"currency_code\":\"PKR\",\"comp_id\":1,\"location_id\":1}', '{\"voucher_number\":{\"old\":null,\"new\":\"JV0004\"},\"voucher_type\":{\"old\":null,\"new\":\"Journal\"},\"status\":{\"old\":null,\"new\":\"Draft\"},\"total_debit\":{\"old\":\"566572.24\",\"new\":566572.2379603399},\"total_credit\":{\"old\":\"566572.24\",\"new\":566572.2379603399},\"currency_code\":{\"old\":null,\"new\":\"PKR\"},\"comp_id\":{\"old\":null,\"new\":1},\"location_id\":{\"old\":null,\"new\":1}}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0', 'qdiKphHKEWVJF6l93k6Em4PWzfY13EoMLSXkCKwF', 'Journal Voucher UPDATE: JV0004', '2025-11-16 09:14:41'),
-(23, 1, 1, 1, 'Accounts', 'transactions', 7, 'UPDATE', '{\"voucher_date\":\"2025-10-17\",\"reference_number\":\"REF4\",\"description\":null,\"total_debit\":\"566572.24\",\"total_credit\":\"566572.24\"}', '{\"voucher_number\":\"JV0004\",\"voucher_date\":\"2025-12-20\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF4\",\"description\":null,\"status\":\"Draft\",\"total_debit\":566572.2379603399,\"total_credit\":566572.2379603399,\"currency_code\":\"PKR\",\"comp_id\":1,\"location_id\":1}', '{\"voucher_number\":{\"old\":null,\"new\":\"JV0004\"},\"voucher_date\":{\"old\":\"2025-10-17\",\"new\":\"2025-12-20\"},\"voucher_type\":{\"old\":null,\"new\":\"Journal\"},\"status\":{\"old\":null,\"new\":\"Draft\"},\"total_debit\":{\"old\":\"566572.24\",\"new\":566572.2379603399},\"total_credit\":{\"old\":\"566572.24\",\"new\":566572.2379603399},\"currency_code\":{\"old\":null,\"new\":\"PKR\"},\"comp_id\":{\"old\":null,\"new\":1},\"location_id\":{\"old\":null,\"new\":1}}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 OPR/125.0.0.0', 'pkfW1mepgWvy51CSUy5cMhUmE8kaDm6PZGyWkJdL', 'Journal Voucher UPDATE: JV0004', '2025-12-20 05:30:25'),
-(24, 1, 1, 1, 'Accounts', 'transactions', 7, 'POST', '{\"status\":\"Draft\",\"posted_at\":null,\"posted_by\":null}', '{\"voucher_number\":\"JV0004\",\"voucher_date\":\"2025-12-20\",\"voucher_type\":\"Journal\",\"reference_number\":\"REF4\",\"description\":null,\"status\":\"Posted\",\"total_debit\":\"566572.24\",\"total_credit\":\"566572.24\",\"currency_code\":\"PKR\",\"comp_id\":1,\"location_id\":1,\"posted_at\":\"2025-12-20T10:30:44.316339Z\",\"posted_by\":1}', '{\"voucher_number\":{\"old\":null,\"new\":\"JV0004\"},\"voucher_date\":{\"old\":null,\"new\":\"2025-12-20\"},\"voucher_type\":{\"old\":null,\"new\":\"Journal\"},\"reference_number\":{\"old\":null,\"new\":\"REF4\"},\"status\":{\"old\":\"Draft\",\"new\":\"Posted\"},\"total_debit\":{\"old\":null,\"new\":\"566572.24\"},\"total_credit\":{\"old\":null,\"new\":\"566572.24\"},\"currency_code\":{\"old\":null,\"new\":\"PKR\"},\"comp_id\":{\"old\":null,\"new\":1},\"location_id\":{\"old\":null,\"new\":1},\"posted_at\":{\"old\":null,\"new\":\"2025-12-20T10:30:44.316339Z\"},\"posted_by\":{\"old\":null,\"new\":1}}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 OPR/125.0.0.0', 'pkfW1mepgWvy51CSUy5cMhUmE8kaDm6PZGyWkJdL', 'Journal Voucher POST: JV0004', '2025-12-20 05:30:44');
 
 -- --------------------------------------------------------
 
@@ -1379,7 +1247,7 @@ CREATE TABLE `tbl_change_history` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `table_name` varchar(100) NOT NULL,
   `record_id` bigint(20) UNSIGNED NOT NULL,
-  `record_identifier` varchar(255) DEFAULT NULL,
+  `record_identifier` varchar(191) DEFAULT NULL,
   `field_name` varchar(100) NOT NULL,
   `old_value` text DEFAULT NULL,
   `new_value` text DEFAULT NULL,
@@ -1387,8 +1255,8 @@ CREATE TABLE `tbl_change_history` (
   `changed_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `change_reason` varchar(500) DEFAULT NULL,
   `change_ip` varchar(45) DEFAULT NULL,
-  `change_type` enum('MANUAL','IMPORT','API','SYSTEM') DEFAULT 'MANUAL',
-  `is_reversed` tinyint(1) DEFAULT 0,
+  `change_type` enum('MANUAL','IMPORT','API','SYSTEM') NOT NULL DEFAULT 'MANUAL',
+  `is_reversed` tinyint(1) NOT NULL DEFAULT 0,
   `reversed_at` timestamp NULL DEFAULT NULL,
   `reversed_by` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1403,9 +1271,9 @@ CREATE TABLE `tbl_deleted_data_recovery` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `original_table` varchar(100) NOT NULL,
   `original_id` bigint(20) UNSIGNED NOT NULL,
-  `record_identifier` varchar(255) DEFAULT NULL,
-  `data_snapshot` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`data_snapshot`)),
-  `related_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`related_data`)),
+  `record_identifier` varchar(191) DEFAULT NULL,
+  `data_snapshot` longtext NOT NULL,
+  `related_data` longtext DEFAULT NULL,
   `deleted_by` bigint(20) UNSIGNED NOT NULL,
   `deleted_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `delete_reason` varchar(500) DEFAULT NULL,
@@ -1414,7 +1282,7 @@ CREATE TABLE `tbl_deleted_data_recovery` (
   `recovered_at` timestamp NULL DEFAULT NULL,
   `recovered_by` bigint(20) UNSIGNED DEFAULT NULL,
   `recovery_notes` text DEFAULT NULL,
-  `status` enum('DELETED','RECOVERED','EXPIRED','PERMANENTLY_DELETED') DEFAULT 'DELETED'
+  `status` enum('DELETED','RECOVERED','EXPIRED','PERMANENTLY_DELETED') NOT NULL DEFAULT 'DELETED'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1427,9 +1295,9 @@ CREATE TABLE `tbl_report_logs` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `user_id` bigint(20) UNSIGNED NOT NULL,
   `company_id` int(10) UNSIGNED DEFAULT NULL,
-  `report_name` varchar(255) NOT NULL,
+  `report_name` varchar(191) NOT NULL,
   `report_type` varchar(100) DEFAULT NULL,
-  `parameters` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`parameters`)),
+  `parameters` longtext DEFAULT NULL,
   `date_range_from` date DEFAULT NULL,
   `date_range_to` date DEFAULT NULL,
   `export_format` varchar(20) DEFAULT NULL,
@@ -1449,14 +1317,14 @@ CREATE TABLE `tbl_report_logs` (
 CREATE TABLE `tbl_security_logs` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `username` varchar(255) DEFAULT NULL,
+  `username` varchar(191) DEFAULT NULL,
   `event_type` varchar(100) NOT NULL,
   `event_status` enum('SUCCESS','FAILED','BLOCKED','WARNING') NOT NULL,
   `ip_address` varchar(45) DEFAULT NULL,
   `user_agent` text DEFAULT NULL,
   `location_info` varchar(255) DEFAULT NULL,
-  `additional_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`additional_data`)),
-  `risk_level` enum('LOW','MEDIUM','HIGH','CRITICAL') DEFAULT 'LOW',
+  `additional_data` longtext DEFAULT NULL,
+  `risk_level` enum('LOW','MEDIUM','HIGH','CRITICAL') NOT NULL DEFAULT 'LOW',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1515,7 +1383,7 @@ CREATE TABLE `tbl_users` (
 --
 
 INSERT INTO `tbl_users` (`id`, `fname`, `mname`, `lname`, `email`, `phone`, `loginid`, `pincode`, `comp_id`, `location_id`, `dept_id`, `email_verified_at`, `password`, `token`, `remember_token`, `status`, `role`, `permissions`, `avatar`, `timezone`, `language`, `currency`, `theme`, `last_login_at`, `last_login_ip`, `failed_login_attempts`, `locked_until`, `two_factor_enabled`, `two_factor_secret`, `recovery_codes`, `session_id`, `device_info`, `force_password_change`, `password_changed_at`, `login_history`, `created_by`, `updated_by`, `created_at`, `updated_at`, `deleted_at`, `last_activity`) VALUES
-(1, 'System', NULL, 'Administrator', 'admin@erpsystem.com', '+1234567890', 'admin', '12345', 1, 1, 1, NULL, '$2y$12$QZ/KZc6V/wK3YGJDrzVLaehK4R7EU.wRkOugBu/7kgg47SxX3yHPm', '5105eeb6f069dc03c70178aa2b3cd31d1c11ccb73d9628fc7dc6dbad54f84548', 'LIOUFPBaHHqduLbi8Cm6k3iHwabWEc6Dl2HbLEneESw0KpDTYecTu3175m1R0KxURgSsDbRENGiBHLlUQJislltStfPmMYZ7Oz5H', 'active', 'super_admin', '{\"users\":[\"create\",\"read\",\"update\",\"delete\"],\"financial\":[\"create\",\"read\",\"update\",\"delete\"],\"reports\":[\"create\",\"read\",\"update\",\"delete\"],\"settings\":[\"create\",\"read\",\"update\",\"delete\"],\"system\":[\"create\",\"read\",\"update\",\"delete\"]}', NULL, 'UTC', 'en', 'USD', 'system', '2026-02-28 03:40:15', '127.0.0.1', 0, NULL, 0, NULL, NULL, '9RPtR3q8NpFhcpqhleWBnBcRViCYlTarnZ0DzJ88', NULL, 0, '2025-08-14 10:19:49', '[{\"timestamp\":\"2026-02-28T08:40:15.826938Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-27T16:53:45.993321Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-27T07:41:38.810581Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-25T17:53:18.601760Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T12:13:55.996425Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T11:28:36.081856Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T10:59:35.149238Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T10:33:26.249869Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T10:26:04.834989Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-11-16T13:44:06.012419Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-11-16T13:15:38.480318Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-24T14:42:53.152903Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-17T16:02:14.237220Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-17T15:31:13.866417Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-16T10:25:33.336675Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-15T14:45:58.911173Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-15T14:45:43.021737Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-15T14:20:53.091772Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-15T14:19:01.693097Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-14T15:15:29.382960Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true}]', NULL, NULL, '2025-08-14 10:19:49', '2026-02-28 03:40:15', NULL, NULL),
+(1, 'System', NULL, 'Administrator', 'admin@erpsystem.com', '+1234567890', 'admin', '12345', 1, 1, 1, NULL, '$2y$12$QZ/KZc6V/wK3YGJDrzVLaehK4R7EU.wRkOugBu/7kgg47SxX3yHPm', '7bfa664a1a2da4c1215244a9d5467d0e2cc2106ca344bd9b956cf376dd8c89bb', 'hyJNg2wg40OB0Z4WS9x19LhN04FKXJSGjN0qBnigC1ZtT5IY0AygT6hLmpwIPB9ztYiYlwNnCx6T12Ve5A1t7ezXp3coIVeugvwE', 'active', 'super_admin', '{\"users\":[\"create\",\"read\",\"update\",\"delete\"],\"financial\":[\"create\",\"read\",\"update\",\"delete\"],\"reports\":[\"create\",\"read\",\"update\",\"delete\"],\"settings\":[\"create\",\"read\",\"update\",\"delete\"],\"system\":[\"create\",\"read\",\"update\",\"delete\"]}', NULL, 'UTC', 'en', 'USD', 'system', '2026-03-01 09:40:30', '127.0.0.1', 0, NULL, 0, NULL, NULL, 'Pd2uqcaLo2IYTyBzw040jKsnYJgE6O4DdVKYqSKh', NULL, 0, '2025-08-14 10:19:49', '[{\"timestamp\":\"2026-03-01T14:40:31.384519Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-03-01T12:07:07.169243Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-28T13:49:48.652226Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-28T08:40:15.826938Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-27T16:53:45.993321Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-27T07:41:38.810581Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-25T17:53:18.601760Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T12:13:55.996425Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T11:28:36.081856Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T10:59:35.149238Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T10:33:26.249869Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T10:26:04.834989Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-11-16T13:44:06.012419Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-11-16T13:15:38.480318Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-24T14:42:53.152903Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-17T16:02:14.237220Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-17T15:31:13.866417Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-16T10:25:33.336675Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-15T14:45:58.911173Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-15T14:45:43.021737Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true}]', NULL, NULL, '2025-08-14 10:19:49', '2026-03-01 09:40:30', NULL, NULL),
 (2, 'Finance', NULL, 'Manager', 'finance@erpsystem.com', '+1234567891', 'finance_mgr', '12346', 1, 1, 1, NULL, '$2y$12$.Kwr9rgMKPjrBG45kDk8x.kTh/l9u1VSLPMZ/BAI0n2Jw69lIf9SG', NULL, NULL, 'active', 'manager', '{\"financial\":[\"create\",\"read\",\"update\",\"delete\"],\"reports\":[\"read\",\"create\"],\"users\":[\"read\"]}', NULL, 'UTC', 'en', 'USD', 'light', NULL, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL, 0, '2025-08-14 10:19:50', NULL, NULL, NULL, '2025-08-14 10:19:50', '2025-08-14 10:19:50', NULL, NULL),
 (3, 'Account', NULL, 'Executive', 'accounts@erpsystem.com', '+1234567892', 'acc_exec', '12347', 1, 1, 1, NULL, '$2y$12$voUVJ1fWNi9mo0rkJppxZ.V96Gn0MF.y6L1KSjKBz7tJGp/7/QN3m', NULL, NULL, 'active', 'user', '{\"financial\":[\"create\",\"read\",\"update\"],\"reports\":[\"read\"]}', NULL, 'Asia/Karachi', 'en', 'PKR', 'dark', NULL, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL, 1, '2025-05-14 10:19:50', NULL, NULL, NULL, '2025-08-14 10:19:50', '2025-08-14 10:19:50', NULL, NULL);
 
@@ -1529,13 +1397,13 @@ CREATE TABLE `tbl_user_activity_logs` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `user_id` bigint(20) UNSIGNED NOT NULL,
   `company_id` int(10) UNSIGNED DEFAULT NULL,
-  `session_id` varchar(255) DEFAULT NULL,
+  `session_id` varchar(191) DEFAULT NULL,
   `url` varchar(500) DEFAULT NULL,
-  `route_name` varchar(255) DEFAULT NULL,
+  `route_name` varchar(191) DEFAULT NULL,
   `method` varchar(10) DEFAULT NULL,
   `controller` varchar(255) DEFAULT NULL,
   `action` varchar(255) DEFAULT NULL,
-  `parameters` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`parameters`)),
+  `parameters` longtext DEFAULT NULL,
   `response_status` int(11) DEFAULT NULL,
   `execution_time` int(11) DEFAULT NULL COMMENT 'in milliseconds',
   `memory_usage` int(11) DEFAULT NULL COMMENT 'in bytes',
@@ -1554,6 +1422,7 @@ CREATE TABLE `temp_level3_mapping` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `old_parent_id` bigint(20) UNSIGNED NOT NULL,
   `new_parent_id` bigint(20) UNSIGNED NOT NULL,
+  `level4_account_id` bigint(20) UNSIGNED NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1601,9 +1470,10 @@ CREATE TABLE `transactions` (
 --
 
 INSERT INTO `transactions` (`id`, `voucher_number`, `voucher_date`, `voucher_type`, `voucher_sub_type`, `reference_number`, `description`, `status`, `total_debit`, `total_credit`, `currency_code`, `exchange_rate`, `base_currency_total`, `attachments`, `period_id`, `fiscal_year`, `comp_id`, `location_id`, `created_by`, `approved_by`, `posted_by`, `approved_at`, `posted_at`, `rejection_reason`, `is_reversed`, `reversal_transaction_id`, `original_transaction_id`, `created_at`, `updated_at`) VALUES
-(4, 'JV0001', '2025-10-07', 'Journal', NULL, 'REF1', NULL, 'Posted', 283286.12, 283286.12, 'PKR', 1.000000, 283286.12, '[\"1759856653_1759848077_1759847940_Doc1.docx\"]', 1, NULL, 1, 1, 1, NULL, NULL, NULL, '2025-10-10 06:44:37', NULL, 0, NULL, NULL, '2025-10-07 12:04:47', '2025-10-10 06:44:37'),
-(6, 'JV0003', '2025-10-10', 'Journal', NULL, 'REF3', NULL, 'Posted', 283286.12, 283286.12, 'PKR', 1.000000, 283286.12, '[]', 1, NULL, 1, 1, 1, NULL, NULL, NULL, '2025-10-10 13:01:28', NULL, 0, NULL, NULL, '2025-10-10 12:13:29', '2025-10-10 13:01:28'),
-(7, 'JV0004', '2025-12-20', 'Journal', NULL, 'REF4', NULL, 'Posted', 566572.24, 566572.24, 'PKR', 1.000000, 566572.24, '[\"1759821998_cv_977_1759261061.pdf\"]', 1, NULL, 1, 1, 1, NULL, 1, NULL, '2025-12-20 05:30:44', NULL, 0, NULL, NULL, '2025-10-17 11:07:08', '2025-12-20 05:30:44');
+(1, 'JV-69a2e43582d00', '2026-01-06', 'Journal', NULL, 'INV-001', 'Sales revenue from product sales', 'Posted', 100000.00, 100000.00, 'PKR', 1.000000, 100000.00, NULL, 1, '2026', 1, 1, 1, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, '2026-02-28 07:48:53', '2026-02-28 07:48:53'),
+(2, 'JV-69a2e43584fe0', '2026-01-07', 'Journal', NULL, 'EXP-001', 'Operating expenses', 'Posted', 50000.00, 50000.00, 'PKR', 1.000000, 50000.00, NULL, 1, '2026', 1, 1, 1, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, '2026-02-28 07:48:53', '2026-02-28 07:48:53'),
+(3, 'JV-69a2e43587483', '2026-01-11', 'Journal', NULL, 'DEF-001', 'Advance customer payment - recorded as deferred revenue', 'Posted', 25000.00, 25000.00, 'PKR', 1.000000, 25000.00, NULL, 1, '2026', 1, 1, 1, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, '2026-02-28 07:48:53', '2026-02-28 07:48:53'),
+(4, 'JV-69a2e43589993', '2026-01-06', 'Journal', NULL, 'OPEN-001', 'Opening balance - Initial capital contribution', 'Posted', 500000.00, 500000.00, 'PKR', 1.000000, 500000.00, NULL, 1, '2026', 1, 1, 1, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, '2026-02-28 07:48:53', '2026-02-28 07:48:53');
 
 -- --------------------------------------------------------
 
@@ -1623,7 +1493,7 @@ CREATE TABLE `transaction_entries` (
   `exchange_rate` decimal(10,6) NOT NULL,
   `base_debit_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
   `base_credit_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
-  `attachment_id` varchar(255) DEFAULT NULL,
+  `attachment_id` varchar(191) DEFAULT NULL,
   `reference` varchar(100) DEFAULT NULL,
   `comp_id` bigint(20) UNSIGNED NOT NULL,
   `location_id` bigint(20) UNSIGNED NOT NULL,
@@ -1636,12 +1506,14 @@ CREATE TABLE `transaction_entries` (
 --
 
 INSERT INTO `transaction_entries` (`id`, `transaction_id`, `line_number`, `account_id`, `description`, `debit_amount`, `credit_amount`, `currency_code`, `exchange_rate`, `base_debit_amount`, `base_credit_amount`, `attachment_id`, `reference`, `comp_id`, `location_id`, `created_at`, `updated_at`) VALUES
-(1, 4, 1, 7, NULL, 1000.00, 0.00, 'USD', 0.003530, 283286.12, 0.00, NULL, NULL, 1, 1, '2025-10-07 12:04:47', '2025-10-07 12:04:47'),
-(2, 4, 2, 97, NULL, 0.00, 1000.00, 'USD', 0.003530, 0.00, 283286.12, NULL, NULL, 1, 1, '2025-10-07 12:04:47', '2025-10-07 12:04:47'),
-(17, 6, 1, 7, NULL, 0.00, 1000.00, 'USD', 0.003530, 0.00, 283286.12, NULL, NULL, 1, 1, '2025-10-10 12:17:10', '2025-10-10 12:17:10'),
-(18, 6, 2, 182, NULL, 1000.00, 0.00, 'USD', 0.003530, 283286.12, 0.00, NULL, NULL, 1, 1, '2025-10-10 12:17:10', '2025-10-10 12:17:10'),
-(33, 7, 1, 26, NULL, 2000.00, 0.00, 'USD', 0.003530, 566572.24, 0.00, NULL, NULL, 1, 1, '2025-12-20 05:30:25', '2025-12-20 05:30:25'),
-(34, 7, 2, 188, NULL, 0.00, 2000.00, 'USD', 0.003530, 0.00, 566572.24, NULL, NULL, 1, 1, '2025-12-20 05:30:25', '2025-12-20 05:30:25');
+(1, 1, 1, 44, 'Cash received from sales', 100000.00, 0.00, 'PKR', 1.000000, 100000.00, 0.00, NULL, NULL, 1, 1, '2026-02-28 07:48:53', '2026-02-28 07:48:53'),
+(2, 1, 2, 207, 'Sales revenue', 0.00, 100000.00, 'PKR', 1.000000, 0.00, 100000.00, NULL, NULL, 1, 1, '2026-02-28 07:48:53', '2026-02-28 07:48:53'),
+(3, 2, 1, 300, 'Operating expenses', 50000.00, 0.00, 'PKR', 1.000000, 50000.00, 0.00, NULL, NULL, 1, 1, '2026-02-28 07:48:53', '2026-02-28 07:48:53'),
+(4, 2, 2, 44, 'Paid from bank', 0.00, 50000.00, 'PKR', 1.000000, 0.00, 50000.00, NULL, NULL, 1, 1, '2026-02-28 07:48:53', '2026-02-28 07:48:53'),
+(5, 3, 1, 44, 'Cash received from customer advance payment', 25000.00, 0.00, 'PKR', 1.000000, 25000.00, 0.00, NULL, NULL, 1, 1, '2026-02-28 07:48:53', '2026-02-28 07:48:53'),
+(6, 3, 2, 79, 'Deferred revenue liability - service not yet delivered', 0.00, 25000.00, 'PKR', 1.000000, 0.00, 25000.00, NULL, NULL, 1, 1, '2026-02-28 07:48:53', '2026-02-28 07:48:53'),
+(7, 4, 1, 44, 'Opening asset balance', 500000.00, 0.00, 'PKR', 1.000000, 500000.00, 0.00, NULL, NULL, 1, 1, '2026-02-28 07:48:53', '2026-02-28 07:48:53'),
+(8, 4, 2, 152, 'Opening capital', 0.00, 500000.00, 'PKR', 1.000000, 0.00, 500000.00, NULL, NULL, 1, 1, '2026-02-28 07:48:53', '2026-02-28 07:48:53');
 
 -- --------------------------------------------------------
 
@@ -1727,36 +1599,37 @@ INSERT INTO `user_rights` (`id`, `user_id`, `menu_id`, `can_view`, `can_add`, `c
 (208, 2, 42, 1, 1, 1, 1, '2026-02-27 04:07:21', '2026-02-27 04:07:21'),
 (209, 2, 43, 1, 1, 1, 1, '2026-02-27 04:07:21', '2026-02-27 04:07:21'),
 (210, 2, 44, 1, 1, 1, 1, '2026-02-27 04:07:21', '2026-02-27 04:07:21'),
-(211, 1, 1, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(212, 1, 2, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(213, 1, 3, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(214, 1, 4, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(215, 1, 5, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(216, 1, 6, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(217, 1, 7, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(218, 1, 8, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(219, 1, 9, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(220, 1, 12, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(221, 1, 13, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(222, 1, 14, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(223, 1, 34, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(224, 1, 35, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(225, 1, 36, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(226, 1, 37, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(227, 1, 38, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(228, 1, 39, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(229, 1, 40, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(230, 1, 41, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(231, 1, 42, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(232, 1, 43, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(233, 1, 44, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(234, 1, 57, 0, 0, 0, 0, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(235, 1, 58, 0, 0, 0, 0, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(236, 1, 59, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(237, 1, 60, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(238, 1, 61, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(239, 1, 62, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49'),
-(240, 1, 63, 1, 1, 1, 1, '2026-02-28 03:46:49', '2026-02-28 03:46:49');
+(241, 1, 1, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(242, 1, 2, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(243, 1, 3, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(244, 1, 4, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(245, 1, 5, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(246, 1, 6, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(247, 1, 7, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(248, 1, 8, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(249, 1, 9, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(250, 1, 12, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(251, 1, 13, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(252, 1, 14, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(253, 1, 34, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(254, 1, 35, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(255, 1, 36, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(256, 1, 37, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(257, 1, 38, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(258, 1, 39, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(259, 1, 40, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(260, 1, 41, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(261, 1, 42, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(262, 1, 43, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(263, 1, 44, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(264, 1, 57, 0, 0, 0, 0, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(265, 1, 58, 0, 0, 0, 0, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(266, 1, 59, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(267, 1, 60, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(268, 1, 61, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(269, 1, 62, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(270, 1, 63, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17'),
+(271, 1, 64, 1, 1, 1, 1, '2026-02-28 04:57:17', '2026-02-28 04:57:17');
 
 -- --------------------------------------------------------
 
@@ -1807,7 +1680,8 @@ CREATE TABLE `voucher_number_configurations` (
 --
 
 INSERT INTO `voucher_number_configurations` (`id`, `comp_id`, `location_id`, `voucher_type`, `prefix`, `running_number`, `number_length`, `reset_frequency`, `last_reset_date`, `is_active`, `created_by`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 'Journal', 'JV', 5, 4, 'Monthly', '2025-10-07', 1, 1, '2025-10-06 07:18:44', '2025-10-17 11:07:08');
+(1, 1, 1, 'Journal', 'JV', 1, 4, 'Monthly', '2026-02-28', 1, 1, '2025-10-06 07:18:44', '2026-02-28 04:13:08'),
+(2, 1, 1, 'Opening', 'OP', 1, 4, 'Monthly', '2026-02-28', 1, 1, '2025-10-06 07:18:44', '2026-02-28 05:09:55');
 
 --
 -- Indexes for dumped tables
@@ -1848,8 +1722,7 @@ ALTER TABLE `code_configurations`
   ADD KEY `code_configurations_created_by_foreign` (`created_by`),
   ADD KEY `code_configurations_updated_by_foreign` (`updated_by`),
   ADD KEY `code_configurations_level2_account_id_index` (`level2_account_id`),
-  ADD KEY `code_configurations_level3_account_id_index` (`level3_account_id`),
-  ADD KEY `code_configurations_level4_account_id_index` (`level4_account_id`);
+  ADD KEY `code_configurations_level3_account_id_index` (`level3_account_id`);
 
 --
 -- Indexes for table `companies`
@@ -2002,54 +1875,54 @@ ALTER TABLE `sessions`
 --
 ALTER TABLE `tbl_audit_logs`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_user` (`user_id`),
-  ADD KEY `idx_company` (`company_id`),
-  ADD KEY `idx_table_record` (`table_name`,`record_id`),
-  ADD KEY `idx_created` (`created_at`),
-  ADD KEY `idx_action` (`action_type`),
-  ADD KEY `idx_module` (`module_name`);
+  ADD KEY `tbl_audit_logs_user_id_index` (`user_id`),
+  ADD KEY `tbl_audit_logs_company_id_index` (`company_id`),
+  ADD KEY `tbl_audit_logs_table_name_record_id_index` (`table_name`,`record_id`),
+  ADD KEY `tbl_audit_logs_created_at_index` (`created_at`),
+  ADD KEY `tbl_audit_logs_action_type_index` (`action_type`),
+  ADD KEY `tbl_audit_logs_module_name_index` (`module_name`);
 
 --
 -- Indexes for table `tbl_change_history`
 --
 ALTER TABLE `tbl_change_history`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_record` (`table_name`,`record_id`),
-  ADD KEY `idx_field` (`field_name`),
-  ADD KEY `idx_changed_at` (`changed_at`),
-  ADD KEY `idx_changed_by` (`changed_by`);
+  ADD KEY `tbl_change_history_table_name_record_id_index` (`table_name`,`record_id`),
+  ADD KEY `tbl_change_history_field_name_index` (`field_name`),
+  ADD KEY `tbl_change_history_changed_at_index` (`changed_at`),
+  ADD KEY `tbl_change_history_changed_by_index` (`changed_by`);
 
 --
 -- Indexes for table `tbl_deleted_data_recovery`
 --
 ALTER TABLE `tbl_deleted_data_recovery`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_table_id` (`original_table`,`original_id`),
-  ADD KEY `idx_identifier` (`record_identifier`),
-  ADD KEY `idx_status` (`status`),
-  ADD KEY `idx_expires` (`recovery_expires_at`),
-  ADD KEY `idx_deleted_at` (`deleted_at`);
+  ADD KEY `tbl_deleted_data_recovery_original_table_original_id_index` (`original_table`,`original_id`),
+  ADD KEY `tbl_deleted_data_recovery_record_identifier_index` (`record_identifier`),
+  ADD KEY `tbl_deleted_data_recovery_status_index` (`status`),
+  ADD KEY `tbl_deleted_data_recovery_recovery_expires_at_index` (`recovery_expires_at`),
+  ADD KEY `tbl_deleted_data_recovery_deleted_at_index` (`deleted_at`);
 
 --
 -- Indexes for table `tbl_report_logs`
 --
 ALTER TABLE `tbl_report_logs`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_user` (`user_id`),
-  ADD KEY `idx_report` (`report_name`),
-  ADD KEY `idx_created` (`created_at`);
+  ADD KEY `tbl_report_logs_user_id_index` (`user_id`),
+  ADD KEY `tbl_report_logs_report_name_index` (`report_name`),
+  ADD KEY `tbl_report_logs_created_at_index` (`created_at`);
 
 --
 -- Indexes for table `tbl_security_logs`
 --
 ALTER TABLE `tbl_security_logs`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_user` (`user_id`),
-  ADD KEY `idx_username` (`username`),
-  ADD KEY `idx_event_type` (`event_type`),
-  ADD KEY `idx_event_status` (`event_status`),
-  ADD KEY `idx_risk_level` (`risk_level`),
-  ADD KEY `idx_created` (`created_at`);
+  ADD KEY `tbl_security_logs_user_id_index` (`user_id`),
+  ADD KEY `tbl_security_logs_username_index` (`username`),
+  ADD KEY `tbl_security_logs_event_type_index` (`event_type`),
+  ADD KEY `tbl_security_logs_event_status_index` (`event_status`),
+  ADD KEY `tbl_security_logs_risk_level_index` (`risk_level`),
+  ADD KEY `tbl_security_logs_created_at_index` (`created_at`);
 
 --
 -- Indexes for table `tbl_users`
@@ -2070,10 +1943,10 @@ ALTER TABLE `tbl_users`
 --
 ALTER TABLE `tbl_user_activity_logs`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_user` (`user_id`),
-  ADD KEY `idx_session` (`session_id`),
-  ADD KEY `idx_route` (`route_name`),
-  ADD KEY `idx_created` (`created_at`);
+  ADD KEY `tbl_user_activity_logs_user_id_index` (`user_id`),
+  ADD KEY `tbl_user_activity_logs_session_id_index` (`session_id`),
+  ADD KEY `tbl_user_activity_logs_route_name_index` (`route_name`),
+  ADD KEY `tbl_user_activity_logs_created_at_index` (`created_at`);
 
 --
 -- Indexes for table `temp_level3_mapping`
@@ -2081,7 +1954,8 @@ ALTER TABLE `tbl_user_activity_logs`
 ALTER TABLE `temp_level3_mapping`
   ADD PRIMARY KEY (`id`),
   ADD KEY `temp_level3_mapping_old_parent_id_index` (`old_parent_id`),
-  ADD KEY `temp_level3_mapping_new_parent_id_index` (`new_parent_id`);
+  ADD KEY `temp_level3_mapping_new_parent_id_index` (`new_parent_id`),
+  ADD KEY `temp_level3_mapping_level4_account_id_index` (`level4_account_id`);
 
 --
 -- Indexes for table `transactions`
@@ -2149,13 +2023,13 @@ ALTER TABLE `voucher_number_configurations`
 -- AUTO_INCREMENT for table `chart_of_accounts`
 --
 ALTER TABLE `chart_of_accounts`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=305;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=366;
 
 --
 -- AUTO_INCREMENT for table `code_configurations`
 --
 ALTER TABLE `code_configurations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `companies`
@@ -2173,7 +2047,7 @@ ALTER TABLE `currencies`
 -- AUTO_INCREMENT for table `currency_exchange_rate_history`
 --
 ALTER TABLE `currency_exchange_rate_history`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=158;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `departments`
@@ -2209,13 +2083,13 @@ ALTER TABLE `locations`
 -- AUTO_INCREMENT for table `menus`
 --
 ALTER TABLE `menus`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
 
 --
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=87;
 
 --
 -- AUTO_INCREMENT for table `modules`
@@ -2233,7 +2107,7 @@ ALTER TABLE `packages`
 -- AUTO_INCREMENT for table `package_features`
 --
 ALTER TABLE `package_features`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=300;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=329;
 
 --
 -- AUTO_INCREMENT for table `sections`
@@ -2245,7 +2119,7 @@ ALTER TABLE `sections`
 -- AUTO_INCREMENT for table `tbl_audit_logs`
 --
 ALTER TABLE `tbl_audit_logs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `tbl_change_history`
@@ -2293,13 +2167,13 @@ ALTER TABLE `temp_level3_mapping`
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `transaction_entries`
 --
 ALTER TABLE `transaction_entries`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -2311,7 +2185,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `user_rights`
 --
 ALTER TABLE `user_rights`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=241;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=272;
 
 --
 -- AUTO_INCREMENT for table `user_sessions`
@@ -2323,7 +2197,7 @@ ALTER TABLE `user_sessions`
 -- AUTO_INCREMENT for table `voucher_number_configurations`
 --
 ALTER TABLE `voucher_number_configurations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables
@@ -2340,10 +2214,11 @@ ALTER TABLE `chart_of_accounts`
 --
 ALTER TABLE `code_configurations`
   ADD CONSTRAINT `code_configurations_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `code_configurations_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `code_configurations_level2_account_id_foreign` FOREIGN KEY (`level2_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `code_configurations_level3_account_id_foreign` FOREIGN KEY (`level3_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `code_configurations_level4_account_id_foreign` FOREIGN KEY (`level4_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `code_configurations_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `code_configurations_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `code_configurations_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `companies`
@@ -2376,8 +2251,7 @@ ALTER TABLE `locations`
 -- Constraints for table `transaction_entries`
 --
 ALTER TABLE `transaction_entries`
-  ADD CONSTRAINT `transaction_entries_account_id_foreign` FOREIGN KEY (`account_id`) REFERENCES `chart_of_accounts` (`id`),
-  ADD CONSTRAINT `transaction_entries_transaction_id_foreign` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `transaction_entries_account_id_foreign` FOREIGN KEY (`account_id`) REFERENCES `chart_of_accounts` (`id`);
 
 --
 -- Constraints for table `user_rights`
