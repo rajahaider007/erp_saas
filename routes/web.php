@@ -212,13 +212,15 @@ Route::prefix('api/code-configuration')->middleware('web.auth')->group(function 
 
 // Balance Sheet Routes
 Route::prefix('accounts/balance-sheet')->name('accounts.balance-sheet.')->middleware('web.auth')->group(function () {
-    Route::get('/', [App\Http\Controllers\Accounts\BalanceSheetController::class, 'index'])->name('index');
+    Route::get('/', [App\Http\Controllers\Accounts\BalanceSheetController::class, 'search'])->name('search');
+    Route::get('/report', [App\Http\Controllers\Accounts\BalanceSheetController::class, 'index'])->name('report');
     Route::get('/level4-details', [App\Http\Controllers\Accounts\BalanceSheetController::class, 'getLevel4Details'])->name('level4-details');
 });
 
 // Income Statement Routes
 Route::prefix('accounts/income-statement')->name('accounts.income-statement.')->middleware('web.auth')->group(function () {
-    Route::get('/', [App\Http\Controllers\Accounts\IncomeStatementController::class, 'index'])->name('index');
+    Route::get('/', [App\Http\Controllers\Accounts\IncomeStatementController::class, 'search'])->name('search');
+    Route::get('/report', [App\Http\Controllers\Accounts\IncomeStatementController::class, 'index'])->name('report');
 });
 
 // Exchange Rate API Routes

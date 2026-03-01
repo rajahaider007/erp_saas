@@ -14,6 +14,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if table already exists
+        if (Schema::hasTable('fiscal_periods')) {
+            return;
+        }
+
         Schema::create('fiscal_periods', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('comp_id');

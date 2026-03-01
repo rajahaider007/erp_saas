@@ -192,14 +192,14 @@ function PrintReportContent() {
                 <div className="print-grand-total">
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>TOTAL CAPITAL & LIABILITIES</span>
-                    <span style={{ fontFamily: "'Courier New', monospace" }}>{formatCurrency(balanceSheetData.totalLiabilitiesAndEquity)}</span>
+                    <span style={{ fontFamily: "'Courier New', monospace" }}>{formatCurrency(balanceSheetData.totalLiabilitiesAndEquityWithNetIncome)}</span>
                   </div>
                 </div>
               </div>
 
               {/* RIGHT: Assets */}
               <div className="print-column">
-                <div className="print-column-title">Property & Assets</div>
+                <div className="print-column-title">Assets</div>
                 
                 {balanceSheetData.assets && balanceSheetData.assets.children && balanceSheetData.assets.children.length > 0 && (
                   <div className="print-section">
@@ -209,7 +209,7 @@ function PrintReportContent() {
                 
                 <div className="print-grand-total">
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>TOTAL PROPERTY & ASSETS</span>
+                    <span>TOTAL ASSETS</span>
                     <span style={{ fontFamily: "'Courier New', monospace" }}>{formatCurrency(balanceSheetData.totalAssets)}</span>
                   </div>
                 </div>
@@ -251,7 +251,7 @@ function ReportContent() {
       as_at_date: selectedDate,
     });
 
-    router.get(`/accounts/balance-sheet?${params.toString()}`, {}, {
+    router.get(`/accounts/balance-sheet/report?${params.toString()}`, {}, {
       preserveState: true,
       preserveScroll: true,
       onFinish: () => setLoading(false)
@@ -263,7 +263,7 @@ function ReportContent() {
       as_at_date: selectedDate,
       print_view: '1'
     });
-    window.open(`/accounts/balance-sheet?${params.toString()}`, '_blank', 'width=1200,height=800');
+    window.open(`/accounts/balance-sheet/report?${params.toString()}`, '_blank', 'width=1200,height=800');
   };
 
   const handleLevel3Click = async (level3Account) => {
@@ -646,7 +646,7 @@ function ReportContent() {
               <h3 className={`text-xl font-bold mb-6 pb-2 border-b-2 text-center ${
                 theme === 'dark' ? 'border-orange-700 text-orange-400' : 'border-orange-500 text-orange-700'
               }`}>
-                LIABILITIES
+                CAPITAL & LIABILITIES
               </h3>
 
               {/* Equity */}
@@ -663,15 +663,57 @@ function ReportContent() {
                 </div>
               )}
 
-              {/* Total Liabilities & Equity */}
+              {/* Total Liabilities */}
+              <div className={`py-3 px-4 rounded font-bold text-base border-2 mt-6 ${
+                theme === 'dark'
+                  ? 'bg-orange-900/20 border-orange-700 text-orange-300'
+                  : 'bg-orange-50 border-orange-600 text-orange-900'
+              }`}>
+                <div className="flex justify-between items-center">
+                  <span>TOTAL LIABILITIES</span>
+                  <span className="font-mono">{formatCurrency(balanceSheetData.totalLiabilities)}</span>
+                </div>
+              </div>
+
+              {/* Total Equity */}
+              <div className={`py-3 px-4 rounded font-bold text-base border-2 mt-6 ${
+                theme === 'dark'
+                  ? 'bg-purple-900/20 border-purple-700 text-purple-300'
+                  : 'bg-purple-50 border-purple-600 text-purple-900'
+              }`}>
+                <div className="flex justify-between items-center">
+                  <span>TOTAL EQUITY</span>
+                  <span className="font-mono">{formatCurrency(balanceSheetData.totalEquity)}</span>
+                </div>
+              </div>
+
+              {/* Net Income / Retained Earnings */}
+              {Math.abs(balanceSheetData.netIncome) > 0.01 && (
+                <div className={`py-3 px-4 rounded font-semibold text-base border-2 mt-4 ${
+                  balanceSheetData.netIncome >= 0
+                    ? (theme === 'dark'
+                        ? 'bg-green-900/20 border-green-700 text-green-300'
+                        : 'bg-green-50 border-green-600 text-green-900')
+                    : (theme === 'dark'
+                        ? 'bg-red-900/20 border-red-700 text-red-300'
+                        : 'bg-red-50 border-red-600 text-red-900')
+                }`}>
+                  <div className="flex justify-between items-center">
+                    <span>{balanceSheetData.netIncome >= 0 ? 'NET PROFIT (Retained Earnings)' : 'NET LOSS'}</span>
+                    <span className="font-mono">{formatCurrency(balanceSheetData.netIncome)}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Total Liabilities & Equity (including Net Income) */}
               <div className={`py-4 px-4 rounded font-bold text-lg border-2 mt-8 ${
                 theme === 'dark'
                   ? 'bg-orange-900/30 border-orange-700 text-orange-300'
                   : 'bg-orange-100 border-orange-600 text-orange-900'
               }`}>
                 <div className="flex justify-between items-center">
-                  <span>TOTAL LIABILITIES</span>
-                  <span className="font-mono">{formatCurrency(balanceSheetData.totalLiabilitiesAndEquity)}</span>
+                  <span>TOTAL LIABILITIES & EQUITY</span>
+                  <span className="font-mono">{formatCurrency(balanceSheetData.totalLiabilitiesAndEquityWithNetIncome)}</span>
                 </div>
               </div>
             </div>

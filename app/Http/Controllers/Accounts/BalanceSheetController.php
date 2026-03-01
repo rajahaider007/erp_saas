@@ -16,13 +16,62 @@ class BalanceSheetController extends Controller
     use CheckUserPermissions;
 
     /**
+     * Display Balance Sheet search/filter page
+     */
+    public function search(Request $request): Response
+    {
+        $isParentCompany = CompanyHelper::isCurrentCompanyParent();
+
+        $compId = $isParentCompany
+            ? ($request->input('comp_id') ?? $request->session()->get('user_comp_id'))
+            : $request->session()->get('user_comp_id');
+
+        $locationId = $isParentCompany
+            ? ($request->input('location_id') ?? $request->session()->get('user_location_id'))
+            : $request->session()->get('user_location_id');
+
+        // Get companies (only for parent company)
+        $companies = [];
+        if ($isParentCompany) {
+            $companies = DB::table('companies')
+                ->where('status', 1)
+                ->select('id', 'company_name')
+                ->get();
+        }
+
+        // Get locations
+        $locations = [];
+        if ($compId) {
+            $locations = DB::table('locations')
+                ->where('company_id', $compId)
+                ->where('status', 1)
+                ->select('id', 'location_name')
+                ->get();
+        }
+
+        return Inertia::render('Accounts/BalanceSheet/Search', [
+            'companies' => $companies,
+            'locations' => $locations,
+            'isParentCompany' => $isParentCompany,
+        ]);
+    }
+
+    /**
      * Display Balance Sheet (Statement of Financial Position - IAS 1)
      * International Standard Format - Horizontal Layout
      */
     public function index(Request $request): Response
     {
-        $compId = $request->input('comp_id') ?? $request->session()->get('user_comp_id');
-        $locationId = $request->input('location_id') ?? $request->session()->get('user_location_id');
+        $isParentCompany = CompanyHelper::isCurrentCompanyParent();
+
+        $compId = $isParentCompany
+            ? ($request->input('comp_id') ?? $request->session()->get('user_comp_id'))
+            : $request->session()->get('user_comp_id');
+
+        $locationId = $isParentCompany
+            ? ($request->input('location_id') ?? $request->session()->get('user_location_id'))
+            : $request->session()->get('user_location_id');
+
         $asAtDate = $request->input('as_at_date', now()->toDateString());
         $comparativeDate = $request->input('comparative_date'); // For comparative balance sheet
 
@@ -125,9 +174,13 @@ class BalanceSheetController extends Controller
      * Build hierarchical balance sheet structure according to International Standards
      * Shows Level 1 (Categories), Level 2 (Groups), Level 3 (Sub-groups)
      * Level 4 accounts are aggregated into Level 3
+     * Includes Net Income (Profit/Loss) as Retained Earnings on the Equity side
      */
     private function buildHierarchicalBalanceSheet($compId, $locationId, $asAtDate, $fiscalYear)
     {
+        // Calculate Net Income from Revenue and Expenses (for Retained Earnings)
+        $netIncome = $this->calculateNetIncome($compId, $locationId, $asAtDate, $fiscalYear);
+        
         // Get Level 1 accounts (Assets, Liabilities, Equity)
         $level1Accounts = DB::table('chart_of_accounts')
             ->where('comp_id', $compId)
@@ -144,6 +197,7 @@ class BalanceSheetController extends Controller
             'totalAssets' => 0,
             'totalLiabilities' => 0,
             'totalEquity' => 0,
+            'netIncome' => $netIncome,
         ];
         
         foreach ($level1Accounts as $level1) {
@@ -228,7 +282,9 @@ class BalanceSheetController extends Controller
         }
         
         $structure['totalLiabilitiesAndEquity'] = $structure['totalLiabilities'] + $structure['totalEquity'];
-        $structure['balancingCheck'] = $structure['totalAssets'] - $structure['totalLiabilitiesAndEquity'];
+        // Add Net Income to the equation (Retained Earnings)
+        $structure['totalLiabilitiesAndEquityWithNetIncome'] = $structure['totalLiabilities'] + $structure['totalEquity'] + $netIncome;
+        $structure['balancingCheck'] = $structure['totalAssets'] - $structure['totalLiabilitiesAndEquityWithNetIncome'];
         
         return $structure;
     }
@@ -284,24 +340,115 @@ class BalanceSheetController extends Controller
 
         // Check account type - database stores as 'Assets', 'Liabilities', 'Equity'
         $accountType = $account->account_type;
+        $normalizedType = strtolower(trim((string) $accountType));
         
         // Assets: Normal debit balance (Debit - Credit)
-        if ($accountType === 'Assets' || 
-            stripos($accountType, 'asset') !== false) {
+        if ($normalizedType === 'assets' || str_contains($normalizedType, 'asset')) {
             return $debit - $credit;
+        }
+
+        // Expenses: Normal debit balance (Debit - Credit)
+        if ($normalizedType === 'expenses' || $normalizedType === 'expense' || str_contains($normalizedType, 'expense')) {
+            return $debit - $credit;
+        }
+
+        // Revenue / Income: Normal credit balance (Credit - Debit)
+        if ($normalizedType === 'revenue' || str_contains($normalizedType, 'revenue') || str_contains($normalizedType, 'income')) {
+            return $credit - $debit;
         }
         
         // Liabilities & Equity: Normal credit balance (Credit - Debit) 
-        if ($accountType === 'Liabilities' || 
-            $accountType === 'Equity' ||
-            stripos($accountType, 'liability') !== false ||
-            stripos($accountType, 'equity') !== false ||
-            stripos($accountType, 'capital') !== false ||
-            stripos($accountType, 'payable') !== false) {
+        if ($normalizedType === 'liabilities' ||
+            $normalizedType === 'equity' ||
+            str_contains($normalizedType, 'liability') ||
+            str_contains($normalizedType, 'equity') ||
+            str_contains($normalizedType, 'capital') ||
+            str_contains($normalizedType, 'payable')) {
             return $credit - $debit;
         }
 
         // Default to asset behavior (Debit - Credit)
         return $debit - $credit;
+    }
+
+    /**
+     * Calculate Net Income (Profit/Loss) from Revenue and Expense accounts
+     * Net Income = Total Revenue - Total Expenses
+     * This represents Retained Earnings on the Balance Sheet
+     */
+    private function calculateNetIncome($compId, $locationId, $asAtDate, $fiscalYear)
+    {
+        // Get all Revenue accounts (Level 4)
+        $revenueAccounts = DB::table('chart_of_accounts as coa')
+            ->leftJoin('transaction_entries as te', function($join) use ($asAtDate, $fiscalYear) {
+                $join->on('coa.id', '=', 'te.account_id')
+                    ->whereExists(function($query) use ($asAtDate, $fiscalYear) {
+                        $query->select(DB::raw(1))
+                            ->from('transactions as t')
+                            ->whereColumn('t.id', 'te.transaction_id')
+                            ->where('t.fiscal_year', '<=', $fiscalYear)
+                            ->where('t.voucher_date', '<=', $asAtDate)
+                            ->where('t.status', 'Posted');
+                    });
+            })
+            ->where('coa.comp_id', $compId)
+            ->where('coa.location_id', $locationId)
+            ->where('coa.account_type', 'Revenue')
+            ->where('coa.account_level', 4)
+            ->where('coa.is_transactional', true)
+            ->select(
+                'coa.id',
+                'coa.account_type',
+                DB::raw('COALESCE(SUM(te.base_debit_amount), 0) as debit_total'),
+                DB::raw('COALESCE(SUM(te.base_credit_amount), 0) as credit_total')
+            )
+            ->groupBy('coa.id', 'coa.account_type')
+            ->get();
+
+        // Get all Expense accounts (Level 4)
+        $expenseAccounts = DB::table('chart_of_accounts as coa')
+            ->leftJoin('transaction_entries as te', function($join) use ($asAtDate, $fiscalYear) {
+                $join->on('coa.id', '=', 'te.account_id')
+                    ->whereExists(function($query) use ($asAtDate, $fiscalYear) {
+                        $query->select(DB::raw(1))
+                            ->from('transactions as t')
+                            ->whereColumn('t.id', 'te.transaction_id')
+                            ->where('t.fiscal_year', '<=', $fiscalYear)
+                            ->where('t.voucher_date', '<=', $asAtDate)
+                            ->where('t.status', 'Posted');
+                    });
+            })
+            ->where('coa.comp_id', $compId)
+            ->where('coa.location_id', $locationId)
+            ->whereIn('coa.account_type', ['Expenses', 'Expense'])
+            ->where('coa.account_level', 4)
+            ->where('coa.is_transactional', true)
+            ->select(
+                'coa.id',
+                'coa.account_type',
+                DB::raw('COALESCE(SUM(te.base_debit_amount), 0) as debit_total'),
+                DB::raw('COALESCE(SUM(te.base_credit_amount), 0) as credit_total')
+            )
+            ->groupBy('coa.id', 'coa.account_type')
+            ->get();
+
+        // Calculate total revenue (Revenue accounts have credit balance)
+        $totalRevenue = 0;
+        foreach ($revenueAccounts as $account) {
+            $balance = $this->calculateAccountBalance($account);
+            $totalRevenue += $balance;
+        }
+
+        // Calculate total expenses (Expense accounts have debit balance)
+        $totalExpenses = 0;
+        foreach ($expenseAccounts as $account) {
+            $balance = $this->calculateAccountBalance($account);
+            $totalExpenses += $balance;
+        }
+
+        // Net Income = Revenue - Expenses
+        $netIncome = $totalRevenue - $totalExpenses;
+
+        return $netIncome;
     }
 }

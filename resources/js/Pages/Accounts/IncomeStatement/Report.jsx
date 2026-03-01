@@ -215,36 +215,30 @@ function ReportContent() {
               <p className={`text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Currency: {currencyCode}</p>
             </div>
 
-            {/* Revenue Section */}
+            {/* === REVENUE SECTION === */}
             <div className="mb-8">
               <div className={`py-2 px-4 font-bold mb-4 rounded ${
-                theme === 'dark'
-                  ? 'bg-gray-700 text-gray-100'
-                  : 'bg-gray-100 text-gray-900'
-              }`}>
-                REVENUE
-              </div>
+                theme === 'dark' ? 'bg-gray-700 text-gray-100' : 'bg-gray-100 text-gray-900'
+              }`}>REVENUE</div>
 
-              <div className="ml-4 space-y-6">
+              <div className="ml-4 space-y-4">
                 {/* Sales Revenue */}
                 <div>
-                  <div className={`font-semibold py-2 ml-4 ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-800'
-                  }`}>{incomeStatementData.revenue.sales.label}</div>
-                  <div className={`ml-8 space-y-1 mb-2 ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-700'
-                  }`}>
-                    {incomeStatementData.revenue.sales.accounts.map((account, idx) => (
-                      <div key={idx} className="flex justify-between">
-                        <span>{account.name}</span>
-                        <span className="font-mono">{formatCurrency(account.amount)}</span>
-                      </div>
-                    ))}
+                  <div className={`font-semibold py-2 ml-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}>
+                    {incomeStatementData.revenue.sales.label}
                   </div>
-                  <div className={`flex justify-between py-2 px-4 rounded ml-4 ${
-                    theme === 'dark'
-                      ? 'bg-gray-700 text-gray-200'
-                      : 'bg-gray-50 text-gray-900'
+                  {incomeStatementData.revenue.sales.accounts.length > 0 && (
+                    <div className={`ml-8 space-y-1 mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'}`}>
+                      {incomeStatementData.revenue.sales.accounts.map((account, idx) => (
+                        <div key={idx} className="flex justify-between">
+                          <span>{account.name}</span>
+                          <span className="font-mono">{formatCurrency(account.amount)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className={`flex justify-between py-1 px-4 rounded ml-4 ${
+                    theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-50 text-gray-900'
                   }`}>
                     <span className="font-semibold">{incomeStatementData.revenue.sales.label}</span>
                     <span className="font-mono font-semibold">{formatCurrency(incomeStatementData.revenue.sales.total)}</span>
@@ -253,23 +247,21 @@ function ReportContent() {
 
                 {/* Service Revenue */}
                 <div>
-                  <div className={`font-semibold py-2 ml-4 ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-800'
-                  }`}>{incomeStatementData.revenue.services.label}</div>
-                  <div className={`ml-8 space-y-1 mb-2 ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-700'
-                  }`}>
-                    {incomeStatementData.revenue.services.accounts.map((account, idx) => (
-                      <div key={idx} className="flex justify-between">
-                        <span>{account.name}</span>
-                        <span className="font-mono">{formatCurrency(account.amount)}</span>
-                      </div>
-                    ))}
+                  <div className={`font-semibold py-2 ml-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}>
+                    {incomeStatementData.revenue.services.label}
                   </div>
-                  <div className={`flex justify-between py-2 px-4 rounded ml-4 ${
-                    theme === 'dark'
-                      ? 'bg-gray-700 text-gray-200'
-                      : 'bg-gray-50 text-gray-900'
+                  {incomeStatementData.revenue.services.accounts.length > 0 && (
+                    <div className={`ml-8 space-y-1 mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'}`}>
+                      {incomeStatementData.revenue.services.accounts.map((account, idx) => (
+                        <div key={idx} className="flex justify-between">
+                          <span>{account.name}</span>
+                          <span className="font-mono">{formatCurrency(account.amount)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className={`flex justify-between py-1 px-4 rounded ml-4 ${
+                    theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-50 text-gray-900'
                   }`}>
                     <span className="font-semibold">{incomeStatementData.revenue.services.label}</span>
                     <span className="font-mono font-semibold">{formatCurrency(incomeStatementData.revenue.services.total)}</span>
@@ -277,25 +269,23 @@ function ReportContent() {
                 </div>
 
                 {/* Other Revenue */}
-                {incomeStatementData.revenue.other_operating.total > 0 && (
+                {incomeStatementData.revenue.other_operating.total !== 0 && (
                   <div>
-                    <div className={`font-semibold py-2 ml-4 ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-800'
-                    }`}>{incomeStatementData.revenue.other_operating.label}</div>
-                    <div className={`ml-8 space-y-1 mb-2 ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-700'
-                    }`}>
-                      {incomeStatementData.revenue.other_operating.accounts.map((account, idx) => (
-                        <div key={idx} className="flex justify-between">
-                          <span>{account.name}</span>
-                          <span className="font-mono">{formatCurrency(account.amount)}</span>
-                        </div>
-                      ))}
+                    <div className={`font-semibold py-2 ml-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}>
+                      {incomeStatementData.revenue.other_operating.label}
                     </div>
-                    <div className={`flex justify-between py-2 px-4 rounded ml-4 ${
-                      theme === 'dark'
-                        ? 'bg-gray-700 text-gray-200'
-                        : 'bg-gray-50 text-gray-900'
+                    {incomeStatementData.revenue.other_operating.accounts.length > 0 && (
+                      <div className={`ml-8 space-y-1 mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'}`}>
+                        {incomeStatementData.revenue.other_operating.accounts.map((account, idx) => (
+                          <div key={idx} className="flex justify-between">
+                            <span>{account.name}</span>
+                            <span className="font-mono">{formatCurrency(account.amount)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div className={`flex justify-between py-1 px-4 rounded ml-4 ${
+                      theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-50 text-gray-900'
                     }`}>
                       <span className="font-semibold">{incomeStatementData.revenue.other_operating.label}</span>
                       <span className="font-mono font-semibold">{formatCurrency(incomeStatementData.revenue.other_operating.total)}</span>
@@ -304,53 +294,303 @@ function ReportContent() {
                 )}
               </div>
 
-              <div className={`flex justify-between py-3 px-4 rounded font-bold text-lg border mt-4 ml-4 ${
-                primaryColor === 'blue' ? 
-                  (theme === 'dark' ? 'bg-blue-900/30 border-blue-700 text-blue-300' : 'bg-blue-100 border-blue-600 text-blue-900') :
-                primaryColor === 'indigo' ? 
-                  (theme === 'dark' ? 'bg-indigo-900/30 border-indigo-700 text-indigo-300' : 'bg-indigo-100 border-indigo-600 text-indigo-900') :
-                primaryColor === 'purple' ? 
-                  (theme === 'dark' ? 'bg-purple-900/30 border-purple-700 text-purple-300' : 'bg-purple-100 border-purple-600 text-purple-900') :
-                primaryColor === 'green' ? 
-                  (theme === 'dark' ? 'bg-green-900/30 border-green-700 text-green-300' : 'bg-green-100 border-green-600 text-green-900') :
-                primaryColor === 'red' ? 
-                  (theme === 'dark' ? 'bg-red-900/30 border-red-700 text-red-300' : 'bg-red-100 border-red-600 text-red-900') :
-                primaryColor === 'orange' ? 
-                  (theme === 'dark' ? 'bg-orange-900/30 border-orange-700 text-orange-300' : 'bg-orange-100 border-orange-600 text-orange-900') :
-                primaryColor === 'teal' ? 
-                  (theme === 'dark' ? 'bg-teal-900/30 border-teal-700 text-teal-300' : 'bg-teal-100 border-teal-600 text-teal-900') :
-                  (theme === 'dark' ? 'bg-pink-900/30 border-pink-700 text-pink-300' : 'bg-pink-100 border-pink-600 text-pink-900')
+              {/* Total Revenue */}
+              <div className={`flex justify-between py-2 px-4 rounded font-bold text-lg border mt-4 ml-4 ${
+                primaryColor === 'blue' ? (theme === 'dark' ? 'bg-blue-900/30 border-blue-700 text-blue-300' : 'bg-blue-100 border-blue-600 text-blue-900') :
+                primaryColor === 'indigo' ? (theme === 'dark' ? 'bg-indigo-900/30 border-indigo-700 text-indigo-300' : 'bg-indigo-100 border-indigo-600 text-indigo-900') :
+                primaryColor === 'purple' ? (theme === 'dark' ? 'bg-purple-900/30 border-purple-700 text-purple-300' : 'bg-purple-100 border-purple-600 text-purple-900') :
+                primaryColor === 'green' ? (theme === 'dark' ? 'bg-green-900/30 border-green-700 text-green-300' : 'bg-green-100 border-green-600 text-green-900') :
+                primaryColor === 'red' ? (theme === 'dark' ? 'bg-red-900/30 border-red-700 text-red-300' : 'bg-red-100 border-red-600 text-red-900') :
+                primaryColor === 'orange' ? (theme === 'dark' ? 'bg-orange-900/30 border-orange-700 text-orange-300' : 'bg-orange-100 border-orange-600 text-orange-900') :
+                primaryColor === 'teal' ? (theme === 'dark' ? 'bg-teal-900/30 border-teal-700 text-teal-300' : 'bg-teal-100 border-teal-600 text-teal-900') :
+                (theme === 'dark' ? 'bg-pink-900/30 border-pink-700 text-pink-300' : 'bg-pink-100 border-pink-600 text-pink-900')
               }`}>
                 <span>TOTAL REVENUE</span>
                 <span className="font-mono">{formatCurrency(incomeStatementData.totalRevenue)}</span>
               </div>
             </div>
 
-            {/* Profit Before Tax - Updated */}
+            {/* === COST OF GOODS SOLD SECTION === */}
+            {incomeStatementData.totalCOGS !== 0 && (
+              <div className="mb-8">
+                <div className={`py-2 px-4 font-bold mb-4 rounded ${
+                  theme === 'dark' ? 'bg-gray-700 text-gray-100' : 'bg-gray-100 text-gray-900'
+                }`}>COST OF GOODS SOLD</div>
+
+                <div className="ml-4 space-y-3">
+                  {incomeStatementData.costOfGoodsSold.purchases.accounts.length > 0 && (
+                    <div>
+                      <div className={`font-semibold py-2 ml-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}>
+                        {incomeStatementData.costOfGoodsSold.purchases.label}
+                      </div>
+                      <div className={`ml-8 space-y-1 mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'}`}>
+                        {incomeStatementData.costOfGoodsSold.purchases.accounts.map((account, idx) => (
+                          <div key={idx} className="flex justify-between">
+                            <span>{account.name}</span>
+                            <span className="font-mono">{formatCurrency(account.amount)}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className={`flex justify-between py-1 px-4 rounded ml-4 ${
+                        theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-50 text-gray-900'
+                      }`}>
+                        <span className="font-semibold">{incomeStatementData.costOfGoodsSold.purchases.label}</span>
+                        <span className="font-mono font-semibold">{formatCurrency(incomeStatementData.costOfGoodsSold.purchases.total)}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Total COGS */}
+                <div className={`flex justify-between py-2 px-4 rounded font-semibold text-base border mt-4 ml-4 ${
+                  theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-300 text-gray-900'
+                }`}>
+                  <span>TOTAL COST OF GOODS SOLD</span>
+                  <span className="font-mono">{formatCurrency(incomeStatementData.totalCOGS)}</span>
+                </div>
+
+                {/* Gross Profit */}
+                <div className={`flex justify-between py-2 px-4 rounded font-bold text-base border mt-2 ml-4 ${
+                  theme === 'dark' ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-gray-200 border-gray-400 text-gray-900'
+                }`}>
+                  <span>GROSS PROFIT</span>
+                  <span className="font-mono">{formatCurrency(incomeStatementData.grossProfit)}</span>
+                </div>
+              </div>
+            )}
+
+            {/* === OPERATING EXPENSES SECTION === */}
+            {incomeStatementData.totalOperatingExpenses !== 0 && (
+              <div className="mb-8">
+                <div className={`py-2 px-4 font-bold mb-4 rounded ${
+                  theme === 'dark' ? 'bg-gray-700 text-gray-100' : 'bg-gray-100 text-gray-900'
+                }`}>OPERATING EXPENSES</div>
+
+                <div className="ml-4 space-y-4">
+                  {incomeStatementData.operatingExpenses.selling_distribution.accounts.length > 0 && (
+                    <div>
+                      <div className={`font-semibold py-2 ml-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}>
+                        {incomeStatementData.operatingExpenses.selling_distribution.label}
+                      </div>
+                      <div className={`ml-8 space-y-1 mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'}`}>
+                        {incomeStatementData.operatingExpenses.selling_distribution.accounts.map((account, idx) => (
+                          <div key={idx} className="flex justify-between">
+                            <span>{account.name}</span>
+                            <span className="font-mono">{formatCurrency(account.amount)}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className={`flex justify-between py-1 px-4 rounded ml-4 ${
+                        theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-50 text-gray-900'
+                      }`}>
+                        <span className="font-semibold">{incomeStatementData.operatingExpenses.selling_distribution.label}</span>
+                        <span className="font-mono font-semibold">{formatCurrency(incomeStatementData.operatingExpenses.selling_distribution.total)}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {incomeStatementData.operatingExpenses.administrative.accounts.length > 0 && (
+                    <div>
+                      <div className={`font-semibold py-2 ml-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}>
+                        {incomeStatementData.operatingExpenses.administrative.label}
+                      </div>
+                      <div className={`ml-8 space-y-1 mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'}`}>
+                        {incomeStatementData.operatingExpenses.administrative.accounts.map((account, idx) => (
+                          <div key={idx} className="flex justify-between">
+                            <span>{account.name}</span>
+                            <span className="font-mono">{formatCurrency(account.amount)}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className={`flex justify-between py-1 px-4 rounded ml-4 ${
+                        theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-50 text-gray-900'
+                      }`}>
+                        <span className="font-semibold">{incomeStatementData.operatingExpenses.administrative.label}</span>
+                        <span className="font-mono font-semibold">{formatCurrency(incomeStatementData.operatingExpenses.administrative.total)}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {incomeStatementData.operatingExpenses.depreciation.accounts.length > 0 && (
+                    <div>
+                      <div className={`font-semibold py-2 ml-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}>
+                        {incomeStatementData.operatingExpenses.depreciation.label}
+                      </div>
+                      <div className={`ml-8 space-y-1 mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'}`}>
+                        {incomeStatementData.operatingExpenses.depreciation.accounts.map((account, idx) => (
+                          <div key={idx} className="flex justify-between">
+                            <span>{account.name}</span>
+                            <span className="font-mono">{formatCurrency(account.amount)}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className={`flex justify-between py-1 px-4 rounded ml-4 ${
+                        theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-50 text-gray-900'
+                      }`}>
+                        <span className="font-semibold">{incomeStatementData.operatingExpenses.depreciation.label}</span>
+                        <span className="font-mono font-semibold">{formatCurrency(incomeStatementData.operatingExpenses.depreciation.total)}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Total Operating Expenses */}
+                <div className={`flex justify-between py-2 px-4 rounded font-semibold text-base border mt-4 ml-4 ${
+                  theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-300 text-gray-900'
+                }`}>
+                  <span>TOTAL OPERATING EXPENSES</span>
+                  <span className="font-mono">{formatCurrency(incomeStatementData.totalOperatingExpenses)}</span>
+                </div>
+
+                {/* Operating Profit */}
+                <div className={`flex justify-between py-2 px-4 rounded font-bold text-base border mt-2 ml-4 ${
+                  theme === 'dark' ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-gray-200 border-gray-400 text-gray-900'
+                }`}>
+                  <span>OPERATING PROFIT</span>
+                  <span className="font-mono">{formatCurrency(incomeStatementData.operatingProfit)}</span>
+                </div>
+              </div>
+            )}
+
+            {/* === FINANCE ITEMS SECTION === */}
+            {(incomeStatementData.financeIncome !== 0 || incomeStatementData.financeExpenses !== 0) && (
+              <div className="mb-8">
+                <div className={`py-2 px-4 font-bold mb-4 rounded ${
+                  theme === 'dark' ? 'bg-gray-700 text-gray-100' : 'bg-gray-100 text-gray-900'
+                }`}>FINANCE ITEMS & OTHER INCOME/EXPENSES</div>
+
+                <div className="ml-4 space-y-3">
+                  {incomeStatementData.financeItems.interest_revenue.accounts.length > 0 && (
+                    <div>
+                      <div className={`font-semibold py-2 ml-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}>
+                        {incomeStatementData.financeItems.interest_revenue.label}
+                      </div>
+                      <div className={`ml-8 space-y-1 mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'}`}>
+                        {incomeStatementData.financeItems.interest_revenue.accounts.map((account, idx) => (
+                          <div key={idx} className="flex justify-between">
+                            <span>{account.name}</span>
+                            <span className="font-mono">{formatCurrency(account.amount)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {incomeStatementData.financeItems.other_income.accounts.length > 0 && (
+                    <div>
+                      <div className={`font-semibold py-2 ml-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}>
+                        {incomeStatementData.financeItems.other_income.label}
+                      </div>
+                      <div className={`ml-8 space-y-1 mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'}`}>
+                        {incomeStatementData.financeItems.other_income.accounts.map((account, idx) => (
+                          <div key={idx} className="flex justify-between">
+                            <span>{account.name}</span>
+                            <span className="font-mono">{formatCurrency(account.amount)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {incomeStatementData.financeItems.interest_expense.accounts.length > 0 && (
+                    <div>
+                      <div className={`font-semibold py-2 ml-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}>
+                        {incomeStatementData.financeItems.interest_expense.label}
+                      </div>
+                      <div className={`ml-8 space-y-1 mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'}`}>
+                        {incomeStatementData.financeItems.interest_expense.accounts.map((account, idx) => (
+                          <div key={idx} className="flex justify-between">
+                            <span>{account.name}</span>
+                            <span className="font-mono">{formatCurrency(account.amount)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {incomeStatementData.financeItems.other_expenses.accounts.length > 0 && (
+                    <div>
+                      <div className={`font-semibold py-2 ml-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}>
+                        {incomeStatementData.financeItems.other_expenses.label}
+                      </div>
+                      <div className={`ml-8 space-y-1 mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'}`}>
+                        {incomeStatementData.financeItems.other_expenses.accounts.map((account, idx) => (
+                          <div key={idx} className="flex justify-between">
+                            <span>{account.name}</span>
+                            <span className="font-mono">{formatCurrency(account.amount)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Finance Summary */}
+                <div className={`flex justify-between py-1 px-4 rounded ml-4 mt-3 ${
+                  theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-50 text-gray-900'
+                }`}>
+                  <span className="font-semibold">Finance Income</span>
+                  <span className="font-mono font-semibold">{formatCurrency(incomeStatementData.financeIncome)}</span>
+                </div>
+                <div className={`flex justify-between py-1 px-4 rounded ml-4 mt-2 ${
+                  theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-50 text-gray-900'
+                }`}>
+                  <span className="font-semibold">Finance Expenses</span>
+                  <span className="font-mono font-semibold">{formatCurrency(incomeStatementData.financeExpenses)}</span>
+                </div>
+              </div>
+            )}
+
+            {/* === PROFIT BEFORE TAX === */}
             <div className={`flex justify-between py-3 px-4 rounded font-bold text-lg border-2 mb-8 ml-4 ${
-              theme === 'dark'
-                ? 'bg-amber-900/30 border-amber-700 text-amber-300'
-                : 'bg-amber-100 border-amber-600 text-amber-900'
+              theme === 'dark' ? 'bg-amber-900/30 border-amber-700 text-amber-300' : 'bg-amber-100 border-amber-600 text-amber-900'
             }`}>
               <span>PROFIT BEFORE TAX</span>
               <span className="font-mono">{formatCurrency(incomeStatementData.profitBeforeTax)}</span>
             </div>
 
-            {/* Profit for the Period */}
+            {/* === TAX EXPENSE === */}
+            {incomeStatementData.taxExpense !== 0 && (
+              <div className="mb-8">
+                <div className={`py-2 px-4 font-bold mb-4 rounded ${
+                  theme === 'dark' ? 'bg-gray-700 text-gray-100' : 'bg-gray-100 text-gray-900'
+                }`}>INCOME TAX</div>
+
+                {incomeStatementData.taxAndProfit.tax_expense.accounts.length > 0 && (
+                  <div className="ml-4">
+                    <div className={`ml-8 space-y-1 mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'}`}>
+                      {incomeStatementData.taxAndProfit.tax_expense.accounts.map((account, idx) => (
+                        <div key={idx} className="flex justify-between">
+                          <span>{account.name}</span>
+                          <span className="font-mono">{formatCurrency(account.amount)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className={`flex justify-between py-2 px-4 rounded font-semibold text-base border ml-4 ${
+                  theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-300 text-gray-900'
+                }`}>
+                  <span>TOTAL TAX EXPENSE</span>
+                  <span className="font-mono">{formatCurrency(incomeStatementData.taxExpense)}</span>
+                </div>
+              </div>
+            )}
+
+            {/* === PROFIT FOR THE PERIOD === */}
             <div className={`flex justify-between py-3 px-4 rounded font-bold text-lg border-2 ml-4 ${
               incomeStatementData.profitForPeriod >= 0 ? 
                 (theme === 'dark' ? 'bg-green-900/30 border-green-700 text-green-300' : 'bg-green-100 border-green-600 text-green-900') :
                 (theme === 'dark' ? 'bg-red-900/30 border-red-700 text-red-300' : 'bg-red-100 border-red-600 text-red-900')
             }`}>
-              <span>PROFIT FOR THE PERIOD</span>
+              <span>NET PROFIT / (LOSS) FOR THE PERIOD</span>
               <span className="font-mono">{formatCurrency(incomeStatementData.profitForPeriod)}</span>
             </div>
 
             {/* Report Footer */}
             <div className={`mt-12 text-center text-sm border-t pt-6 ${
-              theme === 'dark'
-                ? 'border-gray-700 text-gray-500'
-                : 'border-gray-900 text-gray-500'
+              theme === 'dark' ? 'border-gray-700 text-gray-500' : 'border-gray-900 text-gray-500'
             }`}>
               <p>This report has been generated from the accounting system.</p>
               <p>Generated on: {new Date().toLocaleString()}</p>
