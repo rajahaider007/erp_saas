@@ -19,13 +19,98 @@ import {
   Plus,
   Eye,
   Edit,
-  Trash2
+  Trash2,
+  Database
 } from 'lucide-react';
 
 const AccountsDashboard = () => {
-  const { auth, company, dashboardStats, recentTransactions, accountsSummary, currencySymbol } = usePage().props;
+  const { auth, company, dashboardStats, recentTransactions, accountsSummary, currencySymbol, financialCards = [] } = usePage().props;
   const user = auth?.user;
   const { canView } = usePermissions();
+
+  const defaultFinancialCards = [
+    {
+      type: 'main-payable',
+      title: 'Main Payable',
+      count: 0,
+      currency: currencySymbol || '$',
+      displayBalance: '0.00',
+      reportUrl: '/accounts/dashboard-report/main-payable'
+    },
+    {
+      type: 'main-receivable',
+      title: 'Main Receivable',
+      count: 0,
+      currency: currencySymbol || '$',
+      displayBalance: '0.00',
+      reportUrl: '/accounts/dashboard-report/main-receivable'
+    },
+    {
+      type: 'current-cash',
+      title: 'Current Cash In Hand',
+      count: 0,
+      currency: currencySymbol || '$',
+      displayBalance: '0.00',
+      reportUrl: '/accounts/dashboard-report/current-cash'
+    },
+    {
+      type: 'all-cash-codes',
+      title: 'All Cash Codes',
+      count: 0,
+      currency: currencySymbol || '$',
+      displayBalance: '0.00',
+      reportUrl: '/accounts/dashboard-report/all-cash-codes'
+    },
+    {
+      type: 'bank-balances',
+      title: 'Bank Balances',
+      count: 0,
+      currency: currencySymbol || '$',
+      displayBalance: '0.00',
+      reportUrl: '/accounts/dashboard-report/bank-balances'
+    }
+  ];
+
+  const mergedFinancialCards = defaultFinancialCards.map((defaultCard) => {
+    const liveCard = financialCards.find((card) => card.type === defaultCard.type);
+    return liveCard ? { ...defaultCard, ...liveCard } : defaultCard;
+  });
+
+  const cardIconMap = {
+    'main-payable': Receipt,
+    'main-receivable': FileText,
+    'current-cash': DollarSign,
+    'all-cash-codes': Banknote,
+    'bank-balances': CreditCard,
+  };
+
+  const cardColorMap = {
+    'main-payable': {
+      text: 'text-red-600 dark:text-red-400',
+      badge: 'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400',
+      border: 'border-red-200 dark:border-red-800/40'
+    },
+    'main-receivable': {
+      text: 'text-blue-600 dark:text-blue-400',
+      badge: 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
+      border: 'border-blue-200 dark:border-blue-800/40'
+    },
+    'current-cash': {
+      text: 'text-green-600 dark:text-green-400',
+      badge: 'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400',
+      border: 'border-green-200 dark:border-green-800/40'
+    },
+    'all-cash-codes': {
+      text: 'text-emerald-600 dark:text-emerald-400',
+      badge: 'bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400',
+      border: 'border-emerald-200 dark:border-emerald-800/40'
+    },
+    'bank-balances': {
+      text: 'text-purple-600 dark:text-purple-400',
+      badge: 'bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
+      border: 'border-purple-200 dark:border-purple-800/40'
+    },
+  };
 
   // Helper function to get icon component by name
   const getIconComponent = (iconName) => {
@@ -111,6 +196,7 @@ const AccountsDashboard = () => {
       menus: [
         { name: 'Fiscal Year', route: '/accounts/fiscal-year-configuration', icon: Clock },
         { name: 'Voucher Configuration', route: '/accounts/voucher-number-configuration', icon: FileText },
+        { name: 'Account Configuration', route: '/accounts/account-configuration', icon: Database },
         { name: 'Code Configuration', route: '/accounts/code-configuration', icon: Calculator }
       ]
     },
@@ -287,6 +373,49 @@ const AccountsDashboard = () => {
           </div>
 
           {/* Quick Actions */}
+          <div className="mb-8">
+            <div className="flex items-center mb-4">
+              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                <BarChart3 className="h-5 w-5" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white ml-3">
+                Financial Snapshot Reports
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {mergedFinancialCards.map((card) => {
+                const Icon = cardIconMap[card.type] || FileText;
+                const color = cardColorMap[card.type] || cardColorMap['main-receivable'];
+
+                return (
+                  <a
+                    key={card.type}
+                    href={card.reportUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`group bg-white dark:bg-gray-800 rounded-xl border ${color.border} shadow-lg p-4 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]`}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className={`p-2 rounded-lg ${color.badge}`}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all" />
+                    </div>
+
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{card.title}</p>
+                    <p className={`text-xl font-bold ${color.text}`}>
+                      {card.currency}{card.displayBalance}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {card.count} account(s)
+                    </p>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Link
               href="/accounts/journal-voucher/create"

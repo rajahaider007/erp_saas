@@ -7,6 +7,7 @@ use App\Http\Traits\CheckUserPermissions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 
 /**
@@ -40,11 +41,15 @@ class AccountsDashboardController extends Controller
             
             // Get currency symbol from currencies table
             $currencySymbol = '$'; // Default
-            if ($company && $company->default_currency_code) {
+            $defaultCurrencyCode = ($company && isset($company->default_currency_code))
+                ? $company->default_currency_code
+                : null;
+
+            if ($defaultCurrencyCode) {
                 $currency = DB::table('currencies')
-                    ->where('code', $company->default_currency_code)
+                    ->where('code', $defaultCurrencyCode)
                     ->first();
-                if ($currency) {
+                if ($currency && isset($currency->symbol)) {
                     $currencySymbol = $currency->symbol;
                 }
             }
@@ -58,10 +63,14 @@ class AccountsDashboardController extends Controller
             // Get chart of accounts summary
             $accountsSummary = $this->getAccountsSummary($compId, $locationId);
 
+            // Get AP/AR/Cash/Bank dashboard cards with report links
+            $financialCards = $this->getDashboardFinancialCards($compId, $locationId, $currencySymbol);
+
             return Inertia::render('Modules/Accounts/index', [
                 'dashboardStats' => $dashboardStats,
                 'recentTransactions' => $recentTransactions,
                 'accountsSummary' => $accountsSummary,
+                'financialCards' => $financialCards,
                 'currencySymbol' => $currencySymbol
             ]);
 
@@ -251,6 +260,226 @@ class AccountsDashboardController extends Controller
                 ->get()
                 ->toArray()
         ];
+    }
+
+    /**
+     * Dashboard card data for AP/AR/Cash/Bank quick reports
+     */
+    private function getDashboardFinancialCards($compId, $locationId, $currencySymbol)
+    {
+        $types = [
+            'main-payable' => 'Main Payable',
+            'main-receivable' => 'Main Receivable',
+            'current-cash' => 'Current Cash In Hand',
+            'all-cash-codes' => 'All Cash Codes',
+            'bank-balances' => 'Bank Balances',
+        ];
+
+        $cards = [];
+
+        foreach ($types as $type => $title) {
+            $accounts = $this->getAccountsByDashboardType($type, $compId, $locationId)->get();
+            $totalBalance = (float) $accounts->sum('closing_balance');
+
+            $cards[] = [
+                'type' => $type,
+                'title' => $title,
+                'count' => $accounts->count(),
+                'currency' => $currencySymbol,
+                'rawBalance' => $totalBalance,
+                'displayBalance' => number_format(abs($totalBalance), 2),
+                'reportUrl' => '/accounts/dashboard-report/' . $type,
+            ];
+        }
+
+        return $cards;
+    }
+
+    /**
+     * Open a specific dashboard financial report
+     */
+    public function financialReport(Request $request, string $reportType)
+    {
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        if (!$compId || !$locationId) {
+            return Inertia::render('Accounts/DashboardFinancialReport', [
+                'reportType' => $reportType,
+                'reportTitle' => 'Financial Report',
+                'reportDescription' => '',
+                'currencySymbol' => '$',
+                'accounts' => [],
+                'totalBalance' => 0,
+                'filters' => [
+                    'from_date' => $fromDate,
+                    'to_date' => $toDate,
+                ],
+                'error' => 'Company and Location information is required.'
+            ]);
+        }
+
+        $titles = [
+            'main-payable' => ['Main Payable Report', 'Payable account balances with account code and account name.'],
+            'main-receivable' => ['Main Receivable Report', 'Receivable account balances with account code and account name.'],
+            'current-cash' => ['Current Cash In Hand Report', 'Current cash account balances with account code and account name.'],
+            'all-cash-codes' => ['All Cash Codes Report', 'All configured cash code balances with account code and account name.'],
+            'bank-balances' => ['Bank Balances Report', 'Bank names and balances with account code and account name.'],
+        ];
+
+        if (!array_key_exists($reportType, $titles)) {
+            return Inertia::render('Accounts/DashboardFinancialReport', [
+                'reportType' => $reportType,
+                'reportTitle' => 'Financial Report',
+                'reportDescription' => '',
+                'currencySymbol' => '$',
+                'accounts' => [],
+                'totalBalance' => 0,
+                'filters' => [
+                    'from_date' => $fromDate,
+                    'to_date' => $toDate,
+                ],
+                'error' => 'Invalid report type requested.'
+            ]);
+        }
+
+        $company = DB::table('companies')->where('id', $compId)->first();
+        $currencySymbol = '$';
+        $defaultCurrencyCode = ($company && isset($company->default_currency_code))
+            ? $company->default_currency_code
+            : null;
+
+        if ($defaultCurrencyCode) {
+            $currency = DB::table('currencies')->where('code', $defaultCurrencyCode)->first();
+            if ($currency && isset($currency->symbol)) {
+                $currencySymbol = $currency->symbol;
+            }
+        }
+
+        $accounts = $this->getAccountsByDashboardType($reportType, $compId, $locationId, $fromDate, $toDate)
+            ->orderBy('coa.account_code')
+            ->get();
+
+        $totalBalance = (float) $accounts->sum('closing_balance');
+
+        return Inertia::render('Accounts/DashboardFinancialReport', [
+            'reportType' => $reportType,
+            'reportTitle' => $titles[$reportType][0],
+            'reportDescription' => $titles[$reportType][1],
+            'currencySymbol' => $currencySymbol,
+            'accounts' => $accounts,
+            'totalBalance' => $totalBalance,
+            'filters' => [
+                'from_date' => $fromDate,
+                'to_date' => $toDate,
+            ],
+            'generatedAt' => now()->toDateTimeString(),
+            'company' => $company,
+        ]);
+    }
+
+    /**
+     * Build base query for level-4 account balances.
+     */
+    private function buildLevel4BalanceQuery($compId, $locationId, $fromDate = null, $toDate = null)
+    {
+        $openingBalanceExpression = Schema::hasColumn('chart_of_accounts', 'opening_balance')
+            ? 'COALESCE(coa.opening_balance, 0)'
+            : '0';
+
+        $movements = DB::table('transaction_entries as te')
+            ->join('transactions as t', 'te.transaction_id', '=', 't.id')
+            ->where('t.comp_id', $compId)
+            ->where('t.location_id', $locationId)
+            ->where('t.status', 'Posted');
+
+        if ($fromDate) {
+            $movements->whereDate('t.voucher_date', '>=', $fromDate);
+        }
+
+        if ($toDate) {
+            $movements->whereDate('t.voucher_date', '<=', $toDate);
+        }
+
+        $movements->groupBy('te.account_id')
+            ->select(
+                'te.account_id',
+                DB::raw('SUM(COALESCE(te.base_debit_amount, 0) - COALESCE(te.base_credit_amount, 0)) as movement_balance')
+            );
+
+        return DB::table('chart_of_accounts as coa')
+            ->leftJoinSub($movements, 'mv', function ($join) {
+                $join->on('coa.id', '=', 'mv.account_id');
+            })
+            ->where('coa.comp_id', $compId)
+            ->where('coa.location_id', $locationId)
+            ->where('coa.account_level', 4)
+            ->where('coa.is_transactional', true)
+            ->where('coa.status', 'Active')
+            ->select(
+                'coa.id',
+                'coa.account_code',
+                'coa.account_name',
+                'coa.short_code',
+                'coa.account_type',
+                DB::raw($openingBalanceExpression . ' as opening_balance'),
+                DB::raw('COALESCE(mv.movement_balance, 0) as movement_balance'),
+                DB::raw('(' . $openingBalanceExpression . ' + COALESCE(mv.movement_balance, 0)) as closing_balance')
+            );
+    }
+
+    /**
+     * Account list by dashboard report type
+     */
+    private function getAccountsByDashboardType(string $reportType, $compId, $locationId, $fromDate = null, $toDate = null)
+    {
+        $query = $this->buildLevel4BalanceQuery($compId, $locationId, $fromDate, $toDate);
+
+        $hasAny = function ($column, array $keywords) {
+            return function ($q) use ($column, $keywords) {
+                foreach ($keywords as $index => $keyword) {
+                    $method = $index === 0 ? 'whereRaw' : 'orWhereRaw';
+                    $q->{$method}("LOWER({$column}) LIKE ?", ['%' . strtolower($keyword) . '%']);
+                }
+            };
+        };
+
+        switch ($reportType) {
+            case 'main-payable':
+                $query->whereIn('coa.account_type', ['Liability', 'Liabilities'])
+                    ->where($hasAny('coa.account_name', ['payable', 'creditor', 'vendor payable', 'accounts payable']));
+                break;
+
+            case 'main-receivable':
+                $query->whereIn('coa.account_type', ['Asset', 'Assets'])
+                    ->where($hasAny('coa.account_name', ['receivable', 'debtor', 'accounts receivable', 'customer receivable']));
+                break;
+
+            case 'current-cash':
+                $query->whereIn('coa.account_type', ['Asset', 'Assets'])
+                    ->where($hasAny('coa.account_name', ['current cash', 'cash in hand', 'petty cash']))
+                    ->whereRaw('LOWER(coa.account_name) NOT LIKE ?', ['%bank%']);
+                break;
+
+            case 'all-cash-codes':
+                $query->whereIn('coa.account_type', ['Asset', 'Assets'])
+                    ->where($hasAny('coa.account_name', ['cash']))
+                    ->whereRaw('LOWER(coa.account_name) NOT LIKE ?', ['%bank%']);
+                break;
+
+            case 'bank-balances':
+                $query->whereIn('coa.account_type', ['Asset', 'Assets'])
+                    ->where($hasAny('coa.account_name', ['bank']));
+                break;
+
+            default:
+                $query->whereRaw('1 = 0');
+                break;
+        }
+
+        return $query;
     }
 
     /**

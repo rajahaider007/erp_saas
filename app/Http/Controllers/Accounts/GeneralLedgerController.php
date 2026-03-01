@@ -147,6 +147,7 @@ class GeneralLedgerController extends Controller
         // Group data by account
         $groupedData = [];
         $accounts = [];
+        $selectedAccount = null;
         
         if ($accountId) {
             // Single account view
@@ -198,8 +199,6 @@ class GeneralLedgerController extends Controller
             $grandTotalDebit += $accountDebit;
             $grandTotalCredit += $accountCredit;
         }
-
-        $selectedAccount = $accountId ? $accounts->first() : null;
 
         // Get company details
         $company = DB::table('companies')->where('id', $compId)->first();

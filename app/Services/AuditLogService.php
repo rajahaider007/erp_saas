@@ -133,6 +133,25 @@ class AuditLogService
             "Journal Voucher {$action}: " . ($voucherData['voucher_number'] ?? '')
         );
     }
+    /**
+     * Log bank rec operation
+     */
+    public static function logBankVoucher(
+        string $action,
+        int $voucherId,
+        array $voucherData,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'Accounts',
+            'transactions',
+            $voucherId,
+            $oldData,
+            $voucherData,
+            "Journal Voucher {$action}: " . ($voucherData['voucher_number'] ?? '')
+        );
+    }
       /**
      * Log Opening voucher operation
      */

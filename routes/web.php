@@ -76,6 +76,7 @@ Route::get('/erp-modules', function (Request $request) {
 
 // Accounts Module Routes
 Route::get('/accounts', [App\Http\Controllers\Accounts\AccountsDashboardController::class, 'index'])->middleware('web.auth')->name('accounts');
+Route::get('/accounts/dashboard-report/{reportType}', [App\Http\Controllers\Accounts\AccountsDashboardController::class, 'financialReport'])->middleware('web.auth')->name('accounts.dashboard-report');
 
 Route::get('/accounts/chart-of-accounts', [App\Http\Controllers\Accounts\ChartOfAccountsController::class, 'index'])->middleware('web.auth')->name('accounts.chart-of-accounts');
 
@@ -91,6 +92,23 @@ Route::prefix('accounts/voucher-number-configuration')->name('accounts.voucher-n
 
     Route::get('/{id}', [App\Http\Controllers\Accounts\VoucherNumberConfigurationController::class, 'show'])->name('show');
     Route::put('/{id}', [App\Http\Controllers\Accounts\VoucherNumberConfigurationController::class, 'update'])->name('update');
+});
+
+// Account Configuration Routes
+Route::prefix('accounts/account-configuration')->name('accounts.account-configuration.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\Accounts\AccountConfigurationController::class, 'index'])->name('index');
+
+    Route::get('/create', [App\Http\Controllers\Accounts\AccountConfigurationController::class, 'create'])->name('create');
+
+    Route::post('/', [App\Http\Controllers\Accounts\AccountConfigurationController::class, 'store'])->name('store');
+
+    Route::get('/{id}/edit', [App\Http\Controllers\Accounts\AccountConfigurationController::class, 'edit'])->name('edit');
+
+    Route::put('/{id}', [App\Http\Controllers\Accounts\AccountConfigurationController::class, 'update'])->name('update');
+
+    Route::post('/bulk-destroy', [App\Http\Controllers\Accounts\AccountConfigurationController::class, 'bulkDestroy'])->name('bulk-destroy');
+
+    Route::post('/bulk-status', [App\Http\Controllers\Accounts\AccountConfigurationController::class, 'bulkStatus'])->name('bulk-status');
 });
 
 // Chart of Accounts API Routes
@@ -111,6 +129,13 @@ Route::prefix('api/voucher-number-configuration')->middleware('web.auth')->group
     Route::post('/bulk-status', [App\Http\Controllers\Accounts\VoucherNumberConfigurationController::class, 'bulkUpdateStatus']);
     Route::post('/bulk-destroy', [App\Http\Controllers\Accounts\VoucherNumberConfigurationController::class, 'bulkDestroy']);
     Route::get('/export-csv', [App\Http\Controllers\Accounts\VoucherNumberConfigurationController::class, 'exportCsv']);
+});
+
+// Account Configuration API Routes
+Route::prefix('api/account-configuration')->middleware('web.auth')->group(function () {
+    Route::delete('/{id}', [App\Http\Controllers\Accounts\AccountConfigurationController::class, 'destroy']);
+    Route::post('/bulk-destroy', [App\Http\Controllers\Accounts\AccountConfigurationController::class, 'bulkDestroy']);
+    Route::post('/bulk-status', [App\Http\Controllers\Accounts\AccountConfigurationController::class, 'bulkStatus']);
 });
 
 // Journal Voucher Routes
@@ -135,7 +160,28 @@ Route::prefix('accounts/journal-voucher')->name('accounts.journal-voucher.')->mi
     // Bulk actions
     Route::post('/bulk-post', [App\Http\Controllers\Accounts\JournalVoucherController::class, 'bulkPost'])->name('bulk-post');
 });
-
+// Bank Voucher Routes
+Route::prefix('accounts/bank-voucher')->name('accounts.bank-voucher.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\Accounts\BankVoucherController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Accounts\BankVoucherController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Accounts\BankVoucherController::class, 'store'])->name('store');
+    Route::get('/{id}', [App\Http\Controllers\Accounts\BankVoucherController::class, 'show'])->name('show');
+    Route::get('/{id}/edit', [App\Http\Controllers\Accounts\BankVoucherController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [App\Http\Controllers\Accounts\BankVoucherController::class, 'update'])->name('update');
+    // Print routes
+    Route::get('/{id}/print-summary', [App\Http\Controllers\Accounts\BankVoucherController::class, 'printSummary'])->name('print-summary');
+    Route::get('/{id}/print-detailed', [App\Http\Controllers\Accounts\BankVoucherController::class, 'printDetailed'])->name('print-detailed');
+    // Post route
+    Route::post('/{id}/post', [App\Http\Controllers\Accounts\BankVoucherController::class, 'post'])->name('post');
+    // Delete route
+    Route::delete('/{id}', [App\Http\Controllers\Accounts\BankVoucherController::class, 'destroy'])->name('destroy');
+    // Export routes
+    Route::get('/export-csv', [App\Http\Controllers\Accounts\BankVoucherController::class, 'exportCsv'])->name('export-csv');
+    Route::get('/export-excel', [App\Http\Controllers\Accounts\BankVoucherController::class, 'exportExcel'])->name('export-excel');
+    Route::get('/export-pdf', [App\Http\Controllers\Accounts\BankVoucherController::class, 'exportPdf'])->name('export-pdf');
+    // Bulk actions
+    Route::post('/bulk-post', [App\Http\Controllers\Accounts\BankVoucherController::class, 'bulkPost'])->name('bulk-post');
+});
 // Opening Voucher Routes
 Route::prefix('accounts/opening-voucher')->name('accounts.opening-voucher.')->middleware('web.auth')->group(function () {
     Route::get('/', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'index'])->name('index');
@@ -191,15 +237,15 @@ Route::prefix('accounts/code-configuration')->name('accounts.code-configuration.
     Route::post('/', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'store'])->name('store');
     Route::put('/{id}', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'update'])->name('update');
     Route::delete('/{id}', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'destroy'])->name('destroy');
-    
+
     // Bank Account Configuration
     Route::get('/bank', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'bankConfiguration'])->name('bank.show');
     Route::post('/bank', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'storeBankCode'])->name('bank.store');
-    
+
     // Cash Account Configuration
     Route::get('/cash', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'cashConfiguration'])->name('cash.show');
     Route::post('/cash', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'storeCashCode'])->name('cash.store');
-    
+
     // Configuration Requirements
     Route::get('/requirements', [App\Http\Controllers\Accounts\ChartOfAccountCodeConfigurationController::class, 'getConfigurationRequirements'])->name('requirements');
 });
@@ -571,14 +617,14 @@ Route::prefix('system/logs')->name('logs.')->middleware('web.auth')->group(funct
     Route::get('/activity', [LogController::class, 'activityLogs'])->name('activity');
     Route::get('/activity/{id}/details', [LogController::class, 'changeDetails'])->name('details');
     Route::get('/timeline', [LogController::class, 'timeline'])->name('timeline');
-    
+
     // Deleted Items & Recovery
     Route::get('/deleted-items', [LogController::class, 'deletedItems'])->name('deleted-items');
     Route::post('/deleted-items/{id}/restore', [LogController::class, 'restore'])->name('restore');
-    
+
     // Security Logs
     Route::get('/security', [LogController::class, 'securityLogs'])->name('security');
-    
+
     // Reports & Analytics
     Route::get('/reports', [LogController::class, 'reports'])->name('reports');
     Route::get('/export', [LogController::class, 'export'])->name('export');
