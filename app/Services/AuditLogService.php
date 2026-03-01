@@ -31,20 +31,20 @@ class AuditLogService
     ): bool {
         try {
             $request = request();
-            
+
             // For UPDATE action, verify actual changes exist
             if ($action === 'UPDATE') {
                 $changedFields = self::getChangedFields($oldData, $newData);
-                
+
                 if (empty($changedFields)) {
                     // No actual changes, don't log
                     return false;
                 }
             }
-            
+
             // Calculate changed fields
             $changedFields = self::getChangedFields($oldData, $newData);
-            
+
             // Insert into tbl_audit_logs (main audit trail)
             DB::table('tbl_audit_logs')->insert([
                 'user_id' => Auth::id() ?? session('user_id'), // Fallback to session
@@ -63,7 +63,7 @@ class AuditLogService
                 'description' => $description,
                 'created_at' => now()
             ]);
-            
+
             return true;
         } catch (\Exception $e) {
             Log::error('Audit log error: ' . $e->getMessage(), [
@@ -75,7 +75,7 @@ class AuditLogService
             return false;
         }
     }
-    
+
     /**
      * Get only the fields that changed between old and new data
      * 
@@ -88,20 +88,20 @@ class AuditLogService
         if (!$oldData || !$newData) {
             return null;
         }
-        
+
         $changes = [];
-        
+
         // Skip fields that shouldn't be logged
         $skipFields = ['updated_at', 'updated_by', 'created_at', 'created_by', 'last_viewed_at'];
-        
+
         foreach ($newData as $key => $newValue) {
             // Skip auto-generated fields
             if (in_array($key, $skipFields)) {
                 continue;
             }
-            
+
             $oldValue = $oldData[$key] ?? null;
-            
+
             // Check if value actually changed
             if ($oldValue != $newValue) {
                 $changes[$key] = [
@@ -110,10 +110,10 @@ class AuditLogService
                 ];
             }
         }
-        
+
         return !empty($changes) ? $changes : null;
     }
-    
+
     /**
      * Log journal voucher operation
      */
@@ -152,7 +152,27 @@ class AuditLogService
             "Journal Voucher {$action}: " . ($voucherData['voucher_number'] ?? '')
         );
     }
-      /**
+
+    /**
+     * Log cash voucher operation
+     */
+    public static function logCashVoucher(
+        string $action,
+        int $voucherId,
+        array $voucherData,
+        ?array $oldData = null
+    ): bool {
+        return self::log(
+            $action,
+            'Accounts',
+            'transactions',
+            $voucherId,
+            $oldData,
+            $voucherData,
+            "Journal Voucher {$action}: " . ($voucherData['voucher_number'] ?? '')
+        );
+    }
+    /**
      * Log Opening voucher operation
      */
     public static function logOpeningVoucher(
@@ -190,7 +210,7 @@ class AuditLogService
             "Chart of Accounts {$action}: " . ($accountData['account_name'] ?? '')
         );
     }
-    
+
     /**
      * Log user operation
      */
@@ -203,14 +223,14 @@ class AuditLogService
         // Filter sensitive data
         $filteredNewData = self::filterSensitiveData($userData);
         $filteredOldData = $oldData ? self::filterSensitiveData($oldData) : null;
-        
+
         // Create full name from fname, mname, lname
         $fullName = trim(
-            ($userData['fname'] ?? '') . ' ' . 
-            ($userData['mname'] ?? '') . ' ' . 
-            ($userData['lname'] ?? '')
+            ($userData['fname'] ?? '') . ' ' .
+                ($userData['mname'] ?? '') . ' ' .
+                ($userData['lname'] ?? '')
         );
-        
+
         return self::log(
             $action,
             'System',
@@ -221,7 +241,7 @@ class AuditLogService
             "User {$action}: " . $fullName
         );
     }
-    
+
     /**
      * Filter sensitive data before logging
      */
@@ -236,16 +256,16 @@ class AuditLogService
             'api_secret',
             'private_key'
         ];
-        
+
         foreach ($sensitiveFields as $field) {
             if (isset($data[$field])) {
                 $data[$field] = '***FILTERED***';
             }
         }
-        
+
         return $data;
     }
-    
+
     /**
      * Get audit trail for a specific record
      */
@@ -264,7 +284,7 @@ class AuditLogService
             ->orderBy('al.created_at', 'desc')
             ->get();
     }
-    
+
     /**
      * Get recent activity for a user
      */
@@ -277,7 +297,7 @@ class AuditLogService
             ->limit($limit)
             ->get();
     }
-    
+
     /**
      * Get audit summary for date range
      */
@@ -296,16 +316,16 @@ class AuditLogService
             ->whereBetween('created_at', [$fromDate, $toDate])
             ->where('company_id', session('user_comp_id')) // Company filtering
             ->groupBy('module_name', 'action_type');
-        
+
         if ($module) {
             $query->where('module_name', $module);
         }
-        
+
         return $query->get();
     }
-    
+
     // ==================== ACCOUNTS MODULE LOGGING METHODS ====================
-    
+
     /**
      * Log currency ledger operation
      */
@@ -325,7 +345,7 @@ class AuditLogService
             "Currency Ledger {$action}: " . ($data['currency_code'] ?? '') . " - " . ($data['account_name'] ?? '')
         );
     }
-    
+
     /**
      * Log general ledger operation
      */
@@ -345,7 +365,7 @@ class AuditLogService
             "General Ledger {$action}: " . ($data['account_code'] ?? '') . " - " . ($data['account_name'] ?? '')
         );
     }
-    
+
     /**
      * Log voucher number configuration operation
      */
@@ -365,9 +385,9 @@ class AuditLogService
             "Voucher Number Configuration {$action}: " . ($data['voucher_type'] ?? '') . " - " . ($data['prefix'] ?? '')
         );
     }
-    
+
     // ==================== SYSTEM MODULE LOGGING METHODS ====================
-    
+
     /**
      * Log company operation
      */
@@ -387,7 +407,7 @@ class AuditLogService
             "Company {$action}: " . ($data['company_name'] ?? '')
         );
     }
-    
+
     /**
      * Log currency operation
      */
@@ -407,7 +427,7 @@ class AuditLogService
             "Currency {$action}: " . ($data['name'] ?? '') . " (" . ($data['code'] ?? '') . ")"
         );
     }
-    
+
     /**
      * Log department operation
      */
@@ -427,7 +447,7 @@ class AuditLogService
             "Department {$action}: " . ($data['name'] ?? '')
         );
     }
-    
+
     /**
      * Log location operation
      */
@@ -447,7 +467,7 @@ class AuditLogService
             "Location {$action}: " . ($data['name'] ?? '')
         );
     }
-    
+
     /**
      * Log menu operation
      */
@@ -467,7 +487,7 @@ class AuditLogService
             "Menu {$action}: " . ($data['menu_name'] ?? '')
         );
     }
-    
+
     /**
      * Log module operation
      */
@@ -487,7 +507,7 @@ class AuditLogService
             "Module {$action}: " . ($data['module_name'] ?? '')
         );
     }
-    
+
     /**
      * Log package operation
      */
@@ -507,7 +527,7 @@ class AuditLogService
             "Package {$action}: " . ($data['package_name'] ?? '')
         );
     }
-    
+
     /**
      * Log package feature operation
      */
@@ -527,7 +547,7 @@ class AuditLogService
             "Package Feature {$action}: " . ($data['feature_name'] ?? '')
         );
     }
-    
+
     /**
      * Log section operation
      */
@@ -547,7 +567,7 @@ class AuditLogService
             "Section {$action}: " . ($data['section_name'] ?? '')
         );
     }
-    
+
     /**
      * Log role operation
      */
@@ -567,7 +587,7 @@ class AuditLogService
             "Role {$action}: " . ($data['role_name'] ?? '')
         );
     }
-    
+
     /**
      * Log role feature operation
      */
@@ -587,7 +607,7 @@ class AuditLogService
             "Role Feature {$action}: Role " . ($data['role_id'] ?? '') . " - Feature " . ($data['feature_id'] ?? '')
         );
     }
-    
+
     /**
      * Log code configuration operation
      */
@@ -607,9 +627,9 @@ class AuditLogService
             "Code Configuration {$action}: " . ($data['configuration_name'] ?? '')
         );
     }
-    
+
     // ==================== AUTHENTICATION MODULE LOGGING METHODS ====================
-    
+
     /**
      * Log authentication operation
      */
@@ -621,7 +641,7 @@ class AuditLogService
     ): bool {
         $filteredData = self::filterSensitiveData($data);
         $filteredOldData = $oldData ? self::filterSensitiveData($oldData) : null;
-        
+
         return self::log(
             $action,
             'Authentication',
@@ -632,7 +652,7 @@ class AuditLogService
             "Authentication {$action}: " . ($data['email'] ?? '')
         );
     }
-    
+
     /**
      * Log profile operation
      */
@@ -644,13 +664,13 @@ class AuditLogService
     ): bool {
         $filteredData = self::filterSensitiveData($data);
         $filteredOldData = $oldData ? self::filterSensitiveData($oldData) : null;
-        
+
         $fullName = trim(
-            ($data['fname'] ?? '') . ' ' . 
-            ($data['mname'] ?? '') . ' ' . 
-            ($data['lname'] ?? '')
+            ($data['fname'] ?? '') . ' ' .
+                ($data['mname'] ?? '') . ' ' .
+                ($data['lname'] ?? '')
         );
-        
+
         return self::log(
             $action,
             'Authentication',
@@ -661,9 +681,9 @@ class AuditLogService
             "Profile {$action}: " . $fullName
         );
     }
-    
+
     // ==================== REPORTS MODULE LOGGING METHODS ====================
-    
+
     /**
      * Log report generation
      */
@@ -683,9 +703,9 @@ class AuditLogService
             "Report {$action}: " . ($data['report_name'] ?? '') . " - " . ($data['report_type'] ?? '')
         );
     }
-    
+
     // ==================== ATTACHMENT MODULE LOGGING METHODS ====================
-    
+
     /**
      * Log attachment operation
      */
@@ -706,4 +726,3 @@ class AuditLogService
         );
     }
 }
-

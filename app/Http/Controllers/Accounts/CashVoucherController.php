@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 
-class BankVoucherController extends Controller
+class CashVoucherController extends Controller
 {
     use CheckUserPermissions;
     /**
@@ -27,9 +27,9 @@ class BankVoucherController extends Controller
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
         if (!$compId || !$locationId) {
-            return Inertia::render('Accounts/BankVoucher/List', [
-                'pageTitle' => 'Bank Vouchers',
-                'BankVouchers' => [
+            return Inertia::render('Accounts/CashVoucher/List', [
+                'pageTitle' => 'Cash Vouchers',
+                'CashVouchers' => [
                     'data' => [],
                     'total' => 0,
                     'current_page' => 1,
@@ -56,7 +56,7 @@ class BankVoucherController extends Controller
         $query = DB::table('transactions')
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt']);
+            ->whereIn('voucher_type', ['Cash Payment', 'Cash Receipt']);
 
         // Apply search filter
         if ($search) {
@@ -85,16 +85,16 @@ class BankVoucherController extends Controller
         $query->orderBy($sortBy, $sortDirection);
 
         // Paginate results
-        $BankVouchers = $query->paginate($perPage);
+        $CashVouchers = $query->paginate($perPage);
 
         $accounts = $this->getTransactionalAccounts($compId, $locationId);
         
         // Get current fiscal year
         $currentFiscalYear = FiscalYearHelper::getCurrentFiscalYear($compId);
 
-        return Inertia::render('Accounts/BankVoucher/List', [
-            'pageTitle' => 'Bank Vouchers',
-            'BankVouchers' => $BankVouchers,
+        return Inertia::render('Accounts/CashVoucher/List', [
+            'pageTitle' => 'Cash Vouchers',
+            'CashVouchers' => $CashVouchers,
             'accounts' => $accounts,
             'fiscalYear' => $currentFiscalYear,
             'filters' => [
@@ -120,10 +120,10 @@ class BankVoucherController extends Controller
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
         if (!$compId || !$locationId) {
-            return Inertia::render('Accounts/BankVoucher/Create', [
-                'pageTitle' => 'Create Bank Voucher',
+            return Inertia::render('Accounts/CashVoucher/Create', [
+                'pageTitle' => 'Create Cash Voucher',
                 'accounts' => [],
-                'bankAccounts' => [],
+                'CashAccounts' => [],
                 'currencies' => [],
                 'company' => null,
                 'error' => 'Company and Location information is required. Please contact administrator.'
@@ -147,12 +147,12 @@ class BankVoucherController extends Controller
             });
 
         $accounts = $this->getTransactionalAccounts($compId, $locationId);
-        $bankAccounts = $this->getBankAccounts($compId, $locationId);
+        $CashAccounts = $this->getCashAccounts($compId, $locationId);
 
         // Generate preview voucher numbers for display
         $previewVoucherNumbers = [
-            'Bank Payment' => $this->generatePreviewVoucherNumber($compId, $locationId, 'Bank Payment'),
-            'Bank Receipt' => $this->generatePreviewVoucherNumber($compId, $locationId, 'Bank Receipt'),
+            'Cash Payment' => $this->generatePreviewVoucherNumber($compId, $locationId, 'Cash Payment'),
+            'Cash Receipt' => $this->generatePreviewVoucherNumber($compId, $locationId, 'Cash Receipt'),
         ];
         
         // Get current fiscal year
@@ -175,15 +175,15 @@ class BankVoucherController extends Controller
             ];
         }
 
-        return Inertia::render('Accounts/BankVoucher/Create', [
-            'pageTitle' => 'Create Bank Voucher',
+        return Inertia::render('Accounts/CashVoucher/Create', [
+            'pageTitle' => 'Create Cash Voucher',
             'accounts' => $accounts,
-            'bankAccounts' => $bankAccounts,
+            'CashAccounts' => $CashAccounts,
             'currencies' => $currencies,
             'company' => $company,
             'fiscalYear' => $currentFiscalYear,
             'currentPeriod' => $currentPeriodInfo,
-            'preview_voucher_number' => $previewVoucherNumbers['Bank Payment'],
+            'preview_voucher_number' => $previewVoucherNumbers['Cash Payment'],
             'preview_voucher_numbers' => $previewVoucherNumbers
         ]);
     }
@@ -216,8 +216,8 @@ class BankVoucherController extends Controller
             // Validate request
             $validated = $request->validate([
             'voucher_date' => 'required|date',
-            'voucher_sub_type' => 'required|in:Bank Payment,Bank Receipt',
-            'bank_account_id' => 'required|integer|exists:chart_of_accounts,id,account_level,4',
+            'voucher_sub_type' => 'required|in:Cash Payment,Cash Receipt',
+            'Cash_account_id' => 'required|integer|exists:chart_of_accounts,id,account_level,4',
             'description' => 'nullable|string|max:250',
             'reference_number' => 'nullable|string|max:100',
             'entries' => 'required|array|min:1',
@@ -247,10 +247,10 @@ class BankVoucherController extends Controller
             return redirect()->back()->withErrors($e->errors())->withInput();
         }
 
-        // Always auto-generate voucher number for Bank Vouchers
+        // Always auto-generate voucher number for Cash Vouchers
         $company = DB::table('companies')->where('id', $compId)->first();
-        $bankAccount = DB::table('chart_of_accounts')
-            ->where('id', $request->bank_account_id)
+        $CashAccount = DB::table('chart_of_accounts')
+            ->where('id', $request->Cash_account_id)
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
             ->where('status', 'Active')
@@ -258,8 +258,8 @@ class BankVoucherController extends Controller
             ->where('is_transactional', true)
             ->first();
 
-        if (!$bankAccount) {
-            return redirect()->back()->withErrors(['bank_account_id' => 'Selected bank account is invalid.']);
+        if (!$CashAccount) {
+            return redirect()->back()->withErrors(['Cash_account_id' => 'Selected Cash account is invalid.']);
         }
 
         // Validate double entry principle in base currency
@@ -267,8 +267,8 @@ class BankVoucherController extends Controller
         $totalBaseCredit = 0;
         
         foreach ($request->entries as $entry) {
-            if ((int) $entry['account_id'] === (int) $request->bank_account_id) {
-                return redirect()->back()->withErrors(['entries' => 'Detail account cannot be same as selected bank account']);
+            if ((int) $entry['account_id'] === (int) $request->Cash_account_id) {
+                return redirect()->back()->withErrors(['entries' => 'Detail account cannot be same as selected Cash account']);
             }
 
             $amount = (float) ($entry['amount'] ?? 0);
@@ -278,9 +278,9 @@ class BankVoucherController extends Controller
                 return redirect()->back()->withErrors(['entries' => 'Each entry must have amount greater than zero']);
             }
 
-            $isBankPayment = $request->voucher_sub_type === 'Bank Payment';
-            $debit = $isBankPayment ? $amount : 0;
-            $credit = $isBankPayment ? 0 : $amount;
+            $isCashPayment = $request->voucher_sub_type === 'Cash Payment';
+            $debit = $isCashPayment ? $amount : 0;
+            $credit = $isCashPayment ? 0 : $amount;
 
             // Convert to base currency
             // Exchange rate is stored as base_currency/foreign_currency, so we need to invert it
@@ -335,7 +335,7 @@ class BankVoucherController extends Controller
                 'voucher_date' => $request->voucher_date,
                 'voucher_type' => $request->voucher_sub_type,
                 'voucher_sub_type' => $request->voucher_sub_type,
-                'bank_account_id' => $request->bank_account_id,
+                'Cash_account_id' => $request->Cash_account_id,
                 'reference_number' => $request->reference_number,
                 'description' => $request->description,
                 'status' => 'Draft',
@@ -359,14 +359,14 @@ class BankVoucherController extends Controller
             // Create transaction entries
             Log::info('Creating transaction entries...', ['entries_count' => count($request->entries)]);
             $lineNumber = 1;
-            $bankDebitTotal = 0;
-            $bankCreditTotal = 0;
+            $CashDebitTotal = 0;
+            $CashCreditTotal = 0;
 
             foreach ($request->entries as $index => $entry) {
                 $amount = (float) ($entry['amount'] ?? 0);
-                $isBankPayment = $request->voucher_sub_type === 'Bank Payment';
-                $debit = $isBankPayment ? $amount : 0;
-                $credit = $isBankPayment ? 0 : $amount;
+                $isCashPayment = $request->voucher_sub_type === 'Cash Payment';
+                $debit = $isCashPayment ? $amount : 0;
+                $credit = $isCashPayment ? 0 : $amount;
                 $exchangeRate = $entry['exchange_rate'] ?? 1.0;
                 
                 // Calculate base currency amounts
@@ -406,24 +406,24 @@ class BankVoucherController extends Controller
                 ]);
 
                 $lineNumber++;
-                $bankDebitTotal += $baseDebit;
-                $bankCreditTotal += $baseCredit;
+                $CashDebitTotal += $baseDebit;
+                $CashCreditTotal += $baseCredit;
                 
                 Log::info("Entry $index created successfully");
             }
 
-            // Auto contra bank entry (single bank line)
+            // Auto contra Cash entry (single Cash line)
             DB::table('transaction_entries')->insert([
                 'transaction_id' => $transactionId,
                 'line_number' => $lineNumber,
-                'account_id' => $request->bank_account_id,
-                'description' => 'Auto contra bank entry',
-                'debit_amount' => $bankCreditTotal,
-                'credit_amount' => $bankDebitTotal,
+                'account_id' => $request->Cash_account_id,
+                'description' => 'Auto contra Cash entry',
+                'debit_amount' => $CashCreditTotal,
+                'credit_amount' => $CashDebitTotal,
                 'currency_code' => $company->default_currency_code ?? 'PKR',
                 'exchange_rate' => 1,
-                'base_debit_amount' => $bankCreditTotal,
-                'base_credit_amount' => $bankDebitTotal,
+                'base_debit_amount' => $CashCreditTotal,
+                'base_credit_amount' => $CashDebitTotal,
                 'comp_id' => $compId,
                 'location_id' => $locationId,
                 'created_at' => now(),
@@ -433,9 +433,9 @@ class BankVoucherController extends Controller
             DB::table('transactions')
                 ->where('id', $transactionId)
                 ->update([
-                    'total_debit' => $bankDebitTotal,
-                    'total_credit' => $bankDebitTotal,
-                    'base_currency_total' => $bankDebitTotal,
+                    'total_debit' => $CashDebitTotal,
+                    'total_credit' => $CashDebitTotal,
+                    'base_currency_total' => $CashDebitTotal,
                     'updated_at' => now(),
                 ]);
 
@@ -467,7 +467,7 @@ class BankVoucherController extends Controller
                     'created_by' => $userId
                 ];
                 
-                AuditLogService::logBankVoucher('CREATE', $transactionId, $voucherData);
+                AuditLogService::logCashVoucher('CREATE', $transactionId, $voucherData);
                 Log::info('Audit log created for journal voucher creation', ['transaction_id' => $transactionId]);
             } catch (\Exception $auditException) {
                 // Don't fail the main operation if audit logging fails
@@ -478,8 +478,8 @@ class BankVoucherController extends Controller
             }
 
 
-            return redirect()->route('accounts.bank-voucher.index')
-                           ->with('success', 'Bank voucher created successfully!');
+            return redirect()->route('accounts.Cash-voucher.index')
+                           ->with('success', 'Cash voucher created successfully!');
 
         } catch (\Illuminate\Database\QueryException $e) {
             DB::rollback();
@@ -528,8 +528,8 @@ class BankVoucherController extends Controller
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
         if (!$compId || !$locationId) {
-            return Inertia::render('Accounts/BankVoucher/Show', [
-                'pageTitle' => 'Bank Voucher Details',
+            return Inertia::render('Accounts/CashVoucher/Show', [
+                'pageTitle' => 'Cash Voucher Details',
                 'voucher' => null,
                 'entries' => [],
                 'error' => 'Company and Location information is required. Please contact administrator.'
@@ -540,7 +540,7 @@ class BankVoucherController extends Controller
             ->where('id', $id)
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
+            ->whereIn('voucher_type', ['Cash Payment', 'Cash Receipt'])
             ->first();
 
         if (!$voucher) {
@@ -559,8 +559,8 @@ class BankVoucherController extends Controller
             ->orderBy('transaction_entries.line_number')
             ->get();
 
-        return Inertia::render('Accounts/BankVoucher/Show', [
-            'pageTitle' => 'Bank Voucher Details',
+        return Inertia::render('Accounts/CashVoucher/Show', [
+            'pageTitle' => 'Cash Voucher Details',
             'voucher' => $voucher,
             'entries' => $entries,
             'currentPeriod' => $this->getPeriodInfoForDate($voucher->voucher_date, $compId)
@@ -578,10 +578,10 @@ class BankVoucherController extends Controller
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
         
         if (!$compId || !$locationId) {
-            return Inertia::render('Accounts/BankVoucher/Create', [
-                'pageTitle' => 'Edit Bank Voucher',
+            return Inertia::render('Accounts/CashVoucher/Create', [
+                'pageTitle' => 'Edit Cash Voucher',
                 'accounts' => [],
-                'bankAccounts' => [],
+                'CashAccounts' => [],
                 'voucher' => null,
                 'entries' => [],
                 'error' => 'Company and Location information is required. Please contact administrator.'
@@ -592,7 +592,7 @@ class BankVoucherController extends Controller
             ->where('id', $id)
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
+            ->whereIn('voucher_type', ['Cash Payment', 'Cash Receipt'])
             ->first();
 
         if (!$voucher) {
@@ -600,18 +600,18 @@ class BankVoucherController extends Controller
         }
 
         if ($voucher->status !== 'Draft') {
-            return redirect()->route('accounts.bank-voucher.index')
+            return redirect()->route('accounts.Cash-voucher.index')
                 ->with('error', 'Only draft vouchers can be edited');
         }
 
         $entries = DB::table('transaction_entries')
             ->where('transaction_id', $id)
-            ->where('account_id', '!=', $voucher->bank_account_id)
+            ->where('account_id', '!=', $voucher->Cash_account_id)
             ->orderBy('line_number')
             ->get();
 
         $accounts = $this->getTransactionalAccounts($compId, $locationId);
-        $bankAccounts = $this->getBankAccounts($compId, $locationId);
+        $CashAccounts = $this->getCashAccounts($compId, $locationId);
 
         // Load attachments
         $attachments = [];
@@ -728,12 +728,12 @@ class BankVoucherController extends Controller
                 ];
             });
 
-        return Inertia::render('Accounts/BankVoucher/Create', [
-            'pageTitle' => 'Edit Bank Voucher',
+        return Inertia::render('Accounts/CashVoucher/Create', [
+            'pageTitle' => 'Edit Cash Voucher',
             'voucher' => $voucher,
             'entries' => $entries,
             'accounts' => $accounts,
-            'bankAccounts' => $bankAccounts,
+            'CashAccounts' => $CashAccounts,
             'currencies' => $currencies,
             'company' => $company,
             'attachments' => $attachments,
@@ -758,8 +758,8 @@ class BankVoucherController extends Controller
         // Validate request
         $validated = $request->validate([
             'voucher_date' => 'required|date',
-            'voucher_sub_type' => 'required|in:Bank Payment,Bank Receipt',
-            'bank_account_id' => 'required|integer|exists:chart_of_accounts,id,account_level,4',
+            'voucher_sub_type' => 'required|in:Cash Payment,Cash Receipt',
+            'Cash_account_id' => 'required|integer|exists:chart_of_accounts,id,account_level,4',
             'description' => 'nullable|string|max:250',
             'reference_number' => 'nullable|string|max:100',
             'entries' => 'required|array|min:1',
@@ -781,7 +781,7 @@ class BankVoucherController extends Controller
             ->where('id', $id)
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
+            ->whereIn('voucher_type', ['Cash Payment', 'Cash Receipt'])
             ->first();
 
         if (!$voucher) {
@@ -813,8 +813,8 @@ class BankVoucherController extends Controller
         $totalBaseCredit = 0;
         
         foreach ($request->entries as $entry) {
-            if ((int) $entry['account_id'] === (int) $request->bank_account_id) {
-                return redirect()->back()->withErrors(['entries' => 'Detail account cannot be same as selected bank account']);
+            if ((int) $entry['account_id'] === (int) $request->Cash_account_id) {
+                return redirect()->back()->withErrors(['entries' => 'Detail account cannot be same as selected Cash account']);
             }
 
             $amount = (float) ($entry['amount'] ?? 0);
@@ -824,9 +824,9 @@ class BankVoucherController extends Controller
                 return redirect()->back()->withErrors(['entries' => 'Each entry must have amount greater than zero']);
             }
 
-            $isBankPayment = $request->voucher_sub_type === 'Bank Payment';
-            $debit = $isBankPayment ? $amount : 0;
-            $credit = $isBankPayment ? 0 : $amount;
+            $isCashPayment = $request->voucher_sub_type === 'Cash Payment';
+            $debit = $isCashPayment ? $amount : 0;
+            $credit = $isCashPayment ? 0 : $amount;
             
             // Convert to base currency
             // Exchange rate is stored as base_currency/foreign_currency, so we need to invert it
@@ -850,7 +850,7 @@ class BankVoucherController extends Controller
                     'voucher_date' => $request->voucher_date,
                     'voucher_type' => $request->voucher_sub_type,
                     'voucher_sub_type' => $request->voucher_sub_type,
-                    'bank_account_id' => $request->bank_account_id,
+                    'Cash_account_id' => $request->Cash_account_id,
                     'reference_number' => $request->reference_number,
                     'description' => $request->description,
                     'total_debit' => 0,
@@ -869,13 +869,13 @@ class BankVoucherController extends Controller
 
             // Create new transaction entries
             $lineNumber = 1;
-            $bankDebitTotal = 0;
-            $bankCreditTotal = 0;
+            $CashDebitTotal = 0;
+            $CashCreditTotal = 0;
             foreach ($request->entries as $index => $entry) {
                 $amount = (float) ($entry['amount'] ?? 0);
-                $isBankPayment = $request->voucher_sub_type === 'Bank Payment';
-                $debit = $isBankPayment ? $amount : 0;
-                $credit = $isBankPayment ? 0 : $amount;
+                $isCashPayment = $request->voucher_sub_type === 'Cash Payment';
+                $debit = $isCashPayment ? $amount : 0;
+                $credit = $isCashPayment ? 0 : $amount;
                 $exchangeRate = $entry['exchange_rate'] ?? 1.0;
                 
                 // Calculate base currency amounts
@@ -905,21 +905,21 @@ class BankVoucherController extends Controller
                 ]);
 
                 $lineNumber++;
-                $bankDebitTotal += $baseDebit;
-                $bankCreditTotal += $baseCredit;
+                $CashDebitTotal += $baseDebit;
+                $CashCreditTotal += $baseCredit;
             }
 
             DB::table('transaction_entries')->insert([
                 'transaction_id' => $id,
                 'line_number' => $lineNumber,
-                'account_id' => $request->bank_account_id,
-                'description' => 'Auto contra bank entry',
-                'debit_amount' => $bankCreditTotal,
-                'credit_amount' => $bankDebitTotal,
+                'account_id' => $request->Cash_account_id,
+                'description' => 'Auto contra Cash entry',
+                'debit_amount' => $CashCreditTotal,
+                'credit_amount' => $CashDebitTotal,
                 'currency_code' => $company->default_currency_code ?? 'PKR',
                 'exchange_rate' => 1,
-                'base_debit_amount' => $bankCreditTotal,
-                'base_credit_amount' => $bankDebitTotal,
+                'base_debit_amount' => $CashCreditTotal,
+                'base_credit_amount' => $CashDebitTotal,
                 'comp_id' => $compId,
                 'location_id' => $locationId,
                 'created_at' => now(),
@@ -929,9 +929,9 @@ class BankVoucherController extends Controller
             DB::table('transactions')
                 ->where('id', $id)
                 ->update([
-                    'total_debit' => $bankDebitTotal,
-                    'total_credit' => $bankDebitTotal,
-                    'base_currency_total' => $bankDebitTotal,
+                    'total_debit' => $CashDebitTotal,
+                    'total_credit' => $CashDebitTotal,
+                    'base_currency_total' => $CashDebitTotal,
                     'updated_at' => now(),
                 ]);
 
@@ -961,7 +961,7 @@ class BankVoucherController extends Controller
                     'total_credit' => $voucher->total_credit
                 ];
                 
-                AuditLogService::logBankVoucher('UPDATE', $id, $voucherData, $oldData);
+                AuditLogService::logCashVoucher('UPDATE', $id, $voucherData, $oldData);
                 Log::info('Audit log created for journal voucher update', ['transaction_id' => $id]);
             } catch (\Exception $auditException) {
                 // Don't fail the main operation if audit logging fails
@@ -972,8 +972,8 @@ class BankVoucherController extends Controller
             }
 
 
-            return redirect()->route('accounts.bank-voucher.index')
-                           ->with('success', 'Bank voucher updated successfully!');
+            return redirect()->route('accounts.Cash-voucher.index')
+                           ->with('success', 'Cash voucher updated successfully!');
 
         } catch (\Illuminate\Database\QueryException $e) {
             DB::rollback();
@@ -1028,9 +1028,9 @@ class BankVoucherController extends Controller
             ->get();
     }
 
-    private function getBankAccounts($compId, $locationId)
+    private function getCashAccounts($compId, $locationId)
     {
-        $bankCodes = [];
+        $CashCodes = [];
         $parentAccountIds = [];
 
         $sourceTable = null;
@@ -1058,22 +1058,22 @@ class BankVoucherController extends Controller
             }
 
             if ($sourceTable === 'account_configurations' && Schema::hasColumn($sourceTable, 'config_type')) {
-                $configQuery->where('config_type', 'bank');
+                $configQuery->where('config_type', 'Cash');
             }
 
             $configRows = $configQuery->get();
 
             foreach ($configRows as $config) {
-                if (isset($config->bank_code) && !empty($config->bank_code)) {
-                    $bankCodes[] = trim((string) $config->bank_code);
+                if (isset($config->Cash_code) && !empty($config->Cash_code)) {
+                    $CashCodes[] = trim((string) $config->Cash_code);
                 }
 
                 if (isset($config->account_code) && !empty($config->account_code)) {
-                    $bankCodes[] = trim((string) $config->account_code);
+                    $CashCodes[] = trim((string) $config->account_code);
                 }
 
-                if (isset($config->bank_account_id) && !empty($config->bank_account_id)) {
-                    $parentAccountIds[] = (int) $config->bank_account_id;
+                if (isset($config->Cash_account_id) && !empty($config->Cash_account_id)) {
+                    $parentAccountIds[] = (int) $config->Cash_account_id;
                 }
 
                 if (isset($config->account_id) && !empty($config->account_id)) {
@@ -1082,7 +1082,7 @@ class BankVoucherController extends Controller
             }
         }
 
-        $bankCodes = array_values(array_unique(array_filter($bankCodes)));
+        $CashCodes = array_values(array_unique(array_filter($CashCodes)));
         $parentAccountIds = array_values(array_unique(array_filter($parentAccountIds)));
 
         $query = DB::table('chart_of_accounts')
@@ -1093,10 +1093,10 @@ class BankVoucherController extends Controller
             ->where('is_transactional', true)
             ->whereIn(DB::raw('LOWER(account_type)'), ['asset', 'assets']);
 
-        if (!empty($bankCodes) || !empty($parentAccountIds)) {
-            $query->where(function ($childQuery) use ($bankCodes, $parentAccountIds) {
-                foreach ($bankCodes as $bankCode) {
-                    $escapedCode = addcslashes($bankCode, '%_');
+        if (!empty($CashCodes) || !empty($parentAccountIds)) {
+            $query->where(function ($childQuery) use ($CashCodes, $parentAccountIds) {
+                foreach ($CashCodes as $CashCode) {
+                    $escapedCode = addcslashes($CashCode, '%_');
                     $childQuery->orWhere('account_code', 'like', $escapedCode . '%');
                 }
 
@@ -1229,8 +1229,8 @@ class BankVoucherController extends Controller
     private function getDefaultVoucherPrefix($voucherType)
     {
         return match ($voucherType) {
-            'Bank Payment' => 'BPV',
-            'Bank Receipt' => 'BRV',
+            'Cash Payment' => 'BPV',
+            'Cash Receipt' => 'BRV',
             default => 'JV',
         };
     }
@@ -1255,7 +1255,7 @@ class BankVoucherController extends Controller
         $query = DB::table('transactions')
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt']);
+            ->whereIn('voucher_type', ['Cash Payment', 'Cash Receipt']);
 
         // Apply search filter
         if ($search) {
@@ -1285,7 +1285,7 @@ class BankVoucherController extends Controller
 
         $vouchers = $query->get();
 
-        $filename = 'bank_vouchers_' . date('Y-m-d_His') . '.csv';
+        $filename = 'Cash_vouchers_' . date('Y-m-d_His') . '.csv';
         
         $headers = [
             'Content-Type' => 'text/csv',
@@ -1339,7 +1339,7 @@ class BankVoucherController extends Controller
         $query = DB::table('transactions')
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt']);
+            ->whereIn('voucher_type', ['Cash Payment', 'Cash Receipt']);
 
         // Apply search filter
         if ($search) {
@@ -1370,7 +1370,7 @@ class BankVoucherController extends Controller
         $vouchers = $query->get();
 
         // For now, use CSV format but with .xlsx extension (can be enhanced with PhpSpreadsheet later)
-        $filename = 'bank_vouchers_' . date('Y-m-d_His') . '.xlsx';
+        $filename = 'Cash_vouchers_' . date('Y-m-d_His') . '.xlsx';
         
         $headers = [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -1431,7 +1431,7 @@ class BankVoucherController extends Controller
         $query = DB::table('transactions')
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt']);
+            ->whereIn('voucher_type', ['Cash Payment', 'Cash Receipt']);
 
         // Apply search filter
         if ($search) {
@@ -1469,7 +1469,7 @@ class BankVoucherController extends Controller
             th { background-color: #4CAF50; color: white; }
         </style></head><body>';
         
-        $html .= '<h1>Bank Vouchers Report</h1>';
+        $html .= '<h1>Cash Vouchers Report</h1>';
         $html .= '<table><tr><th>ID</th><th>Voucher Number</th><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Status</th></tr>';
         
         foreach ($vouchers as $voucher) {
@@ -1488,7 +1488,7 @@ class BankVoucherController extends Controller
 
         return response($html)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="bank_vouchers_' . date('Y-m-d_His') . '.pdf"');
+            ->header('Content-Disposition', 'attachment; filename="Cash_vouchers_' . date('Y-m-d_His') . '.pdf"');
     }
 
     /**
@@ -1508,7 +1508,7 @@ class BankVoucherController extends Controller
                 ->where('id', $id)
                 ->where('comp_id', $compId)
                 ->where('location_id', $locationId)
-                ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
+                ->whereIn('voucher_type', ['Cash Payment', 'Cash Receipt'])
                 ->first();
 
             if (!$voucher) {
@@ -1553,7 +1553,7 @@ class BankVoucherController extends Controller
                     'posted_by' => null
                 ];
                 
-                AuditLogService::logBankVoucher('POST', $id, $voucherData, $oldData);
+                AuditLogService::logCashVoucher('POST', $id, $voucherData, $oldData);
                 Log::info('Audit log created for journal voucher posting', ['transaction_id' => $id]);
             } catch (\Exception $auditException) {
                 // Don't fail the main operation if audit logging fails
@@ -1563,8 +1563,8 @@ class BankVoucherController extends Controller
                 ]);
             }
 
-            return redirect()->route('accounts.bank-voucher.index')
-                           ->with('success', "Bank voucher {$voucher->voucher_number} posted successfully!");
+            return redirect()->route('accounts.Cash-voucher.index')
+                           ->with('success', "Cash voucher {$voucher->voucher_number} posted successfully!");
 
         } catch (\Exception $e) {
             Log::error('Error posting journal voucher', [
@@ -1603,7 +1603,7 @@ class BankVoucherController extends Controller
                     ->where('id', $voucherId)
                     ->where('comp_id', $compId)
                     ->where('location_id', $locationId)
-                    ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
+                    ->whereIn('voucher_type', ['Cash Payment', 'Cash Receipt'])
                     ->first();
 
                 if (!$voucher) {
@@ -1668,7 +1668,7 @@ class BankVoucherController extends Controller
             ->where('id', $id)
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
+            ->whereIn('voucher_type', ['Cash Payment', 'Cash Receipt'])
             ->first();
 
         if (!$voucher) {
@@ -1689,8 +1689,8 @@ class BankVoucherController extends Controller
 
         $company = DB::table('companies')->where('id', $compId)->first();
 
-        return Inertia::render('Accounts/BankVoucher/PrintSummary', [
-            'pageTitle' => 'Bank Voucher Print Summary',
+        return Inertia::render('Accounts/CashVoucher/PrintSummary', [
+            'pageTitle' => 'Cash Voucher Print Summary',
             'voucher' => $voucher,
             'entries' => $entries,
             'company' => $company
@@ -1713,7 +1713,7 @@ class BankVoucherController extends Controller
             ->where('id', $id)
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
-            ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
+            ->whereIn('voucher_type', ['Cash Payment', 'Cash Receipt'])
             ->first();
 
         if (!$voucher) {
@@ -1734,8 +1734,8 @@ class BankVoucherController extends Controller
 
         $company = DB::table('companies')->where('id', $compId)->first();
 
-        return Inertia::render('Accounts/BankVoucher/PrintDetailed', [
-            'pageTitle' => 'Bank Voucher Print Detailed',
+        return Inertia::render('Accounts/CashVoucher/PrintDetailed', [
+            'pageTitle' => 'Cash Voucher Print Detailed',
             'voucher' => $voucher,
             'entries' => $entries,
             'company' => $company
@@ -1777,7 +1777,7 @@ class BankVoucherController extends Controller
                 ->where('id', $id)
                 ->where('comp_id', $compId)
                 ->where('location_id', $locationId)
-                ->whereIn('voucher_type', ['Bank Payment', 'Bank Receipt'])
+                ->whereIn('voucher_type', ['Cash Payment', 'Cash Receipt'])
                 ->first();
 
             if (!$voucher) {
@@ -1903,7 +1903,7 @@ class BankVoucherController extends Controller
 
             // Create audit log for the journal voucher deletion
             try {
-                AuditLogService::logBankVoucher('DELETE', $id, [], $oldData);
+                AuditLogService::logCashVoucher('DELETE', $id, [], $oldData);
                 Log::info('Audit log created for journal voucher deletion', [
                     'voucher_id' => $id,
                     'voucher_number' => $voucherNumber
@@ -1918,8 +1918,8 @@ class BankVoucherController extends Controller
             }
 
 
-            return redirect()->route('accounts.bank-voucher.index')
-                           ->with('success', "Bank voucher {$voucherNumber} deleted successfully!");
+            return redirect()->route('accounts.Cash-voucher.index')
+                           ->with('success', "Cash voucher {$voucherNumber} deleted successfully!");
 
         } catch (\Illuminate\Database\QueryException $e) {
             DB::rollback();

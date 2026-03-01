@@ -182,6 +182,28 @@ Route::prefix('accounts/bank-voucher')->name('accounts.bank-voucher.')->middlewa
     // Bulk actions
     Route::post('/bulk-post', [App\Http\Controllers\Accounts\BankVoucherController::class, 'bulkPost'])->name('bulk-post');
 });
+// Cash Voucher Routes
+Route::prefix('accounts/cash-voucher')->name('accounts.cash-voucher.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\Accounts\CashVoucherController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Accounts\CashVoucherController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Accounts\CashVoucherController::class, 'store'])->name('store');
+    Route::get('/{id}', [App\Http\Controllers\Accounts\CashVoucherController::class, 'show'])->name('show');
+    Route::get('/{id}/edit', [App\Http\Controllers\Accounts\CashVoucherController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [App\Http\Controllers\Accounts\CashVoucherController::class, 'update'])->name('update');
+    // Print routes
+    Route::get('/{id}/print-summary', [App\Http\Controllers\Accounts\CashVoucherController::class, 'printSummary'])->name('print-summary');
+    Route::get('/{id}/print-detailed', [App\Http\Controllers\Accounts\CashVoucherController::class, 'printDetailed'])->name('print-detailed');
+    // Post route
+    Route::post('/{id}/post', [App\Http\Controllers\Accounts\CashVoucherController::class, 'post'])->name('post');
+    // Delete route
+    Route::delete('/{id}', [App\Http\Controllers\Accounts\CashVoucherController::class, 'destroy'])->name('destroy');
+    // Export routes
+    Route::get('/export-csv', [App\Http\Controllers\Accounts\CashVoucherController::class, 'exportCsv'])->name('export-csv');
+    Route::get('/export-excel', [App\Http\Controllers\Accounts\CashVoucherController::class, 'exportExcel'])->name('export-excel');
+    Route::get('/export-pdf', [App\Http\Controllers\Accounts\CashVoucherController::class, 'exportPdf'])->name('export-pdf');
+    // Bulk actions
+    Route::post('/bulk-post', [App\Http\Controllers\Accounts\CashVoucherController::class, 'bulkPost'])->name('bulk-post');
+});
 // Opening Voucher Routes
 Route::prefix('accounts/opening-voucher')->name('accounts.opening-voucher.')->middleware('web.auth')->group(function () {
     Route::get('/', [App\Http\Controllers\Accounts\OpeningVoucherController::class, 'index'])->name('index');
