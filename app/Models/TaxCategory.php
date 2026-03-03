@@ -18,8 +18,10 @@ class TaxCategory extends Model
         'tax_name',
         'tax_type',
         'tax_rate',
+        'gl_account_id',
         'description',
         'applicable_for',
+        'country_region',
         'is_active'
     ];
 
@@ -32,6 +34,11 @@ class TaxCategory extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function glAccount(): BelongsTo
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'gl_account_id');
     }
 
     // Scopes

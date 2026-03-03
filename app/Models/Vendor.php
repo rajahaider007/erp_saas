@@ -20,17 +20,24 @@ class Vendor extends Model
         'email',
         'phone',
         'address',
+        'payment_terms',
         'city',
         'state',
         'postal_code',
         'country_id',
+        'currency_id',
         'tax_id',
+        'tax_registration_number',
+        'bank_details',
+        'credit_limit',
+        'vendor_type',
         'notes',
         'is_active'
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'credit_limit' => 'decimal:2',
     ];
 
     // Relationships

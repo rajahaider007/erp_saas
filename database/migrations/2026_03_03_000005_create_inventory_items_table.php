@@ -39,6 +39,8 @@ return new class extends Migration
             $table->foreignId('stock_uom_id')->nullable()->constrained('uom_masters')->onDelete('restrict');
             $table->foreignId('purchase_uom_id')->nullable()->constrained('uom_masters')->onDelete('restrict');
             $table->foreignId('sales_uom_id')->nullable()->constrained('uom_masters')->onDelete('restrict');
+            $table->text('uom_conversion_table')->nullable()->comment('Purchase → Stock → Sales UOM conversion factors');
+            $table->text('packaging_hierarchy')->nullable()->comment('Unit/Box/Case/Pallet with qty per level');
 
             // Section C: Costing & Procurement
             $table->enum('costing_method', ['fifo', 'weighted_avg', 'standard_cost', 'lifo'])->default('fifo');
@@ -50,6 +52,7 @@ return new class extends Migration
             $table->decimal('maximum_stock_level', 15, 4)->nullable();
             $table->integer('lead_time_days')->nullable();
             $table->foreignId('default_vendor_id')->nullable()->constrained('vendors')->onDelete('set null');
+            $table->text('substitute_items')->nullable()->comment('Comma-separated substitute item codes');
 
             // Section D: Expiry & Storage
             $table->boolean('expiry_tracking')->default(false);
@@ -71,14 +74,20 @@ return new class extends Migration
             $table->string('hs_tariff_code', 10)->nullable();
             $table->foreignId('country_of_origin_id')->nullable()->constrained('countries')->onDelete('set null');
             $table->string('barcode_gtin', 20)->unique()->nullable();
+            $table->text('alternate_barcodes')->nullable()->comment('Code, Type (EAN/UPC/QR), Vendor, Supplier Code');
 
-            // Section G: GL Account Mapping (Critical)
+            // Section G: Identifiers & Alternate Codes
+            $table->text('alternate_item_codes')->nullable()->comment('Code / Type (Supplier/Customer/Internal) / Vendor Link');
+            $table->boolean('inspection_required')->default(false)->comment('Triggers QC workflow on GRN receipt');
+            $table->boolean('consignment_item_flag')->default(false)->comment('Vendor-owned inventory tracking');
+
+            // Section H: GL Account Mapping (Critical)
             $table->foreignId('inventory_gl_account_id')->nullable()->constrained('chart_of_accounts')->onDelete('restrict');
             $table->foreignId('cogs_gl_account_id')->nullable()->constrained('chart_of_accounts')->onDelete('restrict');
             $table->foreignId('writeoff_gl_account_id')->nullable()->constrained('chart_of_accounts')->onDelete('restrict');
             $table->foreignId('price_variance_gl_account_id')->nullable()->constrained('chart_of_accounts')->onDelete('restrict');
 
-            // Section H: Classification & Analytics
+            // Section I: Classification & Analytics
             $table->enum('abc_classification', ['a', 'b', 'c'])->nullable();
             $table->integer('slow_moving_threshold_days')->default(180);
 

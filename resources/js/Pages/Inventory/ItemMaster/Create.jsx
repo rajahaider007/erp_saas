@@ -237,6 +237,24 @@ const CreateItemMasterForm = () => {
       options: uomOptions,
       help: 'Customer invoicing unit - may differ from Stock UOM'
     },
+    {
+      name: 'uom_conversion_table',
+      label: 'UOM Conversion Table',
+      type: 'textarea',
+      placeholder: 'Example: 12 pcs = 1 box; 1 box = 1 stock unit',
+      required: false,
+      maxLength: 500,
+      help: 'Purchase → Stock → Sales conversion with decimal factors (Sub-table implementation pending)'
+    },
+    {
+      name: 'packaging_hierarchy',
+      label: 'Packaging Hierarchy',
+      type: 'textarea',
+      placeholder: 'Unit / Box / Case / Pallet with qty per level',
+      required: false,
+      maxLength: 500,
+      help: 'For WMS and shipping optimization (Sub-table implementation pending)'
+    },
   ];
 
   // ============================================
@@ -327,6 +345,15 @@ const CreateItemMasterForm = () => {
       required: false,
       options: [],
       help: 'Select from vendor master'
+    },
+    {
+      name: 'substitute_items',
+      label: 'Substitute Items',
+      type: 'text',
+      placeholder: 'Enter substitute item codes (comma-separated)',
+      required: false,
+      maxLength: 500,
+      help: 'Other items that can substitute if stockout (Multi-select implementation pending)'
     },
   ];
 
@@ -490,10 +517,50 @@ const CreateItemMasterForm = () => {
       maxLength: 20,
       help: 'Unique for supply chain'
     },
+    {
+      name: 'alternate_barcodes',
+      label: 'Alternate Barcodes',
+      type: 'textarea',
+      placeholder: 'Code, Type (EAN/UPC/QR), Vendor, Supplier Code',
+      required: false,
+      maxLength: 500,
+      help: 'Multiple symbologies support (Sub-table implementation pending)'
+    },
   ];
 
   // ============================================
-  // SECTION G: GL Account Mapping
+  // SECTION G: Identifiers & Alternate Codes
+  // ============================================
+  const identifiersFields = [
+    {
+      name: 'alternate_item_codes',
+      label: 'Alternate Item Codes',
+      type: 'textarea',
+      placeholder: 'Code / Type (Supplier/Customer/Internal) / Vendor Link',
+      required: false,
+      maxLength: 500,
+      help: 'Map vendor SKU, customer part number (Sub-table implementation pending)'
+    },
+    {
+      name: 'inspection_required',
+      label: 'Inspection Required',
+      type: 'toggle',
+      required: false,
+      defaultValue: false,
+      help: 'Triggers QC workflow on GRN receipt'
+    },
+    {
+      name: 'consignment_item_flag',
+      label: 'Consignment Item Flag',
+      type: 'toggle',
+      required: false,
+      defaultValue: false,
+      help: 'For vendor-owned inventory tracking'
+    },
+  ];
+
+  // ============================================
+  // SECTION H: GL Account Mapping
   // ============================================
   const glFields = [
     {
@@ -535,7 +602,7 @@ const CreateItemMasterForm = () => {
   ];
 
   // ============================================
-  // SECTION H: Additional Classification & Analytics
+  // SECTION I: Additional Classification & Analytics
   // ============================================
   const analyticsFields = [
     {
@@ -579,8 +646,10 @@ const CreateItemMasterForm = () => {
     // Section F
     ...taxFields,
     // Section G
-    ...glFields,
+    ...identifiersFields,
     // Section H
+    ...glFields,
+    // Section I
     ...analyticsFields,
   ];
 
@@ -592,8 +661,9 @@ const CreateItemMasterForm = () => {
     { title: 'Section D: Expiry & Storage', icon: Calendar, description: 'Shelf life management and storage requirements', fields: expiryFields },
     { title: 'Section E: Physical Attributes', icon: Package, description: 'Weight, volume, and dimension specifications', fields: physicalFields },
     { title: 'Section F: Tax & Trade Compliance', icon: Hash, description: 'Tax codes and international trade information', fields: taxFields },
-    { title: 'Section G: GL Account Mapping', icon: DollarSign, description: 'Accounting mappings for inventory and expenses', fields: glFields },
-    { title: 'Section H: Classification & Analytics', icon: Zap, description: 'ABC classification and slow-moving tracking', fields: analyticsFields }
+    { title: 'Section G: Identifiers & Alternate Codes', icon: Hash, description: 'Alternate identifiers, inspection and consignment flags', fields: identifiersFields },
+    { title: 'Section H: GL Account Mapping', icon: DollarSign, description: 'Accounting mappings for inventory and expenses', fields: glFields },
+    { title: 'Section I: Classification & Analytics', icon: Zap, description: 'ABC classification and slow-moving tracking', fields: analyticsFields }
   ].filter(Boolean);
 
   const handleSubmit = (formData) => {

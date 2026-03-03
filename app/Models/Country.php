@@ -13,10 +13,13 @@ class Country extends Model
     protected $fillable = [
         'country_code',
         'country_name',
+        'currency_id',
         'iso_2_code',
         'iso_numeric_code',
+        'tax_system',
         'region',
         'sub_region',
+        'customs_rules',
         'is_active'
     ];
 

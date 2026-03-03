@@ -1,0 +1,186 @@
+📋 Required Master Forms for Inventory Module
+🔴 High Priority - Critical Forms
+1. UOM (Unit of Measure) Master
+Form: UOM Coding
+
+UOM Code
+UOM Name
+UOM Type (Length, Weight, Volume, Quantity, Time)
+Symbol (kg, m, L, pcs)
+Base UOM Flag (Yes/No)
+Decimal Precision
+Status
+2. UOM Conversion Master
+Form: UOM Conversion Configuration
+
+From UOM
+To UOM
+Conversion Factor (decimal)
+Conversion Formula/Direction
+Effective Date
+Item-Specific Flag (General or Item-Specific)
+Example: 1 Box = 12 Pieces, 1 kg = 1000 grams
+3. Tax Category Master
+Form: Tax Category Configuration
+
+Tax Code
+Tax Name
+Tax Rate (%)
+Tax Type (GST, VAT, Sales Tax, Custom Duty)
+Account Head (GL Link)
+Applicable On (Purchase/Sales/Both)
+Country/Region
+Status
+4. Vendor/Supplier Master
+Form: Vendor Master
+
+Vendor Code
+Vendor Name
+Contact Person
+Phone, Email, Address
+Payment Terms (Net 30, Net 60, etc.)
+Currency
+Tax Registration Numbers
+Bank Details
+Credit Limit
+Vendor Type (Local/Import)
+Status
+5. Warehouse Master
+Form: Warehouse/Location Master
+
+Warehouse Code
+Warehouse Name
+Company/Branch
+Address
+Warehouse Type (Main, Transit, Quarantine, etc.)
+Storage Temperature Class
+Capacity
+Active Flag
+6. Zone & Bin Master
+Form: Zone/Bin Configuration
+
+Zone Code
+Zone Name
+Warehouse Link
+Aisle
+Bin Code
+Bin Capacity
+Temperature Class
+Status
+🟡 Medium Priority - Important Forms
+7. Country Master
+Form: Country Master
+
+Country Code (ISO)
+Country Name
+Currency
+Tax System (GST, VAT, etc.)
+Customs Rules
+Status
+8. Brand Master
+Form: Brand Configuration
+
+Brand Code
+Brand Name
+Manufacturer
+Country of Origin
+Status
+9. Reason Code Master
+Form: Reason Code Configuration (for adjustments, returns)
+
+Reason Code
+Reason Description
+Reason Type (Adjustment, Return, Transfer, Write-off)
+Default GL Account
+Requires Approval (Yes/No)
+Status
+10. Item Class Master ✅ (Already exists)
+Form: Item Class Coding
+
+Class Code
+Class Name
+Description
+Status
+11. Item Category Master ✅ (Already exists)
+Form: Item Category Coding
+
+Category Code
+Category Name
+Item Class Link
+Description
+Status
+12. Item Group Master ✅ (Already exists)
+Form: Item Group Coding
+
+Group Code
+Group Name
+Item Category Link
+Description
+Status
+🟢 Low Priority - Optional/Supporting Forms
+13. Temperature Class Master
+Form: Temperature Class Configuration
+
+Class Code
+Class Name
+Temperature Range (e.g., -15°C to -20°C)
+Storage Requirements
+Monitoring Frequency
+Status
+14. Transporter Master
+Form: Transporter Master
+
+Transporter Code
+Transporter Name
+Contact Details
+Vehicle Types
+Service Area
+Rating
+Status
+15. Customer Master (for Sales/Returns)
+Form: Customer Master
+
+Customer Code
+Customer Name
+Contact Details
+Credit Limit
+Payment Terms
+Tax Registration
+Status
+16. Package Type Master
+Form: Package Type Configuration
+
+Package Code
+Package Name (Unit, Box, Case, Pallet)
+Dimensions
+Weight Capacity
+Volume Capacity
+Nesting Rule
+Status
+17. Barcode Type Master
+Form: Barcode Type Configuration
+
+Barcode Type (EAN-13, UPC, QR, Code128)
+Format/Pattern
+Length
+Validation Rule
+Status
+📊 Summary Table
+#	Form Name	Priority	Dependencies
+1	UOM Coding	🔴 High	None
+2	UOM Conversion Configuration	🔴 High	UOM Master
+3	Tax Category Configuration	🔴 High	Chart of Accounts
+4	Vendor Master	🔴 High	Country, Currency
+5	Warehouse Master	🔴 High	Company, Branch
+6	Zone/Bin Configuration	🔴 High	Warehouse
+7	Country Master	🟡 Medium	None
+8	Brand Configuration	🟡 Medium	None
+9	Reason Code Configuration	🟡 Medium	Chart of Accounts
+10	Item Class Coding	✅ Exists	None
+11	Item Category Coding	✅ Exists	Item Class
+12	Item Group Coding	✅ Exists	Item Category
+13	Temperature Class Configuration	🟢 Low	None
+14	Transporter Master	🟢 Low	None
+15	Customer Master	🟢 Low	Country, Currency
+16	Package Type Configuration	🟢 Low	None
+17	Barcode Type Configuration	🟢 Low	None

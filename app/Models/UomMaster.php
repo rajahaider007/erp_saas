@@ -19,6 +19,8 @@ class UomMaster extends Model
         'uom_name',
         'uom_type',
         'symbol',
+        'is_base_uom',
+        'decimal_precision',
         'conversion_factor',
         'base_uom_id',
         'is_active',
@@ -27,6 +29,8 @@ class UomMaster extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_base_uom' => 'boolean',
+        'decimal_precision' => 'integer',
         'conversion_factor' => 'decimal:6',
     ];
 

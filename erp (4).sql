@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 01, 2026 at 11:02 PM
+-- Generation Time: Mar 03, 2026 at 07:18 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -308,7 +308,7 @@ CREATE TABLE `cache` (
 --
 
 INSERT INTO `cache` (`key`, `value`, `expiration`) VALUES
-('laravel-cache-active_currencies', 'a:100:{i:0;a:5:{s:5:\"value\";s:3:\"USD\";s:5:\"label\";s:28:\"United States Dollarss (USD)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:6:\"1.0000\";s:7:\"country\";s:13:\"United States\";}i:1;a:5:{s:5:\"value\";s:3:\"EUR\";s:5:\"label\";s:10:\"Euro (EUR)\";s:6:\"symbol\";s:3:\"€\";s:13:\"exchange_rate\";s:6:\"0.8540\";s:7:\"country\";s:14:\"European Union\";}i:2;a:5:{s:5:\"value\";s:3:\"GBP\";s:5:\"label\";s:28:\"British Pound Sterling (GBP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:6:\"0.7420\";s:7:\"country\";s:14:\"United Kingdom\";}i:3;a:5:{s:5:\"value\";s:3:\"JPY\";s:5:\"label\";s:18:\"Japanese Yen (JPY)\";s:6:\"symbol\";s:2:\"¥\";s:13:\"exchange_rate\";s:8:\"150.0200\";s:7:\"country\";s:5:\"Japan\";}i:4;a:5:{s:5:\"value\";s:3:\"CHF\";s:5:\"label\";s:17:\"Swiss Franc (CHF)\";s:6:\"symbol\";s:3:\"CHF\";s:13:\"exchange_rate\";s:6:\"0.7960\";s:7:\"country\";s:11:\"Switzerland\";}i:5;a:5:{s:5:\"value\";s:3:\"CAD\";s:5:\"label\";s:21:\"Canadian Dollar (CAD)\";s:6:\"symbol\";s:2:\"C$\";s:13:\"exchange_rate\";s:6:\"1.4000\";s:7:\"country\";s:6:\"Canada\";}i:6;a:5:{s:5:\"value\";s:3:\"AUD\";s:5:\"label\";s:23:\"Australian Dollar (AUD)\";s:6:\"symbol\";s:2:\"A$\";s:13:\"exchange_rate\";s:6:\"1.5100\";s:7:\"country\";s:9:\"Australia\";}i:7;a:5:{s:5:\"value\";s:3:\"NZD\";s:5:\"label\";s:24:\"New Zealand Dollar (NZD)\";s:6:\"symbol\";s:3:\"NZ$\";s:13:\"exchange_rate\";s:6:\"1.7100\";s:7:\"country\";s:11:\"New Zealand\";}i:8;a:5:{s:5:\"value\";s:3:\"CNY\";s:5:\"label\";s:18:\"Chinese Yuan (CNY)\";s:6:\"symbol\";s:2:\"¥\";s:13:\"exchange_rate\";s:6:\"7.1300\";s:7:\"country\";s:5:\"China\";}i:9;a:5:{s:5:\"value\";s:3:\"HKD\";s:5:\"label\";s:22:\"Hong Kong Dollar (HKD)\";s:6:\"symbol\";s:3:\"HK$\";s:13:\"exchange_rate\";s:6:\"7.7800\";s:7:\"country\";s:9:\"Hong Kong\";}i:10;a:5:{s:5:\"value\";s:3:\"SGD\";s:5:\"label\";s:22:\"Singapore Dollar (SGD)\";s:6:\"symbol\";s:2:\"S$\";s:13:\"exchange_rate\";s:6:\"1.2900\";s:7:\"country\";s:9:\"Singapore\";}i:11;a:5:{s:5:\"value\";s:3:\"KRW\";s:5:\"label\";s:22:\"South Korean Won (KRW)\";s:6:\"symbol\";s:3:\"₩\";s:13:\"exchange_rate\";s:9:\"1410.7200\";s:7:\"country\";s:11:\"South Korea\";}i:12;a:5:{s:5:\"value\";s:3:\"INR\";s:5:\"label\";s:18:\"Indian Rupee (INR)\";s:6:\"symbol\";s:3:\"₹\";s:13:\"exchange_rate\";s:7:\"88.7800\";s:7:\"country\";s:5:\"India\";}i:13;a:5:{s:5:\"value\";s:3:\"PKR\";s:5:\"label\";s:21:\"Pakistani Rupee (PKR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:8:\"283.2500\";s:7:\"country\";s:8:\"Pakistan\";}i:14;a:5:{s:5:\"value\";s:3:\"BDT\";s:5:\"label\";s:22:\"Bangladeshi Taka (BDT)\";s:6:\"symbol\";s:3:\"৳\";s:13:\"exchange_rate\";s:8:\"121.7500\";s:7:\"country\";s:10:\"Bangladesh\";}i:15;a:5:{s:5:\"value\";s:3:\"LKR\";s:5:\"label\";s:22:\"Sri Lankan Rupee (LKR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:8:\"302.3200\";s:7:\"country\";s:9:\"Sri Lanka\";}i:16;a:5:{s:5:\"value\";s:3:\"NPR\";s:5:\"label\";s:20:\"Nepalese Rupee (NPR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:8:\"142.0500\";s:7:\"country\";s:5:\"Nepal\";}i:17;a:5:{s:5:\"value\";s:3:\"THB\";s:5:\"label\";s:15:\"Thai Baht (THB)\";s:6:\"symbol\";s:3:\"฿\";s:13:\"exchange_rate\";s:7:\"32.4200\";s:7:\"country\";s:8:\"Thailand\";}i:18;a:5:{s:5:\"value\";s:3:\"MYR\";s:5:\"label\";s:23:\"Malaysian Ringgit (MYR)\";s:6:\"symbol\";s:2:\"RM\";s:13:\"exchange_rate\";s:6:\"4.2100\";s:7:\"country\";s:8:\"Malaysia\";}i:19;a:5:{s:5:\"value\";s:3:\"IDR\";s:5:\"label\";s:23:\"Indonesian Rupiah (IDR)\";s:6:\"symbol\";s:2:\"Rp\";s:13:\"exchange_rate\";s:10:\"16600.5900\";s:7:\"country\";s:9:\"Indonesia\";}i:20;a:5:{s:5:\"value\";s:3:\"PHP\";s:5:\"label\";s:21:\"Philippine Peso (PHP)\";s:6:\"symbol\";s:3:\"₱\";s:13:\"exchange_rate\";s:7:\"58.2800\";s:7:\"country\";s:11:\"Philippines\";}i:21;a:5:{s:5:\"value\";s:3:\"VND\";s:5:\"label\";s:21:\"Vietnamese Dong (VND)\";s:6:\"symbol\";s:3:\"₫\";s:13:\"exchange_rate\";s:10:\"26245.6700\";s:7:\"country\";s:7:\"Vietnam\";}i:22;a:5:{s:5:\"value\";s:3:\"AED\";s:5:\"label\";s:16:\"UAE Dirham (AED)\";s:6:\"symbol\";s:5:\"د.إ\";s:13:\"exchange_rate\";s:6:\"3.6700\";s:7:\"country\";s:20:\"United Arab Emirates\";}i:23;a:5:{s:5:\"value\";s:3:\"SAR\";s:5:\"label\";s:17:\"Saudi Riyal (SAR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:6:\"3.7500\";s:7:\"country\";s:12:\"Saudi Arabia\";}i:24;a:5:{s:5:\"value\";s:3:\"QAR\";s:5:\"label\";s:18:\"Qatari Riyal (QAR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:6:\"3.6400\";s:7:\"country\";s:5:\"Qatar\";}i:25;a:5:{s:5:\"value\";s:3:\"KWD\";s:5:\"label\";s:19:\"Kuwaiti Dinar (KWD)\";s:6:\"symbol\";s:5:\"د.ك\";s:13:\"exchange_rate\";s:6:\"0.3060\";s:7:\"country\";s:6:\"Kuwait\";}i:26;a:5:{s:5:\"value\";s:3:\"BHD\";s:5:\"label\";s:20:\"Bahraini Dinar (BHD)\";s:6:\"symbol\";s:5:\"د.ب\";s:13:\"exchange_rate\";s:6:\"0.3760\";s:7:\"country\";s:7:\"Bahrain\";}i:27;a:5:{s:5:\"value\";s:3:\"OMR\";s:5:\"label\";s:16:\"Omani Rial (OMR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:6:\"0.3840\";s:7:\"country\";s:4:\"Oman\";}i:28;a:5:{s:5:\"value\";s:3:\"JOD\";s:5:\"label\";s:21:\"Jordanian Dinar (JOD)\";s:6:\"symbol\";s:5:\"د.ا\";s:13:\"exchange_rate\";s:6:\"0.7090\";s:7:\"country\";s:6:\"Jordan\";}i:29;a:5:{s:5:\"value\";s:3:\"LBP\";s:5:\"label\";s:20:\"Lebanese Pound (LBP)\";s:6:\"symbol\";s:5:\"ل.ل\";s:13:\"exchange_rate\";s:10:\"89500.0000\";s:7:\"country\";s:7:\"Lebanon\";}i:30;a:5:{s:5:\"value\";s:3:\"EGP\";s:5:\"label\";s:20:\"Egyptian Pound (EGP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:7:\"47.6100\";s:7:\"country\";s:5:\"Egypt\";}i:31;a:5:{s:5:\"value\";s:3:\"ZAR\";s:5:\"label\";s:24:\"South African Rand (ZAR)\";s:6:\"symbol\";s:1:\"R\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:12:\"South Africa\";}i:32;a:5:{s:5:\"value\";s:3:\"NGN\";s:5:\"label\";s:20:\"Nigerian Naira (NGN)\";s:6:\"symbol\";s:3:\"₦\";s:13:\"exchange_rate\";s:9:\"1463.5500\";s:7:\"country\";s:7:\"Nigeria\";}i:33;a:5:{s:5:\"value\";s:3:\"KES\";s:5:\"label\";s:21:\"Kenyan Shilling (KES)\";s:6:\"symbol\";s:3:\"KSh\";s:13:\"exchange_rate\";s:8:\"129.1100\";s:7:\"country\";s:5:\"Kenya\";}i:34;a:5:{s:5:\"value\";s:3:\"GHS\";s:5:\"label\";s:19:\"Ghanaian Cedi (GHS)\";s:6:\"symbol\";s:3:\"₵\";s:13:\"exchange_rate\";s:7:\"12.6100\";s:7:\"country\";s:5:\"Ghana\";}i:35;a:5:{s:5:\"value\";s:3:\"SEK\";s:5:\"label\";s:19:\"Swedish Krona (SEK)\";s:6:\"symbol\";s:2:\"kr\";s:13:\"exchange_rate\";s:6:\"9.3800\";s:7:\"country\";s:6:\"Sweden\";}i:36;a:5:{s:5:\"value\";s:3:\"NOK\";s:5:\"label\";s:21:\"Norwegian Krone (NOK)\";s:6:\"symbol\";s:2:\"kr\";s:13:\"exchange_rate\";s:6:\"9.9300\";s:7:\"country\";s:6:\"Norway\";}i:37;a:5:{s:5:\"value\";s:3:\"DKK\";s:5:\"label\";s:18:\"Danish Krone (DKK)\";s:6:\"symbol\";s:2:\"kr\";s:13:\"exchange_rate\";s:6:\"6.3700\";s:7:\"country\";s:7:\"Denmark\";}i:38;a:5:{s:5:\"value\";s:3:\"PLN\";s:5:\"label\";s:18:\"Polish Zloty (PLN)\";s:6:\"symbol\";s:3:\"zł\";s:13:\"exchange_rate\";s:6:\"3.6300\";s:7:\"country\";s:6:\"Poland\";}i:39;a:5:{s:5:\"value\";s:3:\"CZK\";s:5:\"label\";s:18:\"Czech Koruna (CZK)\";s:6:\"symbol\";s:3:\"Kč\";s:13:\"exchange_rate\";s:7:\"20.7800\";s:7:\"country\";s:14:\"Czech Republic\";}i:40;a:5:{s:5:\"value\";s:3:\"HUF\";s:5:\"label\";s:22:\"Hungarian Forint (HUF)\";s:6:\"symbol\";s:2:\"Ft\";s:13:\"exchange_rate\";s:8:\"332.0100\";s:7:\"country\";s:7:\"Hungary\";}i:41;a:5:{s:5:\"value\";s:3:\"RON\";s:5:\"label\";s:18:\"Romanian Leu (RON)\";s:6:\"symbol\";s:3:\"lei\";s:13:\"exchange_rate\";s:6:\"4.3500\";s:7:\"country\";s:7:\"Romania\";}i:42;a:5:{s:5:\"value\";s:3:\"BGN\";s:5:\"label\";s:19:\"Bulgarian Lev (BGN)\";s:6:\"symbol\";s:4:\"лв\";s:13:\"exchange_rate\";s:6:\"1.6700\";s:7:\"country\";s:8:\"Bulgaria\";}i:43;a:5:{s:5:\"value\";s:3:\"HRK\";s:5:\"label\";s:19:\"Croatian Kuna (HRK)\";s:6:\"symbol\";s:2:\"kn\";s:13:\"exchange_rate\";s:6:\"6.4400\";s:7:\"country\";s:7:\"Croatia\";}i:44;a:5:{s:5:\"value\";s:3:\"RSD\";s:5:\"label\";s:19:\"Serbian Dinar (RSD)\";s:6:\"symbol\";s:6:\"дин\";s:13:\"exchange_rate\";s:8:\"100.1100\";s:7:\"country\";s:6:\"Serbia\";}i:45;a:5:{s:5:\"value\";s:3:\"BRL\";s:5:\"label\";s:20:\"Brazilian Real (BRL)\";s:6:\"symbol\";s:2:\"R$\";s:13:\"exchange_rate\";s:6:\"5.3400\";s:7:\"country\";s:6:\"Brazil\";}i:46;a:5:{s:5:\"value\";s:3:\"MXN\";s:5:\"label\";s:18:\"Mexican Peso (MXN)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:7:\"18.3700\";s:7:\"country\";s:6:\"Mexico\";}i:47;a:5:{s:5:\"value\";s:3:\"ARS\";s:5:\"label\";s:20:\"Argentine Peso (ARS)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:9:\"1429.7500\";s:7:\"country\";s:9:\"Argentina\";}i:48;a:5:{s:5:\"value\";s:3:\"CLP\";s:5:\"label\";s:18:\"Chilean Peso (CLP)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:8:\"963.9800\";s:7:\"country\";s:5:\"Chile\";}i:49;a:5:{s:5:\"value\";s:3:\"COP\";s:5:\"label\";s:20:\"Colombian Peso (COP)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:9:\"3867.9200\";s:7:\"country\";s:8:\"Colombia\";}i:50;a:5:{s:5:\"value\";s:3:\"PEN\";s:5:\"label\";s:18:\"Peruvian Sol (PEN)\";s:6:\"symbol\";s:2:\"S/\";s:13:\"exchange_rate\";s:6:\"3.4600\";s:7:\"country\";s:4:\"Peru\";}i:51;a:5:{s:5:\"value\";s:3:\"UYU\";s:5:\"label\";s:20:\"Uruguayan Peso (UYU)\";s:6:\"symbol\";s:2:\"$U\";s:13:\"exchange_rate\";s:7:\"39.9200\";s:7:\"country\";s:7:\"Uruguay\";}i:52;a:5:{s:5:\"value\";s:3:\"BOB\";s:5:\"label\";s:24:\"Bolivian Boliviano (BOB)\";s:6:\"symbol\";s:2:\"Bs\";s:13:\"exchange_rate\";s:6:\"6.9200\";s:7:\"country\";s:7:\"Bolivia\";}i:53;a:5:{s:5:\"value\";s:3:\"VES\";s:5:\"label\";s:25:\"Venezuelan Bolívar (VES)\";s:6:\"symbol\";s:4:\"Bs.S\";s:13:\"exchange_rate\";s:8:\"187.2900\";s:7:\"country\";s:9:\"Venezuela\";}i:54;a:5:{s:5:\"value\";s:3:\"RUB\";s:5:\"label\";s:19:\"Russian Ruble (RUB)\";s:6:\"symbol\";s:3:\"₽\";s:13:\"exchange_rate\";s:7:\"82.8900\";s:7:\"country\";s:6:\"Russia\";}i:55;a:5:{s:5:\"value\";s:3:\"TRY\";s:5:\"label\";s:18:\"Turkish Lira (TRY)\";s:6:\"symbol\";s:3:\"₺\";s:13:\"exchange_rate\";s:7:\"41.7000\";s:7:\"country\";s:6:\"Turkey\";}i:56;a:5:{s:5:\"value\";s:3:\"ILS\";s:5:\"label\";s:20:\"Israeli Shekel (ILS)\";s:6:\"symbol\";s:3:\"₪\";s:13:\"exchange_rate\";s:6:\"3.2800\";s:7:\"country\";s:6:\"Israel\";}i:57;a:5:{s:5:\"value\";s:3:\"UAH\";s:5:\"label\";s:23:\"Ukrainian Hryvnia (UAH)\";s:6:\"symbol\";s:3:\"₴\";s:13:\"exchange_rate\";s:7:\"41.3300\";s:7:\"country\";s:7:\"Ukraine\";}i:58;a:5:{s:5:\"value\";s:3:\"BYN\";s:5:\"label\";s:22:\"Belarusian Ruble (BYN)\";s:6:\"symbol\";s:2:\"Br\";s:13:\"exchange_rate\";s:6:\"3.2300\";s:7:\"country\";s:7:\"Belarus\";}i:59;a:5:{s:5:\"value\";s:3:\"KZT\";s:5:\"label\";s:23:\"Kazakhstani Tenge (KZT)\";s:6:\"symbol\";s:3:\"₸\";s:13:\"exchange_rate\";s:8:\"544.2300\";s:7:\"country\";s:10:\"Kazakhstan\";}i:60;a:5:{s:5:\"value\";s:3:\"UZS\";s:5:\"label\";s:21:\"Uzbekistani Som (UZS)\";s:6:\"symbol\";s:4:\"лв\";s:13:\"exchange_rate\";s:10:\"12078.6900\";s:7:\"country\";s:10:\"Uzbekistan\";}i:61;a:5:{s:5:\"value\";s:3:\"KGS\";s:5:\"label\";s:21:\"Kyrgyzstani Som (KGS)\";s:6:\"symbol\";s:4:\"лв\";s:13:\"exchange_rate\";s:7:\"87.3500\";s:7:\"country\";s:10:\"Kyrgyzstan\";}i:62;a:5:{s:5:\"value\";s:3:\"TJS\";s:5:\"label\";s:24:\"Tajikistani Somoni (TJS)\";s:6:\"symbol\";s:2:\"SM\";s:13:\"exchange_rate\";s:6:\"9.3800\";s:7:\"country\";s:10:\"Tajikistan\";}i:63;a:5:{s:5:\"value\";s:3:\"TMT\";s:5:\"label\";s:25:\"Turkmenistani Manat (TMT)\";s:6:\"symbol\";s:1:\"T\";s:13:\"exchange_rate\";s:6:\"3.5000\";s:7:\"country\";s:12:\"Turkmenistan\";}i:64;a:5:{s:5:\"value\";s:3:\"AFN\";s:5:\"label\";s:20:\"Afghan Afghani (AFN)\";s:6:\"symbol\";s:2:\"؋\";s:13:\"exchange_rate\";s:7:\"67.1500\";s:7:\"country\";s:11:\"Afghanistan\";}i:65;a:5:{s:5:\"value\";s:3:\"IRR\";s:5:\"label\";s:18:\"Iranian Rial (IRR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:10:\"42434.4900\";s:7:\"country\";s:4:\"Iran\";}i:66;a:5:{s:5:\"value\";s:3:\"IQD\";s:5:\"label\";s:17:\"Iraqi Dinar (IQD)\";s:6:\"symbol\";s:5:\"ع.د\";s:13:\"exchange_rate\";s:9:\"1309.3300\";s:7:\"country\";s:4:\"Iraq\";}i:67;a:5:{s:5:\"value\";s:3:\"SYP\";s:5:\"label\";s:18:\"Syrian Pound (SYP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:10:\"12890.1200\";s:7:\"country\";s:5:\"Syria\";}i:68;a:5:{s:5:\"value\";s:3:\"YER\";s:5:\"label\";s:17:\"Yemeni Rial (YER)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:8:\"239.0000\";s:7:\"country\";s:5:\"Yemen\";}i:69;a:5:{s:5:\"value\";s:3:\"SOS\";s:5:\"label\";s:21:\"Somali Shilling (SOS)\";s:6:\"symbol\";s:1:\"S\";s:13:\"exchange_rate\";s:8:\"571.3000\";s:7:\"country\";s:7:\"Somalia\";}i:70;a:5:{s:5:\"value\";s:3:\"ETB\";s:5:\"label\";s:20:\"Ethiopian Birr (ETB)\";s:6:\"symbol\";s:2:\"Br\";s:13:\"exchange_rate\";s:8:\"143.9200\";s:7:\"country\";s:8:\"Ethiopia\";}i:71;a:5:{s:5:\"value\";s:3:\"TZS\";s:5:\"label\";s:24:\"Tanzanian Shilling (TZS)\";s:6:\"symbol\";s:3:\"TSh\";s:13:\"exchange_rate\";s:9:\"2445.6500\";s:7:\"country\";s:8:\"Tanzania\";}i:72;a:5:{s:5:\"value\";s:3:\"UGX\";s:5:\"label\";s:22:\"Ugandan Shilling (UGX)\";s:6:\"symbol\";s:3:\"USh\";s:13:\"exchange_rate\";s:9:\"3430.1500\";s:7:\"country\";s:6:\"Uganda\";}i:73;a:5:{s:5:\"value\";s:3:\"RWF\";s:5:\"label\";s:19:\"Rwandan Franc (RWF)\";s:6:\"symbol\";s:2:\"RF\";s:13:\"exchange_rate\";s:9:\"1452.9700\";s:7:\"country\";s:6:\"Rwanda\";}i:74;a:5:{s:5:\"value\";s:3:\"BIF\";s:5:\"label\";s:21:\"Burundian Franc (BIF)\";s:6:\"symbol\";s:3:\"FBu\";s:13:\"exchange_rate\";s:9:\"2959.3900\";s:7:\"country\";s:7:\"Burundi\";}i:75;a:5:{s:5:\"value\";s:3:\"MWK\";s:5:\"label\";s:21:\"Malawian Kwacha (MWK)\";s:6:\"symbol\";s:2:\"MK\";s:13:\"exchange_rate\";s:9:\"1743.1500\";s:7:\"country\";s:6:\"Malawi\";}i:76;a:5:{s:5:\"value\";s:3:\"ZMW\";s:5:\"label\";s:20:\"Zambian Kwacha (ZMW)\";s:6:\"symbol\";s:2:\"ZK\";s:13:\"exchange_rate\";s:7:\"23.8200\";s:7:\"country\";s:6:\"Zambia\";}i:77;a:5:{s:5:\"value\";s:3:\"BWP\";s:5:\"label\";s:19:\"Botswana Pula (BWP)\";s:6:\"symbol\";s:1:\"P\";s:13:\"exchange_rate\";s:7:\"14.1500\";s:7:\"country\";s:8:\"Botswana\";}i:78;a:5:{s:5:\"value\";s:3:\"NAD\";s:5:\"label\";s:21:\"Namibian Dollar (NAD)\";s:6:\"symbol\";s:2:\"N$\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:7:\"Namibia\";}i:79;a:5:{s:5:\"value\";s:3:\"SZL\";s:5:\"label\";s:21:\"Swazi Lilangeni (SZL)\";s:6:\"symbol\";s:1:\"L\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:8:\"Eswatini\";}i:80;a:5:{s:5:\"value\";s:3:\"LSL\";s:5:\"label\";s:18:\"Lesotho Loti (LSL)\";s:6:\"symbol\";s:1:\"L\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:7:\"Lesotho\";}i:81;a:5:{s:5:\"value\";s:3:\"MUR\";s:5:\"label\";s:21:\"Mauritian Rupee (MUR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:7:\"45.3600\";s:7:\"country\";s:9:\"Mauritius\";}i:82;a:5:{s:5:\"value\";s:3:\"SCR\";s:5:\"label\";s:23:\"Seychellois Rupee (SCR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:7:\"14.6500\";s:7:\"country\";s:10:\"Seychelles\";}i:83;a:5:{s:5:\"value\";s:3:\"MAD\";s:5:\"label\";s:21:\"Moroccan Dirham (MAD)\";s:6:\"symbol\";s:6:\"د.م.\";s:13:\"exchange_rate\";s:6:\"9.1200\";s:7:\"country\";s:7:\"Morocco\";}i:84;a:5:{s:5:\"value\";s:3:\"TND\";s:5:\"label\";s:20:\"Tunisian Dinar (TND)\";s:6:\"symbol\";s:5:\"د.ت\";s:13:\"exchange_rate\";s:6:\"2.9100\";s:7:\"country\";s:7:\"Tunisia\";}i:85;a:5:{s:5:\"value\";s:3:\"DZD\";s:5:\"label\";s:20:\"Algerian Dinar (DZD)\";s:6:\"symbol\";s:5:\"د.ج\";s:13:\"exchange_rate\";s:8:\"129.2400\";s:7:\"country\";s:7:\"Algeria\";}i:86;a:5:{s:5:\"value\";s:3:\"LYD\";s:5:\"label\";s:18:\"Libyan Dinar (LYD)\";s:6:\"symbol\";s:5:\"ل.د\";s:13:\"exchange_rate\";s:6:\"5.3900\";s:7:\"country\";s:5:\"Libya\";}i:87;a:5:{s:5:\"value\";s:3:\"SDG\";s:5:\"label\";s:20:\"Sudanese Pound (SDG)\";s:6:\"symbol\";s:6:\"ج.س.\";s:13:\"exchange_rate\";s:8:\"454.3000\";s:7:\"country\";s:5:\"Sudan\";}i:88;a:5:{s:5:\"value\";s:3:\"SSP\";s:5:\"label\";s:26:\"South Sudanese Pound (SSP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:9:\"4722.1700\";s:7:\"country\";s:11:\"South Sudan\";}i:89;a:5:{s:5:\"value\";s:3:\"CDF\";s:5:\"label\";s:21:\"Congolese Franc (CDF)\";s:6:\"symbol\";s:2:\"FC\";s:13:\"exchange_rate\";s:9:\"2580.5500\";s:7:\"country\";s:28:\"Democratic Republic of Congo\";}i:90;a:5:{s:5:\"value\";s:3:\"XAF\";s:5:\"label\";s:31:\"Central African CFA Franc (XAF)\";s:6:\"symbol\";s:4:\"FCFA\";s:13:\"exchange_rate\";s:8:\"560.2800\";s:7:\"country\";s:24:\"Central African Republic\";}i:91;a:5:{s:5:\"value\";s:3:\"XOF\";s:5:\"label\";s:28:\"West African CFA Franc (XOF)\";s:6:\"symbol\";s:3:\"CFA\";s:13:\"exchange_rate\";s:8:\"560.2800\";s:7:\"country\";s:7:\"Senegal\";}i:92;a:5:{s:5:\"value\";s:3:\"GMD\";s:5:\"label\";s:20:\"Gambian Dalasi (GMD)\";s:6:\"symbol\";s:1:\"D\";s:13:\"exchange_rate\";s:7:\"73.4100\";s:7:\"country\";s:6:\"Gambia\";}i:93;a:5:{s:5:\"value\";s:3:\"GNF\";s:5:\"label\";s:19:\"Guinean Franc (GNF)\";s:6:\"symbol\";s:2:\"FG\";s:13:\"exchange_rate\";s:9:\"8692.7600\";s:7:\"country\";s:6:\"Guinea\";}i:94;a:5:{s:5:\"value\";s:3:\"SLL\";s:5:\"label\";s:26:\"Sierra Leonean Leone (SLL)\";s:6:\"symbol\";s:2:\"Le\";s:13:\"exchange_rate\";s:10:\"23337.0400\";s:7:\"country\";s:12:\"Sierra Leone\";}i:95;a:5:{s:5:\"value\";s:3:\"LRD\";s:5:\"label\";s:21:\"Liberian Dollar (LRD)\";s:6:\"symbol\";s:2:\"L$\";s:13:\"exchange_rate\";s:8:\"181.5600\";s:7:\"country\";s:7:\"Liberia\";}i:96;a:5:{s:5:\"value\";s:3:\"CVE\";s:5:\"label\";s:25:\"Cape Verdean Escudo (CVE)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:7:\"94.1800\";s:7:\"country\";s:10:\"Cape Verde\";}i:97;a:5:{s:5:\"value\";s:3:\"STN\";s:5:\"label\";s:36:\"São Tomé and Príncipe Dobra (STN)\";s:6:\"symbol\";s:2:\"Db\";s:13:\"exchange_rate\";s:7:\"20.9300\";s:7:\"country\";s:24:\"São Tomé and Príncipe\";}i:98;a:5:{s:5:\"value\";s:3:\"AOA\";s:5:\"label\";s:20:\"Angolan Kwanza (AOA)\";s:6:\"symbol\";s:2:\"Kz\";s:13:\"exchange_rate\";s:8:\"920.1900\";s:7:\"country\";s:6:\"Angola\";}i:99;a:5:{s:5:\"value\";s:3:\"ZWL\";s:5:\"label\";s:23:\"Zimbabwean Dollar (ZWL)\";s:6:\"symbol\";s:2:\"Z$\";s:13:\"exchange_rate\";s:7:\"26.6500\";s:7:\"country\";s:8:\"Zimbabwe\";}}', 1772402900);
+('laravel-cache-active_currencies', 'a:100:{i:0;a:5:{s:5:\"value\";s:3:\"USD\";s:5:\"label\";s:28:\"United States Dollarss (USD)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:6:\"1.0000\";s:7:\"country\";s:13:\"United States\";}i:1;a:5:{s:5:\"value\";s:3:\"EUR\";s:5:\"label\";s:10:\"Euro (EUR)\";s:6:\"symbol\";s:3:\"€\";s:13:\"exchange_rate\";s:6:\"0.8540\";s:7:\"country\";s:14:\"European Union\";}i:2;a:5:{s:5:\"value\";s:3:\"GBP\";s:5:\"label\";s:28:\"British Pound Sterling (GBP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:6:\"0.7420\";s:7:\"country\";s:14:\"United Kingdom\";}i:3;a:5:{s:5:\"value\";s:3:\"JPY\";s:5:\"label\";s:18:\"Japanese Yen (JPY)\";s:6:\"symbol\";s:2:\"¥\";s:13:\"exchange_rate\";s:8:\"150.0200\";s:7:\"country\";s:5:\"Japan\";}i:4;a:5:{s:5:\"value\";s:3:\"CHF\";s:5:\"label\";s:17:\"Swiss Franc (CHF)\";s:6:\"symbol\";s:3:\"CHF\";s:13:\"exchange_rate\";s:6:\"0.7960\";s:7:\"country\";s:11:\"Switzerland\";}i:5;a:5:{s:5:\"value\";s:3:\"CAD\";s:5:\"label\";s:21:\"Canadian Dollar (CAD)\";s:6:\"symbol\";s:2:\"C$\";s:13:\"exchange_rate\";s:6:\"1.4000\";s:7:\"country\";s:6:\"Canada\";}i:6;a:5:{s:5:\"value\";s:3:\"AUD\";s:5:\"label\";s:23:\"Australian Dollar (AUD)\";s:6:\"symbol\";s:2:\"A$\";s:13:\"exchange_rate\";s:6:\"1.5100\";s:7:\"country\";s:9:\"Australia\";}i:7;a:5:{s:5:\"value\";s:3:\"NZD\";s:5:\"label\";s:24:\"New Zealand Dollar (NZD)\";s:6:\"symbol\";s:3:\"NZ$\";s:13:\"exchange_rate\";s:6:\"1.7100\";s:7:\"country\";s:11:\"New Zealand\";}i:8;a:5:{s:5:\"value\";s:3:\"CNY\";s:5:\"label\";s:18:\"Chinese Yuan (CNY)\";s:6:\"symbol\";s:2:\"¥\";s:13:\"exchange_rate\";s:6:\"7.1300\";s:7:\"country\";s:5:\"China\";}i:9;a:5:{s:5:\"value\";s:3:\"HKD\";s:5:\"label\";s:22:\"Hong Kong Dollar (HKD)\";s:6:\"symbol\";s:3:\"HK$\";s:13:\"exchange_rate\";s:6:\"7.7800\";s:7:\"country\";s:9:\"Hong Kong\";}i:10;a:5:{s:5:\"value\";s:3:\"SGD\";s:5:\"label\";s:22:\"Singapore Dollar (SGD)\";s:6:\"symbol\";s:2:\"S$\";s:13:\"exchange_rate\";s:6:\"1.2900\";s:7:\"country\";s:9:\"Singapore\";}i:11;a:5:{s:5:\"value\";s:3:\"KRW\";s:5:\"label\";s:22:\"South Korean Won (KRW)\";s:6:\"symbol\";s:3:\"₩\";s:13:\"exchange_rate\";s:9:\"1410.7200\";s:7:\"country\";s:11:\"South Korea\";}i:12;a:5:{s:5:\"value\";s:3:\"INR\";s:5:\"label\";s:18:\"Indian Rupee (INR)\";s:6:\"symbol\";s:3:\"₹\";s:13:\"exchange_rate\";s:7:\"88.7800\";s:7:\"country\";s:5:\"India\";}i:13;a:5:{s:5:\"value\";s:3:\"PKR\";s:5:\"label\";s:21:\"Pakistani Rupee (PKR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:8:\"283.2500\";s:7:\"country\";s:8:\"Pakistan\";}i:14;a:5:{s:5:\"value\";s:3:\"BDT\";s:5:\"label\";s:22:\"Bangladeshi Taka (BDT)\";s:6:\"symbol\";s:3:\"৳\";s:13:\"exchange_rate\";s:8:\"121.7500\";s:7:\"country\";s:10:\"Bangladesh\";}i:15;a:5:{s:5:\"value\";s:3:\"LKR\";s:5:\"label\";s:22:\"Sri Lankan Rupee (LKR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:8:\"302.3200\";s:7:\"country\";s:9:\"Sri Lanka\";}i:16;a:5:{s:5:\"value\";s:3:\"NPR\";s:5:\"label\";s:20:\"Nepalese Rupee (NPR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:8:\"142.0500\";s:7:\"country\";s:5:\"Nepal\";}i:17;a:5:{s:5:\"value\";s:3:\"THB\";s:5:\"label\";s:15:\"Thai Baht (THB)\";s:6:\"symbol\";s:3:\"฿\";s:13:\"exchange_rate\";s:7:\"32.4200\";s:7:\"country\";s:8:\"Thailand\";}i:18;a:5:{s:5:\"value\";s:3:\"MYR\";s:5:\"label\";s:23:\"Malaysian Ringgit (MYR)\";s:6:\"symbol\";s:2:\"RM\";s:13:\"exchange_rate\";s:6:\"4.2100\";s:7:\"country\";s:8:\"Malaysia\";}i:19;a:5:{s:5:\"value\";s:3:\"IDR\";s:5:\"label\";s:23:\"Indonesian Rupiah (IDR)\";s:6:\"symbol\";s:2:\"Rp\";s:13:\"exchange_rate\";s:10:\"16600.5900\";s:7:\"country\";s:9:\"Indonesia\";}i:20;a:5:{s:5:\"value\";s:3:\"PHP\";s:5:\"label\";s:21:\"Philippine Peso (PHP)\";s:6:\"symbol\";s:3:\"₱\";s:13:\"exchange_rate\";s:7:\"58.2800\";s:7:\"country\";s:11:\"Philippines\";}i:21;a:5:{s:5:\"value\";s:3:\"VND\";s:5:\"label\";s:21:\"Vietnamese Dong (VND)\";s:6:\"symbol\";s:3:\"₫\";s:13:\"exchange_rate\";s:10:\"26245.6700\";s:7:\"country\";s:7:\"Vietnam\";}i:22;a:5:{s:5:\"value\";s:3:\"AED\";s:5:\"label\";s:16:\"UAE Dirham (AED)\";s:6:\"symbol\";s:5:\"د.إ\";s:13:\"exchange_rate\";s:6:\"3.6700\";s:7:\"country\";s:20:\"United Arab Emirates\";}i:23;a:5:{s:5:\"value\";s:3:\"SAR\";s:5:\"label\";s:17:\"Saudi Riyal (SAR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:6:\"3.7500\";s:7:\"country\";s:12:\"Saudi Arabia\";}i:24;a:5:{s:5:\"value\";s:3:\"QAR\";s:5:\"label\";s:18:\"Qatari Riyal (QAR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:6:\"3.6400\";s:7:\"country\";s:5:\"Qatar\";}i:25;a:5:{s:5:\"value\";s:3:\"KWD\";s:5:\"label\";s:19:\"Kuwaiti Dinar (KWD)\";s:6:\"symbol\";s:5:\"د.ك\";s:13:\"exchange_rate\";s:6:\"0.3060\";s:7:\"country\";s:6:\"Kuwait\";}i:26;a:5:{s:5:\"value\";s:3:\"BHD\";s:5:\"label\";s:20:\"Bahraini Dinar (BHD)\";s:6:\"symbol\";s:5:\"د.ب\";s:13:\"exchange_rate\";s:6:\"0.3760\";s:7:\"country\";s:7:\"Bahrain\";}i:27;a:5:{s:5:\"value\";s:3:\"OMR\";s:5:\"label\";s:16:\"Omani Rial (OMR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:6:\"0.3840\";s:7:\"country\";s:4:\"Oman\";}i:28;a:5:{s:5:\"value\";s:3:\"JOD\";s:5:\"label\";s:21:\"Jordanian Dinar (JOD)\";s:6:\"symbol\";s:5:\"د.ا\";s:13:\"exchange_rate\";s:6:\"0.7090\";s:7:\"country\";s:6:\"Jordan\";}i:29;a:5:{s:5:\"value\";s:3:\"LBP\";s:5:\"label\";s:20:\"Lebanese Pound (LBP)\";s:6:\"symbol\";s:5:\"ل.ل\";s:13:\"exchange_rate\";s:10:\"89500.0000\";s:7:\"country\";s:7:\"Lebanon\";}i:30;a:5:{s:5:\"value\";s:3:\"EGP\";s:5:\"label\";s:20:\"Egyptian Pound (EGP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:7:\"47.6100\";s:7:\"country\";s:5:\"Egypt\";}i:31;a:5:{s:5:\"value\";s:3:\"ZAR\";s:5:\"label\";s:24:\"South African Rand (ZAR)\";s:6:\"symbol\";s:1:\"R\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:12:\"South Africa\";}i:32;a:5:{s:5:\"value\";s:3:\"NGN\";s:5:\"label\";s:20:\"Nigerian Naira (NGN)\";s:6:\"symbol\";s:3:\"₦\";s:13:\"exchange_rate\";s:9:\"1463.5500\";s:7:\"country\";s:7:\"Nigeria\";}i:33;a:5:{s:5:\"value\";s:3:\"KES\";s:5:\"label\";s:21:\"Kenyan Shilling (KES)\";s:6:\"symbol\";s:3:\"KSh\";s:13:\"exchange_rate\";s:8:\"129.1100\";s:7:\"country\";s:5:\"Kenya\";}i:34;a:5:{s:5:\"value\";s:3:\"GHS\";s:5:\"label\";s:19:\"Ghanaian Cedi (GHS)\";s:6:\"symbol\";s:3:\"₵\";s:13:\"exchange_rate\";s:7:\"12.6100\";s:7:\"country\";s:5:\"Ghana\";}i:35;a:5:{s:5:\"value\";s:3:\"SEK\";s:5:\"label\";s:19:\"Swedish Krona (SEK)\";s:6:\"symbol\";s:2:\"kr\";s:13:\"exchange_rate\";s:6:\"9.3800\";s:7:\"country\";s:6:\"Sweden\";}i:36;a:5:{s:5:\"value\";s:3:\"NOK\";s:5:\"label\";s:21:\"Norwegian Krone (NOK)\";s:6:\"symbol\";s:2:\"kr\";s:13:\"exchange_rate\";s:6:\"9.9300\";s:7:\"country\";s:6:\"Norway\";}i:37;a:5:{s:5:\"value\";s:3:\"DKK\";s:5:\"label\";s:18:\"Danish Krone (DKK)\";s:6:\"symbol\";s:2:\"kr\";s:13:\"exchange_rate\";s:6:\"6.3700\";s:7:\"country\";s:7:\"Denmark\";}i:38;a:5:{s:5:\"value\";s:3:\"PLN\";s:5:\"label\";s:18:\"Polish Zloty (PLN)\";s:6:\"symbol\";s:3:\"zł\";s:13:\"exchange_rate\";s:6:\"3.6300\";s:7:\"country\";s:6:\"Poland\";}i:39;a:5:{s:5:\"value\";s:3:\"CZK\";s:5:\"label\";s:18:\"Czech Koruna (CZK)\";s:6:\"symbol\";s:3:\"Kč\";s:13:\"exchange_rate\";s:7:\"20.7800\";s:7:\"country\";s:14:\"Czech Republic\";}i:40;a:5:{s:5:\"value\";s:3:\"HUF\";s:5:\"label\";s:22:\"Hungarian Forint (HUF)\";s:6:\"symbol\";s:2:\"Ft\";s:13:\"exchange_rate\";s:8:\"332.0100\";s:7:\"country\";s:7:\"Hungary\";}i:41;a:5:{s:5:\"value\";s:3:\"RON\";s:5:\"label\";s:18:\"Romanian Leu (RON)\";s:6:\"symbol\";s:3:\"lei\";s:13:\"exchange_rate\";s:6:\"4.3500\";s:7:\"country\";s:7:\"Romania\";}i:42;a:5:{s:5:\"value\";s:3:\"BGN\";s:5:\"label\";s:19:\"Bulgarian Lev (BGN)\";s:6:\"symbol\";s:4:\"лв\";s:13:\"exchange_rate\";s:6:\"1.6700\";s:7:\"country\";s:8:\"Bulgaria\";}i:43;a:5:{s:5:\"value\";s:3:\"HRK\";s:5:\"label\";s:19:\"Croatian Kuna (HRK)\";s:6:\"symbol\";s:2:\"kn\";s:13:\"exchange_rate\";s:6:\"6.4400\";s:7:\"country\";s:7:\"Croatia\";}i:44;a:5:{s:5:\"value\";s:3:\"RSD\";s:5:\"label\";s:19:\"Serbian Dinar (RSD)\";s:6:\"symbol\";s:6:\"дин\";s:13:\"exchange_rate\";s:8:\"100.1100\";s:7:\"country\";s:6:\"Serbia\";}i:45;a:5:{s:5:\"value\";s:3:\"BRL\";s:5:\"label\";s:20:\"Brazilian Real (BRL)\";s:6:\"symbol\";s:2:\"R$\";s:13:\"exchange_rate\";s:6:\"5.3400\";s:7:\"country\";s:6:\"Brazil\";}i:46;a:5:{s:5:\"value\";s:3:\"MXN\";s:5:\"label\";s:18:\"Mexican Peso (MXN)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:7:\"18.3700\";s:7:\"country\";s:6:\"Mexico\";}i:47;a:5:{s:5:\"value\";s:3:\"ARS\";s:5:\"label\";s:20:\"Argentine Peso (ARS)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:9:\"1429.7500\";s:7:\"country\";s:9:\"Argentina\";}i:48;a:5:{s:5:\"value\";s:3:\"CLP\";s:5:\"label\";s:18:\"Chilean Peso (CLP)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:8:\"963.9800\";s:7:\"country\";s:5:\"Chile\";}i:49;a:5:{s:5:\"value\";s:3:\"COP\";s:5:\"label\";s:20:\"Colombian Peso (COP)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:9:\"3867.9200\";s:7:\"country\";s:8:\"Colombia\";}i:50;a:5:{s:5:\"value\";s:3:\"PEN\";s:5:\"label\";s:18:\"Peruvian Sol (PEN)\";s:6:\"symbol\";s:2:\"S/\";s:13:\"exchange_rate\";s:6:\"3.4600\";s:7:\"country\";s:4:\"Peru\";}i:51;a:5:{s:5:\"value\";s:3:\"UYU\";s:5:\"label\";s:20:\"Uruguayan Peso (UYU)\";s:6:\"symbol\";s:2:\"$U\";s:13:\"exchange_rate\";s:7:\"39.9200\";s:7:\"country\";s:7:\"Uruguay\";}i:52;a:5:{s:5:\"value\";s:3:\"BOB\";s:5:\"label\";s:24:\"Bolivian Boliviano (BOB)\";s:6:\"symbol\";s:2:\"Bs\";s:13:\"exchange_rate\";s:6:\"6.9200\";s:7:\"country\";s:7:\"Bolivia\";}i:53;a:5:{s:5:\"value\";s:3:\"VES\";s:5:\"label\";s:25:\"Venezuelan Bolívar (VES)\";s:6:\"symbol\";s:4:\"Bs.S\";s:13:\"exchange_rate\";s:8:\"187.2900\";s:7:\"country\";s:9:\"Venezuela\";}i:54;a:5:{s:5:\"value\";s:3:\"RUB\";s:5:\"label\";s:19:\"Russian Ruble (RUB)\";s:6:\"symbol\";s:3:\"₽\";s:13:\"exchange_rate\";s:7:\"82.8900\";s:7:\"country\";s:6:\"Russia\";}i:55;a:5:{s:5:\"value\";s:3:\"TRY\";s:5:\"label\";s:18:\"Turkish Lira (TRY)\";s:6:\"symbol\";s:3:\"₺\";s:13:\"exchange_rate\";s:7:\"41.7000\";s:7:\"country\";s:6:\"Turkey\";}i:56;a:5:{s:5:\"value\";s:3:\"ILS\";s:5:\"label\";s:20:\"Israeli Shekel (ILS)\";s:6:\"symbol\";s:3:\"₪\";s:13:\"exchange_rate\";s:6:\"3.2800\";s:7:\"country\";s:6:\"Israel\";}i:57;a:5:{s:5:\"value\";s:3:\"UAH\";s:5:\"label\";s:23:\"Ukrainian Hryvnia (UAH)\";s:6:\"symbol\";s:3:\"₴\";s:13:\"exchange_rate\";s:7:\"41.3300\";s:7:\"country\";s:7:\"Ukraine\";}i:58;a:5:{s:5:\"value\";s:3:\"BYN\";s:5:\"label\";s:22:\"Belarusian Ruble (BYN)\";s:6:\"symbol\";s:2:\"Br\";s:13:\"exchange_rate\";s:6:\"3.2300\";s:7:\"country\";s:7:\"Belarus\";}i:59;a:5:{s:5:\"value\";s:3:\"KZT\";s:5:\"label\";s:23:\"Kazakhstani Tenge (KZT)\";s:6:\"symbol\";s:3:\"₸\";s:13:\"exchange_rate\";s:8:\"544.2300\";s:7:\"country\";s:10:\"Kazakhstan\";}i:60;a:5:{s:5:\"value\";s:3:\"UZS\";s:5:\"label\";s:21:\"Uzbekistani Som (UZS)\";s:6:\"symbol\";s:4:\"лв\";s:13:\"exchange_rate\";s:10:\"12078.6900\";s:7:\"country\";s:10:\"Uzbekistan\";}i:61;a:5:{s:5:\"value\";s:3:\"KGS\";s:5:\"label\";s:21:\"Kyrgyzstani Som (KGS)\";s:6:\"symbol\";s:4:\"лв\";s:13:\"exchange_rate\";s:7:\"87.3500\";s:7:\"country\";s:10:\"Kyrgyzstan\";}i:62;a:5:{s:5:\"value\";s:3:\"TJS\";s:5:\"label\";s:24:\"Tajikistani Somoni (TJS)\";s:6:\"symbol\";s:2:\"SM\";s:13:\"exchange_rate\";s:6:\"9.3800\";s:7:\"country\";s:10:\"Tajikistan\";}i:63;a:5:{s:5:\"value\";s:3:\"TMT\";s:5:\"label\";s:25:\"Turkmenistani Manat (TMT)\";s:6:\"symbol\";s:1:\"T\";s:13:\"exchange_rate\";s:6:\"3.5000\";s:7:\"country\";s:12:\"Turkmenistan\";}i:64;a:5:{s:5:\"value\";s:3:\"AFN\";s:5:\"label\";s:20:\"Afghan Afghani (AFN)\";s:6:\"symbol\";s:2:\"؋\";s:13:\"exchange_rate\";s:7:\"67.1500\";s:7:\"country\";s:11:\"Afghanistan\";}i:65;a:5:{s:5:\"value\";s:3:\"IRR\";s:5:\"label\";s:18:\"Iranian Rial (IRR)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:10:\"42434.4900\";s:7:\"country\";s:4:\"Iran\";}i:66;a:5:{s:5:\"value\";s:3:\"IQD\";s:5:\"label\";s:17:\"Iraqi Dinar (IQD)\";s:6:\"symbol\";s:5:\"ع.د\";s:13:\"exchange_rate\";s:9:\"1309.3300\";s:7:\"country\";s:4:\"Iraq\";}i:67;a:5:{s:5:\"value\";s:3:\"SYP\";s:5:\"label\";s:18:\"Syrian Pound (SYP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:10:\"12890.1200\";s:7:\"country\";s:5:\"Syria\";}i:68;a:5:{s:5:\"value\";s:3:\"YER\";s:5:\"label\";s:17:\"Yemeni Rial (YER)\";s:6:\"symbol\";s:3:\"﷼\";s:13:\"exchange_rate\";s:8:\"239.0000\";s:7:\"country\";s:5:\"Yemen\";}i:69;a:5:{s:5:\"value\";s:3:\"SOS\";s:5:\"label\";s:21:\"Somali Shilling (SOS)\";s:6:\"symbol\";s:1:\"S\";s:13:\"exchange_rate\";s:8:\"571.3000\";s:7:\"country\";s:7:\"Somalia\";}i:70;a:5:{s:5:\"value\";s:3:\"ETB\";s:5:\"label\";s:20:\"Ethiopian Birr (ETB)\";s:6:\"symbol\";s:2:\"Br\";s:13:\"exchange_rate\";s:8:\"143.9200\";s:7:\"country\";s:8:\"Ethiopia\";}i:71;a:5:{s:5:\"value\";s:3:\"TZS\";s:5:\"label\";s:24:\"Tanzanian Shilling (TZS)\";s:6:\"symbol\";s:3:\"TSh\";s:13:\"exchange_rate\";s:9:\"2445.6500\";s:7:\"country\";s:8:\"Tanzania\";}i:72;a:5:{s:5:\"value\";s:3:\"UGX\";s:5:\"label\";s:22:\"Ugandan Shilling (UGX)\";s:6:\"symbol\";s:3:\"USh\";s:13:\"exchange_rate\";s:9:\"3430.1500\";s:7:\"country\";s:6:\"Uganda\";}i:73;a:5:{s:5:\"value\";s:3:\"RWF\";s:5:\"label\";s:19:\"Rwandan Franc (RWF)\";s:6:\"symbol\";s:2:\"RF\";s:13:\"exchange_rate\";s:9:\"1452.9700\";s:7:\"country\";s:6:\"Rwanda\";}i:74;a:5:{s:5:\"value\";s:3:\"BIF\";s:5:\"label\";s:21:\"Burundian Franc (BIF)\";s:6:\"symbol\";s:3:\"FBu\";s:13:\"exchange_rate\";s:9:\"2959.3900\";s:7:\"country\";s:7:\"Burundi\";}i:75;a:5:{s:5:\"value\";s:3:\"MWK\";s:5:\"label\";s:21:\"Malawian Kwacha (MWK)\";s:6:\"symbol\";s:2:\"MK\";s:13:\"exchange_rate\";s:9:\"1743.1500\";s:7:\"country\";s:6:\"Malawi\";}i:76;a:5:{s:5:\"value\";s:3:\"ZMW\";s:5:\"label\";s:20:\"Zambian Kwacha (ZMW)\";s:6:\"symbol\";s:2:\"ZK\";s:13:\"exchange_rate\";s:7:\"23.8200\";s:7:\"country\";s:6:\"Zambia\";}i:77;a:5:{s:5:\"value\";s:3:\"BWP\";s:5:\"label\";s:19:\"Botswana Pula (BWP)\";s:6:\"symbol\";s:1:\"P\";s:13:\"exchange_rate\";s:7:\"14.1500\";s:7:\"country\";s:8:\"Botswana\";}i:78;a:5:{s:5:\"value\";s:3:\"NAD\";s:5:\"label\";s:21:\"Namibian Dollar (NAD)\";s:6:\"symbol\";s:2:\"N$\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:7:\"Namibia\";}i:79;a:5:{s:5:\"value\";s:3:\"SZL\";s:5:\"label\";s:21:\"Swazi Lilangeni (SZL)\";s:6:\"symbol\";s:1:\"L\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:8:\"Eswatini\";}i:80;a:5:{s:5:\"value\";s:3:\"LSL\";s:5:\"label\";s:18:\"Lesotho Loti (LSL)\";s:6:\"symbol\";s:1:\"L\";s:13:\"exchange_rate\";s:7:\"17.2000\";s:7:\"country\";s:7:\"Lesotho\";}i:81;a:5:{s:5:\"value\";s:3:\"MUR\";s:5:\"label\";s:21:\"Mauritian Rupee (MUR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:7:\"45.3600\";s:7:\"country\";s:9:\"Mauritius\";}i:82;a:5:{s:5:\"value\";s:3:\"SCR\";s:5:\"label\";s:23:\"Seychellois Rupee (SCR)\";s:6:\"symbol\";s:3:\"₨\";s:13:\"exchange_rate\";s:7:\"14.6500\";s:7:\"country\";s:10:\"Seychelles\";}i:83;a:5:{s:5:\"value\";s:3:\"MAD\";s:5:\"label\";s:21:\"Moroccan Dirham (MAD)\";s:6:\"symbol\";s:6:\"د.م.\";s:13:\"exchange_rate\";s:6:\"9.1200\";s:7:\"country\";s:7:\"Morocco\";}i:84;a:5:{s:5:\"value\";s:3:\"TND\";s:5:\"label\";s:20:\"Tunisian Dinar (TND)\";s:6:\"symbol\";s:5:\"د.ت\";s:13:\"exchange_rate\";s:6:\"2.9100\";s:7:\"country\";s:7:\"Tunisia\";}i:85;a:5:{s:5:\"value\";s:3:\"DZD\";s:5:\"label\";s:20:\"Algerian Dinar (DZD)\";s:6:\"symbol\";s:5:\"د.ج\";s:13:\"exchange_rate\";s:8:\"129.2400\";s:7:\"country\";s:7:\"Algeria\";}i:86;a:5:{s:5:\"value\";s:3:\"LYD\";s:5:\"label\";s:18:\"Libyan Dinar (LYD)\";s:6:\"symbol\";s:5:\"ل.د\";s:13:\"exchange_rate\";s:6:\"5.3900\";s:7:\"country\";s:5:\"Libya\";}i:87;a:5:{s:5:\"value\";s:3:\"SDG\";s:5:\"label\";s:20:\"Sudanese Pound (SDG)\";s:6:\"symbol\";s:6:\"ج.س.\";s:13:\"exchange_rate\";s:8:\"454.3000\";s:7:\"country\";s:5:\"Sudan\";}i:88;a:5:{s:5:\"value\";s:3:\"SSP\";s:5:\"label\";s:26:\"South Sudanese Pound (SSP)\";s:6:\"symbol\";s:2:\"£\";s:13:\"exchange_rate\";s:9:\"4722.1700\";s:7:\"country\";s:11:\"South Sudan\";}i:89;a:5:{s:5:\"value\";s:3:\"CDF\";s:5:\"label\";s:21:\"Congolese Franc (CDF)\";s:6:\"symbol\";s:2:\"FC\";s:13:\"exchange_rate\";s:9:\"2580.5500\";s:7:\"country\";s:28:\"Democratic Republic of Congo\";}i:90;a:5:{s:5:\"value\";s:3:\"XAF\";s:5:\"label\";s:31:\"Central African CFA Franc (XAF)\";s:6:\"symbol\";s:4:\"FCFA\";s:13:\"exchange_rate\";s:8:\"560.2800\";s:7:\"country\";s:24:\"Central African Republic\";}i:91;a:5:{s:5:\"value\";s:3:\"XOF\";s:5:\"label\";s:28:\"West African CFA Franc (XOF)\";s:6:\"symbol\";s:3:\"CFA\";s:13:\"exchange_rate\";s:8:\"560.2800\";s:7:\"country\";s:7:\"Senegal\";}i:92;a:5:{s:5:\"value\";s:3:\"GMD\";s:5:\"label\";s:20:\"Gambian Dalasi (GMD)\";s:6:\"symbol\";s:1:\"D\";s:13:\"exchange_rate\";s:7:\"73.4100\";s:7:\"country\";s:6:\"Gambia\";}i:93;a:5:{s:5:\"value\";s:3:\"GNF\";s:5:\"label\";s:19:\"Guinean Franc (GNF)\";s:6:\"symbol\";s:2:\"FG\";s:13:\"exchange_rate\";s:9:\"8692.7600\";s:7:\"country\";s:6:\"Guinea\";}i:94;a:5:{s:5:\"value\";s:3:\"SLL\";s:5:\"label\";s:26:\"Sierra Leonean Leone (SLL)\";s:6:\"symbol\";s:2:\"Le\";s:13:\"exchange_rate\";s:10:\"23337.0400\";s:7:\"country\";s:12:\"Sierra Leone\";}i:95;a:5:{s:5:\"value\";s:3:\"LRD\";s:5:\"label\";s:21:\"Liberian Dollar (LRD)\";s:6:\"symbol\";s:2:\"L$\";s:13:\"exchange_rate\";s:8:\"181.5600\";s:7:\"country\";s:7:\"Liberia\";}i:96;a:5:{s:5:\"value\";s:3:\"CVE\";s:5:\"label\";s:25:\"Cape Verdean Escudo (CVE)\";s:6:\"symbol\";s:1:\"$\";s:13:\"exchange_rate\";s:7:\"94.1800\";s:7:\"country\";s:10:\"Cape Verde\";}i:97;a:5:{s:5:\"value\";s:3:\"STN\";s:5:\"label\";s:36:\"São Tomé and Príncipe Dobra (STN)\";s:6:\"symbol\";s:2:\"Db\";s:13:\"exchange_rate\";s:7:\"20.9300\";s:7:\"country\";s:24:\"São Tomé and Príncipe\";}i:98;a:5:{s:5:\"value\";s:3:\"AOA\";s:5:\"label\";s:20:\"Angolan Kwanza (AOA)\";s:6:\"symbol\";s:2:\"Kz\";s:13:\"exchange_rate\";s:8:\"920.1900\";s:7:\"country\";s:6:\"Angola\";}i:99;a:5:{s:5:\"value\";s:3:\"ZWL\";s:5:\"label\";s:23:\"Zimbabwean Dollar (ZWL)\";s:6:\"symbol\";s:2:\"Z$\";s:13:\"exchange_rate\";s:7:\"26.6500\";s:7:\"country\";s:8:\"Zimbabwe\";}}', 1772563057);
 
 -- --------------------------------------------------------
 
@@ -822,6 +822,25 @@ INSERT INTO `companies` (`id`, `parent_comp`, `company_name`, `company_code`, `l
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `countries`
+--
+
+CREATE TABLE `countries` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `country_code` varchar(3) NOT NULL,
+  `country_name` varchar(100) NOT NULL,
+  `iso_2_code` varchar(2) NOT NULL,
+  `iso_numeric_code` varchar(3) NOT NULL,
+  `region` varchar(50) DEFAULT NULL,
+  `sub_region` varchar(50) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `currencies`
 --
 
@@ -1068,6 +1087,161 @@ INSERT INTO `fiscal_periods` (`id`, `comp_id`, `fiscal_year`, `period_number`, `
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `inventory_category_class`
+--
+
+CREATE TABLE `inventory_category_class` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `category_id` bigint(20) UNSIGNED NOT NULL,
+  `class_id` bigint(20) UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `inventory_items`
+--
+
+CREATE TABLE `inventory_items` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `comp_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `location_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `item_code` varchar(50) NOT NULL,
+  `item_name_short` varchar(50) NOT NULL,
+  `item_name_long` varchar(250) DEFAULT NULL,
+  `item_status` enum('active','inactive','discontinued','blocked') NOT NULL DEFAULT 'active',
+  `item_type` enum('raw_material','finished_good','trading','consumable','service') NOT NULL,
+  `item_class_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `item_category_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `item_group_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `brand` varchar(100) DEFAULT NULL,
+  `item_image_path` varchar(191) DEFAULT NULL,
+  `tracking_mode` enum('none','lot','serial') NOT NULL DEFAULT 'none',
+  `stock_uom_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `purchase_uom_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `sales_uom_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `costing_method` enum('fifo','weighted_avg','standard_cost','lifo') NOT NULL DEFAULT 'fifo',
+  `standard_cost` decimal(15,2) DEFAULT NULL,
+  `last_purchase_price` decimal(15,2) DEFAULT NULL,
+  `minimum_order_qty` decimal(15,4) DEFAULT NULL,
+  `reorder_point` decimal(15,4) DEFAULT NULL,
+  `safety_stock` decimal(15,4) DEFAULT NULL,
+  `maximum_stock_level` decimal(15,4) DEFAULT NULL,
+  `lead_time_days` int(11) DEFAULT NULL,
+  `default_vendor_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `expiry_tracking` tinyint(1) NOT NULL DEFAULT 0,
+  `shelf_life_days` int(11) DEFAULT NULL,
+  `expiry_basis` enum('manufacturing_date','receipt_date') DEFAULT NULL,
+  `near_expiry_alert_days` int(11) DEFAULT NULL,
+  `storage_temperature_class` enum('ambient','chilled','frozen','controlled') DEFAULT NULL,
+  `hazardous_material` tinyint(1) NOT NULL DEFAULT 0,
+  `gross_weight_kg` decimal(10,3) DEFAULT NULL,
+  `net_weight_kg` decimal(10,3) DEFAULT NULL,
+  `volume_cbm` decimal(10,3) DEFAULT NULL,
+  `dimensions` varchar(50) DEFAULT NULL,
+  `tax_category_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `hsn_code` varchar(20) DEFAULT NULL,
+  `hs_tariff_code` varchar(10) DEFAULT NULL,
+  `country_of_origin_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `barcode_gtin` varchar(20) DEFAULT NULL,
+  `inventory_gl_account_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `cogs_gl_account_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `writeoff_gl_account_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `price_variance_gl_account_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `abc_classification` enum('a','b','c') DEFAULT NULL,
+  `slow_moving_threshold_days` int(11) NOT NULL DEFAULT 180,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_by` bigint(20) UNSIGNED DEFAULT NULL,
+  `updated_by` bigint(20) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `inventory_item_categories`
+--
+
+CREATE TABLE `inventory_item_categories` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `comp_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `location_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `category_code` varchar(30) NOT NULL,
+  `category_name` varchar(150) NOT NULL,
+  `item_class_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `inventory_item_categories`
+--
+
+INSERT INTO `inventory_item_categories` (`id`, `comp_id`, `location_id`, `category_code`, `category_name`, `item_class_id`, `description`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 'FG', 'Finished Goods', 1, NULL, 1, '2026-03-03 11:28:00', '2026-03-03 11:28:00', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `inventory_item_classes`
+--
+
+CREATE TABLE `inventory_item_classes` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `comp_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `location_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `class_code` varchar(30) NOT NULL,
+  `class_name` varchar(150) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `inventory_item_classes`
+--
+
+INSERT INTO `inventory_item_classes` (`id`, `comp_id`, `location_id`, `class_code`, `class_name`, `description`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 'GENERAL', 'General Class', NULL, 1, '2026-03-03 01:17:06', '2026-03-03 01:17:06', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `inventory_item_groups`
+--
+
+CREATE TABLE `inventory_item_groups` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `comp_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `location_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `group_code` varchar(30) NOT NULL,
+  `group_name` varchar(150) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `inventory_item_groups`
+--
+
+INSERT INTO `inventory_item_groups` (`id`, `comp_id`, `location_id`, `group_code`, `group_name`, `description`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 'GG', 'General Group', NULL, 1, '2026-03-03 11:40:55', '2026-03-03 11:40:55', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `jobs`
 --
 
@@ -1186,7 +1360,11 @@ INSERT INTO `menus` (`id`, `module_id`, `section_id`, `menu_name`, `route`, `ico
 (64, 2, 2, 'Opening Voucher', '/accounts/opening-voucher', 'file-text', 1, 1, '2026-02-28 04:56:29', '2026-02-28 04:56:29', NULL),
 (65, 2, 16, 'Bank Vouchers', '/accounts/bank-voucher', 'file-text', 1, 1, '2025-10-06 10:22:48', '2025-10-06 10:22:48', NULL),
 (66, 2, 2, 'Account Mapping', '/accounts/account-configuration', 'calendar', 1, 3, '2026-02-27 04:06:08', '2026-02-27 04:06:08', NULL),
-(67, 2, 16, 'Cash Vouchers', '/accounts/cash-voucher', 'file-text', 1, 1, '2025-10-06 10:22:48', '2025-10-06 10:22:48', NULL);
+(67, 2, 16, 'Cash Vouchers', '/accounts/cash-voucher', 'file-text', 1, 1, '2025-10-06 10:22:48', '2025-10-06 10:22:48', NULL),
+(68, 2, 17, 'Item Class Coding', '/inventory/item-class-coding', 'file-text', 1, 1, '2026-03-03 10:22:48', '2026-03-03 10:22:48', NULL),
+(69, 2, 17, 'Item Category Coding', '/inventory/item-category-coding', 'file-text', 1, 2, '2026-03-03 10:22:48', '2026-03-03 10:22:48', NULL),
+(70, 2, 17, 'Item Group Coding', '/inventory/item-group-coding', 'file-text', 1, 2, '2026-03-03 10:22:48', '2026-03-03 10:22:48', NULL),
+(71, 2, 17, 'Item Coding', '/inventory/item-master', 'file-text', 1, 5, '2026-03-03 10:22:48', '2026-03-03 10:22:48', NULL);
 
 -- --------------------------------------------------------
 
@@ -1266,7 +1444,22 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (87, '2026_02_27_000001_create_fiscal_periods_table', 31),
 (88, '2026_03_02_create_account_configurations_table', 32),
 (89, '2026_03_02_102000_extend_account_configurations_config_type_enum', 33),
-(90, '2026_03_02_000101_add_bank_fields_to_transactions_and_entries', 34);
+(90, '2026_03_02_000101_add_bank_fields_to_transactions_and_entries', 34),
+(91, '2026_03_02_102000_create_account_configurations_table', 35),
+(92, '2026_03_02_202000_extend_account_configurations_config_type_enum', 35),
+(93, '2026_03_03_000001_create_inventory_item_categories_table', 35),
+(94, '2026_03_03_000002_create_inventory_item_classes_table', 35),
+(95, '2026_03_03_000003_create_inventory_category_class_pivot_table', 35),
+(96, '2026_03_03_100000_remove_tracking_and_abc_from_item_classes', 36),
+(97, '2026_03_03_110000_update_inventory_item_categories_for_item_class', 37),
+(98, '2026_03_03_000003_create_inventory_item_groups_table', 38),
+(106, '2026_03_01_000001_create_uom_masters_table', 39),
+(107, '2026_03_01_000002_create_tax_categories_table', 39),
+(108, '2026_03_01_000006_create_countries_table', 39),
+(109, '2026_03_01_000007_create_vendors_table', 39),
+(110, '2026_03_03_000001_create_inventory_items_table', 40),
+(111, '2026_03_03_000004_create_inventory_item_groups_table', 41),
+(112, '2026_03_03_000005_create_inventory_items_table', 41);
 
 -- --------------------------------------------------------
 
@@ -1293,7 +1486,8 @@ CREATE TABLE `modules` (
 
 INSERT INTO `modules` (`id`, `module_name`, `folder_name`, `slug`, `image`, `status`, `sort_order`, `created_at`, `updated_at`, `deleted_at`) VALUES
 (1, 'System (Admin Panel)', 'system', 'system-admin-panel', NULL, 1, 1, '2025-09-14 05:39:19', '2025-09-14 05:39:19', NULL),
-(2, 'Account Management', 'accounts', 'account-management', 'accounts-icon.png', 1, 2, '2025-10-05 12:14:35', '2025-10-05 12:14:35', NULL);
+(2, 'Account Management', 'accounts', 'account-management', 'accounts-icon.png', 1, 2, '2025-10-05 12:14:35', '2025-10-05 12:14:35', NULL),
+(3, 'Inventory Management', 'inventory', 'inventory-management', 'accounts-icon.png', 1, 3, '2026-03-03 12:14:35', '2026-03-03 12:14:35', NULL);
 
 -- --------------------------------------------------------
 
@@ -1401,38 +1595,42 @@ INSERT INTO `package_features` (`id`, `package_id`, `menu_id`, `is_enabled`, `cr
 (267, 2, 61, 1, '2026-02-28 03:43:55', '2026-02-28 03:43:55'),
 (268, 2, 62, 1, '2026-02-28 03:43:55', '2026-02-28 03:43:55'),
 (269, 2, 63, 1, '2026-02-28 03:43:55', '2026-02-28 03:43:55'),
-(453, 3, 1, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(454, 3, 2, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(455, 3, 3, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(456, 3, 4, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(457, 3, 5, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(458, 3, 6, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(459, 3, 7, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(460, 3, 8, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(461, 3, 9, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(462, 3, 12, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(463, 3, 13, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(464, 3, 14, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(465, 3, 34, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(466, 3, 35, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(467, 3, 36, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(468, 3, 37, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(469, 3, 38, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(470, 3, 39, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(471, 3, 40, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(472, 3, 41, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(473, 3, 42, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(474, 3, 43, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(475, 3, 44, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(476, 3, 59, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(477, 3, 60, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(478, 3, 61, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(479, 3, 62, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(480, 3, 63, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(481, 3, 64, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(482, 3, 65, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(483, 3, 66, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52'),
-(484, 3, 67, 1, '2026-03-01 16:43:52', '2026-03-01 16:43:52');
+(554, 3, 1, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(555, 3, 2, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(556, 3, 3, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(557, 3, 4, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(558, 3, 5, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(559, 3, 6, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(560, 3, 7, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(561, 3, 8, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(562, 3, 9, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(563, 3, 12, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(564, 3, 13, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(565, 3, 14, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(566, 3, 34, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(567, 3, 35, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(568, 3, 36, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(569, 3, 37, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(570, 3, 38, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(571, 3, 39, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(572, 3, 40, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(573, 3, 41, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(574, 3, 42, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(575, 3, 43, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(576, 3, 44, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(577, 3, 59, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(578, 3, 60, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(579, 3, 61, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(580, 3, 62, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(581, 3, 63, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(582, 3, 64, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(583, 3, 65, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(584, 3, 66, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(585, 3, 67, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(586, 3, 68, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(587, 3, 69, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(588, 3, 70, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37'),
+(589, 3, 71, 1, '2026-03-03 12:30:37', '2026-03-03 12:30:37');
 
 -- --------------------------------------------------------
 
@@ -1475,7 +1673,8 @@ INSERT INTO `sections` (`id`, `module_id`, `section_name`, `slug`, `status`, `so
 (10, 2, 'Reports', 'reports', 1, 3, '2025-10-07 02:05:16', '2025-10-07 02:05:16', NULL),
 (11, 2, 'Accounting', 'accounting', 1, 1, '2025-10-07 02:07:30', '2025-10-07 02:07:30', NULL),
 (12, 1, 'Log Reports', 'log-reports', 1, 2, '2025-10-09 08:47:01', '2025-10-09 08:47:01', NULL),
-(16, 2, 'Bank/Cash Vouchers', 'bank-cash', 1, 3, '2025-10-06 07:13:09', '2025-10-06 07:13:09', NULL);
+(16, 2, 'Bank/Cash Vouchers', 'bank-cash', 1, 3, '2025-10-06 07:13:09', '2025-10-06 07:13:09', NULL),
+(17, 3, 'Master Data', 'master-data', 1, 1, '2026-03-03 07:13:09', '2026-03-03 07:13:09', NULL);
 
 -- --------------------------------------------------------
 
@@ -1491,6 +1690,88 @@ CREATE TABLE `sessions` (
   `payload` longtext NOT NULL,
   `last_activity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tax_categories`
+--
+
+CREATE TABLE `tax_categories` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `company_id` bigint(20) UNSIGNED NOT NULL,
+  `tax_code` varchar(20) NOT NULL,
+  `tax_name` varchar(100) NOT NULL,
+  `tax_type` enum('vat','gst','sales_tax','excise','custom') NOT NULL,
+  `tax_rate` decimal(5,2) NOT NULL,
+  `description` varchar(250) DEFAULT NULL,
+  `applicable_for` enum('purchase','sales','both') NOT NULL DEFAULT 'both',
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `tax_categories`
+--
+
+INSERT INTO `tax_categories` (`id`, `company_id`, `tax_code`, `tax_name`, `tax_type`, `tax_rate`, `description`, `applicable_for`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'EXEMPT', 'Tax Exempt', 'gst', 0.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(2, 1, 'ZERO', 'Zero Rated', 'gst', 0.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(3, 1, 'GST5', 'GST 5%', 'gst', 5.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(4, 1, 'GST12', 'GST 12%', 'gst', 12.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(5, 1, 'GST18', 'GST 18%', 'gst', 18.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(6, 1, 'GST28', 'GST 28%', 'gst', 28.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(7, 1, 'VAT_STD', 'VAT Standard', 'vat', 20.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(8, 1, 'VAT_RED', 'VAT Reduced', 'vat', 10.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(9, 1, 'SLTAX_STD', 'Sales Tax Standard', 'sales_tax', 15.00, NULL, 'sales', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(10, 1, 'EXCISE', 'Excise Duty', 'excise', 5.00, NULL, 'purchase', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(11, 1, 'CUSTOM', 'Custom Duty', 'custom', 10.00, NULL, 'purchase', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(12, 2, 'EXEMPT', 'Tax Exempt', 'gst', 0.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(13, 2, 'ZERO', 'Zero Rated', 'gst', 0.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(14, 2, 'GST5', 'GST 5%', 'gst', 5.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(15, 2, 'GST12', 'GST 12%', 'gst', 12.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(16, 2, 'GST18', 'GST 18%', 'gst', 18.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(17, 2, 'GST28', 'GST 28%', 'gst', 28.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(18, 2, 'VAT_STD', 'VAT Standard', 'vat', 20.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(19, 2, 'VAT_RED', 'VAT Reduced', 'vat', 10.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(20, 2, 'SLTAX_STD', 'Sales Tax Standard', 'sales_tax', 15.00, NULL, 'sales', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(21, 2, 'EXCISE', 'Excise Duty', 'excise', 5.00, NULL, 'purchase', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(22, 2, 'CUSTOM', 'Custom Duty', 'custom', 10.00, NULL, 'purchase', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(23, 3, 'EXEMPT', 'Tax Exempt', 'gst', 0.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(24, 3, 'ZERO', 'Zero Rated', 'gst', 0.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(25, 3, 'GST5', 'GST 5%', 'gst', 5.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(26, 3, 'GST12', 'GST 12%', 'gst', 12.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(27, 3, 'GST18', 'GST 18%', 'gst', 18.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(28, 3, 'GST28', 'GST 28%', 'gst', 28.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(29, 3, 'VAT_STD', 'VAT Standard', 'vat', 20.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(30, 3, 'VAT_RED', 'VAT Reduced', 'vat', 10.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(31, 3, 'SLTAX_STD', 'Sales Tax Standard', 'sales_tax', 15.00, NULL, 'sales', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(32, 3, 'EXCISE', 'Excise Duty', 'excise', 5.00, NULL, 'purchase', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(33, 3, 'CUSTOM', 'Custom Duty', 'custom', 10.00, NULL, 'purchase', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(34, 4, 'EXEMPT', 'Tax Exempt', 'gst', 0.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(35, 4, 'ZERO', 'Zero Rated', 'gst', 0.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(36, 4, 'GST5', 'GST 5%', 'gst', 5.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(37, 4, 'GST12', 'GST 12%', 'gst', 12.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(38, 4, 'GST18', 'GST 18%', 'gst', 18.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(39, 4, 'GST28', 'GST 28%', 'gst', 28.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(40, 4, 'VAT_STD', 'VAT Standard', 'vat', 20.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(41, 4, 'VAT_RED', 'VAT Reduced', 'vat', 10.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(42, 4, 'SLTAX_STD', 'Sales Tax Standard', 'sales_tax', 15.00, NULL, 'sales', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(43, 4, 'EXCISE', 'Excise Duty', 'excise', 5.00, NULL, 'purchase', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(44, 4, 'CUSTOM', 'Custom Duty', 'custom', 10.00, NULL, 'purchase', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(45, 5, 'EXEMPT', 'Tax Exempt', 'gst', 0.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(46, 5, 'ZERO', 'Zero Rated', 'gst', 0.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(47, 5, 'GST5', 'GST 5%', 'gst', 5.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(48, 5, 'GST12', 'GST 12%', 'gst', 12.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(49, 5, 'GST18', 'GST 18%', 'gst', 18.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(50, 5, 'GST28', 'GST 28%', 'gst', 28.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(51, 5, 'VAT_STD', 'VAT Standard', 'vat', 20.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(52, 5, 'VAT_RED', 'VAT Reduced', 'vat', 10.00, NULL, 'both', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(53, 5, 'SLTAX_STD', 'Sales Tax Standard', 'sales_tax', 15.00, NULL, 'sales', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(54, 5, 'EXCISE', 'Excise Duty', 'excise', 5.00, NULL, 'purchase', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(55, 5, 'CUSTOM', 'Custom Duty', 'custom', 10.00, NULL, 'purchase', 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL);
 
 -- --------------------------------------------------------
 
@@ -1675,7 +1956,7 @@ CREATE TABLE `tbl_users` (
 --
 
 INSERT INTO `tbl_users` (`id`, `fname`, `mname`, `lname`, `email`, `phone`, `loginid`, `pincode`, `comp_id`, `location_id`, `dept_id`, `email_verified_at`, `password`, `token`, `remember_token`, `status`, `role`, `permissions`, `avatar`, `timezone`, `language`, `currency`, `theme`, `last_login_at`, `last_login_ip`, `failed_login_attempts`, `locked_until`, `two_factor_enabled`, `two_factor_secret`, `recovery_codes`, `session_id`, `device_info`, `force_password_change`, `password_changed_at`, `login_history`, `created_by`, `updated_by`, `created_at`, `updated_at`, `deleted_at`, `last_activity`) VALUES
-(1, 'System', NULL, 'Administrator', 'admin@erpsystem.com', '+1234567890', 'admin', '12345', 1, 1, 1, NULL, '$2y$12$QZ/KZc6V/wK3YGJDrzVLaehK4R7EU.wRkOugBu/7kgg47SxX3yHPm', '09609d6d8574d219eae26aa12db6436adba5e3fef34a3f760f649270ce378763', 'qDd4mnXaTtIq2pNZCpchlMrBvDAB2NVEfUbAtUtpZyW8BrFoilzg2ikGzzaDmK0XNTwNBNhTZj5Qb52lOa2uFEI3dPQ2TP8XmJqH', 'active', 'super_admin', '{\"users\":[\"create\",\"read\",\"update\",\"delete\"],\"financial\":[\"create\",\"read\",\"update\",\"delete\"],\"reports\":[\"create\",\"read\",\"update\",\"delete\"],\"settings\":[\"create\",\"read\",\"update\",\"delete\"],\"system\":[\"create\",\"read\",\"update\",\"delete\"]}', NULL, 'UTC', 'en', 'USD', 'system', '2026-03-01 15:08:30', '127.0.0.1', 0, NULL, 0, NULL, NULL, 'pxfJJnGYwPfnSFErPVcOY5A25CXLIJuUwlNRZEJm', NULL, 0, '2025-08-14 10:19:49', '[{\"timestamp\":\"2026-03-01T20:08:30.672025Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Code\\/1.109.5 Chrome\\/142.0.7444.265 Electron\\/39.3.0 Safari\\/537.36\",\"success\":true},{\"timestamp\":\"2026-03-01T19:12:49.001408Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-03-01T14:40:31.384519Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-03-01T12:07:07.169243Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-28T13:49:48.652226Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-28T08:40:15.826938Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-27T16:53:45.993321Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-27T07:41:38.810581Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-25T17:53:18.601760Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T12:13:55.996425Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T11:28:36.081856Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T10:59:35.149238Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T10:33:26.249869Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T10:26:04.834989Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-11-16T13:44:06.012419Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-11-16T13:15:38.480318Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-24T14:42:53.152903Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-17T16:02:14.237220Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-17T15:31:13.866417Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-16T10:25:33.336675Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true}]', NULL, NULL, '2025-08-14 10:19:49', '2026-03-01 15:08:30', NULL, NULL),
+(1, 'System', NULL, 'Administrator', 'admin@erpsystem.com', '+1234567890', 'admin', '12345', 1, 1, 1, NULL, '$2y$12$QZ/KZc6V/wK3YGJDrzVLaehK4R7EU.wRkOugBu/7kgg47SxX3yHPm', '9fcecc3062702441315576c67c279920c58d0d2d6a876485c680660f7168be06', 'o48AruME5hGeQqYGdgKroAfwyxK7EvoMvo4dzIXSfJGniqjkhZK7tY1AouQokt1eX5ZpT3SOu94NQKJRKLqeNKle0mF0LcaCGIqj', 'active', 'super_admin', '{\"users\":[\"create\",\"read\",\"update\",\"delete\"],\"financial\":[\"create\",\"read\",\"update\",\"delete\"],\"reports\":[\"create\",\"read\",\"update\",\"delete\"],\"settings\":[\"create\",\"read\",\"update\",\"delete\"],\"system\":[\"create\",\"read\",\"update\",\"delete\"]}', NULL, 'UTC', 'en', 'USD', 'system', '2026-03-03 10:36:58', '127.0.0.1', 0, NULL, 0, NULL, NULL, 'JfjZIxiVZcnkv1Ay07GmiaGI91zXX6kPnyQWgtA3', NULL, 0, '2025-08-14 10:19:49', '[{\"timestamp\":\"2026-03-03T15:36:58.922154Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-03-03T06:12:02.173822Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-03-01T20:08:30.672025Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Code\\/1.109.5 Chrome\\/142.0.7444.265 Electron\\/39.3.0 Safari\\/537.36\",\"success\":true},{\"timestamp\":\"2026-03-01T19:12:49.001408Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-03-01T14:40:31.384519Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-03-01T12:07:07.169243Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-28T13:49:48.652226Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-28T08:40:15.826938Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-27T16:53:45.993321Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-27T07:41:38.810581Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2026-02-25T17:53:18.601760Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/143.0.0.0 Safari\\/537.36 OPR\\/127.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T12:13:55.996425Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T11:28:36.081856Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T10:59:35.149238Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T10:33:26.249869Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-12-20T10:26:04.834989Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/141.0.0.0 Safari\\/537.36 OPR\\/125.0.0.0\",\"success\":true},{\"timestamp\":\"2025-11-16T13:44:06.012419Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-11-16T13:15:38.480318Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-24T14:42:53.152903Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true},{\"timestamp\":\"2025-10-17T16:02:14.237220Z\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/138.0.0.0 Safari\\/537.36 OPR\\/122.0.0.0\",\"success\":true}]', NULL, NULL, '2025-08-14 10:19:49', '2026-03-03 10:36:58', NULL, NULL),
 (2, 'Finance', NULL, 'Manager', 'finance@erpsystem.com', '+1234567891', 'finance_mgr', '12346', 1, 1, 1, NULL, '$2y$12$.Kwr9rgMKPjrBG45kDk8x.kTh/l9u1VSLPMZ/BAI0n2Jw69lIf9SG', NULL, NULL, 'active', 'manager', '{\"financial\":[\"create\",\"read\",\"update\",\"delete\"],\"reports\":[\"read\",\"create\"],\"users\":[\"read\"]}', NULL, 'UTC', 'en', 'USD', 'light', NULL, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL, 0, '2025-08-14 10:19:50', NULL, NULL, NULL, '2025-08-14 10:19:50', '2025-08-14 10:19:50', NULL, NULL),
 (3, 'Account', NULL, 'Executive', 'accounts@erpsystem.com', '+1234567892', 'acc_exec', '12347', 1, 1, 1, NULL, '$2y$12$voUVJ1fWNi9mo0rkJppxZ.V96Gn0MF.y6L1KSjKBz7tJGp/7/QN3m', NULL, NULL, 'active', 'user', '{\"financial\":[\"create\",\"read\",\"update\"],\"reports\":[\"read\"]}', NULL, 'Asia/Karachi', 'en', 'PKR', 'dark', NULL, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL, 1, '2025-05-14 10:19:50', NULL, NULL, NULL, '2025-08-14 10:19:50', '2025-08-14 10:19:50', NULL, NULL);
 
@@ -1841,6 +2122,129 @@ INSERT INTO `transaction_entries` (`id`, `transaction_id`, `line_number`, `accou
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `uom_masters`
+--
+
+CREATE TABLE `uom_masters` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `company_id` bigint(20) UNSIGNED NOT NULL,
+  `uom_code` varchar(20) NOT NULL,
+  `uom_name` varchar(100) NOT NULL,
+  `uom_type` varchar(50) NOT NULL,
+  `symbol` varchar(10) DEFAULT NULL,
+  `conversion_factor` decimal(15,6) NOT NULL DEFAULT 1.000000,
+  `base_uom_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `display_order` int(11) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `uom_masters`
+--
+
+INSERT INTO `uom_masters` (`id`, `company_id`, `uom_code`, `uom_name`, `uom_type`, `symbol`, `conversion_factor`, `base_uom_id`, `is_active`, `display_order`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'PCS', 'Piece', 'quantity', 'pcs', 1.000000, NULL, 1, 0, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(2, 1, 'DOZ', 'Dozen', 'quantity', 'doz', 12.000000, NULL, 1, 1, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(3, 1, 'GRS', 'Gross', 'quantity', 'grs', 144.000000, NULL, 1, 2, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(4, 1, 'KG', 'Kilogram', 'weight', 'kg', 1.000000, NULL, 1, 3, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(5, 1, 'G', 'Gram', 'weight', 'g', 0.001000, NULL, 1, 4, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(6, 1, 'MG', 'Milligram', 'weight', 'mg', 0.000001, NULL, 1, 5, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(7, 1, 'LBS', 'Pound', 'weight', 'lbs', 0.453592, NULL, 1, 6, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(8, 1, 'L', 'Liter', 'volume', 'L', 1.000000, NULL, 1, 7, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(9, 1, 'ML', 'Milliliter', 'volume', 'mL', 0.001000, NULL, 1, 8, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(10, 1, 'GAL', 'Gallon (US)', 'volume', 'gal', 3.785410, NULL, 1, 9, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(11, 1, 'BBL', 'Barrel', 'volume', 'bbl', 159.000000, NULL, 1, 10, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(12, 1, 'M', 'Meter', 'length', 'm', 1.000000, NULL, 1, 11, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(13, 1, 'CM', 'Centimeter', 'length', 'cm', 0.010000, NULL, 1, 12, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(14, 1, 'MM', 'Millimeter', 'length', 'mm', 0.001000, NULL, 1, 13, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(15, 1, 'FT', 'Foot', 'length', 'ft', 0.304800, NULL, 1, 14, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(16, 1, 'SQM', 'Square Meter', 'area', 'm²', 1.000000, NULL, 1, 15, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(17, 1, 'SQFT', 'Square Foot', 'area', 'ft²', 0.092903, NULL, 1, 16, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(18, 1, 'HR', 'Hour', 'time', 'hr', 1.000000, NULL, 1, 17, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(19, 1, 'DAY', 'Day', 'time', 'day', 24.000000, NULL, 1, 18, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(20, 2, 'PCS', 'Piece', 'quantity', 'pcs', 1.000000, NULL, 1, 0, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(21, 2, 'DOZ', 'Dozen', 'quantity', 'doz', 12.000000, NULL, 1, 1, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(22, 2, 'GRS', 'Gross', 'quantity', 'grs', 144.000000, NULL, 1, 2, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(23, 2, 'KG', 'Kilogram', 'weight', 'kg', 1.000000, NULL, 1, 3, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(24, 2, 'G', 'Gram', 'weight', 'g', 0.001000, NULL, 1, 4, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(25, 2, 'MG', 'Milligram', 'weight', 'mg', 0.000001, NULL, 1, 5, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(26, 2, 'LBS', 'Pound', 'weight', 'lbs', 0.453592, NULL, 1, 6, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(27, 2, 'L', 'Liter', 'volume', 'L', 1.000000, NULL, 1, 7, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(28, 2, 'ML', 'Milliliter', 'volume', 'mL', 0.001000, NULL, 1, 8, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(29, 2, 'GAL', 'Gallon (US)', 'volume', 'gal', 3.785410, NULL, 1, 9, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(30, 2, 'BBL', 'Barrel', 'volume', 'bbl', 159.000000, NULL, 1, 10, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(31, 2, 'M', 'Meter', 'length', 'm', 1.000000, NULL, 1, 11, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(32, 2, 'CM', 'Centimeter', 'length', 'cm', 0.010000, NULL, 1, 12, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(33, 2, 'MM', 'Millimeter', 'length', 'mm', 0.001000, NULL, 1, 13, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(34, 2, 'FT', 'Foot', 'length', 'ft', 0.304800, NULL, 1, 14, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(35, 2, 'SQM', 'Square Meter', 'area', 'm²', 1.000000, NULL, 1, 15, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(36, 2, 'SQFT', 'Square Foot', 'area', 'ft²', 0.092903, NULL, 1, 16, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(37, 2, 'HR', 'Hour', 'time', 'hr', 1.000000, NULL, 1, 17, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(38, 2, 'DAY', 'Day', 'time', 'day', 24.000000, NULL, 1, 18, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(39, 3, 'PCS', 'Piece', 'quantity', 'pcs', 1.000000, NULL, 1, 0, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(40, 3, 'DOZ', 'Dozen', 'quantity', 'doz', 12.000000, NULL, 1, 1, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(41, 3, 'GRS', 'Gross', 'quantity', 'grs', 144.000000, NULL, 1, 2, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(42, 3, 'KG', 'Kilogram', 'weight', 'kg', 1.000000, NULL, 1, 3, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(43, 3, 'G', 'Gram', 'weight', 'g', 0.001000, NULL, 1, 4, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(44, 3, 'MG', 'Milligram', 'weight', 'mg', 0.000001, NULL, 1, 5, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(45, 3, 'LBS', 'Pound', 'weight', 'lbs', 0.453592, NULL, 1, 6, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(46, 3, 'L', 'Liter', 'volume', 'L', 1.000000, NULL, 1, 7, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(47, 3, 'ML', 'Milliliter', 'volume', 'mL', 0.001000, NULL, 1, 8, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(48, 3, 'GAL', 'Gallon (US)', 'volume', 'gal', 3.785410, NULL, 1, 9, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(49, 3, 'BBL', 'Barrel', 'volume', 'bbl', 159.000000, NULL, 1, 10, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(50, 3, 'M', 'Meter', 'length', 'm', 1.000000, NULL, 1, 11, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(51, 3, 'CM', 'Centimeter', 'length', 'cm', 0.010000, NULL, 1, 12, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(52, 3, 'MM', 'Millimeter', 'length', 'mm', 0.001000, NULL, 1, 13, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(53, 3, 'FT', 'Foot', 'length', 'ft', 0.304800, NULL, 1, 14, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(54, 3, 'SQM', 'Square Meter', 'area', 'm²', 1.000000, NULL, 1, 15, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(55, 3, 'SQFT', 'Square Foot', 'area', 'ft²', 0.092903, NULL, 1, 16, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(56, 3, 'HR', 'Hour', 'time', 'hr', 1.000000, NULL, 1, 17, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(57, 3, 'DAY', 'Day', 'time', 'day', 24.000000, NULL, 1, 18, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(58, 4, 'PCS', 'Piece', 'quantity', 'pcs', 1.000000, NULL, 1, 0, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(59, 4, 'DOZ', 'Dozen', 'quantity', 'doz', 12.000000, NULL, 1, 1, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(60, 4, 'GRS', 'Gross', 'quantity', 'grs', 144.000000, NULL, 1, 2, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(61, 4, 'KG', 'Kilogram', 'weight', 'kg', 1.000000, NULL, 1, 3, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(62, 4, 'G', 'Gram', 'weight', 'g', 0.001000, NULL, 1, 4, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(63, 4, 'MG', 'Milligram', 'weight', 'mg', 0.000001, NULL, 1, 5, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(64, 4, 'LBS', 'Pound', 'weight', 'lbs', 0.453592, NULL, 1, 6, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(65, 4, 'L', 'Liter', 'volume', 'L', 1.000000, NULL, 1, 7, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(66, 4, 'ML', 'Milliliter', 'volume', 'mL', 0.001000, NULL, 1, 8, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(67, 4, 'GAL', 'Gallon (US)', 'volume', 'gal', 3.785410, NULL, 1, 9, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(68, 4, 'BBL', 'Barrel', 'volume', 'bbl', 159.000000, NULL, 1, 10, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(69, 4, 'M', 'Meter', 'length', 'm', 1.000000, NULL, 1, 11, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(70, 4, 'CM', 'Centimeter', 'length', 'cm', 0.010000, NULL, 1, 12, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(71, 4, 'MM', 'Millimeter', 'length', 'mm', 0.001000, NULL, 1, 13, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(72, 4, 'FT', 'Foot', 'length', 'ft', 0.304800, NULL, 1, 14, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(73, 4, 'SQM', 'Square Meter', 'area', 'm²', 1.000000, NULL, 1, 15, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(74, 4, 'SQFT', 'Square Foot', 'area', 'ft²', 0.092903, NULL, 1, 16, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(75, 4, 'HR', 'Hour', 'time', 'hr', 1.000000, NULL, 1, 17, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(76, 4, 'DAY', 'Day', 'time', 'day', 24.000000, NULL, 1, 18, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(77, 5, 'PCS', 'Piece', 'quantity', 'pcs', 1.000000, NULL, 1, 0, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(78, 5, 'DOZ', 'Dozen', 'quantity', 'doz', 12.000000, NULL, 1, 1, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(79, 5, 'GRS', 'Gross', 'quantity', 'grs', 144.000000, NULL, 1, 2, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(80, 5, 'KG', 'Kilogram', 'weight', 'kg', 1.000000, NULL, 1, 3, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(81, 5, 'G', 'Gram', 'weight', 'g', 0.001000, NULL, 1, 4, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(82, 5, 'MG', 'Milligram', 'weight', 'mg', 0.000001, NULL, 1, 5, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(83, 5, 'LBS', 'Pound', 'weight', 'lbs', 0.453592, NULL, 1, 6, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(84, 5, 'L', 'Liter', 'volume', 'L', 1.000000, NULL, 1, 7, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(85, 5, 'ML', 'Milliliter', 'volume', 'mL', 0.001000, NULL, 1, 8, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(86, 5, 'GAL', 'Gallon (US)', 'volume', 'gal', 3.785410, NULL, 1, 9, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(87, 5, 'BBL', 'Barrel', 'volume', 'bbl', 159.000000, NULL, 1, 10, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(88, 5, 'M', 'Meter', 'length', 'm', 1.000000, NULL, 1, 11, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(89, 5, 'CM', 'Centimeter', 'length', 'cm', 0.010000, NULL, 1, 12, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(90, 5, 'MM', 'Millimeter', 'length', 'mm', 0.001000, NULL, 1, 13, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(91, 5, 'FT', 'Foot', 'length', 'ft', 0.304800, NULL, 1, 14, '2026-03-03 12:27:14', '2026-03-03 12:27:14', NULL),
+(92, 5, 'SQM', 'Square Meter', 'area', 'm²', 1.000000, NULL, 1, 15, '2026-03-03 12:27:15', '2026-03-03 12:27:15', NULL),
+(93, 5, 'SQFT', 'Square Foot', 'area', 'ft²', 0.092903, NULL, 1, 16, '2026-03-03 12:27:15', '2026-03-03 12:27:15', NULL),
+(94, 5, 'HR', 'Hour', 'time', 'hr', 1.000000, NULL, 1, 17, '2026-03-03 12:27:15', '2026-03-03 12:27:15', NULL),
+(95, 5, 'DAY', 'Day', 'time', 'day', 24.000000, NULL, 1, 18, '2026-03-03 12:27:15', '2026-03-03 12:27:15', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -1922,40 +2326,44 @@ INSERT INTO `user_rights` (`id`, `user_id`, `menu_id`, `can_view`, `can_add`, `c
 (208, 2, 42, 1, 1, 1, 1, '2026-02-27 04:07:21', '2026-02-27 04:07:21'),
 (209, 2, 43, 1, 1, 1, 1, '2026-02-27 04:07:21', '2026-02-27 04:07:21'),
 (210, 2, 44, 1, 1, 1, 1, '2026-02-27 04:07:21', '2026-02-27 04:07:21'),
-(337, 1, 1, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(338, 1, 2, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(339, 1, 3, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(340, 1, 4, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(341, 1, 5, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(342, 1, 6, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(343, 1, 7, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(344, 1, 8, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(345, 1, 9, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(346, 1, 12, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(347, 1, 13, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(348, 1, 14, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(349, 1, 34, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(350, 1, 35, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(351, 1, 36, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(352, 1, 37, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(353, 1, 38, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(354, 1, 39, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(355, 1, 40, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(356, 1, 41, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(357, 1, 42, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(358, 1, 43, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(359, 1, 44, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(360, 1, 57, 0, 0, 0, 0, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(361, 1, 58, 0, 0, 0, 0, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(362, 1, 59, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(363, 1, 60, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(364, 1, 61, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(365, 1, 62, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(366, 1, 63, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(367, 1, 64, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(368, 1, 65, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(369, 1, 66, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02'),
-(370, 1, 67, 1, 1, 1, 1, '2026-03-01 16:44:02', '2026-03-01 16:44:02');
+(444, 1, 1, 1, 1, 1, 1, '2026-03-03 12:30:48', '2026-03-03 12:30:48'),
+(445, 1, 2, 1, 1, 1, 1, '2026-03-03 12:30:48', '2026-03-03 12:30:48'),
+(446, 1, 3, 1, 1, 1, 1, '2026-03-03 12:30:48', '2026-03-03 12:30:48'),
+(447, 1, 4, 1, 1, 1, 1, '2026-03-03 12:30:48', '2026-03-03 12:30:48'),
+(448, 1, 5, 1, 1, 1, 1, '2026-03-03 12:30:48', '2026-03-03 12:30:48'),
+(449, 1, 6, 1, 1, 1, 1, '2026-03-03 12:30:48', '2026-03-03 12:30:48'),
+(450, 1, 7, 1, 1, 1, 1, '2026-03-03 12:30:48', '2026-03-03 12:30:48'),
+(451, 1, 8, 1, 1, 1, 1, '2026-03-03 12:30:48', '2026-03-03 12:30:48'),
+(452, 1, 9, 1, 1, 1, 1, '2026-03-03 12:30:48', '2026-03-03 12:30:48'),
+(453, 1, 12, 1, 1, 1, 1, '2026-03-03 12:30:48', '2026-03-03 12:30:48'),
+(454, 1, 13, 1, 1, 1, 1, '2026-03-03 12:30:48', '2026-03-03 12:30:48'),
+(455, 1, 14, 1, 1, 1, 1, '2026-03-03 12:30:48', '2026-03-03 12:30:48'),
+(456, 1, 34, 1, 1, 1, 1, '2026-03-03 12:30:48', '2026-03-03 12:30:48'),
+(457, 1, 35, 1, 1, 1, 1, '2026-03-03 12:30:48', '2026-03-03 12:30:48'),
+(458, 1, 36, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(459, 1, 37, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(460, 1, 38, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(461, 1, 39, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(462, 1, 40, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(463, 1, 41, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(464, 1, 42, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(465, 1, 43, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(466, 1, 44, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(467, 1, 57, 0, 0, 0, 0, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(468, 1, 58, 0, 0, 0, 0, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(469, 1, 59, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(470, 1, 60, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(471, 1, 61, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(472, 1, 62, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(473, 1, 63, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(474, 1, 64, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(475, 1, 65, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(476, 1, 66, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(477, 1, 67, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(478, 1, 68, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(479, 1, 69, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(480, 1, 70, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49'),
+(481, 1, 71, 1, 1, 1, 1, '2026-03-03 12:30:49', '2026-03-03 12:30:49');
 
 -- --------------------------------------------------------
 
@@ -1978,6 +2386,74 @@ CREATE TABLE `user_sessions` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `vendors`
+--
+
+CREATE TABLE `vendors` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `company_id` bigint(20) UNSIGNED NOT NULL,
+  `vendor_code` varchar(20) NOT NULL,
+  `vendor_name` varchar(150) NOT NULL,
+  `contact_person` varchar(100) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `country_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `tax_id` varchar(50) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `vendors`
+--
+
+INSERT INTO `vendors` (`id`, `company_id`, `vendor_code`, `vendor_name`, `contact_person`, `email`, `phone`, `address`, `city`, `state`, `postal_code`, `country_id`, `tax_id`, `notes`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'VND001', 'Sunrise Manufacturing Ltd.', 'Rajesh Kumar', 'rajesh@sunrise-mfg.com', '+91-9876543210', 'Plot 123, Industrial Area', 'Mumbai', 'Maharashtra', '400001', NULL, 'GSTN123456789', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(2, 1, 'VND002', 'Global Supplies Inc.', 'Priya Singh', 'priya@globalsupplies.in', '+91-9876543211', 'Block C, Tech Park', 'Bangalore', 'Karnataka', '560001', NULL, 'GSTN987654321', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(3, 1, 'VND003', 'Green Valley Producers', 'Arjun Patel', 'arjun@greenvalley.co.in', '+91-9876543212', 'Village Jhakri', 'Ahmedabad', 'Gujarat', '380001', NULL, 'GSTN456789123', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(4, 1, 'VND004', 'Quality Components USA', 'John Smith', 'john@qualityusa.com', '+1-2125551234', '123 Main Street', 'New York', 'NY', '10001', NULL, 'EIN12-3456789', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(5, 1, 'VND005', 'TechSupply Corp', 'Sarah Johnson', 'sarah@techsupply.com', '+1-4155551234', '456 Tech Blvd', 'San Francisco', 'CA', '94101', NULL, 'EIN98-7654321', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(6, 1, 'VND006', 'Precision Engineering GmbH', 'Klaus Mueller', 'klaus@precision-eng.de', '+49-30-1234567', 'Alexanderplatz 10', 'Berlin', 'Berlin', '10178', NULL, 'DE123456789', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(7, 1, 'VND007', 'Industrial Solutions AG', 'Heike Wagner', 'heike@ind-solutions.de', '+49-201-1234567', 'Ruhrstraße 45', 'Essen', 'North Rhine-Westphalia', '45128', NULL, 'DE987654321', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(8, 2, 'VND001', 'Sunrise Manufacturing Ltd.', 'Rajesh Kumar', 'rajesh@sunrise-mfg.com', '+91-9876543210', 'Plot 123, Industrial Area', 'Mumbai', 'Maharashtra', '400001', NULL, 'GSTN123456789', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(9, 2, 'VND002', 'Global Supplies Inc.', 'Priya Singh', 'priya@globalsupplies.in', '+91-9876543211', 'Block C, Tech Park', 'Bangalore', 'Karnataka', '560001', NULL, 'GSTN987654321', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(10, 2, 'VND003', 'Green Valley Producers', 'Arjun Patel', 'arjun@greenvalley.co.in', '+91-9876543212', 'Village Jhakri', 'Ahmedabad', 'Gujarat', '380001', NULL, 'GSTN456789123', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(11, 2, 'VND004', 'Quality Components USA', 'John Smith', 'john@qualityusa.com', '+1-2125551234', '123 Main Street', 'New York', 'NY', '10001', NULL, 'EIN12-3456789', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(12, 2, 'VND005', 'TechSupply Corp', 'Sarah Johnson', 'sarah@techsupply.com', '+1-4155551234', '456 Tech Blvd', 'San Francisco', 'CA', '94101', NULL, 'EIN98-7654321', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(13, 2, 'VND006', 'Precision Engineering GmbH', 'Klaus Mueller', 'klaus@precision-eng.de', '+49-30-1234567', 'Alexanderplatz 10', 'Berlin', 'Berlin', '10178', NULL, 'DE123456789', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(14, 2, 'VND007', 'Industrial Solutions AG', 'Heike Wagner', 'heike@ind-solutions.de', '+49-201-1234567', 'Ruhrstraße 45', 'Essen', 'North Rhine-Westphalia', '45128', NULL, 'DE987654321', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(15, 3, 'VND001', 'Sunrise Manufacturing Ltd.', 'Rajesh Kumar', 'rajesh@sunrise-mfg.com', '+91-9876543210', 'Plot 123, Industrial Area', 'Mumbai', 'Maharashtra', '400001', NULL, 'GSTN123456789', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(16, 3, 'VND002', 'Global Supplies Inc.', 'Priya Singh', 'priya@globalsupplies.in', '+91-9876543211', 'Block C, Tech Park', 'Bangalore', 'Karnataka', '560001', NULL, 'GSTN987654321', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(17, 3, 'VND003', 'Green Valley Producers', 'Arjun Patel', 'arjun@greenvalley.co.in', '+91-9876543212', 'Village Jhakri', 'Ahmedabad', 'Gujarat', '380001', NULL, 'GSTN456789123', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(18, 3, 'VND004', 'Quality Components USA', 'John Smith', 'john@qualityusa.com', '+1-2125551234', '123 Main Street', 'New York', 'NY', '10001', NULL, 'EIN12-3456789', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(19, 3, 'VND005', 'TechSupply Corp', 'Sarah Johnson', 'sarah@techsupply.com', '+1-4155551234', '456 Tech Blvd', 'San Francisco', 'CA', '94101', NULL, 'EIN98-7654321', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(20, 3, 'VND006', 'Precision Engineering GmbH', 'Klaus Mueller', 'klaus@precision-eng.de', '+49-30-1234567', 'Alexanderplatz 10', 'Berlin', 'Berlin', '10178', NULL, 'DE123456789', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(21, 3, 'VND007', 'Industrial Solutions AG', 'Heike Wagner', 'heike@ind-solutions.de', '+49-201-1234567', 'Ruhrstraße 45', 'Essen', 'North Rhine-Westphalia', '45128', NULL, 'DE987654321', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(22, 4, 'VND001', 'Sunrise Manufacturing Ltd.', 'Rajesh Kumar', 'rajesh@sunrise-mfg.com', '+91-9876543210', 'Plot 123, Industrial Area', 'Mumbai', 'Maharashtra', '400001', NULL, 'GSTN123456789', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(23, 4, 'VND002', 'Global Supplies Inc.', 'Priya Singh', 'priya@globalsupplies.in', '+91-9876543211', 'Block C, Tech Park', 'Bangalore', 'Karnataka', '560001', NULL, 'GSTN987654321', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(24, 4, 'VND003', 'Green Valley Producers', 'Arjun Patel', 'arjun@greenvalley.co.in', '+91-9876543212', 'Village Jhakri', 'Ahmedabad', 'Gujarat', '380001', NULL, 'GSTN456789123', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(25, 4, 'VND004', 'Quality Components USA', 'John Smith', 'john@qualityusa.com', '+1-2125551234', '123 Main Street', 'New York', 'NY', '10001', NULL, 'EIN12-3456789', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(26, 4, 'VND005', 'TechSupply Corp', 'Sarah Johnson', 'sarah@techsupply.com', '+1-4155551234', '456 Tech Blvd', 'San Francisco', 'CA', '94101', NULL, 'EIN98-7654321', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(27, 4, 'VND006', 'Precision Engineering GmbH', 'Klaus Mueller', 'klaus@precision-eng.de', '+49-30-1234567', 'Alexanderplatz 10', 'Berlin', 'Berlin', '10178', NULL, 'DE123456789', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(28, 4, 'VND007', 'Industrial Solutions AG', 'Heike Wagner', 'heike@ind-solutions.de', '+49-201-1234567', 'Ruhrstraße 45', 'Essen', 'North Rhine-Westphalia', '45128', NULL, 'DE987654321', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(29, 5, 'VND001', 'Sunrise Manufacturing Ltd.', 'Rajesh Kumar', 'rajesh@sunrise-mfg.com', '+91-9876543210', 'Plot 123, Industrial Area', 'Mumbai', 'Maharashtra', '400001', NULL, 'GSTN123456789', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(30, 5, 'VND002', 'Global Supplies Inc.', 'Priya Singh', 'priya@globalsupplies.in', '+91-9876543211', 'Block C, Tech Park', 'Bangalore', 'Karnataka', '560001', NULL, 'GSTN987654321', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(31, 5, 'VND003', 'Green Valley Producers', 'Arjun Patel', 'arjun@greenvalley.co.in', '+91-9876543212', 'Village Jhakri', 'Ahmedabad', 'Gujarat', '380001', NULL, 'GSTN456789123', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(32, 5, 'VND004', 'Quality Components USA', 'John Smith', 'john@qualityusa.com', '+1-2125551234', '123 Main Street', 'New York', 'NY', '10001', NULL, 'EIN12-3456789', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(33, 5, 'VND005', 'TechSupply Corp', 'Sarah Johnson', 'sarah@techsupply.com', '+1-4155551234', '456 Tech Blvd', 'San Francisco', 'CA', '94101', NULL, 'EIN98-7654321', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(34, 5, 'VND006', 'Precision Engineering GmbH', 'Klaus Mueller', 'klaus@precision-eng.de', '+49-30-1234567', 'Alexanderplatz 10', 'Berlin', 'Berlin', '10178', NULL, 'DE123456789', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL),
+(35, 5, 'VND007', 'Industrial Solutions AG', 'Heike Wagner', 'heike@ind-solutions.de', '+49-201-1234567', 'Ruhrstraße 45', 'Essen', 'North Rhine-Westphalia', '45128', NULL, 'DE987654321', NULL, 1, '2026-03-03 12:27:21', '2026-03-03 12:27:21', NULL);
 
 -- --------------------------------------------------------
 
@@ -2082,6 +2558,18 @@ ALTER TABLE `companies`
   ADD KEY `companies_package_id_foreign` (`package_id`);
 
 --
+-- Indexes for table `countries`
+--
+ALTER TABLE `countries`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `countries_country_code_unique` (`country_code`),
+  ADD UNIQUE KEY `countries_country_name_unique` (`country_name`),
+  ADD UNIQUE KEY `countries_iso_2_code_unique` (`iso_2_code`),
+  ADD UNIQUE KEY `countries_iso_numeric_code_unique` (`iso_numeric_code`),
+  ADD KEY `countries_country_code_index` (`country_code`),
+  ADD KEY `countries_country_name_index` (`country_name`);
+
+--
 -- Indexes for table `currencies`
 --
 ALTER TABLE `currencies`
@@ -2123,6 +2611,79 @@ ALTER TABLE `fiscal_periods`
   ADD UNIQUE KEY `fiscal_periods_comp_id_fiscal_year_period_number_unique` (`comp_id`,`fiscal_year`,`period_number`),
   ADD KEY `fiscal_periods_comp_id_fiscal_year_index` (`comp_id`,`fiscal_year`),
   ADD KEY `fiscal_periods_comp_id_status_index` (`comp_id`,`status`);
+
+--
+-- Indexes for table `inventory_category_class`
+--
+ALTER TABLE `inventory_category_class`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_inv_cat_cls` (`category_id`,`class_id`),
+  ADD KEY `inventory_category_class_category_id_index` (`category_id`),
+  ADD KEY `inventory_category_class_class_id_index` (`class_id`);
+
+--
+-- Indexes for table `inventory_items`
+--
+ALTER TABLE `inventory_items`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `inventory_items_item_code_unique` (`item_code`),
+  ADD UNIQUE KEY `inventory_items_barcode_gtin_unique` (`barcode_gtin`),
+  ADD KEY `inventory_items_stock_uom_id_foreign` (`stock_uom_id`),
+  ADD KEY `inventory_items_purchase_uom_id_foreign` (`purchase_uom_id`),
+  ADD KEY `inventory_items_sales_uom_id_foreign` (`sales_uom_id`),
+  ADD KEY `inventory_items_comp_id_location_id_index` (`comp_id`,`location_id`),
+  ADD KEY `inventory_items_item_code_index` (`item_code`),
+  ADD KEY `inventory_items_item_status_index` (`item_status`),
+  ADD KEY `inventory_items_item_type_index` (`item_type`),
+  ADD KEY `inventory_items_costing_method_index` (`costing_method`),
+  ADD KEY `inventory_items_comp_id_index` (`comp_id`),
+  ADD KEY `inventory_items_location_id_index` (`location_id`),
+  ADD KEY `inventory_items_item_class_id_index` (`item_class_id`),
+  ADD KEY `inventory_items_item_category_id_index` (`item_category_id`),
+  ADD KEY `inventory_items_item_group_id_index` (`item_group_id`),
+  ADD KEY `inventory_items_default_vendor_id_index` (`default_vendor_id`),
+  ADD KEY `inventory_items_tax_category_id_index` (`tax_category_id`),
+  ADD KEY `inventory_items_country_of_origin_id_index` (`country_of_origin_id`),
+  ADD KEY `inventory_items_inventory_gl_account_id_index` (`inventory_gl_account_id`),
+  ADD KEY `inventory_items_cogs_gl_account_id_index` (`cogs_gl_account_id`),
+  ADD KEY `inventory_items_writeoff_gl_account_id_index` (`writeoff_gl_account_id`),
+  ADD KEY `inventory_items_price_variance_gl_account_id_index` (`price_variance_gl_account_id`),
+  ADD KEY `inventory_items_created_by_index` (`created_by`),
+  ADD KEY `inventory_items_updated_by_index` (`updated_by`);
+
+--
+-- Indexes for table `inventory_item_categories`
+--
+ALTER TABLE `inventory_item_categories`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_inv_item_cat_code` (`comp_id`,`location_id`,`category_code`),
+  ADD KEY `idx_inv_item_cat_comp_loc_status` (`comp_id`,`location_id`,`is_active`),
+  ADD KEY `inventory_item_categories_comp_id_index` (`comp_id`),
+  ADD KEY `inventory_item_categories_location_id_index` (`location_id`),
+  ADD KEY `inventory_item_categories_is_active_index` (`is_active`),
+  ADD KEY `inventory_item_categories_item_class_id_index` (`item_class_id`);
+
+--
+-- Indexes for table `inventory_item_classes`
+--
+ALTER TABLE `inventory_item_classes`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_inv_item_cls_code` (`comp_id`,`location_id`,`class_code`),
+  ADD KEY `idx_inv_item_cls_comp_loc_status` (`comp_id`,`location_id`,`is_active`),
+  ADD KEY `inventory_item_classes_comp_id_index` (`comp_id`),
+  ADD KEY `inventory_item_classes_location_id_index` (`location_id`),
+  ADD KEY `inventory_item_classes_is_active_index` (`is_active`);
+
+--
+-- Indexes for table `inventory_item_groups`
+--
+ALTER TABLE `inventory_item_groups`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_inv_item_grp_code` (`comp_id`,`location_id`,`group_code`),
+  ADD KEY `idx_inv_item_grp_comp_loc_status` (`comp_id`,`location_id`,`is_active`),
+  ADD KEY `inventory_item_groups_comp_id_index` (`comp_id`),
+  ADD KEY `inventory_item_groups_location_id_index` (`location_id`),
+  ADD KEY `inventory_item_groups_is_active_index` (`is_active`);
 
 --
 -- Indexes for table `jobs`
@@ -2207,6 +2768,15 @@ ALTER TABLE `sessions`
   ADD PRIMARY KEY (`id`),
   ADD KEY `sessions_user_id_index` (`user_id`),
   ADD KEY `sessions_last_activity_index` (`last_activity`);
+
+--
+-- Indexes for table `tax_categories`
+--
+ALTER TABLE `tax_categories`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `tax_categories_company_id_tax_code_unique` (`company_id`,`tax_code`),
+  ADD KEY `tax_categories_company_id_index` (`company_id`),
+  ADD KEY `tax_categories_tax_type_index` (`tax_type`);
 
 --
 -- Indexes for table `tbl_audit_logs`
@@ -2319,6 +2889,16 @@ ALTER TABLE `transaction_entries`
   ADD KEY `transaction_entries_comp_id_location_id_index` (`comp_id`,`location_id`);
 
 --
+-- Indexes for table `uom_masters`
+--
+ALTER TABLE `uom_masters`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uom_masters_company_id_uom_code_unique` (`company_id`,`uom_code`),
+  ADD KEY `uom_masters_base_uom_id_foreign` (`base_uom_id`),
+  ADD KEY `uom_masters_company_id_index` (`company_id`),
+  ADD KEY `uom_masters_uom_type_index` (`uom_type`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -2344,6 +2924,16 @@ ALTER TABLE `user_sessions`
   ADD KEY `user_sessions_is_active_index` (`is_active`),
   ADD KEY `user_sessions_last_activity_index` (`last_activity`),
   ADD KEY `user_sessions_expires_at_index` (`expires_at`);
+
+--
+-- Indexes for table `vendors`
+--
+ALTER TABLE `vendors`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `vendors_company_id_vendor_code_unique` (`company_id`,`vendor_code`),
+  ADD KEY `vendors_country_id_foreign` (`country_id`),
+  ADD KEY `vendors_company_id_index` (`company_id`),
+  ADD KEY `vendors_vendor_code_index` (`vendor_code`);
 
 --
 -- Indexes for table `voucher_number_configurations`
@@ -2383,6 +2973,12 @@ ALTER TABLE `companies`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
+-- AUTO_INCREMENT for table `countries`
+--
+ALTER TABLE `countries`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `currencies`
 --
 ALTER TABLE `currencies`
@@ -2413,6 +3009,36 @@ ALTER TABLE `fiscal_periods`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
+-- AUTO_INCREMENT for table `inventory_category_class`
+--
+ALTER TABLE `inventory_category_class`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `inventory_items`
+--
+ALTER TABLE `inventory_items`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `inventory_item_categories`
+--
+ALTER TABLE `inventory_item_categories`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `inventory_item_classes`
+--
+ALTER TABLE `inventory_item_classes`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `inventory_item_groups`
+--
+ALTER TABLE `inventory_item_groups`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `jobs`
 --
 ALTER TABLE `jobs`
@@ -2428,19 +3054,19 @@ ALTER TABLE `locations`
 -- AUTO_INCREMENT for table `menus`
 --
 ALTER TABLE `menus`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
 
 --
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=113;
 
 --
 -- AUTO_INCREMENT for table `modules`
 --
 ALTER TABLE `modules`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `packages`
@@ -2452,13 +3078,19 @@ ALTER TABLE `packages`
 -- AUTO_INCREMENT for table `package_features`
 --
 ALTER TABLE `package_features`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=485;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=590;
 
 --
 -- AUTO_INCREMENT for table `sections`
 --
 ALTER TABLE `sections`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT for table `tax_categories`
+--
+ALTER TABLE `tax_categories`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
 -- AUTO_INCREMENT for table `tbl_audit_logs`
@@ -2521,6 +3153,12 @@ ALTER TABLE `transaction_entries`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
+-- AUTO_INCREMENT for table `uom_masters`
+--
+ALTER TABLE `uom_masters`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
@@ -2530,13 +3168,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `user_rights`
 --
 ALTER TABLE `user_rights`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=371;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=482;
 
 --
 -- AUTO_INCREMENT for table `user_sessions`
 --
 ALTER TABLE `user_sessions`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `vendors`
+--
+ALTER TABLE `vendors`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `voucher_number_configurations`
@@ -2587,10 +3231,31 @@ ALTER TABLE `departments`
   ADD CONSTRAINT `departments_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `inventory_category_class`
+--
+ALTER TABLE `inventory_category_class`
+  ADD CONSTRAINT `fk_inv_cat_cls_category` FOREIGN KEY (`category_id`) REFERENCES `inventory_item_categories` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_inv_cat_cls_class` FOREIGN KEY (`class_id`) REFERENCES `inventory_item_classes` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `inventory_items`
+--
+ALTER TABLE `inventory_items`
+  ADD CONSTRAINT `inventory_items_purchase_uom_id_foreign` FOREIGN KEY (`purchase_uom_id`) REFERENCES `uom_masters` (`id`),
+  ADD CONSTRAINT `inventory_items_sales_uom_id_foreign` FOREIGN KEY (`sales_uom_id`) REFERENCES `uom_masters` (`id`),
+  ADD CONSTRAINT `inventory_items_stock_uom_id_foreign` FOREIGN KEY (`stock_uom_id`) REFERENCES `uom_masters` (`id`);
+
+--
 -- Constraints for table `locations`
 --
 ALTER TABLE `locations`
   ADD CONSTRAINT `locations_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `tax_categories`
+--
+ALTER TABLE `tax_categories`
+  ADD CONSTRAINT `tax_categories_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `transactions`
@@ -2605,10 +3270,24 @@ ALTER TABLE `transaction_entries`
   ADD CONSTRAINT `transaction_entries_account_id_foreign` FOREIGN KEY (`account_id`) REFERENCES `chart_of_accounts` (`id`);
 
 --
+-- Constraints for table `uom_masters`
+--
+ALTER TABLE `uom_masters`
+  ADD CONSTRAINT `uom_masters_base_uom_id_foreign` FOREIGN KEY (`base_uom_id`) REFERENCES `uom_masters` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `uom_masters_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `user_rights`
 --
 ALTER TABLE `user_rights`
   ADD CONSTRAINT `user_rights_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `tbl_users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `vendors`
+--
+ALTER TABLE `vendors`
+  ADD CONSTRAINT `vendors_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `vendors_country_id_foreign` FOREIGN KEY (`country_id`) REFERENCES `countries` (`id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -21,6 +21,9 @@ use App\Http\Controllers\Inventory\ItemCategoryCodingController;
 use App\Http\Controllers\Inventory\ItemClassCodingController;
 use App\Http\Controllers\Inventory\ItemGroupCodingController;
 use App\Http\Controllers\Inventory\ItemMasterController;
+use App\Http\Controllers\Inventory\MasterDataController;
+use App\Http\Controllers\Inventory\UomMasterController;
+use App\Http\Controllers\Inventory\UomConversionController;
 
 // Public routes
 Route::get('/', function () {
@@ -117,6 +120,28 @@ Route::prefix('inventory/item-group-coding')->name('inventory.item-group-coding.
     Route::post('/bulk-destroy', [ItemGroupCodingController::class, 'bulkDestroy'])->name('bulk-destroy');
 });
 
+// Inventory Module - UOM Master
+Route::prefix('inventory/uom-master')->name('inventory.uom-master.')->middleware('web.auth')->group(function () {
+    Route::get('/', [UomMasterController::class, 'list'])->name('list');    
+    Route::get('/create', [UomMasterController::class, 'create'])->name('create');
+    Route::post('/', [UomMasterController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [UomMasterController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [UomMasterController::class, 'update'])->name('update');
+    Route::delete('/{id}', [UomMasterController::class, 'destroy'])->name('destroy');
+    Route::post('/bulk-destroy', [UomMasterController::class, 'bulkDestroy'])->name('bulk-destroy');
+});
+
+// Inventory Module - UOM Conversion
+Route::prefix('inventory/uom-conversion')->name('inventory.uom-conversion.')->middleware('web.auth')->group(function () {
+    Route::get('/', [UomConversionController::class, 'list'])->name('list');    
+    Route::get('/create', [UomConversionController::class, 'create'])->name('create');
+    Route::post('/', [UomConversionController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [UomConversionController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [UomConversionController::class, 'update'])->name('update');
+    Route::delete('/{id}', [UomConversionController::class, 'destroy'])->name('destroy');
+    Route::post('/bulk-destroy', [UomConversionController::class, 'bulkDestroy'])->name('bulk-destroy');
+});
+
 // Inventory Module - Item Master
 Route::prefix('inventory/item-master')->name('inventory.item-master.')->middleware('web.auth')->group(function () {
     Route::get('/', [ItemMasterController::class, 'list'])->name('list');
@@ -127,6 +152,15 @@ Route::prefix('inventory/item-master')->name('inventory.item-master.')->middlewa
     Route::delete('/{id}', [ItemMasterController::class, 'destroy'])->name('destroy');
     Route::post('/bulk-destroy', [ItemMasterController::class, 'bulkDestroy'])->name('bulk-destroy');
     Route::get('/export-csv', [ItemMasterController::class, 'exportCsv'])->name('export-csv');
+});
+
+Route::prefix('inventory/master-data')->name('inventory.master-data.')->middleware('web.auth')->group(function () {
+    Route::get('/{master}', [MasterDataController::class, 'list'])->name('list');
+    Route::get('/{master}/create', [MasterDataController::class, 'create'])->name('create');
+    Route::post('/{master}', [MasterDataController::class, 'store'])->name('store');
+    Route::get('/{master}/{id}/edit', [MasterDataController::class, 'edit'])->name('edit');
+    Route::put('/{master}/{id}', [MasterDataController::class, 'update'])->name('update');
+    Route::delete('/{master}/{id}', [MasterDataController::class, 'destroy'])->name('destroy');
 });
 
 // Voucher Number Configuration Routes
