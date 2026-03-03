@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
-use App\Models\InventoryItemCategory;
-use App\Models\InventoryItemClass;
+use App\Models\InventoryItemGroup;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
-class ItemClassCodingController extends Controller
+class ItemGroupCodingController extends Controller
 {
     public function list(Request $request)
     {
@@ -17,23 +16,23 @@ class ItemClassCodingController extends Controller
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
 
         if (!$compId || !$locationId) {
-            return Inertia::render('Inventory/ItemClassCoding/List', [
+            return Inertia::render('Inventory/ItemGroupCoding/List', [
                 'items' => [],
                 'total' => 0,
                 'filters' => [],
             ]);
         }
 
-        $query = InventoryItemClass::query()
+        $query = InventoryItemGroup::query()
             ->where('comp_id', $compId)
             ->where('location_id', $locationId);
 
-        // Search by class_code or class_name
+        // Search by group_code or group_name
         if ($request->filled('search')) {
             $search = '%' . $request->input('search') . '%';
             $query->where(function ($q) use ($search) {
-                $q->where('class_code', 'like', $search)
-                  ->orWhere('class_name', 'like', $search);
+                $q->where('group_code', 'like', $search)
+                  ->orWhere('group_name', 'like', $search);
             });
         }
 
@@ -43,13 +42,13 @@ class ItemClassCodingController extends Controller
         }
 
         // Sorting
-        $sortBy = $request->input('sort_by', 'class_code');
+        $sortBy = $request->input('sort_by', 'group_code');
         $sortOrder = $request->input('sort_order', 'asc');
         $query->orderBy($sortBy, $sortOrder);
 
         $items = $query->paginate(15);
 
-        return Inertia::render('Inventory/ItemClassCoding/List', [
+        return Inertia::render('Inventory/ItemGroupCoding/List', [
             'items' => $items,
             'filters' => [
                 'search' => $request->input('search'),
@@ -66,12 +65,12 @@ class ItemClassCodingController extends Controller
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
 
         if (!$compId || !$locationId) {
-            return Inertia::render('Inventory/ItemClassCoding/Create', [
+            return Inertia::render('Inventory/ItemGroupCoding/Create', [
                 'error' => 'Company and Location information is required.',
             ]);
         }
 
-        return Inertia::render('Inventory/ItemClassCoding/Create');
+        return Inertia::render('Inventory/ItemGroupCoding/Create');
     }
 
     public function store(Request $request)
@@ -86,32 +85,32 @@ class ItemClassCodingController extends Controller
         }
 
         $validated = $request->validate([
-            'class_code' => [
+            'group_code' => [
                 'required',
                 'string',
                 'max:30',
-                Rule::unique('inventory_item_classes', 'class_code')
+                Rule::unique('inventory_item_groups', 'group_code')
                     ->where(fn ($query) => $query
                         ->where('comp_id', $compId)
                         ->where('location_id', $locationId)
                         ->whereNull('deleted_at')),
             ],
-            'class_name' => 'required|string|max:150',
+            'group_name' => 'required|string|max:150',
             'description' => 'nullable|string|max:500',
             'is_active' => 'nullable|boolean',
         ]);
 
-        InventoryItemClass::create([
+        InventoryItemGroup::create([
             'comp_id' => $compId,
             'location_id' => $locationId,
-            'class_code' => strtoupper(trim($validated['class_code'])),
-            'class_name' => trim($validated['class_name']),
+            'group_code' => strtoupper(trim($validated['group_code'])),
+            'group_name' => trim($validated['group_name']),
             'description' => $validated['description'] ?? null,
             'is_active' => $validated['is_active'] ?? true,
         ]);
 
-        return redirect()->route('inventory.item-class-coding.list')
-            ->with('success', 'Item class created successfully.');
+        return redirect()->route('inventory.item-group-coding.list')
+            ->with('success', 'Item group created successfully.');
     }
 
     public function edit(Request $request, $id)
@@ -123,17 +122,17 @@ class ItemClassCodingController extends Controller
             return back()->withErrors(['error' => 'Company and Location information is required.']);
         }
 
-        $itemClass = InventoryItemClass::where('id', $id)
+        $itemGroup = InventoryItemGroup::where('id', $id)
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
             ->first();
 
-        if (!$itemClass) {
-            return back()->withErrors(['error' => 'Item class not found.']);
+        if (!$itemGroup) {
+            return back()->withErrors(['error' => 'Item group not found.']);
         }
 
-        return Inertia::render('Inventory/ItemClassCoding/Create', [
-            'itemClass' => $itemClass,
+        return Inertia::render('Inventory/ItemGroupCoding/Create', [
+            'itemGroup' => $itemGroup,
         ]);
     }
 
@@ -146,37 +145,37 @@ class ItemClassCodingController extends Controller
             return back()->withErrors(['error' => 'Company and Location information is required.']);
         }
 
-        $itemClass = InventoryItemClass::where('id', $id)
+        $itemGroup = InventoryItemGroup::where('id', $id)
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
             ->first();
 
-        if (!$itemClass) {
-            return back()->withErrors(['error' => 'Item class not found.']);
+        if (!$itemGroup) {
+            return back()->withErrors(['error' => 'Item group not found.']);
         }
 
         $validated = $request->validate([
-            'class_code' => [
+            'group_code' => [
                 'required',
                 'string',
                 'max:30',
-                Rule::unique('inventory_item_classes', 'class_code')
-                    ->ignore($itemClass->id),
+                Rule::unique('inventory_item_groups', 'group_code')
+                    ->ignore($itemGroup->id),
             ],
-            'class_name' => 'required|string|max:150',
+            'group_name' => 'required|string|max:150',
             'description' => 'nullable|string|max:500',
             'is_active' => 'nullable|boolean',
         ]);
 
-        $itemClass->update([
-            'class_code' => strtoupper(trim($validated['class_code'])),
-            'class_name' => trim($validated['class_name']),
+        $itemGroup->update([
+            'group_code' => strtoupper(trim($validated['group_code'])),
+            'group_name' => trim($validated['group_name']),
             'description' => $validated['description'] ?? null,
             'is_active' => $validated['is_active'] ?? true,
         ]);
 
-        return redirect()->route('inventory.item-class-coding.list')
-            ->with('success', 'Item class updated successfully.');
+        return redirect()->route('inventory.item-group-coding.list')
+            ->with('success', 'Item group updated successfully.');
     }
 
     public function destroy(Request $request, $id)
@@ -191,25 +190,59 @@ class ItemClassCodingController extends Controller
             return back()->withErrors(['error' => 'Company and Location information is required.']);
         }
 
-        $itemClass = InventoryItemClass::where('id', $id)
+        $itemGroup = InventoryItemGroup::where('id', $id)
             ->where('comp_id', $compId)
             ->where('location_id', $locationId)
             ->first();
 
-        if (!$itemClass) {
+        if (!$itemGroup) {
             if ($request->expectsJson()) {
-                return response()->json(['error' => 'Item class not found.'], 404);
+                return response()->json(['error' => 'Item group not found.'], 404);
             }
-            return back()->withErrors(['error' => 'Item class not found.']);
+            return back()->withErrors(['error' => 'Item group not found.']);
         }
 
-        $itemClass->delete();
+        $itemGroup->delete();
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Item class deleted successfully.']);
+            return response()->json(['message' => 'Item group deleted successfully.']);
         }
 
-        return redirect()->route('inventory.item-class-coding.list')
-            ->with('success', 'Item class deleted successfully.');
+        return redirect()->route('inventory.item-group-coding.list')
+            ->with('success', 'Item group deleted successfully.');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+
+        if (!$compId || !$locationId) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Company and Location information is required.'], 400);
+            }
+            return back()->withErrors(['error' => 'Company and Location information is required.']);
+        }
+
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'No items selected for deletion.'], 400);
+            }
+            return back()->withErrors(['error' => 'No items selected for deletion.']);
+        }
+
+        InventoryItemGroup::whereIn('id', $ids)
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Selected item groups deleted successfully.']);
+        }
+
+        return redirect()->route('inventory.item-group-coding.list')
+            ->with('success', 'Selected item groups deleted successfully.');
     }
 }

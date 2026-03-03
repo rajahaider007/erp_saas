@@ -16,8 +16,6 @@ class InventoryItemClass extends Model
         'location_id',
         'class_code',
         'class_name',
-        'tracking_type',
-        'abc_classification',
         'description',
         'is_active',
     ];
@@ -27,24 +25,6 @@ class InventoryItemClass extends Model
         'location_id' => 'integer',
         'is_active' => 'boolean',
     ];
-
-    public static function trackingTypeOptions(): array
-    {
-        return [
-            ['value' => 'none', 'label' => 'No Tracking'],
-            ['value' => 'batch', 'label' => 'Batch / Lot Tracking'],
-            ['value' => 'serial', 'label' => 'Serial Tracking'],
-        ];
-    }
-
-    public static function abcClassificationOptions(): array
-    {
-        return [
-            ['value' => 'A', 'label' => 'A - High Value / Tight Control'],
-            ['value' => 'B', 'label' => 'B - Medium Value'],
-            ['value' => 'C', 'label' => 'C - Standard Control'],
-        ];
-    }
 
     public function categories()
     {
@@ -59,5 +39,10 @@ class InventoryItemClass extends Model
     public function scopeByCompanyAndLocation($query, $compId, $locationId)
     {
         return $query->where('comp_id', $compId)->where('location_id', $locationId);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 }

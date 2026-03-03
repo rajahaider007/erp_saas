@@ -77,10 +77,13 @@ Ye document Inventory Module ka **global-level functional + control blueprint** 
 ## 3) 🧱 Inventory Data Model Blueprint
 
 ## 3.1 Master Data
+
 1. **Item Master**
    - Item code (unique)
    - Description (short/long)
-   - Category / subcategory
+   - Class
+   - Category
+   - Group Coding
    - Inventory type (raw, finished, trading, consumable, service-non-stock)
    - Tracking mode (none / lot / serial)
    - Shelf-life & expiry rules (optional)

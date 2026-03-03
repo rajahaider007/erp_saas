@@ -5,18 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class InventoryItemCategory extends Model
+class InventoryItemGroup extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'inventory_item_categories';
+    protected $table = 'inventory_item_groups';
 
     protected $fillable = [
         'comp_id',
         'location_id',
-        'category_code',
-        'category_name',
-        'item_class_id',
+        'group_code',
+        'group_name',
         'description',
         'is_active',
     ];
@@ -24,24 +23,8 @@ class InventoryItemCategory extends Model
     protected $casts = [
         'comp_id' => 'integer',
         'location_id' => 'integer',
-        'item_class_id' => 'integer',
         'is_active' => 'boolean',
     ];
-
-    public function itemClass()
-    {
-        return $this->belongsTo(InventoryItemClass::class, 'item_class_id');
-    }
-
-    public function classes()
-    {
-        return $this->belongsToMany(
-            InventoryItemClass::class,
-            'inventory_category_class',
-            'category_id',
-            'class_id'
-        )->withTimestamps();
-    }
 
     public function scopeByCompanyAndLocation($query, $compId, $locationId)
     {

@@ -38,41 +38,41 @@ const Breadcrumbs = ({ items }) => {
           </div>
         ))}
       </nav>
-      <div className="breadcrumbs-description">Configure inventory item classes</div>
+      <div className="breadcrumbs-description">Configure inventory item groups</div>
     </div>
   );
 };
 
-const CreateItemClassCodingForm = () => {
+const CreateItemGroupCodingForm = () => {
   const {
     errors: pageErrors,
     flash,
-    itemClass = null,
+    itemGroup = null,
     error,
   } = usePage().props;
 
-  const isEditMode = !!itemClass;
+  const isEditMode = !!itemGroup;
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
 
-  const classFields = [
+  const groupFields = [
     {
-      name: 'class_code',
-      label: 'Class Code',
+      name: 'group_code',
+      label: 'Group Code',
       type: 'text',
-      placeholder: 'Enter class code (e.g., ELEC, FOOD, CHEM)',
+      placeholder: 'Enter group code (e.g., RAW, FG, SPARE)',
       icon: Hash,
       required: true,
     },
     {
-      name: 'class_name',
-      label: 'Class Name',
+      name: 'group_name',
+      label: 'Group Name',
       type: 'text',
-      placeholder: 'Enter class name',
+      placeholder: 'Enter group name',
       icon: Tag,
       required: true,
     },
- {
+    {
       name: 'description',
       label: 'Description',
       type: 'textarea',
@@ -117,12 +117,12 @@ const CreateItemClassCodingForm = () => {
 
     const newErrors = {};
 
-    if (!submittedFormData.class_code?.trim()) {
-      newErrors.class_code = 'Class code is required';
+    if (!submittedFormData.group_code?.trim()) {
+      newErrors.group_code = 'Group code is required';
     }
 
-    if (!submittedFormData.class_name?.trim()) {
-      newErrors.class_name = 'Class name is required';
+    if (!submittedFormData.group_name?.trim()) {
+      newErrors.group_name = 'Group name is required';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -132,21 +132,21 @@ const CreateItemClassCodingForm = () => {
     }
 
     const formDataToSend = new FormData();
-    formDataToSend.append('class_code', submittedFormData.class_code || '');
-    formDataToSend.append('class_name', submittedFormData.class_name || '');
+    formDataToSend.append('group_code', submittedFormData.group_code || '');
+    formDataToSend.append('group_name', submittedFormData.group_name || '');
     formDataToSend.append('description', submittedFormData.description || '');
     formDataToSend.append('is_active', submittedFormData.is_active ? '1' : '0');
 
     if (isEditMode) {
       formDataToSend.append('_method', 'PUT');
-      router.post(`/inventory/item-class-coding/${itemClass.id}`, formDataToSend, {
+      router.post(`/inventory/item-group-coding/${itemGroup.id}`, formDataToSend, {
         forceFormData: true,
         onError: (serverErrors) => {
           setErrors(serverErrors);
         },
       });
     } else {
-      router.post('/inventory/item-class-coding', formDataToSend, {
+      router.post('/inventory/item-group-coding', formDataToSend, {
         forceFormData: true,
         onError: (serverErrors) => {
           setErrors(serverErrors);
@@ -157,8 +157,8 @@ const CreateItemClassCodingForm = () => {
 
   const breadcrumbItems = [
     { label: 'Dashboard', icon: Home, href: '/dashboard' },
-    { label: 'Item Class Coding', icon: List, href: '/inventory/item-class-coding' },
-    { label: isEditMode ? `Edit: ${itemClass.class_code}` : 'Add Item Class', icon: isEditMode ? Edit3 : Plus, href: null },
+    { label: 'Item Group Coding', icon: List, href: '/inventory/item-group-coding' },
+    { label: isEditMode ? `Edit: ${itemGroup.group_code}` : 'Add Item Group', icon: isEditMode ? Edit3 : Plus, href: null },
   ];
 
   return (
@@ -182,21 +182,21 @@ const CreateItemClassCodingForm = () => {
       )}
 
       <GeneralizedForm
-        title={isEditMode ? "Edit Item Class" : "Add Item Class"}
-        subtitle={isEditMode ? "Update item class information" : "Create item class (link to categories later)"}
-        fields={classFields}
+        title={isEditMode ? "Edit Item Group" : "Add Item Group"}
+        subtitle={isEditMode ? "Update item group information" : "Create item group (link to categories later)"}
+        fields={groupFields}
         onSubmit={handleSubmit}
-        submitText={isEditMode ? "Update Class" : "Create Class"}
+        submitText={isEditMode ? "Update Group" : "Create Group"}
         resetText="Clear Form"
         showReset={!isEditMode}
         initialData={isEditMode ? {
-          class_code: itemClass.class_code || '',
-          class_name: itemClass.class_name || '',
-          description: itemClass.description || '',
-          is_active: itemClass.is_active ?? true,
+          group_code: itemGroup.group_code || '',
+          group_name: itemGroup.group_name || '',
+          description: itemGroup.description || '',
+          is_active: itemGroup.is_active ?? true,
         } : {
-          class_code: '',
-          class_name: '',
+          group_code: '',
+          group_name: '',
           description: '',
           is_active: true,
         }}
@@ -210,7 +210,7 @@ const Create = () => {
     <App>
       <div className="rounded-xl shadow-lg form-container border-slate-200">
         <div className="p-6">
-          <CreateItemClassCodingForm />
+          <CreateItemGroupCodingForm />
         </div>
       </div>
     </App>

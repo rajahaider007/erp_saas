@@ -17,8 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('location_id')->nullable()->index();
             $table->string('category_code', 30);
             $table->string('category_name', 150);
-            $table->string('inventory_type', 50)->default('trading_goods');
-            $table->string('valuation_method', 30)->default('weighted_average');
+            $table->unsignedBigInteger('item_class_id')->nullable()->index();
             $table->string('description', 500)->nullable();
             $table->boolean('is_active')->default(true)->index();
             $table->timestamps();

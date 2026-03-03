@@ -26,12 +26,12 @@ class ItemCategoryCodingController extends Controller
 
         $search = $request->input('search');
         $status = $request->input('status');
-        $inventoryType = $request->input('inventory_type');
         $sortBy = $request->input('sort_by', 'category_code');
         $sortDirection = $request->input('sort_direction', 'asc');
         $perPage = $request->input('per_page', 25);
 
-        $query = InventoryItemCategory::byCompanyAndLocation($compId, $locationId);
+        $query = InventoryItemCategory::byCompanyAndLocation($compId, $locationId)
+            ->with('itemClass:id,class_code,class_name');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -44,10 +44,6 @@ class ItemCategoryCodingController extends Controller
             $query->where('is_active', $status == '1');
         }
 
-        if ($inventoryType && $inventoryType !== 'all') {
-            $query->where('inventory_type', $inventoryType);
-        }
-
         $categories = $query->orderBy($sortBy, $sortDirection)
             ->paginate($perPage)
             ->appends($request->query());
@@ -57,12 +53,10 @@ class ItemCategoryCodingController extends Controller
             'filters' => [
                 'search' => $search,
                 'status' => $status,
-                'inventory_type' => $inventoryType,
                 'sort_by' => $sortBy,
                 'sort_direction' => $sortDirection,
                 'per_page' => $perPage,
             ],
-            'inventoryTypeOptions' => InventoryItemCategory::inventoryTypeOptions(),
         ]);
     }
 
@@ -75,18 +69,21 @@ class ItemCategoryCodingController extends Controller
         if (!$compId || !$locationId) {
             return Inertia::render('Inventory/ItemCategoryCoding/Create', [
                 'error' => 'Company and Location information is required.',
-                'inventoryTypeOptions' => InventoryItemCategory::inventoryTypeOptions(),
-                'valuationMethodOptions' => InventoryItemCategory::valuationMethodOptions(),
-                'trackingTypeOptions' => InventoryItemClass::trackingTypeOptions(),
-                'abcClassificationOptions' => InventoryItemClass::abcClassificationOptions(),
+                'itemClassOptions' => [],
             ]);
         }
 
+        $itemClassOptions = InventoryItemClass::byCompanyAndLocation($compId, $locationId)
+            ->orderBy('class_code')
+            ->get(['id', 'class_code', 'class_name'])
+            ->map(fn ($itemClass) => [
+                'value' => (string) $itemClass->id,
+                'label' => $itemClass->class_code . ' - ' . $itemClass->class_name,
+            ])
+            ->values();
+
         return Inertia::render('Inventory/ItemCategoryCoding/Create', [
-            'inventoryTypeOptions' => InventoryItemCategory::inventoryTypeOptions(),
-            'valuationMethodOptions' => InventoryItemCategory::valuationMethodOptions(),
-            'trackingTypeOptions' => InventoryItemClass::trackingTypeOptions(),
-            'abcClassificationOptions' => InventoryItemClass::abcClassificationOptions(),
+            'itemClassOptions' => $itemClassOptions,
             'edit_mode' => false,
             'category' => null,
         ]);
@@ -104,22 +101,6 @@ class ItemCategoryCodingController extends Controller
             ]);
         }
 
-        $inventoryTypeValues = collect(InventoryItemCategory::inventoryTypeOptions())
-            ->pluck('value')
-            ->toArray();
-
-        $valuationMethodValues = collect(InventoryItemCategory::valuationMethodOptions())
-            ->pluck('value')
-            ->toArray();
-
-        $trackingTypeValues = collect(InventoryItemClass::trackingTypeOptions())
-            ->pluck('value')
-            ->toArray();
-
-        $abcValues = collect(InventoryItemClass::abcClassificationOptions())
-            ->pluck('value')
-            ->toArray();
-
         $validated = $request->validate([
             'category_code' => [
                 'required',
@@ -132,11 +113,16 @@ class ItemCategoryCodingController extends Controller
                         ->whereNull('deleted_at')),
             ],
             'category_name' => 'required|string|max:150',
-            'inventory_type' => 'required|in:' . implode(',', $inventoryTypeValues),
-            'valuation_method' => 'required|in:' . implode(',', $valuationMethodValues),
+            'item_class_id' => [
+                'required',
+                'integer',
+                Rule::exists('inventory_item_classes', 'id')->where(fn ($query) => $query
+                    ->where('comp_id', $compId)
+                    ->where('location_id', $locationId)
+                    ->whereNull('deleted_at')),
+            ],
             'description' => 'nullable|string|max:500',
             'is_active' => 'nullable|boolean',
-            'classes' => 'nullable|string',
         ]);
 
         // Create category
@@ -145,47 +131,12 @@ class ItemCategoryCodingController extends Controller
             'location_id' => $locationId,
             'category_code' => strtoupper(trim($validated['category_code'])),
             'category_name' => trim($validated['category_name']),
-            'inventory_type' => $validated['inventory_type'],
-            'valuation_method' => $validated['valuation_method'],
+            'item_class_id' => $validated['item_class_id'],
             'description' => $validated['description'] ?? null,
             'is_active' => $validated['is_active'] ?? true,
         ]);
 
-        // Create classes if provided
-        $classCount = 0;
-        if (!empty($validated['classes'])) {
-            $classes = json_decode($validated['classes'], true);
-            if (is_array($classes)) {
-                $classIds = [];
-                foreach ($classes as $classData) {
-                    if (!empty($classData['class_code']) && !empty($classData['class_name'])) {
-                        $class = InventoryItemClass::create([
-                            'comp_id' => $compId,
-                            'location_id' => $locationId,
-                            'class_code' => strtoupper(trim($classData['class_code'])),
-                            'class_name' => trim($classData['class_name']),
-                            'tracking_type' => $classData['tracking_type'] ?? 'none',
-                            'abc_classification' => $classData['abc_classification'] ?? 'B',
-                            'description' => $classData['description'] ?? null,
-                            'is_active' => $classData['is_active'] ?? true,
-                        ]);
-                        $classIds[] = $class->id;
-                        $classCount++;
-                    }
-                }
-                
-                // Attach classes to category via pivot table
-                if (!empty($classIds)) {
-                    $category->classes()->attach($classIds);
-                }
-            }
-        }
-
-        $message = 'Item category created successfully';
-        if ($classCount > 0) {
-            $message .= ' with ' . $classCount . ' classes';
-        }
-        $message .= '.';
+        $message = 'Item category created successfully.';
 
         return redirect()->route('inventory.item-category-coding.list')
             ->with('success', $message);
@@ -200,17 +151,18 @@ class ItemCategoryCodingController extends Controller
         $category = InventoryItemCategory::byCompanyAndLocation($compId, $locationId)
             ->findOrFail($id);
 
-        // Get related classes through pivot table
-        $relatedClasses = $category->classes()
-            ->where('comp_id', $compId)
-            ->where('location_id', $locationId)
-            ->get();
+        $itemClassOptions = InventoryItemClass::byCompanyAndLocation($compId, $locationId)
+            ->orderBy('class_code')
+            ->get(['id', 'class_code', 'class_name'])
+            ->map(fn ($itemClass) => [
+                'value' => (string) $itemClass->id,
+                'label' => $itemClass->class_code . ' - ' . $itemClass->class_name,
+            ])
+            ->values();
 
-        return Inertia::render('Inventory/ItemCategoryCoding/Edit', [
+        return Inertia::render('Inventory/ItemCategoryCoding/Create', [
             'category' => $category,
-            'relatedClasses' => $relatedClasses,
-            'inventoryTypeOptions' => InventoryItemCategory::inventoryTypeOptions(),
-            'valuationMethodOptions' => InventoryItemCategory::valuationMethodOptions(),
+            'itemClassOptions' => $itemClassOptions,
             'edit_mode' => true,
         ]);
     }
@@ -223,14 +175,6 @@ class ItemCategoryCodingController extends Controller
 
         $category = InventoryItemCategory::byCompanyAndLocation($compId, $locationId)
             ->findOrFail($id);
-
-        $inventoryTypeValues = collect(InventoryItemCategory::inventoryTypeOptions())
-            ->pluck('value')
-            ->toArray();
-
-        $valuationMethodValues = collect(InventoryItemCategory::valuationMethodOptions())
-            ->pluck('value')
-            ->toArray();
 
         $validated = $request->validate([
             'category_code' => [
@@ -245,8 +189,14 @@ class ItemCategoryCodingController extends Controller
                         ->whereNull('deleted_at')),
             ],
             'category_name' => 'required|string|max:150',
-            'inventory_type' => 'required|in:' . implode(',', $inventoryTypeValues),
-            'valuation_method' => 'required|in:' . implode(',', $valuationMethodValues),
+            'item_class_id' => [
+                'required',
+                'integer',
+                Rule::exists('inventory_item_classes', 'id')->where(fn ($query) => $query
+                    ->where('comp_id', $compId)
+                    ->where('location_id', $locationId)
+                    ->whereNull('deleted_at')),
+            ],
             'description' => 'nullable|string|max:500',
             'is_active' => 'nullable|boolean',
         ]);
@@ -254,8 +204,7 @@ class ItemCategoryCodingController extends Controller
         $category->update([
             'category_code' => strtoupper(trim($validated['category_code'])),
             'category_name' => trim($validated['category_name']),
-            'inventory_type' => $validated['inventory_type'],
-            'valuation_method' => $validated['valuation_method'],
+            'item_class_id' => $validated['item_class_id'],
             'description' => $validated['description'] ?? null,
             'is_active' => $validated['is_active'] ?? true,
         ]);

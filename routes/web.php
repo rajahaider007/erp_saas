@@ -19,6 +19,8 @@ use App\Http\Controllers\system\UserController;
 use App\Http\Controllers\system\CurrencyController;
 use App\Http\Controllers\Inventory\ItemCategoryCodingController;
 use App\Http\Controllers\Inventory\ItemClassCodingController;
+use App\Http\Controllers\Inventory\ItemGroupCodingController;
+use App\Http\Controllers\Inventory\ItemMasterController;
 
 // Public routes
 Route::get('/', function () {
@@ -87,21 +89,44 @@ Route::get('/accounts/chart-of-accounts', [App\Http\Controllers\Accounts\ChartOf
 
 // Inventory Module - Coding Forms
 Route::prefix('inventory/item-category-coding')->name('inventory.item-category-coding.')->middleware('web.auth')->group(function () {
-    Route::get('/', [ItemCategoryCodingController::class, 'create'])->name('create');
+    Route::get('/', [ItemCategoryCodingController::class, 'list'])->name('list');
+    Route::get('/create', [ItemCategoryCodingController::class, 'create'])->name('create');
     Route::post('/', [ItemCategoryCodingController::class, 'store'])->name('store');
-    Route::get('/list', [ItemCategoryCodingController::class, 'list'])->name('list');
     Route::get('/{id}/edit', [ItemCategoryCodingController::class, 'edit'])->name('edit');
     Route::put('/{id}', [ItemCategoryCodingController::class, 'update'])->name('update');
     Route::delete('/{id}', [ItemCategoryCodingController::class, 'destroy'])->name('destroy');
 });
 
 Route::prefix('inventory/item-class-coding')->name('inventory.item-class-coding.')->middleware('web.auth')->group(function () {
-    Route::get('/', [ItemClassCodingController::class, 'create'])->name('create');
+    Route::get('/', [ItemClassCodingController::class, 'list'])->name('list');    
+    Route::get('/create', [ItemClassCodingController::class, 'create'])->name('create');
     Route::post('/', [ItemClassCodingController::class, 'store'])->name('store');
-    Route::get('/list', [ItemClassCodingController::class, 'list'])->name('list');
     Route::get('/{id}/edit', [ItemClassCodingController::class, 'edit'])->name('edit');
     Route::put('/{id}', [ItemClassCodingController::class, 'update'])->name('update');
     Route::delete('/{id}', [ItemClassCodingController::class, 'destroy'])->name('destroy');
+    Route::post('/bulk-destroy', [ItemClassCodingController::class, 'bulkDestroy'])->name('bulk-destroy');
+});
+
+Route::prefix('inventory/item-group-coding')->name('inventory.item-group-coding.')->middleware('web.auth')->group(function () {
+    Route::get('/', [ItemGroupCodingController::class, 'list'])->name('list');    
+    Route::get('/create', [ItemGroupCodingController::class, 'create'])->name('create');
+    Route::post('/', [ItemGroupCodingController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [ItemGroupCodingController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [ItemGroupCodingController::class, 'update'])->name('update');
+    Route::delete('/{id}', [ItemGroupCodingController::class, 'destroy'])->name('destroy');
+    Route::post('/bulk-destroy', [ItemGroupCodingController::class, 'bulkDestroy'])->name('bulk-destroy');
+});
+
+// Inventory Module - Item Master
+Route::prefix('inventory/item-master')->name('inventory.item-master.')->middleware('web.auth')->group(function () {
+    Route::get('/', [ItemMasterController::class, 'list'])->name('list');
+    Route::get('/create', [ItemMasterController::class, 'create'])->name('create');
+    Route::post('/', [ItemMasterController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [ItemMasterController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [ItemMasterController::class, 'update'])->name('update');
+    Route::delete('/{id}', [ItemMasterController::class, 'destroy'])->name('destroy');
+    Route::post('/bulk-destroy', [ItemMasterController::class, 'bulkDestroy'])->name('bulk-destroy');
+    Route::get('/export-csv', [ItemMasterController::class, 'exportCsv'])->name('export-csv');
 });
 
 // Voucher Number Configuration Routes
