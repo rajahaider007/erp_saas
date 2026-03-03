@@ -1,319 +1,252 @@
-import React, { useState, useEffect } from 'react';
-import { Home, List, Plus, Search, Download, Trash2, Edit, Eye } from 'lucide-react';
-import { router, usePage } from '@inertiajs/react';
-import App from '../../App.jsx';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import App from "../../App.jsx";
+import { usePage, router } from '@inertiajs/react';
+import { Search, Plus, Edit3, Trash2, Download, ChevronDown, ArrowUpDown, Columns, Clock, MoreHorizontal, RefreshCcw, FileText, CheckCircle2, X, Database, Eye, Copy, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const Breadcrumbs = ({ items }) => {
+// Custom Alert Component
+const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, confirmButtonText = 'OK', cancelButtonText = 'Cancel', onConfirm, onCancel }) => {
+  const el = document.createElement('div'); el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999';
+  const iconHtml = { success:'<div style="color:#10B981;font-size:48px;">✓</div>', error:'<div style="color:#EF4444;font-size:48px;">✗</div>', warning:'<div style="color:#F59E0B;font-size:48px;">⚠</div>', question:'<div style="color:#3B82F6;font-size:48px;">?</div>'}[icon]||'';
+  el.innerHTML = `<div style="background:#fff;border-radius:12px;padding:32px;min-width:400px;text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,.25)"> ${iconHtml}<h3 style="margin:20px 0 12px;font-size:20px;font-weight:600;color:#1F2937">${title}</h3><p style="margin:0 0 24px;color:#6B7280">${text}</p><div style="display:flex;gap:12px;justify-content:center;">${showCancelButton?`<button id='c' style='background:#F3F4F6;color:#374151;border:none;padding:12px 24px;border-radius:8px;font-weight:500;cursor:pointer'>${cancelButtonText}</button>`:''}<button id='o' style='background:${icon==='error'||icon==='warning'?'#EF4444':'#3B82F6'};color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:500;cursor:pointer'>${confirmButtonText}</button></div></div>`;
+  document.body.appendChild(el);
+  el.querySelector('#o').addEventListener('click', () => { document.body.removeChild(el); onConfirm && onConfirm(); });
+  const c = el.querySelector('#c'); c && c.addEventListener('click', () => { document.body.removeChild(el); onCancel && onCancel(); });
+}};
+
+export default function List() {
+  const { items: paginatedItems, filters, flash, error } = usePage().props;
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(filters?.search || '');
+  const [statusFilter, setStatusFilter] = useState(filters?.status || 'all');
+  const [sortConfig, setSortConfig] = useState({ key: filters?.sort_by || 'item_code', direction: filters?.sort_direction || 'asc' });
+  const [currentPage, setCurrentPage] = useState(paginatedItems?.current_page || 1);
+  const [pageSize, setPageSize] = useState(filters?.per_page || 25);
+  const [selected, setSelected] = useState([]);
+  const [showColumnSelector, setShowColumnSelector] = useState(false);
+
+  const visibleColumnsInit = useMemo(() => ({ id: true, itemCode: true, itemName: true, itemType: true, category: true, costingMethod: true, status: true, actions: true }), []);
+  const [visibleColumns, setVisibleColumns] = useState(visibleColumnsInit);
+
+  useEffect(() => { if (flash?.success) CustomAlert.fire({ title: 'Success!', text: flash.success, icon: 'success' }); else if (flash?.error) CustomAlert.fire({ title:'Error!', text: flash.error, icon: 'error' }); }, [flash]);
+
+  const pushQuery = (obj) => { const params = new URLSearchParams(window.location.search); Object.entries(obj).forEach(([k,v])=>{ if(v===undefined||v===null||v===''||v==='all') params.delete(k); else params.set(k,v); }); if(!obj.page) params.set('page','1'); router.get(window.location.pathname+'?'+params.toString(), {}, { preserveState:true, preserveScroll:true }); };
+  const handleSearch = (t) => { setSearchTerm(t); pushQuery({ search:t }); };
+  const handleStatusFilter = (s) => { setStatusFilter(s); pushQuery({ status:s }); };
+  const handleSort = (key) => { const dir = sortConfig.key===key && sortConfig.direction==='asc'?'desc':'asc'; setSortConfig({ key, direction:dir }); pushQuery({ sort_by:key, sort_direction:dir }); };
+  const handlePageChange = (p) => { setCurrentPage(p); pushQuery({ page:p.toString() }); };
+  const handlePageSizeChange = (s) => { setPageSize(s); pushQuery({ per_page:s.toString() }); };
+
+  const handleSelectAll = (checked) => { if (checked) setSelected(paginatedItems.data.map(i=>i.id)); else setSelected([]); };
+  const handleSelectRow = (id, checked) => { if (checked) setSelected(prev=>[...prev, id]); else setSelected(prev=>prev.filter(x=>x!==id)); };
+  const handleBulkDelete = () => { if (!selected.length) return; CustomAlert.fire({ title:'Delete Selected Items?', text:`You are about to delete ${selected.length} item(s).`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete!', onConfirm:()=>{ setLoading(true); router.post('/inventory/item-master/bulk-destroy', { ids:selected }, { onSuccess:()=>setSelected([]), onFinish:()=>setLoading(false) }); } }); };
+  const handleDelete = (item) => { CustomAlert.fire({ title:'Are you sure?', text:`You are about to delete "${item.item_name_short}". This action cannot be undone!`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete it!', cancelButtonText:'Cancel', onConfirm:()=>{ setLoading(true); router.delete(`/inventory/item-master/${item.id}`, { onFinish:()=>setLoading(false) }); } }); };
+
+  const statusOptions = [ { value:'all', label:'All Status' }, { value:'1', label:'Active' }, { value:'0', label:'Inactive' } ];
+  const pageSizeOptions = [10,25,50,100];
+
   return (
-    <div className="breadcrumbs-themed">
-      <nav className="breadcrumbs">
-        {items.map((item, index) => (
-          <div key={index} className="breadcrumb-item">
-            <div className="breadcrumb-item-content">
-              {item.icon && (
-                <item.icon className={`breadcrumb-icon ${item.href ? 'breadcrumb-icon-link' : 'breadcrumb-icon-current'}`} />
-              )}
+    <App>
+      <div className="advanced-module-manager">
+        <div className="manager-header">
+          <div className="header-main">
+            <div className="title-section">
+              <h1 className="page-title"><Database className="title-icon" />{usePage().props?.pageTitle || 'Item Master'}</h1>
+              <div className="stats-summary">
+                <div className="stat-item"><span>{paginatedItems?.total || 0} Total Items</span></div>
+                <div className="stat-item"><span>{paginatedItems?.data?.filter(i=>i.is_active).length || 0} Active</span></div>
+              </div>
+            </div>
+            <div className="header-actions">
+              <button className="btn btn-icon" onClick={()=>window.location.reload()} title="Refresh" disabled={loading}><RefreshCcw size={20} className={loading ? 'animate-spin' : ''} /></button>
+              <a href='/inventory/item-master/create' className="btn btn-primary"><Plus size={20} />Create Item</a>
+            </div>
+          </div>
 
-              {item.href ? (
-                <a href={item.href} className="breadcrumb-link-themed">
-                  {item.label}
-                </a>
-              ) : (
-                <span className="breadcrumb-current-themed">{item.label}</span>
-              )}
+          {/* Modern Compact Filters */}
+          <div className="modern-filters-container">
+            <div className="filters-toolbar">
+              <div className="search-section">
+                <div className="search-input-wrapper">
+                  <Search className="search-icon" size={18} />
+                  <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Search items by code or name..."
+                    value={searchTerm}
+                    onChange={(e) => handleSearch(e.target.value)}
+                  />
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">Status</label>
+                  <select
+                    className="filter-select"
+                    value={statusFilter}
+                    onChange={(e) => handleStatusFilter(e.target.value)}
+                  >
+                    {statusOptions.map(o => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">Per Page</label>
+                  <select
+                    className="filter-select"
+                    value={pageSize}
+                    onChange={(e) => handlePageSizeChange(parseInt(e.target.value))}
+                  >
+                    {pageSizeOptions.map(o => (
+                      <option key={o} value={o}>{o}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  className="reset-btn"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setStatusFilter('all');
+                    const params = new URLSearchParams();
+                    params.set('page', '1');
+                    router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
+                  }}
+                >
+                  Reset Filters
+                </button>
+              </div>
             </div>
 
-            {index < items.length - 1 && (
-              <div className="breadcrumb-separator breadcrumb-separator-themed">
-                <svg viewBox="0 0 20 20" fill="currentColor" className="w-full h-full">
-                  <path
-                    fillRule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+            {selected.length > 0 && (
+              <div className="bulk-actions-bar">
+                <span>{selected.length} item(s) selected</span>
+                <button className="btn-sm btn-danger" onClick={handleBulkDelete}>
+                  <Trash2 size={16} /> Delete Selected
+                </button>
               </div>
             )}
           </div>
-        ))}
-      </nav>
-      <div className="breadcrumbs-description">Manage product masters with complete specifications, pricing, and tax information</div>
-    </div>
-  );
-};
-
-const ItemMasterList = () => {
-  const {
-    items = [],
-    filters = {},
-    error,
-  } = usePage().props;
-
-  const [searchTerm, setSearchTerm] = useState(filters?.search || '');
-  const [statusFilter, setStatusFilter] = useState(filters?.status || 'all');
-  const [sortBy, setSortBy] = useState(filters?.sort_by || 'item_code');
-  const [sortDirection, setSortDirection] = useState(filters?.sort_direction || 'asc');
-  const [perPage, setPerPage] = useState(filters?.per_page || 25);
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [alert, setAlert] = useState(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      router.get('/inventory/item-master', {
-        search: searchTerm,
-        status: statusFilter,
-        sort_by: sortBy,
-        sort_direction: sortDirection,
-        per_page: perPage,
-      }, { preserveState: true });
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm, statusFilter, sortBy, sortDirection, perPage]);
-
-  const handleSort = (field) => {
-    if (sortBy === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(field);
-      setSortDirection('asc');
-    }
-  };
-
-  const handleDeleteItem = (itemId) => {
-    if (confirm('Are you sure you want to delete this item?')) {
-      router.delete(`/inventory/item-master/${itemId}`, {
-        onSuccess: () => setAlert({ type: 'success', message: 'Item deleted successfully' }),
-        onError: () => setAlert({ type: 'error', message: 'Failed to delete item' }),
-      });
-    }
-  };
-
-  const handleBulkDelete = () => {
-    if (selectedItems.length === 0) {
-      setAlert({ type: 'warning', message: 'Please select at least one item' });
-      return;
-    }
-
-    if (confirm(`Delete ${selectedItems.length} items?`)) {
-      router.post('/inventory/item-master/bulk-destroy', { ids: selectedItems }, {
-        onSuccess: () => {
-          setSelectedItems([]);
-          setAlert({ type: 'success', message: 'Items deleted successfully' });
-        },
-        onError: () => setAlert({ type: 'error', message: 'Failed to delete items' }),
-      });
-    }
-  };
-
-  const breadcrumbItems = [
-    { label: 'Dashboard', icon: Home, href: '/dashboard' },
-    { label: 'Item Master', icon: List },
-  ];
-
-  return (
-    <div className="list-page-wrapper">
-      <Breadcrumbs items={breadcrumbItems} />
-
-      {error && (
-        <div className="alert-error-themed mb-4">
-          <p>{error}</p>
         </div>
-      )}
 
-      {alert && (
-        <div className={`alert-${alert.type}-themed mb-4`}>
-          <p>{alert.message}</p>
-        </div>
-      )}
-
-      {/* Filters & Actions */}
-      <div className="list-controls">
-        <div className="controls-row">
-          <div className="search-group">
-            <Search size={18} />
-            <input
-              type="text"
-              placeholder="Search by item code or name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
+        {error && (
+          <div className="alert-error-themed mb-4">
+            <p>{error}</p>
           </div>
+        )}
 
-          <div className="filter-group">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">All Status</option>
-              <option value="1">Active</option>
-              <option value="0">Inactive</option>
-            </select>
-
-            <select
-              value={perPage}
-              onChange={(e) => setPerPage(e.target.value)}
-              className="filter-select"
-            >
-              <option value="10">10 per page</option>
-              <option value="25">25 per page</option>
-              <option value="50">50 per page</option>
-              <option value="100">100 per page</option>
-            </select>
-          </div>
-
-          <div className="action-group">
-            <button className="btn-action btn-export" title="Export to CSV">
-              <Download size={18} /> Export
-            </button>
-            {selectedItems.length > 0 && (
-              <button
-                className="btn-action btn-delete"
-                onClick={handleBulkDelete}
-                title="Delete selected items"
-              >
-                <Trash2 size={18} /> Delete ({selectedItems.length})
-              </button>
-            )}
-            <a href="/inventory/item-master/create" className="btn-action btn-primary">
-              <Plus size={18} /> Create Item
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Items Table */}
-      <div className="table-container">
-        {items?.data?.length > 0 ? (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th style={{ width: '40px' }}>
-                  <input
-                    type="checkbox"
-                    checked={selectedItems.length === items.data.length && items.data.length > 0}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedItems(items.data.map(item => item.id));
-                      } else {
-                        setSelectedItems([]);
-                      }
-                    }}
-                  />
-                </th>
-                <th onClick={() => handleSort('item_code')} className="sortable-header">
-                  Item Code
-                  {sortBy === 'item_code' && <span>{sortDirection === 'asc' ? ' ↑' : ' ↓'}</span>}
-                </th>
-                <th onClick={() => handleSort('item_name_short')} className="sortable-header">
-                  Item Name
-                  {sortBy === 'item_name_short' && <span>{sortDirection === 'asc' ? ' ↑' : ' ↓'}</span>}
-                </th>
-                <th>Item Type</th>
-                <th>Category</th>
-                <th>Costing Method</th>
-                <th>Status</th>
-                <th style={{ width: '120px' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.data.map((item) => (
-                <tr key={item.id}>
-                  <td>
+        {/* Items Table */}
+        <div className="table-container">
+          {paginatedItems?.data?.length > 0 ? (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th style={{ width: '40px' }}>
                     <input
                       type="checkbox"
-                      checked={selectedItems.includes(item.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedItems([...selectedItems, item.id]);
-                        } else {
-                          setSelectedItems(selectedItems.filter(id => id !== item.id));
-                        }
-                      }}
+                      checked={selected.length === paginatedItems.data.length && paginatedItems.data.length > 0}
+                      onChange={(e) => handleSelectAll(e.target.checked)}
                     />
-                  </td>
-                  <td className="font-mono text-sm font-semibold">{item.item_code}</td>
-                  <td>
-                    <div>
-                      <div className="font-medium">{item.item_name_short}</div>
-                      {item.item_name_long && (
-                        <div className="text-xs text-gray-500 truncate">{item.item_name_long}</div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="text-sm">
-                    <span className="badge badge-info">{item.item_type}</span>
-                  </td>
-                  <td className="text-sm">{item.category?.category_name || '-'}</td>
-                  <td className="text-sm font-mono">{item.costing_method?.toUpperCase()}</td>
-                  <td>
-                    <span className={`badge ${item.is_active ? 'badge-success' : 'badge-danger'}`}>
-                      {item.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                      <a
-                        href={`/inventory/item-master/${item.id}/edit`}
-                        className="btn-icon btn-edit"
-                        title="Edit"
-                      >
-                        <Edit size={16} />
-                      </a>
-                      <button
-                        className="btn-icon btn-delete"
-                        onClick={() => handleDeleteItem(item.id)}
-                        title="Delete"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
+                  </th>
+                  <th onClick={() => handleSort('item_code')} className="sortable-header">
+                    Item Code {sortConfig.key === 'item_code' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th onClick={() => handleSort('item_name_short')} className="sortable-header">
+                    Item Name {sortConfig.key === 'item_name_short' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th>Item Type</th>
+                  <th>Category</th>
+                  <th>Costing Method</th>
+                  <th>Status</th>
+                  <th style={{ width: '100px' }}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div className="empty-state">
-            <List size={48} />
-            <h3>No Items Found</h3>
-            <p>No inventory items yet. Create your first item to get started.</p>
-            <a href="/inventory/item-master/create" className="btn-primary mt-4">
-              Create Item
-            </a>
+              </thead>
+              <tbody>
+                {paginatedItems.data.map((item) => (
+                  <tr key={item.id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(item.id)}
+                        onChange={(e) => handleSelectRow(item.id, e.target.checked)}
+                      />
+                    </td>
+                    <td className="font-mono text-sm font-semibold">{item.item_code}</td>
+                    <td>
+                      <div>
+                        <div className="font-medium">{item.item_name_short}</div>
+                        {item.item_name_long && (
+                          <div className="text-xs text-gray-500 truncate">{item.item_name_long}</div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="text-sm">
+                      <span className="badge badge-info">{item.item_type?.replace('_', ' ').toUpperCase()}</span>
+                    </td>
+                    <td className="text-sm">{item.itemCategory?.category_name || '-'}</td>
+                    <td className="text-sm font-mono">{item.costing_method?.toUpperCase()}</td>
+                    <td>
+                      <span className={`badge ${item.is_active ? 'badge-success' : 'badge-danger'}`}>
+                        {item.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="action-buttons">
+                        <a
+                          href={`/inventory/item-master/${item.id}/edit`}
+                          className="btn-icon btn-edit"
+                          title="Edit"
+                        >
+                          <Edit3 size={16} />
+                        </a>
+                        <button
+                          className="btn-icon btn-delete"
+                          onClick={() => handleDelete(item)}
+                          title="Delete"
+                          disabled={loading}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="empty-state">
+              <Database size={48} />
+              <h3>No Items Found</h3>
+              <p>No inventory items yet. Create your first item to get started.</p>
+              <a href="/inventory/item-master/create" className="btn btn-primary mt-4">
+                <Plus size={20} /> Create Item
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* Pagination */}
+        {paginatedItems?.links && paginatedItems.links.length > 1 && (
+          <div className="pagination-container">
+            {paginatedItems.links.map((link, index) => (
+              link.url ? (
+                <a
+                  key={index}
+                  href={link.url}
+                  className={`pagination-link ${link.active ? 'active' : ''}`}
+                  dangerouslySetInnerHTML={{ __html: link.label }}
+                />
+              ) : (
+                <span
+                  key={index}
+                  className="pagination-link disabled"
+                  dangerouslySetInnerHTML={{ __html: link.label }}
+                />
+              )
+            ))}
           </div>
         )}
       </div>
-
-      {/* Pagination */}
-      {items?.links && items.links.length > 0 && (
-        <div className="pagination-container">
-          {items.links.map((link, index) => (
-            <a
-              key={index}
-              href={link.url}
-              className={`pagination-link ${link.active ? 'active' : ''} ${!link.url ? 'disabled' : ''}`}
-              dangerouslySetInnerHTML={{ __html: link.label }}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const ListPage = () => {
-  return (
-    <App>
-      <div className="rounded-xl shadow-lg list-container border-slate-200">
-        <div className="p-6">
-          <ItemMasterList />
-        </div>
-      </div>
     </App>
   );
-};
-
-export default ListPage;
+}

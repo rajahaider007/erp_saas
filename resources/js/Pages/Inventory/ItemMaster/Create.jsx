@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Plus, Edit3, Package, Layers, BarChart3, DollarSign, Calendar, Zap, Maximize2, Hash, AlertCircle } from 'lucide-react';
+import { Home, Plus, Edit3, Package, Layers, DollarSign, Calendar, Zap, Hash } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import App from '../../App.jsx';
 import { router, usePage } from '@inertiajs/react';
@@ -584,6 +584,18 @@ const CreateItemMasterForm = () => {
     ...analyticsFields,
   ];
 
+  // Section groupings for display with icons and descriptions
+  const sectionGroups = [
+    { title: 'Section A: Header Information', icon: Package, description: 'Basic product identification and classification', fields: headerFields },
+    !isEditMode && { title: 'Section B: Tracking & UOM Configuration', icon: Layers, description: 'Define tracking mode and unit of measure conversions', fields: trackingFields },
+    { title: 'Section C: Costing & Procurement', icon: DollarSign, description: 'Valuation method, reorder points, and vendor information', fields: costingFields },
+    { title: 'Section D: Expiry & Storage', icon: Calendar, description: 'Shelf life management and storage requirements', fields: expiryFields },
+    { title: 'Section E: Physical Attributes', icon: Package, description: 'Weight, volume, and dimension specifications', fields: physicalFields },
+    { title: 'Section F: Tax & Trade Compliance', icon: Hash, description: 'Tax codes and international trade information', fields: taxFields },
+    { title: 'Section G: GL Account Mapping', icon: DollarSign, description: 'Accounting mappings for inventory and expenses', fields: glFields },
+    { title: 'Section H: Classification & Analytics', icon: Zap, description: 'ABC classification and slow-moving tracking', fields: analyticsFields }
+  ].filter(Boolean);
+
   const handleSubmit = (formData) => {
     setErrors({});
     setAlert(null);
@@ -709,8 +721,52 @@ const CreateItemMasterForm = () => {
     { label: isEditMode ? 'Edit Item' : 'Create Item', icon: isEditMode ? Edit3 : Plus },
   ];
 
+  const initialData = {
+    item_code: item?.item_code || '',
+    item_name_short: item?.item_name_short || '',
+    item_name_long: item?.item_name_long || '',
+    item_status: item?.item_status || 'active',
+    item_type: item?.item_type || '',
+    item_class_id: item?.item_class_id ? String(item.item_class_id) : '',
+    item_category_id: item?.item_category_id ? String(item.item_category_id) : '',
+    item_group_id: item?.item_group_id ? String(item.item_group_id) : '',
+    brand: item?.brand || '',
+    tracking_mode: item?.tracking_mode || 'none',
+    stock_uom_id: item?.stock_uom_id ? String(item.stock_uom_id) : '',
+    purchase_uom_id: item?.purchase_uom_id ? String(item.purchase_uom_id) : '',
+    sales_uom_id: item?.sales_uom_id ? String(item.sales_uom_id) : '',
+    costing_method: item?.costing_method || 'fifo',
+    standard_cost: item?.standard_cost || '',
+    minimum_order_qty: item?.minimum_order_qty || '',
+    reorder_point: item?.reorder_point || '',
+    safety_stock: item?.safety_stock || '',
+    maximum_stock_level: item?.maximum_stock_level || '',
+    lead_time_days: item?.lead_time_days || '',
+    expiry_tracking: item?.expiry_tracking || false,
+    shelf_life_days: item?.shelf_life_days || '',
+    expiry_basis: item?.expiry_basis || 'manufacturing_date',
+    near_expiry_alert_days: item?.near_expiry_alert_days || '',
+    storage_temperature_class: item?.storage_temperature_class || 'ambient',
+    hazardous_material: item?.hazardous_material || false,
+    gross_weight_kg: item?.gross_weight_kg || '',
+    net_weight_kg: item?.net_weight_kg || '',
+    volume_cbm: item?.volume_cbm || '',
+    dimensions: item?.dimensions || '',
+    tax_category_id: item?.tax_category_id ? String(item.tax_category_id) : '',
+    hsn_code: item?.hsn_code || '',
+    hs_tariff_code: item?.hs_tariff_code || '',
+    country_of_origin_id: item?.country_of_origin_id ? String(item.country_of_origin_id) : '',
+    barcode_gtin: item?.barcode_gtin || '',
+    inventory_gl_account_id: item?.inventory_gl_account_id ? String(item.inventory_gl_account_id) : '',
+    cogs_gl_account_id: item?.cogs_gl_account_id ? String(item.cogs_gl_account_id) : '',
+    writeoff_gl_account_id: item?.writeoff_gl_account_id ? String(item.writeoff_gl_account_id) : '',
+    price_variance_gl_account_id: item?.price_variance_gl_account_id ? String(item.price_variance_gl_account_id) : '',
+    abc_classification: item?.abc_classification || 'b',
+    slow_moving_threshold_days: item?.slow_moving_threshold_days || '180',
+  };
+
   return (
-    <div className="form-page-wrapper">
+    <div>
       <Breadcrumbs items={breadcrumbItems} />
 
       {error && (
@@ -732,197 +788,6 @@ const CreateItemMasterForm = () => {
         </div>
       )}
 
-      <div className="form-sections">
-        {/* SECTION A: Header Fields */}
-        <div className="form-section">
-          <div className="section-header">
-            <Package className="section-icon" />
-            <div>
-              <h3 className="section-title">Section A: Header Information</h3>
-              <p className="section-subtitle">Basic product identification and classification</p>
-            </div>
-          </div>
-          <GeneralizedForm
-            fields={headerFields}
-            onSubmit={() => {}}
-            showSubmit={false}
-            initialData={{
-              item_code: item?.item_code || '',
-              item_name_short: item?.item_name_short || '',
-              item_name_long: item?.item_name_long || '',
-              item_status: item?.item_status || 'active',
-              item_type: item?.item_type || '',
-              item_class_id: item?.item_class_id ? String(item.item_class_id) : '',
-              item_category_id: item?.item_category_id ? String(item.item_category_id) : '',
-              item_group_id: item?.item_group_id ? String(item.item_group_id) : '',
-              brand: item?.brand || '',
-            }}
-          />
-        </div>
-
-        {/* SECTION B: Tracking & UOM */}
-        !isEditMode && (
-          <div className="form-section">
-            <div className="section-header">
-              <Layers className="section-icon" />
-              <div>
-                <h3 className="section-title">Section B: Tracking & UOM Configuration</h3>
-                <p className="section-subtitle">Define tracking mode and unit of measure conversions</p>
-              </div>
-            </div>
-            <GeneralizedForm
-              fields={trackingFields}
-              onSubmit={() => {}}
-              showSubmit={false}
-              initialData={{
-                tracking_mode: item?.tracking_mode || 'none',
-                stock_uom_id: item?.stock_uom_id ? String(item.stock_uom_id) : '',
-                purchase_uom_id: item?.purchase_uom_id ? String(item.purchase_uom_id) : '',
-                sales_uom_id: item?.sales_uom_id ? String(item.sales_uom_id) : '',
-              }}
-            />
-          </div>
-        )
-
-        {/* SECTION C: Costing & Procurement */}
-        <div className="form-section">
-          <div className="section-header">
-            <DollarSign className="section-icon" />
-            <div>
-              <h3 className="section-title">Section C: Costing & Procurement</h3>
-              <p className="section-subtitle">Valuation method, reorder points, and vendor information</p>
-            </div>
-          </div>
-          <GeneralizedForm
-            fields={costingFields}
-            onSubmit={() => {}}
-            showSubmit={false}
-            initialData={{
-              costing_method: item?.costing_method || 'fifo',
-              standard_cost: item?.standard_cost || '',
-              last_purchase_price: item?.last_purchase_price || '',
-              minimum_order_qty: item?.minimum_order_qty || '',
-              reorder_point: item?.reorder_point || '',
-              safety_stock: item?.safety_stock || '',
-              maximum_stock_level: item?.maximum_stock_level || '',
-              lead_time_days: item?.lead_time_days || '',
-            }}
-          />
-        </div>
-
-        {/* SECTION D: Expiry & Storage */}
-        <div className="form-section">
-          <div className="section-header">
-            <Calendar className="section-icon" />
-            <div>
-              <h3 className="section-title">Section D: Expiry & Storage</h3>
-              <p className="section-subtitle">Shelf life management and storage requirements</p>
-            </div>
-          </div>
-          <GeneralizedForm
-            fields={expiryFields}
-            onSubmit={() => {}}
-            showSubmit={false}
-            initialData={{
-              expiry_tracking: item?.expiry_tracking || false,
-              shelf_life_days: item?.shelf_life_days || '',
-              expiry_basis: item?.expiry_basis || 'manufacturing_date',
-              near_expiry_alert_days: item?.near_expiry_alert_days || '',
-              storage_temperature_class: item?.storage_temperature_class || 'ambient',
-              hazardous_material: item?.hazardous_material || false,
-            }}
-          />
-        </div>
-
-        {/* SECTION E: Physical Attributes */}
-        <div className="form-section">
-          <div className="section-header">
-            <Maximize2 className="section-icon" />
-            <div>
-              <h3 className="section-title">Section E: Physical Attributes</h3>
-              <p className="section-subtitle">Weight, volume, and dimension specifications</p>
-            </div>
-          </div>
-          <GeneralizedForm
-            fields={physicalFields}
-            onSubmit={() => {}}
-            showSubmit={false}
-            initialData={{
-              gross_weight_kg: item?.gross_weight_kg || '',
-              net_weight_kg: item?.net_weight_kg || '',
-              volume_cbm: item?.volume_cbm || '',
-              dimensions: item?.dimensions || '',
-            }}
-          />
-        </div>
-
-        {/* SECTION F: Tax & Trade Compliance */}
-        <div className="form-section">
-          <div className="section-header">
-            <AlertCircle className="section-icon" />
-            <div>
-              <h3 className="section-title">Section F: Tax & Trade Compliance</h3>
-              <p className="section-subtitle">Tax codes, tariffs, and international trade information</p>
-            </div>
-          </div>
-          <GeneralizedForm
-            fields={taxFields}
-            onSubmit={() => {}}
-            showSubmit={false}
-            initialData={{
-              tax_category_id: item?.tax_category_id ? String(item.tax_category_id) : '',
-              hsn_code: item?.hsn_code || '',
-              hs_tariff_code: item?.hs_tariff_code || '',
-              country_of_origin_id: item?.country_of_origin_id ? String(item.country_of_origin_id) : '',
-              barcode_gtin: item?.barcode_gtin || '',
-            }}
-          />
-        </div>
-
-        {/* SECTION G: GL Account Mapping */}
-        <div className="form-section">
-          <div className="section-header">
-            <BarChart3 className="section-icon" />
-            <div>
-              <h3 className="section-title">Section G: GL Account Mapping</h3>
-              <p className="section-subtitle">Critical for GL posting - map inventory and expense accounts</p>
-            </div>
-          </div>
-          <GeneralizedForm
-            fields={glFields}
-            onSubmit={() => {}}
-            showSubmit={false}
-            initialData={{
-              inventory_gl_account_id: item?.inventory_gl_account_id ? String(item.inventory_gl_account_id) : '',
-              cogs_gl_account_id: item?.cogs_gl_account_id ? String(item.cogs_gl_account_id) : '',
-              writeoff_gl_account_id: item?.writeoff_gl_account_id ? String(item.writeoff_gl_account_id) : '',
-              price_variance_gl_account_id: item?.price_variance_gl_account_id ? String(item.price_variance_gl_account_id) : '',
-            }}
-          />
-        </div>
-
-        {/* SECTION H: Classification & Analytics */}
-        <div className="form-section">
-          <div className="section-header">
-            <Zap className="section-icon" />
-            <div>
-              <h3 className="section-title">Section H: Classification & Analytics</h3>
-              <p className="section-subtitle">ABC classification and slow-moving item tracking</p>
-            </div>
-          </div>
-          <GeneralizedForm
-            fields={analyticsFields}
-            onSubmit={() => {}}
-            showSubmit={false}
-            initialData={{
-              abc_classification: item?.abc_classification || 'b',
-              slow_moving_threshold_days: item?.slow_moving_threshold_days || '180',
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Main Form Submission */}
       <GeneralizedForm
         title={isEditMode ? "Complete Item Master Record" : "Create New Item"}
         subtitle={isEditMode ? "Update all item details and parameters" : "Define complete product master with all required specifications"}
@@ -931,50 +796,8 @@ const CreateItemMasterForm = () => {
         submitText={isEditMode ? "Update Item" : "Create Item"}
         resetText="Clear Form"
         showReset={!isEditMode}
-        initialData={{
-          item_code: item?.item_code || '',
-          item_name_short: item?.item_name_short || '',
-          item_name_long: item?.item_name_long || '',
-          item_status: item?.item_status || 'active',
-          item_type: item?.item_type || '',
-          item_class_id: item?.item_class_id ? String(item.item_class_id) : '',
-          item_category_id: item?.item_category_id ? String(item.item_category_id) : '',
-          item_group_id: item?.item_group_id ? String(item.item_group_id) : '',
-          brand: item?.brand || '',
-          tracking_mode: item?.tracking_mode || 'none',
-          stock_uom_id: item?.stock_uom_id ? String(item.stock_uom_id) : '',
-          purchase_uom_id: item?.purchase_uom_id ? String(item.purchase_uom_id) : '',
-          sales_uom_id: item?.sales_uom_id ? String(item.sales_uom_id) : '',
-          costing_method: item?.costing_method || 'fifo',
-          standard_cost: item?.standard_cost || '',
-          minimum_order_qty: item?.minimum_order_qty || '',
-          reorder_point: item?.reorder_point || '',
-          safety_stock: item?.safety_stock || '',
-          maximum_stock_level: item?.maximum_stock_level || '',
-          lead_time_days: item?.lead_time_days || '',
-          expiry_tracking: item?.expiry_tracking || false,
-          shelf_life_days: item?.shelf_life_days || '',
-          expiry_basis: item?.expiry_basis || 'manufacturing_date',
-          near_expiry_alert_days: item?.near_expiry_alert_days || '',
-          storage_temperature_class: item?.storage_temperature_class || 'ambient',
-          hazardous_material: item?.hazardous_material || false,
-          gross_weight_kg: item?.gross_weight_kg || '',
-          net_weight_kg: item?.net_weight_kg || '',
-          volume_cbm: item?.volume_cbm || '',
-          dimensions: item?.dimensions || '',
-          tax_category_id: item?.tax_category_id ? String(item.tax_category_id) : '',
-          hsn_code: item?.hsn_code || '',
-          hs_tariff_code: item?.hs_tariff_code || '',
-          country_of_origin_id: item?.country_of_origin_id ? String(item.country_of_origin_id) : '',
-          barcode_gtin: item?.barcode_gtin || '',
-          inventory_gl_account_id: item?.inventory_gl_account_id ? String(item.inventory_gl_account_id) : '',
-          cogs_gl_account_id: item?.cogs_gl_account_id ? String(item.cogs_gl_account_id) : '',
-          writeoff_gl_account_id: item?.writeoff_gl_account_id ? String(item.writeoff_gl_account_id) : '',
-          price_variance_gl_account_id: item?.price_variance_gl_account_id ? String(item.price_variance_gl_account_id) : '',
-          abc_classification: item?.abc_classification || 'b',
-          slow_moving_threshold_days: item?.slow_moving_threshold_days || '180',
-        }}
-        hideInSectionView={true}
+        initialData={initialData}
+        fieldGroups={sectionGroups}
       />
     </div>
   );
