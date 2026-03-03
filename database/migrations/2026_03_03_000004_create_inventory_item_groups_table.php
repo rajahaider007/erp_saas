@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('inventory_item_groups')) {
+            return; // Table already exists, skip migration
+        }
+        
         Schema::create('inventory_item_groups', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('comp_id')->nullable()->index();

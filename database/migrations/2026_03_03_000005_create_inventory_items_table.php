@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('inventory_items')) {
+            return; // Table already exists, skip migration
+        }
+        
         Schema::create('inventory_items', function (Blueprint $table) {
             $table->id();
 
@@ -24,9 +28,9 @@ return new class extends Migration
             $table->string('item_name_long', 250)->nullable();
             $table->enum('item_status', ['active', 'inactive', 'discontinued', 'blocked'])->default('active');
             $table->enum('item_type', ['raw_material', 'finished_good', 'trading', 'consumable', 'service']);
-            $table->unsignedBigInteger('item_class_id')->nullable()->index();
-            $table->unsignedBigInteger('item_category_id')->nullable()->index();
-            $table->unsignedBigInteger('item_group_id')->nullable()->index();
+            $table->foreignId('item_class_id')->nullable()->constrained('inventory_item_classes')->onDelete('restrict');
+            $table->foreignId('item_category_id')->nullable()->constrained('inventory_item_categories')->onDelete('restrict');
+            $table->foreignId('item_group_id')->nullable()->constrained('inventory_item_groups')->onDelete('restrict');
             $table->string('brand', 100)->nullable();
             $table->string('item_image_path')->nullable();
 
@@ -45,7 +49,7 @@ return new class extends Migration
             $table->decimal('safety_stock', 15, 4)->nullable();
             $table->decimal('maximum_stock_level', 15, 4)->nullable();
             $table->integer('lead_time_days')->nullable();
-            $table->unsignedBigInteger('default_vendor_id')->nullable()->index();
+            $table->foreignId('default_vendor_id')->nullable()->constrained('vendors')->onDelete('set null');
 
             // Section D: Expiry & Storage
             $table->boolean('expiry_tracking')->default(false);
@@ -62,17 +66,17 @@ return new class extends Migration
             $table->string('dimensions', 50)->nullable();
 
             // Section F: Tax & Trade Compliance
-            $table->unsignedBigInteger('tax_category_id')->nullable()->index();
+            $table->foreignId('tax_category_id')->nullable()->constrained('tax_categories')->onDelete('restrict');
             $table->string('hsn_code', 20)->nullable();
             $table->string('hs_tariff_code', 10)->nullable();
-            $table->unsignedBigInteger('country_of_origin_id')->nullable()->index();
+            $table->foreignId('country_of_origin_id')->nullable()->constrained('countries')->onDelete('set null');
             $table->string('barcode_gtin', 20)->unique()->nullable();
 
             // Section G: GL Account Mapping (Critical)
-            $table->unsignedBigInteger('inventory_gl_account_id')->nullable()->index();
-            $table->unsignedBigInteger('cogs_gl_account_id')->nullable()->index();
-            $table->unsignedBigInteger('writeoff_gl_account_id')->nullable()->index();
-            $table->unsignedBigInteger('price_variance_gl_account_id')->nullable()->index();
+            $table->foreignId('inventory_gl_account_id')->nullable()->constrained('chart_of_accounts')->onDelete('restrict');
+            $table->foreignId('cogs_gl_account_id')->nullable()->constrained('chart_of_accounts')->onDelete('restrict');
+            $table->foreignId('writeoff_gl_account_id')->nullable()->constrained('chart_of_accounts')->onDelete('restrict');
+            $table->foreignId('price_variance_gl_account_id')->nullable()->constrained('chart_of_accounts')->onDelete('restrict');
 
             // Section H: Classification & Analytics
             $table->enum('abc_classification', ['a', 'b', 'c'])->nullable();
