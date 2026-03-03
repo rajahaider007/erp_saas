@@ -11,6 +11,7 @@ This directory contains comprehensive user guides and documentation for AI train
 user_guides/
 ├── currency_system/          # 💱 Currency Management
 ├── accounts_module/          # 📊 Accounting & Finance
+├── inventory_system/         # 📦 Inventory & Stock Management
 ├── system_management/        # ⚙️ System Administration
 └── ai_training/             # 🤖 AI Training Materials
 ```
@@ -38,6 +39,9 @@ user_guides/
 - **CHART_OF_ACCOUNTS_GUIDE.md** - Chart of accounts setup
 - **ACCOUNTING_REPORTS_GUIDE.md** - Financial reporting
 - **MULTI_CURRENCY_ACCOUNTING.md** - Multi-currency accounting
+
+### 📦 **Inventory Module** (`inventory_system/`)
+- **INVENTORY_MODULE_INTERNATIONAL_STANDARDS_BLUEPRINT.md** - International standards blueprint (flows, controls, forms/reports input)
 
 ### ⚙️ **System Management** (`system_management/`)
 - **COMPANY_MANAGEMENT_GUIDE.md** - Company setup & configuration

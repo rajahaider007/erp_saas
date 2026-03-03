@@ -191,13 +191,13 @@ const Sidebar = () => {
           const moduleName = getCurrentModuleName(url);
           return `/${moduleName}`;
         }
-        return '/system/dashboard';
+        return '/system';
       };
 
       const navItems = [
         {
           name: 'Dashboard',
-          href: getDashboardHref(),
+          href: getDashboardHref()+"/dashboard",
           icon: Home,
           current: url === '/dashboard' || (isModuleUrl(url) && url === `/${getCurrentModuleName(url)}`)
         }

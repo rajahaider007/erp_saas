@@ -1,156 +1,196 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import {
-  Search,
-  Plus,
-  Edit3,
-  Trash2,
-  Eye,
-  Filter,
-  Download,
-  RefreshCcw,
-  Settings,
-  ChevronDown,
-  ArrowUpDown,
-  FileText,
-  Calendar,
-  Columns,
-  Copy,
-  Clock,
-  TrendingUp,
-  CheckCircle2,
-  XCircle,
-  Database,
-  Users,
-  X,
-  ChevronLeft,
-  ChevronRight,
-  Briefcase
-} from 'lucide-react';
-
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import App from "../../App.jsx";
-import { router, usePage } from '@inertiajs/react';
+import { usePage, router } from '@inertiajs/react';
+import { Search, Plus, Edit3, Trash2, Download, ChevronDown, ArrowUpDown, Columns, Clock, MoreHorizontal, RefreshCcw, FileText, CheckCircle2, X, Database, Eye, Copy, ChevronLeft, ChevronRight } from 'lucide-react';
 
-// SweetAlert-like component
-const CustomAlert = {
-  fire: ({ title, text, icon, showCancelButton = false, confirmButtonText = 'OK', cancelButtonText = 'Cancel', onConfirm, onCancel }) => {
-    const alertDiv = document.createElement('div');
-    alertDiv.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    `;
-
-    const iconHtml = {
-      success: '<div style="color: #10B981; font-size: 48px;">✓</div>',
-      error: '<div style="color: #EF4444; font-size: 48px;">✗</div>',
-      warning: '<div style="color: #F59E0B; font-size: 48px;">⚠</div>',
-      question: '<div style="color: #3B82F6; font-size: 48px;">?</div>',
-    }[icon] || '';
-
-    alertDiv.innerHTML = `
-      <div style="
-        background: white;
-        border-radius: 12px;
-        padding: 32px;
-        text-align: center;
-        min-width: 400px;
-        max-width: 500px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        animation: slideIn 0.3s ease-out;
-      ">
-        ${iconHtml}
-        <h3 style="margin: 20px 0 12px; font-size: 20px; font-weight: 600; color: #1F2937;">${title}</h3>
-        <p style="margin: 0 0 24px; color: #6B7280; line-height: 1.5;">${text}</p>
-        <div style="display: flex; gap: 12px; justify-content: center;">
-          ${showCancelButton ? `
-            <button id="cancelBtn" style="
-              background: #F3F4F6;
-              color: #374151;
-              border: none;
-              padding: 12px 24px;
-              border-radius: 8px;
-              font-weight: 500;
-              cursor: pointer;
-              transition: all 0.2s;
-            ">${cancelButtonText}</button>
-          ` : ''}
-          <button id="confirmBtn" style="
-            background: ${icon === 'error' || icon === 'warning' ? '#EF4444' : '#3B82F6'};
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-          ">${confirmButtonText}</button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(alertDiv);
-
-    // Add animation styles
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes slideIn {
-        from { opacity: 0; transform: scale(0.9) translateY(-20px); }
-        to { opacity: 1; transform: scale(1) translateY(0); }
-      }
-    `;
-    document.head.appendChild(style);
-
-    const confirmBtn = alertDiv.querySelector('#confirmBtn');
-    const cancelBtn = alertDiv.querySelector('#cancelBtn');
-
-    confirmBtn.addEventListener('click', () => {
-      document.body.removeChild(alertDiv);
-      document.head.removeChild(style);
-      if (onConfirm) onConfirm();
-    });
-
-    if (cancelBtn) {
-      cancelBtn.addEventListener('click', () => {
-        document.body.removeChild(alertDiv);
-        document.head.removeChild(style);
-        if (onCancel) onCancel();
-      });
-    }
-  }
-};
+// SweetAlert-like alert
+const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, confirmButtonText = 'OK', cancelButtonText = 'Cancel', onConfirm, onCancel }) => {
+  const el = document.createElement('div'); el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999';
+  const iconHtml = { success:'<div style="color:#10B981;font-size:48px;">✓</div>', error:'<div style="color:#EF4444;font-size:48px;">✗</div>', warning:'<div style="color:#F59E0B;font-size:48px;">⚠</div>', question:'<div style="color:#3B82F6;font-size:48px;">?</div>'}[icon]||'';
+  el.innerHTML = `<div style="background:#fff;border-radius:12px;padding:32px;min-width:400px;text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,.25)"> ${iconHtml}<h3 style="margin:20px 0 12px;font-size:20px;font-weight:600;color:#1F2937">${title}</h3><p style="margin:0 0 24px;color:#6B7280">${text}</p><div style="display:flex;gap:12px;justify-content:center;">${showCancelButton?`<button id='c' style='background:#F3F4F6;color:#374151;border:none;padding:12px 24px;border-radius:8px;font-weight:500;cursor:pointer'>${cancelButtonText}</button>`:''}<button id='o' style='background:${icon==='error'||icon==='warning'?'#EF4444':'#3B82F6'};color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:500;cursor:pointer'>${confirmButtonText}</button></div></div>`;
+  document.body.appendChild(el);
+  el.querySelector('#o').addEventListener('click', () => { document.body.removeChild(el); onConfirm && onConfirm(); });
+  const c = el.querySelector('#c'); c && c.addEventListener('click', () => { document.body.removeChild(el); onCancel && onCancel(); });
+}};
 
 export default function List() {
-  const { configurations: paginatedConfigurations, filters, flash, warning, configTypes = {} } = usePage().props;
-
+  const { categories: paginatedCategories, filters, flash } = usePage().props;
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
   const [statusFilter, setStatusFilter] = useState(filters?.status || 'all');
-  const [configTypeFilter, setConfigTypeFilter] = useState(filters?.config_type || 'all');
-  const [sortConfig, setSortConfig] = useState({
-    key: filters?.sort_by || 'id',
-    direction: filters?.sort_direction || 'desc'
-  });
-  const [currentPage, setCurrentPage] = useState(paginatedConfigurations?.current_page || 1);
+  const [sortConfig, setSortConfig] = useState({ key: filters?.sort_by || 'category_code', direction: filters?.sort_direction || 'asc' });
+  const [currentPage, setCurrentPage] = useState(paginatedCategories?.current_page || 1);
   const [pageSize, setPageSize] = useState(filters?.per_page || 25);
-  const [selectedConfigurations, setSelectedConfigurations] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [showColumnSelector, setShowColumnSelector] = useState(false);
 
-  // Column visibility state
-  const [visibleColumns, setVisibleColumns] = useState({
-    id: true,
-    configurationInfo: true,
-    status: true,
-    updatedAt: true,
-    actions: true
-  });
+  const visibleColumnsInit = useMemo(() => ({ id: true, categoryCode: true, categoryName: true, inventoryType: true, status: true, updatedAt: true, actions: true }), []);
+  const [visibleColumns, setVisibleColumns] = useState(visibleColumnsInit);
 
-  const configurations = paginatedConfigurations?.data || [];
+  useEffect(() => { if (flash?.success) CustomAlert.fire({ title: 'Success!', text: flash.success, icon: 'success' }); else if (flash?.error) CustomAlert.fire({ title:'Error!', text: flash.error, icon: 'error' }); }, [flash]);
+
+  const pushQuery = (obj) => { const params = new URLSearchParams(window.location.search); Object.entries(obj).forEach(([k,v])=>{ if(v===undefined||v===null||v===''||v==='all') params.delete(k); else params.set(k,v); }); if(!obj.page) params.set('page','1'); router.get(window.location.pathname+'?'+params.toString(), {}, { preserveState:true, preserveScroll:true }); };
+  const handleSearch = (t) => { setSearchTerm(t); pushQuery({ search:t }); };
+  const handleStatusFilter = (s) => { setStatusFilter(s); pushQuery({ status:s }); };
+  const handleSort = (key) => { const dir = sortConfig.key===key && sortConfig.direction==='asc'?'desc':'asc'; setSortConfig({ key, direction:dir }); pushQuery({ sort_by:key, sort_direction:dir }); };
+  const handlePageChange = (p) => { setCurrentPage(p); pushQuery({ page:p.toString() }); };
+  const handlePageSizeChange = (s) => { setPageSize(s); pushQuery({ per_page:s.toString() }); };
+
+  const handleSelectAll = (checked) => { if (checked) setSelected(paginatedCategories.data.map(c=>c.id)); else setSelected([]); };
+  const handleSelectRow = (id, checked) => { if (checked) setSelected(prev=>[...prev, id]); else setSelected(prev=>prev.filter(x=>x!==id)); };
+  const handleBulkDelete = () => { if (!selected.length) return; CustomAlert.fire({ title:'Delete Selected Categories?', text:`You are about to delete ${selected.length} category(ies).`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete!', onConfirm:()=>{ setLoading(true); router.post('/inventory/item-category-coding/bulk-destroy', { ids:selected }, { onSuccess:()=>setSelected([]), onFinish:()=>setLoading(false) }); } }); };
+  const handleDelete = (category) => { CustomAlert.fire({ title:'Are you sure?', text:`You are about to delete "${category.category_name}". This action cannot be undone!`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete it!', cancelButtonText:'Cancel', onConfirm:()=>{ setLoading(true); router.delete(`/inventory/item-category-coding/${category.id}`, { onFinish:()=>setLoading(false) }); } }); };
+
+  const statusOptions = [ { value:'all', label:'All Status' }, { value:'1', label:'Active' }, { value:'0', label:'Inactive' } ];
+  const pageSizeOptions = [10,25,50,100];
+
+  return (
+    <App>
+      <div className="advanced-module-manager">
+        <div className="manager-header">
+          <div className="header-main">
+            <div className="title-section">
+              <h1 className="page-title"><Database className="title-icon" />{usePage().props?.pageTitle || 'Item Category Coding'}</h1>
+              <div className="stats-summary">
+                <div className="stat-item"><span>{paginatedCategories?.total || 0} Total</span></div>
+                <div className="stat-item"><span>{paginatedCategories?.data?.filter(c=>c.is_active).length || 0} Active</span></div>
+              </div>
+            </div>
+            <div className="header-actions">
+              <button className="btn btn-icon" onClick={()=>window.location.reload()} title="Refresh" disabled={loading}><RefreshCcw size={20} className={loading ? 'animate-spin' : ''} /></button>
+              <a href='/inventory/item-category-coding/' className="btn btn-primary"><Plus size={20} />Add Item Category</a>
+            </div>
+          </div>
+          {/* Modern Compact Filters */}
+          <div className="modern-filters-container">
+            <div className="filters-toolbar">
+              <div className="search-section">
+                <div className="search-input-wrapper">
+                  <Search className="search-icon" size={18} />
+                  <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Search item categories..."
+                    value={searchTerm}
+                    onChange={(e) => handleSearch(e.target.value)}
+                  />
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">Status</label>
+                  <select
+                    className="filter-select"
+                    value={statusFilter}
+                    onChange={(e) => handleStatusFilter(e.target.value)}
+                  >
+                    {statusOptions.map(o => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  className="reset-btn"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setStatusFilter('all');
+                    const params = new URLSearchParams();
+                    params.set('page', '1');
+                    router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
+                  }}
+                  title="Reset all filters"
+                >
+                  <RefreshCcw size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+          {showColumnSelector && (<div className="column-selector"><div className="column-selector-content"><h3>Show/Hide Columns</h3><div className="column-grid">{Object.entries(visibleColumns).map(([key, visible]) => (key!=='actions' && (<label key={key} className="column-item"><input type="checkbox" checked={visible} onChange={(e)=>setVisibleColumns({ ...visibleColumns, [key]: e.target.checked })} /><span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>s.toUpperCase())}</span></label>)))}
+          </div><button className="btn btn-sm btn-secondary" onClick={()=>setShowColumnSelector(false)}>Close</button></div></div>)}
+        </div>
+        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />Clear</button><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />Delete</button></div></div>)}
+        <div className="data-table-container"><div className="table-wrapper"><table className="data-table"><thead><tr>
+          <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginatedCategories.data.length && paginatedCategories.data.length>0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
+          {visibleColumns.id && (<th className="sortable" onClick={()=>handleSort('id')}><div className="th-content">ID<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='id'?'active':''}`} /></div></th>)}
+          {visibleColumns.categoryCode && (<th className="sortable" onClick={()=>handleSort('category_code')}><div className="th-content">Category Code<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='category_code'?'active':''}`} /></div></th>)}
+          {visibleColumns.categoryName && (<th className="sortable" onClick={()=>handleSort('category_name')}><div className="th-content">Category Name<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='category_name'?'active':''}`} /></div></th>)}
+          {visibleColumns.inventoryType && (<th><div className="th-content">Inventory Type</div></th>)}
+          {visibleColumns.status && (<th className="sortable" onClick={()=>handleSort('is_active')}><div className="th-content">Status<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='is_active'?'active':''}`} /></div></th>)}
+          {visibleColumns.updatedAt && (<th className="sortable" onClick={()=>handleSort('updated_at')}><div className="th-content">Updated<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='updated_at'?'active':''}`} /></div></th>)}
+          {visibleColumns.actions && (<th className="actions-header">Actions</th>)}
+        </tr></thead><tbody>
+          {paginatedCategories.data.map((category) => (
+            <tr key={category.id} className="table-row">
+              <td><input type="checkbox" className="checkbox" checked={selected.includes(category.id)} onChange={(e)=>handleSelectRow(category.id, e.target.checked)} /></td>
+              {visibleColumns.id && (<td><span className="module-id">#{category.id}</span></td>)}
+              {visibleColumns.categoryCode && (<td><div className="module-details"><div className="module-name">{category.category_code}</div></div></td>)}
+              {visibleColumns.categoryName && (<td><div className="module-details"><div className="module-name">{category.category_name}</div></div></td>)}
+              {visibleColumns.inventoryType && (<td>{category.inventory_type}</td>)}
+              {visibleColumns.status && (<td><span className={`status-badge status-${category.is_active ? 'active' : 'inactive'}`}>{category.is_active ? 'Active' : 'Inactive'}</span></td>)}
+              {visibleColumns.updatedAt && (<td><div className="date-cell"><Clock size={14} /><span>{new Date(category.updated_at).toLocaleString()}</span></div></td>)}
+              {visibleColumns.actions && (
+                <td>
+                  <div className="actions-cell">
+                    <button className="action-btn edit" title="Edit Item Category" onClick={() => router.get(`/inventory/item-category-coding/${category.id}/edit`)}>
+                      <Edit3 size={16} />
+                    </button>
+                    <button className="action-btn delete" title="Delete Item Category" onClick={() => handleDelete(category)}>
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              )}
+            </tr>
+          ))}
+        </tbody></table></div>
+        <div className="pagination-container">
+          <div className="pagination-info">
+            <div className="results-info">Showing {paginatedCategories.from || 0} to {paginatedCategories.to || 0} of {paginatedCategories.total || 0} entries</div>
+            <div className="page-size-selector">
+              <span>Show:</span>
+              <select value={pageSize} onChange={(e)=>handlePageSizeChange(Number(e.target.value))} className="page-size-select">
+                {pageSizeOptions.map(size => (<option key={size} value={size}>{size}</option>))}
+              </select>
+              <span>per page</span>
+            </div>
+          </div>
+          <div className="pagination-controls">
+            <button className="pagination-btn" disabled={currentPage===1} onClick={()=>handlePageChange(1)} title="First Page">
+              <ChevronLeft size={14} />
+              <ChevronLeft size={14} />
+            </button>
+            <button className="pagination-btn" disabled={currentPage===1} onClick={()=>handlePageChange(currentPage-1)} title="Previous Page">
+              <ChevronLeft size={14} />
+            </button>
+            <div className="page-numbers">
+              {Array.from({ length: Math.min(7, paginatedCategories.last_page || 1) }, (_, index) => {
+                let pageNumber; const totalPages = paginatedCategories.last_page || 1;
+                if (totalPages <= 7) pageNumber = index + 1; else if (currentPage <= 4) pageNumber = index + 1; else if (currentPage > totalPages - 4) pageNumber = totalPages - 6 + index; else pageNumber = currentPage - 3 + index;
+                return (
+                  <button key={pageNumber} className={`pagination-btn ${currentPage===pageNumber?'active':''}`} onClick={()=>handlePageChange(pageNumber)}>
+                    {pageNumber}
+                  </button>
+                );
+              })}
+            </div>
+            <button className="pagination-btn" disabled={currentPage===(paginatedCategories.last_page||1)} onClick={()=>handlePageChange(currentPage+1)} title="Next Page">
+              <ChevronRight size={14} />
+            </button>
+            <button className="pagination-btn" disabled={currentPage===(paginatedCategories.last_page||1)} onClick={()=>handlePageChange(paginatedCategories.last_page||1)} title="Last Page">
+              <ChevronRight size={14} />
+              <ChevronRight size={14} />
+            </button>
+          </div>
+          <div className="quick-jump">
+            <span>Go to:</span>
+            <input type="number" min="1" max={paginatedCategories.last_page || 1} value={currentPage} onChange={(e)=>{ const p=Math.max(1, Math.min(paginatedCategories.last_page||1, Number(e.target.value))); handlePageChange(p); }} className="jump-input" />
+            <span>of {paginatedCategories.last_page || 1}</span>
+          </div>
+        </div></div>
+      </div>
+    </App>
+  );
+}
 
   // Handle search and filters
   const handleSearch = useCallback((term) => {
@@ -175,21 +215,6 @@ export default function List() {
       params.set('status', status);
     } else {
       params.delete('status');
-    }
-    params.set('page', '1');
-    router.get(window.location.pathname + '?' + params.toString(), {}, {
-      preserveState: true,
-      preserveScroll: true
-    });
-  }, []);
-
-  const handleConfigTypeFilter = useCallback((type) => {
-    setConfigTypeFilter(type);
-    const params = new URLSearchParams(window.location.search);
-    if (type && type !== 'all') {
-      params.set('config_type', type);
-    } else {
-      params.delete('config_type');
     }
     params.set('page', '1');
     router.get(window.location.pathname + '?' + params.toString(), {}, {
@@ -236,24 +261,24 @@ export default function List() {
 
   // Configuration actions
   const handleEdit = (config) => {
-    router.get(`/accounts/account-configuration/${config.id}/edit`);
+    router.get(`/accounts/voucher-number-configuration/${config.id}/edit`);
   };
   
   const handleDelete = (config) => {
     CustomAlert.fire({
       title: 'Are you sure?',
-      text: `You are about to delete "${config.account_name}" configuration. This action cannot be undone!`,
+      text: `You are about to delete "${config.voucher_type} Voucher" configuration. This action cannot be undone!`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, delete it!',
       cancelButtonText: 'Cancel',
       onConfirm: () => {
         setLoading(true);
-        router.delete(`/api/account-configuration/${config.id}`, {
+        router.delete(`/api/voucher-number-configuration/${config.id}`, {
           onSuccess: () => {
             CustomAlert.fire({
               title: 'Deleted!',
-              text: `Configuration "${config.account_name}" has been deleted.`,
+              text: `Configuration "${config.voucher_type} Voucher" has been deleted.`,
               icon: 'success'
             });
           },
@@ -271,7 +296,7 @@ export default function List() {
   };
 
   const handleView = (config) => {
-    router.get(`/accounts/account-configuration/${config.id}/show`);
+    router.get(`/accounts/voucher-number-configuration/${config.id}/show`);
   };
 
   // Bulk actions
@@ -303,7 +328,7 @@ export default function List() {
       cancelButtonText: 'Cancel',
       onConfirm: () => {
         setLoading(true);
-        router.post('/accounts/account-configuration/bulk-destroy', {
+        router.post('/accounts/voucher-number-configuration/bulk-destroy', {
           ids: selectedConfigurations
         }, {
           onSuccess: (page) => {
@@ -340,7 +365,7 @@ export default function List() {
       cancelButtonText: 'Cancel',
       onConfirm: () => {
         setLoading(true);
-        router.post('/accounts/account-configuration/bulk-status', {
+        router.post('/accounts/voucher-number-configuration/bulk-status', {
           ids: selectedConfigurations,
           status: newStatus
         }, {
@@ -365,6 +390,22 @@ export default function List() {
     });
   };
 
+  // Export functions
+  const exportToCSV = () => {
+    CustomAlert.fire({
+      title: 'Export to CSV',
+      text: 'Download all configurations as CSV file?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, download!',
+      cancelButtonText: 'Cancel',
+      onConfirm: () => {
+        // Open the export URL in a new window
+        window.open('/api/voucher-number-configuration/export-csv', '_blank');
+      }
+    });
+  };
+
   // Format functions
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -376,16 +417,19 @@ export default function List() {
     });
   };
 
+  const getStatusColor = (status) => {
+    return status ? '#10B981' : '#EF4444';
+  };
+
+  const getStatusLabel = (status) => {
+    return status ? 'Active' : 'Inactive';
+  };
+
   // Status options for filtering
   const statusOptions = [
     { value: 'all', label: 'All Status' },
     { value: '1', label: 'Active' },
     { value: '0', label: 'Inactive' }
-  ];
-
-  const configTypeOptions = [
-    { value: 'all', label: 'All Types' },
-    ...Object.entries(configTypes).map(([key, label]) => ({ value: key, label }))
   ];
 
   const pageSizeOptions = [10, 25, 50, 100];
@@ -418,603 +462,14 @@ export default function List() {
 
   return (
     <App>
-      <style>{`
-        .advanced-module-manager {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-          padding: 1.5rem;
-          background: #f9fafb;
-          border-radius: 12px;
-          min-height: calc(100vh - 200px);
-        }
-
-        .manager-header {
-          border-bottom: 2px solid #e5e7eb;
-          padding-bottom: 1.5rem;
-        }
-
-        .header-main {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-        }
-
-        .title-section {
-          flex: 1;
-        }
-
-        .page-title {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          font-size: 1.875rem;
-          font-weight: 700;
-          color: #111827;
-          margin: 0 0 0.75rem 0;
-        }
-
-        .title-icon {
-          color: #3b82f6;
-        }
-
-        .stats-summary {
-          display: flex;
-          gap: 1.5rem;
-          margin-top: 0.75rem;
-        }
-
-        .stat-item {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-size: 0.875rem;
-          color: #6b7280;
-        }
-
-        .header-actions {
-          display: flex;
-          gap: 0.75rem;
-        }
-
-        .btn {
-          padding: 0.5rem 1rem;
-          border: none;
-          border-radius: 6px;
-          font-weight: 500;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          transition: all 0.2s;
-          text-decoration: none;
-          font-size: 0.875rem;
-        }
-
-        .btn-primary {
-          background: #3b82f6;
-          color: white;
-        }
-
-        .btn-primary:hover {
-          background: #2563eb;
-          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-secondary {
-          background: #e5e7eb;
-          color: #374151;
-        }
-
-        .btn-secondary:hover {
-          background: #d1d5db;
-        }
-
-        .btn-icon {
-          width: 40px;
-          height: 40px;
-          padding: 0;
-          justify-content: center;
-          background: white;
-          border: 1px solid #d1d5db;
-        }
-
-        .btn-icon:hover {
-          background: #f3f4f6;
-        }
-
-        .btn-danger {
-          background: #ef4444;
-          color: white;
-        }
-
-        .dropdown {
-          position: relative;
-        }
-
-        .dropdown-toggle {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .dropdown-menu {
-          display: none;
-          position: absolute;
-          top: 100%;
-          right: 0;
-          mt: 0.5rem;
-          background: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 6px;
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-          z-index: 10;
-          min-width: 200px;
-        }
-
-        .dropdown:hover .dropdown-menu {
-          display: block;
-        }
-
-        .dropdown-menu button {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          width: 100%;
-          padding: 0.75rem 1rem;
-          background: none;
-          border: none;
-          text-align: left;
-          cursor: pointer;
-          color: #374151;
-          font-size: 0.875rem;
-          transition: background 0.2s;
-        }
-
-        .dropdown-menu button:hover {
-          background: #f3f4f6;
-        }
-
-        .modern-filters-container {
-          background: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          padding: 1rem;
-        }
-
-        .filters-toolbar {
-          display: flex;
-          gap: 0.75rem;
-          flex-wrap: wrap;
-          align-items: center;
-        }
-
-        .search-section {
-          display: flex;
-          gap: 0.75rem;
-          flex: 1;
-          min-width: 300px;
-          align-items: center;
-          flex-wrap: wrap;
-        }
-
-        .search-input-wrapper {
-          flex: 1;
-          min-width: 250px;
-          position: relative;
-          display: flex;
-          align-items: center;
-        }
-
-        .search-icon {
-          position: absolute;
-          left: 0.75rem;
-          color: #9ca3af;
-        }
-
-        .search-input {
-          width: 100%;
-          padding: 0.5rem 0.75rem 0.5rem 2.5rem;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          font-size: 0.875rem;
-          background: white;
-          color: #111827;
-        }
-
-        .filter-group {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .filter-label {
-          font-size: 0.875rem;
-          color: #6b7280;
-          white-space: nowrap;
-        }
-
-        .filter-select {
-          padding: 0.5rem 0.75rem;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          background: white;
-          color: #111827;
-          font-size: 0.875rem;
-          cursor: pointer;
-        }
-
-        .reset-btn {
-          padding: 0.5rem;
-          background: #f3f4f6;
-          color: #6b7280;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .reset-btn:hover {
-          background: #e5e7eb;
-        }
-
-        .bulk-actions-bar {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          background: #fffbeb;
-          padding: 1rem;
-          border-radius: 8px;
-          border: 1px solid #fbbf24;
-        }
-
-        .selection-info {
-          font-weight: 600;
-          color: #92400e;
-        }
-
-        .bulk-actions {
-          display: flex;
-          gap: 0.5rem;
-          margin-left: auto;
-        }
-
-        .btn-sm {
-          padding: 0.5rem 0.75rem;
-          font-size: 0.875rem;
-        }
-
-        .main-content {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .data-table-container {
-          background: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          overflow: hidden;
-        }
-
-        .loading-state {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 3rem;
-          color: #9ca3af;
-        }
-
-        .loading-spinner {
-          width: 40px;
-          height: 40px;
-          border: 4px solid #e5e7eb;
-          border-top-color: #3b82f6;
-          border-radius: 50%;
-          animation: spin 0.6s linear infinite;
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-
-        .empty-state {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 3rem;
-          color: #9ca3af;
-        }
-
-        .empty-icon {
-          width: 48px;
-          height: 48px;
-          margin-bottom: 1rem;
-          opacity: 0.5;
-        }
-
-        .empty-state h3 {
-          margin: 1rem 0 0.5rem 0;
-          font-size: 1.125rem;
-          color: #6b7280;
-        }
-
-        .empty-state p {
-          margin-bottom: 1.5rem;
-          font-size: 0.875rem;
-        }
-
-        .table-wrapper {
-          overflow-x: auto;
-        }
-
-        .data-table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-
-        .data-table thead {
-          background: #f3f4f6;
-          border-bottom: 2px solid #e5e7eb;
-        }
-
-        .data-table th {
-          padding: 1rem;
-          text-align: left;
-          font-weight: 600;
-          font-size: 0.875rem;
-          color: #374151;
-          white-space: nowrap;
-        }
-
-        .th-content {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .sortable {
-          cursor: pointer;
-          user-select: none;
-        }
-
-        .sortable:hover {
-          background: #e5e7eb;
-        }
-
-        .sort-icon {
-          opacity: 0.5;
-          transition: opacity 0.2s;
-        }
-
-        .sort-icon.active {
-          opacity: 1;
-          color: #3b82f6;
-        }
-
-        .data-table td {
-          padding: 1rem;
-          border-bottom: 1px solid #e5e7eb;
-          font-size: 0.875rem;
-          color: #111827;
-        }
-
-        .data-table tbody tr:hover {
-          background: #f9fafb;
-        }
-
-        .checkbox-cell {
-          width: 50px;
-        }
-
-        .checkbox {
-          width: 18px;
-          height: 18px;
-          cursor: pointer;
-        }
-
-        .module-id {
-          color: #9ca3af;
-          font-size: 0.75rem;
-          font-weight: 600;
-        }
-
-        .module-info {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
-
-        .module-avatar {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 40px;
-          height: 40px;
-          background: #f3f4f6;
-          border-radius: 8px;
-          flex-shrink: 0;
-        }
-
-        .module-details {
-          flex: 1;
-          min-width: 200px;
-        }
-
-        .module-name {
-          font-weight: 600;
-          color: #111827;
-          margin-bottom: 0.25rem;
-        }
-
-        .module-folder {
-          font-size: 0.875rem;
-          color: #6b7280;
-          margin-bottom: 0.25rem;
-        }
-
-        .module-description {
-          font-size: 0.75rem;
-          color: #9ca3af;
-        }
-
-        .status-container {
-          display: flex;
-          align-items: center;
-        }
-
-        .status-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.375rem 0.75rem;
-          border-radius: 12px;
-          font-size: 0.75rem;
-          font-weight: 600;
-        }
-
-        .status-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-        }
-
-        .date-cell {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-size: 0.875rem;
-          color: #6b7280;
-        }
-
-        .actions-cell {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        .action-btn {
-          width: 32px;
-          height: 32px;
-          padding: 0;
-          border: none;
-          border-radius: 6px;
-          background: #f3f4f6;
-          color: #6b7280;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s;
-        }
-
-        .action-btn:hover {
-          background: #e5e7eb;
-        }
-
-        .action-btn.view:hover {
-          background: #dbeafe;
-          color: #3b82f6;
-        }
-
-        .action-btn.edit:hover {
-          background: #dbeafe;
-          color: #3b82f6;
-        }
-
-        .action-btn.delete:hover {
-          background: #fee2e2;
-          color: #ef4444;
-        }
-
-        .pagination-container {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 1rem;
-          background: white;
-          border-top: 1px solid #e5e7eb;
-        }
-
-        .pagination-info {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          font-size: 0.875rem;
-          color: #6b7280;
-        }
-
-        .results-info {
-          font-weight: 500;
-        }
-
-        .page-size-selector {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .page-size-select {
-          padding: 0.375rem 0.5rem;
-          border: 1px solid #d1d5db;
-          border-radius: 4px;
-          background: white;
-          color: #111827;
-          font-size: 0.875rem;
-          cursor: pointer;
-        }
-
-        .pagination-controls {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        .pagination-btn {
-          width: 32px;
-          height: 32px;
-          padding: 0;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          background: white;
-          color: #6b7280;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s;
-          font-weight: 500;
-        }
-
-        .pagination-btn:not(:disabled):hover {
-          background: #f3f4f6;
-          border-color: #9ca3af;
-        }
-
-        .pagination-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .pagination-btn.active {
-          background: #3b82f6;
-          color: white;
-          border-color: #3b82f6;
-        }
-
-        .page-numbers {
-          display: flex;
-          gap: 0.25rem;
-        }
-      `}</style>
-
       <div className="advanced-module-manager">
         {/* Enhanced Header */}
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
               <h1 className="page-title">
-                <Briefcase className="title-icon" />
-                {usePage().props?.pageTitle || 'Account Configuration'}
+                <Database className="title-icon" />
+                {usePage().props?.pageTitle || 'Voucher Number Configuration'}
               </h1>
               <div className="stats-summary">
                 <div className="stat-item">
@@ -1038,7 +493,22 @@ export default function List() {
                 <RefreshCcw size={20} className={loading ? 'animate-spin' : ''} />
               </button>
 
-              <a href='/accounts/account-configuration/create' className="btn btn-primary">
+              {/* Export Dropdown */}
+              <div className="dropdown">
+                <button className="btn btn-secondary dropdown-toggle">
+                  <Download size={20} />
+                  Export
+                  <ChevronDown size={16} />
+                </button>
+                <div className="dropdown-menu">
+                  <button onClick={exportToCSV}>
+                    <FileText size={16} />
+                    Export as CSV
+                  </button>
+                </div>
+              </div>
+
+              <a href='/accounts/voucher-number-configuration/create' className="btn btn-primary">
                 <Plus size={20} />
                 Add Configuration
               </a>
@@ -1055,7 +525,7 @@ export default function List() {
                 <input
                   type="text"
                   className="search-input"
-                  placeholder="Search by account code, name..."
+                  placeholder="Search configurations..."
                   value={searchTerm}
                   onChange={(e) => handleSearch(e.target.value)}
                 />
@@ -1076,27 +546,11 @@ export default function List() {
                 </select>
               </div>
 
-              <div className="filter-group">
-                <label className="filter-label">Type</label>
-                <select
-                  className="filter-select"
-                  value={configTypeFilter}
-                  onChange={(e) => handleConfigTypeFilter(e.target.value)}
-                >
-                  {configTypeOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               <button
                 className="reset-btn"
                 onClick={() => {
                   setSearchTerm('');
                   setStatusFilter('all');
-                  setConfigTypeFilter('all');
                   const params = new URLSearchParams();
                   params.set('page', '1');
                   router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
@@ -1157,7 +611,7 @@ export default function List() {
                 <Database className="empty-icon" />
                 <h3>No configurations found</h3>
                 <p>Try adjusting your filters or search criteria</p>
-                <a href="/accounts/account-configuration/create" className="btn btn-primary">
+                <a href="/accounts/voucher-number-configuration/create" className="btn btn-primary">
                   <Plus size={20} />
                   Add Your First Configuration
                 </a>
@@ -1193,10 +647,10 @@ export default function List() {
                         )}
 
                         {visibleColumns.configurationInfo && (
-                          <th className="sortable" onClick={() => handleSort('account_code')}>
+                          <th className="sortable" onClick={() => handleSort('voucher_type')}>
                             <div className="th-content">
                               Configuration Info
-                              <ArrowUpDown size={14} className={`sort-icon ${sortConfig.key === 'account_code' ? 'active' : ''}`} />
+                              <ArrowUpDown size={14} className={`sort-icon ${sortConfig.key === 'voucher_type' ? 'active' : ''}`} />
                             </div>
                           </th>
                         )}
@@ -1253,12 +707,12 @@ export default function List() {
                             <td>
                               <div className="module-info">
                                 <div className="module-avatar">
-                                  <Briefcase className="w-6 h-6 text-blue-600" />
+                                  <Hash className="w-6 h-6 text-blue-600" />
                                 </div>
                                 <div className="module-details">
-                                  <div className="module-name">{config.account_code} - {config.account_name}</div>
-                                  <div className="module-folder">Type: {configTypes?.[config.config_type] || config.config_type}</div>
-                                  <div className="module-description">Level {config.account_level}</div>
+                                  <div className="module-name">{config.voucher_type} Voucher</div>
+                                  <div className="module-folder">Prefix: {config.prefix} | Length: {config.number_length}</div>
+                                  <div className="module-description">Reset: {config.reset_frequency}</div>
                                 </div>
                               </div>
                             </td>

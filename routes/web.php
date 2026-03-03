@@ -17,6 +17,8 @@ use App\Http\Controllers\system\LocationController;
 use App\Http\Controllers\system\DepartmentController;
 use App\Http\Controllers\system\UserController;
 use App\Http\Controllers\system\CurrencyController;
+use App\Http\Controllers\Inventory\ItemCategoryCodingController;
+use App\Http\Controllers\Inventory\ItemClassCodingController;
 
 // Public routes
 Route::get('/', function () {
@@ -75,10 +77,32 @@ Route::get('/erp-modules', function (Request $request) {
 })->middleware('web.auth')->name('erp.modules');
 
 // Accounts Module Routes
-Route::get('/accounts', [App\Http\Controllers\Accounts\AccountsDashboardController::class, 'index'])->middleware('web.auth')->name('accounts');
+Route::get('/accounts', function () {
+    return redirect('/accounts/dashboard');
+})->middleware('web.auth');
+Route::get('/accounts/dashboard', [App\Http\Controllers\Accounts\AccountsDashboardController::class, 'index'])->middleware('web.auth')->name('accounts');
 Route::get('/accounts/dashboard-report/{reportType}', [App\Http\Controllers\Accounts\AccountsDashboardController::class, 'financialReport'])->middleware('web.auth')->name('accounts.dashboard-report');
 
 Route::get('/accounts/chart-of-accounts', [App\Http\Controllers\Accounts\ChartOfAccountsController::class, 'index'])->middleware('web.auth')->name('accounts.chart-of-accounts');
+
+// Inventory Module - Coding Forms
+Route::prefix('inventory/item-category-coding')->name('inventory.item-category-coding.')->middleware('web.auth')->group(function () {
+    Route::get('/', [ItemCategoryCodingController::class, 'create'])->name('create');
+    Route::post('/', [ItemCategoryCodingController::class, 'store'])->name('store');
+    Route::get('/list', [ItemCategoryCodingController::class, 'list'])->name('list');
+    Route::get('/{id}/edit', [ItemCategoryCodingController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [ItemCategoryCodingController::class, 'update'])->name('update');
+    Route::delete('/{id}', [ItemCategoryCodingController::class, 'destroy'])->name('destroy');
+});
+
+Route::prefix('inventory/item-class-coding')->name('inventory.item-class-coding.')->middleware('web.auth')->group(function () {
+    Route::get('/', [ItemClassCodingController::class, 'create'])->name('create');
+    Route::post('/', [ItemClassCodingController::class, 'store'])->name('store');
+    Route::get('/list', [ItemClassCodingController::class, 'list'])->name('list');
+    Route::get('/{id}/edit', [ItemClassCodingController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [ItemClassCodingController::class, 'update'])->name('update');
+    Route::delete('/{id}', [ItemClassCodingController::class, 'destroy'])->name('destroy');
+});
 
 // Voucher Number Configuration Routes
 Route::prefix('accounts/voucher-number-configuration')->name('accounts.voucher-number-configuration.')->middleware('web.auth')->group(function () {

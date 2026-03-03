@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('account_configurations')) {
+            return;
+        }
+
         Schema::create('account_configurations', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('comp_id')->nullable();

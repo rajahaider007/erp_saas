@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { router, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { FileText, Calendar, Building2 } from 'lucide-react';
 import App from '../App.jsx';
 
@@ -39,6 +39,16 @@ const DashboardFinancialReport = () => {
       preserveState: true,
       replace: true,
     });
+  };
+
+  const getGeneralLedgerUrl = (accountId) => {
+    const params = new URLSearchParams();
+
+    if (accountId) params.set('account_id', String(accountId));
+    if (fromDate) params.set('from_date', fromDate);
+    if (toDate) params.set('to_date', toDate);
+
+    return `/accounts/general-ledger/report?${params.toString()}`;
   };
 
   return (
@@ -143,7 +153,14 @@ const DashboardFinancialReport = () => {
                       accounts.map((account, index) => (
                         <tr key={account.id} className="hover:bg-slate-700/30">
                           <td className="px-4 py-3 text-sm text-slate-300">{index + 1}</td>
-                          <td className="px-4 py-3 text-sm font-medium text-blue-300">{account.account_code}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-blue-300">
+                            <Link
+                              href={getGeneralLedgerUrl(account.id)}
+                              className="text-blue-300 hover:text-blue-200 hover:underline"
+                            >
+                              {account.account_code}
+                            </Link>
+                          </td>
                           <td className="px-4 py-3 text-sm text-slate-100">{account.account_name}</td>
                           <td className="px-4 py-3 text-sm text-slate-300">{account.account_type}</td>
                           <td className="px-4 py-3 text-right text-sm font-semibold text-emerald-400">
