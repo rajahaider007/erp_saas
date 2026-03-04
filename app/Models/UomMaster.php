@@ -19,12 +19,15 @@ class UomMaster extends Model
         'uom_name',
         'uom_type',
         'symbol',
+        'description',
         'is_base_uom',
         'decimal_precision',
         'conversion_factor',
         'base_uom_id',
         'is_active',
-        'display_order'
+        'display_order',
+        'created_by',
+        'updated_by'
     ];
 
     protected $casts = [
@@ -43,6 +46,16 @@ class UomMaster extends Model
     public function baseUom(): BelongsTo
     {
         return $this->belongsTo(UomMaster::class, 'base_uom_id');
+    }
+
+    public function createdByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     public function derivedUoms(): HasMany

@@ -49,6 +49,10 @@ const CreateUomConversionForm = () => {
     flash,
     conversion = null,
     uoms = [],
+    items = [],
+    directionOptions = [],
+    roundingRuleOptions = [],
+    conversionTypeOptions = [],
     error,
   } = usePage().props;
 
@@ -56,22 +60,34 @@ const CreateUomConversionForm = () => {
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
 
+  // Ensure arrays
+  const formattedUoms = Array.isArray(uoms) ? uoms : [];
+  const formattedItems = Array.isArray(items) ? items : [];
+  const directionOpts = (Array.isArray(directionOptions) ? directionOptions : []).map(d => ({ value: d, label: d }));
+  const roundingOpts = (Array.isArray(roundingRuleOptions) ? roundingRuleOptions : []).map(r => ({ value: r, label: r }));
+  const typeOpts = (Array.isArray(conversionTypeOptions) ? conversionTypeOptions : []).map(t => ({ value: t, label: t }));
+
   const conversionFields = [
     {
       name: 'from_uom_id',
       label: 'From UOM',
       type: 'select',
-      options: uoms,
+      options: formattedUoms,
       required: true,
-      help: 'Select the source unit of measure',
     },
     {
       name: 'to_uom_id',
       label: 'To UOM',
       type: 'select',
-      options: uoms,
+      options: formattedUoms,
       required: true,
-      help: 'Select the destination unit of measure',
+    },
+    {
+      name: 'item_id',
+      label: 'Item Code (Optional)',
+      type: 'select',
+      options: formattedItems,
+      required: false,
     },
     {
       name: 'conversion_factor',
@@ -80,36 +96,58 @@ const CreateUomConversionForm = () => {
       placeholder: 'e.g., 1.5 (1 From UOM = 1.5 To UOM)',
       step: '0.0001',
       required: true,
-      help: 'Enter the conversion multiplier',
     },
     {
       name: 'conversion_direction',
-      label: 'Conversion Direction/Formula',
-      type: 'text',
-      placeholder: 'e.g., 1 Box = 12 Pieces, 1 kg = 1000 grams',
+      label: 'Conversion Direction',
+      type: 'select',
+      options: directionOpts,
       required: true,
-      help: 'Describe the conversion relationship',
     },
     {
-      name: 'effective_date',
-      label: 'Effective Date',
+      name: 'rounding_rule',
+      label: 'Rounding Rule',
+      type: 'select',
+      options: roundingOpts,
+      required: true,
+    },
+    {
+      name: 'effective_from',
+      label: 'Effective From Date',
       type: 'date',
       required: true,
-      help: 'Date when this conversion becomes effective',
+    },
+    {
+      name: 'effective_to',
+      label: 'Effective To Date',
+      type: 'date',
+      required: false,
+    },
+    {
+      name: 'conversion_type',
+      label: 'Conversion Type',
+      type: 'select',
+      options: typeOpts,
+      required: true,
+    },
+    {
+      name: 'notes',
+      label: 'Notes',
+      type: 'textarea',
+      placeholder: 'Enter notes (optional)',
+      required: false,
     },
     {
       name: 'is_item_specific',
       label: 'Item-Specific Conversion',
       type: 'toggle',
       required: false,
-      help: 'Check if this conversion applies only to specific items',
     },
     {
       name: 'is_active',
       label: 'Status',
       type: 'toggle',
       required: false,
-      help: 'Mark as active to use in transactions',
     },
   ];
 
@@ -159,12 +197,20 @@ const CreateUomConversionForm = () => {
       newErrors.conversion_factor = 'Conversion factor is required';
     }
 
-    if (!submittedFormData.conversion_direction?.trim()) {
+    if (!submittedFormData.conversion_direction) {
       newErrors.conversion_direction = 'Conversion direction is required';
     }
 
-    if (!submittedFormData.effective_date) {
-      newErrors.effective_date = 'Effective date is required';
+    if (!submittedFormData.rounding_rule) {
+      newErrors.rounding_rule = 'Rounding rule is required';
+    }
+
+    if (!submittedFormData.effective_from) {
+      newErrors.effective_from = 'Effective from date is required';
+    }
+
+    if (!submittedFormData.conversion_type) {
+      newErrors.conversion_type = 'Conversion type is required';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -176,9 +222,14 @@ const CreateUomConversionForm = () => {
     const formDataToSend = new FormData();
     formDataToSend.append('from_uom_id', submittedFormData.from_uom_id || '');
     formDataToSend.append('to_uom_id', submittedFormData.to_uom_id || '');
+    formDataToSend.append('item_id', submittedFormData.item_id || '');
     formDataToSend.append('conversion_factor', submittedFormData.conversion_factor || 0);
     formDataToSend.append('conversion_direction', submittedFormData.conversion_direction || '');
-    formDataToSend.append('effective_date', submittedFormData.effective_date || '');
+    formDataToSend.append('rounding_rule', submittedFormData.rounding_rule || 'None');
+    formDataToSend.append('effective_from', submittedFormData.effective_from || '');
+    formDataToSend.append('effective_to', submittedFormData.effective_to || '');
+    formDataToSend.append('conversion_type', submittedFormData.conversion_type || 'Standard');
+    formDataToSend.append('notes', submittedFormData.notes || '');
     formDataToSend.append('is_item_specific', submittedFormData.is_item_specific ? '1' : '0');
     formDataToSend.append('is_active', submittedFormData.is_active ? '1' : '0');
 

@@ -1,0 +1,734 @@
+---
+
+## 🔴 HIGH PRIORITY MASTERS
+
+---
+
+### FORM 1: UOM Master (Unit of Measure)
+**Form Name:** UOM Coding
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | UOM Code | Text (10 chars, unique) | Uppercase, no spaces, unique constraint | 🔴 |
+| 2 | UOM Name | Text (50 chars) | Required | 🔴 |
+| 3 | UOM Symbol | Text (10 chars) | e.g., kg, pcs, ltr, mtr | 🔴 |
+| 4 | UOM Type | Dropdown | Weight / Volume / Length / Area / Count / Time / Other | 🔴 |
+| 5 | Decimal Precision | Integer (0–6) | How many decimal places allowed | 🔴 |
+| 6 | Base UOM Flag | Toggle | Is this a base unit for its type? | 🟡 |
+| 7 | Description | Text (200 chars) | — | 🟢 |
+| 8 | Status | Dropdown | Active / Inactive | 🔴 |
+| 9 | Created By | System | Read-only | 🔴 |
+| 10 | Created Date | System | Read-only | 🔴 |
+| 11 | Last Modified By | System | Read-only | 🔴 |
+| 12 | Last Modified Date | System | Read-only | 🔴 |
+
+**Validations:**
+- UOM Code must be unique across all companies
+- Inactive UOM cannot be assigned to new items
+- Cannot delete UOM if referenced in any item or transaction
+
+---
+
+### FORM 2: UOM Conversion Configuration
+**Form Name:** UOM Conversion Table
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Conversion ID | Auto | System-generated | 🔴 |
+| 2 | Item Code | Lookup | Blank = global conversion; Filled = item-specific | 🟡 |
+| 3 | From UOM | Lookup | Source unit (e.g., Carton) | 🔴 |
+| 4 | To UOM | Lookup | Target unit (e.g., Pieces) | 🔴 |
+| 5 | Conversion Factor | Decimal (6 places) | From UOM × Factor = To UOM; e.g., 1 Carton = 24 Pcs | 🔴 |
+| 6 | Conversion Direction | Dropdown | Unidirectional / Bidirectional | 🔴 |
+| 7 | Rounding Rule | Dropdown | None / Round Up / Round Down / Round Nearest | 🔴 |
+| 8 | Effective From | Date | Conversion valid from date | 🟡 |
+| 9 | Effective To | Date | Blank = no expiry | 🟢 |
+| 10 | Conversion Type | Dropdown | Standard / Item-Specific / Packaging | 🔴 |
+| 11 | Notes | Text | — | 🟢 |
+| 12 | Status | Dropdown | Active / Inactive | 🔴 |
+| 13 | Created By | System | Read-only | 🔴 |
+| 14 | Created Date | System | Read-only | 🔴 |
+
+**Validations:**
+- From UOM ≠ To UOM
+- No duplicate conversion pair for same item (or global)
+- Conversion factor must be > 0
+- If item-specific, item must exist in item master
+- System must support reverse calculation automatically
+
+---
+
+### FORM 3: Tax Category Configuration
+**Form Name:** Tax Category Master
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Tax Code | Text (20 chars, unique) | Unique per company | 🔴 |
+| 2 | Tax Name | Text (100 chars) | — | 🔴 |
+| 3 | Tax Type | Dropdown | GST / VAT / Sales Tax / Customs Duty / Withholding Tax / Excise / Other | 🔴 |
+| 4 | Tax Rate (%) | Decimal (4 places) | 0.00 to 100.00 | 🔴 |
+| 5 | Tax Calculation Method | Dropdown | Percentage of Net / Percentage of Gross / Fixed Amount / Slab-based | 🔴 |
+| 6 | Compound Tax | Toggle | Is this tax calculated on top of another tax? | 🟡 |
+| 7 | Compound Base Tax Code | Lookup | Required if Compound Tax = Yes | 🟡 |
+| 8 | Tax Category Group | Dropdown | Input Tax / Output Tax / Both | 🔴 |
+| 9 | Applicable On | Dropdown | Purchase / Sales / Both | 🔴 |
+| 10 | Input Tax GL Account | Lookup (Chart of Accounts) | For purchase-side tax posting | 🟡 |
+| 11 | Output Tax GL Account | Lookup (Chart of Accounts) | For sales-side tax posting | 🟡 |
+| 12 | Tax Payable GL Account | Lookup | Net tax payable account | 🟡 |
+| 13 | Country / Region | Lookup | From country master | 🔴 |
+| 14 | HSN/SAC Code Applicability | Toggle | Does this tax require HSN/SAC on invoice? | 🟡 |
+| 15 | E-Invoice Required | Toggle | Mandate for digital reporting | 🟡 |
+| 16 | Reverse Charge Applicable | Toggle | Buyer pays tax directly to govt | 🟡 |
+| 17 | Reverse Charge GL Account | Lookup | Required if reverse charge = Yes | 🟡 |
+| 18 | Input Tax Claimable | Toggle | Can buyer claim credit? | 🔴 |
+| 19 | Exemption Certificate Required | Toggle | For zero-rated/exempt supplies | 🟡 |
+| 20 | Effective From Date | Date | — | 🔴 |
+| 21 | Effective To Date | Date | Blank = no expiry | 🟢 |
+| 22 | Description / Notes | Text area | — | 🟢 |
+| 23 | Status | Dropdown | Active / Inactive | 🔴 |
+| 24 | Created By | System | Read-only | 🔴 |
+| 25 | Created Date | System | Read-only | 🔴 |
+| 26 | Last Modified By | System | Read-only | 🔴 |
+
+**Validations:**
+- Tax Rate: 0 allowed only for exempt/zero-rated types
+- Input/Output GL accounts mandatory if tax posting enabled
+- Cannot deactivate tax code if used in open transactions
+- Compound tax base code cannot self-reference
+
+---
+
+### FORM 4: Vendor / Supplier Master
+**Form Name:** Vendor Master
+
+#### 4A — General Information Tab
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Vendor Code | Text (unique, auto/manual) | Unique per company | 🔴 |
+| 2 | Vendor Name (Legal) | Text (200 chars) | Official registered name | 🔴 |
+| 3 | Vendor Short Name / Alias | Text (50 chars) | For display in lists | 🟡 |
+| 4 | Vendor Type | Dropdown | Local / Import / Both / Service / Freight / 3PL | 🔴 |
+| 5 | Vendor Category | Dropdown | Raw Material / Trading / Service / Asset / Other | 🔴 |
+| 6 | Company / Legal Entity | Lookup | Which company this vendor belongs to | 🔴 |
+| 7 | Country | Lookup | From country master | 🔴 |
+| 8 | Currency | Lookup | Default transaction currency | 🔴 |
+| 9 | Language | Dropdown | For document printing language | 🟢 |
+| 10 | Status | Dropdown | Active / Inactive / Blacklisted / On Hold | 🔴 |
+| 11 | Blacklist / Hold Reason | Text | Mandatory if status = Blacklisted/On Hold | 🟡 |
+| 12 | Vendor Since (Date) | Date | First business date | 🟢 |
+
+#### 4B — Contact Details Tab
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 13 | Primary Contact Person | Text | — | 🔴 |
+| 14 | Designation | Text | — | 🟢 |
+| 15 | Phone (Primary) | Text | Country format validation | 🔴 |
+| 16 | Phone (Secondary) | Text | — | 🟢 |
+| 17 | Mobile | Text | — | 🟡 |
+| 18 | Email (Primary) | Email | Format validation | 🔴 |
+| 19 | Email (Accounts/AP) | Email | For invoice emails | 🟡 |
+| 20 | Fax | Text | — | 🟢 |
+| 21 | Website | URL | — | 🟢 |
+
+#### 4C — Address Tab (Multiple Addresses Supported)
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 22 | Address Type | Dropdown | Registered / Billing / Shipping / Warehouse | 🔴 |
+| 23 | Address Line 1 | Text | — | 🔴 |
+| 24 | Address Line 2 | Text | — | 🟢 |
+| 25 | City | Text | — | 🔴 |
+| 26 | State / Province | Text | — | 🟡 |
+| 27 | Zip / Postal Code | Text | — | 🟡 |
+| 28 | Country | Lookup | — | 🔴 |
+| 29 | Default Address Flag | Toggle | One default per type | 🔴 |
+
+#### 4D — Financial & Payment Tab
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 30 | Payment Terms | Dropdown | Immediate / Net 15 / Net 30 / Net 60 / Net 90 / Custom | 🔴 |
+| 31 | Custom Payment Days | Integer | Required if Payment Terms = Custom | 🟡 |
+| 32 | Payment Method | Dropdown | Bank Transfer / Cheque / Cash / LC / DD | 🔴 |
+| 33 | Credit Limit | Currency | Maximum outstanding allowed | 🟡 |
+| 34 | Credit Limit Currency | Lookup | — | 🟡 |
+| 35 | AP GL Account | Lookup | Accounts Payable posting account | 🔴 |
+| 36 | Advance Payment Policy | Toggle | Is advance required for this vendor? | 🟡 |
+| 37 | Advance % | Decimal | Required if advance policy = Yes | 🟡 |
+| 38 | Early Payment Discount % | Decimal | If paid within X days | 🟢 |
+| 39 | Early Payment Days | Integer | — | 🟢 |
+| 40 | Withholding Tax Applicable | Toggle | — | 🟡 |
+| 41 | Withholding Tax Code | Lookup | From tax master | 🟡 |
+
+#### 4E — Tax Registration Tab
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 42 | Tax Registration Type | Dropdown | GST / VAT / TIN / EIN / PAN / CRN / Other | 🔴 |
+| 43 | Tax Registration Number | Text | Format per country | 🔴 |
+| 44 | Tax Registration Country | Lookup | — | 🔴 |
+| 45 | Additional Tax Reg. (sub-table) | Sub-table | Multiple registrations (e.g., multi-state GST) | 🟡 |
+| 46 | VAT/GST Registered | Toggle | — | 🔴 |
+| 47 | Customs ID / Importer Code | Text | For import vendors | 🟡 |
+| 48 | Tax Exemption Certificate | File | Upload if exempt | 🟢 |
+| 49 | Tax Exemption Expiry Date | Date | Alert before expiry | 🟡 |
+
+#### 4F — Bank Details Tab (Sub-table — Multiple Accounts)
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 50 | Bank Account ID | Auto | — | 🔴 |
+| 51 | Bank Name | Text | — | 🔴 |
+| 52 | Bank Branch | Text | — | 🟡 |
+| 53 | Account Title | Text | Must match vendor legal name | 🔴 |
+| 54 | Account Number | Text | Masked display after save | 🔴 |
+| 55 | Account Type | Dropdown | Current / Savings / Other | 🔴 |
+| 56 | IBAN | Text | Format validation per country | 🟡 |
+| 57 | SWIFT / BIC Code | Text | For international transfers | 🟡 |
+| 58 | Routing / Sort Code | Text | Country-specific | 🟡 |
+| 59 | Currency | Lookup | Account currency | 🔴 |
+| 60 | Country | Lookup | Bank country | 🔴 |
+| 61 | Default Account Flag | Toggle | One default per currency | 🔴 |
+| 62 | Verified Flag | Toggle | Bank details verified by finance | 🔴 |
+| 63 | Verification Date | Date | — | 🟡 |
+
+#### 4G — Procurement Defaults Tab
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 64 | Default Incoterms | Dropdown | Incoterms 2020 list | 🟡 |
+| 65 | Default Incoterms Location | Text | Port/city | 🟡 |
+| 66 | Lead Time (days) | Integer | Default procurement lead time | 🟡 |
+| 67 | Minimum Order Value | Currency | MOV for this vendor | 🟢 |
+| 68 | Price Variance Tolerance % | Decimal | AP match tolerance | 🟡 |
+| 69 | GRN Tolerance % | Decimal | Over/under receipt | 🟡 |
+| 70 | Preferred Transporter | Lookup | From transporter master | 🟢 |
+| 71 | QC Required | Toggle | Trigger inspection on GRN | 🟡 |
+| 72 | Notes / Special Instructions | Text area | — | 🟢 |
+| 73 | Attachments | File | Contracts, certificates | 🟢 |
+
+#### 4H — Audit Trail
+
+| # | Field Name | Type |
+|---|---|---|
+| 74 | Created By | System |
+| 75 | Created Date | System |
+| 76 | Last Modified By | System |
+| 77 | Last Modified Date | System |
+| 78 | Modification History | System log |
+
+**Validations:**
+- Vendor Code: unique, cannot be changed after first transaction
+- Blacklisted vendor: block PO creation
+- Bank details: require dual approval before activation
+- Tax registration: format validation per country
+
+---
+
+### FORM 5: Warehouse Master
+**Form Name:** Warehouse / Location Master
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Warehouse Code | Text (20 chars, unique) | Unique per company | 🔴 |
+| 2 | Warehouse Name | Text (100 chars) | — | 🔴 |
+| 3 | Warehouse Short Name | Text (20 chars) | For display in forms | 🟡 |
+| 4 | Company | Lookup | — | 🔴 |
+| 5 | Branch | Lookup | Child of company | 🔴 |
+| 6 | Warehouse Type | Dropdown | Main / Transit / Quarantine / Return / Scrap / Consignment / Bonded | 🔴 |
+| 7 | Ownership Type | Dropdown | Own / Leased / 3PL / Consignment | 🟡 |
+| 8 | 3PL Provider | Lookup (Vendor) | Required if type = 3PL | 🟡 |
+| 9 | Address Line 1 | Text | — | 🔴 |
+| 10 | Address Line 2 | Text | — | 🟢 |
+| 11 | City | Text | — | 🔴 |
+| 12 | State / Province | Text | — | 🟡 |
+| 13 | Zip / Postal Code | Text | — | 🟡 |
+| 14 | Country | Lookup | — | 🔴 |
+| 15 | Phone | Text | — | 🟢 |
+| 16 | Email | Email | For notifications | 🟢 |
+| 17 | Warehouse Manager | Lookup (User) | Responsible person | 🟡 |
+| 18 | Storage Temperature Class | Lookup | From temperature class master | 🟡 |
+| 19 | Total Area (sqft/sqm) | Decimal | — | 🟢 |
+| 20 | Total Capacity (qty) | Decimal | Max units storable | 🟢 |
+| 21 | Total Weight Capacity (kg) | Decimal | — | 🟢 |
+| 22 | Total Volume Capacity (CBM) | Decimal | — | 🟢 |
+| 23 | Inbound Staging Bin | Lookup (Bin) | Default receiving area | 🟡 |
+| 24 | Outbound Staging Bin | Lookup (Bin) | Default dispatch area | 🟡 |
+| 25 | Quarantine Bin | Lookup (Bin) | For rejected/held stock | 🟡 |
+| 26 | Scrap Bin | Lookup (Bin) | For write-off stock | 🟡 |
+| 27 | Negative Stock Allowed | Toggle | Company policy override | 🔴 |
+| 28 | Bin Management Enabled | Toggle | If Yes → bin-level tracking required | 🔴 |
+| 29 | FEFO Enforced | Toggle | First Expiry First Out rule | 🟡 |
+| 30 | Barcode Scanning Required | Toggle | For WMS mobile operations | 🟡 |
+| 31 | GL Inventory Account Override | Lookup | If this warehouse uses different GL | 🟢 |
+| 32 | Tax Zone | Lookup | For multi-tax jurisdiction | 🟡 |
+| 33 | Customs Bonded | Toggle | For bonded warehouses | 🟡 |
+| 34 | License / Permit Number | Text | Required if bonded | 🟡 |
+| 35 | License Expiry Date | Date | Alert before expiry | 🟡 |
+| 36 | Notes | Text area | — | 🟢 |
+| 37 | Attachments | File | License, lease documents | 🟢 |
+| 38 | Active Flag | Toggle | Inactive = block all transactions | 🔴 |
+| 39 | Created By | System | — | 🔴 |
+| 40 | Created Date | System | — | 🔴 |
+| 41 | Last Modified By | System | — | 🔴 |
+
+**Validations:**
+- Warehouse Code: unique, immutable after first transaction
+- 3PL Provider required if Ownership Type = 3PL
+- Inbound/Outbound/Quarantine bins must belong to this warehouse
+- Cannot deactivate warehouse with open stock
+
+---
+
+### FORM 6: Zone & Bin Master
+**Form Name:** Zone / Bin Configuration
+
+#### 6A — Zone Level
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Zone Code | Text (20 chars, unique per warehouse) | — | 🔴 |
+| 2 | Zone Name | Text (100 chars) | — | 🔴 |
+| 3 | Warehouse | Lookup | Parent warehouse | 🔴 |
+| 4 | Zone Type | Dropdown | Storage / Receiving / Dispatch / Quarantine / Scrap / Overflow | 🔴 |
+| 5 | Storage Temperature Class | Lookup | From temperature class master | 🟡 |
+| 6 | Zone Area (sqft/sqm) | Decimal | — | 🟢 |
+| 7 | Zone Capacity (units) | Decimal | — | 🟢 |
+| 8 | Picking Sequence | Integer | Order in which zone is picked | 🟡 |
+| 9 | Putaway Strategy | Dropdown | Fixed / Dynamic / FIFO / FEFO | 🟡 |
+| 10 | Barcode | Text | Zone barcode for scanning | 🟡 |
+| 11 | Notes | Text | — | 🟢 |
+| 12 | Status | Dropdown | Active / Inactive | 🔴 |
+
+#### 6B — Aisle Level
+
+| # | Field Name | Type | Status |
+|---|---|---|---|
+| 1 | Aisle Code | Text (unique per zone) | 🔴 |
+| 2 | Aisle Name | Text | 🔴 |
+| 3 | Zone Link | Lookup | 🔴 |
+| 4 | Aisle Direction | Dropdown: Left-to-Right / Right-to-Left | 🟢 |
+| 5 | Status | Dropdown | 🔴 |
+
+#### 6C — Bin Level
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Bin Code | Text (unique per warehouse) | — | 🔴 |
+| 2 | Bin Name / Label | Text | Print label name | 🟡 |
+| 3 | Warehouse | Lookup | — | 🔴 |
+| 4 | Zone | Lookup | Child of warehouse | 🔴 |
+| 5 | Aisle | Lookup | Child of zone | 🟡 |
+| 6 | Row | Text | Physical row identifier | 🟡 |
+| 7 | Level / Rack | Text | e.g., Level 2, Rack B | 🟡 |
+| 8 | Position | Text | Exact position in rack | 🟡 |
+| 9 | Bin Type | Dropdown | Standard / Staging / Quarantine / Overflow / Dispatch | 🔴 |
+| 10 | Storage Temperature Class | Lookup | Can differ from zone | 🟡 |
+| 11 | Max Qty Capacity | Decimal | — | 🟢 |
+| 12 | Max Weight Capacity (kg) | Decimal | — | 🟢 |
+| 13 | Max Volume Capacity (CBM) | Decimal | — | 🟢 |
+| 14 | Dimensions (L×W×H) | Text | — | 🟢 |
+| 15 | Single Item Only | Toggle | Bin restricted to one item | 🟡 |
+| 16 | Single Lot Only | Toggle | Bin restricted to one lot | 🟡 |
+| 17 | Dedicated Item | Lookup | Fixed item for this bin | 🟢 |
+| 18 | Barcode | Text | Bin barcode for scanning | 🟡 |
+| 19 | QR Code | Auto-generate | System-generated | 🟡 |
+| 20 | Picking Sequence | Integer | Order in pick routes | 🟡 |
+| 21 | Notes | Text | — | 🟢 |
+| 22 | Status | Dropdown | Active / Inactive / Full / Blocked | 🔴 |
+| 23 | Created By | System | — | 🔴 |
+| 24 | Created Date | System | — | 🔴 |
+
+**Validations:**
+- Bin Code unique per warehouse
+- Cannot deactivate bin with existing stock
+- Weight/volume capacity: warn when approaching limit
+- Single Item / Single Lot: enforce on putaway
+
+---
+
+## 🟡 MEDIUM PRIORITY MASTERS
+
+---
+
+### FORM 7: Country Master
+**Form Name:** Country Master
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Country Code (ISO 3166-1 Alpha-2) | Text (2 chars, unique) | e.g., PK, US, GB, AE | 🔴 |
+| 2 | Country Code Alpha-3 | Text (3 chars) | e.g., PAK, USA, GBR | 🟡 |
+| 3 | Country Name | Text (100 chars) | — | 🔴 |
+| 4 | Country Name (Local Language) | Text | — | 🟢 |
+| 5 | Default Currency | Lookup | From currency master | 🔴 |
+| 6 | Tax System | Dropdown | GST / VAT / Sales Tax / No Tax / Mixed | 🔴 |
+| 7 | Default Tax Rate % | Decimal | Standard rate | 🟡 |
+| 8 | Tax Authority Name | Text | e.g., FBR, HMRC, IRS | 🟡 |
+| 9 | Fiscal Year Start Month | Dropdown | Jan–Dec | 🔴 |
+| 10 | Date Format | Dropdown | DD/MM/YYYY / MM/DD/YYYY / YYYY-MM-DD | 🔴 |
+| 11 | Number Format | Dropdown | 1,000.00 / 1.000,00 | 🔴 |
+| 12 | Decimal Places (Currency) | Integer (0–4) | — | 🔴 |
+| 13 | Phone Country Code | Text | e.g., +92 | 🟡 |
+| 14 | Customs Rules | Text area | Import/export regulations summary | 🟡 |
+| 15 | HS Code System | Dropdown | WCO HS 2022 / Country-specific | 🟡 |
+| 16 | E-Invoice Mandate | Toggle | Mandatory digital invoicing? | 🟡 |
+| 17 | E-Invoice Platform | Text | Name of govt portal | 🟡 |
+| 18 | Withholding Tax Applicable | Toggle | — | 🟡 |
+| 19 | Incoterms Default | Dropdown | Most common for this country | 🟢 |
+| 20 | Language | Dropdown | Default language for documents | 🟡 |
+| 21 | Time Zone | Dropdown | From tz database | 🟡 |
+| 22 | Status | Dropdown | Active / Inactive | 🔴 |
+| 23 | Notes | Text area | Any special compliance notes | 🟢 |
+| 24 | Created By | System | — | 🔴 |
+| 25 | Created Date | System | — | 🔴 |
+
+**Validations:**
+- ISO code must be valid 2-letter code
+- Cannot deactivate country with active vendors/customers
+
+---
+
+### FORM 8: Brand Master
+**Form Name:** Brand Configuration
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Brand Code | Text (20 chars, unique) | — | 🔴 |
+| 2 | Brand Name | Text (100 chars) | — | 🔴 |
+| 3 | Brand Short Name | Text (30 chars) | For display/reports | 🟡 |
+| 4 | Manufacturer Name | Text (200 chars) | Company that manufactures | 🟡 |
+| 5 | Manufacturer Code | Lookup (Vendor) | Link to vendor master if applicable | 🟢 |
+| 6 | Country of Origin | Lookup (Country) | — | 🟡 |
+| 7 | Brand Owner | Text | Legal brand owner entity | 🟡 |
+| 8 | Brand Category | Dropdown | Own Brand / Third-Party / Licensed | 🟡 |
+| 9 | Trademark / IP Reference | Text | Registration number | 🟢 |
+| 10 | Brand Logo | File (Image) | JPG/PNG, max 2MB | 🟢 |
+| 11 | Website | URL | — | 🟢 |
+| 12 | Description | Text area | — | 🟢 |
+| 13 | Status | Dropdown | Active / Inactive / Discontinued | 🔴 |
+| 14 | Created By | System | — | 🔴 |
+| 15 | Created Date | System | — | 🔴 |
+| 16 | Last Modified By | System | — | 🔴 |
+
+**Validations:**
+- Brand Code unique globally
+- Inactive brand: block assignment to new items
+
+---
+
+### FORM 9: Reason Code Master
+**Form Name:** Reason Code Configuration
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Reason Code | Text (20 chars, unique) | Uppercase recommended | 🔴 |
+| 2 | Reason Description | Text (200 chars) | Clear, user-facing description | 🔴 |
+| 3 | Reason Type | Dropdown | Adjustment / Return-Vendor / Return-Customer / Transfer / Write-Off / Write-Down / Damage / Expiry / Count Variance / Other | 🔴 |
+| 4 | Applicable Transaction | Multi-select | Stock Adjustment / GRN / RTV / RMA / Transfer / Stock Count | 🔴 |
+| 5 | Default GL Account (Debit) | Lookup | Auto-populate in transactions | 🟡 |
+| 6 | Default GL Account (Credit) | Lookup | — | 🟡 |
+| 7 | Requires Approval | Toggle | Does this reason trigger approval workflow? | 🔴 |
+| 8 | Approval Threshold (value) | Currency | Approval required only above this value | 🟡 |
+| 9 | Approval Level | Dropdown | Warehouse Manager / Finance Manager / CFO | 🟡 |
+| 10 | Requires Supporting Document | Toggle | Attachment mandatory? | 🟡 |
+| 11 | Document Description | Text | What document is required | 🟡 |
+| 12 | Notify Finance | Toggle | Email alert to finance team? | 🟡 |
+| 13 | Notify Management | Toggle | Email alert above threshold? | 🟡 |
+| 14 | Internal Use Only | Toggle | Hidden from storekeeper | 🟢 |
+| 15 | Display in Reports | Toggle | Include in audit reports | 🔴 |
+| 16 | Notes | Text | — | 🟢 |
+| 17 | Status | Dropdown | Active / Inactive | 🔴 |
+| 18 | Created By | System | — | 🔴 |
+| 19 | Created Date | System | — | 🔴 |
+| 20 | Last Modified By | System | — | 🔴 |
+
+**Validations:**
+- At least one Applicable Transaction must be selected
+- If Requires Approval = Yes, Approval Level must be set
+- GL accounts must be valid and active
+- Cannot deactivate reason code used in open transactions
+
+---
+
+### FORM 10: Item Class Master ✅
+**Form Name:** Item Class Coding
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Class Code | Text (20 chars, unique) | — | 🔴 |
+| 2 | Class Name | Text (100 chars) | — | 🔴 |
+| 3 | Description | Text (200 chars) | — | 🟢 |
+| 4 | Default Costing Method | Dropdown | FIFO / Moving Average / Standard | 🟡 |
+| 5 | Default GL — Inventory | Lookup | Inherited by items in this class | 🟡 |
+| 6 | Default GL — COGS | Lookup | — | 🟡 |
+| 7 | Status | Dropdown | Active / Inactive | 🔴 |
+| 8 | Created By | System | — | 🔴 |
+| 9 | Created Date | System | — | 🔴 |
+
+---
+
+### FORM 11: Item Category Master ✅
+**Form Name:** Item Category Coding
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Category Code | Text (20 chars, unique) | — | 🔴 |
+| 2 | Category Name | Text (100 chars) | — | 🔴 |
+| 3 | Item Class | Lookup | Parent class | 🔴 |
+| 4 | Description | Text (200 chars) | — | 🟢 |
+| 5 | Default Tracking Mode | Dropdown | None / Lot / Serial | 🟡 |
+| 6 | Default Expiry Policy | Toggle | Expiry tracking on/off | 🟡 |
+| 7 | Default Storage Temp Class | Lookup | — | 🟡 |
+| 8 | Default GL — Inventory | Lookup | Overrides class default | 🟡 |
+| 9 | Default GL — COGS | Lookup | — | 🟡 |
+| 10 | Status | Dropdown | Active / Inactive | 🔴 |
+| 11 | Created By | System | — | 🔴 |
+| 12 | Created Date | System | — | 🔴 |
+
+---
+
+### FORM 12: Item Group Master ✅
+**Form Name:** Item Group Coding
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Group Code | Text (20 chars, unique) | — | 🔴 |
+| 2 | Group Name | Text (100 chars) | — | 🔴 |
+| 3 | Item Category | Lookup | Parent category | 🔴 |
+| 4 | Item Class | Auto-fill | From category | 🔴 |
+| 5 | Description | Text (200 chars) | — | 🟢 |
+| 6 | Reorder Policy | Dropdown | Min-Max / Reorder Point / Manual | 🟡 |
+| 7 | ABC Classification Default | Dropdown | A / B / C | 🟡 |
+| 8 | Status | Dropdown | Active / Inactive | 🔴 |
+| 9 | Created By | System | — | 🔴 |
+| 10 | Created Date | System | — | 🔴 |
+
+---
+
+## 🟢 LOW PRIORITY MASTERS
+
+---
+
+### FORM 13: Temperature Class Master
+**Form Name:** Temperature Class Configuration
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Class Code | Text (20 chars, unique) | — | 🔴 |
+| 2 | Class Name | Text (100 chars) | e.g., Frozen, Chilled, Ambient | 🔴 |
+| 3 | Min Temperature (°C) | Decimal | Min < Max | 🔴 |
+| 4 | Max Temperature (°C) | Decimal | — | 🔴 |
+| 5 | Unit of Measure | Dropdown | Celsius / Fahrenheit | 🔴 |
+| 6 | Humidity Range (%) | Text | e.g., 40%–60% | 🟡 |
+| 7 | Storage Requirements | Text area | Special storage conditions | 🟡 |
+| 8 | Monitoring Frequency | Dropdown | Continuous / Hourly / Daily / Weekly | 🟡 |
+| 9 | Alert Threshold (deviation) | Decimal | Trigger alert if temp deviates by X°C | 🟡 |
+| 10 | Equipment Required | Text | e.g., Cold Room, Refrigerator | 🟢 |
+| 11 | Regulatory Reference | Text | e.g., GDP, WHO cold chain guidelines | 🟢 |
+| 12 | Applicable Industries | Multi-select | Pharma / Food / Chemical / Other | 🟢 |
+| 13 | Color Code | Text (Hex) | For visual identification in UI | 🟢 |
+| 14 | Status | Dropdown | Active / Inactive | 🔴 |
+| 15 | Notes | Text | — | 🟢 |
+| 16 | Created By | System | — | 🔴 |
+| 17 | Created Date | System | — | 🔴 |
+
+**Validations:**
+- Min Temperature must be less than Max Temperature
+- Cannot deactivate class assigned to active warehouses/bins/items
+
+---
+
+### FORM 14: Transporter Master
+**Form Name:** Transporter Master
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Transporter Code | Text (unique) | — | 🔴 |
+| 2 | Transporter Name | Text (200 chars) | — | 🔴 |
+| 3 | Transporter Type | Dropdown | Local / International / Freight Forwarder / Courier / 3PL | 🔴 |
+| 4 | Contact Person | Text | — | 🔴 |
+| 5 | Phone (Primary) | Text | — | 🔴 |
+| 6 | Phone (Secondary) | Text | — | 🟢 |
+| 7 | Email | Email | — | 🔴 |
+| 8 | Website | URL | — | 🟢 |
+| 9 | Address | Text area | — | 🟡 |
+| 10 | Country | Lookup | — | 🔴 |
+| 11 | Vehicle Types | Multi-select | Truck / Van / Container / Air / Sea / Rail | 🟡 |
+| 12 | Max Load Capacity (kg) | Decimal | Per vehicle/trip | 🟢 |
+| 13 | Max Volume Capacity (CBM) | Decimal | — | 🟢 |
+| 14 | Cold Chain Capable | Toggle | Can handle temperature-sensitive goods | 🟡 |
+| 15 | Temperature Classes Supported | Multi-lookup | From temperature class master | 🟡 |
+| 16 | Service Areas / Regions | Text area | Coverage zones | 🟡 |
+| 17 | International Routes | Text | — | 🟢 |
+| 18 | Transit Time (local days) | Integer | Average local delivery | 🟢 |
+| 19 | Transit Time (import days) | Integer | Average international | 🟢 |
+| 20 | Tax Registration No. | Text | — | 🟡 |
+| 21 | License / Permit No. | Text | Transport license | 🟡 |
+| 22 | License Expiry Date | Date | Alert before expiry | 🟡 |
+| 23 | Insurance Policy No. | Text | Cargo insurance | 🟢 |
+| 24 | Insurance Expiry Date | Date | Alert before expiry | 🟢 |
+| 25 | Rating | Dropdown | 1 Star to 5 Stars | 🟢 |
+| 26 | Performance Notes | Text | — | 🟢 |
+| 27 | GL Account (Freight Cost) | Lookup | Default freight GL | 🟡 |
+| 28 | Status | Dropdown | Active / Inactive / Blacklisted | 🔴 |
+| 29 | Blacklist Reason | Text | If blacklisted | 🟡 |
+| 30 | Created By | System | — | 🔴 |
+| 31 | Created Date | System | — | 🔴 |
+
+---
+
+### FORM 15: Customer Master
+**Form Name:** Customer Master
+
+#### General Information
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Customer Code | Text (unique, auto/manual) | — | 🔴 |
+| 2 | Customer Name (Legal) | Text (200 chars) | — | 🔴 |
+| 3 | Customer Short Name | Text (50 chars) | — | 🟡 |
+| 4 | Customer Type | Dropdown | Retail / Wholesale / Distributor / Government / Export / Internal | 🔴 |
+| 5 | Company | Lookup | — | 🔴 |
+| 6 | Country | Lookup | — | 🔴 |
+| 7 | Currency | Lookup | Default billing currency | 🔴 |
+| 8 | Status | Dropdown | Active / Inactive / Blacklisted / On Hold | 🔴 |
+| 9 | Hold / Blacklist Reason | Text | Mandatory if applicable | 🟡 |
+
+#### Contact Details
+
+| # | Field Name | Type | Status |
+|---|---|---|---|
+| 10 | Contact Person | Text | 🔴 |
+| 11 | Phone (Primary) | Text | 🔴 |
+| 12 | Phone (Secondary) | Text | 🟢 |
+| 13 | Email (Primary) | Email | 🔴 |
+| 14 | Email (Accounts/AR) | Email | 🟡 |
+| 15 | Address (Multi-type: Billing/Shipping) | Sub-table | 🔴 |
+
+#### Financial Details
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 16 | Payment Terms | Dropdown | Immediate / Net 30 / Net 60 / Custom | 🔴 |
+| 17 | Credit Limit | Currency | — | 🟡 |
+| 18 | Credit Limit Currency | Lookup | — | 🟡 |
+| 19 | Credit Hold Auto | Toggle | Auto-hold if overdue | 🟡 |
+| 20 | AR GL Account | Lookup | Receivable posting account | 🔴 |
+| 21 | Sales GL Account | Lookup | Revenue account | 🟡 |
+| 22 | Tax Registration No. | Text | — | 🟡 |
+| 23 | Tax Registration Type | Dropdown | GST/VAT/TIN etc. | 🟡 |
+| 24 | Tax Exemption Flag | Toggle | — | 🟡 |
+| 25 | Tax Exemption Certificate | File | — | 🟢 |
+| 26 | Tax Exemption Expiry Date | Date | — | 🟡 |
+| 27 | Default Price List | Lookup | Customer-specific pricing | 🟡 |
+| 28 | Default Discount % | Decimal | — | 🟢 |
+| 29 | Attachments | File | Contract, KYC docs | 🟢 |
+| 30 | Notes | Text | — | 🟢 |
+| 31 | Created By | System | — | 🔴 |
+| 32 | Created Date | System | — | 🔴 |
+| 33 | Last Modified By | System | — | 🔴 |
+
+---
+
+### FORM 16: Package Type Master
+**Form Name:** Package Type Configuration
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Package Code | Text (20 chars, unique) | — | 🔴 |
+| 2 | Package Name | Text (100 chars) | e.g., Unit, Box, Case, Pallet | 🔴 |
+| 3 | Package Level | Integer | 1=Unit, 2=Box, 3=Case, 4=Pallet | 🔴 |
+| 4 | Parent Package Type | Lookup | e.g., Box → Case | 🟡 |
+| 5 | Units Per Parent | Integer | How many of this package = 1 parent | 🟡 |
+| 6 | Length (cm) | Decimal | — | 🟡 |
+| 7 | Width (cm) | Decimal | — | 🟡 |
+| 8 | Height (cm) | Decimal | — | 🟡 |
+| 9 | Volume (CBM) | Auto-calc | L×W×H / 1,000,000 | 🟡 |
+| 10 | Tare Weight (kg) | Decimal | Weight of empty package | 🟡 |
+| 11 | Max Net Weight (kg) | Decimal | Max payload | 🟡 |
+| 12 | Max Gross Weight (kg) | Auto-calc | Tare + Net | 🟡 |
+| 13 | Volume Capacity (litres/CBM) | Decimal | — | 🟢 |
+| 14 | Stackable | Toggle | Can this package be stacked? | 🟢 |
+| 15 | Max Stack Layers | Integer | — | 🟢 |
+| 16 | Nesting Rule | Dropdown | Fixed / Configurable / None | 🟢 |
+| 17 | Barcode Type | Lookup | From barcode type master | 🟡 |
+| 18 | GS1 SSCC Applicable | Toggle | For pallet-level tracking | 🟢 |
+| 19 | Reusable | Toggle | Returnable packaging | 🟢 |
+| 20 | Material | Dropdown | Cardboard / Wood / Plastic / Metal / Other | 🟢 |
+| 21 | Notes | Text | — | 🟢 |
+| 22 | Status | Dropdown | Active / Inactive | 🔴 |
+| 23 | Created By | System | — | 🔴 |
+| 24 | Created Date | System | — | 🔴 |
+
+---
+
+### FORM 17: Barcode Type Master
+**Form Name:** Barcode Type Configuration
+
+| # | Field Name | Type | Validation / Rule | Status |
+|---|---|---|---|---|
+| 1 | Barcode Type Code | Text (20 chars, unique) | — | 🔴 |
+| 2 | Barcode Type Name | Text (100 chars) | e.g., EAN-13, Code 128, QR Code | 🔴 |
+| 3 | Symbology | Dropdown | EAN-8 / EAN-13 / UPC-A / UPC-E / Code 128 / Code 39 / QR Code / DataMatrix / Aztec / PDF417 / SSCC-18 / ITF-14 | 🔴 |
+| 4 | Barcode Category | Dropdown | 1D Linear / 2D Matrix / Composite | 🔴 |
+| 5 | Fixed Length | Toggle | Is the barcode always same length? | 🔴 |
+| 6 | Min Length | Integer | If variable length | 🟡 |
+| 7 | Max Length | Integer | — | 🟡 |
+| 8 | Fixed Length Value | Integer | Required if Fixed Length = Yes | 🟡 |
+| 9 | Allowed Characters | Dropdown | Numeric Only / Alphanumeric / All | 🔴 |
+| 10 | Format / Pattern | Text (Regex) | Validation pattern | 🟡 |
+| 11 | Check Digit Algorithm | Dropdown | None / Modulo 10 / Modulo 43 / Auto | 🟡 |
+| 12 | Check Digit Position | Dropdown | Last / First / Auto | 🟡 |
+| 13 | GS1 Standard | Toggle | Follows GS1 specification? | 🟡 |
+| 14 | Application Identifier (AI) | Text | GS1 AI if applicable | 🟢 |
+| 15 | Applicable To | Multi-select | Item / Carton / Pallet / Location / Batch / Serial | 🔴 |
+| 16 | Scanner Compatibility | Text | Compatible scanner types | 🟢 |
+| 17 | Print Width (mm) | Decimal | For label printing | 🟢 |
+| 18 | Print Height (mm) | Decimal | — | 🟢 |
+| 19 | Sample Barcode | Text | Example for reference | 🟢 |
+| 20 | Description / Notes | Text area | — | 🟢 |
+| 21 | Status | Dropdown | Active / Inactive | 🔴 |
+| 22 | Created By | System | — | 🔴 |
+| 23 | Created Date | System | — | 🔴 |
+
+---
+
+## 📊 Complete Summary Table
+
+| # | Form Name | Priority | Total Fields | Mandatory 🔴 | Conditional 🟡 | Optional 🟢 | Key Dependencies |
+|---|---|---|---|---|---|---|---|
+| 1 | UOM Master | 🔴 High | 12 | 7 | 1 | 4 | None |
+| 2 | UOM Conversion | 🔴 High | 14 | 7 | 4 | 3 | UOM Master |
+| 3 | Tax Category | 🔴 High | 26 | 8 | 13 | 5 | Chart of Accounts, Country |
+| 4 | Vendor Master | 🔴 High | 78 | 28 | 32 | 18 | Country, Currency, COA |
+| 5 | Warehouse Master | 🔴 High | 41 | 15 | 16 | 10 | Company, Branch, Bin |
+| 6 | Zone & Bin Master | 🔴 High | 37 | 14 | 14 | 9 | Warehouse |
+| 7 | Country Master | 🟡 Medium | 25 | 8 | 11 | 6 | Currency |
+| 8 | Brand Master | 🟡 Medium | 16 | 4 | 5 | 7 | Country, Vendor |
+| 9 | Reason Code Master | 🟡 Medium | 20 | 7 | 9 | 4 | Chart of Accounts |
+| 10 | Item Class Master | ✅ Exists | 9 | 5 | 2 | 2 | COA |
+| 11 | Item Category Master | ✅ Exists | 12 | 5 | 5 | 2 | Item Class |
+| 12 | Item Group Master | ✅ Exists | 10 | 5 | 3 | 2 | Item Category |
+| 13 | Temperature Class | 🟢 Low | 17 | 5 | 5 | 7 | None |
+| 14 | Transporter Master | 🟢 Low | 31 | 8 | 13 | 10 | Country, COA |
+| 15 | Customer Master | 🟢 Low | 33 | 11 | 14 | 8 | Country, Currency, COA |
+| 16 | Package Type | 🟢 Low | 24 | 4 | 9 | 11 | Barcode Type |
+| 17 | Barcode Type | 🟢 Low | 23 | 6 | 9 | 8 | None |
+
+---
+
+## ⚠️ Global Validations (All Master Forms)
+
+- **Unique Codes:** All codes are unique per company (or globally where specified)
+- **Inactive Block:** Inactive records cannot be selected in new transactions
+- **Delete Protection:** Records referenced in any transaction cannot be deleted — only deactivated
+- **Audit Trail:** All creates, edits, status changes logged with user + timestamp
+- **Approval on Sensitive Changes:** Bank details (vendor), credit limits, tax rates require dual approval
+- **Naming Convention:** All codes: UPPERCASE, no special characters except hyphen and underscore
+
+---
+
+*Document: Master Forms Field Specification | Inventory Module ERP*
+*Version 2.0 | All forms production-ready for Phase-A development*

@@ -17,7 +17,7 @@ const GeneralizedForm = ({
   showReset = true,
   initialData = {},
 }) => {
-  const [formData, setFormData] = useState(initialData);
+  const [formData, setFormData] = useState(initialData || {});
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState(null);
   const [showPasswords, setShowPasswords] = useState({});
@@ -135,7 +135,7 @@ const GeneralizedForm = ({
   };
 
   const handleReset = () => {
-    setFormData(initialData);
+    setFormData(initialData || {});
     setImagePreviews({});
     setAlert(null);
     Object.keys(fileInputRefs.current).forEach(key => {

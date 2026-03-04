@@ -19,12 +19,17 @@ return new class extends Migration
             $table->string('uom_name', 100);
             $table->string('uom_type', 50); // length, weight, volume, quantity, area, time
             $table->string('symbol', 10);
+            $table->text('description')->nullable(); // 200 chars
             $table->integer('decimal_precision')->default(2);
             $table->decimal('conversion_factor', 15, 6)->default(1);
             $table->foreignId('base_uom_id')->nullable()->constrained('uom_masters')->onDelete('set null');
             $table->boolean('is_base_uom')->default(true);
             $table->boolean('is_active')->default(true);
             $table->integer('display_order')->default(0);
+            
+            // Audit trail
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
 
             $table->timestamps();
             $table->softDeletes();

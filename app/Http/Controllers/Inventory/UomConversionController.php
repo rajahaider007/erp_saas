@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Inventory;
 use App\Http\Controllers\Controller;
 use App\Models\UomMaster;
 use App\Models\UomConversion;
+use App\Models\InventoryItem;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -91,6 +92,10 @@ class UomConversionController extends Controller
             return Inertia::render('Inventory/UomConversion/Create', [
                 'error' => 'Company information is required.',
                 'uoms' => [],
+                'items' => [],
+                'directionOptions' => ['Unidirectional', 'Bidirectional'],
+                'roundingRuleOptions' => ['None', 'Round Up', 'Round Down', 'Round Nearest'],
+                'conversionTypeOptions' => ['Standard', 'Item-Specific', 'Packaging'],
             ]);
         }
 
@@ -99,14 +104,27 @@ class UomConversionController extends Controller
             ->orderBy('uom_code')
             ->get(['id', 'uom_code', 'uom_name', 'symbol'])
             ->map(fn ($u) => [
-                'id' => $u->id,
+                'value' => $u->id,
                 'label' => "{$u->uom_code} - {$u->uom_name} ({$u->symbol})",
-                'uom_code' => $u->uom_code,
+            ])
+            ->toArray();
+
+        $items = InventoryItem::where('comp_id', $compId)
+            ->where('is_active', true)
+            ->orderBy('item_code')
+            ->get(['id', 'item_code', 'item_name_short'])
+            ->map(fn ($i) => [
+                'value' => $i->id,
+                'label' => "{$i->item_code} - {$i->item_name_short}",
             ])
             ->toArray();
 
         return Inertia::render('Inventory/UomConversion/Create', [
             'uoms' => $uoms,
+            'items' => $items,
+            'directionOptions' => ['Unidirectional', 'Bidirectional'],
+            'roundingRuleOptions' => ['None', 'Round Up', 'Round Down', 'Round Nearest'],
+            'conversionTypeOptions' => ['Standard', 'Item-Specific', 'Packaging'],
         ]);
     }
 
@@ -139,9 +157,14 @@ class UomConversionController extends Controller
         $validated = $request->validate([
             'from_uom_id' => 'required|integer|exists:uom_masters,id',
             'to_uom_id' => 'required|integer|exists:uom_masters,id|different:from_uom_id',
+            'item_id' => 'nullable|integer|exists:inventory_items,id',
             'conversion_factor' => 'required|numeric|min:0.0001|max:999999.9999',
-            'conversion_direction' => 'required|string|max:100',
-            'effective_date' => 'required|date',
+            'conversion_direction' => 'required|string|in:Unidirectional,Bidirectional',
+            'rounding_rule' => 'required|string|in:None,Round Up,Round Down,Round Nearest',
+            'effective_from' => 'required|date',
+            'effective_to' => 'nullable|date|after_or_equal:effective_from',
+            'conversion_type' => 'required|string|in:Standard,Item-Specific,Packaging',
+            'notes' => 'nullable|string|max:500',
             'is_item_specific' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',
         ]);
@@ -150,11 +173,18 @@ class UomConversionController extends Controller
             'company_id' => $compId,
             'from_uom_id' => $validated['from_uom_id'],
             'to_uom_id' => $validated['to_uom_id'],
+            'item_id' => $validated['item_id'] ?? null,
             'conversion_factor' => $validated['conversion_factor'],
             'conversion_direction' => trim($validated['conversion_direction']),
-            'effective_date' => $validated['effective_date'],
+            'rounding_rule' => $validated['rounding_rule'],
+            'effective_from' => $validated['effective_from'],
+            'effective_to' => $validated['effective_to'] ?? null,
+            'conversion_type' => $validated['conversion_type'],
+            'notes' => $validated['notes'] ?? null,
             'is_item_specific' => $validated['is_item_specific'] ?? false,
             'is_active' => $validated['is_active'] ?? true,
+            'created_by' => auth()->id(),
+            'updated_by' => auth()->id(),
         ]);
 
         return redirect()->route('inventory.uom-conversion.list')
@@ -183,15 +213,28 @@ class UomConversionController extends Controller
             ->orderBy('uom_code')
             ->get(['id', 'uom_code', 'uom_name', 'symbol'])
             ->map(fn ($u) => [
-                'id' => $u->id,
+                'value' => $u->id,
                 'label' => "{$u->uom_code} - {$u->uom_name} ({$u->symbol})",
-                'uom_code' => $u->uom_code,
+            ])
+            ->toArray();
+
+        $items = InventoryItem::where('comp_id', $compId)
+            ->where('is_active', true)
+            ->orderBy('item_code')
+            ->get(['id', 'item_code', 'item_name_short'])
+            ->map(fn ($i) => [
+                'value' => $i->id,
+                'label' => "{$i->item_code} - {$i->item_name_short}",
             ])
             ->toArray();
 
         return Inertia::render('Inventory/UomConversion/Create', [
             'conversion' => $conversion,
             'uoms' => $uoms,
+            'items' => $items,
+            'directionOptions' => ['Unidirectional', 'Bidirectional'],
+            'roundingRuleOptions' => ['None', 'Round Up', 'Round Down', 'Round Nearest'],
+            'conversionTypeOptions' => ['Standard', 'Item-Specific', 'Packaging'],
         ]);
     }
 
@@ -230,9 +273,14 @@ class UomConversionController extends Controller
         $validated = $request->validate([
             'from_uom_id' => 'required|integer|exists:uom_masters,id',
             'to_uom_id' => 'required|integer|exists:uom_masters,id|different:from_uom_id',
+            'item_id' => 'nullable|integer|exists:inventory_items,id',
             'conversion_factor' => 'required|numeric|min:0.0001|max:999999.9999',
-            'conversion_direction' => 'required|string|max:100',
-            'effective_date' => 'required|date',
+            'conversion_direction' => 'required|string|in:Unidirectional,Bidirectional',
+            'rounding_rule' => 'required|string|in:None,Round Up,Round Down,Round Nearest',
+            'effective_from' => 'required|date',
+            'effective_to' => 'nullable|date|after_or_equal:effective_from',
+            'conversion_type' => 'required|string|in:Standard,Item-Specific,Packaging',
+            'notes' => 'nullable|string|max:500',
             'is_item_specific' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',
         ]);
@@ -240,11 +288,17 @@ class UomConversionController extends Controller
         $conversion->update([
             'from_uom_id' => $validated['from_uom_id'],
             'to_uom_id' => $validated['to_uom_id'],
+            'item_id' => $validated['item_id'] ?? null,
             'conversion_factor' => $validated['conversion_factor'],
             'conversion_direction' => trim($validated['conversion_direction']),
-            'effective_date' => $validated['effective_date'],
+            'rounding_rule' => $validated['rounding_rule'],
+            'effective_from' => $validated['effective_from'],
+            'effective_to' => $validated['effective_to'] ?? null,
+            'conversion_type' => $validated['conversion_type'],
+            'notes' => $validated['notes'] ?? null,
             'is_item_specific' => $validated['is_item_specific'] ?? false,
             'is_active' => $validated['is_active'] ?? true,
+            'updated_by' => auth()->id(),
         ]);
 
         return redirect()->route('inventory.uom-conversion.list')

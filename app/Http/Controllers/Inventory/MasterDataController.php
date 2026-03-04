@@ -22,7 +22,9 @@ use App\Models\UomMaster;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class MasterDataController extends Controller
@@ -108,6 +110,12 @@ class MasterDataController extends Controller
         $validated = $request->validate($this->rules($config, $companyId));
         $validated['company_id'] = $companyId;
 
+        if ($master === 'tax-category') {
+            $this->applyTaxCategoryRules($validated, null);
+            $validated['created_by'] = auth()->id();
+            $validated['updated_by'] = auth()->id();
+        }
+
         if ($master === 'country-master') {
             $validated['iso_2_code'] = $validated['iso_2_code'] ?? strtoupper(substr($validated['country_code'], 0, 2));
             $validated['iso_numeric_code'] = $validated['iso_numeric_code'] ?? str_pad((string) (abs(crc32($validated['country_code'])) % 1000), 3, '0', STR_PAD_LEFT);
@@ -162,6 +170,11 @@ class MasterDataController extends Controller
         }
 
         $validated = $request->validate($this->rules($config, $companyId, $record->id));
+
+        if ($master === 'tax-category') {
+            $this->applyTaxCategoryRules($validated, $record->id);
+            $validated['updated_by'] = auth()->id();
+        }
 
         if ($master === 'country-master') {
             $validated['iso_2_code'] = $validated['iso_2_code'] ?? $record->iso_2_code ?? strtoupper(substr($validated['country_code'] ?? $record->country_code, 0, 2));
@@ -254,6 +267,9 @@ class MasterDataController extends Controller
         $locationOptions = Location::where('company_id', $companyId)->where('status', true)->get(['id', 'location_name'])
             ->map(fn ($row) => ['value' => (string) $row->id, 'label' => $row->location_name])->values();
 
+        $taxCategoryOptions = TaxCategory::byCompany($companyId)->active()->get(['id', 'tax_code', 'tax_name'])
+            ->map(fn ($row) => ['value' => (string) $row->id, 'label' => $row->tax_code . ' - ' . $row->tax_name])->values();
+
         return [
             'uomOptions' => $uomOptions,
             'countryOptions' => $countryOptions,
@@ -261,11 +277,26 @@ class MasterDataController extends Controller
             'glAccountOptions' => $glAccountOptions,
             'warehouseOptions' => $warehouseOptions,
             'locationOptions' => $locationOptions,
+            'taxCategoryOptions' => $taxCategoryOptions,
             'taxTypeOptions' => [
                 ['value' => 'gst', 'label' => 'GST'],
                 ['value' => 'vat', 'label' => 'VAT'],
                 ['value' => 'sales_tax', 'label' => 'Sales Tax'],
-                ['value' => 'custom', 'label' => 'Custom Duty'],
+                ['value' => 'customs_duty', 'label' => 'Customs Duty'],
+                ['value' => 'withholding_tax', 'label' => 'Withholding Tax'],
+                ['value' => 'excise', 'label' => 'Excise'],
+                ['value' => 'other', 'label' => 'Other'],
+            ],
+            'taxCalculationMethodOptions' => [
+                ['value' => 'percentage_net', 'label' => 'Percentage of Net'],
+                ['value' => 'percentage_gross', 'label' => 'Percentage of Gross'],
+                ['value' => 'fixed_amount', 'label' => 'Fixed Amount'],
+                ['value' => 'slab_based', 'label' => 'Slab-based'],
+            ],
+            'taxCategoryGroupOptions' => [
+                ['value' => 'input_tax', 'label' => 'Input Tax'],
+                ['value' => 'output_tax', 'label' => 'Output Tax'],
+                ['value' => 'both', 'label' => 'Both'],
             ],
             'applicableOnOptions' => [
                 ['value' => 'purchase', 'label' => 'Purchase'],
@@ -388,24 +419,54 @@ class MasterDataController extends Controller
                 'rules' => [
                     'tax_code' => ['required', 'string', 'max:20'],
                     'tax_name' => ['required', 'string', 'max:100'],
-                    'tax_rate' => ['required', 'numeric', 'min:0', 'max:100'],
-                    'tax_type' => ['required', Rule::in(['gst', 'vat', 'sales_tax', 'custom'])],
-                    'gl_account_id' => ['nullable', 'exists:chart_of_accounts,id'],
+                    'tax_type' => ['required', Rule::in(['gst', 'vat', 'sales_tax', 'customs_duty', 'withholding_tax', 'excise', 'other'])],
+                    'tax_rate' => ['required', 'numeric', 'decimal:0,4', 'min:0', 'max:100'],
+                    'tax_calculation_method' => ['required', Rule::in(['percentage_net', 'percentage_gross', 'fixed_amount', 'slab_based'])],
+                    'is_compound_tax' => ['nullable', 'boolean'],
+                    'compound_base_tax_category_id' => ['nullable', 'exists:tax_categories,id'],
+                    'tax_category_group' => ['required', Rule::in(['input_tax', 'output_tax', 'both'])],
                     'applicable_for' => ['required', Rule::in(['purchase', 'sales', 'both'])],
-                    'country_region' => ['nullable', 'string', 'max:100'],
+                    'input_tax_gl_account_id' => ['nullable', 'exists:chart_of_accounts,id'],
+                    'output_tax_gl_account_id' => ['nullable', 'exists:chart_of_accounts,id'],
+                    'tax_payable_gl_account_id' => ['nullable', 'exists:chart_of_accounts,id'],
+                    'country_id' => ['required', 'exists:countries,id'],
+                    'hsn_sac_required' => ['nullable', 'boolean'],
+                    'e_invoice_required' => ['nullable', 'boolean'],
+                    'reverse_charge_applicable' => ['nullable', 'boolean'],
+                    'reverse_charge_gl_account_id' => ['nullable', 'exists:chart_of_accounts,id'],
+                    'input_tax_claimable' => ['required', 'boolean'],
+                    'exemption_certificate_required' => ['nullable', 'boolean'],
+                    'effective_from_date' => ['required', 'date'],
+                    'effective_to_date' => ['nullable', 'date', 'after_or_equal:effective_from_date'],
+                    'description' => ['nullable', 'string', 'max:500'],
                     'is_active' => ['nullable', 'boolean'],
                 ],
                 'fields' => [
                     ['name' => 'tax_code', 'label' => 'Tax Code', 'type' => 'text', 'required' => true],
                     ['name' => 'tax_name', 'label' => 'Tax Name', 'type' => 'text', 'required' => true],
-                    ['name' => 'tax_rate', 'label' => 'Tax Rate (%)', 'type' => 'number', 'required' => true],
                     ['name' => 'tax_type', 'label' => 'Tax Type', 'type' => 'select', 'required' => true, 'optionsKey' => 'taxTypeOptions'],
-                    ['name' => 'gl_account_id', 'label' => 'Account Head', 'type' => 'select', 'optionsKey' => 'glAccountOptions'],
+                    ['name' => 'tax_rate', 'label' => 'Tax Rate (%)', 'type' => 'number', 'required' => true, 'min' => 0, 'max' => 100],
+                    ['name' => 'tax_calculation_method', 'label' => 'Tax Calculation Method', 'type' => 'select', 'required' => true, 'optionsKey' => 'taxCalculationMethodOptions'],
+                    ['name' => 'is_compound_tax', 'label' => 'Compound Tax', 'type' => 'toggle'],
+                    ['name' => 'compound_base_tax_category_id', 'label' => 'Compound Base Tax Code', 'type' => 'select', 'optionsKey' => 'taxCategoryOptions'],
+                    ['name' => 'tax_category_group', 'label' => 'Tax Category Group', 'type' => 'select', 'required' => true, 'optionsKey' => 'taxCategoryGroupOptions'],
                     ['name' => 'applicable_for', 'label' => 'Applicable On', 'type' => 'select', 'required' => true, 'optionsKey' => 'applicableOnOptions'],
-                    ['name' => 'country_region', 'label' => 'Country/Region', 'type' => 'text'],
+                    ['name' => 'input_tax_gl_account_id', 'label' => 'Input Tax GL Account', 'type' => 'select', 'optionsKey' => 'glAccountOptions'],
+                    ['name' => 'output_tax_gl_account_id', 'label' => 'Output Tax GL Account', 'type' => 'select', 'optionsKey' => 'glAccountOptions'],
+                    ['name' => 'tax_payable_gl_account_id', 'label' => 'Tax Payable GL Account', 'type' => 'select', 'optionsKey' => 'glAccountOptions'],
+                    ['name' => 'country_id', 'label' => 'Country / Region', 'type' => 'select', 'required' => true, 'optionsKey' => 'countryOptions'],
+                    ['name' => 'hsn_sac_required', 'label' => 'HSN/SAC Code Applicability', 'type' => 'toggle'],
+                    ['name' => 'e_invoice_required', 'label' => 'E-Invoice Required', 'type' => 'toggle'],
+                    ['name' => 'reverse_charge_applicable', 'label' => 'Reverse Charge Applicable', 'type' => 'toggle'],
+                    ['name' => 'reverse_charge_gl_account_id', 'label' => 'Reverse Charge GL Account', 'type' => 'select', 'optionsKey' => 'glAccountOptions'],
+                    ['name' => 'input_tax_claimable', 'label' => 'Input Tax Claimable', 'type' => 'toggle', 'required' => true],
+                    ['name' => 'exemption_certificate_required', 'label' => 'Exemption Certificate Required', 'type' => 'toggle'],
+                    ['name' => 'effective_from_date', 'label' => 'Effective From Date', 'type' => 'date', 'required' => true],
+                    ['name' => 'effective_to_date', 'label' => 'Effective To Date', 'type' => 'date'],
+                    ['name' => 'description', 'label' => 'Description / Notes', 'type' => 'textarea'],
                     ['name' => 'is_active', 'label' => 'Status', 'type' => 'toggle'],
                 ],
-                'list_columns' => ['tax_code' => 'Tax Code', 'tax_name' => 'Tax Name', 'tax_rate' => 'Tax Rate'],
+                'list_columns' => ['tax_code' => 'Tax Code', 'tax_name' => 'Tax Name', 'tax_type' => 'Tax Type', 'tax_rate' => 'Tax Rate'],
             ],
             'vendor-master' => [
                 'key' => 'vendor-master',
@@ -752,5 +813,71 @@ class MasterDataController extends Controller
         ];
 
         return $configs[$master] ?? null;
+    }
+
+    private function applyTaxCategoryRules(array &$validated, ?int $recordId = null): void
+    {
+        $validated['tax_code'] = strtoupper(trim($validated['tax_code']));
+
+        if (($validated['is_compound_tax'] ?? false) && empty($validated['compound_base_tax_category_id'])) {
+            throw ValidationException::withMessages([
+                'compound_base_tax_category_id' => 'Compound base tax code is required when compound tax is enabled.',
+            ]);
+        }
+
+        if (!($validated['is_compound_tax'] ?? false)) {
+            $validated['compound_base_tax_category_id'] = null;
+        }
+
+        if (!empty($validated['compound_base_tax_category_id']) && $recordId && (int) $validated['compound_base_tax_category_id'] === $recordId) {
+            throw ValidationException::withMessages([
+                'compound_base_tax_category_id' => 'Compound tax base code cannot self-reference.',
+            ]);
+        }
+
+        if (($validated['reverse_charge_applicable'] ?? false) && empty($validated['reverse_charge_gl_account_id'])) {
+            throw ValidationException::withMessages([
+                'reverse_charge_gl_account_id' => 'Reverse charge GL account is required when reverse charge is enabled.',
+            ]);
+        }
+
+        if (!($validated['reverse_charge_applicable'] ?? false)) {
+            $validated['reverse_charge_gl_account_id'] = null;
+        }
+
+        if (($validated['applicable_for'] ?? null) === 'purchase' && empty($validated['input_tax_gl_account_id'])) {
+            throw ValidationException::withMessages([
+                'input_tax_gl_account_id' => 'Input tax GL account is required when applicable on Purchase.',
+            ]);
+        }
+
+        if (($validated['applicable_for'] ?? null) === 'sales' && empty($validated['output_tax_gl_account_id'])) {
+            throw ValidationException::withMessages([
+                'output_tax_gl_account_id' => 'Output tax GL account is required when applicable on Sales.',
+            ]);
+        }
+
+        if (($validated['applicable_for'] ?? null) === 'both') {
+            if (empty($validated['input_tax_gl_account_id']) || empty($validated['output_tax_gl_account_id'])) {
+                throw ValidationException::withMessages([
+                    'input_tax_gl_account_id' => 'Input and Output tax GL accounts are required when applicable on Both.',
+                ]);
+            }
+        }
+
+        if (((float) ($validated['tax_rate'] ?? 0)) === 0.0 && !($validated['exemption_certificate_required'] ?? false)) {
+            throw ValidationException::withMessages([
+                'tax_rate' => 'Tax rate 0.00 is allowed only for exempt/zero-rated taxes with exemption certificate required.',
+            ]);
+        }
+
+        if ($recordId && isset($validated['is_active']) && !$validated['is_active']) {
+            $hasOpenUsage = DB::table('inventory_items')->where('tax_category_id', $recordId)->exists();
+            if ($hasOpenUsage) {
+                throw ValidationException::withMessages([
+                    'is_active' => 'Cannot deactivate tax code because it is used in active records.',
+                ]);
+            }
+        }
     }
 }

@@ -78,7 +78,7 @@ class UomMasterController extends Controller
         }
 
         return Inertia::render('Inventory/UomMaster/Create', [
-            'uomTypes' => ['Length', 'Weight', 'Volume', 'Quantity', 'Time'],
+            'uomTypes' => ['Length', 'Weight', 'Volume', 'Quantity', 'Time', 'Area', 'Other'],
         ]);
     }
 
@@ -103,8 +103,9 @@ class UomMasterController extends Controller
                         ->whereNull('deleted_at')),
             ],
             'uom_name' => 'required|string|max:100',
-            'uom_type' => 'required|string|in:Length,Weight,Volume,Quantity,Time',
+            'uom_type' => 'required|string|in:Length,Weight,Volume,Quantity,Time,Area,Other',
             'symbol' => 'required|string|max:10',
+            'description' => 'nullable|string|max:200',
             'decimal_precision' => 'required|integer|min:0|max:10',
             'is_active' => 'nullable|boolean',
         ]);
@@ -115,10 +116,13 @@ class UomMasterController extends Controller
             'uom_name' => trim($validated['uom_name']),
             'uom_type' => $validated['uom_type'],
             'symbol' => trim($validated['symbol']),
+            'description' => $validated['description'] ?? null,
             'decimal_precision' => $validated['decimal_precision'],
             'is_base_uom' => true,
             'is_active' => $validated['is_active'] ?? true,
             'display_order' => UomMaster::where('company_id', $compId)->max('display_order') + 1,
+            'created_by' => auth()->id(),
+            'updated_by' => auth()->id(),
         ]);
 
         return redirect()->route('inventory.uom-master.list')
@@ -143,7 +147,7 @@ class UomMasterController extends Controller
 
         return Inertia::render('Inventory/UomMaster/Create', [
             'uom' => $uom,
-            'uomTypes' => ['Length', 'Weight', 'Volume', 'Quantity', 'Time'],
+            'uomTypes' => ['Length', 'Weight', 'Volume', 'Quantity', 'Time', 'Area', 'Other'],
         ]);
     }
 
@@ -172,8 +176,9 @@ class UomMasterController extends Controller
                     ->ignore($uom->id),
             ],
             'uom_name' => 'required|string|max:100',
-            'uom_type' => 'required|string|in:Length,Weight,Volume,Quantity,Time',
+            'uom_type' => 'required|string|in:Length,Weight,Volume,Quantity,Time,Area,Other',
             'symbol' => 'required|string|max:10',
+            'description' => 'nullable|string|max:200',
             'decimal_precision' => 'required|integer|min:0|max:10',
             'is_active' => 'nullable|boolean',
         ]);
@@ -183,8 +188,10 @@ class UomMasterController extends Controller
             'uom_name' => trim($validated['uom_name']),
             'uom_type' => $validated['uom_type'],
             'symbol' => trim($validated['symbol']),
+            'description' => $validated['description'] ?? null,
             'decimal_precision' => $validated['decimal_precision'],
             'is_active' => $validated['is_active'] ?? true,
+            'updated_by' => auth()->id(),
         ]);
 
         return redirect()->route('inventory.uom-master.list')

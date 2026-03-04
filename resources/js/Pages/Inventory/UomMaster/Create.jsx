@@ -56,15 +56,16 @@ const CreateUomMasterForm = () => {
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
 
+  // Ensure uomTypes is an array and map it before using in fields
+  const formattedUomTypes = (Array.isArray(uomTypes) ? uomTypes : []).map(type => ({ value: type, label: type }));
+
   const uomFields = [
     {
       name: 'uom_code',
       label: 'UOM Code',
       type: 'text',
-      placeholder: 'Enter UOM code (e.g., KG, M, L, PCS, HR)',
-      icon: Hash,
+      placeholder: 'Enter UOM code (e.g., KG, M, L, PCS, HR)',      icon: Hash,
       required: true,
-      help: 'Unique identifier for this unit of measure',
     },
     {
       name: 'uom_name',
@@ -73,15 +74,13 @@ const CreateUomMasterForm = () => {
       placeholder: 'Enter full UOM name',
       icon: Tag,
       required: true,
-      help: 'Full description of the unit of measure',
     },
     {
       name: 'uom_type',
       label: 'UOM Type',
       type: 'select',
-      options: uomTypes.map(type => ({ value: type, label: type })),
+      options: formattedUomTypes,
       required: true,
-      help: 'Categorize the type of measurement',
     },
     {
       name: 'symbol',
@@ -89,7 +88,13 @@ const CreateUomMasterForm = () => {
       type: 'text',
       placeholder: 'Enter symbol (e.g., kg, m, L, pcs)',
       required: true,
-      help: 'Short symbol for this unit of measure',
+    },
+    {
+      name: 'description',
+      label: 'Description',
+      type: 'textarea',
+      placeholder: 'Enter description (max 200 chars)',
+      required: false,
     },
     {
       name: 'decimal_precision',
@@ -97,14 +102,12 @@ const CreateUomMasterForm = () => {
       type: 'number',
       placeholder: '0-10',
       required: true,
-      help: 'Number of decimal places allowed',
     },
     {
       name: 'is_active',
       label: 'Status',
       type: 'toggle',
       required: false,
-      help: 'Mark as active to use in transactions',
     },
   ];
 
@@ -169,6 +172,7 @@ const CreateUomMasterForm = () => {
     formDataToSend.append('uom_name', submittedFormData.uom_name || '');
     formDataToSend.append('uom_type', submittedFormData.uom_type || '');
     formDataToSend.append('symbol', submittedFormData.symbol || '');
+    formDataToSend.append('description', submittedFormData.description || '');
     formDataToSend.append('decimal_precision', submittedFormData.decimal_precision || 0);
     formDataToSend.append('is_active', submittedFormData.is_active ? '1' : '0');
 

@@ -28,7 +28,7 @@ export default function List() {
   const visibleColumnsInit = useMemo(() => ({ id: true, uomCode: true, uomName: true, uomType: true, symbol: true, decimalPrecision: true, status: true, updatedAt: true, actions: true }), []);
   const [visibleColumns, setVisibleColumns] = useState(visibleColumnsInit);
 
-  const uomTypes = ['Length', 'Weight', 'Volume', 'Quantity', 'Time'];
+  const uomTypes = ['Length', 'Weight', 'Volume', 'Quantity', 'Time', 'Area', 'Other'];
 
   useEffect(() => { if (flash?.success) CustomAlert.fire({ title: 'Success!', text: flash.success, icon: 'success' }); else if (flash?.error) CustomAlert.fire({ title:'Error!', text: flash.error, icon: 'error' }); }, [flash]);
 
