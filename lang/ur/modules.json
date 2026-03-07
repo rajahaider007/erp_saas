@@ -1,0 +1,15 @@
+{
+  "page_title": "ERP ماڈیولز",
+  "page_description": "اپنے بزنس ماڈیولز تک رسائی حاصل کریں اور اپنے ادارے کا مؤثر انتظام کریں۔",
+  "system_online": "سسٹم آن لائن",
+  "modules_available": "{count} ماڈیول دستیاب",
+  "access_module": "ماڈیول تک رسائی",
+  "key_features": "اہم خصوصیات",
+  "accessible_modules": "قابل رسائی ماڈیولز",
+  "restricted_modules": "محدود ماڈیولز",
+  "no_modules_title": "کوئی ماڈیول دستیاب نہیں",
+  "no_modules_message": "ماڈیولز تک رسائی کے لیے اپنے منتظم سے رابطہ کریں۔",
+  "footer_welcome": "{company} میں خوش آمدید - آپ کا بزنس مینجمنٹ حل",
+  "default_description": "جامع بزنس مینجمنٹ کے لیے {name} ماڈیول تک رسائی",
+  "default_features": ["انتظام", "رپورٹس", "تجزیات", "ترتیبات"]
+}

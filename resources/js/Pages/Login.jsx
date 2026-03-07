@@ -4,8 +4,10 @@ import { router } from '@inertiajs/react';
 import { usePage } from '@inertiajs/react';
 import Modal from 'react-modal';
 import LoginHeroAnimation from '@/Components/LoginHeroAnimation';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const LoginPage = () => {
+  const { t, locale, setLocale, supportedLocales } = useTranslations();
   const { errors: pageErrors, concurrent_sessions: concurrentSessions } = usePage().props;
   const [formData, setFormData] = useState({
     email: 'admin@erpsystem.com',
@@ -28,6 +30,13 @@ const LoginPage = () => {
     }
   }, []);
 
+  // Set document direction and lang for RTL (e.g. Urdu)
+  useEffect(() => {
+    const info = Array.isArray(supportedLocales) && supportedLocales.find((l) => l.code === locale);
+    document.documentElement.lang = locale || 'en';
+    document.documentElement.dir = (info && info.dir) || 'ltr';
+  }, [locale, supportedLocales]);
+
   // When opening login (e.g. after logout), ensure dark class is removed so form text stays readable.
   // Otherwise theme from previous page leaves document.documentElement with "dark" and text turns white.
   useEffect(() => {
@@ -46,10 +55,10 @@ const LoginPage = () => {
     if (pageErrors && Object.keys(pageErrors).length > 0) {
       setAlert({
         type: 'error',
-        message: pageErrors.email || pageErrors.password || pageErrors.general || 'Login failed'
+        message: pageErrors.email || pageErrors.password || pageErrors.general || t('login.errors.login_failed')
       });
     }
-  }, [pageErrors]);
+  }, [pageErrors, t]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -63,7 +72,7 @@ const LoginPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.email || !formData.password) {
-      setAlert({ type: 'error', message: 'Please fill in all fields' });
+      setAlert({ type: 'error', message: t('login.errors.fill_all') });
       return;
     }
     setIsLoading(true);
@@ -76,7 +85,7 @@ const LoginPage = () => {
       onError: (errors) => {
         setAlert({
           type: 'error',
-          message: errors.email || errors.password || errors.general || 'Login failed'
+          message: errors.email || errors.password || errors.general || t('login.errors.login_failed')
         });
         setIsLoading(false);
       },
@@ -134,10 +143,10 @@ const LoginPage = () => {
             <span className="text-xl font-bold tracking-tight">E</span>
           </div>
           <h1 className="text-4xl xl:text-5xl font-semibold tracking-tight text-white leading-tight max-w-md">
-            ERP Financial Suite
+            {t('login.brand')}
           </h1>
           <p className="mt-4 text-lg text-slate-400 max-w-sm font-sans" style={{ fontFamily: 'Figtree, sans-serif' }}>
-            International standard financial management. One place for accounts, inventory, and reporting.
+            {t('login.tagline')}
           </p>
         </div>
         {/* Hero animation: robot, chips, factory */}
@@ -159,25 +168,41 @@ const LoginPage = () => {
         </div>
         <div className="relative z-10 pt-8 border-t border-white/10">
           <p className="text-sm text-slate-500 font-sans" style={{ fontFamily: 'Figtree, sans-serif' }}>
-            Secure sign-in · Your data stays in your control
+            {t('login.footer_secure')}
           </p>
         </div>
       </div>
 
       {/* Right panel — form */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-10 lg:p-12">
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-10 lg:p-12 relative">
+        {/* Locale switcher */}
+        {supportedLocales.length > 1 && (
+          <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex rounded-lg border border-slate-200 bg-white/80 p-0.5">
+            {supportedLocales.map((loc) => (
+              <button
+                key={loc.code}
+                type="button"
+                onClick={() => setLocale(loc.code)}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${locale === loc.code ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+                title={loc.name}
+              >
+                {loc.name}
+              </button>
+            ))}
+          </div>
+        )}
         <div
           className={`w-full max-w-[400px] transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}
           style={{ fontFamily: 'Figtree, sans-serif' }}
         >
           <div className="lg:hidden mb-8">
             <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-slate-900 text-white text-sm font-bold mb-4">E</div>
-            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-900">ERP Financial Suite</h1>
-            <p className="text-slate-500 dark:text-slate-500 text-sm mt-1">Sign in to continue</p>
+            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-900">{t('login.brand')}</h1>
+            <p className="text-slate-500 dark:text-slate-500 text-sm mt-1">{t('login.sign_in_continue')}</p>
           </div>
 
-          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-900 mb-1">Welcome back</h2>
-          <p className="text-slate-500 dark:text-slate-500 text-sm mb-8">Sign in with your email and password.</p>
+          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-900 mb-1">{t('login.title')}</h2>
+          <p className="text-slate-500 dark:text-slate-500 text-sm mb-8">{t('login.subtitle')}</p>
 
           {alert && (
             <div className="mb-6 animate-[slideIn_0.25s_ease-out]">
@@ -188,7 +213,7 @@ const LoginPage = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-700 mb-1.5">
-                Email or login ID
+                {t('login.email_label')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -207,7 +232,7 @@ const LoginPage = () => {
                       ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                       : 'border-slate-200 focus:ring-indigo-500 focus:border-indigo-500 hover:border-slate-300'
                   }`}
-                  placeholder="you@company.com"
+                  placeholder={t('login.email_placeholder')}
                   autoComplete="email"
                   required
                 />
@@ -222,7 +247,7 @@ const LoginPage = () => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-700 mb-1.5">
-                Password
+                {t('login.password_label')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -241,7 +266,7 @@ const LoginPage = () => {
                       ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                       : 'border-slate-200 focus:ring-indigo-500 focus:border-indigo-500 hover:border-slate-300'
                   }`}
-                  placeholder="••••••••"
+                  placeholder={t('login.password_placeholder')}
                   autoComplete="current-password"
                   required
                 />
@@ -249,7 +274,7 @@ const LoginPage = () => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? t('login.hide_password') : t('login.show_password')}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -272,13 +297,13 @@ const LoginPage = () => {
                   onChange={handleChange}
                   className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                 />
-                <span className="text-sm text-slate-600 dark:text-slate-600">Remember me</span>
+                <span className="text-sm text-slate-600 dark:text-slate-600">{t('login.remember_me')}</span>
               </label>
               <button
                 type="button"
                 className="text-sm font-medium text-indigo-600 dark:text-indigo-600 hover:text-indigo-700 dark:hover:text-indigo-500 hover:underline"
               >
-                Forgot password?
+                {t('login.forgot_password')}
               </button>
             </div>
 
@@ -290,13 +315,13 @@ const LoginPage = () => {
               {isLoading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                'Sign in'
+                t('login.sign_in')
               )}
             </button>
           </form>
 
           <p className="mt-8 text-center text-xs text-slate-400 dark:text-slate-500">
-            © {new Date().getFullYear()} ERP Financial Suite
+            {t('login.copyright', { year: new Date().getFullYear() })}
           </p>
         </div>
       </div>
@@ -305,7 +330,7 @@ const LoginPage = () => {
       <Modal
         isOpen={isConcurrentModalOpen}
         onRequestClose={() => setIsConcurrentModalOpen(false)}
-        contentLabel="Active sessions"
+        contentLabel={t('login.concurrent.modal_label')}
         className="bg-white rounded-2xl shadow-xl p-6 max-w-md mx-auto border border-slate-200"
         overlayClassName="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
         closeTimeoutMS={200}
@@ -314,9 +339,9 @@ const LoginPage = () => {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 text-amber-600 mb-4">
             <AlertCircle className="w-6 h-6" />
           </div>
-          <h2 className="text-xl font-semibold text-slate-900 mb-2">Active session detected</h2>
+          <h2 className="text-xl font-semibold text-slate-900 mb-2">{t('login.concurrent.title')}</h2>
           <p className="text-slate-600 text-sm mb-6">
-            You're already signed in on another device. Log out other sessions or continue here.
+            {t('login.concurrent.description')}
           </p>
           <div className="bg-slate-50 rounded-xl p-4 mb-6 max-h-52 overflow-y-auto space-y-3">
             {concurrentSessions && concurrentSessions.map((session, index) => (
@@ -332,7 +357,7 @@ const LoginPage = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-slate-500">Last active</p>
+                  <p className="text-xs text-slate-500">{t('login.concurrent.last_active')}</p>
                   <p className="text-xs font-medium text-slate-700">{session.last_activity}</p>
                 </div>
               </div>
@@ -344,13 +369,13 @@ const LoginPage = () => {
               className="w-full py-3 px-4 rounded-xl font-semibold text-white bg-slate-900 hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
             >
               <LogOut className="w-5 h-5" />
-              Log out all other sessions
+              {t('login.concurrent.log_out_all')}
             </button>
             <button
               onClick={() => setIsConcurrentModalOpen(false)}
               className="w-full py-3 px-4 rounded-xl font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
             >
-              Cancel
+              {t('login.concurrent.cancel')}
             </button>
           </div>
         </div>

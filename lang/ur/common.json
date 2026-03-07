@@ -1,0 +1,28 @@
+{
+  "actions": {
+    "save": "محفوظ کریں",
+    "cancel": "منسوخ کریں",
+    "delete": "حذف کریں",
+    "edit": "ترمیم",
+    "add": "شامل کریں",
+    "search": "تلاش کریں",
+    "submit": "جمع کرائیں",
+    "back": "واپس",
+    "next": "اگلا",
+    "close": "بند کریں",
+    "confirm": "تصدیق کریں",
+    "logout": "لاگ آؤٹ",
+    "loading": "لوڈ ہو رہا ہے..."
+  },
+  "status": {
+    "active": "فعال",
+    "inactive": "غیر فعال",
+    "restricted": "محدود"
+  },
+  "labels": {
+    "user": "صارف",
+    "language": "زبان",
+    "theme": "تھیم",
+    "settings": "ترتیبات"
+  }
+}

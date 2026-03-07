@@ -1,0 +1,30 @@
+{
+  "title": "Welcome back",
+  "subtitle": "Sign in with your email and password.",
+  "brand": "ERP Financial Suite",
+  "tagline": "International standard financial management. One place for accounts, inventory, and reporting.",
+  "footer_secure": "Secure sign-in · Your data stays in your control",
+  "sign_in_continue": "Sign in to continue",
+  "email_label": "Email or login ID",
+  "email_placeholder": "you@company.com",
+  "password_label": "Password",
+  "password_placeholder": "••••••••",
+  "remember_me": "Remember me",
+  "forgot_password": "Forgot password?",
+  "sign_in": "Sign in",
+  "show_password": "Show password",
+  "hide_password": "Hide password",
+  "errors": {
+    "fill_all": "Please fill in all fields",
+    "login_failed": "Login failed"
+  },
+  "copyright": "© {year} ERP Financial Suite",
+  "concurrent": {
+    "title": "Active session detected",
+    "description": "You're already signed in on another device. Log out other sessions or continue here.",
+    "last_active": "Last active",
+    "log_out_all": "Log out all other sessions",
+    "cancel": "Cancel",
+    "modal_label": "Active sessions"
+  }
+}

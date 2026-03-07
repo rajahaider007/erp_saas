@@ -80,6 +80,15 @@ Route::get('/login', function (Request $request) {
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+// Locale switcher for i18n (works for guest and authenticated users)
+Route::post('/locale', function (Request $request) {
+    $locale = $request->input('locale', 'en');
+    if (in_array($locale, \App\Services\TranslationLoaderService::LOCALES, true)) {
+        $request->session()->put('locale', $locale);
+    }
+    return back();
+})->name('locale.set');
+
 Route::get('/dashboard', function (Request $request) {
     return redirect('/system/dashboard');
 })->middleware('web.auth')->name('dashboard');
@@ -420,12 +429,9 @@ Route::prefix('api')->middleware('web.auth')->group(function () {
     Route::get('/storage-breakdown/{companyId}', [App\Http\Controllers\AttachmentController::class, 'getStorageBreakdown']);
 });
 
-// Voucher Attachments Routes - MUST BE BEFORE OTHER ROUTES
-Route::prefix('storage/voucher-attachments')->middleware('web.auth')->group(function () {
-    Route::get('/{filename}', [App\Http\Controllers\AttachmentController::class, 'serveVoucherAttachment'])->where('filename', '.*');
-});
-
+// Voucher Attachments: serve via Laravel (not /storage/) to avoid 404 from public/storage symlink and corrupted binary files
 Route::prefix('attachments')->middleware('web.auth')->group(function () {
+    Route::get('/serve/{filename}', [App\Http\Controllers\AttachmentController::class, 'serveVoucherAttachment'])->where('filename', '.*');
     Route::get('/download/{filename}', [App\Http\Controllers\AttachmentController::class, 'downloadVoucherAttachment'])->where('filename', '.*');
     Route::get('/list/{voucherId}', [App\Http\Controllers\AttachmentController::class, 'listVoucherAttachments']);
 });

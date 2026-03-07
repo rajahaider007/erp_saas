@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { usePage } from '@inertiajs/react';
 import { Head } from './Head';
 import Header from './Header';
 import Sidebar from './Sidebar';
@@ -8,6 +9,14 @@ import { useLayout } from '../../Contexts/LayoutContext';
 
 const AppLayout = ({ children, title }) => {
   const { sidebarCollapsed, headerAsSidebar } = useLayout();
+  const { locale, supportedLocales } = usePage().props;
+
+  // Set document direction and lang for RTL (e.g. Urdu) and accessibility
+  useEffect(() => {
+    const info = Array.isArray(supportedLocales) && supportedLocales.find((l) => l.code === locale);
+    document.documentElement.lang = locale || 'en';
+    document.documentElement.dir = (info && info.dir) || 'ltr';
+  }, [locale, supportedLocales]);
 
   return (
     <>

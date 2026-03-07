@@ -33,20 +33,24 @@ class StorageService
         return storage_path('app/public/' . self::attachmentsBasePath() . '/' . $relativePath);
     }
 
-    /** URL for an attachment (relative path e.g. journal-voucher/file.pdf or general/sub/file.pdf) */
+    /**
+     * URL for an attachment (relative path e.g. journal-voucher/file.pdf or general/sub/file.pdf).
+     * Uses Laravel route attachments/serve/ so the request is never served by the public/storage
+     * symlink (which would 404 for paths like voucher-attachments/general/...). Prevents 404 and corrupted downloads.
+     */
     public static function attachmentUrl(string $relativePath): string
     {
         $relativePath = ltrim($relativePath, '/');
-        if ($relativePath === '' || strpos($relativePath, 'general/') === 0) {
-            return url('storage/' . $relativePath);
+        if ($relativePath === '') {
+            return url('attachments/serve');
         }
-        return url('storage/' . self::attachmentsBasePath() . '/' . $relativePath);
+        return url('attachments/serve/' . $relativePath);
     }
 
-    /** URL prefix for voucher attachment links (e.g. storage/internal-storage/) — use attachmentUrl() when path may be general */
+    /** URL prefix for voucher attachment links. Use attachmentUrl() when path may be general. */
     public static function attachmentUrlPrefix(): string
     {
-        return 'storage/' . self::attachmentsBasePath() . '/';
+        return 'attachments/serve/';
     }
 
     /**

@@ -1,0 +1,11 @@
+{
+  "dashboard": "ڈیش بورڈ",
+  "erp_modules": "ERP ماڈیولز",
+  "storage": "سٹوریج",
+  "settings": "ترتیبات",
+  "navigation": "نیویگیشن",
+  "footer": {
+    "app_name": "ERP سسٹم v1.0",
+    "edition": "پروفیشنل ایڈیشن"
+  }
+}

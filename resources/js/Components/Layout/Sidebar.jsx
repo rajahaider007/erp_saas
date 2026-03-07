@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Link, usePage } from '@inertiajs/react';
 import { useLayout } from '../../Contexts/LayoutContext';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useTranslations } from '../../hooks/useTranslations';
 import {
   X,
   Home,
@@ -123,6 +124,7 @@ const TooltipPortal = ({ item, anchorEl, onRequestClose, keepOpenClear }) => {
 
 const Sidebar = () => {
   const { url } = usePage();
+  const { t } = useTranslations();
   const {
     sidebarOpen,
     setSidebarOpen,
@@ -197,7 +199,7 @@ const Sidebar = () => {
 
       const navItems = [
         {
-          name: 'Dashboard',
+          name: t('sidebar.dashboard'),
           href: getDashboardHref()+"/dashboard",
           icon: Home,
           current: url === '/dashboard' || (isModuleUrl(url) && url === `/${getCurrentModuleName(url)}`)
@@ -207,7 +209,7 @@ const Sidebar = () => {
       // Add ERP Modules link if user has access (module switch is from ERP Modules page only)
       if (canView('/system/AddModules')) {
         navItems.push({
-          name: 'ERP Modules',
+          name: t('sidebar.erp_modules'),
           href: '/erp-modules',
           icon: Package,
           current: url === '/erp-modules'
@@ -307,7 +309,7 @@ const Sidebar = () => {
       );
       return [...existingItems, ...sectionsToAdd];
     });
-  }, [currentModuleData, canView, user?.role]);
+  }, [currentModuleData, canView, user?.role, t]);
 
   // Build navigation from availableMenus (filtered by module) — same logic for all pages including /system
   React.useEffect(() => {
@@ -353,7 +355,7 @@ const Sidebar = () => {
 
     // Storage / Attachment Manager — visible when on System
     const storageNavItem = onSystemRoute
-      ? { name: 'Storage', href: '/system/attachment-manager', icon: HardDrive }
+      ? { name: t('sidebar.storage'), href: '/system/attachment-manager', icon: HardDrive }
       : null;
 
     setNavigation(prev => {
@@ -362,7 +364,7 @@ const Sidebar = () => {
       );
       return [...existingItems, ...sectionsToAdd, ...(storageNavItem ? [storageNavItem] : [])];
     });
-  }, [availableMenus, url, canView, user?.role]);
+  }, [availableMenus, url, canView, user?.role, t]);
 
   // Map icon name string from DB to lucide-react icon component
   const iconFromName = (name) => {
@@ -574,7 +576,7 @@ const Sidebar = () => {
               {/* Mobile close button */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
                 <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Navigation
+                  {t('sidebar.navigation')}
                 </span>
                 <button
                   onClick={() => setSidebarOpen(false)}
@@ -603,7 +605,7 @@ const Sidebar = () => {
                       }`}
                   >
                     <Settings className="h-4 w-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                    <span className="ml-3 truncate">Settings</span>
+                    <span className="ml-3 truncate">{t('sidebar.settings')}</span>
                   </Link>
                   <Link
                     href="/system/attachment-manager"
@@ -613,7 +615,7 @@ const Sidebar = () => {
                       }`}
                   >
                     <HardDrive className="h-4 w-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                    <span className="ml-3 truncate">Storage</span>
+                    <span className="ml-3 truncate">{t('sidebar.storage')}</span>
                   </Link>
                 </div>
               </nav>
@@ -626,10 +628,10 @@ const Sidebar = () => {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
-                      ERP System v1.0
+                      {t('sidebar.footer.app_name')}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Professional Edition
+                      {t('sidebar.footer.edition')}
                     </p>
                   </div>
                 </div>
@@ -669,10 +671,10 @@ const Sidebar = () => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
-                    ERP System v1.0
+                    {t('sidebar.footer.app_name')}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Professional Edition
+                    {t('sidebar.footer.edition')}
                   </p>
                 </div>
               </div>

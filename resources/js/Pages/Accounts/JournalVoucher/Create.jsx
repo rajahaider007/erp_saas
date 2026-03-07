@@ -951,7 +951,7 @@ const JournalVoucherCreate = () => {
                                 </div>
                                 <div className="flex items-center gap-1 flex-shrink-0">
                                   <a
-                                    href={attachment.url || `/storage/voucher-attachments/${attachment}`}
+                                    href={attachment.url || `/attachments/serve/${attachment}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="p-1 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-colors"

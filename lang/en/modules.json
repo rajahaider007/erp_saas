@@ -1,0 +1,15 @@
+{
+  "page_title": "ERP Modules",
+  "page_description": "Access your business modules and manage your organization efficiently.",
+  "system_online": "System Online",
+  "modules_available": "{count} Modules Available",
+  "access_module": "Access Module",
+  "key_features": "Key Features",
+  "accessible_modules": "Accessible Modules",
+  "restricted_modules": "Restricted Modules",
+  "no_modules_title": "No Modules Available",
+  "no_modules_message": "Contact your administrator to get access to modules.",
+  "footer_welcome": "Welcome to {company} - Your Business Management Solution",
+  "default_description": "Access {name} module for comprehensive business management",
+  "default_features": ["Management", "Reports", "Analytics", "Settings"]
+}

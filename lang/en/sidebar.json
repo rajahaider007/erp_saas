@@ -1,0 +1,11 @@
+{
+  "dashboard": "Dashboard",
+  "erp_modules": "ERP Modules",
+  "storage": "Storage",
+  "settings": "Settings",
+  "navigation": "Navigation",
+  "footer": {
+    "app_name": "ERP System v1.0",
+    "edition": "Professional Edition"
+  }
+}

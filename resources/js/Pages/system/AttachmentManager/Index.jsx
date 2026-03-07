@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Trash2,
   Download,
-  Eye,
   FileText,
   Search,
   HardDrive,
@@ -31,8 +30,9 @@ const formatFileSize = (bytes) => {
 };
 
 const formatRelativeTime = (dateStr) => {
-  if (!dateStr) return '—';
-  const date = new Date(dateStr);
+  if (dateStr == null) return '—';
+  // Support Unix timestamp (seconds) so timezone is correct; otherwise ISO/date string
+  const date = typeof dateStr === 'number' ? new Date(dateStr * 1000) : new Date(dateStr);
   const now = new Date();
   const diffMs = now - date;
   const diffMins = Math.floor(diffMs / 60000);
@@ -187,9 +187,9 @@ export default function FileManagerIndex() {
       return sortAsc ? va - vb : vb - va;
     }
     if (sortBy === 'last_modified' || sortBy === 'voucher_date') {
-      va = new Date(va).getTime();
-      vb = new Date(vb).getTime();
-      return sortAsc ? va - vb : vb - va;
+      const tsA = sortBy === 'last_modified' && (a.last_modified_ts != null) ? a.last_modified_ts * 1000 : new Date(va).getTime();
+      const tsB = sortBy === 'last_modified' && (b.last_modified_ts != null) ? b.last_modified_ts * 1000 : new Date(vb).getTime();
+      return sortAsc ? tsA - tsB : tsB - tsA;
     }
     va = String(va).toLowerCase();
     vb = String(vb).toLowerCase();
@@ -274,6 +274,7 @@ export default function FileManagerIndex() {
   const onDrop = (e) => {
     e.preventDefault();
     setDragOver(false);
+    if (uploading) return;
     const list = e.dataTransfer?.files;
     if (list?.length) {
       const subfolder = selectedFolder && selectedFolder.startsWith('general/') ? selectedFolder.replace(/^general\//, '') : '';
@@ -409,11 +410,21 @@ export default function FileManagerIndex() {
                 {viewMode === 'list' ? <LayoutGrid className="w-5 h-5" /> : <List className="w-5 h-5" />}
               </button>
               <button
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium"
+                onClick={() => !uploading && fileInputRef.current?.click()}
+                disabled={uploading}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                <Upload className="w-4 h-4" />
-                Upload
+                {uploading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Uploading…
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    Upload
+                  </>
+                )}
               </button>
               <input
                 ref={fileInputRef}
@@ -459,11 +470,21 @@ export default function FileManagerIndex() {
 
           {/* Content */}
           <div
-            className={`flex-1 overflow-auto p-4 ${dragOver ? 'ring-2 ring-blue-500 ring-inset bg-blue-900/10' : ''}`}
+            className={`flex-1 overflow-auto p-4 relative ${dragOver ? 'ring-2 ring-blue-500 ring-inset bg-blue-900/10' : ''}`}
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={onDrop}
           >
+            {/* Full-area upload overlay so user sees upload in progress */}
+            {uploading && (
+              <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-gray-900/80 backdrop-blur-sm">
+                <div className="flex flex-col items-center gap-4 p-6 bg-gray-800 rounded-2xl border border-gray-700 shadow-xl">
+                  <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  <p className="text-lg font-medium text-white">Uploading files…</p>
+                  <p className="text-sm text-gray-400">Please wait, do not close the page.</p>
+                </div>
+              </div>
+            )}
             {loading ? (
               <div className="flex items-center justify-center py-20">
                 <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-500 border-t-transparent" />
@@ -536,22 +557,13 @@ export default function FileManagerIndex() {
                             </td>
                             <td className="px-4 py-2 text-gray-400">{formatFileSize(f.size)}</td>
                             <td className="px-4 py-2 text-gray-400">
-                              {formatRelativeTime(f.last_modified || f.voucher_date)}
+                              {formatRelativeTime(f.last_modified_ts ?? f.last_modified ?? f.voucher_date)}
                             </td>
                             <td className="px-4 py-2 text-right">
                               <a
-                                href={f.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded inline-block"
-                                title="View"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </a>
-                              <a
-                                href={f.url}
+                                href={f.download_url || f.url}
                                 download
-                                className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded inline-block ml-1"
+                                className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded inline-block"
                                 title="Download"
                               >
                                 <Download className="w-4 h-4" />
@@ -584,19 +596,14 @@ export default function FileManagerIndex() {
                           {displayFileName(f)}
                         </p>
                         <p className="text-xs text-gray-400 mt-1">{formatFileSize(f.size)}</p>
-                        <div className="flex gap-2 mt-2">
-                          <a
-                            href={f.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </a>
-                          <a href={f.url} download className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded">
-                            <Download className="w-4 h-4" />
-                          </a>
-                        </div>
+                        <a
+                          href={f.download_url || f.url}
+                          download
+                          className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded mt-2 inline-block"
+                          title="Download"
+                        >
+                          <Download className="w-4 h-4" />
+                        </a>
                       </div>
                     ))}
                   </div>
@@ -608,11 +615,21 @@ export default function FileManagerIndex() {
                     <p className="text-lg font-medium">No files yet</p>
                     <p className="text-sm mt-1">Upload files or they will appear when attached to vouchers.</p>
                     <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium"
+                      onClick={() => !uploading && fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                      <Upload className="w-4 h-4" />
-                      Upload files
+                      {uploading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Uploading…
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4" />
+                          Upload files
+                        </>
+                      )}
                     </button>
                   </div>
                 )}

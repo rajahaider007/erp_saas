@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Middleware;
 use App\Models\Currency;
 use App\Helpers\FiscalYearHelper;
+use App\Services\TranslationLoaderService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
@@ -41,8 +42,13 @@ class HandleInertiaRequests extends Middleware
             $user = \App\Models\User::where('id', $userId)->where('status', 'active')->first();
         }
         
-        // If no user is authenticated, return minimal shared data
+        // If no user is authenticated, return minimal shared data (including i18n for login page)
         if (!$user) {
+            $loader = new TranslationLoaderService();
+            $locale = $request->session()->get('locale', config('app.locale', 'en'));
+            if (!in_array($locale, TranslationLoaderService::LOCALES, true)) {
+                $locale = TranslationLoaderService::DEFAULT_LOCALE;
+            }
             return [
                 ...parent::share($request),
                 'auth' => [
@@ -53,6 +59,9 @@ class HandleInertiaRequests extends Middleware
                 'availableModules' => [],
                 'company' => null,
                 'currencies' => [],
+                'locale' => $locale,
+                'translations' => $loader->loadForLocale($locale),
+                'supportedLocales' => TranslationLoaderService::getSupportedLocales(),
             ];
         }
         
@@ -213,6 +222,12 @@ class HandleInertiaRequests extends Middleware
         });
 
 
+        $loader = new TranslationLoaderService();
+        $locale = $request->session()->get('locale', config('app.locale', 'en'));
+        if (!in_array($locale, TranslationLoaderService::LOCALES, true)) {
+            $locale = TranslationLoaderService::DEFAULT_LOCALE;
+        }
+
         $sharedData = [
             ...parent::share($request),
             'auth' => [
@@ -223,6 +238,9 @@ class HandleInertiaRequests extends Middleware
             'availableModules' => $availableModules,
             'company' => $company,
             'currencies' => $currencies,
+            'locale' => $locale,
+            'translations' => $loader->loadForLocale($locale),
+            'supportedLocales' => TranslationLoaderService::getSupportedLocales(),
         ];
 
         // Add fiscal year if user has a company

@@ -35,8 +35,22 @@ class AttachmentManagerController extends Controller
             ]);
         }
 
-        // Get storage usage info
-        $storageInfo = StorageService::getCompanyStorageUsage($compId);
+        // Storage usage from same file list as UI so "Space" matches displayed files
+        $company = Company::find($compId);
+        $limitMb = $company ? (float) ($company->attachment_storage_limit_mb ?? 1000) : 1000;
+        $attachments = $this->getFilteredAttachments($compId, []);
+        $usedBytes = (int) array_sum(array_column($attachments, 'size'));
+        $usedMb = round($usedBytes / (1024 * 1024), 2);
+        $availableMb = max(0, $limitMb - $usedMb);
+        $percentage = $limitMb > 0 ? round(($usedMb / $limitMb) * 100, 2) : 0;
+        $storageInfo = [
+            'used_mb' => $usedMb,
+            'limit_mb' => $limitMb,
+            'percentage' => $percentage,
+            'available_mb' => $availableMb,
+            'is_near_limit' => $percentage >= 90,
+            'is_over_limit' => $percentage >= 100,
+        ];
         $storageBreakdown = StorageService::getStorageBreakdown($compId);
 
         return Inertia::render('system/AttachmentManager/Index', [
@@ -227,7 +241,8 @@ class AttachmentManagerController extends Controller
     }
 
     /**
-     * Get storage usage for current company (API for file manager)
+     * Get storage usage for current company (API for file manager).
+     * Uses the same file list as the UI (getFilteredAttachments) so "Space" matches displayed files.
      */
     public function storageUsage(Request $request)
     {
@@ -235,7 +250,21 @@ class AttachmentManagerController extends Controller
         if (!$compId) {
             return response()->json(['success' => false], 403);
         }
-        $info = StorageService::getCompanyStorageUsage($compId);
+        $company = DB::table('companies')->where('id', $compId)->first();
+        $limitMb = $company ? (float) ($company->attachment_storage_limit_mb ?? 1000) : 1000;
+        $attachments = $this->getFilteredAttachments($compId, []);
+        $usedBytes = (int) array_sum(array_column($attachments, 'size'));
+        $usedMb = round($usedBytes / (1024 * 1024), 2);
+        $availableMb = max(0, $limitMb - $usedMb);
+        $percentage = $limitMb > 0 ? round(($usedMb / $limitMb) * 100, 2) : 0;
+        $info = [
+            'used_mb' => $usedMb,
+            'limit_mb' => $limitMb,
+            'percentage' => $percentage,
+            'available_mb' => $availableMb,
+            'is_near_limit' => $percentage >= 90,
+            'is_over_limit' => $percentage >= 100,
+        ];
         return response()->json(array_merge(['success' => true], $info));
     }
 
@@ -359,7 +388,9 @@ class AttachmentManagerController extends Controller
                     'description' => $attachment->entry_description,
                     'attachment_type' => $attachment->attachment_type,
                     'url' => StorageService::attachmentUrl($attachment->filename),
+                    'download_url' => url('attachments/download/' . $attachment->filename),
                     'last_modified' => date('Y-m-d H:i:s', filemtime($filePath)),
+                    'last_modified_ts' => filemtime($filePath),
                 ];
             }
         }
@@ -426,7 +457,9 @@ class AttachmentManagerController extends Controller
                             'description' => $transaction->description,
                             'attachment_type' => 'voucher_attachment',
                             'url' => StorageService::attachmentUrl($attachment),
+                            'download_url' => url('attachments/download/' . $attachment),
                             'last_modified' => date('Y-m-d H:i:s', filemtime($filePath)),
+                            'last_modified_ts' => filemtime($filePath),
                         ];
                     }
                 }
@@ -462,6 +495,8 @@ class AttachmentManagerController extends Controller
                 continue;
             }
 
+            // Use file mtime so "Last modified" matches Windows folder (avoids timezone/DB vs disk mismatch)
+            $lastModTs = filemtime($filePath);
             $attachments[] = [
                 'filename' => $cf->storage_filename,
                 'folder_slug' => $folder['slug'],
@@ -475,18 +510,94 @@ class AttachmentManagerController extends Controller
                 'description' => null,
                 'attachment_type' => 'company_file',
                 'url' => StorageService::attachmentUrl($cf->storage_filename),
+                'download_url' => url('attachments/download/' . $cf->storage_filename),
                 'last_modified' => $cf->created_at,
+                'last_modified_ts' => $lastModTs,
+            ];
+        }
+
+        // Include files on disk that are not in DB (e.g. uploaded via other flow) so list and storage match reality
+        $existingFilenames = array_column($attachments, 'filename');
+        $diskFiles = self::scanAttachmentDirectories();
+        foreach ($diskFiles as $relativePath => $fullPath) {
+            if (in_array($relativePath, $existingFilenames, true)) {
+                continue;
+            }
+            $fileSize = @filesize($fullPath);
+            if ($fileSize === false) {
+                continue;
+            }
+            $fileExtension = pathinfo($relativePath, PATHINFO_EXTENSION);
+            if (!empty($filters['file_type']) && strtolower($fileExtension) !== strtolower($filters['file_type'])) {
+                continue;
+            }
+            if (!empty($filters['search'])) {
+                if (strpos(strtolower($relativePath), strtolower($filters['search'])) === false) {
+                    continue;
+                }
+            }
+            $folder = self::folderFromFilename($relativePath);
+            if (!empty($filters['folder']) && $folder['slug'] !== $filters['folder']) {
+                continue;
+            }
+            $lastModTs = filemtime($fullPath);
+            $attachments[] = [
+                'filename' => $relativePath,
+                'folder_slug' => $folder['slug'],
+                'folder_label' => $folder['label'],
+                'size' => $fileSize,
+                'size_mb' => round($fileSize / (1024 * 1024), 2),
+                'file_type' => $fileExtension,
+                'voucher_date' => null,
+                'voucher_type' => null,
+                'voucher_number' => '—',
+                'description' => null,
+                'attachment_type' => 'disk_only',
+                'url' => StorageService::attachmentUrl($relativePath),
+                'download_url' => url('attachments/download/' . $relativePath),
+                'last_modified' => date('Y-m-d H:i:s', $lastModTs),
+                'last_modified_ts' => $lastModTs,
             ];
         }
 
         // Sort by date (newest first)
         usort($attachments, function($a, $b) {
-            $tA = is_string($a['voucher_date']) ? strtotime($a['voucher_date']) : (is_object($a['voucher_date']) ? $a['voucher_date']->timestamp : 0);
-            $tB = is_string($b['voucher_date']) ? strtotime($b['voucher_date']) : (is_object($b['voucher_date']) ? $b['voucher_date']->timestamp : 0);
+            $tA = isset($a['last_modified_ts']) ? $a['last_modified_ts'] : (is_string($a['voucher_date']) ? strtotime($a['voucher_date']) : (is_object($a['voucher_date']) ? $a['voucher_date']->timestamp : 0));
+            $tB = isset($b['last_modified_ts']) ? $b['last_modified_ts'] : (is_string($b['voucher_date']) ? strtotime($b['voucher_date']) : (is_object($b['voucher_date']) ? $b['voucher_date']->timestamp : 0));
             return $tB - $tA;
         });
 
         return $attachments;
+    }
+
+    /**
+     * Scan storage/app/public/general and internal-storage for files; return [relativePath => fullPath]
+     */
+    private static function scanAttachmentDirectories(): array
+    {
+        $out = [];
+        $base = storage_path('app/public');
+        $baseLen = strlen($base) + 1;
+        $dirs = ['general', StorageService::attachmentsBasePath()];
+        foreach ($dirs as $dir) {
+            $path = $base . DIRECTORY_SEPARATOR . $dir;
+            if (!is_dir($path)) {
+                continue;
+            }
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS | \RecursiveDirectoryIterator::FOLLOW_SYMLINKS),
+                \RecursiveIteratorIterator::SELF_FIRST
+            );
+            foreach ($iterator as $file) {
+                if (!$file->isFile()) {
+                    continue;
+                }
+                $full = $file->getPathname();
+                $relative = str_replace('\\', '/', substr($full, $baseLen));
+                $out[$relative] = $full;
+            }
+        }
+        return $out;
     }
 
     /**

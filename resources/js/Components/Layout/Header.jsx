@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { useLayout } from '../../Contexts/LayoutContext';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useTranslations } from '../../hooks/useTranslations';
 import {
   Menu,
   Search,
@@ -30,6 +31,7 @@ import {
 
 const Header = () => {
   const { props, url } = usePage();
+  const { t, locale, setLocale, supportedLocales } = useTranslations();
   const { auth, company, userRights, availableMenus } = props;
   const user = auth?.user;
   
@@ -89,7 +91,7 @@ const Header = () => {
     const buildHeaderNavigation = () => {
       const navItems = [
         {
-          name: 'Dashboard',
+          name: t('header.dashboard'),
           href: '/system/dashboard',
           icon: Home,
           current: url === '/system/dashboard'
@@ -99,7 +101,7 @@ const Header = () => {
       // Add ERP Modules link if user has access
       if (canView('/system/AddModules')) {
         navItems.push({
-          name: 'Modules',
+          name: t('header.erp_modules'),
           href: '/erp-modules',
           icon: Grid3X3,
           current: url === '/erp-modules'
@@ -124,7 +126,7 @@ const Header = () => {
     };
 
     buildHeaderNavigation();
-  }, [url, canView, user?.role, modules]);
+  }, [url, canView, user?.role, modules, t]);
 
   // Function to detect if we're in a module-specific URL
   const isModuleUrl = (url) => {
@@ -603,12 +605,29 @@ const Header = () => {
           {/* Right Section */}
           <div className="flex items-center space-x-2">
 
-            {/* Language Selector */}
+            {/* App locale (EN / اردو) — in-app translations */}
+            {supportedLocales && supportedLocales.length > 1 && (
+              <div className="hidden sm:flex items-center rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-800/50 p-0.5">
+                {supportedLocales.map((loc) => (
+                  <button
+                    key={loc.code}
+                    type="button"
+                    onClick={() => setLocale(loc.code)}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${locale === loc.code ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'}`}
+                    title={loc.name}
+                  >
+                    {loc.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Language Selector (e.g. Google Translate) */}
             <div className="relative">
               <button
                 onClick={() => setLanguageMenuOpen(!languageMenuOpen)}
                 className="inline-flex items-center justify-center space-x-2 rounded-md p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white transition-colors duration-200 notranslate"
-                aria-label="Select language"
+                aria-label={t('header.language')}
               >
                 <Globe className="h-5 w-5" />
                 <span className="hidden sm:block text-xs notranslate">
@@ -689,7 +708,7 @@ const Header = () => {
               <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
                 className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white transition-colors duration-200"
-                aria-label="Notifications"
+                aria-label={t('header.notifications')}
               >
                 <Bell className="h-5 w-5" />
                 <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-xs text-white flex items-center justify-center">
@@ -720,7 +739,7 @@ const Header = () => {
             <button
               onClick={openCustomizer}
               className="inline-flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white transition-colors duration-200"
-              aria-label="Settings"
+              aria-label={t('header.settings')}
             >
               <Settings className="h-5 w-5" />
             </button>
@@ -730,7 +749,7 @@ const Header = () => {
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
                 className="flex items-center space-x-2 rounded-md p-1.5 text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white transition-colors duration-200"
-                aria-label="Profile menu"
+                aria-label={t('header.profile')}
               >
                 <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
                   {user?.profile_photo_url ? (
@@ -744,7 +763,7 @@ const Header = () => {
                   )}
                 </div>
                 <span className="hidden sm:block text-sm font-medium">
-                  {user?.fname ? `${user.fname} ${user.lname}`.trim() : 'User'}
+                  {user?.fname ? `${user.fname} ${user.lname}`.trim() : t('common.labels.user')}
                 </span>
                 <ChevronDown className="h-4 w-4" />
               </button>

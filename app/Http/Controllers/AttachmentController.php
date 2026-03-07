@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Arr;
 use App\Services\AuditLogService;
 use App\Services\StorageService;
-use Illuminate\Support\Facades\Storage;
 
 class AttachmentController extends Controller
 {
@@ -244,18 +244,23 @@ class AttachmentController extends Controller
             ]);
         }
         
-        // Set appropriate headers
+        // Binary-safe stream to prevent corrupted files (no extra output, correct Content-Length)
+        $filenameForHeader = basename($filename);
         $headers = [
             'Content-Type' => $mimeType,
             'Content-Length' => $fileSize,
             'Cache-Control' => 'public, max-age=3600',
-            'Content-Disposition' => 'inline; filename="' . $filename . '"'
+            'Content-Disposition' => 'inline; filename="' . $filenameForHeader . '"',
         ];
 
-        // For downloads, you can use:
-        // $headers['Content-Disposition'] = 'attachment; filename="' . $filename . '"';
-
-        return response()->file($filePath, $headers);
+        return new StreamedResponse(function () use ($filePath) {
+            $stream = fopen($filePath, 'rb');
+            if ($stream === false) {
+                abort(500, 'Cannot read file');
+            }
+            fpassthru($stream);
+            fclose($stream);
+        }, 200, $headers);
     }
 
     /**
@@ -311,7 +316,23 @@ class AttachmentController extends Controller
             ]);
         }
 
-        return response()->download($filePath, $filename);
+        $downloadName = basename($filename);
+        $mimeType = mime_content_type($filePath);
+        $fileSize = filesize($filePath);
+
+        // Binary-safe stream to prevent corrupted downloads
+        return new StreamedResponse(function () use ($filePath) {
+            $stream = fopen($filePath, 'rb');
+            if ($stream === false) {
+                abort(500, 'Cannot read file');
+            }
+            fpassthru($stream);
+            fclose($stream);
+        }, 200, [
+            'Content-Type' => $mimeType,
+            'Content-Length' => $fileSize,
+            'Content-Disposition' => 'attachment; filename="' . $downloadName . '"',
+        ]);
     }
 
     /**

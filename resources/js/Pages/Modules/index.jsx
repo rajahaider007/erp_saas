@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useTranslations } from '../../hooks/useTranslations';
 import {
   Settings,
   Users,
@@ -29,9 +30,16 @@ import {
 } from 'lucide-react';
 
 const ModulesPage = () => {
+  const { t, locale, supportedLocales } = useTranslations();
   const { auth, company, availableModules } = usePage().props;
   const user = auth?.user;
   const { hasAccessToModule } = usePermissions();
+
+  React.useEffect(() => {
+    const info = Array.isArray(supportedLocales) && supportedLocales.find((l) => l.code === locale);
+    document.documentElement.lang = locale || 'en';
+    document.documentElement.dir = (info && info.dir) || 'ltr';
+  }, [locale, supportedLocales]);
 
   // Get modules with permissions - Dynamic from database (usePage at top level only)
   const getModules = () => {
@@ -88,14 +96,14 @@ const ModulesPage = () => {
       return {
         id: module.id,
         name: module.module_name,
-        description: module.description || `Access ${module.module_name} module for comprehensive business management`,
+        description: module.description || t('modules.default_description', { name: module.module_name }),
         icon: Icon,
         color: module.color || 'blue',
         gradient: gradient,
         route: `/${module.folder_name}/dashboard`,
         hasAccess,
         isDisabled: !hasAccess,
-        features: module.features || ['Management', 'Reports', 'Analytics', 'Settings'],
+        features: module.features || t('modules.default_features') || ['Management', 'Reports', 'Analytics', 'Settings'],
         status: module.status ? 'active' : 'inactive',
         created_at: module.created_at,
         updated_at: module.updated_at,
@@ -146,12 +154,12 @@ const ModulesPage = () => {
             {isDisabled ? (
               <div className="flex items-center space-x-2 text-gray-400 bg-gray-100/50 dark:bg-gray-700/50 backdrop-blur-sm px-3 py-2 rounded-full border border-gray-200/50">
                 <Lock className="h-4 w-4" />
-                <span className="text-sm font-medium">Restricted</span>
+                <span className="text-sm font-medium">{t('common.status.restricted')}</span>
               </div>
             ) : (
               <div className="flex items-center space-x-2 text-green-600 bg-green-50/80 dark:bg-green-900/20 backdrop-blur-sm px-3 py-2 rounded-full border border-green-200/50 group-hover:bg-green-100/80 dark:group-hover:bg-green-900/30 transition-all duration-300">
                 <Unlock className="h-4 w-4" />
-                <span className="text-sm font-medium">Active</span>
+                <span className="text-sm font-medium">{t('common.status.active')}</span>
               </div>
             )}
           </div>
@@ -169,7 +177,7 @@ const ModulesPage = () => {
           {/* Enhanced Features - Professional */}
           <div className="mb-6">
             <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide">
-              Key Features
+              {t('modules.key_features')}
             </h4>
             <div className="flex flex-wrap gap-2">
               {module.features.map((feature, index) => (
@@ -191,7 +199,7 @@ const ModulesPage = () => {
           {!isDisabled && (
             <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50/80 to-gray-100/80 dark:from-gray-700/80 dark:to-gray-600/80 backdrop-blur-sm rounded-xl group-hover:from-gray-100/80 group-hover:to-gray-200/80 dark:group-hover:from-gray-600/80 dark:group-hover:to-gray-500/80 transition-all duration-300 border border-gray-200/50">
               <span className="text-sm text-gray-700 dark:text-gray-200 font-semibold">
-                Access Module
+                {t('modules.access_module')}
               </span>
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
@@ -241,20 +249,20 @@ const ModulesPage = () => {
                   <Grid3X3 className="h-6 w-6" />
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                  ERP Modules
+                  {t('modules.page_title')}
                 </h1>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                Access your business modules and manage your organization efficiently.
+                {t('modules.page_description')}
               </p>
               <div className="flex items-center justify-center sm:justify-start space-x-4 text-sm">
                 <div className="flex items-center space-x-2 text-green-600">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span className="font-medium">System Online</span>
+                  <span className="font-medium">{t('modules.system_online')}</span>
                 </div>
                 <div className="flex items-center space-x-2 text-blue-600">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                  <span className="font-medium">{modules.length} Modules Available</span>
+                  <span className="font-medium">{t('modules.modules_available', { count: modules.length })}</span>
                 </div>
               </div>
             </div>
@@ -262,7 +270,7 @@ const ModulesPage = () => {
               {user && (
                 <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200 text-sm">
                   <User className="h-4 w-4" />
-                  <span className="font-medium">{user.name || user.email || user.loginid || 'User'}</span>
+                  <span className="font-medium">{user.name || user.email || user.loginid || t('common.labels.user')}</span>
                 </div>
               )}
               <button
@@ -271,7 +279,7 @@ const ModulesPage = () => {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-200/80 dark:bg-gray-700/80 hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-700 dark:text-gray-200 hover:text-red-700 dark:hover:text-red-300 font-medium transition-colors"
               >
                 <LogOut className="h-4 w-4" />
-                Logout
+                {t('common.actions.logout')}
               </button>
             </div>
           </div>
@@ -288,7 +296,7 @@ const ModulesPage = () => {
                 <Unlock className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white ml-3">
-                Accessible Modules ({accessibleModules.length})
+                {t('modules.accessible_modules')} ({accessibleModules.length})
               </h2>
             </div>
             
@@ -310,7 +318,7 @@ const ModulesPage = () => {
                 <Lock className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white ml-3">
-                Restricted Modules ({disabledModules.length})
+                {t('modules.restricted_modules')} ({disabledModules.length})
               </h2>
             </div>
             
@@ -331,10 +339,10 @@ const ModulesPage = () => {
               <Layout className="h-12 w-12 text-gray-400" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              No Modules Available
+              {t('modules.no_modules_title')}
             </h3>
             <p className="text-gray-600 dark:text-gray-300">
-              Contact your administrator to get access to modules.
+              {t('modules.no_modules_message')}
             </p>
           </div>
         )}
@@ -345,7 +353,7 @@ const ModulesPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-gray-500 dark:text-gray-400">
-              Welcome to {company?.company_name || 'ERP Enterprise'} - Your Business Management Solution
+              {t('modules.footer_welcome', { company: company?.company_name || 'ERP Enterprise' })}
             </p>
           </div>
         </div>

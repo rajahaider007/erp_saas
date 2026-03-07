@@ -1,0 +1,28 @@
+{
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "submit": "Submit",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "confirm": "Confirm",
+    "logout": "Logout",
+    "loading": "Loading..."
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "restricted": "Restricted"
+  },
+  "labels": {
+    "user": "User",
+    "language": "Language",
+    "theme": "Theme",
+    "settings": "Settings"
+  }
+}

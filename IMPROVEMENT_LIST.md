@@ -171,7 +171,7 @@ Work through these items **one by one**. Each item has a short title, descriptio
 ---
 
 ## 11. i18n Translation System (JSON, English/Urdu, Extensible)
-**Status:** [ ] Not started
+**Status:** [x] Done
 
 **Requirements:**
 - JSON-based translation files, well-structured (e.g. by form name and template name for easy management).
@@ -179,18 +179,20 @@ Work through these items **one by one**. Each item has a short title, descriptio
 - Fast; integrated across the app (no missing areas).
 - Optional: form in the system to manage translations and add languages (can be a later phase).
 
-**Tasks:**
-- Define JSON structure (e.g. `lang/{locale}/{module}/{form-or-template}.json` or similar).
-- Integrate Laravel `lang` and/or frontend i18n (e.g. react-i18next, Inertia shared data) so backend and frontend use same keys where needed.
-- Replace hardcoded strings with translation keys in login, sidebar, ERP modules, and key forms; add English and Urdu files.
-- Document structure (form names, template names) so future translators can manage JSON easily.
-- (Optional) Build an admin form to edit JSON translations and add new locales.
+**Implemented:**
+- **JSON structure:** `lang/{locale}/*.json` — one file per area: `common`, `login`, `sidebar`, `header`, `modules` (English + Urdu).
+- **Backend:** `App\Services\TranslationLoaderService` loads all JSON for the current locale; locale from session (default `en`). Shared via Inertia: `locale`, `translations`, `supportedLocales`.
+- **Route:** `POST /locale` stores locale in session and redirects back.
+- **Frontend:** `resources/js/hooks/useTranslations.js` — `t(key, replacements)`, `locale`, `setLocale`, `supportedLocales`. Placeholders: `{year}`, `{company}`, `{count}`, etc.
+- **Integrated in:** Login page, Sidebar, Header, ERP Modules page. RTL support for Urdu (`document.documentElement.dir` and `lang` set from layout / login / modules page).
+- **Locale switcher:** Login (top-right) and Header (EN | اردو). User-friendly and persistent (session).
+- **Documentation:** `lang/README.md` for translators and structure.
 
 **Relevant areas:**
-- `lang/` directory structure
-- Laravel localization config and middleware
-- Frontend i18n setup (e.g. in `app.jsx` or layout)
-- Shared Inertia data for locale and messages
+- `lang/` directory (en + ur JSON files), `lang/README.md`
+- `App\Services\TranslationLoaderService`, `app/Http/Middleware/HandleInertiaRequests.php`
+- `resources/js/hooks/useTranslations.js`
+- Routes: `POST /locale`
 
 ---
 
