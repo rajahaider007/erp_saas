@@ -12,6 +12,7 @@ import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
 
 const GeneralLedgerReport = () => {
   const { auth, company, currencies } = usePage().props;
+  const { t } = useTranslations();
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState([]);
   const [filters, setFilters] = useState({
@@ -189,7 +190,6 @@ const GeneralLedgerReport = () => {
 
   // Calculate totals
   const calculateTotals = () => {
-  const { t } = useTranslations();
     const totals = reportData.reduce((acc, row) => {
       acc.opening_balance += parseFloat(row.opening_balance || 0);
       acc.debit_total += parseFloat(row.debit_total || 0);

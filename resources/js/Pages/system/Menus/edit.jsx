@@ -8,6 +8,7 @@ import { useTranslations } from '@/hooks/useTranslations';
 
 const EditMenuForm = () => {
   const { menu, modules } = usePage().props;
+  const { t } = useTranslations();
   const [sections, setSections] = useState([]);
   const [moduleId, setModuleId] = useState(menu.module_id);
 
@@ -30,7 +31,6 @@ const EditMenuForm = () => {
   ], [modules, sections]);
 
   const handleSubmit = (data) => {
-  const { t } = useTranslations();
     router.post(`/system/menus/${menu.id}`, { ...data, _method: 'put' });
   };
 

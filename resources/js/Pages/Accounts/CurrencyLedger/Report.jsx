@@ -18,6 +18,7 @@ import App from '../../App.jsx';
 
 const CurrencyLedgerReport = () => {
   const { groupedData = {}, accounts = [], accountTotals = {}, account, company, filters, flash, totalDebit, totalCredit } = usePage().props;
+  const { t } = useTranslations();
   
   const [loading, setLoading] = useState(false);
 
@@ -50,7 +51,6 @@ const CurrencyLedgerReport = () => {
     };
 
     const initializeDataTables = () => {
-    const { t } = useTranslations();
       if (window.$ && window.$.fn.DataTable) {
         // Initialize DataTable for each account
         accounts.forEach((accountData) => {
@@ -236,7 +236,6 @@ const CurrencyLedgerReport = () => {
   };
 
   const formatDate = (dateString) => {
-  const { t } = useTranslations();
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {

@@ -26,6 +26,7 @@ const TrialBalanceReport = () => {
     grandTotalDebit = 0, 
     grandTotalCredit = 0 
   } = usePage().props;
+  const { t } = useTranslations();
   
   const [loading, setLoading] = useState(false);
   const [collapsedLevels, setCollapsedLevels] = useState({});
@@ -131,7 +132,6 @@ const TrialBalanceReport = () => {
 
   // Render level 4 (transactional accounts)
   const renderLevel4 = (accounts, level3Key) => {
-  const { t } = useTranslations();
     if (!accounts || accounts.length === 0) return null;
 
     return accounts.map((account, index) => (
@@ -167,7 +167,6 @@ const TrialBalanceReport = () => {
 
   // Render level 3 accounts
   const renderLevel3 = (level3Accounts, level2Key) => {
-  const { t } = useTranslations();
     if (!level3Accounts || Object.keys(level3Accounts).length === 0) return null;
 
     return Object.entries(level3Accounts).map(([key, level3]) => {
@@ -220,7 +219,6 @@ const TrialBalanceReport = () => {
 
   // Render level 2 accounts
   const renderLevel2 = (level2Accounts, level1Key) => {
-  const { t } = useTranslations();
     if (!level2Accounts || Object.keys(level2Accounts).length === 0) return null;
 
     return Object.entries(level2Accounts).map(([key, level2]) => {
@@ -270,7 +268,6 @@ const TrialBalanceReport = () => {
 
   // Render flat data for specific level
   const renderFlatData = () => {
-  const { t } = useTranslations();
     if (!trialBalanceData || trialBalanceData.length === 0) return null;
 
     return trialBalanceData.map((account, index) => (
@@ -310,7 +307,6 @@ const TrialBalanceReport = () => {
 
   // Render level 1 accounts (hierarchical)
   const renderLevel1 = () => {
-  const { t } = useTranslations();
     if (!trialBalanceData || trialBalanceData.length === 0) return null;
 
     return trialBalanceData.map((level1, index) => {

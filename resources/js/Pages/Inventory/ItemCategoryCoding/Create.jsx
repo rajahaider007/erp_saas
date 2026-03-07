@@ -122,7 +122,6 @@ const { t } = useTranslations();
   ];
 
   const handleSubmit = (formData) => {
-  const { t } = useTranslations();
     setErrors({});
     setAlert(null);
 

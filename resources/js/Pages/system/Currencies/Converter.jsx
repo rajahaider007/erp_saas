@@ -54,6 +54,7 @@ const Breadcrumbs = ({ items }) => {
 
 const CurrencyConverter = () => {
   const { currencies: allCurrencies } = usePage().props;
+  const { t } = useTranslations();
   const [amount, setAmount] = useState('100');
   const [fromCurrency, setFromCurrency] = useState('USD');
   const [toCurrency, setToCurrency] = useState('EUR');
@@ -87,7 +88,6 @@ const CurrencyConverter = () => {
   };
 
   const handleSwapCurrencies = () => {
-  const { t } = useTranslations();
     setFromCurrency(toCurrency);
     setToCurrency(fromCurrency);
     setResult(null);

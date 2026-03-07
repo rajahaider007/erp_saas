@@ -6,6 +6,7 @@ import App from '../../App.jsx';
 
 export default function CashConfiguration() {
   const { cashHead, cashCodes = [], compId, locationId, flash } = usePage().props;
+  const { t } = useTranslations();
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     cash_location: '',
@@ -46,7 +47,6 @@ export default function CashConfiguration() {
   };
 
   const handleDelete = (codeId, cashLocation) => {
-  const { t } = useTranslations();
     if (confirm(`Are you sure you want to delete cash account "${cashLocation}"?`)) {
       router.delete(`/accounts/code-configuration/${codeId}`);
     }

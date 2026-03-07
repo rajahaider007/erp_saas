@@ -669,7 +669,6 @@ const { t } = useTranslations();
   ].filter(Boolean);
 
   const handleSubmit = (formData) => {
-  const { t } = useTranslations();
     setErrors({});
     setAlert(null);
 

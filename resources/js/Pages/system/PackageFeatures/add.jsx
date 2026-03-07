@@ -27,6 +27,7 @@ const Breadcrumbs = ({ items }) => (
 
 const AddPackageFeatureForm = () => {
   const { packages, menus } = usePage().props;
+  const { t } = useTranslations();
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
   const [requestStatus, setRequestStatus] = useState('');
@@ -60,7 +61,6 @@ const AddPackageFeatureForm = () => {
   };
 
   const handleSelectAll = (isEnabled) => {
-  const { t } = useTranslations();
     const newFeatures = {};
     menus.forEach(menu => {
       newFeatures[menu.id] = isEnabled;

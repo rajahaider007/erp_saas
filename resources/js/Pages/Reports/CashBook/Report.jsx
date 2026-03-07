@@ -22,6 +22,7 @@ import App from '../../App.jsx';
  */
 const CashBookReport = () => {
   const { auth, cashBookData: initialData, accounts, filters: initialFilters, totals, company, error } = usePage().props;
+  const { t } = useTranslations();
 
   const [filters, setFilters] = useState({
     account_id: initialFilters?.account_id || '',
@@ -102,7 +103,6 @@ const CashBookReport = () => {
   };
 
   const handlePrint = () => {
-  const { t } = useTranslations();
     window.print();
   };
 

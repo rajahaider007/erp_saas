@@ -146,6 +146,7 @@ const CustomAlert = {
 
 export default function List() {
   const { modules: paginatedModules, filters, flash } = usePage().props;
+  const { t } = useTranslations();
 
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
@@ -436,7 +437,6 @@ const exportToCSV = () => {
   };
 
   const getStatusLabel = (status) => {
-  const { t } = useTranslations();
     return status ? 'Active' : 'Inactive';
   };
 

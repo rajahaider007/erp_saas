@@ -4,6 +4,7 @@ import { Eye, EyeOff, Search, Calendar, Clock, Upload, ChevronDown } from 'lucid
 import CustomDatePicker from '../../Components/DatePicker/DatePicker';
 
 const FormThemeSystem = () => {
+  const { t } = useTranslations();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     text: '',
@@ -30,7 +31,6 @@ const FormThemeSystem = () => {
   });
 
   const handleInputChange = (field, value) => {
-  const { t } = useTranslations();
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

@@ -85,7 +85,6 @@ const SystemDashboard = () => {
   };
 
   const SectionCard = ({ section }) => {
-  const { t } = useTranslations();
     const Icon = section.icon;
     
     return (

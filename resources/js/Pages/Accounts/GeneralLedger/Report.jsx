@@ -16,6 +16,7 @@ import App from '../../App.jsx';
 
 const GeneralLedgerReport = () => {
   const { groupedData = {}, accounts = [], accountTotals = {}, account, company, filters, flash, totalDebit, totalCredit } = usePage().props;
+  const { t } = useTranslations();
   
   const [loading, setLoading] = useState(false);
 
@@ -48,7 +49,6 @@ const GeneralLedgerReport = () => {
     };
 
     const initializeDataTables = () => {
-    const { t } = useTranslations();
       if (window.$ && window.$.fn.DataTable) {
         // Initialize DataTable for each account
         accounts.forEach((accountData) => {
@@ -234,7 +234,6 @@ const GeneralLedgerReport = () => {
   };
 
   const formatDate = (dateString) => {
-  const { t } = useTranslations();
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {

@@ -17,6 +17,7 @@ import App from '../../App.jsx';
  */
 const CashBookSearch = () => {
   const { auth, companies, locations, cashAccounts, isParentCompany } = usePage().props;
+  const { t } = useTranslations();
   
   // Get current date in YYYY-MM-DD format
   const getCurrentDate = () => {
@@ -187,7 +188,6 @@ const CashBookSearch = () => {
   };
 
   const setThisYearFilter = () => {
-  const { t } = useTranslations();
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 1);
     const endOfYear = new Date(now.getFullYear(), 11, 31);

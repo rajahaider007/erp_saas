@@ -12,6 +12,7 @@ export default function Reports({
     securityIncidents, 
     filters 
 }) {
+    const { t } = useTranslations();
     const [fromDate, setFromDate] = useState(filters.from_date ? new Date(filters.from_date) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
     const [toDate, setToDate] = useState(filters.to_date ? new Date(filters.to_date) : new Date());
     const [reportType, setReportType] = useState(filters.report_type || 'overview');
@@ -46,7 +47,6 @@ export default function Reports({
     };
 
     const handleExport = (format) => {
-    const { t } = useTranslations();
         console.log(`Exporting ${reportType} report as ${format}`);
         
         // Create export URL with current filters

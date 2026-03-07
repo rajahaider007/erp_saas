@@ -77,7 +77,6 @@ const { t } = useTranslations();
   };
 
   const removeRow = (index) => {
-  const { t } = useTranslations();
     if (rows.length <= 1) {
       setAlert({ type: 'error', message: t('inventory.uom_conversion.create.msg_at_least_one_conversion_row_is_required') });
       return;
@@ -104,7 +103,6 @@ const { t } = useTranslations();
     : formattedUoms;
 
   const handleSubmit = (e) => {
-  const { t } = useTranslations();
     e.preventDefault();
     setErrors({});
     setAlert(null);

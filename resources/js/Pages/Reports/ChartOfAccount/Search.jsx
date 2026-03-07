@@ -15,6 +15,7 @@ import App from '../../App.jsx';
  */
 const ChartOfAccountSearch = () => {
   const { auth, companies, locations, isParentCompany } = usePage().props;
+  const { t } = useTranslations();
   
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -51,7 +52,6 @@ const ChartOfAccountSearch = () => {
   };
 
   const handleReset = () => {
-  const { t } = useTranslations();
     setSelectedCompany(null);
     setSelectedLocation(null);
     setAvailableLocations([]);

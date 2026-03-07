@@ -9,6 +9,7 @@ export default function PrintView() {
     asAtDate,
     currencyCode,
   } = usePage().props;
+  const { t } = useTranslations();
 
   const [drillDownData, setDrillDownData] = useState(null);
 
@@ -50,7 +51,6 @@ export default function PrintView() {
   }, []);
 
   const formatCurrency = (value) => {
-  const { t } = useTranslations();
     const absValue = Math.abs(value || 0);
     const formatted = new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,

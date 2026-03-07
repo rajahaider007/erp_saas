@@ -65,12 +65,12 @@ const Breadcrumbs = ({ items }) => {
 // Department Form Component (Unified for Create and Edit)
 const DepartmentForm = () => {
   const { errors: pageErrors, flash, department, companies, locations } = usePage().props;
+  const { t } = useTranslations();
   const isEdit = !!department;
   const [filteredLocations, setFilteredLocations] = useState(locations || []);
   
   // Handle company change to filter locations
   const handleCompanyChange = (companyId, formData, setFormData) => {
-  const { t } = useTranslations();
     setFormData({ ...formData, company_id: companyId, location_id: '' });
     
     if (companyId) {

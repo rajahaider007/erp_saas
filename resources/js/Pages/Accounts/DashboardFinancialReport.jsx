@@ -20,6 +20,7 @@ const DashboardFinancialReport = () => {
 
   const [fromDate, setFromDate] = useState(filters?.from_date || '');
   const [toDate, setToDate] = useState(filters?.to_date || '');
+  const { t } = useTranslations();
 
   const formatAmount = (amount) => {
     const value = Number(amount || 0);
@@ -43,7 +44,6 @@ const DashboardFinancialReport = () => {
   };
 
   const getGeneralLedgerUrl = (accountId) => {
-  const { t } = useTranslations();
     const params = new URLSearchParams();
 
     if (accountId) params.set('account_id', String(accountId));

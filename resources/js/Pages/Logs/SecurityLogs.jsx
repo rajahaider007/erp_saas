@@ -6,6 +6,7 @@ import { Shield, Search, Calendar, Filter, Eye, AlertTriangle, User, Clock, Chev
 import CustomDatePicker from '../../Components/DatePicker/DatePicker';
 
 export default function SecurityLogs({ logs = { data: [] }, users = [], companies = [], locations = [], isParentCompany = false, filters = {} }) {
+    const { t } = useTranslations();
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [selectedLocation, setSelectedLocation] = useState(null);
     const [availableLocations, setAvailableLocations] = useState(locations);
@@ -93,7 +94,6 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
     };
 
     const getEventBadgeClass = (eventType) => {
-    const { t } = useTranslations();
         const classes = {
             'LOGIN': 'bg-blue-100 text-blue-700 border-blue-300',
             'LOGOUT': 'bg-gray-100 text-gray-700 border-gray-300',

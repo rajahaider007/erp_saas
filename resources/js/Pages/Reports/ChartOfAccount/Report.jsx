@@ -22,6 +22,7 @@ import App from '../../App.jsx';
  */
 const ChartOfAccountReport = () => {
   const { auth, chartOfAccountData: initialData, filters: initialFilters, totals, company, error } = usePage().props;
+  const { t } = useTranslations();
   
   const [filters, setFilters] = useState({
     level: initialFilters?.level || 'all',
@@ -191,7 +192,6 @@ const ChartOfAccountReport = () => {
     };
 
     const triggerPrint = () => {
-    const { t } = useTranslations();
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           setTimeout(() => {

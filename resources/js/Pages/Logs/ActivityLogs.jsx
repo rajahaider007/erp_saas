@@ -6,6 +6,7 @@ import { FileText, Search, Calendar, Filter, Eye, RotateCcw, Download, Activity,
 import CustomDatePicker from '../../Components/DatePicker/DatePicker';
 
 export default function ActivityLogs({ logs, users, companies = [], locations = [], isParentCompany = false, filters }) {
+    const { t } = useTranslations();
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [selectedLocation, setSelectedLocation] = useState(null);
     const [availableLocations, setAvailableLocations] = useState(locations);
@@ -83,7 +84,6 @@ export default function ActivityLogs({ logs, users, companies = [], locations = 
     };
 
     const getActionBadgeClass = (actionType) => {
-    const { t } = useTranslations();
         const classes = {
             'CREATE': 'bg-green-100 text-green-700 border-green-300',
             'UPDATE': 'bg-blue-100 text-blue-700 border-blue-300',

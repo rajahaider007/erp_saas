@@ -18,6 +18,7 @@ import App from '../../App.jsx';
 
 const BalanceSheetSearch = () => {
   const { companies = [], locations = [], isParentCompany = false, flash } = usePage().props;
+  const { t } = useTranslations();
   
   // Get current date in YYYY-MM-DD format
   const getCurrentDate = () => {
@@ -88,7 +89,6 @@ const BalanceSheetSearch = () => {
   };
 
   const handleReset = () => {
-  const { t } = useTranslations();
     setSelectedCompany(null);
     setSelectedLocation(null);
     setAvailableLocations([]);

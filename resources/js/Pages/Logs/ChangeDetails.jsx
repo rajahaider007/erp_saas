@@ -5,6 +5,7 @@ import AppLayout from '../../Layouts/AppLayout';
 import { ArrowLeft, Clock, User, FileText, Eye, Calendar, MapPin, Shield, Database, Hash, Building } from 'lucide-react';
 
 export default function ChangeDetails({ log }) {
+    const { t } = useTranslations();
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleString();
     };
@@ -35,7 +36,6 @@ export default function ChangeDetails({ log }) {
     };
 
     const getActionBadgeClass = (actionType) => {
-    const { t } = useTranslations();
         const classes = {
             'CREATE': 'bg-green-100 text-green-700 border-green-300',
             'UPDATE': 'bg-blue-100 text-blue-700 border-blue-300',

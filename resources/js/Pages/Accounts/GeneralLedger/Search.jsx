@@ -19,6 +19,7 @@ import App from '../../App.jsx';
 
 const GeneralLedgerSearch = () => {
   const { accounts = [], companies = [], locations = [], isParentCompany = false, flash } = usePage().props;
+  const { t } = useTranslations();
   
   // Get current date in YYYY-MM-DD format
   const getCurrentDate = () => {
@@ -227,7 +228,6 @@ const GeneralLedgerSearch = () => {
   };
 
   const setThisYearFilter = () => {
-  const { t } = useTranslations();
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 1);
     const endOfYear = new Date(now.getFullYear(), 11, 31);

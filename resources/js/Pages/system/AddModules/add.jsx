@@ -229,7 +229,6 @@ const { t } = useTranslations();
   };
 
   const handleReset = () => {
-  const { t } = useTranslations();
     setErrors({});
     setAlert(null);
     setRequestStatus('');

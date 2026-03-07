@@ -20,7 +20,7 @@ function ReportContent() {
     currencyCode,
     error
   } = usePage().props;
-
+  const { t } = useTranslations();
   const { theme, primaryColor } = useLayout();
 
   const [selectedFromDate, setSelectedFromDate] = useState(fromDate);
@@ -48,7 +48,6 @@ function ReportContent() {
   };
 
   const formatCurrency = (value) => {
-  const { t } = useTranslations();
     return new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2

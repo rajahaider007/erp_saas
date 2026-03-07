@@ -24,7 +24,7 @@ function PageContent() {
     currentFiscalYear,
     flash = {}
   } = usePage().props;
-
+  const { t } = useTranslations();
   const { theme, primaryColor } = useLayout();
 
   const [loading, setLoading] = useState(false);
@@ -51,7 +51,6 @@ function PageContent() {
   };
 
   const handleUpdatePeriodStatus = (periodId, status) => {
-  const { t } = useTranslations();
     if (loading) return;
     
     setLoading(true);

@@ -10,6 +10,7 @@ const TrialBalancePrint = () => {
         grandTotalDebit = 0,
         grandTotalCredit = 0
     } = usePage().props;
+    const { t } = useTranslations();
 
     // Get orientation from URL or default to portrait
     const urlParams = new URLSearchParams(window.location.search);
@@ -46,7 +47,6 @@ const TrialBalancePrint = () => {
 
     // Render level 4 (transactional accounts)
     const renderLevel4 = (accounts) => {
-    const { t } = useTranslations();
         if (!accounts || accounts.length === 0) return null;
 
         return accounts.map((account, index) => (
@@ -82,7 +82,6 @@ const TrialBalancePrint = () => {
 
     // Render level 3 accounts
     const renderLevel3 = (level3Accounts) => {
-    const { t } = useTranslations();
         if (!level3Accounts || Object.keys(level3Accounts).length === 0) return null;
 
         return Object.values(level3Accounts).map((level3, index) => (
@@ -121,7 +120,6 @@ const TrialBalancePrint = () => {
 
     // Render level 2 accounts
     const renderLevel2 = (level2Accounts) => {
-    const { t } = useTranslations();
         if (!level2Accounts || Object.keys(level2Accounts).length === 0) return null;
 
         return Object.values(level2Accounts).map((level2, index) => (
@@ -157,7 +155,6 @@ const TrialBalancePrint = () => {
 
     // Render flat data for specific level
     const renderFlatData = () => {
-    const { t } = useTranslations();
         if (!trialBalanceData || trialBalanceData.length === 0) return null;
 
         return trialBalanceData.map((account, index) => (
@@ -197,7 +194,6 @@ const TrialBalancePrint = () => {
 
     // Render level 1 accounts (hierarchical)
     const renderLevel1 = () => {
-    const { t } = useTranslations();
         if (!trialBalanceData || trialBalanceData.length === 0) return null;
 
         return trialBalanceData.map((level1, index) => (

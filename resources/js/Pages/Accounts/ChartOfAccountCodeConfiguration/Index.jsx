@@ -6,6 +6,7 @@ import App from '../../App.jsx';
 
 export default function ChartOfAccountCodeConfigurationIndex() {
   const { level3Accounts = [], compId, locationId } = usePage().props;
+  const { t } = useTranslations();
   const [expandedLevel3, setExpandedLevel3] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [selectedLevel3, setSelectedLevel3] = useState(null);
@@ -65,7 +66,6 @@ export default function ChartOfAccountCodeConfigurationIndex() {
   };
 
   const handleDeleteCode = (codeId, codeName) => {
-  const { t } = useTranslations();
     if (confirm(`Are you sure you want to delete account code "${codeName}"?`)) {
       router.delete(`/accounts/code-configuration/${codeId}`, {
         onSuccess: () => {

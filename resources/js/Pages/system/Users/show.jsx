@@ -10,6 +10,7 @@ import App from "../../App.jsx";
 
 const UserShow = () => {
   const { user } = usePage().props;
+  const { t } = useTranslations();
 
   const getStatusBadge = (status) => {
     const statusClasses = {
@@ -27,7 +28,6 @@ const UserShow = () => {
   };
 
   const getRoleBadge = (role) => {
-  const { t } = useTranslations();
     const roleClasses = {
       super_admin: 'bg-purple-100 text-purple-800',
       admin: 'bg-blue-100 text-blue-800',

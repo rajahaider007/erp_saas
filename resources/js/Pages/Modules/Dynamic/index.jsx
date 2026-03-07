@@ -59,7 +59,6 @@ const DynamicModuleDashboard = () => {
   }));
 
   const SectionCard = ({ section }) => {
-  const { t } = useTranslations();
     const Icon = iconMap[section.icon?.toLowerCase()] || iconMap.default;
     
     return (

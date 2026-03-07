@@ -5,6 +5,7 @@ import AppLayout from '../../Layouts/AppLayout';
 import { Trash2, Search, RotateCcw, Eye, AlertTriangle, Clock, User, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function DeletedItems({ deletedItems, filters }) {
+    const { t } = useTranslations();
     const [search, setSearch] = useState(filters.search || '');
     const [table, setTable] = useState(filters.table || '');
     const [restoring, setRestoring] = useState(null);
@@ -48,7 +49,6 @@ export default function DeletedItems({ deletedItems, filters }) {
     };
 
     const getDaysRemainingClass = (days) => {
-    const { t } = useTranslations();
         if (days <= 7) return 'text-red-600 font-bold';
         if (days <= 30) return 'text-yellow-600 font-semibold';
         return 'text-green-600';

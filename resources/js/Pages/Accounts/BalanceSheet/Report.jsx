@@ -46,7 +46,6 @@ const { t } = useTranslations();
   };
 
   const renderPrintHierarchy = (data) => {
-  const { t } = useTranslations();
     if (!data || !data.children || data.children.length === 0) {
       return null;
     }
@@ -327,7 +326,6 @@ function ReportContent() {
   };
 
   const renderAccountHierarchy = (data, showTotal = true) => {
-  const { t } = useTranslations();
     if (!data || !data.children || data.children.length === 0) {
       return null;
     }
@@ -449,7 +447,6 @@ function ReportContent() {
 
   // Render function for print view
   const renderPrintHierarchy = (data) => {
-  const { t } = useTranslations();
     if (!data || !data.children || data.children.length === 0) {
       return null;
     }

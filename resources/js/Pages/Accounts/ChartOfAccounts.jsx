@@ -33,6 +33,7 @@ import {
 
 const ChartOfAccounts = () => {
   const { props } = usePage();
+  const { t } = useTranslations();
   const { currencies = [], accounts: seededAccounts = [], error } = props;
 
   const [accounts, setAccounts] = useState(seededAccounts);
@@ -371,7 +372,6 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
 
   // Load expanded state from localStorage
   const loadExpandedState = () => {
-  const { t } = useTranslations();
     try {
       const savedState = localStorage.getItem('chartOfAccountsState');
       if (savedState) {
@@ -766,7 +766,6 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
 
   // Render account tree with accordion functionality
   const renderAccountTree = (accountsToRender, level = 0) => {
-  const { t } = useTranslations();
     return accountsToRender.map((account) => {
       const hasChildren = accounts.some(acc => acc.parent_account_id === account.id);
       const isExpanded = expandedAccounts[account.id];
