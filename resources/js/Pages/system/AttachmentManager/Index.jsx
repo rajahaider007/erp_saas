@@ -222,9 +222,10 @@ export default function FileManagerIndex() {
     }
   };
 
-  const handleUpload = async (fileList) => {
+  const handleUpload = async (fileList, subfolder = '') => {
     if (!fileList?.length) return;
     const form = new FormData();
+    if (subfolder) form.append('folder', subfolder);
     for (let i = 0; i < fileList.length; i++) form.append('files[]', fileList[i]);
     setUploading(true);
     setAlert(null);
@@ -262,7 +263,10 @@ export default function FileManagerIndex() {
     e.preventDefault();
     setDragOver(false);
     const list = e.dataTransfer?.files;
-    if (list?.length) handleUpload(Array.from(list));
+    if (list?.length) {
+      const subfolder = selectedFolder && selectedFolder.startsWith('general/') ? selectedFolder.replace(/^general\//, '') : '';
+      handleUpload(Array.from(list), subfolder);
+    }
   };
 
   const usedMb = storageInfo.used_mb ?? 0;
@@ -303,7 +307,17 @@ export default function FileManagerIndex() {
             </div>
           </div>
           <nav className="p-2 flex-1 overflow-y-auto">
-            <p className="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Folders</p>
+            <div className="flex items-center justify-between px-3 py-1.5">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Folders</p>
+              <button
+                type="button"
+                onClick={() => setNewFolderModalOpen(true)}
+                className="p-1.5 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white"
+                title="New folder"
+              >
+                <FolderPlus className="w-4 h-4" />
+              </button>
+            </div>
             {folders.length === 0 ? (
               <button
                 onClick={() => setSelectedFolder('')}
@@ -354,8 +368,8 @@ export default function FileManagerIndex() {
         {/* Main */}
         <main className="flex-1 flex flex-col min-w-0">
           {/* Top bar */}
-          <div className="h-14 border-b border-gray-700 flex items-center justify-between px-4 gap-4">
-            <div className="relative flex-1 max-w-md">
+          <div className="h-14 border-b border-gray-700 flex items-center justify-between px-4 gap-4 flex-wrap">
+            <div className="relative flex-1 min-w-[200px] max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
@@ -365,6 +379,15 @@ export default function FileManagerIndex() {
                 className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
+            <select
+              value={fileTypeFilter}
+              onChange={(e) => setFileTypeFilter(e.target.value)}
+              className="px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[120px]"
+            >
+              {FILE_TYPE_OPTIONS.map((opt) => (
+                <option key={opt.value || 'all'} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
@@ -384,7 +407,7 @@ export default function FileManagerIndex() {
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.zip"
                 className="hidden"
                 onChange={onFileInputChange}
               />
@@ -462,10 +485,11 @@ export default function FileManagerIndex() {
                             Size {sortBy === 'size' && (sortAsc ? '↑' : '↓')}
                           </th>
                           <th
-                            className="px-4 py-3 cursor-pointer hover:bg-gray-700 w-40"
+                            className="px-4 py-3 cursor-pointer hover:bg-gray-700 w-40 select-none"
                             onClick={() => { setSortBy('last_modified'); setSortAsc((s) => !s); }}
+                            title="Click to sort by Last modified"
                           >
-                            Last modified {sortBy === 'last_modified' && (sortAsc ? '↑' : '↓')}
+                            Last modified {sortBy === 'last_modified' && (sortAsc ? ' ↑' : ' ↓')}
                           </th>
                           <th className="px-4 py-3 w-24 text-right">Actions</th>
                         </tr>
@@ -594,10 +618,13 @@ export default function FileManagerIndex() {
             <input
               type="file"
               multiple
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.zip"
               onChange={(e) => {
                 const list = e.target.files;
-                if (list?.length) handleUpload(Array.from(list));
+                if (list?.length) {
+                  const sub = selectedFolder && selectedFolder.startsWith('general/') ? selectedFolder.replace(/^general\//, '') : '';
+                  handleUpload(Array.from(list), sub);
+                }
               }}
               className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-600 file:text-white"
             />
@@ -608,6 +635,42 @@ export default function FileManagerIndex() {
                 className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600"
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New folder modal */}
+      {newFolderModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => !creatingFolder && setNewFolderModalOpen(false)}>
+          <div className="bg-gray-800 rounded-xl border border-gray-700 w-full max-w-md p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <FolderPlus className="w-5 h-5" />
+              New folder
+            </h3>
+            <input
+              type="text"
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              placeholder="Folder name"
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              onKeyDown={(e) => e.key === 'Enter' && handleCreateFolder()}
+              autoFocus
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={() => { setNewFolderModalOpen(false); setNewFolderName(''); }}
+                className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateFolder}
+                disabled={creatingFolder || !newFolderName.trim()}
+                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {creatingFolder ? 'Creating…' : 'Create'}
               </button>
             </div>
           </div>
