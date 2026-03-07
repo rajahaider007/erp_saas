@@ -32,6 +32,7 @@ const Breadcrumbs = ({ items }) => (
 
 const CodeConfigurationForm = () => {
   const { configuration, companies, locations, codeTypes } = usePage().props;
+  const { t } = useTranslations();
   
   // Debug logging
   // console.log('CodeConfigurationForm Debug:', { companies: companies.length, locations: locations.length, codeTypes: codeTypes.length });
@@ -125,8 +126,6 @@ const CodeConfigurationForm = () => {
   };
 
   const handleLocationChange = (locationId) => {
-  const { t } = useTranslations();
-
     // Use the stored company ID
     const actualCompanyId = currentCompanyId;
 

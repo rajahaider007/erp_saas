@@ -47,7 +47,6 @@ const formatRelativeTime = (dateStr) => {
 };
 
 const getFileIcon = (type) => {
-const { t } = useTranslations();
   const t = (type || '').toLowerCase();
   if (['pdf'].includes(t)) return '📄';
   if (['doc', 'docx'].includes(t)) return '📝';
@@ -73,6 +72,7 @@ const FILE_TYPE_OPTIONS = [
 
 export default function FileManagerIndex() {
   const { storageInfo: initialStorage = {}, company, error: pageError } = usePage().props;
+  const { t } = useTranslations();
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [storageInfo, setStorageInfo] = useState(initialStorage);
@@ -205,7 +205,6 @@ export default function FileManagerIndex() {
     );
   };
   const selectAll = () => {
-  const { t } = useTranslations();
     if (selected.length === files.length) setSelected([]);
     else setSelected(files.map((f) => f.filename));
   };
@@ -275,7 +274,6 @@ export default function FileManagerIndex() {
   };
 
   const onDrop = (e) => {
-  const { t } = useTranslations();
     e.preventDefault();
     setDragOver(false);
     if (uploading) return;

@@ -64,6 +64,7 @@ const Breadcrumbs = ({ items }) => {
 
 const CurrenciesIndex = () => {
   const { currencies, flash } = usePage().props;
+  const { t } = useTranslations();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState('all');
   const [alert, setAlert] = useState(null);
@@ -102,7 +103,6 @@ const CurrenciesIndex = () => {
   };
 
   const handleUpdateFromApi = () => {
-  const { t } = useTranslations();
     if (confirm('This will update exchange rates from external API. Continue?')) {
       setAlert({ type: 'info', message: t('system.currencies.index.msg_updating_exchange_rates_please_wait') });
       router.post('/system/currencies/update-from-api', {
@@ -114,7 +114,6 @@ const CurrenciesIndex = () => {
   };
 
   const handleViewHistory = (currencyId) => {
-  const { t } = useTranslations();
     router.visit(`/system/currencies/${currencyId}/history`);
   };
 

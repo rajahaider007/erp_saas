@@ -86,7 +86,6 @@ const { t } = useTranslations();
   };
 
   const handleEdit = () => {
-  const { t } = useTranslations();
     if (voucher.status !== 'Draft') {
       setAlert({ type: 'error', message: t('accounts.journal_voucher.show.msg_only_draft_vouchers_can_be_edited') });
       return;
@@ -95,7 +94,6 @@ const { t } = useTranslations();
   };
 
   const handleDelete = () => {
-  const { t } = useTranslations();
     if (voucher.status !== 'Draft') {
       setAlert({ type: 'error', message: t('accounts.journal_voucher.show.msg_only_draft_vouchers_can_be_deleted') });
       return;
@@ -107,7 +105,6 @@ const { t } = useTranslations();
   };
 
   const handlePost = () => {
-  const { t } = useTranslations();
     if (voucher.status !== 'Draft') {
       setAlert({ type: 'error', message: t('accounts.journal_voucher.show.msg_only_draft_vouchers_can_be_posted') });
       return;

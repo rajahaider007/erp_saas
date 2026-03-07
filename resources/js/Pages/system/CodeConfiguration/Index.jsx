@@ -14,6 +14,7 @@ const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, conf
 
 const Index = () => {
   const { configurations: paginated, companies, locations, codeTypes, flash, filters } = usePage().props;
+  const { t } = useTranslations();
   const [search, setSearch] = useState(filters?.search || '');
   const [companyFilter, setCompanyFilter] = useState(filters?.company_id || '');
   const [locationFilter, setLocationFilter] = useState(filters?.location_id || '');
@@ -42,7 +43,6 @@ const Index = () => {
   }, [flash]);
 
   const handleDelete = (config) => { 
-  const { t } = useTranslations();
     CustomAlert.fire({ 
       title:'Are you sure?', 
       text:`You are about to delete "${config.code_name}". This action cannot be undone!`, 

@@ -4,7 +4,9 @@ import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
-const Breadcrumbs = ({ items }) => (
+const Breadcrumbs = ({ items }) => {
+  const { t } = useTranslations();
+  return (
   <div className="breadcrumbs-themed">
     <nav className="breadcrumbs">
       {items.map((item, idx) => (
@@ -23,10 +25,12 @@ const Breadcrumbs = ({ items }) => (
     </nav>
     <div className="breadcrumbs-description">{t('system.role_features.edit.edit_role_features_and_menu_access')}</div>
   </div>
-);
+  );
+};
 
 const EditRoleFeatureForm = () => {
   const { role: roleData, roles, menus, roleFeatures } = usePage().props;
+  const { t } = useTranslations();
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
   const [requestStatus, setRequestStatus] = useState('');
@@ -53,7 +57,6 @@ const EditRoleFeatureForm = () => {
   };
 
   const handleMenuToggle = (menuId, isEnabled) => {
-  const { t } = useTranslations();
     setMenuFeatures(prev => ({
       ...prev,
       [menuId]: isEnabled

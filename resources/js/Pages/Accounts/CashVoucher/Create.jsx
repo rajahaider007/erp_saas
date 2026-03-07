@@ -57,6 +57,7 @@ const { t } = useTranslations();
 
 const CashVoucherCreate = () => {
   const { accounts = [], CashAccounts = [], voucher = null, entries = [], flash, currencies = [], company = null, preview_voucher_number = null, preview_voucher_numbers = {}, attachments: initialAttachments = [], currentPeriod = null } = usePage().props;
+  const { t } = useTranslations();
   const isEdit = !!voucher;
   const autoVoucherNumbering = true; // Always auto-generate voucher numbers
   const getAutoVoucherNumberByType = (type) => {
@@ -155,7 +156,6 @@ const CashVoucherCreate = () => {
 
   // Keyboard navigation helper
   const handleKeyDown = (e, currentIndex, field) => {
-  const { t } = useTranslations();
     // Enter key to move to next field
     if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
       e.preventDefault();
@@ -312,7 +312,6 @@ const CashVoucherCreate = () => {
 
   // Remove attachment
   const removeAttachment = (attachmentId) => {
-  const { t } = useTranslations();
     setAttachments(prev => {
       if (!Array.isArray(prev)) return [];
       // Handle both object attachments and string filenames
@@ -493,7 +492,6 @@ const CashVoucherCreate = () => {
 
   // Add new entry
   const addEntry = () => {
-  const { t } = useTranslations();
     setFormData(prev => ({
       ...prev,
       entries: [...prev.entries, { 
@@ -510,7 +508,6 @@ const CashVoucherCreate = () => {
 
   // Remove entry
   const removeEntry = (index) => {
-  const { t } = useTranslations();
     if (formData.entries.length <= 1) {
       setAlert({ type: 'error', message: t('accounts.cash_voucher.create.msg_at_least_1_detail_entry_is_required') });
       return;
@@ -524,7 +521,6 @@ const CashVoucherCreate = () => {
 
   // Update entry
   const updateEntry = (index, field, value) => {
-  const { t } = useTranslations();
     setFormData(prev => ({
       ...prev,
       entries: prev.entries.map((entry, i) => 

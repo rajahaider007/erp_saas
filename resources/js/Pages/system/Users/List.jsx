@@ -17,6 +17,7 @@ const USERS_ROUTE = '/system/users';
 
 const List = () => {
   const { users: paginated, companies, locations, departments, flash, filters } = usePage().props;
+  const { t } = useTranslations();
   const { canAdd, canEdit, canDelete, showPermissionDeniedAlert } = usePermissions();
   const [search, setSearch] = useState(filters?.search || '');
   const [companyId, setCompanyId] = useState(filters?.company_id || '');
@@ -50,7 +51,6 @@ const List = () => {
   const handleSelectAll = (checked) => { if (checked) setSelected(paginated.data.map(u=>u.id)); else setSelected([]); };
   const handleSelectRow = (id, checked) => { if (checked) setSelected(prev=>[...prev, id]); else setSelected(prev=>prev.filter(x=>x!==id)); };
   const handleBulkDelete = () => {
-  const { t } = useTranslations();
     if (!selected.length) return;
     if (!canDelete(USERS_ROUTE)) { showPermissionDeniedAlert('delete', 'users'); return; }
     CustomAlert.fire({ title:'Delete Selected Users?', text:`You are about to delete ${selected.length} user(s).`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete!', onConfirm:()=> router.post('/system/users/bulk-destroy', { ids:selected }, { onSuccess:()=>setSelected([]) }) });

@@ -1,12 +1,12 @@
 {
-  "dashboard": "ڈیش بورڈ",
-  "erp_modules": "ERP ماڈیولز",
-  "settings": "ترتیبات",
-  "storage": "سٹوریج",
-  "language": "زبان",
-  "theme": "تھیم",
-  "profile": "پروفائل",
-  "notifications": "نوٹیفکیشنز",
-  "english": "English",
-  "urdu": "اردو"
+    "dashboard": "ڈیش بورڈ",
+    "erp_modules": "ERP ماڈیولز",
+    "settings": "ترتیبات",
+    "storage": "سٹوریج",
+    "language": "زبان",
+    "theme": "تھیم",
+    "profile": "پروفائل",
+    "notifications": "نوٹیفکیشنز",
+    "english": "انگریزی",
+    "urdu": "اردو"
 }

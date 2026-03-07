@@ -137,6 +137,7 @@ const CustomAlert = {
 
 const JournalVoucherList = () => {
   const { journalVouchers: paginatedVouchers = [], accounts = [], flash, filters } = usePage().props;
+  const { t } = useTranslations();
   const { canAdd, canEdit, canDelete, showPermissionDeniedAlert } = usePermissions();
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
@@ -668,7 +669,6 @@ const JournalVoucherList = () => {
   };
 
   const getStatusColor = (status) => {
-  const { t } = useTranslations();
     switch (status.toLowerCase()) {
       case 'draft':
         return 'bg-yellow-100 text-yellow-800';

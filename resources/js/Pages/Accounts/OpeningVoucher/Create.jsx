@@ -57,6 +57,7 @@ const { t } = useTranslations();
 
 const OpeningVoucherCreate = () => {
   const { accounts = [], voucher = null, entries = [], flash, currencies = [], company = null, preview_voucher_number = null, attachments: initialAttachments = [], currentPeriod = null } = usePage().props;
+  const { t } = useTranslations();
   const isEdit = !!voucher;
   const autoVoucherNumbering = true; // Always auto-generate voucher numbers
   
@@ -150,7 +151,6 @@ const OpeningVoucherCreate = () => {
 
   // Keyboard navigation helper
   const handleKeyDown = (e, currentIndex, field) => {
-  const { t } = useTranslations();
     // Enter key to move to next field
     if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
       e.preventDefault();
@@ -298,7 +298,6 @@ const OpeningVoucherCreate = () => {
 
   // Remove attachment
   const removeAttachment = (attachmentId) => {
-  const { t } = useTranslations();
     setAttachments(prev => {
       if (!Array.isArray(prev)) return [];
       // Handle both object attachments and string filenames
@@ -517,7 +516,6 @@ const OpeningVoucherCreate = () => {
 
   // Remove entry
   const removeEntry = (index) => {
-  const { t } = useTranslations();
     if (formData.entries.length <= 2) {
       setAlert({ type: 'error', message: t('accounts.opening_voucher.create.msg_at_least_2_entries_are_required_for_doub') });
       return;
@@ -531,7 +529,6 @@ const OpeningVoucherCreate = () => {
 
   // Update entry
   const updateEntry = (index, field, value) => {
-  const { t } = useTranslations();
     setFormData(prev => ({
       ...prev,
       entries: prev.entries.map((entry, i) => 

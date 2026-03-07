@@ -4,6 +4,7 @@ import { useTranslations } from '@/hooks/useTranslations';
 
 const PrintDetailed = () => {
   const { voucher, entries = [], company } = usePage().props;
+  const { t } = useTranslations();
 
   useEffect(() => {
     // Auto print when page loads
@@ -24,7 +25,6 @@ const PrintDetailed = () => {
   };
 
   const formatDate = (dateString) => {
-  const { t } = useTranslations();
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {

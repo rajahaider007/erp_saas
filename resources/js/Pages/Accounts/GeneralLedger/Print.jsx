@@ -13,6 +13,7 @@ const GeneralLedgerPrint = () => {
     totalDebit = 0,
     totalCredit = 0
   } = usePage().props;
+  const { t } = useTranslations();
 
   useEffect(() => {
     // Auto print when page loads
@@ -30,7 +31,6 @@ const GeneralLedgerPrint = () => {
   };
 
   const formatDate = (dateString) => {
-  const { t } = useTranslations();
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {

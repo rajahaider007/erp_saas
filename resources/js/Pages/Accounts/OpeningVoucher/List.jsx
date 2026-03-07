@@ -134,6 +134,7 @@ const CustomAlert = {
 
 const OpeningVoucherList = () => {
   const { OpeningVouchers: paginatedVouchers = [], accounts = [], flash, filters } = usePage().props;
+  const { t } = useTranslations();
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
   const [statusFilter, setStatusFilter] = useState(filters?.status || 'all');
@@ -652,7 +653,6 @@ const OpeningVoucherList = () => {
   };
 
   const getStatusColor = (status) => {
-  const { t } = useTranslations();
     switch (status.toLowerCase()) {
       case 'draft':
         return 'bg-yellow-100 text-yellow-800';

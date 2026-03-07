@@ -129,6 +129,7 @@ const CustomAlert = {
 
 export default function List() {
   const { configurations: paginatedConfigurations, filters, flash, warning, configTypes = {} } = usePage().props;
+  const { t } = useTranslations();
 
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
@@ -368,7 +369,6 @@ export default function List() {
 
   // Format functions
   const formatDate = (dateString) => {
-  const { t } = useTranslations();
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',

@@ -129,6 +129,7 @@ const CustomAlert = {
 
 export default function List() {
   const { configurations: paginatedConfigurations, filters, flash, warning } = usePage().props;
+  const { t } = useTranslations();
 
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
@@ -386,7 +387,6 @@ export default function List() {
   };
 
   const getStatusLabel = (status) => {
-  const { t } = useTranslations();
     return status ? 'Active' : 'Inactive';
   };
 

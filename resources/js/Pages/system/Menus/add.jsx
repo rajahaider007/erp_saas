@@ -30,6 +30,7 @@ const Breadcrumbs = ({ items }) => (
 
 const AddMenuForm = () => {
   const { modules } = usePage().props;
+  const { t } = useTranslations();
   const [sections, setSections] = useState([]);
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
@@ -57,7 +58,6 @@ const AddMenuForm = () => {
 
   // Handle module selection
   const handleModuleChange = (moduleId) => {
-  const { t } = useTranslations();
     setSelectedModuleId(moduleId);
     loadSections(moduleId);
   };

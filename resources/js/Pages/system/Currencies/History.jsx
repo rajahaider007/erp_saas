@@ -54,6 +54,7 @@ const Breadcrumbs = ({ items }) => {
 
 const CurrencyHistory = () => {
   const { currency, history } = usePage().props;
+  const { t } = useTranslations();
   const [selectedPeriod, setSelectedPeriod] = useState(30);
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -81,7 +82,6 @@ const CurrencyHistory = () => {
   };
 
   const getRateChangeColor = (change) => {
-  const { t } = useTranslations();
     if (change > 0) return 'text-green-600 dark:text-green-400';
     if (change < 0) return 'text-red-600 dark:text-red-400';
     return 'text-gray-600 dark:text-gray-400';

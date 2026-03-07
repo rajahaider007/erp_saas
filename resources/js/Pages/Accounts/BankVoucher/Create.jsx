@@ -57,6 +57,7 @@ const { t } = useTranslations();
 
 const BankVoucherCreate = () => {
   const { accounts = [], bankAccounts = [], voucher = null, entries = [], flash, currencies = [], company = null, preview_voucher_number = null, preview_voucher_numbers = {}, attachments: initialAttachments = [], currentPeriod = null } = usePage().props;
+  const { t } = useTranslations();
   const isEdit = !!voucher;
   const autoVoucherNumbering = true; // Always auto-generate voucher numbers
   const getAutoVoucherNumberByType = (type) => {
@@ -161,7 +162,6 @@ const BankVoucherCreate = () => {
 
   // Keyboard navigation helper
   const handleKeyDown = (e, currentIndex, field) => {
-  const { t } = useTranslations();
     // Enter key to move to next field
     if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
       e.preventDefault();
@@ -318,7 +318,6 @@ const BankVoucherCreate = () => {
 
   // Remove attachment
   const removeAttachment = (attachmentId) => {
-  const { t } = useTranslations();
     setAttachments(prev => {
       if (!Array.isArray(prev)) return [];
       // Handle both object attachments and string filenames
@@ -518,7 +517,6 @@ const BankVoucherCreate = () => {
 
   // Remove entry
   const removeEntry = (index) => {
-  const { t } = useTranslations();
     if (formData.entries.length <= 1) {
       setAlert({ type: 'error', message: t('accounts.bank_voucher.create.msg_at_least_1_detail_entry_is_required') });
       return;
@@ -532,7 +530,6 @@ const BankVoucherCreate = () => {
 
   // Update entry
   const updateEntry = (index, field, value) => {
-  const { t } = useTranslations();
     setFormData(prev => ({
       ...prev,
       entries: prev.entries.map((entry, i) => 

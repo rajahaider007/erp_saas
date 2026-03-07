@@ -104,7 +104,6 @@ const { t } = useTranslations();
   }, [flash]);
 
   const handleSubmit = (data) => {
-  const { t } = useTranslations();
     router.post(`/system/sections/${section.id}`, { ...data, _method: 'put' }, {
       onSuccess: () => {
         setAlert({
