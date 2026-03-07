@@ -9,7 +9,6 @@ use App\Services\AuditLogService;
 use App\Models\Company;
 use App\Models\CompanyFile;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -55,14 +54,33 @@ class AttachmentManagerController extends Controller
     {
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         
-        $filters = $request->only(['from_date', 'to_date', 'voucher_type', 'file_type', 'search']);
+        $filters = $request->only(['from_date', 'to_date', 'voucher_type', 'file_type', 'search', 'folder']);
         
         try {
             $attachments = $this->getFilteredAttachments($compId, $filters);
-            
+            $folders = [
+                ['slug' => '', 'label' => 'All files'],
+                ['slug' => 'journal-voucher', 'label' => 'Journal Voucher'],
+                ['slug' => 'cash-voucher', 'label' => 'Cash Voucher'],
+                ['slug' => 'bank-voucher', 'label' => 'Bank Voucher'],
+                ['slug' => 'opening-voucher', 'label' => 'Opening Voucher'],
+                ['slug' => 'general', 'label' => 'General / Uploads'],
+            ];
+            $generalPath = storage_path('app/public/voucher-attachments/general');
+            if (is_dir($generalPath)) {
+                foreach (scandir($generalPath) as $entry) {
+                    if ($entry !== '.' && $entry !== '..' && is_dir($generalPath . DIRECTORY_SEPARATOR . $entry)) {
+                        $customSlug = 'general/' . $entry;
+                        if (!in_array($customSlug, array_column($folders, 'slug'), true)) {
+                            $folders[] = ['slug' => $customSlug, 'label' => ucfirst(str_replace(['-', '_'], ' ', $entry))];
+                        }
+                    }
+                }
+            }
             return response()->json([
                 'success' => true,
-                'data' => $attachments
+                'data' => $attachments,
+                'folders' => $folders,
             ]);
         } catch (\Exception $e) {
             Log::error('Error getting filtered attachments', [
@@ -154,11 +172,14 @@ class AttachmentManagerController extends Controller
 
         $request->validate([
             'files' => 'required|array',
-            'files.*' => 'required|file|max:30720|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif', // 30MB per file
+            'files.*' => 'required|file|max:30720|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif,zip', // 30MB per file, incl. zip
         ]);
 
         $uploaded = [];
         $errors = [];
+        $subfolder = $request->input('folder', '');
+        $subfolder = preg_replace('/[^a-z0-9_-]/', '', strtolower($subfolder));
+        $formSlug = $subfolder ? 'general/' . $subfolder : 'general';
 
         foreach ($request->file('files') as $file) {
             $check = StorageService::canUploadFile($compId, $file->getSize());
@@ -168,21 +189,23 @@ class AttachmentManagerController extends Controller
             }
 
             $filename = time() . '_' . uniqid() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
-            $path = $file->storeAs('public/voucher-attachments', $filename);
+            Storage::makeDirectory('public/voucher-attachments/' . $formSlug);
+            $path = $file->storeAs('public/voucher-attachments/' . $formSlug, $filename);
+            $storageFilename = $formSlug . '/' . $filename;
 
             CompanyFile::create([
                 'comp_id' => $compId,
-                'storage_filename' => $filename,
+                'storage_filename' => $storageFilename,
                 'original_name' => $file->getClientOriginalName(),
                 'file_size' => $file->getSize(),
                 'mime_type' => $file->getMimeType(),
             ]);
 
             $uploaded[] = [
-                'filename' => $filename,
+                'filename' => $storageFilename,
                 'original_name' => $file->getClientOriginalName(),
                 'size' => $file->getSize(),
-                'url' => url('storage/voucher-attachments/' . $filename),
+                'url' => url('storage/voucher-attachments/' . $storageFilename),
             ];
         }
 
@@ -205,6 +228,52 @@ class AttachmentManagerController extends Controller
         }
         $info = StorageService::getCompanyStorageUsage($compId);
         return response()->json(array_merge(['success' => true], $info));
+    }
+
+    /**
+     * Get folder slug and display label from filename (e.g. journal-voucher/file.pdf or general/my-folder/file.pdf)
+     */
+    private static function folderFromFilename($filename)
+    {
+        $dir = pathinfo($filename, PATHINFO_DIRNAME);
+        $slug = ($dir === '' || $dir === '.') ? 'general' : $dir;
+        $labels = [
+            'journal-voucher' => 'Journal Voucher',
+            'cash-voucher' => 'Cash Voucher',
+            'bank-voucher' => 'Bank Voucher',
+            'opening-voucher' => 'Opening Voucher',
+            'general' => 'General / Uploads',
+        ];
+        $label = $labels[$slug] ?? ucfirst(str_replace(['-', '_'], ' ', basename($slug)));
+        return ['slug' => $slug, 'label' => $label];
+    }
+
+    /**
+     * Create a new folder under general (for file manager)
+     */
+    public function createFolder(Request $request)
+    {
+        $this->requirePermission($request, null, 'can_add');
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        if (!$compId) {
+            return response()->json(['success' => false, 'message' => 'Company context required'], 403);
+        }
+        $name = $request->input('name');
+        if (empty(trim($name ?? ''))) {
+            return response()->json(['success' => false, 'message' => 'Folder name is required'], 422);
+        }
+        $slug = preg_replace('/[^a-z0-9_-]/', '-', strtolower(trim($name)));
+        $slug = trim(preg_replace('/-+/', '-', $slug), '-') ?: 'new-folder';
+        $path = 'public/voucher-attachments/general/' . $slug;
+        if (Storage::exists($path)) {
+            return response()->json(['success' => false, 'message' => 'A folder with this name already exists'], 422);
+        }
+        Storage::makeDirectory($path);
+        return response()->json([
+            'success' => true,
+            'message' => 'Folder created',
+            'folder' => ['slug' => 'general/' . $slug, 'label' => trim($name)],
+        ]);
     }
 
     /**
@@ -263,8 +332,15 @@ class AttachmentManagerController extends Controller
                     }
                 }
 
+                $folder = self::folderFromFilename($attachment->filename);
+                if (!empty($filters['folder']) && $folder['slug'] !== $filters['folder']) {
+                    continue;
+                }
+
                 $attachments[] = [
                     'filename' => $attachment->filename,
+                    'folder_slug' => $folder['slug'],
+                    'folder_label' => $folder['label'],
                     'size' => $fileSize,
                     'size_mb' => round($fileSize / (1024 * 1024), 2),
                     'file_type' => $fileExtension,
@@ -323,8 +399,15 @@ class AttachmentManagerController extends Controller
                             }
                         }
 
+                        $folder = self::folderFromFilename($attachment);
+                        if (!empty($filters['folder']) && $folder['slug'] !== $filters['folder']) {
+                            continue;
+                        }
+
                         $attachments[] = [
                             'filename' => $attachment,
+                            'folder_slug' => $folder['slug'],
+                            'folder_label' => $folder['label'],
                             'size' => $fileSize,
                             'size_mb' => round($fileSize / (1024 * 1024), 2),
                             'file_type' => $fileExtension,
@@ -333,7 +416,8 @@ class AttachmentManagerController extends Controller
                             'voucher_number' => $transaction->voucher_number,
                             'description' => $transaction->description,
                             'attachment_type' => 'voucher_attachment',
-                            'url' => url('storage/voucher-attachments/' . $attachment)
+                            'url' => url('storage/voucher-attachments/' . $attachment),
+                            'last_modified' => date('Y-m-d H:i:s', filemtime($filePath)),
                         ];
                     }
                 }
@@ -364,8 +448,15 @@ class AttachmentManagerController extends Controller
                 }
             }
 
+            $folder = self::folderFromFilename($cf->storage_filename);
+            if (!empty($filters['folder']) && $folder['slug'] !== $filters['folder']) {
+                continue;
+            }
+
             $attachments[] = [
                 'filename' => $cf->storage_filename,
+                'folder_slug' => $folder['slug'],
+                'folder_label' => $folder['label'],
                 'size' => $fileSize,
                 'size_mb' => round($fileSize / (1024 * 1024), 2),
                 'file_type' => $fileExtension,

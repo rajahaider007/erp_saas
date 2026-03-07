@@ -65,19 +65,26 @@ class AttachmentController extends Controller
                 }
             }
 
+            // Form folder: form_slug (e.g. journal-voucher, cash-voucher) so file manager shows by form
+            $formSlug = $request->input('form_slug', 'general');
+            $formSlug = preg_replace('/[^a-z0-9_-]/', '', strtolower($formSlug)) ?: 'general';
+            $storePath = 'public/voucher-attachments/' . $formSlug;
+            Storage::makeDirectory($storePath);
+
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
-                    $filename = time() . '_' . $file->getClientOriginalName();
-                    $path = $file->storeAs('public/voucher-attachments', $filename);
-                    
+                    $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+                    $path = $file->storeAs($storePath, $filename);
+                    $relativeId = $formSlug . '/' . $filename;
                     $attachmentData = [
-                        'id' => $filename, // Use filename as ID for now
-                        'filename' => $filename,
+                        'id' => $relativeId,
+                        'filename' => $relativeId,
                         'original_name' => $file->getClientOriginalName(),
                         'path' => $path,
                         'size' => $file->getSize(),
                         'mime_type' => $file->getMimeType(),
-                        'url' => url('storage/voucher-attachments/' . $filename)
+                        'url' => url('storage/voucher-attachments/' . $relativeId),
+                        'form_slug' => $formSlug,
                     ];
                     
                     $uploadedAttachments[] = $attachmentData;
@@ -111,17 +118,18 @@ class AttachmentController extends Controller
             } elseif ($request->hasFile('attachment')) {
                 // Handle single file upload (for entry attachments)
                 $file = $request->file('attachment');
-                $filename = time() . '_' . $file->getClientOriginalName();
-                $path = $file->storeAs('public/voucher-attachments', $filename);
-                
+                $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+                $path = $file->storeAs($storePath, $filename);
+                $relativeId = $formSlug . '/' . $filename;
                 $attachmentData = [
-                    'id' => $filename, // Use filename as ID for now
-                    'filename' => $filename,
+                    'id' => $relativeId,
+                    'filename' => $relativeId,
                     'original_name' => $file->getClientOriginalName(),
                     'path' => $path,
                     'size' => $file->getSize(),
                     'mime_type' => $file->getMimeType(),
-                    'url' => url('storage/voucher-attachments/' . $filename)
+                    'url' => url('storage/voucher-attachments/' . $relativeId),
+                    'form_slug' => $formSlug,
                 ];
                 
                 $uploadedAttachments[] = $attachmentData;
@@ -189,8 +197,8 @@ class AttachmentController extends Controller
             abort(403, 'Unauthorized access');
         }
 
-        // Validate filename to prevent directory traversal
-        if (preg_match('/[^a-zA-Z0-9._-]/', $filename)) {
+        // Validate filename/path (allow form folder: e.g. journal-voucher/file.pdf)
+        if (strpos($filename, '..') !== false || preg_match('/[^a-zA-Z0-9._\-\/]/', $filename)) {
             abort(400, 'Invalid filename');
         }
 
@@ -257,8 +265,8 @@ class AttachmentController extends Controller
             abort(403, 'Unauthorized access');
         }
 
-        // Validate filename to prevent directory traversal
-        if (preg_match('/[^a-zA-Z0-9._-]/', $filename)) {
+        // Validate filename/path (allow form folder: e.g. journal-voucher/file.pdf)
+        if (strpos($filename, '..') !== false || preg_match('/[^a-zA-Z0-9._\-\/]/', $filename)) {
             abort(400, 'Invalid filename');
         }
 

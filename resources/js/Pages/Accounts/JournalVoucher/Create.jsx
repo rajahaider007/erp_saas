@@ -252,6 +252,7 @@ const JournalVoucherCreate = () => {
     setUploadingAttachments(true);
     try {
       const formData = new FormData();
+      formData.append('form_slug', 'journal-voucher');
       validFiles.forEach((file, index) => {
         formData.append(`attachments[${index}]`, file);
       });
@@ -342,6 +343,7 @@ const JournalVoucherCreate = () => {
 
     try {
       const formData = new FormData();
+      formData.append('form_slug', 'journal-voucher');
       formData.append('attachment', validFiles[0]);
 
       const response = await fetch('/api/upload-attachments', {

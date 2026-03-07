@@ -426,7 +426,7 @@ Route::prefix('storage/voucher-attachments')->middleware('web.auth')->group(func
 });
 
 Route::prefix('attachments')->middleware('web.auth')->group(function () {
-    Route::get('/download/{filename}', [App\Http\Controllers\AttachmentController::class, 'downloadVoucherAttachment']);
+    Route::get('/download/{filename}', [App\Http\Controllers\AttachmentController::class, 'downloadVoucherAttachment'])->where('filename', '.*');
     Route::get('/list/{voucherId}', [App\Http\Controllers\AttachmentController::class, 'listVoucherAttachments']);
 });
 
@@ -438,7 +438,10 @@ Route::prefix('system/attachment-manager')->name('system.attachment-manager.')->
 // Attachment Manager API Routes
 Route::prefix('api/attachment-manager')->middleware('web.auth')->group(function () {
     Route::get('/attachments', [App\Http\Controllers\system\AttachmentManagerController::class, 'getAttachments']);
+    Route::post('/upload', [App\Http\Controllers\system\AttachmentManagerController::class, 'upload']);
+    Route::post('/create-folder', [App\Http\Controllers\system\AttachmentManagerController::class, 'createFolder']);
     Route::post('/delete', [App\Http\Controllers\system\AttachmentManagerController::class, 'deleteAttachments']);
+    Route::get('/storage-usage', [App\Http\Controllers\system\AttachmentManagerController::class, 'storageUsage']);
 });
 
 // Journal Voucher API Routes

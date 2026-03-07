@@ -266,6 +266,7 @@ const CashVoucherCreate = () => {
     setUploadingAttachments(true);
     try {
       const formData = new FormData();
+      formData.append('form_slug', 'cash-voucher');
       validFiles.forEach((file, index) => {
         formData.append(`attachments[${index}]`, file);
       });
@@ -356,6 +357,7 @@ const CashVoucherCreate = () => {
 
     try {
       const formData = new FormData();
+      formData.append('form_slug', 'cash-voucher');
       formData.append('attachment', validFiles[0]);
 
       const response = await fetch('/api/upload-attachments', {

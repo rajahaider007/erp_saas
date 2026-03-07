@@ -1,231 +1,285 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Trash2, 
-  Download, 
-  Eye, 
-  Calendar, 
-  FileText, 
-  Filter,
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Trash2,
+  Download,
+  Eye,
+  FileText,
   Search,
   HardDrive,
   AlertTriangle,
   CheckSquare,
   Square,
-  Home,
+  Upload,
+  LayoutGrid,
   List,
-  Settings,
+  FolderOpen,
   File,
-  CheckCircle,
-  X
+  X,
+  Check,
+  User,
+  FolderPlus,
 } from 'lucide-react';
-import App from "../../App.jsx";
-import StorageWarning from "../../../Components/StorageWarning";
+import App from '../../App.jsx';
 import { router, usePage } from '@inertiajs/react';
 
-// Helper function to format file sizes
 const formatFileSize = (bytes) => {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return '0 B';
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-// Professional Breadcrumbs Component
-const Breadcrumbs = ({ items }) => {
-  return (
-    <div className="breadcrumbs-themed">
-      <nav className="breadcrumbs">
-        {items.map((item, index) => (
-          <div key={index} className="breadcrumb-item">
-            <div className="breadcrumb-item-content">
-              {item.icon && (
-                <item.icon className={`breadcrumb-icon ${item.href ? 'breadcrumb-icon-link' : 'breadcrumb-icon-current'}`} />
-              )}
-              {item.href ? (
-                <a href={item.href} className="breadcrumb-link-themed">{item.label}</a>
-              ) : (
-                <span className="breadcrumb-current-themed">{item.label}</span>
-              )}
-            </div>
-            {index < items.length - 1 && (
-              <div className="breadcrumb-separator breadcrumb-separator-themed">
-                <svg viewBox="0 0 20 20" fill="currentColor" className="w-full h-full">
-                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-            )}
-          </div>
-        ))}
-      </nav>
-      <div className="breadcrumbs-description">Manage and organize your attachment files</div>
-    </div>
-  );
+const formatRelativeTime = (dateStr) => {
+  if (!dateStr) return '—';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins} min ago`;
+  if (diffHours < 24) return `${diffHours} hours ago`;
+  if (diffDays < 7) return `${diffDays} days ago`;
+  return date.toLocaleDateString();
 };
 
-const AttachmentManagerIndex = () => {
-  const { storageInfo = {}, storageBreakdown = {}, error, company } = usePage().props;
-  const [attachments, setAttachments] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedAttachments, setSelectedAttachments] = useState([]);
+const getFileIcon = (type) => {
+  const t = (type || '').toLowerCase();
+  if (['pdf'].includes(t)) return '📄';
+  if (['doc', 'docx'].includes(t)) return '📝';
+  if (['xls', 'xlsx'].includes(t)) return '📊';
+  if (['jpg', 'jpeg', 'png', 'gif'].includes(t)) return '🖼️';
+  if (['zip'].includes(t)) return '📦';
+  return '📎';
+};
+
+const FILE_TYPE_OPTIONS = [
+  { value: '', label: 'All types' },
+  { value: 'pdf', label: 'PDF' },
+  { value: 'doc', label: 'DOC' },
+  { value: 'docx', label: 'DOCX' },
+  { value: 'xls', label: 'XLS' },
+  { value: 'xlsx', label: 'XLSX' },
+  { value: 'jpg', label: 'JPG' },
+  { value: 'jpeg', label: 'JPEG' },
+  { value: 'png', label: 'PNG' },
+  { value: 'gif', label: 'GIF' },
+  { value: 'zip', label: 'ZIP' },
+];
+
+export default function FileManagerIndex() {
+  const { storageInfo: initialStorage = {}, company, error: pageError } = usePage().props;
+  const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [storageInfo, setStorageInfo] = useState(initialStorage);
+  const [selected, setSelected] = useState([]);
   const [alert, setAlert] = useState(null);
-  const [filters, setFilters] = useState({
-    from_date: '',
-    to_date: '',
-    voucher_type: '',
-    file_type: '',
-    search: ''
-  });
+  const [search, setSearch] = useState('');
+  const [fileTypeFilter, setFileTypeFilter] = useState('');
+  const [sortBy, setSortBy] = useState('last_modified');
+  const [sortAsc, setSortAsc] = useState(false);
+  const [viewMode, setViewMode] = useState('list'); // list | grid
+  const [uploading, setUploading] = useState(false);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const [selectedFolder, setSelectedFolder] = useState('');
+  const [newFolderModalOpen, setNewFolderModalOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [creatingFolder, setCreatingFolder] = useState(false);
+  const [folders, setFolders] = useState([
+    { slug: '', label: 'All files' },
+    { slug: 'journal-voucher', label: 'Journal Voucher' },
+    { slug: 'cash-voucher', label: 'Cash Voucher' },
+    { slug: 'bank-voucher', label: 'Bank Voucher' },
+    { slug: 'opening-voucher', label: 'Opening Voucher' },
+    { slug: 'general', label: 'General / Uploads' },
+  ]);
+  const fileInputRef = useRef(null);
 
-  // Handle flash messages
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('success')) {
-      setAlert({ type: 'success', message: urlParams.get('success') });
-      setTimeout(() => setAlert(null), 5000);
-    } else if (urlParams.get('error')) {
-      setAlert({ type: 'error', message: urlParams.get('error') });
-      setTimeout(() => setAlert(null), 5000);
-    }
-  }, []);
+  const filters = { search, from_date: '', to_date: '', voucher_type: '', file_type: fileTypeFilter, folder: selectedFolder };
 
-  // Load attachments when filters change
-  useEffect(() => {
-    loadAttachments();
-  }, [filters]);
-
-  const loadAttachments = async () => {
+  const loadFiles = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/attachment-manager/attachments?' + new URLSearchParams(filters), {
-        headers: {
-          'Accept': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-        }
+      const params = { search: search || undefined, folder: selectedFolder || undefined, file_type: fileTypeFilter || undefined };
+      const q = new URLSearchParams(params);
+      const res = await fetch('/api/attachment-manager/attachments?' + q, {
+        headers: { Accept: 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        setAttachments(data.data || []);
-      } else {
-        setAlert({ type: 'error', message: 'Failed to load attachments' });
+      if (res.ok) {
+        const data = await res.json();
+        setFiles(data.data || []);
+        if (data.folders && data.folders.length) setFolders(data.folders);
       }
-    } catch (error) {
-      setAlert({ type: 'error', message: 'Error loading attachments: ' + error.message });
+    } catch (e) {
+      setAlert({ type: 'error', message: 'Failed to load files' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFilterChange = (field, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleSelectAll = () => {
-    if (selectedAttachments.length === attachments.length) {
-      setSelectedAttachments([]);
-    } else {
-      setSelectedAttachments(attachments.map(att => att.filename));
-    }
-  };
-
-  const handleSelectAttachment = (filename) => {
-    setSelectedAttachments(prev => 
-      prev.includes(filename)
-        ? prev.filter(f => f !== filename)
-        : [...prev, filename]
-    );
-  };
-
-  const handleDeleteSelected = async () => {
-    if (selectedAttachments.length === 0) {
-      setAlert({ type: 'error', message: 'Please select attachments to delete' });
-      return;
-    }
-
-    if (!confirm(`Are you sure you want to delete ${selectedAttachments.length} attachment(s)? This action cannot be undone.`)) {
-      return;
-    }
-
+  const loadStorage = async () => {
     try {
-      const response = await fetch('/api/attachment-manager/delete', {
+      const res = await fetch('/api/attachment-manager/storage-usage', {
+        headers: { Accept: 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.used_mb !== undefined) setStorageInfo(data);
+      }
+    } catch (_) {}
+  };
+
+  useEffect(() => { loadFiles(); }, [search, selectedFolder, fileTypeFilter]);
+  useEffect(() => { loadStorage(); }, [files.length]);
+
+  const handleCreateFolder = async () => {
+    const name = newFolderName.trim();
+    if (!name) return;
+    setCreatingFolder(true);
+    setAlert(null);
+    try {
+      const res = await fetch('/api/attachment-manager/create-folder', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+          Accept: 'application/json',
         },
-        body: JSON.stringify({
-          attachment_ids: selectedAttachments
-        })
+        body: JSON.stringify({ name }),
       });
-
-      if (response.ok) {
-        const data = await response.json();
+      const data = await res.json();
+      if (res.ok) {
         setAlert({ type: 'success', message: data.message });
-        setSelectedAttachments([]);
-        loadAttachments(); // Reload attachments
+        setNewFolderModalOpen(false);
+        setNewFolderName('');
+        loadFiles();
       } else {
-        const data = await response.json();
-        setAlert({ type: 'error', message: data.message || 'Failed to delete attachments' });
+        setAlert({ type: 'error', message: data.message || 'Could not create folder' });
       }
-    } catch (error) {
-      setAlert({ type: 'error', message: 'Error deleting attachments: ' + error.message });
+    } catch (e) {
+      setAlert({ type: 'error', message: 'Could not create folder' });
+    } finally {
+      setCreatingFolder(false);
     }
   };
 
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
+  const displayFileName = (f) => (f.filename && f.filename.includes('/') ? f.filename.split('/').pop() : f.filename) || f.filename;
 
-  const getFileIcon = (fileType) => {
-    const type = fileType.toLowerCase();
-    if (['pdf'].includes(type)) return '📄';
-    if (['doc', 'docx'].includes(type)) return '📝';
-    if (['xls', 'xlsx'].includes(type)) return '📊';
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(type)) return '🖼️';
-    return '📎';
-  };
-
-  const breadcrumbItems = [
-    {
-      label: 'Dashboard',
-      icon: Home,
-      href: '/dashboard'
-    },
-    {
-      label: 'System',
-      icon: Settings,
-      href: null
-    },
-    {
-      label: 'Attachment Manager',
-      icon: HardDrive,
-      href: null
+  const sortedFiles = [...files].sort((a, b) => {
+    let va = a[sortBy] ?? '';
+    let vb = b[sortBy] ?? '';
+    if (sortBy === 'size') {
+      va = a.size ?? 0;
+      vb = b.size ?? 0;
+      return sortAsc ? va - vb : vb - va;
     }
-  ];
+    if (sortBy === 'last_modified' || sortBy === 'voucher_date') {
+      va = new Date(va).getTime();
+      vb = new Date(vb).getTime();
+      return sortAsc ? va - vb : vb - va;
+    }
+    va = String(va).toLowerCase();
+    vb = String(vb).toLowerCase();
+    const cmp = va.localeCompare(vb);
+    return sortAsc ? cmp : -cmp;
+  });
 
-  if (error) {
+  const toggleSelect = (filename) => {
+    setSelected((prev) =>
+      prev.includes(filename) ? prev.filter((f) => f !== filename) : [...prev, filename]
+    );
+  };
+  const selectAll = () => {
+    if (selected.length === files.length) setSelected([]);
+    else setSelected(files.map((f) => f.filename));
+  };
+
+  const handleDelete = async () => {
+    if (selected.length === 0) return;
+    if (!confirm(`Delete ${selected.length} file(s)? This cannot be undone.`)) return;
+    try {
+      const res = await fetch('/api/attachment-manager/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        },
+        body: JSON.stringify({ attachment_ids: selected }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAlert({ type: 'success', message: data.message });
+        setSelected([]);
+        loadFiles();
+        loadStorage();
+      } else setAlert({ type: 'error', message: data.message || 'Delete failed' });
+    } catch (e) {
+      setAlert({ type: 'error', message: 'Delete failed' });
+    }
+  };
+
+  const handleUpload = async (fileList) => {
+    if (!fileList?.length) return;
+    const form = new FormData();
+    for (let i = 0; i < fileList.length; i++) form.append('files[]', fileList[i]);
+    setUploading(true);
+    setAlert(null);
+    try {
+      const res = await fetch('/api/attachment-manager/upload', {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
+        body: form,
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAlert({ type: 'success', message: data.message });
+        setUploadModalOpen(false);
+        loadFiles();
+        loadStorage();
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      } else setAlert({ type: 'error', message: data.message || 'Upload failed' });
+    } catch (e) {
+      setAlert({ type: 'error', message: 'Upload failed' });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const onFileInputChange = (e) => {
+    const list = e.target.files;
+    if (list?.length) {
+      const subfolder = selectedFolder && selectedFolder.startsWith('general/') ? selectedFolder.replace(/^general\//, '') : '';
+      handleUpload(Array.from(list), subfolder);
+    }
+    e.target.value = '';
+  };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const list = e.dataTransfer?.files;
+    if (list?.length) handleUpload(Array.from(list));
+  };
+
+  const usedMb = storageInfo.used_mb ?? 0;
+  const limitMb = storageInfo.limit_mb ?? 1000;
+  const usedGiB = (usedMb / 1024).toFixed(2);
+  const limitGiB = (limitMb / 1024).toFixed(2);
+  const percent = limitMb > 0 ? Math.min(100, (usedMb / limitMb) * 100) : 0;
+  const isOverLimit = storageInfo.is_over_limit;
+  const isNearLimit = storageInfo.is_near_limit;
+
+  if (pageError) {
     return (
       <App>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-              <div className="flex items-center">
-                <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400 mr-3" />
-                <div>
-                  <h3 className="text-lg font-medium text-red-800 dark:text-red-200">Error</h3>
-                  <p className="text-red-700 dark:text-red-300 mt-1">{error}</p>
-                </div>
-              </div>
-            </div>
+        <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+          <div className="bg-red-900/30 border border-red-700 rounded-lg p-6 flex items-center gap-3">
+            <AlertTriangle className="h-6 w-6 text-red-400" />
+            <p className="text-red-200">{pageError}</p>
           </div>
         </div>
       </App>
@@ -234,312 +288,331 @@ const AttachmentManagerIndex = () => {
 
   return (
     <App>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Breadcrumbs */}
-          <Breadcrumbs items={breadcrumbItems} />
-
-          {/* Storage Warning */}
-          {company && (
-            <StorageWarning 
-              companyId={company.id} 
-              showDetails={true}
-            />
-          )}
-
-          {/* Alert Messages */}
-          {alert && (
-            <div className={`mb-6 p-4 rounded-lg animate-slideIn ${
-              alert.type === 'success' 
-                ? 'bg-green-50 border border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300' 
-                : 'bg-red-50 border border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300'
-            }`}>
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  {alert.type === 'success' ? (
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                  )}
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium">{alert.message}</p>
-                </div>
+      <div className="min-h-screen bg-gray-900 text-gray-100 flex">
+        {/* Sidebar */}
+        <aside className="w-64 flex-shrink-0 bg-gray-800/80 border-r border-gray-700 flex flex-col">
+          <div className="p-4 border-b border-gray-700">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                <User className="w-5 h-5" />
               </div>
+              <div className="min-w-0">
+                <p className="font-medium truncate">{company?.company_name || 'Company'}</p>
+                <p className="text-xs text-gray-400 truncate">File Manager</p>
+              </div>
+            </div>
+          </div>
+          <nav className="p-2 flex-1 overflow-y-auto">
+            <p className="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Folders</p>
+            {folders.length === 0 ? (
+              <button
+                onClick={() => setSelectedFolder('')}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left font-medium text-gray-300 hover:bg-gray-700"
+              >
+                <FolderOpen className="w-5 h-5" />
+                All files
+              </button>
+            ) : (
+              folders.map((folder) => (
+                <button
+                  key={folder.slug}
+                  onClick={() => setSelectedFolder(folder.slug)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left font-medium transition-colors ${
+                    selectedFolder === folder.slug
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  <FolderOpen className="w-5 h-5 flex-shrink-0" />
+                  <span className="truncate">{folder.label}</span>
+                </button>
+              ))
+            )}
+          </nav>
+          <div className="p-4 border-t border-gray-700 space-y-4">
+            <div>
+              <p className="text-xs font-medium text-gray-400 mb-1">Space</p>
+              <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    isOverLimit ? 'bg-red-500' : isNearLimit ? 'bg-amber-500' : 'bg-blue-500'
+                  }`}
+                  style={{ width: `${percent}%` }}
+                />
+              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                {usedGiB} GiB / {limitGiB} GiB
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-gray-400 mb-1">Files</p>
+              <p className="text-sm font-medium">{files.length} items</p>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main */}
+        <main className="flex-1 flex flex-col min-w-0">
+          {/* Top bar */}
+          <div className="h-14 border-b border-gray-700 flex items-center justify-between px-4 gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
+                className="p-2 rounded-lg hover:bg-gray-700 text-gray-400 hover:text-white"
+                title={viewMode === 'list' ? 'Grid view' : 'List view'}
+              >
+                {viewMode === 'list' ? <LayoutGrid className="w-5 h-5" /> : <List className="w-5 h-5" />}
+              </button>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium"
+              >
+                <Upload className="w-4 h-4" />
+                Upload
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
+                className="hidden"
+                onChange={onFileInputChange}
+              />
+              {selected.length > 0 && (
+                <>
+                  <button
+                    onClick={() => selected.forEach((fn) => { const f = files.find((x) => x.filename === fn); if (f) window.open(f.url, '_blank'); })}
+                    className="p-2 rounded-lg hover:bg-gray-700 text-gray-400 hover:text-white"
+                    title="Download selected"
+                  >
+                    <Download className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-medium"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete ({selected.length})
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {alert && (
+            <div
+              className={`mx-4 mt-4 px-4 py-3 rounded-lg flex items-center justify-between ${
+                alert.type === 'success' ? 'bg-green-900/30 text-green-200' : 'bg-red-900/30 text-red-200'
+              }`}
+            >
+              <span>{alert.message}</span>
+              <button onClick={() => setAlert(null)} className="p-1 hover:opacity-80">
+                <X className="w-4 h-4" />
+              </button>
             </div>
           )}
 
-          {/* Main Container */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-            <div className="p-6">
-              {/* Header */}
-              <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-                  <HardDrive className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-                  Attachment Manager
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-2">
-                  Manage and organize your attachment files with advanced filtering options
-                </p>
+          {/* Content */}
+          <div
+            className={`flex-1 overflow-auto p-4 ${dragOver ? 'ring-2 ring-blue-500 ring-inset bg-blue-900/10' : ''}`}
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={onDrop}
+          >
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-500 border-t-transparent" />
               </div>
-
-              {/* Filters Section */}
-              <div className="mb-6 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                  <Filter className="w-5 h-5" />
-                  Filters
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                  {/* Date Range */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      From Date
-                    </label>
-                    <input
-                      type="date"
-                      value={filters.from_date}
-                      onChange={(e) => handleFilterChange('from_date', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      To Date
-                    </label>
-                    <input
-                      type="date"
-                      value={filters.to_date}
-                      onChange={(e) => handleFilterChange('to_date', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    />
-                  </div>
-
-                  {/* Voucher Type */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Voucher Type
-                    </label>
-                    <select
-                      value={filters.voucher_type}
-                      onChange={(e) => handleFilterChange('voucher_type', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    >
-                      <option value="">All Types</option>
-                      <option value="Journal">Journal</option>
-                      <option value="Payment">Payment</option>
-                      <option value="Receipt">Receipt</option>
-                      <option value="Invoice">Invoice</option>
-                    </select>
-                  </div>
-
-                  {/* File Type */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      File Type
-                    </label>
-                    <select
-                      value={filters.file_type}
-                      onChange={(e) => handleFilterChange('file_type', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    >
-                      <option value="">All Files</option>
-                      <option value="pdf">PDF</option>
-                      <option value="doc">DOC</option>
-                      <option value="docx">DOCX</option>
-                      <option value="xls">XLS</option>
-                      <option value="xlsx">XLSX</option>
-                      <option value="jpg">JPG</option>
-                      <option value="jpeg">JPEG</option>
-                      <option value="png">PNG</option>
-                      <option value="gif">GIF</option>
-                    </select>
-                  </div>
-
-                  {/* Search */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Search
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={filters.search}
-                        onChange={(e) => handleFilterChange('search', e.target.value)}
-                        placeholder="Search files..."
-                        className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                      />
-                      <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions Bar */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={handleSelectAll}
-                    className="flex items-center gap-2 px-3 py-2 text-sm bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors"
-                  >
-                    {selectedAttachments.length === attachments.length ? (
-                      <CheckSquare className="w-4 h-4" />
-                    ) : (
-                      <Square className="w-4 h-4" />
-                    )}
-                    Select All
-                  </button>
-                  
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {selectedAttachments.length} of {attachments.length} selected
-                  </span>
-                </div>
-
-                {selectedAttachments.length > 0 && (
-                  <button
-                    onClick={handleDeleteSelected}
-                    className="flex items-center gap-2 px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Delete Selected ({selectedAttachments.length})
-                  </button>
-                )}
-              </div>
-
-              {/* Attachments List */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                {loading ? (
-                  <div className="p-8 text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="text-gray-600 dark:text-gray-400 mt-2">Loading attachments...</p>
-                  </div>
-                ) : attachments.length === 0 ? (
-                  <div className="p-8 text-center">
-                    <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 dark:text-gray-400">No attachments found matching your criteria.</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
+            ) : (
+              <>
+                {viewMode === 'list' ? (
+                  <div className="bg-gray-800/50 rounded-xl border border-gray-700 overflow-hidden">
                     <table className="w-full">
-                      <thead className="bg-gray-50 dark:bg-gray-700">
+                      <thead className="bg-gray-800 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                         <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Select
+                          <th className="px-4 py-3 w-10">
+                            <button onClick={selectAll} className="p-1 hover:bg-gray-700 rounded" disabled={!files.length}>
+                              {files.length > 0 && selected.length === files.length ? (
+                                <CheckSquare className="w-4 h-4 text-blue-400" />
+                              ) : (
+                                <Square className="w-4 h-4" />
+                              )}
+                            </button>
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            File
+                          <th
+                            className="px-4 py-3 cursor-pointer hover:bg-gray-700"
+                            onClick={() => { setSortBy('filename'); setSortAsc((s) => !s); }}
+                          >
+                            Name {sortBy === 'filename' && (sortAsc ? '↑' : '↓')}
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Voucher
+                          <th
+                            className="px-4 py-3 cursor-pointer hover:bg-gray-700 w-28"
+                            onClick={() => { setSortBy('size'); setSortAsc((s) => !s); }}
+                          >
+                            Size {sortBy === 'size' && (sortAsc ? '↑' : '↓')}
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Date
+                          <th
+                            className="px-4 py-3 cursor-pointer hover:bg-gray-700 w-40"
+                            onClick={() => { setSortBy('last_modified'); setSortAsc((s) => !s); }}
+                          >
+                            Last modified {sortBy === 'last_modified' && (sortAsc ? '↑' : '↓')}
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Size
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Actions
-                          </th>
+                          <th className="px-4 py-3 w-24 text-right">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                        {attachments.map((attachment, index) => (
-                          <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <td className="px-4 py-3">
+                      <tbody className="divide-y divide-gray-700">
+                        {sortedFiles.map((f) => (
+                          <tr key={f.filename} className="hover:bg-gray-700/50">
+                            <td className="px-4 py-2">
                               <button
-                                onClick={() => handleSelectAttachment(attachment.filename)}
-                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                onClick={() => toggleSelect(f.filename)}
+                                className="p-1 hover:bg-gray-600 rounded"
                               >
-                                {selectedAttachments.includes(attachment.filename) ? (
-                                  <CheckSquare className="w-4 h-4" />
+                                {selected.includes(f.filename) ? (
+                                  <CheckSquare className="w-4 h-4 text-blue-400" />
                                 ) : (
                                   <Square className="w-4 h-4" />
                                 )}
                               </button>
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-4 py-2">
                               <div className="flex items-center gap-3">
-                                <span className="text-2xl">{getFileIcon(attachment.file_type)}</span>
-                                <div>
-                                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-xs">
-                                    {attachment.filename}
-                                  </p>
-                                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    {attachment.file_type.toUpperCase()}
-                                  </p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3">
-                              <div>
-                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                  {attachment.voucher_number}
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                  {attachment.voucher_type}
-                                </p>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3 text-gray-400" />
-                                <span className="text-sm text-gray-900 dark:text-gray-100">
-                                  {new Date(attachment.voucher_date).toLocaleDateString()}
+                                <span className="text-xl">{getFileIcon(f.file_type)}</span>
+                                <span className="font-medium truncate max-w-xs" title={f.filename}>
+                                  {displayFileName(f)}
                                 </span>
+                                {f.folder_label && (
+                                  <span className="text-xs text-gray-500 truncate max-w-[120px]" title={f.folder_label}>
+                                    {f.folder_label}
+                                  </span>
+                                )}
                               </div>
                             </td>
-                            <td className="px-4 py-3">
-                              <span className="text-sm text-gray-900 dark:text-gray-100">
-                                {formatFileSize(attachment.size)}
-                              </span>
+                            <td className="px-4 py-2 text-gray-400">{formatFileSize(f.size)}</td>
+                            <td className="px-4 py-2 text-gray-400">
+                              {formatRelativeTime(f.last_modified || f.voucher_date)}
                             </td>
-                            <td className="px-4 py-3">
-                              <div className="flex items-center gap-2">
-                                <a
-                                  href={attachment.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="p-1 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-colors"
-                                  title="View file"
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </a>
-                                <a
-                                  href={attachment.url}
-                                  download
-                                  className="p-1 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30 rounded transition-colors"
-                                  title="Download file"
-                                >
-                                  <Download className="w-4 h-4" />
-                                </a>
-                              </div>
+                            <td className="px-4 py-2 text-right">
+                              <a
+                                href={f.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded inline-block"
+                                title="View"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </a>
+                              <a
+                                href={f.url}
+                                download
+                                className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded inline-block ml-1"
+                                title="Download"
+                              >
+                                <Download className="w-4 h-4" />
+                              </a>
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                    {sortedFiles.map((f) => (
+                      <div
+                        key={f.filename}
+                        className="bg-gray-800/50 rounded-xl border border-gray-700 p-4 hover:bg-gray-700/50 flex flex-col items-center text-center"
+                      >
+                        <button
+                          onClick={() => toggleSelect(f.filename)}
+                          className="self-start p-1 rounded hover:bg-gray-600"
+                        >
+                          {selected.includes(f.filename) ? (
+                            <CheckSquare className="w-4 h-4 text-blue-400" />
+                          ) : (
+                            <Square className="w-4 h-4 text-gray-500" />
+                          )}
+                        </button>
+                        <span className="text-4xl my-2">{getFileIcon(f.file_type)}</span>
+                        <p className="text-sm font-medium truncate w-full" title={f.filename}>
+                          {displayFileName(f)}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">{formatFileSize(f.size)}</p>
+                        <div className="flex gap-2 mt-2">
+                          <a
+                            href={f.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </a>
+                          <a href={f.url} download className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded">
+                            <Download className="w-4 h-4" />
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
-              </div>
 
-              {/* Summary */}
-              {attachments.length > 0 && (
-                <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                  Showing {attachments.length} attachment(s)
-                </div>
-              )}
+                {!loading && files.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+                    <File className="w-16 h-16 mb-4 opacity-50" />
+                    <p className="text-lg font-medium">No files yet</p>
+                    <p className="text-sm mt-1">Upload files or they will appear when attached to vouchers.</p>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Upload files
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </main>
+      </div>
+
+      {/* Upload modal (optional – we use direct input + drag-drop) */}
+      {uploadModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-gray-800 rounded-xl border border-gray-700 w-full max-w-md p-6">
+            <h3 className="text-lg font-semibold mb-4">Upload files</h3>
+            <input
+              type="file"
+              multiple
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
+              onChange={(e) => {
+                const list = e.target.files;
+                if (list?.length) handleUpload(Array.from(list));
+              }}
+              className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-600 file:text-white"
+            />
+            {uploading && <p className="mt-2 text-sm text-gray-400">Uploading…</p>}
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={() => setUploadModalOpen(false)}
+                className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </App>
   );
-};
-
-export default AttachmentManagerIndex;
+}
