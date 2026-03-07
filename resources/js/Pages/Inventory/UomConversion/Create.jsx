@@ -5,7 +5,7 @@ import { router, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 import InlineSearchSelect from '../../../Components/InlineSearchSelect';
 
-const Breadcrumbs = ({ items }) => (
+const Breadcrumbs = ({ items, description }) => (
   <div className="breadcrumbs-themed">
     <nav className="breadcrumbs">
       {items.map((item, index) => (
@@ -30,7 +30,7 @@ const Breadcrumbs = ({ items }) => (
         </div>
       ))}
     </nav>
-    <div className="breadcrumbs-description">{t('inventory.uom_conversion.create.configure_unit_of_measure_conversions_on')}</div>
+    {description && <div className="breadcrumbs-description">{description}</div>}
   </div>
 );
 
@@ -168,6 +168,7 @@ const { t } = useTranslations();
             { label: 'UOM Conversion', href: '/inventory/uom-conversion' },
             { label: isEditMode ? 'Edit Conversions' : 'Create Conversions' },
           ]}
+          description={t('inventory.uom_conversion.create.configure_unit_of_measure_conversions_on')}
         />
 
         <div className="form-section">

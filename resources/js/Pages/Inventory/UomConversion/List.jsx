@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { Search, Plus, Edit3, Trash2, ArrowUpDown, Clock, RefreshCcw, CheckCircle2, X, ChevronLeft, ChevronRight, ArrowLeftRight } from 'lucide-react';
 
 // SweetAlert-like alert
@@ -14,6 +15,7 @@ const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, conf
 }};
 
 export default function List() {
+  const { t } = useTranslations();
   const { items: paginatedItems, filters, flash } = usePage().props;
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
@@ -122,11 +124,11 @@ export default function List() {
                   {Object.entries(visibleColumns).map(([key, visible]) => (key !== 'actions' && (
                     <label key={key} className="column-item">
                       <input type="checkbox" checked={visible} onChange={(e)=>setVisibleColumns({ ...visibleColumns, [key]: e.target.checked })} />
-                      <span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>{t('inventory.uom_conversion.list.stouppercase')}</span>
+                      <span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>s.toUpperCase())}</span>
                     </label>
                   )))}
                 </div>
-                <button className="btn btn-sm btn-secondary" onClick={()=>{t('inventory.uom_conversion.list.setshowcolumnselectorfalseclose')}</button>
+                <button className="btn btn-sm btn-secondary" onClick={()=>setShowColumnSelector(false)}>{t('inventory.uom_conversion.list.close')}</button>
               </div>
             </div>
           )}
@@ -135,7 +137,7 @@ export default function List() {
           <div className="bulk-actions-bar">
             <div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div>
             <div className="bulk-actions">
-              <button className="btn btn-sm btn-secondary" onClick={()=>{t('inventory.uom_conversion.list.setselected')}<X size={16} />{t('inventory.uom_conversion.list.clear')}</button>
+              <button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />{t('inventory.uom_conversion.list.clear')}</button>
               <button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />{t('inventory.uom_conversion.list.delete')}</button>
             </div>
           </div>
@@ -145,21 +147,21 @@ export default function List() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length === data.length && data.length > 0} onChange={(e)=>{t('inventory.uom_conversion.list.handleselectalletargetchecked_')}</th>
-                  {visibleColumns.id && (<th className="sortable" onClick={()=>{t('inventory.uom_conversion.list.handlesortid')}<div className="th-content">{t('inventory.uom_conversion.list.id')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='id'?'active':''}`} /></div></th>)}
-                  {visibleColumns.fromUom && (<th className="sortable" onClick={()=>{t('inventory.uom_conversion.list.handlesortfrom_uom_id')}<div className="th-content">{t('inventory.uom_conversion.list.from_uom')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='from_uom_id'?'active':''}`} /></div></th>)}
-                  {visibleColumns.toUom && (<th className="sortable" onClick={()=>{t('inventory.uom_conversion.list.handlesortto_uom_id')}<div className="th-content">{t('inventory.uom_conversion.list.to_uom')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='to_uom_id'?'active':''}`} /></div></th>)}
-                  {visibleColumns.conversionFactor && (<th className="sortable" onClick={()=>{t('inventory.uom_conversion.list.handlesortconversion_factor')}<div className="th-content">{t('inventory.uom_conversion.list.factor')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='conversion_factor'?'active':''}`} /></div></th>)}
-                  {visibleColumns.conversionDirection && (<th className="sortable" onClick={()=>{t('inventory.uom_conversion.list.handlesortconversion_direction')}<div className="th-content">{t('inventory.uom_conversion.list.direction')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='conversion_direction'?'active':''}`} /></div></th>)}
-                  {visibleColumns.status && (<th className="sortable" onClick={()=>{t('inventory.uom_conversion.list.handlesortis_active')}<div className="th-content">{t('inventory.uom_conversion.list.status')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='is_active'?'active':''}`} /></div></th>)}
-                  {visibleColumns.updatedAt && (<th className="sortable" onClick={()=>{t('inventory.uom_conversion.list.handlesortupdated_at')}<div className="th-content">{t('inventory.uom_conversion.list.updated')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='updated_at'?'active':''}`} /></div></th>)}
+                  <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length === data.length && data.length > 0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
+                  {visibleColumns.id && (<th className="sortable" onClick={()=>handleSort('id')}><div className="th-content">{t('inventory.uom_conversion.list.id')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='id'?'active':''}`} /></div></th>)}
+                  {visibleColumns.fromUom && (<th className="sortable" onClick={()=>handleSort('from_uom_id')}><div className="th-content">{t('inventory.uom_conversion.list.from_uom')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='from_uom_id'?'active':''}`} /></div></th>)}
+                  {visibleColumns.toUom && (<th className="sortable" onClick={()=>handleSort('to_uom_id')}><div className="th-content">{t('inventory.uom_conversion.list.to_uom')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='to_uom_id'?'active':''}`} /></div></th>)}
+                  {visibleColumns.conversionFactor && (<th className="sortable" onClick={()=>handleSort('conversion_factor')}><div className="th-content">{t('inventory.uom_conversion.list.factor')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='conversion_factor'?'active':''}`} /></div></th>)}
+                  {visibleColumns.conversionDirection && (<th className="sortable" onClick={()=>handleSort('conversion_direction')}><div className="th-content">{t('inventory.uom_conversion.list.direction')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='conversion_direction'?'active':''}`} /></div></th>)}
+                  {visibleColumns.status && (<th className="sortable" onClick={()=>handleSort('is_active')}><div className="th-content">{t('inventory.uom_conversion.list.status')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='is_active'?'active':''}`} /></div></th>)}
+                  {visibleColumns.updatedAt && (<th className="sortable" onClick={()=>handleSort('updated_at')}><div className="th-content">{t('inventory.uom_conversion.list.updated')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='updated_at'?'active':''}`} /></div></th>)}
                   {visibleColumns.actions && (<th className="actions-header">{t('inventory.uom_conversion.list.actions')}</th>)}
                 </tr>
               </thead>
               <tbody>
                 {data.map((item) => (
                   <tr key={item.id} className="table-row">
-                    <td><input type="checkbox" className="checkbox" checked={selected.includes(item.id)} onChange={(e)=>{t('inventory.uom_conversion.list.handleselectrowitemid_etargetchecked_')}</td>
+                    <td><input type="checkbox" className="checkbox" checked={selected.includes(item.id)} onChange={(e)=>handleSelectRow(item.id, e.target.checked)} /></td>
                     {visibleColumns.id && (<td><span className="module-id">#{item.id}</span></td>)}
                     {visibleColumns.fromUom && (<td><div className="module-details"><div className="module-name">{item.from_uom_code}</div><div className="module-meta">{item.from_uom_name}</div></div></td>)}
                     {visibleColumns.toUom && (<td><div className="module-details"><div className="module-name">{item.to_uom_code}</div><div className="module-meta">{item.to_uom_name}</div></div></td>)}

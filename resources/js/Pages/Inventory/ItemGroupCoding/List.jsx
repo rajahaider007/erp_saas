@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { Search, Plus, Edit3, Trash2, Download, ChevronDown, ArrowUpDown, Columns, Clock, MoreHorizontal, RefreshCcw, FileText, CheckCircle2, X, Database, Eye, Copy, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // SweetAlert-like alert
@@ -14,6 +15,7 @@ const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, conf
 }};
 
 export default function List() {
+  const { t } = useTranslations();
   const { items: paginatedItems, filters, flash } = usePage().props;
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
@@ -105,22 +107,22 @@ export default function List() {
               </div>
             </div>
           </div>
-          {showColumnSelector && (<div className="column-selector"><div className="column-selector-content"><h3>{t('inventory.item_group_coding.list.showhide_columns')}</h3><div className="column-grid">{Object.entries(visibleColumns).map(([key, visible]) => (key!=='actions' && (<label key={key} className="column-item"><input type="checkbox" checked={visible} onChange={(e)=>setVisibleColumns({ ...visibleColumns, [key]: e.target.checked })} /><span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>{t('inventory.item_group_coding.list.stouppercase')}</span></label>)))}
-          </div><button className="btn btn-sm btn-secondary" onClick={()=>{t('inventory.item_group_coding.list.setshowcolumnselectorfalseclose')}</button></div></div>)}
+          {showColumnSelector && (<div className="column-selector"><div className="column-selector-content"><h3>{t('inventory.item_group_coding.list.showhide_columns')}</h3><div className="column-grid">{Object.entries(visibleColumns).map(([key, visible]) => (key!=='actions' && (<label key={key} className="column-item"><input type="checkbox" checked={visible} onChange={(e)=>setVisibleColumns({ ...visibleColumns, [key]: e.target.checked })} /><span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>s.toUpperCase())}</span></label>)))}
+          </div><button className="btn btn-sm btn-secondary" onClick={()=>setShowColumnSelector(false)}>{t('inventory.item_group_coding.list.close')}</button></div></div>)}
         </div>
-        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>{t('inventory.item_group_coding.list.setselected')}<X size={16} />{t('inventory.item_group_coding.list.clear')}</button><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />{t('inventory.item_group_coding.list.delete')}</button></div></div>)}
+        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />{t('inventory.item_group_coding.list.clear')}</button><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />{t('inventory.item_group_coding.list.delete')}</button></div></div>)}
         <div className="data-table-container"><div className="table-wrapper"><table className="data-table"><thead><tr>
-          <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginatedItems.data.length && paginatedItems.data.length>0} onChange={(e)=>{t('inventory.item_group_coding.list.handleselectalletargetchecked_')}</th>
-          {visibleColumns.id && (<th className="sortable" onClick={()=>{t('inventory.item_group_coding.list.handlesortid')}<div className="th-content">{t('inventory.item_group_coding.list.id')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='id'?'active':''}`} /></div></th>)}
-          {visibleColumns.groupCode && (<th className="sortable" onClick={()=>{t('inventory.item_group_coding.list.handlesortgroup_code')}<div className="th-content">{t('inventory.item_group_coding.list.group_code')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='group_code'?'active':''}`} /></div></th>)}
-          {visibleColumns.groupName && (<th className="sortable" onClick={()=>{t('inventory.item_group_coding.list.handlesortgroup_name')}<div className="th-content">{t('inventory.item_group_coding.list.group_name')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='group_name'?'active':''}`} /></div></th>)}
-          {visibleColumns.status && (<th className="sortable" onClick={()=>{t('inventory.item_group_coding.list.handlesortis_active')}<div className="th-content">{t('inventory.item_group_coding.list.status')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='is_active'?'active':''}`} /></div></th>)}
-          {visibleColumns.updatedAt && (<th className="sortable" onClick={()=>{t('inventory.item_group_coding.list.handlesortupdated_at')}<div className="th-content">{t('inventory.item_group_coding.list.updated')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='updated_at'?'active':''}`} /></div></th>)}
+          <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginatedItems.data.length && paginatedItems.data.length>0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
+          {visibleColumns.id && (<th className="sortable" onClick={()=>handleSort('id')}><div className="th-content">{t('inventory.item_group_coding.list.id')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='id'?'active':''}`} /></div></th>)}
+          {visibleColumns.groupCode && (<th className="sortable" onClick={()=>handleSort('group_code')}><div className="th-content">{t('inventory.item_group_coding.list.group_code')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='group_code'?'active':''}`} /></div></th>)}
+          {visibleColumns.groupName && (<th className="sortable" onClick={()=>handleSort('group_name')}><div className="th-content">{t('inventory.item_group_coding.list.group_name')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='group_name'?'active':''}`} /></div></th>)}
+          {visibleColumns.status && (<th className="sortable" onClick={()=>handleSort('is_active')}><div className="th-content">{t('inventory.item_group_coding.list.status')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='is_active'?'active':''}`} /></div></th>)}
+          {visibleColumns.updatedAt && (<th className="sortable" onClick={()=>handleSort('updated_at')}><div className="th-content">{t('inventory.item_group_coding.list.updated')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='updated_at'?'active':''}`} /></div></th>)}
           {visibleColumns.actions && (<th className="actions-header">{t('inventory.item_group_coding.list.actions')}</th>)}
         </tr></thead><tbody>
           {paginatedItems.data.map((item) => (
             <tr key={item.id} className="table-row">
-              <td><input type="checkbox" className="checkbox" checked={selected.includes(item.id)} onChange={(e)=>{t('inventory.item_group_coding.list.handleselectrowitemid_etargetchecked_')}</td>
+              <td><input type="checkbox" className="checkbox" checked={selected.includes(item.id)} onChange={(e)=>handleSelectRow(item.id, e.target.checked)} /></td>
               {visibleColumns.id && (<td><span className="module-id">#{item.id}</span></td>)}
               {visibleColumns.groupCode && (<td><div className="module-details"><div className="module-name">{item.group_code}</div></div></td>)}
               {visibleColumns.groupName && (<td><div className="module-details"><div className="module-name">{item.group_name}</div></div></td>)}

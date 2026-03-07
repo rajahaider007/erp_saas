@@ -97,7 +97,7 @@ const CurrencyLedgerReport = () => {
                 processing: '<i class="fas fa-spinner fa-spin"></i> Processing...',
                 loadingRecords: '<i class="fas fa-spinner fa-spin"></i> Loading...'
               },
-              dom: '<"top"lf>{t('accounts.currency_ledger.report.rt')}<"bottom"ip><"clear">',
+              dom: `<"top"lf>${t('accounts.currency_ledger.report.rt')}<"bottom"ip><"clear">`,
               initComplete: function() {
                 // Add custom styling after initialization
                 this.api().columns().every(function() {

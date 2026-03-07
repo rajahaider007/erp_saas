@@ -170,14 +170,14 @@ const List = () => {
           </div>
         </div>
 
-        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>{t('system.users.list.setselected')}<X size={16} />{t('system.users.list.clear')}</button><div className="dropdown"><button className="btn btn-sm btn-secondary dropdown-toggle">{t('system.users.list.change_status')}<ChevronDown size={12} /></button><div className="dropdown-menu"><button onClick={()=>{t('system.users.list.handlebulkstatuschangeactiveset_active')}</button><button onClick={()=>{t('system.users.list.handlebulkstatuschangeinactiveset_inacti')}</button><button onClick={()=>{t('system.users.list.handlebulkstatuschangesuspendedset_suspe')}</button><button onClick={()=>{t('system.users.list.handlebulkstatuschangependingset_pending')}</button></div></div>{canDelete(USERS_ROUTE) && <button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />{t('system.users.list.delete')}</button>}</div></div>)}
+        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />{t('system.users.list.clear')}</button><div className="dropdown"><button className="btn btn-sm btn-secondary dropdown-toggle">{t('system.users.list.change_status')}<ChevronDown size={12} /></button><div className="dropdown-menu"><button onClick={()=>handleBulkStatusChange('active')}>{t('system.users.list.active')}</button><button onClick={()=>handleBulkStatusChange('inactive')}>{t('system.users.list.inactive')}</button><button onClick={()=>handleBulkStatusChange('suspended')}>{t('system.users.list.suspended')}</button><button onClick={()=>handleBulkStatusChange('pending')}>{t('system.users.list.pending')}</button></div></div>{canDelete(USERS_ROUTE) && <button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />{t('system.users.list.delete')}</button>}</div></div>)}
 
         <div className="data-table-container">
           <div className="table-wrapper">
             <table className="data-table">
               <thead>
                 <tr>
-                  <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginated.data.length && paginated.data.length>0} onChange={(e)=>{t('system.users.list.handleselectalletargetchecked_')}</th>
+                  <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginated.data.length && paginated.data.length>0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
                   <th className="sortable" onClick={()=>{}}><div className="th-content">{t('system.users.list.id')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
                   <th className="sortable" onClick={()=>{}}><div className="th-content">{t('system.users.list.user')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
                   <th className="sortable" onClick={()=>{}}><div className="th-content">{t('system.users.list.contact')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
@@ -190,7 +190,7 @@ const List = () => {
               <tbody>
                 {paginated.data.map(user => (
                   <tr key={user.id} className="table-row">
-                    <td><input type="checkbox" className="checkbox" checked={selected.includes(user.id)} onChange={(e)=>{t('system.users.list.handleselectrowuserid_etargetchecked_')}</td>
+                    <td><input type="checkbox" className="checkbox" checked={selected.includes(user.id)} onChange={(e)=>handleSelectRow(user.id, e.target.checked)} /></td>
                     <td><span className="module-id">#{user.id}</span></td>
                     <td>
                       <div className="module-details">

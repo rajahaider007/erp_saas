@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { Search, Plus, Edit3, Trash2, Download, ChevronDown, ArrowUpDown, Columns, Clock, MoreHorizontal, RefreshCcw, FileText, CheckCircle2, X, Database, Eye, Copy, ChevronLeft, ChevronRight, Droplet } from 'lucide-react';
 
 // SweetAlert-like alert
@@ -14,6 +15,7 @@ const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, conf
 }};
 
 export default function List() {
+  const { t } = useTranslations();
   const { items: paginatedItems, filters, flash } = usePage().props;
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
@@ -124,25 +126,25 @@ export default function List() {
               </div>
             </div>
           </div>
-          {showColumnSelector && (<div className="column-selector"><div className="column-selector-content"><h3>{t('inventory.uom_master.list.showhide_columns')}</h3><div className="column-grid">{Object.entries(visibleColumns).map(([key, visible]) => (key!=='actions' && (<label key={key} className="column-item"><input type="checkbox" checked={visible} onChange={(e)=>setVisibleColumns({ ...visibleColumns, [key]: e.target.checked })} /><span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>{t('inventory.uom_master.list.stouppercase')}</span></label>)))}
-          </div><button className="btn btn-sm btn-secondary" onClick={()=>{t('inventory.uom_master.list.setshowcolumnselectorfalseclose')}</button></div></div>)}
+          {showColumnSelector && (<div className="column-selector"><div className="column-selector-content"><h3>{t('inventory.uom_master.list.showhide_columns')}</h3><div className="column-grid">{Object.entries(visibleColumns).map(([key, visible]) => (key!=='actions' && (<label key={key} className="column-item"><input type="checkbox" checked={visible} onChange={(e)=>setVisibleColumns({ ...visibleColumns, [key]: e.target.checked })} /><span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>s.toUpperCase())}</span></label>)))}
+          </div><button className="btn btn-sm btn-secondary" onClick={()=>setShowColumnSelector(false)}>{t('inventory.uom_master.list.close')}</button></div></div>)}
         </div>
-        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>{t('inventory.uom_master.list.setselected')}<X size={16} />{t('inventory.uom_master.list.clear')}</button><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />{t('inventory.uom_master.list.delete')}</button></div></div>)}
+        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />{t('inventory.uom_master.list.clear')}</button><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />{t('inventory.uom_master.list.delete')}</button></div></div>)}
         <div className="data-table-container"><div className="table-wrapper"><table className="data-table"><thead><tr>
-          <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginatedItems.data.length && paginatedItems.data.length>0} onChange={(e)=>{t('inventory.uom_master.list.handleselectalletargetchecked_')}</th>
-          {visibleColumns.id && (<th className="sortable" onClick={()=>{t('inventory.uom_master.list.handlesortid')}<div className="th-content">{t('inventory.uom_master.list.id')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='id'?'active':''}`} /></div></th>)}
-          {visibleColumns.uomCode && (<th className="sortable" onClick={()=>{t('inventory.uom_master.list.handlesortuom_code')}<div className="th-content">{t('inventory.uom_master.list.uom_code')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='uom_code'?'active':''}`} /></div></th>)}
-          {visibleColumns.uomName && (<th className="sortable" onClick={()=>{t('inventory.uom_master.list.handlesortuom_name')}<div className="th-content">{t('inventory.uom_master.list.uom_name')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='uom_name'?'active':''}`} /></div></th>)}
-          {visibleColumns.uomType && (<th className="sortable" onClick={()=>{t('inventory.uom_master.list.handlesortuom_type')}<div className="th-content">{t('inventory.uom_master.list.type')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='uom_type'?'active':''}`} /></div></th>)}
-          {visibleColumns.symbol && (<th className="sortable" onClick={()=>{t('inventory.uom_master.list.handlesortsymbol')}<div className="th-content">{t('inventory.uom_master.list.symbol')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='symbol'?'active':''}`} /></div></th>)}
-          {visibleColumns.decimalPrecision && (<th className="sortable" onClick={()=>{t('inventory.uom_master.list.handlesortdecimal_precision')}<div className="th-content">{t('inventory.uom_master.list.precision')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='decimal_precision'?'active':''}`} /></div></th>)}
-          {visibleColumns.status && (<th className="sortable" onClick={()=>{t('inventory.uom_master.list.handlesortis_active')}<div className="th-content">{t('inventory.uom_master.list.status')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='is_active'?'active':''}`} /></div></th>)}
-          {visibleColumns.updatedAt && (<th className="sortable" onClick={()=>{t('inventory.uom_master.list.handlesortupdated_at')}<div className="th-content">{t('inventory.uom_master.list.updated')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='updated_at'?'active':''}`} /></div></th>)}
+          <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginatedItems.data.length && paginatedItems.data.length>0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
+          {visibleColumns.id && (<th className="sortable" onClick={()=>handleSort('id')}><div className="th-content">{t('inventory.uom_master.list.id')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='id'?'active':''}`} /></div></th>)}
+          {visibleColumns.uomCode && (<th className="sortable" onClick={()=>handleSort('uom_code')}><div className="th-content">{t('inventory.uom_master.list.uom_code')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='uom_code'?'active':''}`} /></div></th>)}
+          {visibleColumns.uomName && (<th className="sortable" onClick={()=>handleSort('uom_name')}><div className="th-content">{t('inventory.uom_master.list.uom_name')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='uom_name'?'active':''}`} /></div></th>)}
+          {visibleColumns.uomType && (<th className="sortable" onClick={()=>handleSort('uom_type')}><div className="th-content">{t('inventory.uom_master.list.type')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='uom_type'?'active':''}`} /></div></th>)}
+          {visibleColumns.symbol && (<th className="sortable" onClick={()=>handleSort('symbol')}><div className="th-content">{t('inventory.uom_master.list.symbol')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='symbol'?'active':''}`} /></div></th>)}
+          {visibleColumns.decimalPrecision && (<th className="sortable" onClick={()=>handleSort('decimal_precision')}><div className="th-content">{t('inventory.uom_master.list.precision')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='decimal_precision'?'active':''}`} /></div></th>)}
+          {visibleColumns.status && (<th className="sortable" onClick={()=>handleSort('is_active')}><div className="th-content">{t('inventory.uom_master.list.status')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='is_active'?'active':''}`} /></div></th>)}
+          {visibleColumns.updatedAt && (<th className="sortable" onClick={()=>handleSort('updated_at')}><div className="th-content">{t('inventory.uom_master.list.updated')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='updated_at'?'active':''}`} /></div></th>)}
           {visibleColumns.actions && (<th className="actions-header">{t('inventory.uom_master.list.actions')}</th>)}
         </tr></thead><tbody>
           {paginatedItems.data.map((item) => (
             <tr key={item.id} className="table-row">
-              <td><input type="checkbox" className="checkbox" checked={selected.includes(item.id)} onChange={(e)=>{t('inventory.uom_master.list.handleselectrowitemid_etargetchecked_')}</td>
+              <td><input type="checkbox" className="checkbox" checked={selected.includes(item.id)} onChange={(e)=>handleSelectRow(item.id, e.target.checked)} /></td>
               {visibleColumns.id && (<td><span className="module-id">#{item.id}</span></td>)}
               {visibleColumns.uomCode && (<td><div className="module-details"><div className="module-name">{item.uom_code}</div></div></td>)}
               {visibleColumns.uomName && (<td><div className="module-details"><div className="module-name">{item.uom_name}</div></div></td>)}

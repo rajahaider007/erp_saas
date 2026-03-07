@@ -171,7 +171,7 @@ const Index = () => {
           <div className="bulk-actions-bar">
             <div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div>
             <div className="bulk-actions">
-              <button className="btn btn-sm btn-secondary" onClick={()=>{t('system.code_configuration.index.setselected')}<X size={16} />{t('system.code_configuration.index.clear')}</button>
+              <button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />{t('system.code_configuration.index.clear')}</button>
             </div>
           </div>
         )}
@@ -181,7 +181,7 @@ const Index = () => {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginated.data.length && paginated.data.length>0} onChange={(e)=>{t('system.code_configuration.index.handleselectalletargetchecked_')}</th>
+                  <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginated.data.length && paginated.data.length>0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
                   <th className="sortable"><div className="th-content">{t('system.code_configuration.index.id')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
                   <th className="sortable"><div className="th-content">{t('system.code_configuration.index.code_type')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
                   <th className="sortable"><div className="th-content">{t('system.code_configuration.index.code_name')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
@@ -208,7 +208,7 @@ const Index = () => {
                 ) : (
                   paginated.data.map(config => (
                     <tr key={config.id} className="table-row">
-                      <td><input type="checkbox" className="checkbox" checked={selected.includes(config.id)} onChange={(e)=>{t('system.code_configuration.index.handleselectrowconfigid_etargetchecked_')}</td>
+                      <td><input type="checkbox" className="checkbox" checked={selected.includes(config.id)} onChange={(e)=>handleSelectRow(config.id, e.target.checked)} /></td>
                       <td><span className="module-id">#{config.id}</span></td>
                       <td>
                         <div className="module-details">

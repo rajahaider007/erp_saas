@@ -4,7 +4,9 @@ import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
-const Breadcrumbs = ({ items }) => (
+const Breadcrumbs = ({ items }) => {
+  const { t } = useTranslations();
+  return (
   <div className="breadcrumbs-themed">
     <nav className="breadcrumbs">
       {items.map((item, idx) => (
@@ -23,14 +25,15 @@ const Breadcrumbs = ({ items }) => (
     </nav>
     <div className="breadcrumbs-description">{t('system.role_features.index.manage_role_features_and_permissions')}</div>
   </div>
-);
+  );
+};
 
 const RoleFeaturesIndex = () => {
+  const { t } = useTranslations();
   const { roles } = usePage().props;
   const [alert, setAlert] = useState(null);
 
   const handleDelete = (roleId, roleName) => {
-  const { t } = useTranslations();
     if (window.confirm(`Are you sure you want to delete features for role "${roleName}"?`)) {
       router.delete(`/system/role-features/${roleId}`, {
         onSuccess: () => {
