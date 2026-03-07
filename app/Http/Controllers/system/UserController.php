@@ -298,29 +298,35 @@ class UserController extends Controller
 
     /**
      * Show the user rights configuration form.
+     * Pass rightsFormMenus (not availableMenus) so shared layout sidebar keeps logged-in user's menus.
      */
     public function rights(User $user)
     {
-        // Load user with relationships
-        $user->load(['company', 'location', 'department']);
-        
-        // Get available menus for rights based on user's company package
-        $availableMenus = collect();
-        if ($user->comp_id) {
-            $company = Company::with('package')->find($user->comp_id);
-            if ($company) {
-                $availableMenus = $company->getAvailableMenusForRights();
-            }
+        $user->load(['company.package', 'location', 'department']);
+        $rightsFormMenus = [];
+        if ($user->comp_id && $user->company) {
+            $menus = $user->company->getAvailableMenusForRights();
+            $rightsFormMenus = $menus->map(function ($menu) {
+                $section = $menu->section;
+                $module = $section ? $section->module : null;
+                return [
+                    'id' => $menu->id,
+                    'menu_name' => $menu->menu_name,
+                    'route' => $menu->route,
+                    'icon' => $menu->icon,
+                    'section_name' => $section->section_name ?? 'General',
+                    'module_name' => $module->module_name ?? '',
+                    'folder_name' => $module->folder_name ?? '',
+                ];
+            })->values()->all();
         }
-        
-        // Get user's current rights
-        $userRights = $user->rights()->get()->keyBy('menu_id');
+        $userRights = $user->rights()->get()->keyBy('menu_id')->toArray();
 
         return Inertia::render('system/Users/UserRights', [
             'user' => $user,
-            'availableMenus' => $availableMenus,
+            'rightsFormMenus' => $rightsFormMenus,
             'userRights' => $userRights,
-            'pageTitle' => 'User Rights Configuration'
+            'pageTitle' => 'User Rights Configuration',
         ]);
     }
 
@@ -329,15 +335,13 @@ class UserController extends Controller
      */
     public function updateRights(Request $request, User $user)
     {
+        $this->requirePermission($request, null, 'can_edit');
         try {
-            $this->updateUserRights($user, $request->user_rights);
-            
+            $this->updateUserRights($user, $request->user_rights ?? []);
             return redirect()->route('system.users.rights', $user)
-                ->with('success', 'User rights updated successfully!');
+                ->with('success', 'User rights updated successfully.');
         } catch (\Exception $e) {
-            \Log::error('Error updating user rights: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
-            
+            Log::error('Error updating user rights: ' . $e->getMessage());
             return redirect()->back()
                 ->with('error', 'Failed to update user rights: ' . $e->getMessage());
         }
@@ -535,40 +539,23 @@ class UserController extends Controller
     }
 
     /**
-     * Update user rights
+     * Update user rights in database.
      */
-    private function updateUserRights(User $user, array $userRights)
+    private function updateUserRights(User $user, array $userRights): void
     {
-        // Delete existing rights
         $user->rights()->delete();
-
-        // Create new rights
         foreach ($userRights as $rightData) {
-            // Check if this is an array with menu_id key (from our form)
-            if (is_array($rightData) && isset($rightData['menu_id'])) {
-                
-                \App\Models\UserRight::create([
-                    'user_id' => $user->id,
-                    'menu_id' => $rightData['menu_id'],
-                    'can_view' => $rightData['can_view'] ?? false,
-                    'can_add' => $rightData['can_add'] ?? false,
-                    'can_edit' => $rightData['can_edit'] ?? false,
-                    'can_delete' => $rightData['can_delete'] ?? false,
-                ]);
+            if (!is_array($rightData) || empty($rightData['menu_id'])) {
+                continue;
             }
-            // Check if this is an array with menu_id as key (alternative format)
-            elseif (is_array($rightData) && isset($rightData['can_view'])) {
-                $menuId = array_search($rightData, $userRights);
-                
-                \App\Models\UserRight::create([
-                    'user_id' => $user->id,
-                    'menu_id' => $menuId,
-                    'can_view' => $rightData['can_view'] ?? false,
-                    'can_add' => $rightData['can_add'] ?? false,
-                    'can_edit' => $rightData['can_edit'] ?? false,
-                    'can_delete' => $rightData['can_delete'] ?? false,
-                ]);
-            }
+            \App\Models\UserRight::create([
+                'user_id' => $user->id,
+                'menu_id' => (int) $rightData['menu_id'],
+                'can_view' => (bool) ($rightData['can_view'] ?? false),
+                'can_add' => (bool) ($rightData['can_add'] ?? false),
+                'can_edit' => (bool) ($rightData['can_edit'] ?? false),
+                'can_delete' => (bool) ($rightData['can_delete'] ?? false),
+            ]);
         }
     }
 

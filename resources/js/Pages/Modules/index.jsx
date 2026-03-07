@@ -23,19 +23,18 @@ import {
   ChevronRight,
   Grid3X3,
   Layout,
-  Monitor
+  Monitor,
+  LogOut,
+  User
 } from 'lucide-react';
 
 const ModulesPage = () => {
-  const { auth, company } = usePage().props;
+  const { auth, company, availableModules } = usePage().props;
   const user = auth?.user;
   const { canView } = usePermissions();
 
-  // Get modules with permissions - Dynamic from database
+  // Get modules with permissions - Dynamic from database (usePage at top level only)
   const getModules = () => {
-    // Get modules from database through availableModules
-    const { availableModules } = usePage().props;
-    
     // Icon mapping for dynamic modules
     const iconMap = {
       'system': Settings,
@@ -79,8 +78,8 @@ const ModulesPage = () => {
       return gradients[Math.floor(Math.random() * gradients.length)];
     };
 
-    // Create modules array from database data
-    const modules = availableModules?.map((module, index) => {
+    // Create modules array from database data (availableModules from props)
+    const modules = availableModules?.map((module) => {
       const Icon = iconMap[module.folder_name?.toLowerCase()] || iconMap.default;
       const gradient = gradientMap[module.color] || getRandomGradient();
       
@@ -110,29 +109,9 @@ const ModulesPage = () => {
   const accessibleModules = modules.filter(module => module.hasAccess);
   const disabledModules = modules.filter(module => !module.hasAccess);
 
-  const handleModuleClick = async (module) => {
-    try {
-      // Save module to session first
-      const response = await fetch('/set-current-module', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify({ module_id: module.id })
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        // Navigate to module dashboard
-        router.visit(module.route);
-      } else {
-        console.error('Failed to set module:', result.message);
-      }
-    } catch (error) {
-      console.error('Error setting module:', error);
-    }
+  const handleModuleClick = (module) => {
+    // Use Inertia router so CSRF and session are handled; server redirects to module dashboard
+    router.post('/set-current-module', { module_id: module.id });
   };
 
   const ModuleCard = ({ module, isDisabled = false }) => {
@@ -142,15 +121,15 @@ const ModulesPage = () => {
       <div className={`group relative overflow-hidden rounded-2xl bg-white/70 backdrop-blur-xl shadow-2xl transition-all duration-700 hover:shadow-3xl dark:bg-gray-800/70 border border-white/20 dark:border-gray-700/50 ${
         isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.03] cursor-pointer hover:-translate-y-3'
       }`}>
-        {/* Glassmorphism Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 dark:from-gray-900/10 dark:to-gray-800/5" />
+        {/* Glassmorphism Background - pointer-events-none so clicks reach parent */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 dark:from-gray-900/10 dark:to-gray-800/5 pointer-events-none" />
         
         {/* Animated Gradient Overlay */}
-        <div className={`absolute inset-0 bg-gradient-to-br ${module.gradient} opacity-0 group-hover:opacity-10 transition-all duration-700`} />
+        <div className={`absolute inset-0 bg-gradient-to-br ${module.gradient} opacity-0 group-hover:opacity-10 transition-all duration-700 pointer-events-none`} />
         
         {/* Modern Shimmer Effect */}
         {!isDisabled && (
-          <div className="absolute inset-0 -top-4 -left-4 w-[calc(100%+2rem)] h-[calc(100%+2rem)] bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-pulse transition-opacity duration-700" />
+          <div className="absolute inset-0 -top-4 -left-4 w-[calc(100%+2rem)] h-[calc(100%+2rem)] bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-pulse transition-opacity duration-700 pointer-events-none" />
         )}
         
         {/* Card Content - Professional */}
@@ -219,9 +198,9 @@ const ModulesPage = () => {
           )}
         </div>
 
-        {/* Modern Hover Border with Gradient */}
+        {/* Modern Hover Border with Gradient - pointer-events-none so card is clickable */}
         {!isDisabled && (
-          <div className={`absolute inset-0 rounded-2xl border-2 border-transparent bg-gradient-to-r ${module.gradient} opacity-0 group-hover:opacity-100 transition-all duration-700`}
+          <div className={`absolute inset-0 rounded-2xl border-2 border-transparent bg-gradient-to-r ${module.gradient} opacity-0 group-hover:opacity-100 transition-all duration-700 pointer-events-none`}
                style={{ padding: '3px' }}>
             <div className="w-full h-full bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl" />
           </div>
@@ -229,11 +208,11 @@ const ModulesPage = () => {
 
         {/* Enhanced Glow Effect */}
         {!isDisabled && (
-          <div className={`absolute -inset-2 bg-gradient-to-r ${module.gradient} rounded-2xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-700`} />
+          <div className={`absolute -inset-2 bg-gradient-to-r ${module.gradient} rounded-2xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-700 pointer-events-none`} />
         )}
 
         {/* Status Indicator */}
-        <div className={`absolute top-4 right-4 w-3 h-3 rounded-full ${
+        <div className={`absolute top-4 right-4 w-3 h-3 rounded-full pointer-events-none ${
           module.status === 'active' ? 'bg-green-500' : 'bg-gray-400'
         } group-hover:scale-125 transition-transform duration-300`} />
       </div>
@@ -249,30 +228,48 @@ const ModulesPage = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-400/10 rounded-full blur-3xl animate-pulse delay-500" />
       </div>
       
-      {/* Header Section - Compact */}
+      {/* Header Section - Compact with user & logout */}
       <div className="relative bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl shadow-2xl border-b border-white/20 dark:border-gray-700/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-3">
-              <div className="p-2 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg">
-                <Grid3X3 className="h-6 w-6" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <div className="flex items-center justify-center sm:justify-start gap-3 mb-2">
+                <div className="p-2 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg">
+                  <Grid3X3 className="h-6 w-6" />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                  ERP Modules
+                </h1>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                Access your business modules and manage your organization efficiently.
+              </p>
+              <div className="flex items-center justify-center sm:justify-start space-x-4 text-sm">
+                <div className="flex items-center space-x-2 text-green-600">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <span className="font-medium">System Online</span>
+                </div>
+                <div className="flex items-center space-x-2 text-blue-600">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                  <span className="font-medium">{modules.length} Modules Available</span>
+                </div>
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
-              ERP Modules
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-4">
-              Access your business modules and manage your organization efficiently.
-            </p>
-            <div className="flex items-center justify-center space-x-4 text-sm">
-              <div className="flex items-center space-x-2 text-green-600">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="font-medium">System Online</span>
-              </div>
-              <div className="flex items-center space-x-2 text-blue-600">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                <span className="font-medium">{modules.length} Modules Available</span>
-              </div>
+            <div className="flex items-center justify-center sm:justify-end gap-3">
+              {user && (
+                <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200 text-sm">
+                  <User className="h-4 w-4" />
+                  <span className="font-medium">{user.name || user.email || user.loginid || 'User'}</span>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => router.post('/logout')}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-200/80 dark:bg-gray-700/80 hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-700 dark:text-gray-200 hover:text-red-700 dark:hover:text-red-300 font-medium transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </button>
             </div>
           </div>
         </div>

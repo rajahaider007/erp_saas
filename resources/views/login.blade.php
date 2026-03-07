@@ -10,7 +10,7 @@
     <!-- Preload fonts for better performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Meta tags for better SEO and social sharing -->
     <meta name="description"
@@ -20,7 +20,7 @@
     <meta name="robots" content="noindex, nofollow">
 
     <!-- PWA Meta tags -->
-    <meta name="theme-color" content="#7c3aed">
+    <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="ERP Login">
@@ -42,48 +42,41 @@
     @inertiaHead
 
     <style>
-        /* Loading screen styles */
+        /* Loading screen styles — matches login split layout */
         #loading-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
+            background: #f8fafc;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            transition: opacity 0.5s ease-out;
+            transition: opacity 0.4s ease-out;
         }
 
         .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid #8b5cf6;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #e2e8f0;
+            border-top-color: #0f172a;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            to { transform: rotate(360deg); }
         }
 
         .loading-text {
-            color: white;
-            font-family: 'Inter', sans-serif;
-            font-size: 16px;
+            color: #64748b;
+            font-family: 'Figtree', sans-serif;
+            font-size: 14px;
             font-weight: 500;
-            margin-top: 20px;
-            opacity: 0.8;
+            margin-top: 16px;
         }
 
         /* Hide loading screen when React app loads */
@@ -96,8 +89,8 @@
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
+            font-family: 'Figtree', sans-serif;
+            background: #f8fafc;
             min-height: 100vh;
         }
 
@@ -110,35 +103,36 @@
             min-height: 100vh;
             padding: 20px;
             text-align: center;
-            color: white;
+            color: #334155;
         }
 
         .error-fallback h1 {
-            color: #ef4444;
+            color: #dc2626;
             margin-bottom: 20px;
         }
 
         .error-fallback p {
-            color: #d1d5db;
+            color: #64748b;
             max-width: 500px;
             line-height: 1.6;
         }
 
         .retry-button {
-            background: linear-gradient(45deg, #7c3aed, #3b82f6);
+            background: #0f172a;
             border: none;
             padding: 12px 24px;
-            border-radius: 8px;
+            border-radius: 12px;
             color: white;
             font-weight: 600;
             cursor: pointer;
             margin-top: 20px;
-            transition: transform 0.2s;
+            transition: background 0.2s;
         }
 
         .retry-button:hover {
-            transform: scale(1.05);
+            background: #1e293b;
         }
+
     </style>
 </head>
 <body>
@@ -148,7 +142,7 @@
     <!-- Loading Screen -->
     <div id="loading-screen">
         <div class="loading-spinner"></div>
-        <div class="loading-text">Loading ERP Financial Suite...</div>
+        <div class="loading-text">Loading…</div>
     </div>
 
     <!-- React App Mount Point -->

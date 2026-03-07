@@ -64,7 +64,15 @@ Route::prefix('system/menus')->name('system.menus.')->middleware('web.auth')->gr
     Route::get('/export-csv', [MenuController::class, 'exportCsv'])->name('export-csv');
 });
 
-Route::get('/login', function () {
+Route::get('/login', function (Request $request) {
+    // If already logged in, redirect to ERP modules (session stays intact)
+    $userId = $request->session()->get('user_id');
+    if ($userId) {
+        $user = \App\Models\User::where('id', $userId)->where('status', 'active')->first();
+        if ($user) {
+            return redirect('/erp-modules');
+        }
+    }
     return Inertia::render('Login');
 })->name('login');
 

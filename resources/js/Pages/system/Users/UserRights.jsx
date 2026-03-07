@@ -1,513 +1,491 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { usePage, router } from '@inertiajs/react';
-import { 
-  User, Building, MapPin, Users, Package, Shield, 
-  Eye, Plus, Edit, Trash2, CheckSquare, Square,
-  Home, Settings, ChevronDown, ChevronRight
+import { Link, usePage, router } from '@inertiajs/react';
+import {
+  User,
+  Building,
+  MapPin,
+  Package,
+  Shield,
+  Eye,
+  Plus,
+  Edit,
+  Trash2,
+  ChevronDown,
+  ChevronRight,
+  ArrowLeft,
+  Save,
+  Check,
+  X,
 } from 'lucide-react';
 import App from '../../App.jsx';
 
-const CustomAlert = { 
-  fire: ({ title, text, icon, showCancelButton = false, confirmButtonText = 'OK', cancelButtonText = 'Cancel', onConfirm, onCancel }) => {
-    if (icon === 'success') {
-      alert(`✅ ${title}\n${text}`);
-    } else if (icon === 'error') {
-      alert(`❌ ${title}\n${text}`);
-    } else {
-      alert(`${title}\n${text}`);
-    }
-  } 
-};
+const DEFAULT_RIGHT = { can_view: false, can_add: false, can_edit: false, can_delete: false };
 
-const Breadcrumbs = ({ items }) => (
-  <div className="breadcrumbs-themed">
-    <nav className="breadcrumbs">
-      {items.map((item, idx) => (
-        <div key={idx} className="breadcrumb-item">
-          <div className="breadcrumb-item-content">
-            {item.icon && (<item.icon className={`breadcrumb-icon ${item.href ? 'breadcrumb-icon-link' : 'breadcrumb-icon-current'}`} />)}
-            {item.href ? (<a href={item.href} className="breadcrumb-link-themed">{item.label}</a>) : (<span className="breadcrumb-current-themed">{item.label}</span>)}
-          </div>
-          {idx < items.length - 1 && (
-            <div className="breadcrumb-separator breadcrumb-separator-themed">
-              <svg viewBox="0 0 20 20" fill="currentColor" className="w-full h-full"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
-            </div>
-          )}
-        </div>
-      ))}
-    </nav>
-    <div className="breadcrumbs-description">Configure user permissions and access rights</div>
-  </div>
-);
+function buildInitialRights(userRightsFromServer) {
+  const out = {};
+  if (!userRightsFromServer || typeof userRightsFromServer !== 'object') return out;
+  const entries = Array.isArray(userRightsFromServer)
+    ? userRightsFromServer
+    : Object.entries(userRightsFromServer).map(([k, v]) => [k, v]);
+  entries.forEach(([menuId, r]) => {
+    const id = typeof menuId === 'string' ? parseInt(menuId, 10) : menuId;
+    if (isNaN(id)) return;
+    const row = r && typeof r === 'object' ? r : {};
+    out[id] = {
+      can_view: !!row.can_view,
+      can_add: !!row.can_add,
+      can_edit: !!row.can_edit,
+      can_delete: !!row.can_delete,
+    };
+  });
+  return out;
+}
 
-const UserRights = () => {
-  const { user, availableMenus, userRights: existingRights, flash } = usePage().props;
-  const [rights, setRights] = useState({});
+function groupMenusByModuleSection(menus) {
+  const groups = {};
+  (menus || []).forEach((menu) => {
+    const moduleName = menu.module_name || 'Other';
+    const sectionName = menu.section_name || 'General';
+    if (!groups[moduleName]) groups[moduleName] = {};
+    if (!groups[moduleName][sectionName]) groups[moduleName][sectionName] = [];
+    groups[moduleName][sectionName].push(menu);
+  });
+  return groups;
+}
+
+export default function UserRights() {
+  const { user, rightsFormMenus = [], userRights: serverRights = {}, flash } = usePage().props;
+  const [rights, setRights] = useState(() => buildInitialRights(serverRights));
   const [expandedModules, setExpandedModules] = useState({});
   const [expandedSections, setExpandedSections] = useState({});
+  const [message, setMessage] = useState(null);
+  const [saving, setSaving] = useState(false);
 
-  // Initialize rights from existing user rights
+  const menusArray = Array.isArray(rightsFormMenus) ? rightsFormMenus : [];
+
   useEffect(() => {
-    if (existingRights && Object.keys(existingRights).length > 0) {
-      const initialRights = {};
-      Object.values(existingRights).forEach(right => {
-        initialRights[right.menu_id] = {
-          can_view: right.can_view,
-          can_add: right.can_add,
-          can_edit: right.can_edit,
-          can_delete: right.can_delete
-        };
-      });
-      setRights(initialRights);
-    }
-  }, [existingRights]);
+    setRights((prev) => ({ ...buildInitialRights(serverRights), ...prev }));
+  }, [serverRights]);
 
-  // Handle flash messages
   useEffect(() => {
     if (flash?.success) {
-      CustomAlert.fire({ title: 'Success!', text: flash.success, icon: 'success' });
-    } else if (flash?.error) {
-      CustomAlert.fire({ title: 'Error!', text: flash.error, icon: 'error' });
+      setMessage({ type: 'success', text: flash.success });
+      const t = setTimeout(() => setMessage(null), 4000);
+      return () => clearTimeout(t);
+    }
+    if (flash?.error) {
+      setMessage({ type: 'error', text: flash.error });
     }
   }, [flash]);
 
-  // Group menus by module and section
-  const groupedMenus = useMemo(() => {
-    const groups = {};
-    availableMenus.forEach(menu => {
-      const moduleName = menu.section?.module?.module_name || 'Other';
-      const sectionName = menu.section?.section_name || 'General';
-      
-      if (!groups[moduleName]) {
-        groups[moduleName] = {};
-      }
-      if (!groups[moduleName][sectionName]) {
-        groups[moduleName][sectionName] = [];
-      }
-      groups[moduleName][sectionName].push(menu);
-    });
-    return groups;
-  }, [availableMenus]);
+  const grouped = useMemo(() => groupMenusByModuleSection(menusArray), [menusArray]);
 
-  // Initialize expanded states to expand all modules and sections by default
   useEffect(() => {
-    if (Object.keys(groupedMenus).length > 0) {
-      const initialExpandedModules = {};
-      const initialExpandedSections = {};
-      
-      Object.keys(groupedMenus).forEach(moduleName => {
-        initialExpandedModules[moduleName] = true;
-        
-        Object.keys(groupedMenus[moduleName]).forEach(sectionName => {
-          initialExpandedSections[`${moduleName}-${sectionName}`] = true;
-        });
+    const mods = {};
+    const secs = {};
+    Object.keys(grouped).forEach((moduleName) => {
+      mods[moduleName] = true;
+      Object.keys(grouped[moduleName]).forEach((sectionName) => {
+        secs[`${moduleName}::${sectionName}`] = true;
       });
-      
-      setExpandedModules(initialExpandedModules);
-      setExpandedSections(initialExpandedSections);
-    }
-  }, [groupedMenus]);
+    });
+    setExpandedModules((prev) => ({ ...mods, ...prev }));
+    setExpandedSections((prev) => ({ ...secs, ...prev }));
+  }, [grouped]);
 
-  // Toggle individual right
-  const toggleRight = (menuId, rightType) => {
-    setRights(prev => ({
+  const toggleRight = (menuId, key) => {
+    setRights((prev) => ({
       ...prev,
       [menuId]: {
-        ...prev[menuId],
-        [rightType]: !prev[menuId]?.[rightType]
-      }
+        ...(prev[menuId] || DEFAULT_RIGHT),
+        [key]: !(prev[menuId] || DEFAULT_RIGHT)[key],
+      },
     }));
   };
 
-  // Toggle all rights for a menu
-  const toggleAllRightsForMenu = (menuId, enabled) => {
-    setRights(prev => ({
+  const setAllForMenu = (menuId, value) => {
+    setRights((prev) => ({
       ...prev,
       [menuId]: {
-        can_view: enabled,
-        can_add: enabled,
-        can_edit: enabled,
-        can_delete: enabled
-      }
+        can_view: value,
+        can_add: value,
+        can_edit: value,
+        can_delete: value,
+      },
     }));
   };
 
-  // Toggle all rights for a section
-  const toggleAllRightsForSection = (sectionMenus, enabled) => {
-    setRights(prev => {
-      const newRights = { ...prev };
-      sectionMenus.forEach(menu => {
-        newRights[menu.id] = {
-          can_view: enabled,
-          can_add: enabled,
-          can_edit: enabled,
-          can_delete: enabled
+  const setAllForSection = (menus, value) => {
+    setRights((prev) => {
+      const next = { ...prev };
+      menus.forEach((m) => {
+        next[m.id] = {
+          can_view: value,
+          can_add: value,
+          can_edit: value,
+          can_delete: value,
         };
       });
-      return newRights;
+      return next;
     });
   };
 
-  // Toggle all rights for a module
-  const toggleAllRightsForModule = (moduleSections, enabled) => {
-    setRights(prev => {
-      const newRights = { ...prev };
-      Object.values(moduleSections).forEach(sectionMenus => {
-        sectionMenus.forEach(menu => {
-          newRights[menu.id] = {
-            can_view: enabled,
-            can_add: enabled,
-            can_edit: enabled,
-            can_delete: enabled
+  const setAllForModule = (sections, value) => {
+    setRights((prev) => {
+      const next = { ...prev };
+      Object.values(sections).forEach((menus) => {
+        menus.forEach((m) => {
+          next[m.id] = {
+            can_view: value,
+            can_add: value,
+            can_edit: value,
+            can_delete: value,
           };
         });
       });
-      return newRights;
+      return next;
     });
   };
 
-  // Toggle module expansion
-  const toggleModule = (moduleName) => {
-    setExpandedModules(prev => ({
-      ...prev,
-      [moduleName]: !prev[moduleName]
-    }));
+  const toggleModule = (name) => {
+    setExpandedModules((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
-  // Toggle section expansion
   const toggleSection = (moduleName, sectionName) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [`${moduleName}-${sectionName}`]: !prev[`${moduleName}-${sectionName}`]
-    }));
+    const key = `${moduleName}::${sectionName}`;
+    setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Save rights
   const handleSave = () => {
-    const userRights = Object.entries(rights).map(([menuId, rightsData]) => ({
-      menu_id: parseInt(menuId),
-      ...rightsData
+    setMessage(null);
+    setSaving(true);
+    const payload = Object.entries(rights).map(([menuId, data]) => ({
+      menu_id: parseInt(menuId, 10),
+      can_view: !!data.can_view,
+      can_add: !!data.can_add,
+      can_edit: !!data.can_edit,
+      can_delete: !!data.can_delete,
     }));
 
-    console.log('Sending user rights data:', userRights);
-    console.log('Current rights state:', rights);
-
-    router.put(`/system/users/${user.id}/rights`, {
-      user_rights: userRights,
-      _method: 'PUT'
-    }, {
-      onSuccess: (page) => {
-        console.log('Success response:', page);
-        CustomAlert.fire({ 
-          title: 'Success!', 
-          text: 'User rights updated successfully!', 
-          icon: 'success' 
-        });
+    router.put(`/system/users/${user.id}/rights`, { user_rights: payload }, {
+      onSuccess: () => {
+        setSaving(false);
+        setMessage({ type: 'success', text: 'User rights updated successfully.' });
+        setTimeout(() => setMessage(null), 4000);
       },
       onError: (errors) => {
-        console.log('Error response:', errors);
-        console.log('Error details:', JSON.stringify(errors, null, 2));
-        CustomAlert.fire({ 
-          title: 'Error!', 
-          text: `Failed to update user rights: ${JSON.stringify(errors)}`, 
-          icon: 'error' 
-        });
-      }
+        setSaving(false);
+        const msg = typeof errors === 'string' ? errors : errors?.message || 'Failed to update rights.';
+        setMessage({ type: 'error', text: msg });
+      },
+      onFinish: () => setSaving(false),
     });
   };
 
-  const breadcrumbItems = [
-    { label: 'Dashboard', icon: Home, href: '/dashboard' },
-    { label: 'Users', icon: Users, href: '/system/users' },
-    { label: 'User Rights', icon: Shield, href: null },
-  ];
+  const RightToggle = ({ menuId, type, icon: Icon, label }) => {
+    const on = (rights[menuId] || DEFAULT_RIGHT)[type];
+    return (
+      <button
+        type="button"
+        onClick={() => toggleRight(menuId, type)}
+        title={`${label}: ${on ? 'Allowed' : 'Denied'}`}
+        aria-pressed={on}
+        aria-label={`${label} permission ${on ? 'on' : 'off'}`}
+        className={`min-w-[2.25rem] h-9 flex items-center justify-center rounded-md border-2 transition-all ${
+          on
+            ? 'bg-emerald-500 border-emerald-600 text-white shadow-sm hover:bg-emerald-600 dark:bg-emerald-600 dark:border-emerald-500'
+            : 'bg-transparent border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-gray-400 hover:text-gray-500 dark:hover:text-gray-400'
+        }`}
+      >
+        <Icon className="h-4 w-4" strokeWidth={on ? 2.5 : 2} />
+      </button>
+    );
+  };
+
+  const fullName = [user?.fname, user?.mname, user?.lname].filter(Boolean).join(' ') || user?.loginid || '—';
 
   return (
     <App>
-      {/* Main Content Card */}
-      <div className="rounded-xl shadow-lg form-container border-slate-200">
-        <div className="p-6">
-          {/* Breadcrumbs */}
-          <Breadcrumbs items={breadcrumbItems} />
-          
-          {/* User Information Header */}
-          <div className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-6 border border-blue-200 dark:border-blue-800">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-full">
-                  <User className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {user.fname} {user.mname} {user.lname}
-                  </h1>
-                  <p className="text-gray-600 dark:text-gray-400">User Rights Configuration</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm text-gray-500 dark:text-gray-400">User ID</div>
-                <div className="font-medium text-gray-900 dark:text-white">{user.loginid}</div>
-              </div>
+      <div className="advanced-module-manager">
+        <div className="manager-header">
+          <div className="header-main">
+            <div className="title-section">
+              <h1 className="page-title">
+                <Shield className="title-icon" />
+                User Rights
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                {fullName} · {user?.loginid}
+              </p>
             </div>
-            
-            {/* Company Information */}
-            <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4">
-              <div className="flex items-center space-x-2">
+            <div className="header-actions">
+              <Link href="/system/users" className="btn btn-secondary flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Users
+              </Link>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving}
+                className="btn btn-primary flex items-center gap-2"
+              >
+                {saving ? (
+                  <span className="animate-pulse">Saving…</span>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    Save Rights
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {message && (
+          <div
+            className={`mb-4 flex items-center gap-3 px-4 py-3 rounded-xl border ${
+              message.type === 'success'
+                ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
+                : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
+            }`}
+          >
+            {message.type === 'success' ? (
+              <Check className="h-5 w-5 flex-shrink-0" />
+            ) : (
+              <X className="h-5 w-5 flex-shrink-0" />
+            )}
+            <span className="text-sm font-medium">{message.text}</span>
+          </div>
+        )}
+
+        <div className="rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
+          <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">User & context</h2>
+            <div className="mt-3 flex flex-wrap gap-4 sm:gap-6 text-sm">
+              <span className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                 <User className="h-4 w-4 text-gray-400" />
-                <div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">User Name</div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                    {user.fname} {user.mname} {user.lname}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
+                {user?.company?.company_name ?? '—'}
+              </span>
+              <span className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                 <Building className="h-4 w-4 text-gray-400" />
-                <div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Company</div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                    {user.company?.company_name || 'Not assigned'}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
+                {user?.location?.location_name ?? '—'}
+              </span>
+              <span className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                 <MapPin className="h-4 w-4 text-gray-400" />
-                <div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Location</div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                    {user.location?.location_name || 'Not assigned'}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Users className="h-4 w-4 text-gray-400" />
-                <div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Department</div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                    {user.department?.department_name || 'Not assigned'}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
+                {user?.department?.department_name ?? '—'}
+              </span>
+              <span className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                 <Package className="h-4 w-4 text-gray-400" />
-                <div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Package</div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                    {user.company?.package?.package_name || 'Not assigned'}
-                  </div>
-                </div>
-              </div>
+                {user?.company?.package?.package_name ?? '—'}
+              </span>
             </div>
           </div>
 
-          {/* Permission Configuration */}
-          <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Permission Configuration
-              </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Configure what this user can access based on your company package
-              </p>
+          <div className="p-4 sm:p-6">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-1">
+              Permission configuration
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Configure what this user can access. Use Allow all / Deny all per section or per menu.
+            </p>
+
+            {/* Legend: permission icons meaning + checked state */}
+            <div className="mb-6 p-4 rounded-lg bg-gray-100 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Permission buttons</p>
+              <div className="flex flex-wrap items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-9 h-9 rounded-md border-2 bg-emerald-500 border-emerald-600 text-white">
+                    <Eye className="h-4 w-4" />
+                  </span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">View (on)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-9 h-9 rounded-md border-2 border-gray-300 dark:border-gray-600 text-gray-400 bg-transparent">
+                    <Eye className="h-4 w-4" />
+                  </span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">View (off)</span>
+                </div>
+                <span className="text-gray-300 dark:text-gray-600">|</span>
+                <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                  <span><strong className="text-gray-700 dark:text-gray-300">View</strong> — open/list</span>
+                  <span><strong className="text-gray-700 dark:text-gray-300">Add</strong> — create</span>
+                  <span><strong className="text-gray-700 dark:text-gray-300">Edit</strong> — update</span>
+                  <span><strong className="text-gray-700 dark:text-gray-300">Delete</strong> — remove</span>
+                </div>
+              </div>
             </div>
 
-            <div className="p-6">
-              <div className="space-y-6">
-                {Object.entries(groupedMenus).map(([moduleName, sections]) => (
-                  <div key={moduleName} className="border border-gray-200 dark:border-gray-700 rounded-lg">
-                    {/* Module Header */}
-                    <div className="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <button
-                            onClick={() => toggleModule(moduleName)}
-                            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                          >
-                            {expandedModules[moduleName] ? (
-                              <ChevronDown className="h-5 w-5" />
-                            ) : (
-                              <ChevronRight className="h-5 w-5" />
-                            )}
-                          </button>
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                            {moduleName}
-                          </h3>
-                          <button
-                            onClick={() => toggleAllRightsForModule(sections, true)}
-                            className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full hover:bg-green-200 dark:bg-green-900/50 dark:text-green-400"
-                          >
-                            Allow All
-                          </button>
-                          <button
-                            onClick={() => toggleAllRightsForModule(sections, false)}
-                            className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded-full hover:bg-red-200 dark:bg-red-900/50 dark:text-red-400"
-                          >
-                            Deny All
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+            {menusArray.length === 0 ? (
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>No menus available for this user’s package. Assign a company and package first.</p>
+                <Link href="/system/users" className="text-primary-600 dark:text-primary-400 hover:underline mt-2 inline-block">
+                  Back to Users
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                {Object.entries(grouped).map(([moduleName, sections]) => (
+                  <div
+                    key={moduleName}
+                    className="rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm"
+                  >
+                    {/* MODULE row — strongest visual */}
+                    <button
+                      type="button"
+                      onClick={() => toggleModule(moduleName)}
+                      className="w-full flex items-center justify-between px-5 py-3.5 bg-gray-100 dark:bg-gray-700/80 hover:bg-gray-200 dark:hover:bg-gray-700 text-left border-b-2 border-gray-200 dark:border-gray-600"
+                    >
+                      <span className="flex items-center gap-3">
+                        {expandedModules[moduleName] ? (
+                          <ChevronDown className="h-5 w-5 text-gray-600 dark:text-gray-300 shrink-0" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5 text-gray-600 dark:text-gray-300 shrink-0" />
+                        )}
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-200">
+                          Module
+                        </span>
+                        <span className="font-semibold text-gray-900 dark:text-white text-base">
+                          {moduleName}
+                        </span>
+                      </span>
+                      <span className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setAllForModule(sections, true); }}
+                          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200 hover:bg-emerald-200 dark:hover:bg-emerald-900/70"
+                        >
+                          Allow all
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setAllForModule(sections, false); }}
+                          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200 hover:bg-red-200 dark:hover:bg-red-900/70"
+                        >
+                          Deny all
+                        </button>
+                      </span>
+                    </button>
 
-                    {/* Sections */}
                     {expandedModules[moduleName] && (
-                      <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                        {Object.entries(sections).map(([sectionName, menus]) => (
-                          <div key={sectionName}>
-                            {/* Section Header */}
-                            <div className="bg-blue-50 dark:bg-blue-900/20 px-6 py-3">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-3">
-                                  <button
-                                    onClick={() => toggleSection(moduleName, sectionName)}
-                                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                                  >
-                                    {expandedSections[`${moduleName}-${sectionName}`] ? (
-                                      <ChevronDown className="h-4 w-4" />
-                                    ) : (
-                                      <ChevronRight className="h-4 w-4" />
-                                    )}
-                                  </button>
-                                  <h4 className="text-md font-medium text-gray-800 dark:text-white">
+                      <div className="bg-gray-50/50 dark:bg-gray-800/30">
+                        {Object.entries(sections).map(([sectionName, menus]) => {
+                          const sectionKey = `${moduleName}::${sectionName}`;
+                          return (
+                            <div key={sectionKey} className="border-b border-gray-200 dark:border-gray-600 last:border-b-0">
+                              {/* SECTION row — indented, different bg */}
+                              <button
+                                type="button"
+                                onClick={() => toggleSection(moduleName, sectionName)}
+                                className="w-full flex items-center justify-between pl-12 pr-5 py-2.5 bg-white dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 text-left border-l-4 border-blue-400 dark:border-blue-500"
+                              >
+                                <span className="flex items-center gap-2">
+                                  {expandedSections[sectionKey] ? (
+                                    <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                  ) : (
+                                    <ChevronRight className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                  )}
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">
+                                    Section
+                                  </span>
+                                  <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
                                     {sectionName}
-                                  </h4>
+                                  </span>
+                                </span>
+                                <span className="flex items-center gap-1.5">
                                   <button
-                                    onClick={() => toggleAllRightsForSection(menus, true)}
-                                    className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 dark:bg-green-900/50 dark:text-green-400"
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); setAllForSection(menus, true); }}
+                                    className="px-2.5 py-1 text-xs font-medium rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/60"
                                   >
-                                    Allow All
+                                    Allow
                                   </button>
                                   <button
-                                    onClick={() => toggleAllRightsForSection(menus, false)}
-                                    className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 dark:bg-red-900/50 dark:text-red-400"
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); setAllForSection(menus, false); }}
+                                    className="px-2.5 py-1 text-xs font-medium rounded-md bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/60"
                                   >
-                                    Deny All
+                                    Deny
                                   </button>
-                                </div>
-                              </div>
-                            </div>
+                                </span>
+                              </button>
 
-                            {/* Menus */}
-                            {expandedSections[`${moduleName}-${sectionName}`] && (
-                              <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                                {menus.map(menu => (
-                                  <div key={menu.id} className="px-6 py-4">
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center space-x-3">
-                                        <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                          <Settings className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                                        </div>
-                                        <div>
-                                          <h5 className="text-sm font-medium text-gray-900 dark:text-white">
+                              {/* MENU rows — most indented, clear form rows */}
+                              {expandedSections[sectionKey] && (
+                                <div className="divide-y divide-gray-100 dark:divide-gray-700/80 bg-gray-50/30 dark:bg-gray-900/20">
+                                  {menus.map((menu) => {
+                                    const r = rights[menu.id] || DEFAULT_RIGHT;
+                                    const allOn = r.can_view && r.can_add && r.can_edit && r.can_delete;
+                                    return (
+                                      <div
+                                        key={menu.id}
+                                        className="flex flex-wrap items-center justify-between gap-3 pl-16 pr-5 py-3 border-l-2 border-gray-200 dark:border-gray-600 ml-2 hover:bg-gray-100/50 dark:hover:bg-gray-800/30"
+                                      >
+                                        <div className="flex items-center gap-3 min-w-0">
+                                          <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
                                             {menu.menu_name}
-                                          </h5>
-                                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                                            {menu.menu_description || 'No description'}
-                                          </p>
-                                        </div>
-                                      </div>
-
-                                      <div className="flex items-center space-x-4">
-                                        {/* Quick Toggle */}
-                                        <button
-                                          onClick={() => toggleAllRightsForMenu(menu.id, !rights[menu.id]?.can_view)}
-                                          className="flex items-center space-x-1 px-2 py-1 text-xs rounded"
-                                        >
-                                          {rights[menu.id]?.can_view ? (
-                                            <span className="text-green-600 dark:text-green-400">✓ Allowed</span>
-                                          ) : (
-                                            <span className="text-gray-500 dark:text-gray-400">✗ Denied</span>
-                                          )}
-                                        </button>
-
-                                        {/* Individual Rights */}
-                                        <div className="flex items-center space-x-2">
-                                          {/* View Right */}
+                                          </span>
                                           <button
-                                            onClick={() => toggleRight(menu.id, 'can_view')}
-                                            className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                                              rights[menu.id]?.can_view
-                                                ? 'bg-blue-500 text-white hover:bg-blue-600'
-                                                : 'bg-gray-200 text-gray-500 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
+                                            type="button"
+                                            onClick={() => setAllForMenu(menu.id, !allOn)}
+                                            className={`text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap ${
+                                              allOn
+                                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-200'
+                                                : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
                                             }`}
-                                            title="View Right"
                                           >
-                                            <Eye className="h-4 w-4" />
-                                          </button>
-
-                                          {/* Add Right */}
-                                          <button
-                                            onClick={() => toggleRight(menu.id, 'can_add')}
-                                            className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                                              rights[menu.id]?.can_add
-                                                ? 'bg-green-500 text-white hover:bg-green-600'
-                                                : 'bg-gray-200 text-gray-500 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
-                                            }`}
-                                            title="Add Right"
-                                          >
-                                            <Plus className="h-4 w-4" />
-                                          </button>
-
-                                          {/* Edit Right */}
-                                          <button
-                                            onClick={() => toggleRight(menu.id, 'can_edit')}
-                                            className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                                              rights[menu.id]?.can_edit
-                                                ? 'bg-yellow-500 text-white hover:bg-yellow-600'
-                                                : 'bg-gray-200 text-gray-500 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
-                                            }`}
-                                            title="Edit Right"
-                                          >
-                                            <Edit className="h-4 w-4" />
-                                          </button>
-
-                                          {/* Delete Right */}
-                                          <button
-                                            onClick={() => toggleRight(menu.id, 'can_delete')}
-                                            className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                                              rights[menu.id]?.can_delete
-                                                ? 'bg-red-500 text-white hover:bg-red-600'
-                                                : 'bg-gray-200 text-gray-500 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
-                                            }`}
-                                            title="Delete Right"
-                                          >
-                                            <Trash2 className="h-4 w-4" />
+                                            {allOn ? 'Allowed' : 'Denied'}
                                           </button>
                                         </div>
+                                        <div className="flex items-center gap-2">
+                                          <span className="sr-only">View</span>
+                                          <RightToggle menuId={menu.id} type="can_view" icon={Eye} label="View" />
+                                          <span className="sr-only">Add</span>
+                                          <RightToggle menuId={menu.id} type="can_add" icon={Plus} label="Add" />
+                                          <span className="sr-only">Edit</span>
+                                          <RightToggle menuId={menu.id} type="can_edit" icon={Edit} label="Edit" />
+                                          <span className="sr-only">Delete</span>
+                                          <RightToggle menuId={menu.id} type="can_delete" icon={Trash2} label="Delete" />
+                                        </div>
                                       </div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
                 ))}
               </div>
+            )}
 
-              {/* Action Buttons */}
-              <div className="mt-8 flex items-center justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <button
-                  onClick={() => router.visit('/system/users')}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
-                >
+            {menusArray.length > 0 && (
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+                <Link href="/system/users" className="btn btn-secondary">
                   Cancel
-                </button>
+                </Link>
                 <button
+                  type="button"
                   onClick={handleSave}
-                  className="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  disabled={saving}
+                  className="btn btn-primary flex items-center gap-2"
                 >
-                  Save Rights
+                  {saving ? 'Saving…' : (
+                    <>
+                      <Save className="h-4 w-4" />
+                      Save Rights
+                    </>
+                  )}
                 </button>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
     </App>
   );
-};
-
-export default UserRights;
+}

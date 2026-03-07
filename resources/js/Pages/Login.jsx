@@ -1,449 +1,369 @@
-        import React, { useState, useEffect } from 'react';
-        import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle2, Loader2, Shield, Globe, Zap, LogOut, Monitor, Smartphone, Tablet } from 'lucide-react';
-        import { router } from '@inertiajs/react';
-        import { usePage } from '@inertiajs/react';
-        import Modal from 'react-modal';
+import React, { useState, useEffect } from 'react';
+import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle2, Loader2, LogOut, Monitor, Smartphone, Tablet } from 'lucide-react';
+import { router } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
+import Modal from 'react-modal';
+import LoginHeroAnimation from '@/Components/LoginHeroAnimation';
 
-        const LoginPage = () => {
-          const { errors: pageErrors, concurrent_sessions: concurrentSessions, login_data: loginData } = usePage().props;
-          const [formData, setFormData] = useState({
-            email: 'admin@erpsystem.com',
-            password: '',
-            remember_me: false,
-            terminate_other_sessions: false
-          });
-          
-          const [isConcurrentModalOpen, setIsConcurrentModalOpen] = useState(false);
-          const [showPassword, setShowPassword] = useState(false);
-          const [isLoading, setIsLoading] = useState(false);
-          const [alert, setAlert] = useState(null);
-          const [isVisible, setIsVisible] = useState(false);
-          const [focusedField, setFocusedField] = useState('');
+const LoginPage = () => {
+  const { errors: pageErrors, concurrent_sessions: concurrentSessions } = usePage().props;
+  const [formData, setFormData] = useState({
+    email: 'admin@erpsystem.com',
+    password: '',
+    remember_me: false,
+    terminate_other_sessions: false
+  });
 
-          useEffect(() => {
-            setIsVisible(true);
-            if (window.dispatchEvent) {
-              window.dispatchEvent(new Event('react-app-loaded'));
-            }
-          }, []);
+  const [isConcurrentModalOpen, setIsConcurrentModalOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [alert, setAlert] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [focusedField, setFocusedField] = useState('');
 
-          useEffect(() => {
-            if (concurrentSessions && concurrentSessions.length > 0) {
-              setIsConcurrentModalOpen(true);
-            }
-          }, [concurrentSessions]);
+  useEffect(() => {
+    setIsVisible(true);
+    if (window.dispatchEvent) {
+      window.dispatchEvent(new Event('react-app-loaded'));
+    }
+  }, []);
 
-          useEffect(() => {
-            if (pageErrors && Object.keys(pageErrors).length > 0) {
-              setAlert({
-                type: 'error',
-                message: pageErrors.email || pageErrors.password || pageErrors.general || 'Login failed'
-              });
-            }
-          }, [pageErrors]);
+  // When opening login (e.g. after logout), ensure dark class is removed so form text stays readable.
+  // Otherwise theme from previous page leaves document.documentElement with "dark" and text turns white.
+  useEffect(() => {
+    document.documentElement.classList.remove('dark');
+    document.body.classList.remove('dark');
+    return () => { /* no need to restore; next page sets its own theme */ };
+  }, []);
 
-          const handleChange = (e) => {
-            const { name, value, type, checked } = e.target;
-            setFormData(prev => ({ 
-              ...prev, 
-              [name]: type === 'checkbox' ? checked : value 
-            }));
-            setAlert(null);
-          };
+  useEffect(() => {
+    if (concurrentSessions && concurrentSessions.length > 0) {
+      setIsConcurrentModalOpen(true);
+    }
+  }, [concurrentSessions]);
 
-          const handleSubmit = (e) => {
-            e.preventDefault();
-            
-            console.log('Form submitted with data:', formData);
-            
-            if (!formData.email || !formData.password) {
-              setAlert({
-                type: 'error',
-                message: 'Please fill in all fields'
-              });
-              return;
-            }
+  useEffect(() => {
+    if (pageErrors && Object.keys(pageErrors).length > 0) {
+      setAlert({
+        type: 'error',
+        message: pageErrors.email || pageErrors.password || pageErrors.general || 'Login failed'
+      });
+    }
+  }, [pageErrors]);
 
-            setIsLoading(true);
-            setAlert(null);
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+    setAlert(null);
+  };
 
-            console.log('Making POST request to /login with data:', formData);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.email || !formData.password) {
+      setAlert({ type: 'error', message: 'Please fill in all fields' });
+      return;
+    }
+    setIsLoading(true);
+    setAlert(null);
+    router.post('/login', formData, {
+      onSuccess: () => {
+        // Server returns redirect to /erp-modules; Inertia follows it, so no client visit needed.
+        // Avoids double load and ensures first load of Modules page is interactive.
+      },
+      onError: (errors) => {
+        setAlert({
+          type: 'error',
+          message: errors.email || errors.password || errors.general || 'Login failed'
+        });
+        setIsLoading(false);
+      },
+      onFinish: () => setIsLoading(false)
+    });
+  };
 
-            // Test if router is available
-            console.log('Router object:', router);
-            console.log('Router.post method:', typeof router.post);
+  const handleForceLogout = (sessionId) => {
+    router.post('/force-logout', {
+      session_id: sessionId,
+      login_data: formData
+    }, {
+      onSuccess: () => {
+        setIsConcurrentModalOpen(false);
+        setFormData(prev => ({ ...prev, terminate_other_sessions: true }));
+        handleSubmit(new Event('submit'));
+      }
+    });
+  };
 
-            try {
-                router.post('/login', formData, {
-                    onStart: () => {
-                        console.log('Request started...');
-                    },
-                    onSuccess: (page) => {
-                        console.log('Login success, redirecting to ERP modules...', page);
-                        setAlert({
-                            type: 'success',
-                            message: 'Login successful! Redirecting...'
-                        });
-                        // Redirect to ERP modules after successful login
-                        setTimeout(() => {
-                            router.visit('/erp-modules');
-                        }, 1000);
-                    },
-                    onError: (errors) => {
-                        console.log('Login error:', errors);
-                        setAlert({
-                            type: 'error',
-                            message: errors.email || errors.password || errors.general || 'Login failed'
-                        });
-                        setIsLoading(false);
-                    },
-                    onFinish: () => {
-                        console.log('Request finished');
-                        setIsLoading(false);
-                    }
-                });
-            } catch (error) {
-                console.error('Router error:', error);
-                setAlert({
-                    type: 'error',
-                    message: 'Failed to submit login form'
-                });
-                setIsLoading(false);
-            }
-          };
+  const DeviceIcon = ({ type }) => {
+    switch (type) {
+      case 'Mobile': return <Smartphone className="w-5 h-5 text-slate-500" />;
+      case 'Tablet': return <Tablet className="w-5 h-5 text-slate-500" />;
+      default: return <Monitor className="w-5 h-5 text-slate-500" />;
+    }
+  };
 
-          const handleForceLogout = (sessionId) => {
-            router.post('/force-logout', {
-              session_id: sessionId,
-              login_data: formData
-            }, {
-              onSuccess: () => {
-                setIsConcurrentModalOpen(false);
-                setFormData(prev => ({ ...prev, terminate_other_sessions: true }));
-                handleSubmit(new Event('submit'));
-              }
-            });
-          };
+  const AlertComponent = ({ type, message }) => {
+    const isError = type === 'error';
+    const Icon = isError ? AlertCircle : CheckCircle2;
+    return (
+      <div
+        className={`flex items-center gap-3 p-4 rounded-xl border ${
+          isError
+            ? 'bg-red-50 border-red-200 text-red-800'
+            : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+        }`}
+      >
+        <Icon className="w-5 h-5 flex-shrink-0" />
+        <p className="text-sm font-medium">{message}</p>
+      </div>
+    );
+  };
 
-          const DeviceIcon = ({ type }) => {
-            switch (type) {
-              case 'Mobile': return <Smartphone className="w-5 h-5 text-blue-400" />;
-              case 'Tablet': return <Tablet className="w-5 h-5 text-purple-400" />;
-              default: return <Monitor className="w-5 h-5 text-green-400" />;
-            }
-          };
+  return (
+    <div className="min-h-screen flex bg-slate-50">
+      {/* Left panel — brand */}
+      <div
+        className="hidden lg:flex lg:w-[52%] flex-col justify-between bg-slate-900 text-white p-12 xl:p-16 relative overflow-hidden"
+        style={{ fontFamily: 'Fraunces, serif' }}
+      >
+        <div className="relative z-10">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white/10 text-white mb-10">
+            <span className="text-xl font-bold tracking-tight">E</span>
+          </div>
+          <h1 className="text-4xl xl:text-5xl font-semibold tracking-tight text-white leading-tight max-w-md">
+            ERP Financial Suite
+          </h1>
+          <p className="mt-4 text-lg text-slate-400 max-w-sm font-sans" style={{ fontFamily: 'Figtree, sans-serif' }}>
+            International standard financial management. One place for accounts, inventory, and reporting.
+          </p>
+        </div>
+        {/* Hero animation: robot, chips, factory */}
+        <div className="relative z-10 flex-1 min-h-[200px] flex items-center justify-center">
+          <LoginHeroAnimation />
+        </div>
+        {/* Minimal grid pattern */}
+        <div className="absolute inset-0 opacity-[0.04]" aria-hidden="true">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, white 1px, transparent 1px),
+                linear-gradient(to bottom, white 1px, transparent 1px)
+              `,
+              backgroundSize: '64px 64px'
+            }}
+          />
+        </div>
+        <div className="relative z-10 pt-8 border-t border-white/10">
+          <p className="text-sm text-slate-500 font-sans" style={{ fontFamily: 'Figtree, sans-serif' }}>
+            Secure sign-in · Your data stays in your control
+          </p>
+        </div>
+      </div>
 
-          const AlertComponent = ({ type, message }) => {
-            const isError = type === 'error';
-            const Icon = isError ? AlertCircle : CheckCircle2;
+      {/* Right panel — form */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-10 lg:p-12">
+        <div
+          className={`w-full max-w-[400px] transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}
+          style={{ fontFamily: 'Figtree, sans-serif' }}
+        >
+          <div className="lg:hidden mb-8">
+            <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-slate-900 text-white text-sm font-bold mb-4">E</div>
+            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-900">ERP Financial Suite</h1>
+            <p className="text-slate-500 dark:text-slate-500 text-sm mt-1">Sign in to continue</p>
+          </div>
 
-            return (
-              <div className={`flex items-center gap-3 p-4 rounded-xl border transition-all duration-300 ${isError
-                ? 'bg-red-50/20 border-red-200/50 text-red-300'
-                : 'bg-green-50/20 border-green-200/50 text-green-300'
-                }`}>
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                <p className="text-sm font-medium">{message}</p>
-              </div>
-            );
-          };
+          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-900 mb-1">Welcome back</h2>
+          <p className="text-slate-500 dark:text-slate-500 text-sm mb-8">Sign in with your email and password.</p>
 
-          return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
-              {/* Concurrent Session Modal */}
-              <Modal
-                isOpen={isConcurrentModalOpen}
-                onRequestClose={() => setIsConcurrentModalOpen(false)}
-                contentLabel="Active Sessions"
-                className="modal-content bg-slate-800 rounded-2xl p-6 max-w-md mx-auto border border-purple-500/30 backdrop-blur-xl"
-                overlayClassName="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-                closeTimeoutMS={300}
-              >
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-amber-600 to-orange-600 rounded-full mb-4">
-                    <AlertCircle className="w-8 h-8 text-white" />
-                  </div>
-                  
-                  <h2 className="text-2xl font-bold text-white mb-2">Active Session Detected</h2>
-                  <p className="text-purple-200 mb-6">
-                    You're already logged in on another device. What would you like to do?
-                  </p>
-                  
-                  <div className="bg-white/5 rounded-xl p-4 mb-6 max-h-60 overflow-y-auto">
-                    <h3 className="text-amber-300 font-medium mb-3">Active Sessions</h3>
-                    
-                    <div className="space-y-3">
-                      {concurrentSessions && concurrentSessions.map((session, index) => (
-                        <div 
-                          key={index} 
-                          className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg border border-amber-500/30 animate-pulse"
-                        >
-                          <div className="flex items-center gap-3">
-                            <DeviceIcon type={session.device} />
-                            <div className="text-left">
-                              <p className="text-white text-sm font-medium">{session.device}</p>
-                              <p className="text-xs text-slate-300">{session.ip}</p>
-                            </div>
-                          </div>
-                          
-                          <div className="text-right">
-                            <p className="text-xs text-slate-300">Last active</p>
-                            <p className="text-xs text-amber-300">{session.last_activity}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col gap-3">
-                    <button
-                      onClick={() => concurrentSessions.forEach(s => handleForceLogout(s.session_id))}
-                      className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
-                    >
-                      <LogOut className="w-5 h-5" />
-                      Logout All Other Sessions
-                    </button>
-                    
-                    <button
-                      onClick={() => setIsConcurrentModalOpen(false)}
-                      className="w-full bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-300"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </Modal>
-
-              {/* Background elements */}
-              <div className="absolute inset-0">
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-                <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2000"></div>
-                <div className="absolute bottom-1/4 left-1/2 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-4000"></div>
-              </div>
-
-              {/* Floating particles */}
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {[...Array(20)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute w-2 h-2 bg-white rounded-full opacity-10 animate-float"
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                      animationDelay: `${Math.random() * 10}s`,
-                      animationDuration: `${10 + Math.random() * 20}s`
-                    }}
-                  ></div>
-                ))}
-              </div>
-
-              <div className={`relative z-10 w-full max-w-md transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-                {/* Logo/Brand Section */}
-                <div className="text-center mb-8">
-                  <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl mb-6 shadow-2xl transform hover:scale-110 transition-transform duration-300">
-                    <Shield className="w-10 h-10 text-white" />
-                  </div>
-                  <h1 className="text-3xl font-bold text-white mb-2">ERP Financial Suite</h1>
-                  <p className="text-purple-200">International Standard Financial Management</p>
-                </div>
-
-                {/* Login Card */}
-                <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20">
-                  <div className="text-center mb-8">
-                    <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
-                    <p className="text-purple-200">Sign in to your account</p>
-                  </div>
-
-                  {alert && (
-                    <div className="mb-6 transform animate-slideIn">
-                      <AlertComponent type={alert.type} message={alert.message} />
-                    </div>
-                  )}
-
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Email Field */}
-                    <div className="space-y-2">
-                      <label htmlFor="email" className="block text-sm font-medium text-purple-200">
-                        Email or Login ID
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                          <Mail className={`h-5 w-5 transition-colors duration-300 ${focusedField === 'email' ? 'text-purple-400' : 'text-gray-400'}`} />
-                        </div>
-                        <input
-                          type="text"
-                          id="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          onFocus={() => setFocusedField('email')}
-                          onBlur={() => setFocusedField('')}
-                          className={`block w-full pl-12 pr-4 py-4 bg-white/10 border backdrop-blur-sm rounded-xl text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300 ${pageErrors?.email
-                            ? 'border-red-400 focus:ring-red-500'
-                            : 'border-white/20 focus:ring-purple-500 hover:border-white/30'
-                            }`}
-                          placeholder="Enter your email or login ID"
-                          autoComplete="email"
-                          required
-                        />
-                        {focusedField === 'email' && (
-                          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600/20 to-blue-600/20 -z-10 blur-sm"></div>
-                        )}
-                      </div>
-                      {pageErrors?.email && (
-                        <p className="text-red-400 text-sm mt-1 flex items-center gap-1 animate-slideIn">
-                          <AlertCircle className="w-4 h-4" />
-                          {Array.isArray(pageErrors.email) ? pageErrors.email[0] : pageErrors.email}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Password Field */}
-                    <div className="space-y-2">
-                      <label htmlFor="password" className="block text-sm font-medium text-purple-200">
-                        Password
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                          <Lock className={`h-5 w-5 transition-colors duration-300 ${focusedField === 'password' ? 'text-purple-400' : 'text-gray-400'}`} />
-                        </div>
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          id="password"
-                          name="password"
-                          value={formData.password}
-                          onChange={handleChange}
-                          onFocus={() => setFocusedField('password')}
-                          onBlur={() => setFocusedField('')}
-                          className={`block w-full pl-12 pr-12 py-4 bg-white/10 border backdrop-blur-sm rounded-xl text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300 ${pageErrors?.password
-                            ? 'border-red-400 focus:ring-red-500'
-                            : 'border-white/20 focus:ring-purple-500 hover:border-white/30'
-                            }`}
-                          placeholder="Enter your password"
-                          autoComplete="current-password"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-purple-400 transition-colors duration-300"
-                        >
-                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                        </button>
-                        {focusedField === 'password' && (
-                          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600/20 to-blue-600/20 -z-10 blur-sm"></div>
-                        )}
-                      </div>
-                      {pageErrors?.password && (
-                        <p className="text-red-400 text-sm mt-1 flex items-center gap-1 animate-slideIn">
-                          <AlertCircle className="w-4 h-4" />
-                          {Array.isArray(pageErrors.password) ? pageErrors.password[0] : pageErrors.password}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Remember Me and Forgot Password */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <input
-                          id="remember_me"
-                          name="remember_me"
-                          type="checkbox"
-                          checked={formData.remember_me}
-                          onChange={handleChange}
-                          className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded bg-gray-700"
-                        />
-                        <label htmlFor="remember_me" className="ml-2 block text-sm text-purple-200">
-                          Remember me
-                        </label>
-                      </div>
-                      
-                      <button
-                        type="button"
-                        className="text-purple-300 hover:text-white text-sm font-medium transition-colors duration-300 hover:underline"
-                      >
-                        Forgot your password?
-                      </button>
-                    </div>
-
-                    {/* Login Button */}
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative overflow-hidden"
-                    >
-                      {isLoading && (
-                        <div className="absolute inset-0 bg-gradient-to-r from-purple-700 to-blue-700 flex items-center justify-center">
-                          <Loader2 className="w-6 h-6 animate-spin text-white" />
-                        </div>
-                      )}
-                      <span className={`flex items-center justify-center gap-2 transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
-                        <Shield className="w-5 h-5" />
-                        Sign In Securely
-                      </span>
-                    </button>
-                  </form>
-                </div>
-
-                {/* Features Section */}
-                <div className="mt-8 grid grid-cols-3 gap-4 text-center">
-                  <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300">
-                    <Shield className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-                    <p className="text-xs text-purple-200">Bank-Grade Security</p>
-                  </div>
-                  <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300">
-                    <Globe className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-                    <p className="text-xs text-purple-200">Multi-Currency</p>
-                  </div>
-                  <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300">
-                    <Zap className="w-6 h-6 text-pink-400 mx-auto mb-2" />
-                    <p className="text-xs text-purple-200">Real-time Analytics</p>
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div className="text-center mt-8 text-purple-200 text-sm">
-                  <p>&copy; 2025 ERP Financial Suite. All rights reserved.</p>
-                  <p className="mt-2">Version 1.0.0 | International Standards Compliant</p>
-                </div>
-              </div>
-
-              {/* Custom styles */}
-              <style jsx="true">{`
-                @keyframes float {
-                  0%, 100% { transform: translateY(0px) rotate(0deg); }
-                  50% { transform: translateY(-20px) rotate(180deg); }
-                }
-                
-                @keyframes slideIn {
-                  from {
-                    opacity: 0;
-                    transform: translateY(-10px);
-                  }
-                  to {
-                    opacity: 1;
-                    transform: translateY(0);
-                  }
-                }
-                
-                .animate-float {
-                  animation: float 20s infinite linear;
-                }
-                
-                .animate-slideIn {
-                  animation: slideIn 0.3s ease-out;
-                }
-                
-                .animation-delay-2000 {
-                  animation-delay: 2s;
-                }
-                
-                .animation-delay-4000 {
-                  animation-delay: 4s;
-                }
-              `}</style>
+          {alert && (
+            <div className="mb-6 animate-[slideIn_0.25s_ease-out]">
+              <AlertComponent type={alert.type} message={alert.message} />
             </div>
-          );
-        };
+          )}
 
-        export default LoginPage;
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-700 mb-1.5">
+                Email or login ID
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <Mail className={`h-5 w-5 transition-colors ${focusedField === 'email' ? 'text-indigo-500' : ''}`} />
+                </div>
+                <input
+                  type="text"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={() => setFocusedField('')}
+                  className={`block w-full pl-11 pr-4 py-3 rounded-xl border bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all ${
+                    pageErrors?.email
+                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                      : 'border-slate-200 focus:ring-indigo-500 focus:border-indigo-500 hover:border-slate-300'
+                  }`}
+                  placeholder="you@company.com"
+                  autoComplete="email"
+                  required
+                />
+                {pageErrors?.email && (
+                  <p className="text-red-600 text-sm mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    {Array.isArray(pageErrors.email) ? pageErrors.email[0] : pageErrors.email}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-700 mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <Lock className={`h-5 w-5 transition-colors ${focusedField === 'password' ? 'text-indigo-500' : ''}`} />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedField('password')}
+                  onBlur={() => setFocusedField('')}
+                  className={`block w-full pl-11 pr-12 py-3 rounded-xl border bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all ${
+                    pageErrors?.password
+                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                      : 'border-slate-200 focus:ring-indigo-500 focus:border-indigo-500 hover:border-slate-300'
+                  }`}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+                {pageErrors?.password && (
+                  <p className="text-red-600 text-sm mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    {Array.isArray(pageErrors.password) ? pageErrors.password[0] : pageErrors.password}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  id="remember_me"
+                  name="remember_me"
+                  type="checkbox"
+                  checked={formData.remember_me}
+                  onChange={handleChange}
+                  className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span className="text-sm text-slate-600 dark:text-slate-600">Remember me</span>
+              </label>
+              <button
+                type="button"
+                className="text-sm font-medium text-indigo-600 dark:text-indigo-600 hover:text-indigo-700 dark:hover:text-indigo-500 hover:underline"
+              >
+                Forgot password?
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                'Sign in'
+              )}
+            </button>
+          </form>
+
+          <p className="mt-8 text-center text-xs text-slate-400 dark:text-slate-500">
+            © {new Date().getFullYear()} ERP Financial Suite
+          </p>
+        </div>
+      </div>
+
+      {/* Concurrent session modal */}
+      <Modal
+        isOpen={isConcurrentModalOpen}
+        onRequestClose={() => setIsConcurrentModalOpen(false)}
+        contentLabel="Active sessions"
+        className="bg-white rounded-2xl shadow-xl p-6 max-w-md mx-auto border border-slate-200"
+        overlayClassName="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        closeTimeoutMS={200}
+      >
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 text-amber-600 mb-4">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <h2 className="text-xl font-semibold text-slate-900 mb-2">Active session detected</h2>
+          <p className="text-slate-600 text-sm mb-6">
+            You're already signed in on another device. Log out other sessions or continue here.
+          </p>
+          <div className="bg-slate-50 rounded-xl p-4 mb-6 max-h-52 overflow-y-auto space-y-3">
+            {concurrentSessions && concurrentSessions.map((session, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <DeviceIcon type={session.device} />
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">{session.device}</p>
+                    <p className="text-xs text-slate-500">{session.ip}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-slate-500">Last active</p>
+                  <p className="text-xs font-medium text-slate-700">{session.last_activity}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => concurrentSessions.forEach(s => handleForceLogout(s.session_id))}
+              className="w-full py-3 px-4 rounded-xl font-semibold text-white bg-slate-900 hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
+            >
+              <LogOut className="w-5 h-5" />
+              Log out all other sessions
+            </button>
+            <button
+              onClick={() => setIsConcurrentModalOpen(false)}
+              className="w-full py-3 px-4 rounded-xl font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <style>{`
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default LoginPage;

@@ -15,7 +15,10 @@ class ModuleController extends Controller
 
         $module = DB::table('modules')->where('id', $request->module_id)->first();
         if (!$module) {
-            return response()->json(['success' => false, 'message' => 'Module not found']);
+            if ($request->header('X-Inertia')) {
+                return back()->withErrors(['module_id' => 'Module not found']);
+            }
+            return response()->json(['success' => false, 'message' => 'Module not found'], 404);
         }
 
         // Store in session
@@ -27,10 +30,8 @@ class ModuleController extends Controller
             'image' => $module->image
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Module set successfully',
-            'module' => $module
-        ]);
+        // Inertia requests: redirect so client follows (avoids 419 / CSRF issues with fetch)
+        $moduleRoute = '/' . ltrim($module->folder_name, '/') . '/dashboard';
+        return redirect()->to($moduleRoute);
     }
 }

@@ -266,12 +266,11 @@ const Sidebar = () => {
     loadCurrentModuleData();
   }, [url]);
 
-  // Remove System section completely
+  // Remove top-level "System" only when NOT on a system route, so /system/users/1/rights keeps same sidebar as /system/users
   React.useEffect(() => {
-    // Always remove System section from navigation
-    setNavigation(prev => {
-      return prev.filter(i => i.name !== 'System');
-    });
+    const onSystemRoute = (url || '').startsWith('/system');
+    if (onSystemRoute) return; // keep all items (including section named "System") so sections/menus stay visible
+    setNavigation(prev => prev.filter(i => i.name !== 'System'));
   }, [url, canView, availableMenus, user?.role]);
 
   // Update navigation when current module data changes
@@ -324,18 +323,21 @@ const Sidebar = () => {
     });
   }, [currentModuleData, canView, user?.role]);
 
-  // Build navigation from availableMenus (filtered by module)
+  // Build navigation from availableMenus (filtered by module) — same logic for all pages including /system
   React.useEffect(() => {
     if (!availableMenus || availableMenus.length === 0) return;
 
-    // Get current module from URL
     const currentModule = getCurrentModuleName(url);
     if (!currentModule) return;
 
-    // Filter menus by current module
-    const moduleMenus = availableMenus.filter(menu => 
-      menu.folder_name === currentModule
-    );
+    // Match by folder_name (case-insensitive); on /system also include menus with route starting with /system so rights page shows same nav as /system/users
+    const currentModuleLower = String(currentModule).toLowerCase();
+    const onSystemRoute = currentModuleLower === 'system';
+    const moduleMenus = availableMenus.filter(menu => {
+      const folderMatch = menu.folder_name && String(menu.folder_name).toLowerCase() === currentModuleLower;
+      const routeMatch = onSystemRoute && menu.route && String(menu.route).startsWith('/system');
+      return folderMatch || routeMatch;
+    });
 
     // Group menus by section
     const sectionsMap = {};
@@ -355,13 +357,11 @@ const Sidebar = () => {
       });
     });
 
-    // Convert to array and filter out empty sections
     const sectionsToAdd = Object.values(sectionsMap)
       .filter(section => section.children.length > 0);
 
     setNavigation(prev => {
-      // Remove any existing sections from this module and add new ones
-      const existingItems = prev.filter(item => 
+      const existingItems = prev.filter(item =>
         !sectionsToAdd.some(section => section.name === item.name)
       );
       return [...existingItems, ...sectionsToAdd];
@@ -558,8 +558,10 @@ const Sidebar = () => {
     );
   };
 
-  // Don't render sidebar if header is acting as sidebar
-  if (headerAsSidebar) {
+  // Don't render sidebar if header is acting as sidebar, except on system routes
+  // (e.g. /system/users/1/rights) so navigation stays available
+  const isSystemRoute = (url || '').startsWith('/system');
+  if (headerAsSidebar && !isSystemRoute) {
     return null;
   }
 
