@@ -129,7 +129,7 @@ const Sidebar = () => {
     headerAsSidebar
   } = useLayout();
   
-  const { canView, getAccessibleMenus } = usePermissions();
+  const { canView } = usePermissions();
 
   const [expandedItems, setExpandedItems] = React.useState([]);
   // hovered item object when collapsed
@@ -203,7 +203,7 @@ const Sidebar = () => {
         }
       ];
 
-      // Add ERP Modules link if user has access
+      // Add ERP Modules link if user has access (module switch is from ERP Modules page only)
       if (canView('/system/AddModules')) {
         navItems.push({
           name: 'ERP Modules',
@@ -213,26 +213,11 @@ const Sidebar = () => {
         });
       }
 
-      // Add accessible modules
-      if (modules && Array.isArray(modules)) {
-        modules.forEach(module => {
-          if (canView(`/${module.folder_name}`)) {
-            navItems.push({
-              name: module.module_name,
-              href: `/${module.folder_name}`,
-              icon: getModuleIcon(module.folder_name),
-              current: url.startsWith(`/${module.folder_name}`),
-              children: [] // Will be populated with sections/menus
-            });
-          }
-        });
-      }
-
       setNavigation(navItems);
     };
 
     buildNavigation();
-  }, [url, modules, canView]);
+  }, [url, canView]);
 
   // Load current module data from session
   React.useEffect(() => {
@@ -339,9 +324,14 @@ const Sidebar = () => {
       return folderMatch || routeMatch;
     });
 
+    // Filter menus by user rights: only show menus user can view (or super_admin sees all)
+    const filteredMenus = user?.role === 'super_admin'
+      ? moduleMenus
+      : moduleMenus.filter(menu => canView(menu.id));
+
     // Group menus by section
     const sectionsMap = {};
-    moduleMenus.forEach(menu => {
+    filteredMenus.forEach(menu => {
       const sectionName = menu.section_name || 'General';
       if (!sectionsMap[sectionName]) {
         sectionsMap[sectionName] = {

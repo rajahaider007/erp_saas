@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { usePermissions } from '../../../hooks/usePermissions';
 import { Search, Plus, Edit3, Trash2, Download, ChevronDown, ArrowUpDown, Columns, Clock, MoreHorizontal, RefreshCcw, FileText, CheckCircle2, X, Database, Eye, Copy, ChevronLeft, ChevronRight, User, Shield } from 'lucide-react';
 
 // SweetAlert-like alert
@@ -11,8 +12,11 @@ const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, conf
   document.body.appendChild(el); el.querySelector('#o').addEventListener('click',()=>{document.body.removeChild(el); onConfirm&&onConfirm();}); const c=el.querySelector('#c'); c&&c.addEventListener('click',()=>{document.body.removeChild(el); onCancel&&onCancel();});
 }};
 
+const USERS_ROUTE = '/system/users';
+
 const List = () => {
   const { users: paginated, companies, locations, departments, flash, filters } = usePage().props;
+  const { canAdd, canEdit, canDelete, showPermissionDeniedAlert } = usePermissions();
   const [search, setSearch] = useState(filters?.search || '');
   const [companyId, setCompanyId] = useState(filters?.company_id || '');
   const [locationId, setLocationId] = useState(filters?.location_id || '');
@@ -37,11 +41,18 @@ const List = () => {
     else if (flash?.error) CustomAlert.fire({ title:'Error!', text: flash.error, icon: 'error' }); 
   }, [flash]);
 
-  const handleDelete = (user) => { CustomAlert.fire({ title:'Are you sure?', text:`You are about to delete "${user.fname} ${user.lname}". This action cannot be undone!`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete it!', cancelButtonText:'Cancel', onConfirm:()=> router.delete(`/system/users/${user.id}`) }); };
+  const handleDelete = (user) => {
+    if (!canDelete(USERS_ROUTE)) { showPermissionDeniedAlert('delete', 'users'); return; }
+    CustomAlert.fire({ title:'Are you sure?', text:`You are about to delete "${user.fname} ${user.lname}". This action cannot be undone!`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete it!', cancelButtonText:'Cancel', onConfirm:()=> router.delete(`/system/users/${user.id}`) });
+  };
 
   const handleSelectAll = (checked) => { if (checked) setSelected(paginated.data.map(u=>u.id)); else setSelected([]); };
   const handleSelectRow = (id, checked) => { if (checked) setSelected(prev=>[...prev, id]); else setSelected(prev=>prev.filter(x=>x!==id)); };
-  const handleBulkDelete = () => { if (!selected.length) return; CustomAlert.fire({ title:'Delete Selected Users?', text:`You are about to delete ${selected.length} user(s).`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete!', onConfirm:()=> router.post('/system/users/bulk-destroy', { ids:selected }, { onSuccess:()=>setSelected([]) }) }); };
+  const handleBulkDelete = () => {
+    if (!selected.length) return;
+    if (!canDelete(USERS_ROUTE)) { showPermissionDeniedAlert('delete', 'users'); return; }
+    CustomAlert.fire({ title:'Delete Selected Users?', text:`You are about to delete ${selected.length} user(s).`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete!', onConfirm:()=> router.post('/system/users/bulk-destroy', { ids:selected }, { onSuccess:()=>setSelected([]) }) });
+  };
   const handleBulkStatusChange = (status) => { if (!selected.length) return; const action = status === 'active' ? 'activate' : status === 'inactive' ? 'deactivate' : `set ${status}`; CustomAlert.fire({ title:`${action.charAt(0).toUpperCase()+action.slice(1)} Selected Users?`, text:`You are about to ${action} ${selected.length} user(s).`, icon:'question', showCancelButton:true, confirmButtonText:`Yes, ${action}!`, onConfirm:()=> router.post('/system/users/bulk-status', { ids:selected, status }, { onSuccess:()=>setSelected([]) }) }); };
 
   return (
@@ -59,7 +70,9 @@ const List = () => {
             </div>
             <div className="header-actions">
               <button className="btn btn-icon" onClick={()=>window.location.reload()} title="Refresh"><RefreshCcw size={20} /></button>
-              <a href='/system/users/create' className="btn btn-primary"><Plus size={20} />Add User</a>
+              {canAdd(USERS_ROUTE) && (
+                <a href='/system/users/create' className="btn btn-primary"><Plus size={20} />Add User</a>
+              )}
             </div>
           </div>
           {/* Modern Compact Filters */}
@@ -155,7 +168,7 @@ const List = () => {
           </div>
         </div>
 
-        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />Clear</button><div className="dropdown"><button className="btn btn-sm btn-secondary dropdown-toggle">Change Status<ChevronDown size={12} /></button><div className="dropdown-menu"><button onClick={()=>handleBulkStatusChange('active')}>Set Active</button><button onClick={()=>handleBulkStatusChange('inactive')}>Set Inactive</button><button onClick={()=>handleBulkStatusChange('suspended')}>Set Suspended</button><button onClick={()=>handleBulkStatusChange('pending')}>Set Pending</button></div></div><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />Delete</button></div></div>)}
+        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />Clear</button><div className="dropdown"><button className="btn btn-sm btn-secondary dropdown-toggle">Change Status<ChevronDown size={12} /></button><div className="dropdown-menu"><button onClick={()=>handleBulkStatusChange('active')}>Set Active</button><button onClick={()=>handleBulkStatusChange('inactive')}>Set Inactive</button><button onClick={()=>handleBulkStatusChange('suspended')}>Set Suspended</button><button onClick={()=>handleBulkStatusChange('pending')}>Set Pending</button></div></div>{canDelete(USERS_ROUTE) && <button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />Delete</button>}</div></div>)}
 
         <div className="data-table-container">
           <div className="table-wrapper">
@@ -208,18 +221,26 @@ const List = () => {
                         <button className="action-btn view" title="View Details" onClick={()=>router.get(`/system/users/${user.id}`)}>
                           <Eye size={16} />
                         </button>
-                        <button className="action-btn edit" title="Edit User" onClick={()=>router.get(`/system/users/${user.id}/edit`)}>
-                          <Edit3 size={16} />
-                        </button>
-                        <button className="action-btn rights" title="Configure User Rights" onClick={()=>router.get(`/system/users/${user.id}/rights`)}>
-                          <Shield size={16} />
-                        </button>
-                        <button className="action-btn copy" title="Duplicate" onClick={()=>router.get('/system/users/create', { duplicate: user.id })}>
-                          <Copy size={16} />
-                        </button>
-                        <button className="action-btn delete" title="Delete User" onClick={()=>handleDelete(user)}>
-                          <Trash2 size={16} />
-                        </button>
+                        {canEdit(USERS_ROUTE) && (
+                          <button className="action-btn edit" title="Edit User" onClick={()=>router.get(`/system/users/${user.id}/edit`)}>
+                            <Edit3 size={16} />
+                          </button>
+                        )}
+                        {canEdit(USERS_ROUTE) && (
+                          <button className="action-btn rights" title="Configure User Rights" onClick={()=>router.get(`/system/users/${user.id}/rights`)}>
+                            <Shield size={16} />
+                          </button>
+                        )}
+                        {canAdd(USERS_ROUTE) && (
+                          <button className="action-btn copy" title="Duplicate" onClick={()=>router.get('/system/users/create', { duplicate: user.id })}>
+                            <Copy size={16} />
+                          </button>
+                        )}
+                        {canDelete(USERS_ROUTE) && (
+                          <button className="action-btn delete" title="Delete User" onClick={()=>handleDelete(user)}>
+                            <Trash2 size={16} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import {
   X,
   Settings,
-  Monitor,
   Moon,
   Sun,
   Sidebar,
@@ -16,8 +15,7 @@ import {
   Type,
   Minimize,
   Eye,
-  EyeOff,
-  Brush
+  EyeOff
 } from 'lucide-react';
 
 const LayoutContext = createContext(undefined);
@@ -35,26 +33,11 @@ export function LayoutProvider({ children }) {
     { name: 'Pink', value: 'pink', color: 'bg-pink-500', primary: '#EC4899' },
   ];
 
-  // Form theme schemes configuration
-  const formThemes = [
-    { 
-      name: 'Enterprise Blue', 
-      value: 'theme-1',
-      preview: 'bg-gradient-to-br from-blue-500 to-purple-600',
-      description: 'Professional blue theme with clean gradients'
-    },
-    { 
-      name: 'Professional Dark', 
-      value: 'theme-2',
-      preview: 'bg-gradient-to-br from-gray-800 to-purple-900',
-      description: 'Dark mode with purple accents'
-    },
-    { 
-      name: 'Modern Gradient', 
-      value: 'theme-3',
-      preview: 'bg-gradient-to-br from-cyan-400 to-blue-500',
-      description: 'Bright and modern cyan-blue gradient'
-    }
+  // Form themes: theme-1 & theme-3 = light styles, theme-2 = dark form style (used with app dark mode)
+  const formThemeOptions = [
+    { id: 'light-1', theme: 'light', formTheme: 'theme-1', label: 'Light — Style 1', sub: 'Blue/purple forms', preview: 'bg-gradient-to-br from-blue-500 to-purple-600' },
+    { id: 'light-2', theme: 'light', formTheme: 'theme-3', label: 'Light — Style 2', sub: 'Cyan/blue forms', preview: 'bg-gradient-to-br from-cyan-400 to-blue-500' },
+    { id: 'dark', theme: 'dark', formTheme: 'theme-2', label: 'Dark', sub: 'Dark forms', preview: 'bg-gradient-to-br from-gray-800 to-purple-900' },
   ];
 
   // Initialize state with defaults
@@ -79,7 +62,13 @@ export function LayoutProvider({ children }) {
       const saved = localStorage.getItem('erp-layout-settings');
       if (saved) {
         const parsed = JSON.parse(saved);
-        return { ...defaults, ...parsed };
+        const merged = { ...defaults, ...parsed };
+        // If old data had theme 'system', treat as light + theme-1
+        if (merged.theme === 'system') {
+          merged.theme = 'light';
+          merged.formTheme = 'theme-1';
+        }
+        return merged;
       }
     } catch (error) {
       console.error('Error parsing saved layout settings:', error);
@@ -103,8 +92,6 @@ export function LayoutProvider({ children }) {
   const [compactMode, setCompactMode] = useState(initialState.compactMode);
   const [borderRadius, setBorderRadius] = useState(initialState.borderRadius);
   const [fontSize, setFontSize] = useState(initialState.fontSize);
-  
-  // New form theme state
   const [formTheme, setFormTheme] = useState(initialState.formTheme);
 
   // Temporary states for customizer preview
@@ -166,13 +153,8 @@ export function LayoutProvider({ children }) {
 
     const root = document.documentElement;
     
-    // Apply theme
-    if (theme === 'system') {
-      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      root.classList.toggle('dark', systemDark);
-    } else {
-      root.classList.toggle('dark', theme === 'dark');
-    }
+    // App theme: light or dark (no system in combined switch)
+    root.classList.toggle('dark', theme === 'dark');
 
     // Apply primary color CSS variables
     const colorConfig = colorSchemes.find(scheme => scheme.value === primaryColor);
@@ -180,8 +162,8 @@ export function LayoutProvider({ children }) {
       root.style.setProperty('--primary-color', colorConfig.primary);
     }
 
-    // Apply form theme
-    root.classList.remove('form-theme-1', 'form-theme-2', 'form-theme-3');
+    // Form style: theme-1 / theme-2 / theme-3 (light-1, dark, light-2)
+    root.classList.remove('form-theme-1', 'form-theme-2', 'form-theme-3', 'form-theme-system');
     root.classList.add(`form-${formTheme}`);
 
     // Apply other settings as classes
@@ -197,19 +179,6 @@ export function LayoutProvider({ children }) {
     root.classList.add(`font-${fontSize}`);
 
   }, [theme, primaryColor, animationsEnabled, compactMode, borderRadius, fontSize, formTheme]);
-
-  // Listen for system theme changes when in 'system' mode
-  useEffect(() => {
-    if (typeof window === 'undefined' || theme !== 'system') return;
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = (e) => {
-      document.documentElement.classList.toggle('dark', e.matches);
-    };
-
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, [theme]);
 
   // Customizer helper functions
   const openCustomizer = () => {
@@ -325,10 +294,6 @@ export function LayoutProvider({ children }) {
     return colorSchemes.find(scheme => scheme.value === primaryColor) || colorSchemes[0];
   };
 
-  const getCurrentFormTheme = () => {
-    return formThemes.find(theme => theme.value === formTheme) || formThemes[0];
-  };
-
   const getThemeClasses = () => {
     let classes = [];
     if (!animationsEnabled) classes.push('animations-disabled');
@@ -337,6 +302,12 @@ export function LayoutProvider({ children }) {
     classes.push(`font-${fontSize}`);
     classes.push(`form-${formTheme}`);
     return classes.join(' ');
+  };
+
+  const currentThemeOption = () => formThemeOptions.find(o => o.theme === theme && o.formTheme === formTheme) || formThemeOptions[0];
+
+  const setCombinedTheme = (option) => {
+    setTempSettings(prev => ({ ...prev, theme: option.theme, formTheme: option.formTheme }));
   };
 
   // Customizer file import handler
@@ -359,13 +330,8 @@ export function LayoutProvider({ children }) {
       // Apply temp settings for preview
       const root = document.documentElement;
       
-      // Apply theme
-      if (tempSettings.theme === 'system') {
-        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        root.classList.toggle('dark', systemDark);
-      } else {
-        root.classList.toggle('dark', tempSettings.theme === 'dark');
-      }
+      // Apply theme (light/dark)
+      root.classList.toggle('dark', tempSettings.theme === 'dark');
       
       // Apply primary color
       const colorConfig = colorSchemes.find(scheme => scheme.value === tempSettings.primaryColor);
@@ -373,8 +339,8 @@ export function LayoutProvider({ children }) {
         root.style.setProperty('--primary-color', colorConfig.primary);
       }
       
-      // Apply form theme
-      root.classList.remove('form-theme-1', 'form-theme-2', 'form-theme-3');
+      // Form theme from temp settings
+      root.classList.remove('form-theme-1', 'form-theme-2', 'form-theme-3', 'form-theme-system');
       root.classList.add(`form-${tempSettings.formTheme}`);
       
       // Apply other settings
@@ -474,43 +440,38 @@ export function LayoutProvider({ children }) {
                 </div>
               )}
 
-              {/* Theme Selection */}
+              {/* Theme — one switch: Dark + dark forms | Light + Style 1 | Light + Style 2 */}
               <div className="space-y-3">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white flex items-center space-x-2">
                   <Palette className="h-4 w-4" />
-                  <span>Theme Mode</span>
+                  <span>Theme (App + Forms)</span>
                 </h3>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    onClick={() => updateTempSetting('theme', 'light')}
-                    className={`flex flex-col items-center space-y-2 rounded-lg border-2 p-3 transition-all ${tempSettings.theme === 'light'
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                      : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
-                    }`}
-                  >
-                    <Sun className="h-5 w-5 text-orange-500" />
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Light</span>
-                  </button>
-                  <button
-                    onClick={() => updateTempSetting('theme', 'dark')}
-                    className={`flex flex-col items-center space-y-2 rounded-lg border-2 p-3 transition-all ${tempSettings.theme === 'dark'
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                      : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
-                    }`}
-                  >
-                    <Moon className="h-5 w-5 text-blue-500" />
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Dark</span>
-                  </button>
-                  <button
-                    onClick={() => updateTempSetting('theme', 'system')}
-                    className={`flex flex-col items-center space-y-2 rounded-lg border-2 p-3 transition-all ${tempSettings.theme === 'system'
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                      : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
-                    }`}
-                  >
-                    <Monitor className="h-5 w-5 text-gray-500" />
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">System</span>
-                  </button>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  One option: app and form style change together.
+                </p>
+                <div className="space-y-2">
+                  {formThemeOptions.map((opt) => {
+                    const isSelected = tempSettings.theme === opt.theme && tempSettings.formTheme === opt.formTheme;
+                    return (
+                      <button
+                        key={opt.id}
+                        onClick={() => setCombinedTheme(opt)}
+                        className={`w-full flex items-center gap-3 rounded-lg border-2 p-3 text-left transition-all ${isSelected
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                        }`}
+                        title={opt.sub}
+                      >
+                        <div className={`h-10 w-10 rounded-lg ${opt.preview} flex-shrink-0 flex items-center justify-center`}>
+                          {opt.theme === 'dark' ? <Moon className="h-5 w-5 text-white" /> : <Sun className="h-5 w-5 text-white" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">{opt.label}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{opt.sub}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -533,36 +494,6 @@ export function LayoutProvider({ children }) {
                     >
                       <div className={`h-6 w-6 rounded-full ${scheme.color}`} />
                       <span className="text-xs text-gray-600 dark:text-gray-400">{scheme.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Form Theme Selection */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium text-gray-900 dark:text-white flex items-center space-x-2">
-                  <Brush className="h-4 w-4" />
-                  <span>Form Theme</span>
-                </h3>
-                <div className="space-y-2">
-                  {formThemes.map((theme) => (
-                    <button
-                      key={theme.value}
-                      onClick={() => updateTempSetting('formTheme', theme.value)}
-                      className={`w-full flex items-center space-x-3 rounded-lg border-2 p-3 transition-all text-left ${tempSettings.formTheme === theme.value
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                        : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
-                      }`}
-                    >
-                      <div className={`w-12 h-8 rounded-md ${theme.preview} flex-shrink-0`} />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {theme.name}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {theme.description}
-                        </p>
-                      </div>
                     </button>
                   ))}
                 </div>
@@ -797,15 +728,11 @@ export function LayoutProvider({ children }) {
                 <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
                   <div className="flex justify-between">
                     <span>Theme:</span>
-                    <span className="font-medium capitalize">{theme}</span>
+                    <span className="font-medium">{currentThemeOption().label}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Primary Color:</span>
                     <span className="font-medium capitalize">{primaryColor}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Form Theme:</span>
-                    <span className="font-medium">{getCurrentFormTheme().name}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Font Size:</span>
@@ -889,8 +816,6 @@ export function LayoutProvider({ children }) {
     setBorderRadius,
     fontSize,
     setFontSize,
-    formTheme,
-    setFormTheme,
     tempSettings,
     setTempSettings,
     updateTempSetting,
@@ -901,10 +826,8 @@ export function LayoutProvider({ children }) {
     exportSettings,
     importSettings,
     colorSchemes,
-    formThemes,
     getThemeClasses,
     getCurrentColorScheme,
-    getCurrentFormTheme,
     
     // Integrated Customizer Component
     IntegratedCustomizer,

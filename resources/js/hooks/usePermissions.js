@@ -51,6 +51,11 @@ export const usePermissions = () => {
    * @returns {boolean}
    */
   const hasPermission = useCallback((menuId, permission = 'can_view') => {
+    // Super admin has full access
+    if (auth?.user?.role === 'super_admin') {
+      return true;
+    }
+
     // If it's a route name, find the menu ID
     if (typeof menuId === 'string' && menuId.startsWith('/')) {
       const menu = availableMenus?.find(m => m.route === menuId);
@@ -62,7 +67,7 @@ export const usePermissions = () => {
     }
     
     return menuPermissions[menuId]?.[permission] || false;
-  }, [availableMenus, menuPermissions]);
+  }, [auth?.user?.role, availableMenus, menuPermissions]);
 
   /**
    * Check if user has permission for a specific route
@@ -173,6 +178,22 @@ export const usePermissions = () => {
   }, [availableMenus, hasPermission]);
 
   /**
+   * Check if user has access to at least one form/menu in a module (by folder_name).
+   * Used for sidebar module visibility and ERP Modules screen.
+   * @param {string} folderName - Module folder name (e.g. 'accounts', 'system')
+   * @returns {boolean}
+   */
+  const hasAccessToModule = useCallback((folderName) => {
+    if (!folderName) return false;
+    if (auth?.user?.role === 'super_admin') return true;
+    if (!availableMenus || !Array.isArray(availableMenus)) return false;
+    const normalized = String(folderName).toLowerCase();
+    return availableMenus.some(
+      m => String(m.folder_name || '').toLowerCase() === normalized && (menuPermissions[m.id]?.can_view === true)
+    );
+  }, [auth?.user?.role, availableMenus, menuPermissions]);
+
+  /**
    * Show permission denied alert
    * @param {string} action - Action that was denied
    * @param {string} resource - Resource name
@@ -190,6 +211,7 @@ export const usePermissions = () => {
     canEdit,
     canDelete,
     getMenuPermissions,
+    hasAccessToModule,
     
     // Role checking functions
     hasAnyRole,

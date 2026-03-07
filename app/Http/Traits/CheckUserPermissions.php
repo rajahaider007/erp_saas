@@ -85,6 +85,11 @@ trait CheckUserPermissions
             return true;
         }
 
+        // Super admin bypasses all permission checks
+        if ($user->role === 'super_admin') {
+            return true;
+        }
+
         $hasPermission = $user->hasPermission($menu->id, $permission);
         
         Log::info('CheckUserPermissions: Permission check result', [

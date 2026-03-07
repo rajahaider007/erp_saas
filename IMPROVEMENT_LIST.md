@@ -56,7 +56,7 @@ Work through these items **one by one**. Each item has a short title, descriptio
 ---
 
 ## 4. Rights Enforcement — Menu, Forms, and ERP Modules
-**Status:** [ ] Not started
+**Status:** [x] Done
 
 **Issues:**
 - If a form has no rights, its menu still appears in the sidebar.
@@ -76,7 +76,7 @@ Work through these items **one by one**. Each item has a short title, descriptio
 ---
 
 ## 5. Theme Customizer — Single Option for Theme Mode + Form Theme
-**Status:** [ ] Not started
+**Status:** [x] Done
 
 **Issue:** Theme Customizer has separate options for “Theme Mode” and “Form Theme”; user wants a single, unified option.
 

@@ -31,7 +31,7 @@ import {
 const ModulesPage = () => {
   const { auth, company, availableModules } = usePage().props;
   const user = auth?.user;
-  const { canView } = usePermissions();
+  const { hasAccessToModule } = usePermissions();
 
   // Get modules with permissions - Dynamic from database (usePage at top level only)
   const getModules = () => {
@@ -79,9 +79,11 @@ const ModulesPage = () => {
     };
 
     // Create modules array from database data (availableModules from props)
+    // hasAccess: user must have can_view for at least one menu/form in this module
     const modules = availableModules?.map((module) => {
       const Icon = iconMap[module.folder_name?.toLowerCase()] || iconMap.default;
       const gradient = gradientMap[module.color] || getRandomGradient();
+      const hasAccess = hasAccessToModule(module.folder_name);
       
       return {
         id: module.id,
@@ -91,8 +93,8 @@ const ModulesPage = () => {
         color: module.color || 'blue',
         gradient: gradient,
         route: `/${module.folder_name}/dashboard`,
-        hasAccess: true, // All modules from database are accessible
-        isDisabled: false,
+        hasAccess,
+        isDisabled: !hasAccess,
         features: module.features || ['Management', 'Reports', 'Analytics', 'Settings'],
         status: module.status ? 'active' : 'inactive',
         created_at: module.created_at,
@@ -110,6 +112,7 @@ const ModulesPage = () => {
   const disabledModules = modules.filter(module => !module.hasAccess);
 
   const handleModuleClick = (module) => {
+    if (!module.hasAccess) return;
     // Use Inertia router so CSRF and session are handled; server redirects to module dashboard
     router.post('/set-current-module', { module_id: module.id });
   };

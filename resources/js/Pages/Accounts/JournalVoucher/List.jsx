@@ -34,6 +34,9 @@ import {
 } from 'lucide-react';
 import App from '../../App.jsx';
 import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
+import { usePermissions } from '../../../hooks/usePermissions';
+
+const JOURNAL_VOUCHER_ROUTE = '/accounts/journal-voucher';
 
 // SweetAlert-like component
 const CustomAlert = {
@@ -133,6 +136,7 @@ const CustomAlert = {
 
 const JournalVoucherList = () => {
   const { journalVouchers: paginatedVouchers = [], accounts = [], flash, filters } = usePage().props;
+  const { canAdd, canEdit, canDelete, showPermissionDeniedAlert } = usePermissions();
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
   const [statusFilter, setStatusFilter] = useState(filters?.status || 'all');
@@ -438,6 +442,10 @@ const JournalVoucherList = () => {
   };
 
   const handleEdit = (voucher) => {
+    if (!canEdit(JOURNAL_VOUCHER_ROUTE)) {
+      showPermissionDeniedAlert('edit', 'journal vouchers');
+      return;
+    }
     if (voucher.status !== 'Draft') {
       CustomAlert.fire({
         title: 'Cannot Edit',
@@ -450,6 +458,10 @@ const JournalVoucherList = () => {
   };
 
   const handleDelete = (voucher) => {
+    if (!canDelete(JOURNAL_VOUCHER_ROUTE)) {
+      showPermissionDeniedAlert('delete', 'journal vouchers');
+      return;
+    }
     if (voucher.status !== 'Draft') {
       CustomAlert.fire({
         title: 'Cannot Delete',
@@ -512,6 +524,10 @@ const JournalVoucherList = () => {
     }
 
     if (action === 'delete') {
+      if (!canDelete(JOURNAL_VOUCHER_ROUTE)) {
+        showPermissionDeniedAlert('delete', 'journal vouchers');
+        return;
+      }
       CustomAlert.fire({
         title: 'Delete Selected Vouchers?',
         text: `You are about to delete ${selectedVouchers.length} journal voucher(s). This action cannot be undone!`,
@@ -725,10 +741,12 @@ const JournalVoucherList = () => {
                 </div>
               </div>
 
-              <a href='/accounts/journal-voucher/create' className="btn btn-primary">
-                <Plus size={20} />
-                Add Journal Voucher
-              </a>
+              {canAdd(JOURNAL_VOUCHER_ROUTE) && (
+                <a href='/accounts/journal-voucher/create' className="btn btn-primary">
+                  <Plus size={20} />
+                  Add Journal Voucher
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -888,14 +906,18 @@ const JournalVoucherList = () => {
                     <CheckCircle size={16} />
                     Post Selected
                   </button>
-                  <div className="dropdown-divider"></div>
-                  <button 
-                    onClick={() => handleBulkAction('delete')}
-                    className="text-danger"
-                  >
-                    <Trash2 size={16} />
-                    Delete Selected
-                  </button>
+                  {canDelete(JOURNAL_VOUCHER_ROUTE) && (
+                    <>
+                      <div className="dropdown-divider"></div>
+                      <button 
+                        onClick={() => handleBulkAction('delete')}
+                        className="text-danger"
+                      >
+                        <Trash2 size={16} />
+                        Delete Selected
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -916,10 +938,12 @@ const JournalVoucherList = () => {
                 <Database className="empty-icon" />
                 <h3>No journal vouchers found</h3>
                 <p>Try adjusting your filters or search criteria</p>
-                <a href="/accounts/journal-voucher/create" className="btn btn-primary">
-                  <Plus size={20} />
-                  Add Your First Journal Voucher
-                </a>
+                {canAdd(JOURNAL_VOUCHER_ROUTE) && (
+                  <a href="/accounts/journal-voucher/create" className="btn btn-primary">
+                    <Plus size={20} />
+                    Add Your First Journal Voucher
+                  </a>
+                )}
               </div>
             ) : (
               <>
@@ -1086,13 +1110,15 @@ const JournalVoucherList = () => {
 
                                 {voucher.status === 'Draft' && (
                                   <>
-                                    <button
-                                      className="action-btn edit"
-                                      title="Edit Voucher"
-                                      onClick={() => handleEdit(voucher)}
-                                    >
-                                      <Edit3 size={16} />
-                                    </button>
+                                    {canEdit(JOURNAL_VOUCHER_ROUTE) && (
+                                      <button
+                                        className="action-btn edit"
+                                        title="Edit Voucher"
+                                        onClick={() => handleEdit(voucher)}
+                                      >
+                                        <Edit3 size={16} />
+                                      </button>
+                                    )}
                                     <button
                                       className="action-btn copy"
                                       title="Post Voucher"
@@ -1100,13 +1126,15 @@ const JournalVoucherList = () => {
                                     >
                                       <CheckCircle size={16} />
                                     </button>
-                                    <button
-                                      className="action-btn delete"
-                                      title="Delete Voucher"
-                                      onClick={() => handleDelete(voucher)}
-                                    >
-                                      <Trash2 size={16} />
-                                    </button>
+                                    {canDelete(JOURNAL_VOUCHER_ROUTE) && (
+                                      <button
+                                        className="action-btn delete"
+                                        title="Delete Voucher"
+                                        onClick={() => handleDelete(voucher)}
+                                      >
+                                        <Trash2 size={16} />
+                                      </button>
+                                    )}
                                   </>
                                 )}
                               </div>
