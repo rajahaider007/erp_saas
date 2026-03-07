@@ -17,6 +17,26 @@
     "تجزیات",
     "ترتیبات"
   ],
+  "accounts": {
+    "index": {
+      "welcome_back": "خوش آمدید،",
+      "total_revenue": "کل آمدنی",
+      "current_year": "موجودہ سال",
+      "outstanding_invoices": "بقایا انوائسز",
+      "pending_payments": "زیر التوا ادائیگیں",
+      "profit_margin": "منافع کا مارجن",
+      "no_recent_transactions_found": "حالیہ لین دین نہیں ملے"
+    }
+  },
+  "dashboard": {
+    "module_management": "ماڈیول مینجمنٹ"
+  },
+  "dynamic": {
+    "index": {
+      "coming_soon": "جلد آ رہا ہے",
+      "in_development": "تشکیل کے تحت"
+    }
+  },
   "system": {
     "dashboard": {
       "system_administration": "سسٹم ایڈمنسٹریشن"

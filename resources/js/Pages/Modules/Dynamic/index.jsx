@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 
 const DynamicModuleDashboard = () => {
+  const { t } = useTranslations();
   const { module, sections, menus, company } = usePage().props;
 
   // Icon mapping for sections

@@ -12,6 +12,26 @@
   "footer_welcome": "Welcome to {company} - Your Business Management Solution",
   "default_description": "Access {name} module for comprehensive business management",
   "default_features": ["Management", "Reports", "Analytics", "Settings"],
+  "accounts": {
+    "index": {
+      "welcome_back": "Welcome back,",
+      "total_revenue": "Total Revenue",
+      "current_year": "Current Year",
+      "outstanding_invoices": "Outstanding Invoices",
+      "pending_payments": "Pending Payments",
+      "profit_margin": "Profit Margin",
+      "no_recent_transactions_found": "No recent transactions found"
+    }
+  },
+  "dashboard": {
+    "module_management": "Module Management"
+  },
+  "dynamic": {
+    "index": {
+      "coming_soon": "Coming Soon",
+      "in_development": "In Development"
+    }
+  },
   "system": {
     "dashboard": {
       "system_administration": "System Administration"

@@ -4,6 +4,7 @@ import { router, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
 export default function List() {
+  const { t } = useTranslations();
   const { items, filters, config, error, flash } = usePage().props;
   const [search, setSearch] = useState(filters?.search || '');
   const [isActive, setIsActive] = useState(filters?.is_active ?? '');
@@ -33,7 +34,6 @@ export default function List() {
   };
 
   const onDelete = (id) => {
-  const { t } = useTranslations();
     const confirmed = window.confirm('Are you sure you want to delete this record?');
     if (!confirmed) return;
 

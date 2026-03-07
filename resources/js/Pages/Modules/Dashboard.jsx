@@ -1,5 +1,6 @@
 import React from 'react';
 import App from '../App.jsx';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   Package, 
   Grid3X3, 
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react';
 
 export default function ModuleDashboard({ moduleName = 'Module' }) {
+  const { t } = useTranslations();
   return (
     <App>
       <div className="space-y-8">
