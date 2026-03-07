@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Inventory;
 use App\Http\Controllers\Controller;
 use App\Models\UomMaster;
 use App\Models\UomConversion;
-use App\Models\InventoryItem;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -43,11 +42,6 @@ class UomConversionController extends Controller
             $query->where('is_active', $request->boolean('is_active'));
         }
 
-        // Filter by Item-Specific
-        if ($request->filled('is_item_specific')) {
-            $query->where('is_item_specific', $request->boolean('is_item_specific'));
-        }
-
         // Sorting
         $sortBy = $request->input('sort_by', 'from_uom_id');
         $sortOrder = $request->input('sort_order', 'asc');
@@ -65,8 +59,6 @@ class UomConversionController extends Controller
                 'to_uom_name' => $item->toUom?->uom_name ?? 'N/A',
                 'conversion_factor' => $item->conversion_factor,
                 'conversion_direction' => $item->conversion_direction,
-                'effective_date' => $item->effective_date,
-                'is_item_specific' => $item->is_item_specific,
                 'is_active' => $item->is_active,
                 'updated_at' => $item->updated_at,
             ];
@@ -77,7 +69,6 @@ class UomConversionController extends Controller
             'filters' => [
                 'search' => $request->input('search'),
                 'is_active' => $request->input('is_active'),
-                'is_item_specific' => $request->input('is_item_specific'),
                 'sort_by' => $sortBy,
                 'sort_order' => $sortOrder,
             ],
@@ -92,10 +83,6 @@ class UomConversionController extends Controller
             return Inertia::render('Inventory/UomConversion/Create', [
                 'error' => 'Company information is required.',
                 'uoms' => [],
-                'items' => [],
-                'directionOptions' => ['Unidirectional', 'Bidirectional'],
-                'roundingRuleOptions' => ['None', 'Round Up', 'Round Down', 'Round Nearest'],
-                'conversionTypeOptions' => ['Standard', 'Item-Specific', 'Packaging'],
             ]);
         }
 
@@ -109,22 +96,8 @@ class UomConversionController extends Controller
             ])
             ->toArray();
 
-        $items = InventoryItem::where('comp_id', $compId)
-            ->where('is_active', true)
-            ->orderBy('item_code')
-            ->get(['id', 'item_code', 'item_name_short'])
-            ->map(fn ($i) => [
-                'value' => $i->id,
-                'label' => "{$i->item_code} - {$i->item_name_short}",
-            ])
-            ->toArray();
-
         return Inertia::render('Inventory/UomConversion/Create', [
             'uoms' => $uoms,
-            'items' => $items,
-            'directionOptions' => ['Unidirectional', 'Bidirectional'],
-            'roundingRuleOptions' => ['None', 'Round Up', 'Round Down', 'Round Nearest'],
-            'conversionTypeOptions' => ['Standard', 'Item-Specific', 'Packaging'],
         ]);
     }
 
@@ -133,62 +106,46 @@ class UomConversionController extends Controller
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
 
         if (!$compId) {
-            return back()->withErrors([
-                'error' => 'Company information is required.'
-            ]);
-        }
-
-        // Verify UOMs belong to the company
-        $fromUom = UomMaster::where('id', $request->input('from_uom_id'))
-            ->where('company_id', $compId)
-            ->first();
-        $toUom = UomMaster::where('id', $request->input('to_uom_id'))
-            ->where('company_id', $compId)
-            ->first();
-
-        if (!$fromUom || !$toUom) {
-            return back()->withErrors(['error' => 'Invalid UOM selection.']);
-        }
-
-        if ($fromUom->id === $toUom->id) {
-            return back()->withErrors(['error' => 'From UOM and To UOM cannot be the same.']);
+            return back()->withErrors(['error' => 'Company information is required.']);
         }
 
         $validated = $request->validate([
             'from_uom_id' => 'required|integer|exists:uom_masters,id',
-            'to_uom_id' => 'required|integer|exists:uom_masters,id|different:from_uom_id',
-            'item_id' => 'nullable|integer|exists:inventory_items,id',
-            'conversion_factor' => 'required|numeric|min:0.0001|max:999999.9999',
-            'conversion_direction' => 'required|string|in:Unidirectional,Bidirectional',
-            'rounding_rule' => 'required|string|in:None,Round Up,Round Down,Round Nearest',
-            'effective_from' => 'required|date',
-            'effective_to' => 'nullable|date|after_or_equal:effective_from',
-            'conversion_type' => 'required|string|in:Standard,Item-Specific,Packaging',
-            'notes' => 'nullable|string|max:500',
-            'is_item_specific' => 'nullable|boolean',
-            'is_active' => 'nullable|boolean',
+            'conversions' => 'required|array|min:1',
+            'conversions.*.to_uom_id' => 'required|integer|exists:uom_masters,id',
+            'conversions.*.conversion_factor' => 'required|numeric|min:0.0001|max:999999.9999',
+            'conversions.*.operation' => 'nullable|string|in:Multiply,Divide',
         ]);
 
-        UomConversion::create([
-            'company_id' => $compId,
-            'from_uom_id' => $validated['from_uom_id'],
-            'to_uom_id' => $validated['to_uom_id'],
-            'item_id' => $validated['item_id'] ?? null,
-            'conversion_factor' => $validated['conversion_factor'],
-            'conversion_direction' => trim($validated['conversion_direction']),
-            'rounding_rule' => $validated['rounding_rule'],
-            'effective_from' => $validated['effective_from'],
-            'effective_to' => $validated['effective_to'] ?? null,
-            'conversion_type' => $validated['conversion_type'],
-            'notes' => $validated['notes'] ?? null,
-            'is_item_specific' => $validated['is_item_specific'] ?? false,
-            'is_active' => $validated['is_active'] ?? true,
-            'created_by' => auth()->id(),
-            'updated_by' => auth()->id(),
-        ]);
+        $fromUomId = (int) $validated['from_uom_id'];
+        $fromUom = UomMaster::where('id', $fromUomId)->where('company_id', $compId)->first();
+        if (!$fromUom) {
+            return back()->withErrors(['error' => 'Invalid From UOM.']);
+        }
+
+        foreach ($validated['conversions'] as $row) {
+            $toUomId = (int) $row['to_uom_id'];
+            if ($toUomId === $fromUomId) {
+                return back()->withErrors(['error' => 'From UOM and To UOM cannot be the same in any row.']);
+            }
+            $toUom = UomMaster::where('id', $toUomId)->where('company_id', $compId)->first();
+            if (!$toUom) {
+                return back()->withErrors(['error' => "Invalid To UOM in row (To UOM id: {$toUomId})."]);
+            }
+
+            $operation = isset($row['operation']) && in_array($row['operation'], ['Multiply', 'Divide'], true) ? $row['operation'] : 'Multiply';
+            UomConversion::create([
+                'company_id' => $compId,
+                'from_uom_id' => $fromUomId,
+                'to_uom_id' => $toUomId,
+                'conversion_factor' => $row['conversion_factor'],
+                'conversion_direction' => $operation,
+                'is_active' => true,
+            ]);
+        }
 
         return redirect()->route('inventory.uom-conversion.list')
-            ->with('success', 'UOM conversion created successfully.');
+            ->with('success', 'UOM conversions saved successfully.');
     }
 
     public function edit(Request $request, $id)
@@ -201,12 +158,24 @@ class UomConversionController extends Controller
 
         $conversion = UomConversion::where('id', $id)
             ->where('company_id', $compId)
-            ->with(['fromUom', 'toUom'])
             ->first();
 
         if (!$conversion) {
             return back()->withErrors(['error' => 'UOM conversion not found.']);
         }
+
+        $fromUomId = $conversion->from_uom_id;
+        $rows = UomConversion::where('company_id', $compId)
+            ->where('from_uom_id', $fromUomId)
+            ->orderBy('to_uom_id')
+            ->get(['id', 'to_uom_id', 'conversion_factor', 'conversion_direction'])
+            ->map(fn ($r) => [
+                'id' => $r->id,
+                'to_uom_id' => $r->to_uom_id,
+                'conversion_factor' => (string) $r->conversion_factor,
+                'operation' => in_array($r->conversion_direction, ['Multiply', 'Divide'], true) ? $r->conversion_direction : 'Multiply',
+            ])
+            ->toArray();
 
         $uoms = UomMaster::where('company_id', $compId)
             ->where('is_active', true)
@@ -218,23 +187,12 @@ class UomConversionController extends Controller
             ])
             ->toArray();
 
-        $items = InventoryItem::where('comp_id', $compId)
-            ->where('is_active', true)
-            ->orderBy('item_code')
-            ->get(['id', 'item_code', 'item_name_short'])
-            ->map(fn ($i) => [
-                'value' => $i->id,
-                'label' => "{$i->item_code} - {$i->item_name_short}",
-            ])
-            ->toArray();
-
         return Inertia::render('Inventory/UomConversion/Create', [
-            'conversion' => $conversion,
+            'conversionSet' => [
+                'from_uom_id' => $fromUomId,
+                'rows' => $rows,
+            ],
             'uoms' => $uoms,
-            'items' => $items,
-            'directionOptions' => ['Unidirectional', 'Bidirectional'],
-            'roundingRuleOptions' => ['None', 'Round Up', 'Round Down', 'Round Nearest'],
-            'conversionTypeOptions' => ['Standard', 'Item-Specific', 'Packaging'],
         ]);
     }
 
@@ -246,63 +204,84 @@ class UomConversionController extends Controller
             return back()->withErrors(['error' => 'Company information is required.']);
         }
 
-        $conversion = UomConversion::where('id', $id)
+        $existing = UomConversion::where('id', $id)
             ->where('company_id', $compId)
             ->first();
 
-        if (!$conversion) {
+        if (!$existing) {
             return back()->withErrors(['error' => 'UOM conversion not found.']);
-        }
-
-        // Verify UOMs belong to the company
-        $fromUom = UomMaster::where('id', $request->input('from_uom_id'))
-            ->where('company_id', $compId)
-            ->first();
-        $toUom = UomMaster::where('id', $request->input('to_uom_id'))
-            ->where('company_id', $compId)
-            ->first();
-
-        if (!$fromUom || !$toUom) {
-            return back()->withErrors(['error' => 'Invalid UOM selection.']);
-        }
-
-        if ($fromUom->id === $toUom->id) {
-            return back()->withErrors(['error' => 'From UOM and To UOM cannot be the same.']);
         }
 
         $validated = $request->validate([
             'from_uom_id' => 'required|integer|exists:uom_masters,id',
-            'to_uom_id' => 'required|integer|exists:uom_masters,id|different:from_uom_id',
-            'item_id' => 'nullable|integer|exists:inventory_items,id',
-            'conversion_factor' => 'required|numeric|min:0.0001|max:999999.9999',
-            'conversion_direction' => 'required|string|in:Unidirectional,Bidirectional',
-            'rounding_rule' => 'required|string|in:None,Round Up,Round Down,Round Nearest',
-            'effective_from' => 'required|date',
-            'effective_to' => 'nullable|date|after_or_equal:effective_from',
-            'conversion_type' => 'required|string|in:Standard,Item-Specific,Packaging',
-            'notes' => 'nullable|string|max:500',
-            'is_item_specific' => 'nullable|boolean',
-            'is_active' => 'nullable|boolean',
+            'conversions' => 'required|array|min:1',
+            'conversions.*.id' => 'nullable|integer|exists:uom_conversions,id',
+            'conversions.*.to_uom_id' => 'required|integer|exists:uom_masters,id',
+            'conversions.*.conversion_factor' => 'required|numeric|min:0.0001|max:999999.9999',
+            'conversions.*.operation' => 'nullable|string|in:Multiply,Divide',
         ]);
 
-        $conversion->update([
-            'from_uom_id' => $validated['from_uom_id'],
-            'to_uom_id' => $validated['to_uom_id'],
-            'item_id' => $validated['item_id'] ?? null,
-            'conversion_factor' => $validated['conversion_factor'],
-            'conversion_direction' => trim($validated['conversion_direction']),
-            'rounding_rule' => $validated['rounding_rule'],
-            'effective_from' => $validated['effective_from'],
-            'effective_to' => $validated['effective_to'] ?? null,
-            'conversion_type' => $validated['conversion_type'],
-            'notes' => $validated['notes'] ?? null,
-            'is_item_specific' => $validated['is_item_specific'] ?? false,
-            'is_active' => $validated['is_active'] ?? true,
-            'updated_by' => auth()->id(),
-        ]);
+        $fromUomId = (int) $validated['from_uom_id'];
+        $fromUom = UomMaster::where('id', $fromUomId)->where('company_id', $compId)->first();
+        if (!$fromUom) {
+            return back()->withErrors(['error' => 'Invalid From UOM.']);
+        }
+
+        $existingIds = UomConversion::where('company_id', $compId)
+            ->where('from_uom_id', $existing->from_uom_id)
+            ->pluck('id')
+            ->toArray();
+
+        $submittedIds = [];
+
+        foreach ($validated['conversions'] as $row) {
+            $toUomId = (int) $row['to_uom_id'];
+            if ($toUomId === $fromUomId) {
+                return back()->withErrors(['error' => 'From UOM and To UOM cannot be the same in any row.']);
+            }
+            $toUom = UomMaster::where('id', $toUomId)->where('company_id', $compId)->first();
+            if (!$toUom) {
+                return back()->withErrors(['error' => "Invalid To UOM in row (To UOM id: {$toUomId})."]);
+            }
+
+            if (!empty($row['id'])) {
+                $rec = UomConversion::where('id', $row['id'])
+                    ->where('company_id', $compId)
+                    ->where('from_uom_id', $existing->from_uom_id)
+                    ->first();
+                if ($rec) {
+                    $operation = isset($row['operation']) && in_array($row['operation'], ['Multiply', 'Divide'], true) ? $row['operation'] : 'Multiply';
+                    $rec->update([
+                        'from_uom_id' => $fromUomId,
+                        'to_uom_id' => $toUomId,
+                        'conversion_factor' => $row['conversion_factor'],
+                        'conversion_direction' => $operation,
+                    ]);
+                    $submittedIds[] = $rec->id;
+                }
+            } else {
+                $operation = isset($row['operation']) && in_array($row['operation'], ['Multiply', 'Divide'], true) ? $row['operation'] : 'Multiply';
+                $newRec = UomConversion::create([
+                    'company_id' => $compId,
+                    'from_uom_id' => $fromUomId,
+                    'to_uom_id' => $toUomId,
+                    'conversion_factor' => $row['conversion_factor'],
+                    'conversion_direction' => $operation,
+                    'is_active' => true,
+                ]);
+                $submittedIds[] = $newRec->id;
+            }
+        }
+
+        $toDelete = array_diff($existingIds, $submittedIds);
+        if (!empty($toDelete)) {
+            UomConversion::where('company_id', $compId)
+                ->whereIn('id', $toDelete)
+                ->delete();
+        }
 
         return redirect()->route('inventory.uom-conversion.list')
-            ->with('success', 'UOM conversion updated successfully.');
+            ->with('success', 'UOM conversions updated successfully.');
     }
 
     public function destroy(Request $request, $id)

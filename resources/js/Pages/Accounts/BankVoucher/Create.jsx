@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import App from '../../App.jsx';
 import FloatingCurrencyWidget from '../../../Components/FloatingCurrencyWidget.jsx';
-import Select2 from '../../../Components/Select2.jsx';
+import InlineSearchSelect from '../../../Components/InlineSearchSelect';
 import CustomDatePicker from '../../../Components/DatePicker/DatePicker.jsx';
 import StorageWarning from '../../../Components/StorageWarning.jsx';
 
@@ -868,7 +868,7 @@ const BankVoucherCreate = () => {
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                           Bank Account *
                         </label>
-                        <Select2
+                        <InlineSearchSelect
                           options={bankAccounts.map(account => ({
                             value: account.id,
                             label: `${account.account_code} - ${account.account_name}`,
@@ -1087,7 +1087,7 @@ const BankVoucherCreate = () => {
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Account *
                           </label>
-                          <Select2
+                          <InlineSearchSelect
                             options={accounts
                               .filter(account => parseInt(account.id) !== parseInt(formData.bank_account_id || 0))
                               .map(account => ({
@@ -1129,7 +1129,7 @@ const BankVoucherCreate = () => {
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Currency
                           </label>
-                          <Select2
+                          <InlineSearchSelect
                             options={currencies.length > 0 ? currencies.map(currency => ({
                               value: currency.value,
                               label: `${currency.symbol} ${currency.label}`,

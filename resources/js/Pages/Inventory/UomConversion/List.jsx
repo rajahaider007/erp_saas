@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
-import { Search, Plus, Edit3, Trash2, Download, ChevronDown, ArrowUpDown, Columns, Clock, MoreHorizontal, RefreshCcw, FileText, CheckCircle2, X, Database, Eye, Copy, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { Search, Plus, Edit3, Trash2, ArrowUpDown, Clock, RefreshCcw, CheckCircle2, X, ChevronLeft, ChevronRight, ArrowLeftRight } from 'lucide-react';
 
 // SweetAlert-like alert
 const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, confirmButtonText = 'OK', cancelButtonText = 'Cancel', onConfirm, onCancel }) => {
@@ -18,14 +18,22 @@ export default function List() {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
   const [statusFilter, setStatusFilter] = useState(filters?.is_active || 'all');
-  const [itemSpecificFilter, setItemSpecificFilter] = useState(filters?.is_item_specific || 'all');
   const [sortConfig, setSortConfig] = useState({ key: filters?.sort_by || 'from_uom_id', direction: filters?.sort_order || 'asc' });
   const [currentPage, setCurrentPage] = useState(paginatedItems?.current_page || 1);
   const [pageSize, setPageSize] = useState(filters?.per_page || 25);
   const [selected, setSelected] = useState([]);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
 
-  const visibleColumnsInit = useMemo(() => ({ id: true, fromUom: true, toUom: true, conversionFactor: true, conversionDirection: true, effectiveDate: true, itemSpecific: true, status: true, updatedAt: true, actions: true }), []);
+  const visibleColumnsInit = useMemo(() => ({
+    id: true,
+    fromUom: true,
+    toUom: true,
+    conversionFactor: true,
+    conversionDirection: true,
+    status: true,
+    updatedAt: true,
+    actions: true,
+  }), []);
   const [visibleColumns, setVisibleColumns] = useState(visibleColumnsInit);
 
   useEffect(() => { if (flash?.success) CustomAlert.fire({ title: 'Success!', text: flash.success, icon: 'success' }); else if (flash?.error) CustomAlert.fire({ title:'Error!', text: flash.error, icon: 'error' }); }, [flash]);
@@ -33,19 +41,18 @@ export default function List() {
   const pushQuery = (obj) => { const params = new URLSearchParams(window.location.search); Object.entries(obj).forEach(([k,v])=>{ if(v===undefined||v===null||v===''||v==='all') params.delete(k); else params.set(k,v); }); if(!obj.page) params.set('page','1'); router.get(window.location.pathname+'?'+params.toString(), {}, { preserveState:true, preserveScroll:true }); };
   const handleSearch = (t) => { setSearchTerm(t); pushQuery({ search:t }); };
   const handleStatusFilter = (s) => { setStatusFilter(s); pushQuery({ is_active:s }); };
-  const handleItemSpecificFilter = (s) => { setItemSpecificFilter(s); pushQuery({ is_item_specific:s }); };
   const handleSort = (key) => { const dir = sortConfig.key===key && sortConfig.direction==='asc'?'desc':'asc'; setSortConfig({ key, direction:dir }); pushQuery({ sort_by:key, sort_order:dir }); };
   const handlePageChange = (p) => { setCurrentPage(p); pushQuery({ page:p.toString() }); };
   const handlePageSizeChange = (s) => { setPageSize(s); pushQuery({ per_page:s.toString() }); };
 
-  const handleSelectAll = (checked) => { if (checked) setSelected(paginatedItems.data.map(i=>i.id)); else setSelected([]); };
+  const handleSelectAll = (checked) => { if (checked) setSelected((paginatedItems?.data || []).map(i=>i.id)); else setSelected([]); };
   const handleSelectRow = (id, checked) => { if (checked) setSelected(prev=>[...prev, id]); else setSelected(prev=>prev.filter(x=>x!==id)); };
-  const handleBulkDelete = () => { if (!selected.length) return; CustomAlert.fire({ title:'Delete Selected Conversions?', text:`You are about to delete ${selected.length} conversion(s).`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete!', onConfirm:()=>{ setLoading(true); router.post('/inventory/uom-conversion/bulk-destroy', { ids:selected }, { onSuccess:()=>setSelected([]), onFinish:()=>setLoading(false) }); } }); };
-  const handleDelete = (item) => { CustomAlert.fire({ title:'Are you sure?', text:`You are about to delete the conversion from "${item.from_uom_code}" to "${item.to_uom_code}". This action cannot be undone!`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete it!', cancelButtonText:'Cancel', onConfirm:()=>{ setLoading(true); router.delete(`/inventory/uom-conversion/${item.id}`, { onFinish:()=>setLoading(false) }); } }); };
+  const handleBulkDelete = () => { if (!selected.length) return; CustomAlert.fire({ title:'Delete Selected Conversions?', text:`You are about to delete ${selected.length} UOM conversion(s).`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete!', onConfirm:()=>{ setLoading(true); router.post('/inventory/uom-conversion/bulk-destroy', { ids:selected }, { onSuccess:()=>setSelected([]), onFinish:()=>setLoading(false) }); } }); };
+  const handleDelete = (item) => { CustomAlert.fire({ title:'Are you sure?', text:`Delete conversion: ${item.from_uom_code} → ${item.to_uom_code}? This cannot be undone.`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete it!', cancelButtonText:'Cancel', onConfirm:()=>{ setLoading(true); router.delete(`/inventory/uom-conversion/${item.id}`, { onFinish:()=>setLoading(false) }); } }); };
 
   const statusOptions = [ { value:'all', label:'All Status' }, { value:'1', label:'Active' }, { value:'0', label:'Inactive' } ];
-  const itemSpecificOptions = [ { value:'all', label:'All Types' }, { value:'1', label:'Item-Specific' }, { value:'0', label:'General' } ];
-  const pageSizeOptions = [10,25,50,100];
+  const pageSizeOptions = [10, 25, 50, 100];
+  const data = paginatedItems?.data || [];
 
   return (
     <App>
@@ -53,18 +60,17 @@ export default function List() {
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
-              <h1 className="page-title"><ArrowRight className="title-icon" />UOM Conversion Configuration</h1>
+              <h1 className="page-title"><ArrowLeftRight className="title-icon" />UOM Conversion</h1>
               <div className="stats-summary">
                 <div className="stat-item"><span>{paginatedItems?.total || 0} Total</span></div>
-                <div className="stat-item"><span>{paginatedItems?.data?.filter(i=>i.is_active).length || 0} Active</span></div>
+                <div className="stat-item"><span>{data.filter(i=>i.is_active).length} Active</span></div>
               </div>
             </div>
             <div className="header-actions">
               <button className="btn btn-icon" onClick={()=>window.location.reload()} title="Refresh" disabled={loading}><RefreshCcw size={20} className={loading ? 'animate-spin' : ''} /></button>
-              <a href='/inventory/uom-conversion/create' className="btn btn-primary"><Plus size={20} />Add Conversion</a>
+              <a href="/inventory/uom-conversion/create" className="btn btn-primary"><Plus size={20} />Add Conversion</a>
             </div>
           </div>
-          {/* Modern Compact Filters */}
           <div className="modern-filters-container">
             <div className="filters-toolbar">
               <div className="search-section">
@@ -73,23 +79,10 @@ export default function List() {
                   <input
                     type="text"
                     className="search-input"
-                    placeholder="Search conversions by UOM code..."
+                    placeholder="Search by From/To UOM code..."
                     value={searchTerm}
                     onChange={(e) => handleSearch(e.target.value)}
                   />
-                </div>
-
-                <div className="filter-group">
-                  <label className="filter-label">Type</label>
-                  <select
-                    className="filter-select"
-                    value={itemSpecificFilter}
-                    onChange={(e) => handleItemSpecificFilter(e.target.value)}
-                  >
-                    {itemSpecificOptions.map(o => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </select>
                 </div>
 
                 <div className="filter-group">
@@ -110,7 +103,6 @@ export default function List() {
                   onClick={() => {
                     setSearchTerm('');
                     setStatusFilter('all');
-                    setItemSpecificFilter('all');
                     const params = new URLSearchParams();
                     params.set('page', '1');
                     router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
@@ -122,68 +114,94 @@ export default function List() {
               </div>
             </div>
           </div>
-          {showColumnSelector && (<div className="column-selector"><div className="column-selector-content"><h3>Show/Hide Columns</h3><div className="column-grid">{Object.entries(visibleColumns).map(([key, visible]) => (key!=='actions' && (<label key={key} className="column-item"><input type="checkbox" checked={visible} onChange={(e)=>setVisibleColumns({ ...visibleColumns, [key]: e.target.checked })} /><span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>s.toUpperCase())}</span></label>)))}
-          </div><button className="btn btn-sm btn-secondary" onClick={()=>setShowColumnSelector(false)}>Close</button></div></div>)}
+          {showColumnSelector && (
+            <div className="column-selector">
+              <div className="column-selector-content">
+                <h3>Show/Hide Columns</h3>
+                <div className="column-grid">
+                  {Object.entries(visibleColumns).map(([key, visible]) => (key !== 'actions' && (
+                    <label key={key} className="column-item">
+                      <input type="checkbox" checked={visible} onChange={(e)=>setVisibleColumns({ ...visibleColumns, [key]: e.target.checked })} />
+                      <span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>s.toUpperCase())}</span>
+                    </label>
+                  )))}
+                </div>
+                <button className="btn btn-sm btn-secondary" onClick={()=>setShowColumnSelector(false)}>Close</button>
+              </div>
+            </div>
+          )}
         </div>
-        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />Clear</button><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />Delete</button></div></div>)}
-        <div className="data-table-container"><div className="table-wrapper"><table className="data-table"><thead><tr>
-          <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginatedItems.data.length && paginatedItems.data.length>0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
-          {visibleColumns.id && (<th className="sortable" onClick={()=>handleSort('id')}><div className="th-content">ID<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='id'?'active':''}`} /></div></th>)}
-          {visibleColumns.fromUom && (<th className="sortable" onClick={()=>handleSort('from_uom_id')}><div className="th-content">From UOM<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='from_uom_id'?'active':''}`} /></div></th>)}
-          {visibleColumns.toUom && (<th className="sortable" onClick={()=>handleSort('to_uom_id')}><div className="th-content">To UOM<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='to_uom_id'?'active':''}`} /></div></th>)}
-          {visibleColumns.conversionFactor && (<th className="sortable" onClick={()=>handleSort('conversion_factor')}><div className="th-content">Factor<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='conversion_factor'?'active':''}`} /></div></th>)}
-          {visibleColumns.conversionDirection && (<th className="sortable" onClick={()=>handleSort('conversion_direction')}><div className="th-content">Direction<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='conversion_direction'?'active':''}`} /></div></th>)}
-          {visibleColumns.effectiveDate && (<th className="sortable" onClick={()=>handleSort('effective_date')}><div className="th-content">Effective Date<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='effective_date'?'active':''}`} /></div></th>)}
-          {visibleColumns.itemSpecific && (<th className="sortable" onClick={()=>handleSort('is_item_specific')}><div className="th-content">Type<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='is_item_specific'?'active':''}`} /></div></th>)}
-          {visibleColumns.status && (<th className="sortable" onClick={()=>handleSort('is_active')}><div className="th-content">Status<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='is_active'?'active':''}`} /></div></th>)}
-          {visibleColumns.updatedAt && (<th className="sortable" onClick={()=>handleSort('updated_at')}><div className="th-content">Updated<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='updated_at'?'active':''}`} /></div></th>)}
-          {visibleColumns.actions && (<th className="actions-header">Actions</th>)}
-        </tr></thead><tbody>
-          {paginatedItems.data.map((item) => (
-            <tr key={item.id} className="table-row">
-              <td><input type="checkbox" className="checkbox" checked={selected.includes(item.id)} onChange={(e)=>handleSelectRow(item.id, e.target.checked)} /></td>
-              {visibleColumns.id && (<td><span className="module-id">#{item.id}</span></td>)}
-              {visibleColumns.fromUom && (<td><div className="module-details"><div className="module-name">{item.from_uom_code}</div><div className="module-code">{item.from_uom_name}</div></div></td>)}
-              {visibleColumns.toUom && (<td><div className="module-details"><div className="module-name">{item.to_uom_code}</div><div className="module-code">{item.to_uom_name}</div></div></td>)}
-              {visibleColumns.conversionFactor && (<td><span className="badge badge-info">{parseFloat(item.conversion_factor).toFixed(4)}</span></td>)}
-              {visibleColumns.conversionDirection && (<td><span className="badge badge-secondary">{item.conversion_direction}</span></td>)}
-              {visibleColumns.effectiveDate && (<td><span className="badge badge-default">{new Date(item.effective_date).toLocaleDateString()}</span></td>)}
-              {visibleColumns.itemSpecific && (<td><span className={`badge ${item.is_item_specific ? 'badge-warning' : 'badge-success'}`}>{item.is_item_specific ? 'Item-Specific' : 'General'}</span></td>)}
-              {visibleColumns.status && (<td><span className={`status-badge status-${item.is_active ? 'active' : 'inactive'}`}>{item.is_active ? 'Active' : 'Inactive'}</span></td>)}
-              {visibleColumns.updatedAt && (<td><div className="date-cell"><Clock size={14} /><span>{new Date(item.updated_at).toLocaleString()}</span></div></td>)}
-              {visibleColumns.actions && (
-                <td>
-                  <div className="actions-cell">
-                    <button className="action-btn edit" title="Edit Conversion" onClick={() => router.get(`/inventory/uom-conversion/${item.id}/edit`)}>
-                      <Edit3 size={16} />
-                    </button>
-                    <button className="action-btn delete" title="Delete Conversion" onClick={() => handleDelete(item)}>
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </td>
-              )}
-            </tr>
-          ))}
-        </tbody></table></div>
-        <div className="pagination-container">
-          <div className="pagination-info">
-            <div className="results-info">Showing {paginatedItems.from || 0} to {paginatedItems.to || 0} of {paginatedItems.total || 0} entries</div>
-            <div className="page-size-selector">
-              <span>Show:</span>
-              <select value={pageSize} onChange={(e)=>handlePageSizeChange(Number(e.target.value))} className="page-size-select">
-                {pageSizeOptions.map(size => (<option key={size} value={size}>{size}</option>))}
-              </select>
+        {selected.length > 0 && (
+          <div className="bulk-actions-bar">
+            <div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div>
+            <div className="bulk-actions">
+              <button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />Clear</button>
+              <button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />Delete</button>
             </div>
           </div>
-          <div className="pagination-buttons">
-            <button className="btn btn-sm" onClick={() => handlePageChange(1)} disabled={currentPage === 1}><ChevronLeft size={16} />First</button>
-            <button className="btn btn-sm" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}><ChevronLeft size={16} /></button>
-            <span className="pagination-current">Page {paginatedItems.current_page} of {paginatedItems.last_page}</span>
-            <button className="btn btn-sm" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === paginatedItems.last_page}><ChevronRight size={16} /></button>
-            <button className="btn btn-sm" onClick={() => handlePageChange(paginatedItems.last_page)} disabled={currentPage === paginatedItems.last_page}>Last<ChevronRight size={16} /></button>
+        )}
+        <div className="data-table-container">
+          <div className="table-wrapper">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length === data.length && data.length > 0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
+                  {visibleColumns.id && (<th className="sortable" onClick={()=>handleSort('id')}><div className="th-content">ID<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='id'?'active':''}`} /></div></th>)}
+                  {visibleColumns.fromUom && (<th className="sortable" onClick={()=>handleSort('from_uom_id')}><div className="th-content">From UOM<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='from_uom_id'?'active':''}`} /></div></th>)}
+                  {visibleColumns.toUom && (<th className="sortable" onClick={()=>handleSort('to_uom_id')}><div className="th-content">To UOM<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='to_uom_id'?'active':''}`} /></div></th>)}
+                  {visibleColumns.conversionFactor && (<th className="sortable" onClick={()=>handleSort('conversion_factor')}><div className="th-content">Factor<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='conversion_factor'?'active':''}`} /></div></th>)}
+                  {visibleColumns.conversionDirection && (<th className="sortable" onClick={()=>handleSort('conversion_direction')}><div className="th-content">Direction<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='conversion_direction'?'active':''}`} /></div></th>)}
+                  {visibleColumns.status && (<th className="sortable" onClick={()=>handleSort('is_active')}><div className="th-content">Status<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='is_active'?'active':''}`} /></div></th>)}
+                  {visibleColumns.updatedAt && (<th className="sortable" onClick={()=>handleSort('updated_at')}><div className="th-content">Updated<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='updated_at'?'active':''}`} /></div></th>)}
+                  {visibleColumns.actions && (<th className="actions-header">Actions</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((item) => (
+                  <tr key={item.id} className="table-row">
+                    <td><input type="checkbox" className="checkbox" checked={selected.includes(item.id)} onChange={(e)=>handleSelectRow(item.id, e.target.checked)} /></td>
+                    {visibleColumns.id && (<td><span className="module-id">#{item.id}</span></td>)}
+                    {visibleColumns.fromUom && (<td><div className="module-details"><div className="module-name">{item.from_uom_code}</div><div className="module-meta">{item.from_uom_name}</div></div></td>)}
+                    {visibleColumns.toUom && (<td><div className="module-details"><div className="module-name">{item.to_uom_code}</div><div className="module-meta">{item.to_uom_name}</div></div></td>)}
+                    {visibleColumns.conversionFactor && (<td><span className="badge badge-default">{Number(item.conversion_factor)}</span></td>)}
+                    {visibleColumns.conversionDirection && (<td><span className="badge badge-info">{item.conversion_direction || 'Multiply'}</span></td>)}
+                    {visibleColumns.status && (<td><span className={`status-badge status-${item.is_active ? 'active' : 'inactive'}`}>{item.is_active ? 'Active' : 'Inactive'}</span></td>)}
+                    {visibleColumns.updatedAt && (<td><div className="date-cell"><Clock size={14} /><span>{item.updated_at ? new Date(item.updated_at).toLocaleString() : '—'}</span></div></td>)}
+                    {visibleColumns.actions && (
+                      <td>
+                        <div className="actions-cell">
+                          <button className="action-btn edit" title="Edit Conversion" onClick={() => router.get(`/inventory/uom-conversion/${item.id}/edit`)}>
+                            <Edit3 size={16} />
+                          </button>
+                          <button className="action-btn delete" title="Delete Conversion" onClick={() => handleDelete(item)}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
+          <div className="pagination-container">
+            <div className="pagination-info">
+              <div className="results-info">Showing {paginatedItems?.from ?? 0} to {paginatedItems?.to ?? 0} of {paginatedItems?.total ?? 0} entries</div>
+              <div className="page-size-selector">
+                <span>Show:</span>
+                <select value={pageSize} onChange={(e)=>handlePageSizeChange(Number(e.target.value))} className="page-size-select">
+                  {pageSizeOptions.map(size => (<option key={size} value={size}>{size}</option>))}
+                </select>
+              </div>
+            </div>
+            <div className="pagination-buttons">
+              <button className="btn btn-sm" onClick={() => handlePageChange(1)} disabled={currentPage === 1}><ChevronLeft size={16} />First</button>
+              <button className="btn btn-sm" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}><ChevronLeft size={16} /></button>
+              <span className="pagination-current">Page {paginatedItems?.current_page ?? 1} of {paginatedItems?.last_page ?? 1}</span>
+              <button className="btn btn-sm" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === (paginatedItems?.last_page ?? 1)}><ChevronRight size={16} /></button>
+              <button className="btn btn-sm" onClick={() => handlePageChange(paginatedItems?.last_page ?? 1)} disabled={currentPage === (paginatedItems?.last_page ?? 1)}>Last<ChevronRight size={16} /></button>
+            </div>
+          </div>
         </div>
       </div>
     </App>

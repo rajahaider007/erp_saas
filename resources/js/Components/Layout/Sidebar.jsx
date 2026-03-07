@@ -19,7 +19,8 @@ import {
   Mail,
   Phone,
   Building,
-  Bell
+  Bell,
+  HardDrive
 } from 'lucide-react';
 
 const TooltipPortal = ({ item, anchorEl, onRequestClose, keepOpenClear }) => {
@@ -350,11 +351,16 @@ const Sidebar = () => {
     const sectionsToAdd = Object.values(sectionsMap)
       .filter(section => section.children.length > 0);
 
+    // Storage / Attachment Manager — visible when on System
+    const storageNavItem = onSystemRoute
+      ? { name: 'Storage', href: '/system/attachment-manager', icon: HardDrive }
+      : null;
+
     setNavigation(prev => {
       const existingItems = prev.filter(item =>
-        !sectionsToAdd.some(section => section.name === item.name)
+        !sectionsToAdd.some(section => section.name === item.name) && item.name !== 'Storage'
       );
-      return [...existingItems, ...sectionsToAdd];
+      return [...existingItems, ...sectionsToAdd, ...(storageNavItem ? [storageNavItem] : [])];
     });
   }, [availableMenus, url, canView, user?.role]);
 
@@ -377,6 +383,8 @@ const Sidebar = () => {
       case 'mail': return Mail;
       case 'building': return Building;
       case 'bell': return Bell;
+      case 'harddrive':
+      case 'storage': return HardDrive;
       default: return Settings;
     }
   };
@@ -585,7 +593,7 @@ const Sidebar = () => {
                 {/* Divider */}
                 <div className="my-6 border-t border-gray-200 dark:border-gray-700" />
 
-                {/* Settings */}
+                {/* Settings & Storage */}
                 <div className="space-y-1">
                   <Link
                     href="/erp/settings"
@@ -596,6 +604,16 @@ const Sidebar = () => {
                   >
                     <Settings className="h-4 w-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
                     <span className="ml-3 truncate">Settings</span>
+                  </Link>
+                  <Link
+                    href="/system/attachment-manager"
+                    className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${(url || '').startsWith('/system/attachment-manager')
+                      ? 'bg-blue-100 text-blue-900 dark:bg-blue-900/20 dark:text-blue-100'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white'
+                      }`}
+                  >
+                    <HardDrive className="h-4 w-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                    <span className="ml-3 truncate">Storage</span>
                   </Link>
                 </div>
               </nav>

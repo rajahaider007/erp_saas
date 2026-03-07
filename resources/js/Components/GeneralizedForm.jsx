@@ -4,7 +4,7 @@ import {
   Search, Calendar, Clock, ChevronDown, Mail, Lock, Shield,
   Type, Folder, Image, ToggleLeft, ToggleRight
 } from 'lucide-react';
-import Select2 from './Select2';
+import InlineSearchSelect from './InlineSearchSelect';
 
 // Generalized Form Component
 const GeneralizedForm = ({
@@ -218,13 +218,13 @@ const GeneralizedForm = ({
         );
 
       case 'select':
-      // Use Select2 for searchable fields, regular select for others
+      // Use InlineSearchSelect for searchable fields, regular select for others
       if (field.searchable) {
         return (
           <div className="input-group" key={field.name}>
             <label className="input-label">{field.label}</label>
             <div className="input-wrapper" style={{ overflow: 'visible', position: 'relative' }}>
-              <Select2
+              <InlineSearchSelect
                 options={field.options || []}
                 value={fieldValue}
                 onChange={(value) => handleInputChange(field.name, value, field)}

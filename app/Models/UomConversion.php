@@ -17,29 +17,16 @@ class UomConversion extends Model
         'company_id',
         'from_uom_id',
         'to_uom_id',
-        'item_id',
         'conversion_factor',
         'conversion_direction',
-        'rounding_rule',
-        'effective_from',
-        'effective_to',
-        'conversion_type',
-        'notes',
-        'is_item_specific',
         'is_active',
-        'created_by',
-        'updated_by'
     ];
 
     protected $casts = [
         'conversion_factor' => 'decimal:6',
-        'effective_from' => 'date',
-        'effective_to' => 'date',
-        'is_item_specific' => 'boolean',
         'is_active' => 'boolean',
     ];
 
-    // Relationships
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
@@ -55,22 +42,6 @@ class UomConversion extends Model
         return $this->belongsTo(UomMaster::class, 'to_uom_id');
     }
 
-    public function item(): BelongsTo
-    {
-        return $this->belongsTo(InventoryItem::class, 'item_id');
-    }
-
-    public function createdByUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updatedByUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
-
-    // Scopes
     public function scopeByCompany($query, $companyId)
     {
         return $query->where('company_id', $companyId);

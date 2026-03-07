@@ -715,10 +715,32 @@
      font-size: 0.875rem;
  }
 
- .pagination-controls {
+ .pagination-controls,
+ .pagination-buttons {
      display: flex;
      align-items: center;
      gap: 0.25rem;
+     flex-wrap: nowrap;
+ }
+
+ .advanced-module-manager .pagination-container .pagination-buttons {
+     display: flex !important;
+     flex-direction: row !important;
+     flex-wrap: nowrap !important;
+     align-items: center;
+     gap: 0.5rem;
+ }
+
+ .pagination-container .pagination-buttons .btn {
+     flex: 0 0 auto;
+ }
+
+ .pagination-current {
+     font-size: 0.875rem;
+     color: #6b7280;
+     padding: 0 0.5rem;
+     white-space: nowrap;
+     flex-shrink: 0;
  }
 
  .pagination-btn {
@@ -944,7 +966,8 @@
          gap: 1rem;
      }
 
-     .pagination-controls {
+     .pagination-controls,
+     .pagination-buttons {
          justify-content: center;
      }
 
@@ -1010,124 +1033,122 @@
      }
  }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    .advanced-module-manager {
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-    }
+/* Dark list/table: only when app theme is Dark (Theme customizer), not system preference */
+html.dark .advanced-module-manager {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
 
-    .manager-header,
-    .main-content,
-    .modern-filters-container {
-        background: rgba(30, 41, 59, 0.95);
-        border-color: rgba(148, 163, 184, 0.1);
-    }
+html.dark .manager-header,
+html.dark .main-content,
+html.dark .modern-filters-container {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: rgba(148, 163, 184, 0.1);
+}
 
-    .page-title {
-        color: #f8fafc;
-    }
+html.dark .page-title {
+    color: #f8fafc;
+}
 
-    .stat-item {
-        color: #94a3b8;
-    }
+html.dark .stat-item {
+    color: #94a3b8;
+}
 
-    .filter-label {
-        color: #94a3b8;
-    }
+html.dark .filter-label {
+    color: #94a3b8;
+}
 
-    .search-input-wrapper .search-input,
-    .filter-select,
-    .date-input,
-    .page-size-select,
-    .jump-input {
-        background: #374151;
-        border-color: #4b5563;
-        color: #f9fafb;
-    }
+html.dark .search-input-wrapper .search-input,
+html.dark .filter-select,
+html.dark .date-input,
+html.dark .page-size-select,
+html.dark .jump-input {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+}
 
-    .search-input-wrapper .search-input::placeholder {
-        color: #9ca3af;
-    }
+html.dark .search-input-wrapper .search-input::placeholder {
+    color: #9ca3af;
+}
 
-    .search-input-wrapper .search-icon {
-        color: #9ca3af;
-    }
+html.dark .search-input-wrapper .search-icon {
+    color: #9ca3af;
+}
 
-    .search-input-wrapper .search-input:focus,
-    .filter-select:focus,
-    .date-input:focus {
-        border-color: #60a5fa;
-        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1), 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
+html.dark .search-input-wrapper .search-input:focus,
+html.dark .filter-select:focus,
+html.dark .date-input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
 
-    .filter-select {
-        background-image: none !important;
-    }
+html.dark .filter-select {
+    background-image: none !important;
+}
 
-    .date-input::-webkit-calendar-picker-indicator {
-        color: #9ca3af;
-    }
+html.dark .date-input::-webkit-calendar-picker-indicator {
+    color: #9ca3af;
+}
 
-    .date-input::-webkit-calendar-picker-indicator:hover {
-        background: #4b5563;
-        color: #60a5fa;
-    }
+html.dark .date-input::-webkit-calendar-picker-indicator:hover {
+    background: #4b5563;
+    color: #60a5fa;
+}
 
-    .reset-btn {
-        background: #374151;
-        border-color: #4b5563;
-        color: #9ca3af;
-    }
+html.dark .reset-btn {
+    background: #374151;
+    border-color: #4b5563;
+    color: #9ca3af;
+}
 
-    .reset-btn:hover {
-        border-color: #f87171;
-        color: #f87171;
-        background: rgba(248, 113, 113, 0.1);
-    }
+html.dark .reset-btn:hover {
+    border-color: #f87171;
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.1);
+}
 
-    .filter-group.has-value .filter-label {
-        color: #60a5fa;
-    }
+html.dark .filter-group.has-value .filter-label {
+    color: #60a5fa;
+}
 
-    .filter-group.has-value .filter-select,
-    .filter-group.has-value .date-input {
-        border-color: #60a5fa;
-        background: rgba(96, 165, 250, 0.1);
-    }
+html.dark .filter-group.has-value .filter-select,
+html.dark .filter-group.has-value .date-input {
+    border-color: #60a5fa;
+    background: rgba(96, 165, 250, 0.1);
+}
 
-    .search-input-wrapper.has-value .search-input {
-        border-color: #60a5fa;
-        background: rgba(96, 165, 250, 0.1);
-    }
+html.dark .search-input-wrapper.has-value .search-input {
+    border-color: #60a5fa;
+    background: rgba(96, 165, 250, 0.1);
+}
 
-    .data-table th {
-        background: #374151;
-        color: #f9fafb;
-    }
+html.dark .data-table th {
+    background: #374151;
+    color: #f9fafb;
+}
 
-    .data-table td {
-        color: #e5e7eb;
-        border-color: #4b5563;
-    }
+html.dark .data-table td {
+    color: #e5e7eb;
+    border-color: #4b5563;
+}
 
-    .table-row:hover {
-        background: rgba(59, 130, 246, 0.1);
-    }
+html.dark .table-row:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
 
-    .pagination-container {
-        background: #374151;
-        border-color: #4b5563;
-    }
+html.dark .pagination-container {
+    background: #374151;
+    border-color: #4b5563;
+}
 
-    .pagination-btn {
-        background: #4b5563;
-        border-color: #6b7280;
-        color: #f9fafb;
-    }
+html.dark .pagination-btn {
+    background: #4b5563;
+    border-color: #6b7280;
+    color: #f9fafb;
+}
 
-    .pagination-btn:hover:not(:disabled) {
-        background: #6b7280;
-    }
+html.dark .pagination-btn:hover:not(:disabled) {
+    background: #6b7280;
 }
 
  /* High contrast mode */
@@ -1135,7 +1156,7 @@
 
      .data-table th,
      .data-table td {
-         border-bottom: 2px solid #000;
+         border-bottom: 2px solid #94a3b8;
      }
 
      .status-badge,
@@ -1181,7 +1202,7 @@
 
      .data-table th,
      .data-table td {
-         border: 1px solid #000 !important;
+         border: 1px solid #d1d5db !important;
          padding: 0.5rem !important;
      }
  }

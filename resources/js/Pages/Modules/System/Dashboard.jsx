@@ -12,7 +12,8 @@ import {
   TrendingUp,
   Database,
   Globe,
-  Key
+  Key,
+  HardDrive
 } from 'lucide-react';
 
 export default function SystemDashboard() {
@@ -80,6 +81,14 @@ export default function SystemDashboard() {
       href: '/system/menus',
       color: 'bg-red-500',
       stats: { total: 45, active: 42 }
+    },
+    {
+      name: 'Storage',
+      description: 'Manage attachments and file storage',
+      icon: HardDrive,
+      href: '/system/attachment-manager',
+      color: 'bg-slate-600',
+      stats: { total: 0, active: 0 }
     }
   ];
 
@@ -229,6 +238,14 @@ export default function SystemDashboard() {
             >
               <Package className="h-5 w-5 text-purple-600 dark:text-purple-400 mr-3" />
               <span className="text-purple-900 dark:text-purple-100 font-medium">Create Module</span>
+            </a>
+            
+            <a
+              href="/system/attachment-manager"
+              className="flex items-center p-4 bg-slate-50 dark:bg-slate-900/20 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900/30 transition-colors"
+            >
+              <HardDrive className="h-5 w-5 text-slate-600 dark:text-slate-400 mr-3" />
+              <span className="text-slate-900 dark:text-slate-100 font-medium">Storage & Attachments</span>
             </a>
           </div>
         </div>

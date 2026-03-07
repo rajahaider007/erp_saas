@@ -91,7 +91,7 @@ Work through these items **one by one**. Each item has a short title, descriptio
 ---
 
 ## 6. Dark/Light Mode — Some Forms Not Fully Themed
-**Status:** [ ] Not started
+**Status:** [x] Done
 
 **Issue:** When switching from dark to light (or vice versa), some forms don’t fully switch — some divs/elements don’t have theme classes.
 
@@ -106,7 +106,7 @@ Work through these items **one by one**. Each item has a short title, descriptio
 ---
 
 ## 7. Footer — System Footer Instead of Website Footer
-**Status:** [ ] Not started
+**Status:** [x] Done
 
 **Issue:** Current footer looks like a marketing/website footer; it should look like a system/app footer.
 
@@ -121,7 +121,7 @@ Work through these items **one by one**. Each item has a short title, descriptio
 ---
 
 ## 8. Unit Conversion Form — Design and Master–Detail
-**Status:** [ ] Not started
+**Status:** [x] Done
 
 **Issue:** “Create New Unit Conversion” form should be 100% consistent with system design and implemented as a master–detail form so multiple conversions can be added for a “from unit”.
 
@@ -136,7 +136,7 @@ Work through these items **one by one**. Each item has a short title, descriptio
 ---
 
 ## 9. Journal Voucher — Account Select (Search + Scroll + Dropdown)
-**Status:** [ ] Not started
+**Status:** [x] Done
 
 **Issue:** In Journal Voucher form, the “Account *” select has bad behavior when searching and scrolling: clicking an option from a lower select opens the dropdown of the select above (z-index/position/consistency issue).
 
@@ -151,7 +151,7 @@ Work through these items **one by one**. Each item has a short title, descriptio
 ---
 
 ## 10. Storage System — Visibility and Entry Point
-**Status:** [ ] Not started
+**Status:** [x] Done
 
 **Issue:** You designed a storage system but it’s not obvious where it lives in the app.
 

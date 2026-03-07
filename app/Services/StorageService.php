@@ -117,7 +117,13 @@ class StorageService
                 ->flatten()
                 ->toArray();
             
-            $attachments = array_unique(array_merge($entryAttachments, $transactionAttachments));
+            // Standalone files from file manager (company_files)
+            $companyFiles = DB::table('company_files')
+                ->where('comp_id', $companyId)
+                ->pluck('storage_filename')
+                ->toArray();
+
+            $attachments = array_unique(array_merge($entryAttachments, $transactionAttachments, $companyFiles));
             
             return array_filter($attachments); // Remove null/empty values
         } catch (\Exception $e) {

@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import App from '../../App.jsx';
 import FloatingCurrencyWidget from '../../../Components/FloatingCurrencyWidget';
-import Select2 from '../../../Components/Select2';
+import InlineSearchSelect from '../../../Components/InlineSearchSelect';
 import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
 import StorageWarning from '../../../Components/StorageWarning';
 
@@ -1027,7 +1027,7 @@ const OpeningVoucherCreate = () => {
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Account *
                           </label>
-                          <Select2
+                          <InlineSearchSelect
                             options={accounts.map(account => ({
                               value: account.id,
                               label: `${account.account_code} - ${account.account_name}`,
@@ -1067,7 +1067,7 @@ const OpeningVoucherCreate = () => {
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Currency
                           </label>
-                          <Select2
+                          <InlineSearchSelect
                             options={currencies.length > 0 ? currencies.map(currency => ({
                               value: currency.value,
                               label: `${currency.symbol} ${currency.label}`,

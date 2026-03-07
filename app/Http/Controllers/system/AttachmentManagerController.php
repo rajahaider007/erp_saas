@@ -7,7 +7,9 @@ use App\Http\Traits\CheckUserPermissions;
 use App\Services\StorageService;
 use App\Services\AuditLogService;
 use App\Models\Company;
+use App\Models\CompanyFile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -139,6 +141,73 @@ class AttachmentManagerController extends Controller
     }
 
     /**
+     * Upload files from file manager (standalone — stored in company_files)
+     */
+    public function upload(Request $request)
+    {
+        $this->requirePermission($request, null, 'can_add');
+
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        if (!$compId) {
+            return response()->json(['success' => false, 'message' => 'Company context required'], 403);
+        }
+
+        $request->validate([
+            'files' => 'required|array',
+            'files.*' => 'required|file|max:30720|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif', // 30MB per file
+        ]);
+
+        $uploaded = [];
+        $errors = [];
+
+        foreach ($request->file('files') as $file) {
+            $check = StorageService::canUploadFile($compId, $file->getSize());
+            if (!$check['can_upload']) {
+                $errors[] = $file->getClientOriginalName() . ': Storage limit exceeded.';
+                continue;
+            }
+
+            $filename = time() . '_' . uniqid() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+            $path = $file->storeAs('public/voucher-attachments', $filename);
+
+            CompanyFile::create([
+                'comp_id' => $compId,
+                'storage_filename' => $filename,
+                'original_name' => $file->getClientOriginalName(),
+                'file_size' => $file->getSize(),
+                'mime_type' => $file->getMimeType(),
+            ]);
+
+            $uploaded[] = [
+                'filename' => $filename,
+                'original_name' => $file->getClientOriginalName(),
+                'size' => $file->getSize(),
+                'url' => url('storage/voucher-attachments/' . $filename),
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => count($uploaded) . ' file(s) uploaded.',
+            'uploaded' => $uploaded,
+            'errors' => $errors,
+        ]);
+    }
+
+    /**
+     * Get storage usage for current company (API for file manager)
+     */
+    public function storageUsage(Request $request)
+    {
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        if (!$compId) {
+            return response()->json(['success' => false], 403);
+        }
+        $info = StorageService::getCompanyStorageUsage($compId);
+        return response()->json(array_merge(['success' => true], $info));
+    }
+
+    /**
      * Get filtered attachments based on criteria
      */
     private function getFilteredAttachments($compId, $filters)
@@ -204,7 +273,8 @@ class AttachmentManagerController extends Controller
                     'voucher_number' => $attachment->voucher_number,
                     'description' => $attachment->entry_description,
                     'attachment_type' => $attachment->attachment_type,
-                    'url' => url('storage/voucher-attachments/' . $attachment->filename)
+                    'url' => url('storage/voucher-attachments/' . $attachment->filename),
+                    'last_modified' => date('Y-m-d H:i:s', filemtime($filePath)),
                 ];
             }
         }
@@ -270,9 +340,50 @@ class AttachmentManagerController extends Controller
             }
         }
 
+        // Add standalone company files (file manager uploads)
+        $companyFiles = DB::table('company_files')
+            ->where('comp_id', $compId)
+            ->get();
+
+        foreach ($companyFiles as $cf) {
+            $filePath = storage_path('app/public/voucher-attachments/' . $cf->storage_filename);
+            if (!file_exists($filePath)) {
+                continue;
+            }
+            $fileSize = filesize($filePath);
+            $fileExtension = pathinfo($cf->storage_filename, PATHINFO_EXTENSION);
+
+            if (!empty($filters['file_type']) && strtolower($fileExtension) !== strtolower($filters['file_type'])) {
+                continue;
+            }
+            if (!empty($filters['search'])) {
+                $searchTerm = strtolower($filters['search']);
+                if (strpos(strtolower($cf->storage_filename), $searchTerm) === false &&
+                    strpos(strtolower($cf->original_name ?? ''), $searchTerm) === false) {
+                    continue;
+                }
+            }
+
+            $attachments[] = [
+                'filename' => $cf->storage_filename,
+                'size' => $fileSize,
+                'size_mb' => round($fileSize / (1024 * 1024), 2),
+                'file_type' => $fileExtension,
+                'voucher_date' => $cf->created_at,
+                'voucher_type' => null,
+                'voucher_number' => '—',
+                'description' => null,
+                'attachment_type' => 'company_file',
+                'url' => url('storage/voucher-attachments/' . $cf->storage_filename),
+                'last_modified' => $cf->created_at,
+            ];
+        }
+
         // Sort by date (newest first)
         usort($attachments, function($a, $b) {
-            return strtotime($b['voucher_date']) - strtotime($a['voucher_date']);
+            $tA = is_string($a['voucher_date']) ? strtotime($a['voucher_date']) : (is_object($a['voucher_date']) ? $a['voucher_date']->timestamp : 0);
+            $tB = is_string($b['voucher_date']) ? strtotime($b['voucher_date']) : (is_object($b['voucher_date']) ? $b['voucher_date']->timestamp : 0);
+            return $tB - $tA;
         });
 
         return $attachments;
@@ -320,6 +431,12 @@ class AttachmentManagerController extends Controller
                         }
                     }
                 }
+
+                // Remove from company_files if present (standalone file manager uploads)
+                DB::table('company_files')
+                    ->where('comp_id', $compId)
+                    ->where('storage_filename', $attachmentId)
+                    ->delete();
                 
                 return true;
             }
