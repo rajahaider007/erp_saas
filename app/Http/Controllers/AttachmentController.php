@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Arr;
 use App\Services\AuditLogService;
 use App\Services\StorageService;
+use Illuminate\Support\Facades\Storage;
 
 class AttachmentController extends Controller
 {
@@ -65,16 +66,17 @@ class AttachmentController extends Controller
                 }
             }
 
-            // Form folder: form_slug (e.g. journal-voucher, cash-voucher) so file manager shows by form
+            // Form folder under Internal Storage: internal-storage/{form_slug}
             $formSlug = $request->input('form_slug', 'general');
             $formSlug = preg_replace('/[^a-z0-9_-]/', '', strtolower($formSlug)) ?: 'general';
-            $storePath = 'public/voucher-attachments/' . $formSlug;
-            Storage::makeDirectory($storePath);
+            $base = StorageService::attachmentsBasePath();
+            $storePath = $base . '/' . $formSlug;
+            Storage::disk('public')->makeDirectory($storePath);
 
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
                     $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
-                    $path = $file->storeAs($storePath, $filename);
+                    $path = $file->storeAs($storePath, $filename, 'public');
                     $relativeId = $formSlug . '/' . $filename;
                     $attachmentData = [
                         'id' => $relativeId,
@@ -83,7 +85,7 @@ class AttachmentController extends Controller
                         'path' => $path,
                         'size' => $file->getSize(),
                         'mime_type' => $file->getMimeType(),
-                        'url' => url('storage/voucher-attachments/' . $relativeId),
+                        'url' => url(StorageService::attachmentUrlPrefix() . $relativeId),
                         'form_slug' => $formSlug,
                     ];
                     
@@ -119,7 +121,7 @@ class AttachmentController extends Controller
                 // Handle single file upload (for entry attachments)
                 $file = $request->file('attachment');
                 $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
-                $path = $file->storeAs($storePath, $filename);
+                $path = $file->storeAs($storePath, $filename, 'public');
                 $relativeId = $formSlug . '/' . $filename;
                 $attachmentData = [
                     'id' => $relativeId,
@@ -128,7 +130,7 @@ class AttachmentController extends Controller
                     'path' => $path,
                     'size' => $file->getSize(),
                     'mime_type' => $file->getMimeType(),
-                    'url' => url('storage/voucher-attachments/' . $relativeId),
+                    'url' => url(StorageService::attachmentUrlPrefix() . $relativeId),
                     'form_slug' => $formSlug,
                 ];
                 
@@ -202,9 +204,10 @@ class AttachmentController extends Controller
             abort(400, 'Invalid filename');
         }
 
-        $filePath = storage_path('app/public/voucher-attachments/' . $filename);
-        
-        // Check if file exists
+        $filePath = StorageService::attachmentFullPath($filename);
+        if (!file_exists($filePath) && strpos($filename, 'general/') !== 0) {
+            $filePath = storage_path('app/public/voucher-attachments/' . $filename);
+        }
         if (!file_exists($filePath)) {
             abort(404, 'File not found');
         }
@@ -270,9 +273,10 @@ class AttachmentController extends Controller
             abort(400, 'Invalid filename');
         }
 
-        $filePath = storage_path('app/public/voucher-attachments/' . $filename);
-        
-        // Check if file exists
+        $filePath = StorageService::attachmentFullPath($filename);
+        if (!file_exists($filePath) && strpos($filename, 'general/') !== 0) {
+            $filePath = storage_path('app/public/voucher-attachments/' . $filename);
+        }
         if (!file_exists($filePath)) {
             abort(404, 'File not found');
         }
@@ -339,13 +343,16 @@ class AttachmentController extends Controller
                 $attachmentIds = json_decode($voucher->attachments, true);
                 if (is_array($attachmentIds)) {
                     foreach ($attachmentIds as $attachmentId) {
-                        $filePath = storage_path('app/public/voucher-attachments/' . $attachmentId);
+                        $filePath = StorageService::attachmentFullPath($attachmentId);
+                        if (!file_exists($filePath)) {
+                            $filePath = storage_path('app/public/voucher-attachments/' . $attachmentId);
+                        }
                         if (file_exists($filePath)) {
                             $attachments[] = [
                                 'id' => $attachmentId,
                                 'name' => $attachmentId,
                                 'size' => filesize($filePath),
-                                'url' => url('/storage/voucher-attachments/' . $attachmentId),
+                                'url' => url(StorageService::attachmentUrlPrefix() . $attachmentId),
                                 'download_url' => url('/attachments/download/' . $attachmentId)
                             ];
                         }

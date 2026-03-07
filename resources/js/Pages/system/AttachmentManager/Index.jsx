@@ -103,18 +103,25 @@ export default function FileManagerIndex() {
   const loadFiles = async () => {
     setLoading(true);
     try {
-      const params = { search: search || undefined, folder: selectedFolder || undefined, file_type: fileTypeFilter || undefined };
+      const params = {};
+      if (search && String(search).trim()) params.search = String(search).trim();
+      if (selectedFolder) params.folder = selectedFolder;
+      if (fileTypeFilter) params.file_type = fileTypeFilter;
       const q = new URLSearchParams(params);
       const res = await fetch('/api/attachment-manager/attachments?' + q, {
+        credentials: 'include',
         headers: { Accept: 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
       });
-      if (res.ok) {
-        const data = await res.json();
-        setFiles(data.data || []);
-        if (data.folders && data.folders.length) setFolders(data.folders);
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success !== false) {
+        setFiles(Array.isArray(data.data) ? data.data : []);
+        setFolders(Array.isArray(data.folders) ? data.folders : []);
+      } else {
+        setAlert({ type: 'error', message: data.message || 'Failed to load files' });
       }
     } catch (e) {
       setAlert({ type: 'error', message: 'Failed to load files' });
+      setFiles([]);
     } finally {
       setLoading(false);
     }
@@ -123,6 +130,7 @@ export default function FileManagerIndex() {
   const loadStorage = async () => {
     try {
       const res = await fetch('/api/attachment-manager/storage-usage', {
+        credentials: 'include',
         headers: { Accept: 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
       });
       if (res.ok) {
@@ -143,6 +151,7 @@ export default function FileManagerIndex() {
     try {
       const res = await fetch('/api/attachment-manager/create-folder', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
@@ -155,7 +164,8 @@ export default function FileManagerIndex() {
         setAlert({ type: 'success', message: data.message });
         setNewFolderModalOpen(false);
         setNewFolderName('');
-        loadFiles();
+        await loadFiles();
+        if (data.folder?.slug) setSelectedFolder(data.folder.slug);
       } else {
         setAlert({ type: 'error', message: data.message || 'Could not create folder' });
       }
@@ -203,6 +213,7 @@ export default function FileManagerIndex() {
     try {
       const res = await fetch('/api/attachment-manager/delete', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
@@ -232,6 +243,7 @@ export default function FileManagerIndex() {
     try {
       const res = await fetch('/api/attachment-manager/upload', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
         body: form,
       });
@@ -239,8 +251,8 @@ export default function FileManagerIndex() {
       if (res.ok) {
         setAlert({ type: 'success', message: data.message });
         setUploadModalOpen(false);
-        loadFiles();
-        loadStorage();
+        await loadFiles();
+        await loadStorage();
         if (fileInputRef.current) fileInputRef.current.value = '';
       } else setAlert({ type: 'error', message: data.message || 'Upload failed' });
     } catch (e) {

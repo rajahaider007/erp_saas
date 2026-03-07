@@ -228,8 +228,6 @@ Work through these items **one by one**. Each item has a short title, descriptio
 | 9 | Journal Voucher Account select    | Medium                     |
 |10 | Storage system entry point        | Quick win                  |
 |11 | i18n (JSON, EN/UR, structure)     | Larger (do when ready)     |
-|11 | i18n (JSON, EN/UR, structure)     | Larger (do when ready)     |
-
 |12 | Overall professional design       | Good as final pass         |
 
 ---

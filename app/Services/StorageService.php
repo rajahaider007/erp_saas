@@ -8,6 +8,47 @@ use Illuminate\Support\Facades\Log;
 
 class StorageService
 {
+    /** Base folder inside storage/app/public for voucher form attachments (Internal Storage) */
+    public static function attachmentsBasePath(): string
+    {
+        return config('filesystems.attachments_internal_base', 'internal-storage');
+    }
+
+    /** General folder is outside internal-storage: storage/app/public/general/ — any files can go here */
+    public static function generalBasePath(): string
+    {
+        return 'general';
+    }
+
+    /** Full filesystem path for an attachment relative path (e.g. journal-voucher/file.pdf or general/file.pdf) */
+    public static function attachmentFullPath(string $relativePath): string
+    {
+        $relativePath = ltrim($relativePath, '/');
+        if ($relativePath === '' || $relativePath === 'general') {
+            return storage_path('app/public/general');
+        }
+        if (strpos($relativePath, 'general/') === 0) {
+            return storage_path('app/public/' . $relativePath);
+        }
+        return storage_path('app/public/' . self::attachmentsBasePath() . '/' . $relativePath);
+    }
+
+    /** URL for an attachment (relative path e.g. journal-voucher/file.pdf or general/sub/file.pdf) */
+    public static function attachmentUrl(string $relativePath): string
+    {
+        $relativePath = ltrim($relativePath, '/');
+        if ($relativePath === '' || strpos($relativePath, 'general/') === 0) {
+            return url('storage/' . $relativePath);
+        }
+        return url('storage/' . self::attachmentsBasePath() . '/' . $relativePath);
+    }
+
+    /** URL prefix for voucher attachment links (e.g. storage/internal-storage/) — use attachmentUrl() when path may be general */
+    public static function attachmentUrlPrefix(): string
+    {
+        return 'storage/' . self::attachmentsBasePath() . '/';
+    }
+
     /**
      * Get storage usage for a company
      */
@@ -69,7 +110,10 @@ class StorageService
             $attachments = self::getCompanyAttachments($companyId);
             
             foreach ($attachments as $attachment) {
-                $filePath = storage_path('app/public/voucher-attachments/' . $attachment);
+                $filePath = self::attachmentFullPath($attachment);
+                if (!file_exists($filePath)) {
+                    $filePath = storage_path('app/public/voucher-attachments/' . $attachment);
+                }
                 if (file_exists($filePath)) {
                     $totalBytes += filesize($filePath);
                 }
@@ -194,7 +238,10 @@ class StorageService
                 ->get();
             
             foreach ($entryAttachments as $attachment) {
-                $filePath = storage_path('app/public/voucher-attachments/' . $attachment->attachment_id);
+                $filePath = self::attachmentFullPath($attachment->attachment_id);
+                if (!file_exists($filePath)) {
+                    $filePath = storage_path('app/public/voucher-attachments/' . $attachment->attachment_id);
+                }
                 if (file_exists($filePath)) {
                     $fileSize = filesize($filePath);
                     $breakdown['transaction_entries'] += $fileSize;
@@ -220,7 +267,10 @@ class StorageService
                 $attachments = json_decode($transaction->attachments, true);
                 if (is_array($attachments)) {
                     foreach ($attachments as $attachment) {
-                        $filePath = storage_path('app/public/voucher-attachments/' . $attachment);
+                        $filePath = self::attachmentFullPath($attachment);
+                        if (!file_exists($filePath)) {
+                            $filePath = storage_path('app/public/voucher-attachments/' . $attachment);
+                        }
                         if (file_exists($filePath)) {
                             $fileSize = filesize($filePath);
                             $breakdown['voucher_attachments'] += $fileSize;

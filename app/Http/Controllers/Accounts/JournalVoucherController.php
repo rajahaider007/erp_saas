@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\CheckUserPermissions;
 use App\Services\AuditLogService;
 use App\Services\RecoveryService;
+use App\Services\StorageService;
 use App\Helpers\FiscalYearHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -545,13 +546,15 @@ class JournalVoucherController extends Controller
             
             if (is_array($attachmentIds)) {
                 foreach ($attachmentIds as $attachmentId) {
-                    $filePath = storage_path('app/public/voucher-attachments/' . $attachmentId);
-                    
+                    $filePath = StorageService::attachmentFullPath($attachmentId);
+                    if (!file_exists($filePath)) {
+                        $filePath = storage_path('app/public/voucher-attachments/' . $attachmentId);
+                    }
                     if (file_exists($filePath)) {
                         $attachments[] = [
                             'id' => $attachmentId,
                             'original_name' => $attachmentId,
-                            'url' => url('/storage/voucher-attachments/' . $attachmentId),
+                            'url' => url(StorageService::attachmentUrlPrefix() . $attachmentId),
                             'size' => filesize($filePath)
                         ];
                     } else {
@@ -571,7 +574,7 @@ class JournalVoucherController extends Controller
                                 $attachments[] = [
                                     'id' => $fileName,
                                     'original_name' => $originalFileName, // Use the original filename
-                                    'url' => url('/storage/voucher-attachments/' . $fileName),
+                                    'url' => url(StorageService::attachmentUrlPrefix() . $fileName),
                                     'size' => filesize($file)
                                 ];
                                 break;
@@ -592,7 +595,7 @@ class JournalVoucherController extends Controller
                                     $attachments[] = [
                                         'id' => $fileName,
                                         'original_name' => $originalFileName,
-                                        'url' => url('/storage/voucher-attachments/' . $fileName),
+                                        'url' => url(StorageService::attachmentUrlPrefix() . $fileName),
                                         'size' => filesize($file)
                                     ];
                                     break;
@@ -628,7 +631,7 @@ class JournalVoucherController extends Controller
                                 $attachments[] = [
                                     'id' => $selectedFile['name'],
                                     'original_name' => $originalFileName,
-                                    'url' => url('/storage/voucher-attachments/' . $selectedFile['name']),
+                                    'url' => url(StorageService::attachmentUrlPrefix() . $selectedFile['name']),
                                     'size' => filesize($selectedFile['file'])
                                 ];
                             }

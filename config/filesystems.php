@@ -77,4 +77,17 @@ return [
         public_path('storage') => storage_path('app/public'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Internal Storage (voucher form attachments)
+    |--------------------------------------------------------------------------
+    | Form folders (journal-voucher, cash-voucher, etc.) live under:
+    | storage/app/public/{attachments_internal_base}/
+    |
+    | "General" folder is kept outside — storage/app/public/general/ — so any
+    | files (from file manager or elsewhere) can be stored there.
+    */
+
+    'attachments_internal_base' => 'internal-storage',
+
 ];
