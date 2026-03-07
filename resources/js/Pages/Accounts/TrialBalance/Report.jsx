@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   Search, 
   Filter, 
@@ -130,6 +131,7 @@ const TrialBalanceReport = () => {
 
   // Render level 4 (transactional accounts)
   const renderLevel4 = (accounts, level3Key) => {
+  const { t } = useTranslations();
     if (!accounts || accounts.length === 0) return null;
 
     return accounts.map((account, index) => (
@@ -138,10 +140,10 @@ const TrialBalanceReport = () => {
           <span className="account-code">{account.account_code}</span>
           {account.account_name}
           {account.is_transactional && (
-            <span className="badge badge-trans">Transactional</span>
+            <span className="badge badge-trans">{t('accounts.trial_balance.report.transactional')}</span>
           )}
           {account.is_cash_account && (
-            <span className="badge badge-cash">CASH</span>
+            <span className="badge badge-cash">{t('accounts.trial_balance.report.cash')}</span>
           )}
         </td>
         <td className="number-col">
@@ -165,6 +167,7 @@ const TrialBalanceReport = () => {
 
   // Render level 3 accounts
   const renderLevel3 = (level3Accounts, level2Key) => {
+  const { t } = useTranslations();
     if (!level3Accounts || Object.keys(level3Accounts).length === 0) return null;
 
     return Object.entries(level3Accounts).map(([key, level3]) => {
@@ -187,10 +190,10 @@ const TrialBalanceReport = () => {
               <span className="account-code">{level3.account_code}</span>
               {level3.account_name}
               {level3.supports_children && (
-                <span className="badge badge-parent">Parent</span>
+                <span className="badge badge-parent">{t('accounts.trial_balance.report.parent')}</span>
               )}
               {level3.is_cash_account && (
-                <span className="badge badge-cash">CASH</span>
+                <span className="badge badge-cash">{t('accounts.trial_balance.report.cash')}</span>
               )}
             </td>
             <td className="number-col">
@@ -217,6 +220,7 @@ const TrialBalanceReport = () => {
 
   // Render level 2 accounts
   const renderLevel2 = (level2Accounts, level1Key) => {
+  const { t } = useTranslations();
     if (!level2Accounts || Object.keys(level2Accounts).length === 0) return null;
 
     return Object.entries(level2Accounts).map(([key, level2]) => {
@@ -239,7 +243,7 @@ const TrialBalanceReport = () => {
               <span className="account-code">{level2.account_code}</span>
               {level2.account_name}
               {level2.supports_children && (
-                <span className="badge badge-parent">Parent</span>
+                <span className="badge badge-parent">{t('accounts.trial_balance.report.parent')}</span>
               )}
             </td>
             <td className="number-col">
@@ -266,6 +270,7 @@ const TrialBalanceReport = () => {
 
   // Render flat data for specific level
   const renderFlatData = () => {
+  const { t } = useTranslations();
     if (!trialBalanceData || trialBalanceData.length === 0) return null;
 
     return trialBalanceData.map((account, index) => (
@@ -281,7 +286,7 @@ const TrialBalanceReport = () => {
             </div>
           )}
           {account.is_transactional === 1 && (
-            <span className="badge badge-trans">Transactional</span>
+            <span className="badge badge-trans">{t('accounts.trial_balance.report.transactional')}</span>
           )}
         </td>
         <td className="number-col">
@@ -305,6 +310,7 @@ const TrialBalanceReport = () => {
 
   // Render level 1 accounts (hierarchical)
   const renderLevel1 = () => {
+  const { t } = useTranslations();
     if (!trialBalanceData || trialBalanceData.length === 0) return null;
 
     return trialBalanceData.map((level1, index) => {
@@ -326,7 +332,7 @@ const TrialBalanceReport = () => {
               )}
               <span className="account-code">{level1.account_code}</span>
               <strong>{level1.account_name}</strong>
-              <span className="badge badge-parent">Parent</span>
+              <span className="badge badge-parent">{t('accounts.trial_balance.report.parent')}</span>
             </td>
             <td className="number-col">
               <span className={level1.debit_total > 0 ? 'amount-debit' : 'zero-amount'}>
@@ -380,24 +386,24 @@ const TrialBalanceReport = () => {
                 value={printOrientation}
                 onChange={(e) => setPrintOrientation(e.target.value)}
                 className="form-control form-control-sm"
-                title="Print Orientation"
+                title={t('accounts.trial_balance.report.print_orientation')}
               >
-                <option value="portrait">Portrait</option>
-                <option value="landscape">Landscape</option>
+                <option value="portrait">{t('accounts.trial_balance.report.portrait')}</option>
+                <option value="landscape">{t('accounts.trial_balance.report.landscape')}</option>
               </select>
               {isHierarchical && (
                 <>
                   <button 
                     className="btn btn-icon" 
                     onClick={expandAll}
-                    title="Expand All"
+                    title={t('accounts.trial_balance.report.expand_all')}
                   >
                     <ChevronDown size={20} />
                   </button>
                   <button 
                     className="btn btn-icon" 
                     onClick={collapseAll}
-                    title="Collapse All"
+                    title={t('accounts.trial_balance.report.collapse_all')}
                   >
                     <ChevronRight size={20} />
                   </button>
@@ -406,28 +412,28 @@ const TrialBalanceReport = () => {
               <button 
                 className="btn btn-icon" 
                 onClick={handleBackToFilters}
-                title="Back to Filters"
+                title={t('accounts.trial_balance.report.back_to_filters')}
               >
                 <Filter size={20} />
               </button>
               <button 
                 className="btn btn-icon" 
                 onClick={handlePrint}
-                title="Print Report"
+                title={t('accounts.trial_balance.report.print_report')}
               >
                 <Printer size={20} />
               </button>
               <button 
                 className="btn btn-icon" 
                 onClick={handleExportExcel}
-                title="Export to CSV"
+                title={t('accounts.trial_balance.report.export_to_csv')}
               >
                 <FileText size={20} />
               </button>
               <button 
                 className="btn btn-icon" 
                 onClick={handleExportXLSX}
-                title="Export to Excel (XLSX)"
+                title={t('accounts.trial_balance.report.export_to_excel_xlsx')}
               >
                 <Download size={20} />
               </button>
@@ -437,17 +443,17 @@ const TrialBalanceReport = () => {
 
         {/* Applied Filters Display */}
         <div className="applied-filters-container">
-          <div className="applied-filters-title">Applied Filters:</div>
+          <div className="applied-filters-title">{t('accounts.trial_balance.report.applied_filters')}</div>
           <div className="applied-filters-list">
             {filters?.from_date && (
               <div className="filter-badge">
-                <span className="filter-badge-label">From:</span>
+                <span className="filter-badge-label">{t('accounts.trial_balance.report.from')}</span>
                 <span className="filter-badge-value">{filters.from_date}</span>
               </div>
             )}
             {filters?.to_date && (
               <div className="filter-badge">
-                <span className="filter-badge-label">To:</span>
+                <span className="filter-badge-label">{t('accounts.trial_balance.report.to')}</span>
                 <span className="filter-badge-value">{filters.to_date}</span>
               </div>
             )}
@@ -460,13 +466,13 @@ const TrialBalanceReport = () => {
             {loading ? (
               <div className="loading-state">
                 <div className="loading-spinner"></div>
-                <p>Loading trial balance...</p>
+                <p>{t('accounts.trial_balance.report.loading_trial_balance')}</p>
               </div>
             ) : trialBalanceData?.length === 0 ? (
               <div className="empty-state">
                 <Database className="empty-icon" />
-                <h3>No accounts found</h3>
-                <p>Try adjusting your filters to see results</p>
+                <h3>{t('accounts.trial_balance.report.no_accounts_found')}</h3>
+                <p>{t('accounts.trial_balance.report.try_adjusting_your_filters_to_see_result')}</p>
                 <button 
                   className="btn btn-primary mt-4"
                   onClick={handleBackToFilters}
@@ -480,10 +486,10 @@ const TrialBalanceReport = () => {
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th>ACCOUNT</th>
-                      <th className="number-col">DEBIT</th>
-                      <th className="number-col">CREDIT</th>
-                      <th className="number-col">BALANCE</th>
+                      <th>{t('accounts.trial_balance.report.account')}</th>
+                      <th className="number-col">{t('accounts.trial_balance.report.debit')}</th>
+                      <th className="number-col">{t('accounts.trial_balance.report.credit')}</th>
+                      <th className="number-col">{t('accounts.trial_balance.report.balance')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -491,7 +497,7 @@ const TrialBalanceReport = () => {
 
                     {/* Grand Total Row */}
                     <tr className="grand-total-row">
-                      <td><strong>GRAND TOTAL</strong></td>
+                      <td><strong>{t('accounts.trial_balance.report.grand_total')}</strong></td>
                       <td className="number-col">
                         <strong>{formatCurrency(grandTotalDebit)}</strong>
                       </td>
@@ -508,18 +514,18 @@ const TrialBalanceReport = () => {
                 {/* Summary Card */}
                 {trialBalanceData.length > 0 && (
                   <div className="report-summary-card">
-                    <h3 className="summary-title">Report Summary</h3>
+                    <h3 className="summary-title">{t('accounts.trial_balance.report.report_summary')}</h3>
                     <div className="grid grid-cols-3 gap-4">
                       <div className="text-center">
-                        <p className="text-sm opacity-80">Total Debit</p>
+                        <p className="text-sm opacity-80">{t('accounts.trial_balance.report.total_debit')}</p>
                         <p className="text-2xl font-bold">{formatCurrency(grandTotalDebit)}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-sm opacity-80">Total Credit</p>
+                        <p className="text-sm opacity-80">{t('accounts.trial_balance.report.total_credit')}</p>
                         <p className="text-2xl font-bold">{formatCurrency(grandTotalCredit)}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-sm opacity-80">Difference</p>
+                        <p className="text-sm opacity-80">{t('accounts.trial_balance.report.difference')}</p>
                         <p className="text-2xl font-bold">{formatCurrency(Math.abs(grandTotalDebit - grandTotalCredit))}</p>
                       </div>
                     </div>
@@ -535,8 +541,8 @@ const TrialBalanceReport = () => {
           <button 
             className="scroll-to-top-btn"
             onClick={scrollToTop}
-            title="Scroll to Top"
-            aria-label="Scroll to top"
+            title={t('accounts.trial_balance.report.scroll_to_top')}
+            aria-label={t('accounts.trial_balance.report.scroll_to_top')}
           >
             <ArrowUp size={20} />
           </button>

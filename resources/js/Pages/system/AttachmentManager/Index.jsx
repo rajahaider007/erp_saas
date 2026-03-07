@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import App from '../../App.jsx';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const formatFileSize = (bytes) => {
   if (bytes === 0) return '0 B';
@@ -46,6 +47,7 @@ const formatRelativeTime = (dateStr) => {
 };
 
 const getFileIcon = (type) => {
+const { t } = useTranslations();
   const t = (type || '').toLowerCase();
   if (['pdf'].includes(t)) return '📄';
   if (['doc', 'docx'].includes(t)) return '📝';
@@ -120,7 +122,7 @@ export default function FileManagerIndex() {
         setAlert({ type: 'error', message: data.message || 'Failed to load files' });
       }
     } catch (e) {
-      setAlert({ type: 'error', message: 'Failed to load files' });
+      setAlert({ type: 'error', message: t('system.attachment_manager.index.msg_failed_to_load_files') });
       setFiles([]);
     } finally {
       setLoading(false);
@@ -170,7 +172,7 @@ export default function FileManagerIndex() {
         setAlert({ type: 'error', message: data.message || 'Could not create folder' });
       }
     } catch (e) {
-      setAlert({ type: 'error', message: 'Could not create folder' });
+      setAlert({ type: 'error', message: t('system.attachment_manager.index.msg_could_not_create_folder') });
     } finally {
       setCreatingFolder(false);
     }
@@ -203,6 +205,7 @@ export default function FileManagerIndex() {
     );
   };
   const selectAll = () => {
+  const { t } = useTranslations();
     if (selected.length === files.length) setSelected([]);
     else setSelected(files.map((f) => f.filename));
   };
@@ -229,7 +232,7 @@ export default function FileManagerIndex() {
         loadStorage();
       } else setAlert({ type: 'error', message: data.message || 'Delete failed' });
     } catch (e) {
-      setAlert({ type: 'error', message: 'Delete failed' });
+      setAlert({ type: 'error', message: t('system.attachment_manager.index.msg_delete_failed') });
     }
   };
 
@@ -256,7 +259,7 @@ export default function FileManagerIndex() {
         if (fileInputRef.current) fileInputRef.current.value = '';
       } else setAlert({ type: 'error', message: data.message || 'Upload failed' });
     } catch (e) {
-      setAlert({ type: 'error', message: 'Upload failed' });
+      setAlert({ type: 'error', message: t('system.attachment_manager.index.msg_upload_failed') });
     } finally {
       setUploading(false);
     }
@@ -272,6 +275,7 @@ export default function FileManagerIndex() {
   };
 
   const onDrop = (e) => {
+  const { t } = useTranslations();
     e.preventDefault();
     setDragOver(false);
     if (uploading) return;
@@ -315,18 +319,18 @@ export default function FileManagerIndex() {
               </div>
               <div className="min-w-0">
                 <p className="font-medium truncate">{company?.company_name || 'Company'}</p>
-                <p className="text-xs text-gray-400 truncate">File Manager</p>
+                <p className="text-xs text-gray-400 truncate">{t('system.attachment_manager.index.file_manager')}</p>
               </div>
             </div>
           </div>
           <nav className="p-2 flex-1 overflow-y-auto">
             <div className="flex items-center justify-between px-3 py-1.5">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Folders</p>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('system.attachment_manager.index.folders')}</p>
               <button
                 type="button"
                 onClick={() => setNewFolderModalOpen(true)}
                 className="p-1.5 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white"
-                title="New folder"
+                title={t('system.attachment_manager.index.new_folder')}
               >
                 <FolderPlus className="w-4 h-4" />
               </button>
@@ -358,7 +362,7 @@ export default function FileManagerIndex() {
           </nav>
           <div className="p-4 border-t border-gray-700 space-y-4">
             <div>
-              <p className="text-xs font-medium text-gray-400 mb-1">Space</p>
+              <p className="text-xs font-medium text-gray-400 mb-1">{t('system.attachment_manager.index.space')}</p>
               <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all ${
@@ -372,7 +376,7 @@ export default function FileManagerIndex() {
               </p>
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-400 mb-1">Files</p>
+              <p className="text-xs font-medium text-gray-400 mb-1">{t('system.attachment_manager.index.files')}</p>
               <p className="text-sm font-medium">{files.length} items</p>
             </div>
           </div>
@@ -386,7 +390,7 @@ export default function FileManagerIndex() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder={t('system.attachment_manager.index.search')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -439,7 +443,7 @@ export default function FileManagerIndex() {
                   <button
                     onClick={() => selected.forEach((fn) => { const f = files.find((x) => x.filename === fn); if (f) window.open(f.url, '_blank'); })}
                     className="p-2 rounded-lg hover:bg-gray-700 text-gray-400 hover:text-white"
-                    title="Download selected"
+                    title={t('system.attachment_manager.index.download_selected')}
                   >
                     <Download className="w-5 h-5" />
                   </button>
@@ -480,8 +484,8 @@ export default function FileManagerIndex() {
               <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-gray-900/80 backdrop-blur-sm">
                 <div className="flex flex-col items-center gap-4 p-6 bg-gray-800 rounded-2xl border border-gray-700 shadow-xl">
                   <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                  <p className="text-lg font-medium text-white">Uploading files…</p>
-                  <p className="text-sm text-gray-400">Please wait, do not close the page.</p>
+                  <p className="text-lg font-medium text-white">{t('system.attachment_manager.index.uploading_files')}</p>
+                  <p className="text-sm text-gray-400">{t('system.attachment_manager.index.please_wait_do_not_close_the_page')}</p>
                 </div>
               </div>
             )}
@@ -520,11 +524,11 @@ export default function FileManagerIndex() {
                           <th
                             className="px-4 py-3 cursor-pointer hover:bg-gray-700 w-40 select-none"
                             onClick={() => { setSortBy('last_modified'); setSortAsc((s) => !s); }}
-                            title="Click to sort by Last modified"
+                            title={t('system.attachment_manager.index.click_to_sort_by_last_modified')}
                           >
                             Last modified {sortBy === 'last_modified' && (sortAsc ? ' ↑' : ' ↓')}
                           </th>
-                          <th className="px-4 py-3 w-24 text-right">Actions</th>
+                          <th className="px-4 py-3 w-24 text-right">{t('system.attachment_manager.index.actions')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-700">
@@ -564,7 +568,7 @@ export default function FileManagerIndex() {
                                 href={f.download_url || f.url}
                                 download
                                 className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded inline-block"
-                                title="Download"
+                                title={t('system.attachment_manager.index.download')}
                               >
                                 <Download className="w-4 h-4" />
                               </a>
@@ -600,7 +604,7 @@ export default function FileManagerIndex() {
                           href={f.download_url || f.url}
                           download
                           className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded mt-2 inline-block"
-                          title="Download"
+                          title={t('system.attachment_manager.index.download')}
                         >
                           <Download className="w-4 h-4" />
                         </a>
@@ -612,8 +616,8 @@ export default function FileManagerIndex() {
                 {!loading && files.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                     <File className="w-16 h-16 mb-4 opacity-50" />
-                    <p className="text-lg font-medium">No files yet</p>
-                    <p className="text-sm mt-1">Upload files or they will appear when attached to vouchers.</p>
+                    <p className="text-lg font-medium">{t('system.attachment_manager.index.no_files_yet')}</p>
+                    <p className="text-sm mt-1">{t('system.attachment_manager.index.upload_files_or_they_will_appear_when_at')}</p>
                     <button
                       onClick={() => !uploading && fileInputRef.current?.click()}
                       disabled={uploading}
@@ -643,7 +647,7 @@ export default function FileManagerIndex() {
       {uploadModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="bg-gray-800 rounded-xl border border-gray-700 w-full max-w-md p-6">
-            <h3 className="text-lg font-semibold mb-4">Upload files</h3>
+            <h3 className="text-lg font-semibold mb-4">{t('system.attachment_manager.index.upload_files')}</h3>
             <input
               type="file"
               multiple
@@ -657,7 +661,7 @@ export default function FileManagerIndex() {
               }}
               className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-600 file:text-white"
             />
-            {uploading && <p className="mt-2 text-sm text-gray-400">Uploading…</p>}
+            {uploading && <p className="mt-2 text-sm text-gray-400">{t('system.attachment_manager.index.uploading')}</p>}
             <div className="mt-4 flex justify-end gap-2">
               <button
                 onClick={() => setUploadModalOpen(false)}
@@ -682,7 +686,7 @@ export default function FileManagerIndex() {
               type="text"
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.target.value)}
-              placeholder="Folder name"
+              placeholder={t('system.attachment_manager.index.folder_name')}
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               onKeyDown={(e) => e.key === 'Enter' && handleCreateFolder()}
               autoFocus

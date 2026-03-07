@@ -5,6 +5,7 @@ import PermissionAwareForm, { PermissionButton } from '../../../Components/Permi
 import { usePermissions } from '../../../hooks/usePermissions';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // Professional Breadcrumbs Component
 const Breadcrumbs = ({ items }) => {
@@ -63,6 +64,7 @@ const Breadcrumbs = ({ items }) => {
 
 // Location Form Component (Unified for Create and Edit)
 const LocationForm = () => {
+const { t } = useTranslations();
   const { errors: pageErrors, flash, location, companies } = usePage().props;
   const isEdit = !!location;
   

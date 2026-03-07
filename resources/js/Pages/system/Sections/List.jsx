@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { Search, Plus, Edit3, Trash2, Download, ChevronDown, ArrowUpDown, Columns, Clock, MoreHorizontal, RefreshCcw, FileText, CheckCircle2, X, Database, Eye, Copy, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // SweetAlert-like component (same as Modules)

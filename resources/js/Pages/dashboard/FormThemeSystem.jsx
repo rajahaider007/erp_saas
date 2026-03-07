@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { Eye, EyeOff, Search, Calendar, Clock, Upload, ChevronDown } from 'lucide-react';
 import CustomDatePicker from '../../Components/DatePicker/DatePicker';
 
@@ -29,6 +30,7 @@ const FormThemeSystem = () => {
   });
 
   const handleInputChange = (field, value) => {
+  const { t } = useTranslations();
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

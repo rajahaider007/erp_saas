@@ -46,6 +46,7 @@ import {
 
 import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // SweetAlert-like component
 const CustomAlert = {
@@ -435,6 +436,7 @@ const exportToCSV = () => {
   };
 
   const getStatusLabel = (status) => {
+  const { t } = useTranslations();
     return status ? 'Active' : 'Inactive';
   };
 

@@ -7,5 +7,16 @@
   "footer": {
     "app_name": "ERP System v1.0",
     "edition": "Professional Edition"
+  },
+  "menus": {
+    "accounts_cash_voucher": "Cash Voucher",
+    "accounts_bank_voucher": "Bank Voucher",
+    "accounts_chart_of_accounts": "Chart of Accounts",
+    "accounts_journal_voucher": "Journal Voucher",
+    "accounts_opening_voucher": "Opening Voucher",
+    "system_users": "Users",
+    "system_menus": "Menus",
+    "system_companies": "Companies",
+    "system_roles": "Roles"
   }
 }

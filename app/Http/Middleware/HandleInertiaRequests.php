@@ -160,9 +160,12 @@ class HandleInertiaRequests extends Middleware
                         ->select('menus.*', 'sections.section_name', 'sections.module_id', 'modules.module_name', 'modules.folder_name')
                         ->get()
                         ->map(function ($menu) {
+                            $route = $menu->route ?? '';
+                            $slug = trim(str_replace(['/', '-'], ['_', '_'], preg_replace('#^/+#', '', $route)), '_') ?: 'menu_' . $menu->id;
                             return [
                                 'id' => $menu->id,
                                 'menu_name' => $menu->menu_name,
+                                'menu_slug' => $slug,
                                 'route' => $menu->route,
                                 'icon' => $menu->icon,
                                 'section_name' => $menu->section_name,
@@ -187,9 +190,12 @@ class HandleInertiaRequests extends Middleware
                         ->select('menus.*', 'sections.section_name', 'sections.module_id', 'modules.module_name', 'modules.folder_name')
                         ->get()
                         ->map(function ($menu) {
+                            $route = $menu->route ?? '';
+                            $slug = trim(str_replace(['/', '-'], ['_', '_'], preg_replace('#^/+#', '', $route)), '_') ?: 'menu_' . $menu->id;
                             return [
                                 'id' => $menu->id,
                                 'menu_name' => $menu->menu_name,
+                                'menu_slug' => $slug,
                                 'route' => $menu->route,
                                 'icon' => $menu->icon,
                                 'section_name' => $menu->section_name,

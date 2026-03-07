@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Shield, Home, List, Plus, Edit, Trash2, Eye } from 'lucide-react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const Breadcrumbs = ({ items }) => (
   <div className="breadcrumbs-themed">
@@ -20,7 +21,7 @@ const Breadcrumbs = ({ items }) => (
         </div>
       ))}
     </nav>
-    <div className="breadcrumbs-description">Manage role features and permissions</div>
+    <div className="breadcrumbs-description">{t('system.role_features.index.manage_role_features_and_permissions')}</div>
   </div>
 );
 
@@ -29,13 +30,14 @@ const RoleFeaturesIndex = () => {
   const [alert, setAlert] = useState(null);
 
   const handleDelete = (roleId, roleName) => {
+  const { t } = useTranslations();
     if (window.confirm(`Are you sure you want to delete features for role "${roleName}"?`)) {
       router.delete(`/system/role-features/${roleId}`, {
         onSuccess: () => {
           setAlert({ type: 'success', message: `Role features for "${roleName}" deleted successfully!` });
         },
         onError: () => {
-          setAlert({ type: 'error', message: 'Failed to delete role features.' });
+          setAlert({ type: 'error', message: t('system.role_features.index.msg_failed_to_delete_role_features') });
         }
       });
     }
@@ -80,7 +82,7 @@ const RoleFeaturesIndex = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Role Features</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('system.role_features.index.role_features')}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Manage menu access permissions for different roles
           </p>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import Select from 'react-select';
 import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
 import Swal from 'sweetalert2';
@@ -186,6 +187,7 @@ const CashBookSearch = () => {
   };
 
   const setThisYearFilter = () => {
+  const { t } = useTranslations();
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 1);
     const endOfYear = new Date(now.getFullYear(), 11, 31);
@@ -211,7 +213,7 @@ const CashBookSearch = () => {
                 </div>
                 <div className="stat-item">
                   <TrendingUp size={16} />
-                  <span>Select filters to generate report</span>
+                  <span>{t('reports.cash_book.search.select_filters_to_generate_report')}</span>
                 </div>
               </div>
             </div>
@@ -220,7 +222,7 @@ const CashBookSearch = () => {
               <button
                 className="btn btn-icon"
                 onClick={handleReset}
-                title="Reset All Filters"
+                title={t('reports.cash_book.search.reset_all_filters')}
               >
                 <RefreshCcw size={20} />
               </button>
@@ -257,7 +259,7 @@ const CashBookSearch = () => {
                         value={selectedCompany}
                         onChange={handleCompanyChange}
                         styles={customSelectStyles}
-                        placeholder="Select a company..."
+                        placeholder={t('reports.cash_book.search.select_a_company')}
                         isClearable
                         isSearchable
                         className="react-select-container"
@@ -280,7 +282,7 @@ const CashBookSearch = () => {
                           value={selectedLocation}
                           onChange={handleLocationChange}
                           styles={customSelectStyles}
-                          placeholder="Select a location..."
+                          placeholder={t('reports.cash_book.search.select_a_location')}
                           isClearable
                           isSearchable
                           className="react-select-container"
@@ -307,7 +309,7 @@ const CashBookSearch = () => {
                       value={selectedCashAccount}
                       onChange={setSelectedCashAccount}
                       styles={customSelectStyles}
-                      placeholder="Search and select account..."
+                      placeholder={t('reports.cash_book.search.search_and_select_account')}
                       isClearable
                       isSearchable
                       className="react-select-container"
@@ -329,7 +331,7 @@ const CashBookSearch = () => {
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 mb-2 block">From Date</label>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('reports.cash_book.search.from_date')}</label>
                       <CustomDatePicker
                         selected={fromDate ? new Date(fromDate) : null}
                         onChange={(date) => {
@@ -358,12 +360,12 @@ const CashBookSearch = () => {
                           setFromDate(selectedFromDate);
                         }}
                         type="date"
-                        placeholder="Select from date"
+                        placeholder={t('reports.cash_book.search.select_from_date')}
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 mb-2 block">To Date</label>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('reports.cash_book.search.to_date')}</label>
                       <CustomDatePicker
                         selected={toDate ? new Date(toDate) : null}
                         onChange={(date) => {
@@ -392,7 +394,7 @@ const CashBookSearch = () => {
                           setToDate(selectedToDate);
                         }}
                         type="date"
-                        placeholder="Select to date"
+                        placeholder={t('reports.cash_book.search.select_to_date')}
                         maxDate={new Date()}
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                       />

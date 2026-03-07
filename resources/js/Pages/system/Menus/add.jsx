@@ -3,6 +3,7 @@ import { Type, Settings, Layers, Home, List, Plus } from 'lucide-react';
 import App from "../../App.jsx";
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // Debug Panel removed per requirement
 
@@ -56,6 +57,7 @@ const AddMenuForm = () => {
 
   // Handle module selection
   const handleModuleChange = (moduleId) => {
+  const { t } = useTranslations();
     setSelectedModuleId(moduleId);
     loadSections(moduleId);
   };

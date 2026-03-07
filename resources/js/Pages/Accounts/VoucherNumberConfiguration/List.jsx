@@ -29,6 +29,7 @@ import {
 
 import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // SweetAlert-like component
 const CustomAlert = {
@@ -385,6 +386,7 @@ export default function List() {
   };
 
   const getStatusLabel = (status) => {
+  const { t } = useTranslations();
     return status ? 'Active' : 'Inactive';
   };
 
@@ -450,7 +452,7 @@ export default function List() {
               <button
                 className="btn btn-icon"
                 onClick={() => window.location.reload()}
-                title="Refresh"
+                title={t('accounts.voucher_number_configuration.list.refresh')}
                 disabled={loading}
               >
                 <RefreshCcw size={20} className={loading ? 'animate-spin' : ''} />
@@ -488,14 +490,14 @@ export default function List() {
                 <input
                   type="text"
                   className="search-input"
-                  placeholder="Search configurations..."
+                  placeholder={t('accounts.voucher_number_configuration.list.search_configurations')}
                   value={searchTerm}
                   onChange={(e) => handleSearch(e.target.value)}
                 />
               </div>
 
               <div className="filter-group">
-                <label className="filter-label">Status</label>
+                <label className="filter-label">{t('accounts.voucher_number_configuration.list.status')}</label>
                 <select
                   className="filter-select"
                   value={statusFilter}
@@ -518,7 +520,7 @@ export default function List() {
                   params.set('page', '1');
                   router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
                 }}
-                title="Reset all filters"
+                title={t('accounts.voucher_number_configuration.list.reset_all_filters')}
               >
                 <RefreshCcw size={16} />
               </button>
@@ -567,13 +569,13 @@ export default function List() {
             {loading ? (
               <div className="loading-state">
                 <div className="loading-spinner"></div>
-                <p>Loading configurations...</p>
+                <p>{t('accounts.voucher_number_configuration.list.loading_configurations')}</p>
               </div>
             ) : !configurations?.length ? (
               <div className="empty-state">
                 <Database className="empty-icon" />
-                <h3>No configurations found</h3>
-                <p>Try adjusting your filters or search criteria</p>
+                <h3>{t('accounts.voucher_number_configuration.list.no_configurations_found')}</h3>
+                <p>{t('accounts.voucher_number_configuration.list.try_adjusting_your_filters_or_search_cri')}</p>
                 <a href="/accounts/voucher-number-configuration/create" className="btn btn-primary">
                   <Plus size={20} />
                   Add Your First Configuration
@@ -637,7 +639,7 @@ export default function List() {
                         )}
 
                         {visibleColumns.actions && (
-                          <th className="actions-header">Actions</th>
+                          <th className="actions-header">{t('accounts.voucher_number_configuration.list.actions')}</th>
                         )}
                       </tr>
                     </thead>
@@ -715,21 +717,21 @@ export default function List() {
                               <div className="actions-cell">
                                 <button
                                   className="action-btn view"
-                                  title="View Details"
+                                  title={t('accounts.voucher_number_configuration.list.view_details')}
                                   onClick={() => handleView(config)}
                                 >
                                   <Eye size={16} />
                                 </button>
                                 <button
                                   className="action-btn edit"
-                                  title="Edit Configuration"
+                                  title={t('accounts.voucher_number_configuration.list.edit_configuration')}
                                   onClick={() => handleEdit(config)}
                                 >
                                   <Edit3 size={16} />
                                 </button>
                                 <button
                                   className="action-btn delete"
-                                  title="Delete Configuration"
+                                  title={t('accounts.voucher_number_configuration.list.delete_configuration')}
                                   onClick={() => handleDelete(config)}
                                 >
                                   <Trash2 size={16} />
@@ -751,7 +753,7 @@ export default function List() {
                         Showing {((paginatedConfigurations.current_page - 1) * paginatedConfigurations.per_page) + 1} to {Math.min(paginatedConfigurations.current_page * paginatedConfigurations.per_page, paginatedConfigurations.total)} of {paginatedConfigurations.total} results
                       </div>
                       <div className="page-size-selector">
-                        <span>Show</span>
+                        <span>{t('accounts.voucher_number_configuration.list.show')}</span>
                         <select
                           className="page-size-select"
                           value={pageSize}
@@ -761,7 +763,7 @@ export default function List() {
                             <option key={size} value={size}>{size}</option>
                           ))}
                         </select>
-                        <span>per page</span>
+                        <span>{t('accounts.voucher_number_configuration.list.per_page')}</span>
                       </div>
                     </div>
 

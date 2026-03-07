@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import Select from 'react-select';
 import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
 import Swal from 'sweetalert2';
@@ -87,6 +88,7 @@ const BalanceSheetSearch = () => {
   };
 
   const handleReset = () => {
+  const { t } = useTranslations();
     setSelectedCompany(null);
     setSelectedLocation(null);
     setAvailableLocations([]);
@@ -170,7 +172,7 @@ const BalanceSheetSearch = () => {
               <div className="stats-summary">
                 <div className="stat-item">
                   <TrendingUp size={16} />
-                  <span>Select date and company to view balance sheet</span>
+                  <span>{t('accounts.balance_sheet.search.select_date_and_company_to_view_balance_')}</span>
                 </div>
               </div>
             </div>
@@ -179,7 +181,7 @@ const BalanceSheetSearch = () => {
               <button
                 className="btn btn-icon"
                 onClick={handleReset}
-                title="Reset All Filters"
+                title={t('accounts.balance_sheet.search.reset_all_filters')}
               >
                 <RefreshCcw size={20} />
               </button>
@@ -205,7 +207,7 @@ const BalanceSheetSearch = () => {
             <div className="filter-card-header">
               <div className="flex items-center gap-2">
                 <Filter className="w-5 h-5 text-blue-400" />
-                <h2 className="text-lg font-semibold text-gray-100">Report Filters</h2>
+                <h2 className="text-lg font-semibold text-gray-100">{t('accounts.balance_sheet.search.report_filters')}</h2>
               </div>
               <p className="text-sm text-gray-400 mt-1">
                 Configure filters to generate your balance sheet report
@@ -227,7 +229,7 @@ const BalanceSheetSearch = () => {
                         value={selectedCompany}
                         onChange={handleCompanyChange}
                         styles={customSelectStyles}
-                        placeholder="Select company..."
+                        placeholder={t('accounts.balance_sheet.search.select_company')}
                         isClearable
                         isSearchable
                         className="react-select-container"
@@ -249,7 +251,7 @@ const BalanceSheetSearch = () => {
                           value={selectedLocation}
                           onChange={setSelectedLocation}
                           styles={customSelectStyles}
-                          placeholder="Select location..."
+                          placeholder={t('accounts.balance_sheet.search.select_location')}
                           isClearable
                           isSearchable
                           className="react-select-container"
@@ -273,7 +275,7 @@ const BalanceSheetSearch = () => {
                     selected={asAtDate ? new Date(asAtDate) : null}
                     onChange={(date) => setAsAtDate(date ? date.toISOString().split('T')[0] : '')}
                     type="date"
-                    placeholder="Select as at date"
+                    placeholder={t('accounts.balance_sheet.search.select_as_at_date')}
                     className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   />
                   <p className="text-xs text-gray-400 mt-2">
@@ -300,7 +302,7 @@ const BalanceSheetSearch = () => {
                         }}
                         className="w-4 h-4 cursor-pointer"
                       />
-                      <span className="text-sm text-gray-300">Current Period Only</span>
+                      <span className="text-sm text-gray-300">{t('accounts.balance_sheet.search.current_period_only')}</span>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
                       <input
@@ -311,7 +313,7 @@ const BalanceSheetSearch = () => {
                         onChange={(e) => setViewType(e.target.value)}
                         className="w-4 h-4 cursor-pointer"
                       />
-                      <span className="text-sm text-gray-300">Comparative View</span>
+                      <span className="text-sm text-gray-300">{t('accounts.balance_sheet.search.comparative_view')}</span>
                     </label>
                   </div>
                 </div>
@@ -327,7 +329,7 @@ const BalanceSheetSearch = () => {
                       selected={comparativeDate ? new Date(comparativeDate) : null}
                       onChange={(date) => setComparativeDate(date ? date.toISOString().split('T')[0] : '')}
                       type="date"
-                      placeholder="Select comparative date"
+                      placeholder={t('accounts.balance_sheet.search.select_comparative_date')}
                       className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                     />
                     <p className="text-xs text-gray-400 mt-2">

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Type, Settings, Layers, Home, List, Plus } from 'lucide-react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import App from "../../App.jsx";
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import PermissionAwareForm from '../../../Components/PermissionAwareForm';
@@ -10,6 +11,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 
 // Breadcrumbs (same design as Add Module Form)
 const Breadcrumbs = ({ items }) => {
+const { t } = useTranslations();
   return (
     <div className="breadcrumbs-themed">
       <nav className="breadcrumbs">
@@ -41,6 +43,7 @@ const Breadcrumbs = ({ items }) => {
 };
 
 const AddSectionForm = () => {
+const { t } = useTranslations();
   const { modules, errors: pageErrors, flash } = usePage().props;
 
   const fields = useMemo(() => [

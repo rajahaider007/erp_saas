@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import Select from 'react-select';
 import {
   Building, MapPin, Search, ChevronRight, FileText,
@@ -50,6 +51,7 @@ const ChartOfAccountSearch = () => {
   };
 
   const handleReset = () => {
+  const { t } = useTranslations();
     setSelectedCompany(null);
     setSelectedLocation(null);
     setAvailableLocations([]);
@@ -130,11 +132,11 @@ const ChartOfAccountSearch = () => {
               <div className="stats-summary">
                 <div className="stat-item">
                   <Database size={16} />
-                  <span>Select filters to generate report</span>
+                  <span>{t('reports.chart_of_account.search.select_filters_to_generate_report')}</span>
                 </div>
                 <div className="stat-item">
                   <TrendingUp size={16} />
-                  <span>IFRS Compliant Structure</span>
+                  <span>{t('reports.chart_of_account.search.ifrs_compliant_structure')}</span>
                 </div>
               </div>
             </div>
@@ -143,7 +145,7 @@ const ChartOfAccountSearch = () => {
               <button
                 className="btn btn-icon"
                 onClick={handleReset}
-                title="Reset All Filters"
+                title={t('reports.chart_of_account.search.reset_all_filters')}
               >
                 <RefreshCcw size={20} />
               </button>
@@ -180,7 +182,7 @@ const ChartOfAccountSearch = () => {
                         value={selectedCompany}
                         onChange={handleCompanyChange}
                         styles={customSelectStyles}
-                        placeholder="Select a company..."
+                        placeholder={t('reports.chart_of_account.search.select_a_company')}
                         isClearable
                         isSearchable
                         className="react-select-container"
@@ -203,7 +205,7 @@ const ChartOfAccountSearch = () => {
                           value={selectedLocation}
                           onChange={handleLocationChange}
                           styles={customSelectStyles}
-                          placeholder="Select a location..."
+                          placeholder={t('reports.chart_of_account.search.select_a_location')}
                           isClearable
                           isSearchable
                           className="react-select-container"
@@ -243,7 +245,7 @@ const ChartOfAccountSearch = () => {
                 <div className="bg-gradient-to-br from-blue-900/50 to-blue-800/50 border border-blue-700 rounded-lg p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <BarChart3 size={24} className="text-blue-400" />
-                    <h3 className="font-semibold text-blue-200">Hierarchical Structure</h3>
+                    <h3 className="font-semibold text-blue-200">{t('reports.chart_of_account.search.hierarchical_structure')}</h3>
                   </div>
                   <p className="text-sm text-blue-300">
                     View accounts organized by level from main categories to transactional accounts
@@ -253,7 +255,7 @@ const ChartOfAccountSearch = () => {
                 <div className="bg-gradient-to-br from-green-900/50 to-green-800/50 border border-green-700 rounded-lg p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <FileText size={24} className="text-green-400" />
-                    <h3 className="font-semibold text-green-200">IFRS Compliant</h3>
+                    <h3 className="font-semibold text-green-200">{t('reports.chart_of_account.search.ifrs_compliant')}</h3>
                   </div>
                   <p className="text-sm text-green-300">
                     Follows IAS 1, IFRS 8, and other international accounting standards
@@ -263,7 +265,7 @@ const ChartOfAccountSearch = () => {
                 <div className="bg-gradient-to-br from-purple-900/50 to-purple-800/50 border border-purple-700 rounded-lg p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <TrendingUp size={24} className="text-purple-400" />
-                    <h3 className="font-semibold text-purple-200">Account Analysis</h3>
+                    <h3 className="font-semibold text-purple-200">{t('reports.chart_of_account.search.account_analysis')}</h3>
                   </div>
                   <p className="text-sm text-purple-300">
                     Analyze balances, transactions, and account classifications

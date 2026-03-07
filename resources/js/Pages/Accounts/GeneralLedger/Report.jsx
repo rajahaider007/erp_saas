@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   Search, 
   Filter, 
@@ -47,6 +48,7 @@ const GeneralLedgerReport = () => {
     };
 
     const initializeDataTables = () => {
+    const { t } = useTranslations();
       if (window.$ && window.$.fn.DataTable) {
         // Initialize DataTable for each account
         accounts.forEach((accountData) => {
@@ -93,7 +95,7 @@ const GeneralLedgerReport = () => {
                 processing: '<i class="fas fa-spinner fa-spin"></i> Processing...',
                 loadingRecords: '<i class="fas fa-spinner fa-spin"></i> Loading...'
               },
-              dom: '<"top"lf>rt<"bottom"ip><"clear">',
+              dom: '<"top"lf>{t('accounts.general_ledger.report.rt')}<"bottom"ip><"clear">',
               initComplete: function() {
                 // Add custom styling after initialization
                 this.api().columns().every(function() {
@@ -232,6 +234,7 @@ const GeneralLedgerReport = () => {
   };
 
   const formatDate = (dateString) => {
+  const { t } = useTranslations();
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -270,7 +273,7 @@ const GeneralLedgerReport = () => {
               <button
                 className="report-btn"
                 onClick={handleBackToFilters}
-                title="Back to Filters"
+                title={t('accounts.general_ledger.report.back_to_filters')}
               >
                 <Filter size={20} />
                 Change Filters
@@ -279,7 +282,7 @@ const GeneralLedgerReport = () => {
               <button
                 className="report-btn"
                 onClick={handlePrint}
-                title="Print Report"
+                title={t('accounts.general_ledger.report.print_report')}
               >
                 <Printer size={20} />
                 Print
@@ -313,59 +316,59 @@ const GeneralLedgerReport = () => {
 
         {/* Applied Filters Display */}
         <div className="applied-filters-container">
-          <div className="applied-filters-title">Applied Filters:</div>
+          <div className="applied-filters-title">{t('accounts.general_ledger.report.applied_filters')}</div>
           <div className="applied-filters-list">
               {account && (
                 <div className="filter-badge">
-                  <span className="filter-badge-label">Account:</span>
+                  <span className="filter-badge-label">{t('accounts.general_ledger.report.account')}</span>
                   <span className="filter-badge-value">{account.account_code} - {account.account_name}</span>
                 </div>
               )}
               {!account && (
                 <div className="filter-badge">
-                  <span className="filter-badge-label">Scope:</span>
-                  <span className="filter-badge-value">All Accounts</span>
+                  <span className="filter-badge-label">{t('accounts.general_ledger.report.scope')}</span>
+                  <span className="filter-badge-value">{t('accounts.general_ledger.report.all_accounts')}</span>
                 </div>
               )}
               {filters?.from_date && (
                 <div className="filter-badge">
-                  <span className="filter-badge-label">From:</span>
+                  <span className="filter-badge-label">{t('accounts.general_ledger.report.from')}</span>
                   <span className="filter-badge-value">{filters.from_date}</span>
                 </div>
               )}
               {filters?.to_date && (
                 <div className="filter-badge">
-                  <span className="filter-badge-label">To:</span>
+                  <span className="filter-badge-label">{t('accounts.general_ledger.report.to')}</span>
                   <span className="filter-badge-value">{filters.to_date}</span>
                 </div>
               )}
               {filters?.voucher_type && (
                 <div className="filter-badge">
-                  <span className="filter-badge-label">Type:</span>
+                  <span className="filter-badge-label">{t('accounts.general_ledger.report.type')}</span>
                   <span className="filter-badge-value">{filters.voucher_type}</span>
                 </div>
               )}
               {filters?.status && (
                 <div className="filter-badge">
-                  <span className="filter-badge-label">Status:</span>
+                  <span className="filter-badge-label">{t('accounts.general_ledger.report.status')}</span>
                   <span className="filter-badge-value">{filters.status}</span>
                 </div>
               )}
               {filters?.currency_code && (
                 <div className="filter-badge">
-                  <span className="filter-badge-label">Currency:</span>
+                  <span className="filter-badge-label">{t('accounts.general_ledger.report.currency')}</span>
                   <span className="filter-badge-value">{filters.currency_code}</span>
                 </div>
               )}
               {filters?.min_amount && (
                 <div className="filter-badge">
-                  <span className="filter-badge-label">Min Amount:</span>
+                  <span className="filter-badge-label">{t('accounts.general_ledger.report.min_amount')}</span>
                   <span className="filter-badge-value">{filters.min_amount}</span>
                 </div>
               )}
               {filters?.max_amount && (
                 <div className="filter-badge">
-                  <span className="filter-badge-label">Max Amount:</span>
+                  <span className="filter-badge-label">{t('accounts.general_ledger.report.max_amount')}</span>
                   <span className="filter-badge-value">{filters.max_amount}</span>
                 </div>
               )}
@@ -379,13 +382,13 @@ const GeneralLedgerReport = () => {
             {loading ? (
               <div className="loading-state">
                 <div className="loading-spinner"></div>
-                <p>Loading general ledger...</p>
+                <p>{t('accounts.general_ledger.report.loading_general_ledger')}</p>
               </div>
             ) : accounts?.length === 0 ? (
               <div className="empty-state">
                 <Database className="empty-icon" />
-                <h3>No transactions found</h3>
-                <p>Try adjusting your filters or date range</p>
+                <h3>{t('accounts.general_ledger.report.no_transactions_found')}</h3>
+                <p>{t('accounts.general_ledger.report.try_adjusting_your_filters_or_date_range')}</p>
               </div>
             ) : (
               <div className="space-y-8">
@@ -406,7 +409,7 @@ const GeneralLedgerReport = () => {
                             <p className="text-sm opacity-80">{accountData.account_type}</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm">Opening Balance:</p>
+                            <p className="text-sm">{t('accounts.general_ledger.report.opening_balance')}</p>
                             <p className="text-lg font-bold">{formatCurrency(totals.opening_balance || 0)}</p>
                           </div>
                         </div>
@@ -417,23 +420,23 @@ const GeneralLedgerReport = () => {
                         <table id={`data-table-${accountData.id}`} className="data-table bg-slate-800 text-white">
                           <thead>
                             <tr>
-                              <th style={{width: '12%'}}>Date</th>
-                              <th style={{width: '15%'}}>Voucher No</th>
-                              <th style={{width: '10%'}}>Type</th>
-                              <th style={{width: '35%'}}>Description</th>
-                              <th style={{width: '14%'}} className="text-right">Debit</th>
-                              <th style={{width: '14%'}} className="text-right">Credit</th>
-                              <th style={{width: '14%'}} className="text-right">Balance</th>
+                              <th style={{width: '12%'}}>{t('accounts.general_ledger.report.date')}</th>
+                              <th style={{width: '15%'}}>{t('accounts.general_ledger.report.voucher_no')}</th>
+                              <th style={{width: '10%'}}>{t('accounts.general_ledger.report.type')}</th>
+                              <th style={{width: '35%'}}>{t('accounts.general_ledger.report.description')}</th>
+                              <th style={{width: '14%'}} className="text-right">{t('accounts.general_ledger.report.debit')}</th>
+                              <th style={{width: '14%'}} className="text-right">{t('accounts.general_ledger.report.credit')}</th>
+                              <th style={{width: '14%'}} className="text-right">{t('accounts.general_ledger.report.balance')}</th>
                             </tr>
                           </thead>
                           <tbody>
                             {/* Opening Balance Row */}
                             {totals.opening_balance !== 0 && (
                               <tr className="opening-balance-row bg-slate-700 text-white font-bold">
-                                <td>Opening</td>
+                                <td>{t('accounts.general_ledger.report.opening')}</td>
                                 <td>-</td>
-                                <td>Balance</td>
-                                <td>Balance brought forward</td>
+                                <td>{t('accounts.general_ledger.report.balance')}</td>
+                                <td>{t('accounts.general_ledger.report.balance_brought_forward')}</td>
                                 <td className="text-right">-</td>
                                 <td className="text-right">-</td>
                                 <td className="text-right">
@@ -470,8 +473,8 @@ const GeneralLedgerReport = () => {
                           <tfoot>
                             {/* Account Totals */}
                             <tr className="total-row bg-slate-700 text-white font-bold">
-                              <td colSpan="3">Account Total:</td>
-                              <td className="text-right">Summary</td>
+                              <td colSpan="3">{t('accounts.general_ledger.report.account_total')}</td>
+                              <td className="text-right">{t('accounts.general_ledger.report.summary')}</td>
                               <td className="text-right">{formatCurrency(totals.total_debit || 0)}</td>
                               <td className="text-right">{formatCurrency(totals.total_credit || 0)}</td>
                               <td className="text-right">-</td>
@@ -479,8 +482,8 @@ const GeneralLedgerReport = () => {
 
                             {/* Account Closing Balance */}
                             <tr className="closing-balance-row bg-slate-600 text-white font-bold">
-                              <td colSpan="3">Closing Balance:</td>
-                              <td className="text-right">Final Balance</td>
+                              <td colSpan="3">{t('accounts.general_ledger.report.closing_balance')}</td>
+                              <td className="text-right">{t('accounts.general_ledger.report.final_balance')}</td>
                               <td className="text-right">-</td>
                               <td className="text-right">-</td>
                               <td className="text-right">{formatCurrency(totals.closing_balance || 0)}</td>
@@ -495,18 +498,18 @@ const GeneralLedgerReport = () => {
                 {/* Grand Totals Summary */}
                 {accounts.length > 1 && (
                   <div className="grand-totals bg-green-900 text-white p-6 rounded-lg">
-                    <h3 className="text-xl font-bold mb-4">Grand Totals - All Accounts</h3>
+                    <h3 className="text-xl font-bold mb-4">{t('accounts.general_ledger.report.grand_totals__all_accounts')}</h3>
                     <div className="grid grid-cols-3 gap-4">
                       <div className="text-center">
-                        <p className="text-sm opacity-80">Total Debit</p>
+                        <p className="text-sm opacity-80">{t('accounts.general_ledger.report.total_debit')}</p>
                         <p className="text-2xl font-bold">{formatCurrency(totalDebit)}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-sm opacity-80">Total Credit</p>
+                        <p className="text-sm opacity-80">{t('accounts.general_ledger.report.total_credit')}</p>
                         <p className="text-2xl font-bold">{formatCurrency(totalCredit)}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-sm opacity-80">Net Balance</p>
+                        <p className="text-sm opacity-80">{t('accounts.general_ledger.report.net_balance')}</p>
                         <p className="text-2xl font-bold">{formatCurrency(totalDebit - totalCredit)}</p>
                       </div>
                     </div>

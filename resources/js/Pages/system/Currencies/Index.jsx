@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   DollarSign, Plus, Edit, Trash2, Search, Filter, 
   ChevronDown, Globe, Star, TrendingUp, Home, List, Clock 
@@ -101,8 +102,9 @@ const CurrenciesIndex = () => {
   };
 
   const handleUpdateFromApi = () => {
+  const { t } = useTranslations();
     if (confirm('This will update exchange rates from external API. Continue?')) {
-      setAlert({ type: 'info', message: 'Updating exchange rates... Please wait.' });
+      setAlert({ type: 'info', message: t('system.currencies.index.msg_updating_exchange_rates_please_wait') });
       router.post('/system/currencies/update-from-api', {
         provider: 'frankfurter'
       }, {
@@ -112,6 +114,7 @@ const CurrenciesIndex = () => {
   };
 
   const handleViewHistory = (currencyId) => {
+  const { t } = useTranslations();
     router.visit(`/system/currencies/${currencyId}/history`);
   };
 
@@ -166,8 +169,8 @@ const CurrenciesIndex = () => {
         {/* Header */}
         <div className="page-header">
           <div>
-            <h1 className="page-title">Currencies Management</h1>
-            <p className="page-subtitle">Manage currencies and exchange rates</p>
+            <h1 className="page-title">{t('system.currencies.index.currencies_management')}</h1>
+            <p className="page-subtitle">{t('system.currencies.index.manage_currencies_and_exchange_rates')}</p>
           </div>
           <div className="page-actions">
             <button
@@ -200,7 +203,7 @@ const CurrenciesIndex = () => {
             <Search className="search-icon" />
             <input
               type="text"
-              placeholder="Search currencies..."
+              placeholder={t('system.currencies.index.search_currencies')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
@@ -235,14 +238,14 @@ const CurrenciesIndex = () => {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Code</th>
-                  <th>Currency</th>
-                  <th>Symbol</th>
-                  <th>Country</th>
-                  <th>Exchange Rate</th>
-                  <th>Status</th>
-                  <th>Base</th>
-                  <th>Actions</th>
+                  <th>{t('system.currencies.index.code')}</th>
+                  <th>{t('system.currencies.index.currency')}</th>
+                  <th>{t('system.currencies.index.symbol')}</th>
+                  <th>{t('system.currencies.index.country')}</th>
+                  <th>{t('system.currencies.index.exchange_rate')}</th>
+                  <th>{t('system.currencies.index.status')}</th>
+                  <th>{t('system.currencies.index.base')}</th>
+                  <th>{t('system.currencies.index.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -293,21 +296,21 @@ const CurrenciesIndex = () => {
                           <button
                             onClick={() => handleViewHistory(currency.id)}
                             className="btn-icon btn-icon-info"
-                            title="View History"
+                            title={t('system.currencies.index.view_history')}
                           >
                             <Clock className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => router.visit(`/system/currencies/${currency.id}/edit`)}
                             className="btn-icon btn-icon-primary"
-                            title="Edit"
+                            title={t('system.currencies.index.edit')}
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(currency.id)}
                             className="btn-icon btn-icon-danger"
-                            title="Delete"
+                            title={t('system.currencies.index.delete')}
                             disabled={currency.is_base_currency}
                           >
                             <Trash2 className="w-4 h-4" />

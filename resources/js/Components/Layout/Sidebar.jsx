@@ -24,7 +24,14 @@ import {
   HardDrive
 } from 'lucide-react';
 
-const TooltipPortal = ({ item, anchorEl, onRequestClose, keepOpenClear }) => {
+const menuLabel = (child, t) => {
+  if (!child.menuSlug || !t) return child.name;
+  const k = 'sidebar.menus.' + child.menuSlug;
+  const v = t(k);
+  return (v && v !== k) ? v : child.name;
+};
+
+const TooltipPortal = ({ item, anchorEl, onRequestClose, keepOpenClear, t }) => {
   const portalRef = React.useRef(null);
   const [pos, setPos] = React.useState({ left: 0, top: 0 });
 
@@ -99,6 +106,7 @@ const TooltipPortal = ({ item, anchorEl, onRequestClose, keepOpenClear }) => {
           {item.children.map(child => {
             const ChildIcon = child.icon;
             const isChildActive = window.location.pathname === child.href || window.location.pathname.startsWith(child.href + '/');
+            const label = menuLabel(child, t);
 
             return (
               <Link
@@ -110,7 +118,7 @@ const TooltipPortal = ({ item, anchorEl, onRequestClose, keepOpenClear }) => {
                   }`}
               >
                 <ChildIcon className="h-4 w-4 flex-shrink-0" />
-                <span className="ml-3 truncate">{child.name}</span>
+                <span className="ml-3 truncate">{label}</span>
                 {isChildActive && <div className="ml-auto w-2 h-2 bg-blue-600 rounded-full" />}
               </Link>
             );
@@ -294,11 +302,16 @@ const Sidebar = () => {
             }
             return canView(menu.id);
           })
-          .map(menu => ({
-            name: menu.menu_name,
-            href: (menu.route && menu.route !== 'undefined' && menu.route !== 'null') ? menu.route : '#',
-            icon: iconFromName(menu.icon)
-          }))
+          .map(menu => {
+            const r = (menu.route || '').replace(/^\/+/, '').replace(/[/-]/g, '_').replace(/_+$/, '');
+            const menuSlug = r || ('menu_' + (menu.id || ''));
+            return {
+              name: menu.menu_name,
+              menuSlug,
+              href: (menu.route && menu.route !== 'undefined' && menu.route !== 'null') ? menu.route : '#',
+              icon: iconFromName(menu.icon)
+            };
+          })
       }))
       .filter(section => section.children.length > 0); // Only show sections that have accessible menus
 
@@ -343,8 +356,13 @@ const Sidebar = () => {
           children: []
         };
       }
+      const menuSlug = menu.menu_slug || (() => {
+        const r = (menu.route || '').replace(/^\/+/, '').replace(/[/-]/g, '_').replace(/_+$/, '');
+        return r || ('menu_' + menu.id);
+      })();
       sectionsMap[sectionName].children.push({
         name: menu.menu_name,
+        menuSlug,
         href: menu.route || '#',
         icon: iconFromName(menu.icon)
       });
@@ -509,7 +527,7 @@ const Sidebar = () => {
             >
               <Icon className={`${sidebarCollapsed ? 'h-5 w-5' : 'h-4 w-4'} flex-shrink-0 group-hover:scale-110 transition-transform`} />
               {!sidebarCollapsed && (
-                <span className="ml-3 truncate">{item.name}</span>
+                <span className="ml-3 truncate">{menuLabel(item, t)}</span>
               )}
             </Link>
           )}
@@ -522,7 +540,7 @@ const Sidebar = () => {
           {/* Tooltip for collapsed sidebar (simple text tooltip for no children) */}
           {sidebarCollapsed && !hasChildren && (
             <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-              {item.name}
+              {menuLabel(item, t)}
               <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-r-4 border-r-gray-900 border-t-2 border-b-2 border-t-transparent border-b-transparent"></div>
             </div>
           )}
@@ -534,6 +552,7 @@ const Sidebar = () => {
             {item.children.map(child => {
               const ChildIcon = child.icon;
               const isChildActive = url === child.href || url.startsWith(child.href + '/');
+              const label = menuLabel(child, t);
 
               return (
                 <Link
@@ -545,7 +564,7 @@ const Sidebar = () => {
                     }`}
                 >
                   <ChildIcon className="h-4 w-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                  <span className="ml-3 truncate">{child.name}</span>
+                  <span className="ml-3 truncate">{label}</span>
                   {isChildActive && (
                     <div className="ml-auto w-2 h-2 bg-blue-600 rounded-full" />
                   )}
@@ -690,6 +709,7 @@ const Sidebar = () => {
           anchorEl={hoveredAnchor}
           onRequestClose={requestCloseFromPortal}
           keepOpenClear={clearPortalCloseTimeout}
+          t={t}
         />
       )}
     </>

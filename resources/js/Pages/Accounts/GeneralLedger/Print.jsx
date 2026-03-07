@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const GeneralLedgerPrint = () => {
   const { 
@@ -29,6 +30,7 @@ const GeneralLedgerPrint = () => {
   };
 
   const formatDate = (dateString) => {
+  const { t } = useTranslations();
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -304,25 +306,25 @@ const GeneralLedgerPrint = () => {
               {company?.city && company?.country && <div>{company.city}, {company.country}</div>}
               {company?.phone && <div>Tel: {company.phone} {company?.email && `| Email: ${company.email}`}</div>}
             </div>
-            <div className="report-title">General Ledger Report</div>
+            <div className="report-title">{t('accounts.general_ledger.print.general_ledger_report')}</div>
           </div>
 
           {/* Account Information */}
           <div className="account-info">
             {account && (
               <div className="account-info-row">
-                <div className="account-info-cell info-label">Account Code:</div>
+                <div className="account-info-cell info-label">{t('accounts.general_ledger.print.account_code')}</div>
                 <div className="account-info-cell info-value">{account.account_code}</div>
-                <div className="account-info-cell info-label">Account Name:</div>
+                <div className="account-info-cell info-label">{t('accounts.general_ledger.print.account_name')}</div>
                 <div className="account-info-cell info-value">{account.account_name}</div>
               </div>
             )}
             <div className="account-info-row">
-              <div className="account-info-cell info-label">Period:</div>
+              <div className="account-info-cell info-label">{t('accounts.general_ledger.print.period')}</div>
               <div className="account-info-cell info-value">
                 {filters?.from_date ? formatDate(filters.from_date) : 'Beginning'} to {filters?.to_date ? formatDate(filters.to_date) : 'End'}
               </div>
-              <div className="account-info-cell info-label">Report Date:</div>
+              <div className="account-info-cell info-label">{t('accounts.general_ledger.print.report_date')}</div>
               <div className="account-info-cell info-value">{new Date().toLocaleDateString('en-US', { dateStyle: 'long' })}</div>
             </div>
           </div>
@@ -332,13 +334,13 @@ const GeneralLedgerPrint = () => {
             <thead>
               <tr>
                 <th style={{width: '3%'}} className="text-center">#</th>
-                <th style={{width: '10%'}}>Date</th>
-                <th style={{width: '12%'}}>Voucher No</th>
-                <th style={{width: '8%'}}>Type</th>
-                <th style={{width: '35%'}}>Description</th>
-                <th style={{width: '11%'}} className="text-right">Debit</th>
-                <th style={{width: '11%'}} className="text-right">Credit</th>
-                <th style={{width: '11%'}} className="text-right">Balance</th>
+                <th style={{width: '10%'}}>{t('accounts.general_ledger.print.date')}</th>
+                <th style={{width: '12%'}}>{t('accounts.general_ledger.print.voucher_no')}</th>
+                <th style={{width: '8%'}}>{t('accounts.general_ledger.print.type')}</th>
+                <th style={{width: '35%'}}>{t('accounts.general_ledger.print.description')}</th>
+                <th style={{width: '11%'}} className="text-right">{t('accounts.general_ledger.print.debit')}</th>
+                <th style={{width: '11%'}} className="text-right">{t('accounts.general_ledger.print.credit')}</th>
+                <th style={{width: '11%'}} className="text-right">{t('accounts.general_ledger.print.balance')}</th>
               </tr>
             </thead>
             <tbody>
@@ -360,10 +362,10 @@ const GeneralLedgerPrint = () => {
                     {totals.opening_balance !== 0 && (
                       <tr className="opening-balance-row">
                         <td className="text-center">-</td>
-                        <td>Opening</td>
+                        <td>{t('accounts.general_ledger.print.opening')}</td>
                         <td>-</td>
-                        <td>Balance</td>
-                        <td>Balance brought forward</td>
+                        <td>{t('accounts.general_ledger.print.balance')}</td>
+                        <td>{t('accounts.general_ledger.print.balance_brought_forward')}</td>
                         <td className="text-right">-</td>
                         <td className="text-right">-</td>
                         <td className="text-right amount-cell">{formatCurrency(totals.opening_balance || 0)}</td>
@@ -396,8 +398,8 @@ const GeneralLedgerPrint = () => {
 
                     {/* Account Totals */}
                     <tr className="summary-row">
-                      <td colSpan="4" className="text-right">Account Total:</td>
-                      <td className="text-right">Summary</td>
+                      <td colSpan="4" className="text-right">{t('accounts.general_ledger.print.account_total')}</td>
+                      <td className="text-right">{t('accounts.general_ledger.print.summary')}</td>
                       <td className="text-right amount-cell">{formatCurrency(totals.total_debit || 0)}</td>
                       <td className="text-right amount-cell">{formatCurrency(totals.total_credit || 0)}</td>
                       <td className="text-right amount-cell">-</td>
@@ -405,8 +407,8 @@ const GeneralLedgerPrint = () => {
 
                     {/* Account Closing Balance */}
                     <tr className="closing-balance">
-                      <td colSpan="4" className="text-right">Closing Balance:</td>
-                      <td className="text-right">Final Balance</td>
+                      <td colSpan="4" className="text-right">{t('accounts.general_ledger.print.closing_balance')}</td>
+                      <td className="text-right">{t('accounts.general_ledger.print.final_balance')}</td>
                       <td className="text-right">-</td>
                       <td className="text-right">-</td>
                       <td className="text-right amount-cell">{formatCurrency(totals.closing_balance || 0)}</td>
@@ -423,8 +425,8 @@ const GeneralLedgerPrint = () => {
               {/* Grand Totals */}
               {accounts.length > 1 && (
                 <tr className="grand-total-row">
-                  <td colSpan="4" className="text-right font-bold">GRAND TOTAL:</td>
-                  <td className="text-right font-bold">All Accounts</td>
+                  <td colSpan="4" className="text-right font-bold">{t('accounts.general_ledger.print.grand_total')}</td>
+                  <td className="text-right font-bold">{t('accounts.general_ledger.print.all_accounts')}</td>
                   <td className="text-right amount-cell font-bold">{formatCurrency(totalDebit)}</td>
                   <td className="text-right amount-cell font-bold">{formatCurrency(totalCredit)}</td>
                   <td className="text-right amount-cell">-</td>
@@ -436,7 +438,7 @@ const GeneralLedgerPrint = () => {
 
           {/* Footer - Shows on each page */}
           <div className="report-footer">
-            <div>General Ledger Report | Generated by ERP System</div>
+            <div>{t('accounts.general_ledger.print.general_ledger_report__generated_by_erp_')}</div>
             <div>Printed on: {new Date().toLocaleString('en-US', { 
               dateStyle: 'medium', 
               timeStyle: 'short' 

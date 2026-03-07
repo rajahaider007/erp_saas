@@ -57,8 +57,8 @@ export default function List() {
               </div>
             </div>
             <div className="header-actions">
-              <button className="btn btn-icon" onClick={()=>window.location.reload()} title="Refresh" disabled={loading}><RefreshCcw size={20} className={loading ? 'animate-spin' : ''} /></button>
-              <a href='/inventory/item-master/create' className="btn btn-primary"><Plus size={20} />Create Item</a>
+              <button className="btn btn-icon" onClick={()=>window.location.reload()} title={t('inventory.item_master.list.refresh')} disabled={loading}><RefreshCcw size={20} className={loading ? 'animate-spin' : ''} /></button>
+              <a href='/inventory/item-master/create' className="btn btn-primary"><Plus size={20} />{t('inventory.item_master.list.create_item')}</a>
             </div>
           </div>
 
@@ -71,14 +71,14 @@ export default function List() {
                   <input
                     type="text"
                     className="search-input"
-                    placeholder="Search items by code or name..."
+                    placeholder={t('inventory.item_master.list.search_items_by_code_or_name')}
                     value={searchTerm}
                     onChange={(e) => handleSearch(e.target.value)}
                   />
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Status</label>
+                  <label className="filter-label">{t('inventory.item_master.list.status')}</label>
                   <select
                     className="filter-select"
                     value={statusFilter}
@@ -91,7 +91,7 @@ export default function List() {
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Per Page</label>
+                  <label className="filter-label">{t('inventory.item_master.list.per_page')}</label>
                   <select
                     className="filter-select"
                     value={pageSize}
@@ -154,11 +154,11 @@ export default function List() {
                   <th onClick={() => handleSort('item_name_short')} className="sortable-header">
                     Item Name {sortConfig.key === 'item_name_short' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                   </th>
-                  <th>Item Type</th>
-                  <th>Category</th>
-                  <th>Costing Method</th>
-                  <th>Status</th>
-                  <th style={{ width: '100px' }}>Actions</th>
+                  <th>{t('inventory.item_master.list.item_type')}</th>
+                  <th>{t('inventory.item_master.list.category')}</th>
+                  <th>{t('inventory.item_master.list.costing_method')}</th>
+                  <th>{t('inventory.item_master.list.status')}</th>
+                  <th style={{ width: '100px' }}>{t('inventory.item_master.list.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -195,14 +195,14 @@ export default function List() {
                         <a
                           href={`/inventory/item-master/${item.id}/edit`}
                           className="btn-icon btn-edit"
-                          title="Edit"
+                          title={t('inventory.item_master.list.edit')}
                         >
                           <Edit3 size={16} />
                         </a>
                         <button
                           className="btn-icon btn-delete"
                           onClick={() => handleDelete(item)}
-                          title="Delete"
+                          title={t('inventory.item_master.list.delete')}
                           disabled={loading}
                         >
                           <Trash2 size={16} />
@@ -216,8 +216,8 @@ export default function List() {
           ) : (
             <div className="empty-state">
               <Database size={48} />
-              <h3>No Items Found</h3>
-              <p>No inventory items yet. Create your first item to get started.</p>
+              <h3>{t('inventory.item_master.list.no_items_found')}</h3>
+              <p>{t('inventory.item_master.list.no_inventory_items_yet_create_your_first')}</p>
               <a href="/inventory/item-master/create" className="btn btn-primary mt-4">
                 <Plus size={20} /> Create Item
               </a>

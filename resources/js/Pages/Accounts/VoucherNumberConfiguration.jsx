@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import { router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // Redirect to list page - same pattern as AddModules
 const VoucherNumberConfiguration = () => {
+const { t } = useTranslations();
   useEffect(() => {
     router.visit('/accounts/voucher-number-configuration');
   }, []);

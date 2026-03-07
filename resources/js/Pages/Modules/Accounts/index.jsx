@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import App from '../../App.jsx';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
@@ -24,6 +25,7 @@ import {
 } from 'lucide-react';
 
 const AccountsDashboard = () => {
+  const { t } = useTranslations();
   const { auth, company, dashboardStats, recentTransactions, accountsSummary, currencySymbol, financialCards = [] } = usePage().props;
   const user = auth?.user;
   const { canView } = usePermissions();
@@ -221,6 +223,7 @@ const AccountsDashboard = () => {
   };
 
   const SectionCard = ({ section }) => {
+  const { t } = useTranslations();
     const Icon = section.icon;
     
     return (
@@ -288,7 +291,7 @@ const AccountsDashboard = () => {
               
               <div className="flex items-center space-x-4">
                 <div className="text-right">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Welcome back,</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('modules.accounts.index.welcome_back')}</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
                     {user?.fname ? `${user.fname} ${user.lname}`.trim() : 'Accountant'}
                   </p>
@@ -308,11 +311,11 @@ const AccountsDashboard = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Revenue</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('modules.accounts.index.total_revenue')}</p>
                   <p className="text-2xl font-bold text-green-600">
                     {dashboardStats?.totalRevenue?.currency}{dashboardStats?.totalRevenue?.value || '0.00'}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Current Year</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('modules.accounts.index.current_year')}</p>
                 </div>
                 <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-xl text-green-600 dark:text-green-400">
                   <DollarSign className="h-6 w-6" />
@@ -323,7 +326,7 @@ const AccountsDashboard = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Outstanding Invoices</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('modules.accounts.index.outstanding_invoices')}</p>
                   <p className="text-2xl font-bold text-blue-600">
                     {dashboardStats?.outstandingInvoices?.currency}{dashboardStats?.outstandingInvoices?.value || '0.00'}
                   </p>
@@ -340,7 +343,7 @@ const AccountsDashboard = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Pending Payments</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('modules.accounts.index.pending_payments')}</p>
                   <p className="text-2xl font-bold text-orange-600">
                     {dashboardStats?.pendingPayments?.currency}{dashboardStats?.pendingPayments?.value || '0.00'}
                   </p>
@@ -357,7 +360,7 @@ const AccountsDashboard = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Profit Margin</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('modules.accounts.index.profit_margin')}</p>
                   <p className="text-2xl font-bold text-purple-600">
                     {dashboardStats?.profitMargin?.value || '0.0'}%
                   </p>
@@ -551,7 +554,7 @@ const AccountsDashboard = () => {
                   <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-xl inline-flex">
                     <FileText className="h-8 w-8 text-gray-400" />
                   </div>
-                  <p className="mt-4 text-gray-600 dark:text-gray-400">No recent transactions found</p>
+                  <p className="mt-4 text-gray-600 dark:text-gray-400">{t('modules.accounts.index.no_recent_transactions_found')}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
                     Transactions will appear here once you start posting vouchers
                   </p>

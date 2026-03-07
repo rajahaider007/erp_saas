@@ -5,6 +5,7 @@ import PermissionAwareForm, { PermissionButton } from '../../../Components/Permi
 import { usePermissions } from '../../../hooks/usePermissions';
 import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // Professional Breadcrumbs Component
 const Breadcrumbs = ({ items }) => {
@@ -63,6 +64,7 @@ const Breadcrumbs = ({ items }) => {
 
 // Company Form Component (Unified for Create and Edit)
 const CreateCompanyForm = () => {
+const { t } = useTranslations();
   const { errors: pageErrors, flash, company, currencies, isParentCompany, restrictedFields } = usePage().props;
   const isEdit = !!company;
   

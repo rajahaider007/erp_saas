@@ -3,6 +3,7 @@ import { Type, Home, List, Plus, Settings, Layers, CheckSquare, Square } from 'l
 import App from "../../App.jsx";
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const Breadcrumbs = ({ items }) => (
   <div className="breadcrumbs-themed">
@@ -53,6 +54,7 @@ const AddPackageForm = () => {
   };
 
   const handleSelectAllMenus = (isEnabled) => {
+  const { t } = useTranslations();
     const newMenus = {};
     menus.forEach(menu => {
       newMenus[menu.id] = isEnabled;

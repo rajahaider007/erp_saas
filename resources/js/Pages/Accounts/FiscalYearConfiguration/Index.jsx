@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   Calendar, 
   Plus, 
@@ -50,6 +51,7 @@ function PageContent() {
   };
 
   const handleUpdatePeriodStatus = (periodId, status) => {
+  const { t } = useTranslations();
     if (loading) return;
     
     setLoading(true);
@@ -126,7 +128,7 @@ function PageContent() {
             }`}>
               <h2 className={`text-lg font-semibold mb-4 ${
                 theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-              }`}>Fiscal Years</h2>
+              }`}>{t('accounts.fiscal_year_configuration.index.fiscal_years')}</h2>
               
               <div className="space-y-2 max-h-96 overflow-y-auto mb-6">
                 {fiscalYears.map((year) => (
@@ -177,7 +179,7 @@ function PageContent() {
                     type="text"
                     value={newYear}
                     onChange={(e) => setNewYear(e.target.value)}
-                    placeholder="YYYY"
+                    placeholder={t('accounts.fiscal_year_configuration.index.yyyy')}
                     maxLength="4"
                     className={`flex-1 px-3 py-2 border rounded-lg transition-colors focus:outline-none ${
                       theme === 'dark'
@@ -239,19 +241,19 @@ function PageContent() {
                       }`}>#</th>
                       <th className={`text-left py-3 px-4 font-semibold ${
                         theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                      }`}>Period Name</th>
+                      }`}>{t('accounts.fiscal_year_configuration.index.period_name')}</th>
                       <th className={`text-left py-3 px-4 font-semibold ${
                         theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                      }`}>Type</th>
+                      }`}>{t('accounts.fiscal_year_configuration.index.type')}</th>
                       <th className={`text-left py-3 px-4 font-semibold ${
                         theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                      }`}>Date Range</th>
+                      }`}>{t('accounts.fiscal_year_configuration.index.date_range')}</th>
                       <th className={`text-center py-3 px-4 font-semibold ${
                         theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                      }`}>Status</th>
+                      }`}>{t('accounts.fiscal_year_configuration.index.status')}</th>
                       <th className={`text-center py-3 px-4 font-semibold ${
                         theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                      }`}>Actions</th>
+                      }`}>{t('accounts.fiscal_year_configuration.index.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -317,7 +319,7 @@ function PageContent() {
                                     ? 'bg-yellow-900/50 text-yellow-200 hover:bg-yellow-900'
                                     : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
                                 }`}
-                                title="Lock period for review"
+                                title={t('accounts.fiscal_year_configuration.index.lock_period_for_review')}
                               >
                                 <Lock className="w-3 h-3" />
                                 Lock
@@ -332,7 +334,7 @@ function PageContent() {
                                     ? 'bg-green-900/50 text-green-200 hover:bg-green-900'
                                     : 'bg-green-100 text-green-800 hover:bg-green-200'
                                 }`}
-                                title="Close period permanently"
+                                title={t('accounts.fiscal_year_configuration.index.close_period_permanently')}
                               >
                                 <CheckCircle2 className="w-3 h-3" />
                                 Close
@@ -369,12 +371,12 @@ function PageContent() {
                 <ul className={`text-sm space-y-1 ml-6 list-disc ${
                   theme === 'dark' ? 'text-blue-300' : 'text-blue-800'
                 }`}>
-                  <li>Periods are automatically created when a fiscal year is created</li>
-                  <li><strong>Open:</strong> Period is active and transactions can be posted</li>
-                  <li><strong>Locked:</strong> Period is under review, no new transactions can be posted but existing entries can be modified</li>
-                  <li><strong>Closed:</strong> Period is permanently closed, no changes allowed</li>
-                  <li>Adjustment periods allow for year-end accruals and corrections</li>
-                  <li>All transactions must be posted before closing a period</li>
+                  <li>{t('accounts.fiscal_year_configuration.index.periods_are_automatically_created_when_a')}</li>
+                  <li><strong>{t('accounts.fiscal_year_configuration.index.open')}</strong>{t('accounts.fiscal_year_configuration.index.period_is_active_and_transactions_can_be')}</li>
+                  <li><strong>{t('accounts.fiscal_year_configuration.index.locked')}</strong> Period is under review, no new transactions can be posted but existing entries can be modified</li>
+                  <li><strong>{t('accounts.fiscal_year_configuration.index.closed')}</strong>{t('accounts.fiscal_year_configuration.index.period_is_permanently_closed_no_changes_')}</li>
+                  <li>{t('accounts.fiscal_year_configuration.index.adjustment_periods_allow_for_yearend_acc')}</li>
+                  <li>{t('accounts.fiscal_year_configuration.index.all_transactions_must_be_posted_before_c')}</li>
                 </ul>
               </div>
             </div>
@@ -386,7 +388,7 @@ function PageContent() {
 
 export default function FiscalYearConfiguration() {
   return (
-    <App title="Fiscal Year Configuration">
+    <App title={t('accounts.fiscal_year_configuration.index.fiscal_year_configuration')}>
       <PageContent />
     </App>
   );

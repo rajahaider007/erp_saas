@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import AppLayout from '../../Layouts/AppLayout';
 import { BarChart3, Download, Calendar, Filter, TrendingUp, Users, Shield, Clock, Activity, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import CustomDatePicker from '../../Components/DatePicker/DatePicker';
@@ -45,6 +46,7 @@ export default function Reports({
     };
 
     const handleExport = (format) => {
+    const { t } = useTranslations();
         console.log(`Exporting ${reportType} report as ${format}`);
         
         // Create export URL with current filters
@@ -69,7 +71,7 @@ export default function Reports({
 
     return (
         <AppLayout>
-            <Head title="Log Reports" />
+            <Head title={t('logs.reports.log_reports')} />
 
             <div className="form-theme-system min-h-screen p-6">
                 {/* Header */}
@@ -89,15 +91,15 @@ export default function Reports({
                         <div className="header-actions">
                             <Link href={route('logs.activity')} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <Activity size={16} />
-                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Activity Logs</span>
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>{t('logs.reports.activity_logs')}</span>
                             </Link>
                             <Link href={route('logs.deleted-items')} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <AlertTriangle size={16} />
-                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Deleted Items</span>
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>{t('logs.reports.deleted_items')}</span>
                             </Link>
                             <Link href={route('logs.security')} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <Shield size={16} />
-                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Security Logs</span>
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>{t('logs.reports.security_logs')}</span>
                             </Link>
                         </div>
                     </div>
@@ -108,7 +110,7 @@ export default function Reports({
                     <div className="filters-row">
                         {/* Report Type Filter */}
                         <div className="filter-group">
-                            <label className="filter-label">Report Type</label>
+                            <label className="filter-label">{t('logs.reports.report_type')}</label>
                             <select
                                 className="professional-select"
                                 value={reportType}
@@ -123,7 +125,7 @@ export default function Reports({
 
                         {/* Date Range Filter */}
                         <div className="filter-group">
-                            <label className="filter-label">Date Range</label>
+                            <label className="filter-label">{t('logs.reports.date_range')}</label>
                             <div className="date-range-wrapper">
                                 <CustomDatePicker
                                     selected={fromDate}
@@ -131,7 +133,7 @@ export default function Reports({
                                     placeholderText="From Date"
                                     className="professional-date-input"
                                 />
-                                <span className="date-separator">to</span>
+                                <span className="date-separator">{t('logs.reports.to')}</span>
                                 <CustomDatePicker
                                     selected={toDate}
                                     onChange={setToDate}
@@ -145,11 +147,11 @@ export default function Reports({
                         <div className="filter-actions">
                             <button onClick={handleFilter} className="btn-primary-professional" style={{color: 'white', fontWeight: '600'}}>
                                 <Filter size={18} />
-                                <span style={{color: 'white', fontWeight: '600'}}>Apply Filters</span>
+                                <span style={{color: 'white', fontWeight: '600'}}>{t('logs.reports.apply_filters')}</span>
                             </button>
                             <button onClick={handleReset} className="btn-secondary-professional" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <Calendar size={18} />
-                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Reset</span>
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>{t('logs.reports.reset')}</span>
                             </button>
                         </div>
 
@@ -157,11 +159,11 @@ export default function Reports({
                         <div className="export-actions">
                             <button onClick={() => handleExport('PDF')} className="btn-export-professional pdf" style={{color: 'white', fontWeight: '600'}}>
                                 <Download size={18} />
-                                <span style={{color: 'white', fontWeight: '600'}}>Export PDF</span>
+                                <span style={{color: 'white', fontWeight: '600'}}>{t('logs.reports.export_pdf')}</span>
                             </button>
                             <button onClick={() => handleExport('Excel')} className="btn-export-professional excel" style={{color: 'white', fontWeight: '600'}}>
                                 <Download size={18} />
-                                <span style={{color: 'white', fontWeight: '600'}}>Export Excel</span>
+                                <span style={{color: 'white', fontWeight: '600'}}>{t('logs.reports.export_excel')}</span>
                             </button>
                         </div>
                     </div>
@@ -177,11 +179,11 @@ export default function Reports({
                                     <Activity size={24} />
                                 </div>
                                 <div className="kpi-title">
-                                    <h3>Activity Overview</h3>
-                                    <p>System activity metrics</p>
+                                    <h3>{t('logs.reports.activity_overview')}</h3>
+                                    <p>{t('logs.reports.system_activity_metrics')}</p>
                                 </div>
                                 <div className="kpi-status">
-                                    <span className="status-badge active">Active</span>
+                                    <span className="status-badge active">{t('logs.reports.active')}</span>
                                 </div>
                             </div>
                             <div className="kpi-content">
@@ -228,11 +230,11 @@ export default function Reports({
                                     <Shield size={24} />
                                 </div>
                                 <div className="kpi-title">
-                                    <h3>Security Overview</h3>
-                                    <p>Security event monitoring</p>
+                                    <h3>{t('logs.reports.security_overview')}</h3>
+                                    <p>{t('logs.reports.security_event_monitoring')}</p>
                                 </div>
                                 <div className="kpi-status">
-                                    <span className="status-badge secure">Secure</span>
+                                    <span className="status-badge secure">{t('logs.reports.secure')}</span>
                                 </div>
                             </div>
                             <div className="kpi-content">
@@ -282,11 +284,11 @@ export default function Reports({
                                     <Users size={24} />
                                 </div>
                                 <div className="analytics-title">
-                                    <h3>Top Active Users</h3>
-                                    <p>User activity ranking</p>
+                                    <h3>{t('logs.reports.top_active_users')}</h3>
+                                    <p>{t('logs.reports.user_activity_ranking')}</p>
                                 </div>
                                 <div className="analytics-action">
-                                    <button className="btn-view-all">View All</button>
+                                    <button className="btn-view-all">{t('logs.reports.view_all')}</button>
                                 </div>
                             </div>
                             <div className="analytics-content">
@@ -310,7 +312,7 @@ export default function Reports({
                                                 </div>
                                                 <div className="user-stats">
                                                     <div className="stat-value">{user.total_actions}</div>
-                                                    <div className="stat-label">Actions</div>
+                                                    <div className="stat-label">{t('logs.reports.actions')}</div>
                                                 </div>
                                                 <div className="user-trend">
                                                     <span className="trend-indicator positive">↗</span>
@@ -323,8 +325,8 @@ export default function Reports({
                                         <div className="empty-icon">
                                             <Users size={48} />
                                         </div>
-                                        <div className="empty-title">No User Data</div>
-                                        <div className="empty-description">User activity data will appear here</div>
+                                        <div className="empty-title">{t('logs.reports.no_user_data')}</div>
+                                        <div className="empty-description">{t('logs.reports.user_activity_data_will_appear_here')}</div>
                                     </div>
                                 )}
                             </div>
@@ -336,11 +338,11 @@ export default function Reports({
                                     <AlertTriangle size={24} />
                                 </div>
                                 <div className="analytics-title">
-                                    <h3>Security Incidents</h3>
-                                    <p>Recent security events</p>
+                                    <h3>{t('logs.reports.security_incidents')}</h3>
+                                    <p>{t('logs.reports.recent_security_events')}</p>
                                 </div>
                                 <div className="analytics-action">
-                                    <button className="btn-view-all">View All</button>
+                                    <button className="btn-view-all">{t('logs.reports.view_all')}</button>
                                 </div>
                             </div>
                             <div className="analytics-content">
@@ -372,8 +374,8 @@ export default function Reports({
                                         <div className="empty-icon">
                                             <Shield size={48} />
                                         </div>
-                                        <div className="empty-title">All Clear</div>
-                                        <div className="empty-description">No security incidents detected</div>
+                                        <div className="empty-title">{t('logs.reports.all_clear')}</div>
+                                        <div className="empty-description">{t('logs.reports.no_security_incidents_detected')}</div>
                                         <div className="security-badge">
                                             <span className="badge-success">🛡️ System Secure</span>
                                         </div>
@@ -391,20 +393,20 @@ export default function Reports({
                                     <TrendingUp size={24} />
                                 </div>
                                 <div className="health-title">
-                                    <h3>System Health & Activity</h3>
-                                    <p>Real-time system performance metrics</p>
+                                    <h3>{t('logs.reports.system_health__activity')}</h3>
+                                    <p>{t('logs.reports.realtime_system_performance_metrics')}</p>
                                 </div>
                                 <div className="health-status">
                                     <span className="status-indicator healthy"></span>
-                                    <span className="status-text">All Systems Operational</span>
+                                    <span className="status-text">{t('logs.reports.all_systems_operational')}</span>
                                 </div>
                             </div>
                             <div className="health-content">
                                 {activityStats?.module_breakdown && activityStats.module_breakdown.length > 0 ? (
                                     <div className="module-breakdown">
                                         <div className="breakdown-header">
-                                            <h4>Activity by Module</h4>
-                                            <span className="breakdown-period">Last 30 days</span>
+                                            <h4>{t('logs.reports.activity_by_module')}</h4>
+                                            <span className="breakdown-period">{t('logs.reports.last_30_days')}</span>
                                         </div>
                                         <div className="breakdown-list">
                                             {activityStats.module_breakdown.map((module, index) => (
@@ -440,8 +442,8 @@ export default function Reports({
                                         <div className="empty-icon">
                                             <BarChart3 size={48} />
                                         </div>
-                                        <div className="empty-title">No Activity Data</div>
-                                        <div className="empty-description">System activity data will appear here</div>
+                                        <div className="empty-title">{t('logs.reports.no_activity_data')}</div>
+                                        <div className="empty-description">{t('logs.reports.system_activity_data_will_appear_here')}</div>
                                     </div>
                                 )}
                             </div>
@@ -455,8 +457,8 @@ export default function Reports({
                                         <Shield size={20} />
                                     </div>
                                     <div className="compliance-info">
-                                        <div className="compliance-title">Data Protection</div>
-                                        <div className="compliance-status">GDPR Compliant</div>
+                                        <div className="compliance-title">{t('logs.reports.data_protection')}</div>
+                                        <div className="compliance-status">{t('logs.reports.gdpr_compliant')}</div>
                                     </div>
                                     <div className="compliance-badge">
                                         <span className="badge-success">✓</span>
@@ -467,7 +469,7 @@ export default function Reports({
                                         <Clock size={20} />
                                     </div>
                                     <div className="compliance-info">
-                                        <div className="compliance-title">Uptime</div>
+                                        <div className="compliance-title">{t('logs.reports.uptime')}</div>
                                         <div className="compliance-status">99.9% Available</div>
                                     </div>
                                     <div className="compliance-badge">
@@ -479,8 +481,8 @@ export default function Reports({
                                         <AlertTriangle size={20} />
                                     </div>
                                     <div className="compliance-info">
-                                        <div className="compliance-title">Security</div>
-                                        <div className="compliance-status">Zero Incidents</div>
+                                        <div className="compliance-title">{t('logs.reports.security')}</div>
+                                        <div className="compliance-status">{t('logs.reports.zero_incidents')}</div>
                                     </div>
                                     <div className="compliance-badge">
                                         <span className="badge-success">✓</span>
@@ -491,7 +493,7 @@ export default function Reports({
                                         <Users size={20} />
                                     </div>
                                     <div className="compliance-info">
-                                        <div className="compliance-title">User Satisfaction</div>
+                                        <div className="compliance-title">{t('logs.reports.user_satisfaction')}</div>
                                         <div className="compliance-status">98% Rating</div>
                                     </div>
                                     <div className="compliance-badge">

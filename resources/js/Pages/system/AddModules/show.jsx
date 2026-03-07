@@ -1,8 +1,10 @@
 import React from 'react';
 import App from "../../App.jsx";
 import { usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const Show = () => {
+const { t } = useTranslations();
   const { module } = usePage().props;
   return (
     <App>

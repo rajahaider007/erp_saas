@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import Select from 'react-select';
 import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
 import Swal from 'sweetalert2';
@@ -91,6 +92,7 @@ const TrialBalanceSearch = () => {
   };
 
   const handleReset = () => {
+  const { t } = useTranslations();
     setSelectedCompany(null);
     setSelectedLocation(null);
     setAvailableLocations([]);
@@ -175,7 +177,7 @@ const TrialBalanceSearch = () => {
               <div className="stats-summary">
                 <div className="stat-item">
                   <TrendingUp size={16} />
-                  <span>Select date range to generate trial balance</span>
+                  <span>{t('accounts.trial_balance.search.select_date_range_to_generate_trial_bala')}</span>
                 </div>
               </div>
             </div>
@@ -184,7 +186,7 @@ const TrialBalanceSearch = () => {
               <button
                 className="btn btn-icon"
                 onClick={handleReset}
-                title="Reset All Filters"
+                title={t('accounts.trial_balance.search.reset_all_filters')}
               >
                 <RefreshCcw size={20} />
               </button>
@@ -210,7 +212,7 @@ const TrialBalanceSearch = () => {
             <div className="filter-card-header">
               <div className="flex items-center gap-2">
                 <Filter className="w-5 h-5 text-blue-400" />
-                <h2 className="text-lg font-semibold text-gray-100">Report Filters</h2>
+                <h2 className="text-lg font-semibold text-gray-100">{t('accounts.trial_balance.search.report_filters')}</h2>
               </div>
               <p className="text-sm text-gray-400 mt-1">
                 Configure filters to generate your trial balance report
@@ -232,7 +234,7 @@ const TrialBalanceSearch = () => {
                         value={selectedCompany}
                         onChange={handleCompanyChange}
                         styles={customSelectStyles}
-                        placeholder="Select company..."
+                        placeholder={t('accounts.trial_balance.search.select_company')}
                         isClearable
                         isSearchable
                         className="react-select-container"
@@ -254,7 +256,7 @@ const TrialBalanceSearch = () => {
                           value={selectedLocation}
                           onChange={setSelectedLocation}
                           styles={customSelectStyles}
-                          placeholder="Select location..."
+                          placeholder={t('accounts.trial_balance.search.select_location')}
                           isClearable
                           isSearchable
                           className="react-select-container"
@@ -276,22 +278,22 @@ const TrialBalanceSearch = () => {
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 mb-2 block">From Date</label>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('accounts.trial_balance.search.from_date')}</label>
                       <CustomDatePicker
                         selected={fromDate ? new Date(fromDate) : null}
                         onChange={(date) => setFromDate(date ? date.toISOString().split('T')[0] : '')}
                         type="date"
-                        placeholder="Select from date"
+                        placeholder={t('accounts.trial_balance.search.select_from_date')}
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 mb-2 block">To Date</label>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('accounts.trial_balance.search.to_date')}</label>
                       <CustomDatePicker
                         selected={toDate ? new Date(toDate) : null}
                         onChange={(date) => setToDate(date ? date.toISOString().split('T')[0] : '')}
                         type="date"
-                        placeholder="Select to date"
+                        placeholder={t('accounts.trial_balance.search.select_to_date')}
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                       />
                     </div>
@@ -309,11 +311,11 @@ const TrialBalanceSearch = () => {
                     onChange={(e) => setSelectedLevel(e.target.value)}
                     className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   >
-                    <option value="all">All Levels</option>
-                    <option value="1">Level 1 Only</option>
-                    <option value="2">Level 2 Only</option>
-                    <option value="3">Level 3 Only</option>
-                    <option value="4">Level 4 Only</option>
+                    <option value="all">{t('accounts.trial_balance.search.all_levels')}</option>
+                    <option value="1">{t('accounts.trial_balance.search.level_1_only')}</option>
+                    <option value="2">{t('accounts.trial_balance.search.level_2_only')}</option>
+                    <option value="3">{t('accounts.trial_balance.search.level_3_only')}</option>
+                    <option value="4">{t('accounts.trial_balance.search.level_4_only')}</option>
                   </select>
                   <p className="text-xs text-gray-400 mt-2">
                     Filter accounts by their hierarchy level
@@ -330,7 +332,7 @@ const TrialBalanceSearch = () => {
                       className="w-5 h-5 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
                     />
                     <div>
-                      <span className="text-sm font-semibold text-gray-100">Hide Zero Balances</span>
+                      <span className="text-sm font-semibold text-gray-100">{t('accounts.trial_balance.search.hide_zero_balances')}</span>
                       <p className="text-xs text-gray-400 mt-1">
                         Exclude accounts with zero debit, credit, and balance amounts
                       </p>

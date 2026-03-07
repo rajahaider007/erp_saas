@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Head, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import App from '../App.jsx';
 import Swal from 'sweetalert2';
 import {
@@ -370,6 +371,7 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
 
   // Load expanded state from localStorage
   const loadExpandedState = () => {
+  const { t } = useTranslations();
     try {
       const savedState = localStorage.getItem('chartOfAccountsState');
       if (savedState) {
@@ -764,6 +766,7 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
 
   // Render account tree with accordion functionality
   const renderAccountTree = (accountsToRender, level = 0) => {
+  const { t } = useTranslations();
     return accountsToRender.map((account) => {
       const hasChildren = accounts.some(acc => acc.parent_account_id === account.id);
       const isExpanded = expandedAccounts[account.id];

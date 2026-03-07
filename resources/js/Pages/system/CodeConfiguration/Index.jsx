@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { Search, Plus, Edit3, Trash2, RefreshCcw, ChevronLeft, ChevronRight, Code, Clock, X, CheckCircle2, ArrowUpDown, Building2, MapPin } from 'lucide-react';
 
 // SweetAlert-like alert
@@ -41,6 +42,7 @@ const Index = () => {
   }, [flash]);
 
   const handleDelete = (config) => { 
+  const { t } = useTranslations();
     CustomAlert.fire({ 
       title:'Are you sure?', 
       text:`You are about to delete "${config.code_name}". This action cannot be undone!`, 
@@ -61,7 +63,7 @@ const Index = () => {
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
-              <h1 className="page-title"><Code className="title-icon" />Code Configuration</h1>
+              <h1 className="page-title"><Code className="title-icon" />{t('system.code_configuration.index.code_configuration')}</h1>
               <div className="stats-summary">
                 <div className="stat-item"><span>{paginated?.total || 0} Total</span></div>
                 <div className="stat-item"><span>{paginated?.data?.filter(c=>c.is_active).length || 0} Active</span></div>
@@ -69,8 +71,8 @@ const Index = () => {
               </div>
             </div>
             <div className="header-actions">
-              <button className="btn btn-icon" onClick={()=>window.location.reload()} title="Refresh"><RefreshCcw size={20} /></button>
-              <a href='/system/code-configurations/create' className="btn btn-primary"><Plus size={20} />Add Configuration</a>
+              <button className="btn btn-icon" onClick={()=>window.location.reload()} title={t('system.code_configuration.index.refresh')}><RefreshCcw size={20} /></button>
+              <a href='/system/code-configurations/create' className="btn btn-primary"><Plus size={20} />{t('system.code_configuration.index.add_configuration')}</a>
             </div>
           </div>
           
@@ -83,20 +85,20 @@ const Index = () => {
                   <input
                     type="text"
                     className="search-input"
-                    placeholder="Search by name, type, prefix..."
+                    placeholder={t('system.code_configuration.index.search_by_name_type_prefix')}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Company</label>
+                  <label className="filter-label">{t('system.code_configuration.index.company')}</label>
                   <select
                     className="filter-select"
                     value={companyFilter}
                     onChange={(e) => setCompanyFilter(e.target.value)}
                   >
-                    <option value="">All Companies</option>
+                    <option value="">{t('system.code_configuration.index.all_companies')}</option>
                     {companies?.map((company) => (
                       <option key={company.id} value={company.id}>{company.name}</option>
                     ))}
@@ -104,13 +106,13 @@ const Index = () => {
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Location</label>
+                  <label className="filter-label">{t('system.code_configuration.index.location')}</label>
                   <select
                     className="filter-select"
                     value={locationFilter}
                     onChange={(e) => setLocationFilter(e.target.value)}
                   >
-                    <option value="">All Locations</option>
+                    <option value="">{t('system.code_configuration.index.all_locations')}</option>
                     {locations?.map((location) => (
                       <option key={location.id} value={location.id}>{location.name}</option>
                     ))}
@@ -118,13 +120,13 @@ const Index = () => {
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Code Type</label>
+                  <label className="filter-label">{t('system.code_configuration.index.code_type')}</label>
                   <select
                     className="filter-select"
                     value={codeTypeFilter}
                     onChange={(e) => setCodeTypeFilter(e.target.value)}
                   >
-                    <option value="">All Types</option>
+                    <option value="">{t('system.code_configuration.index.all_types')}</option>
                     {codeTypes?.map((type) => (
                       <option key={type.value} value={type.value}>{type.label}</option>
                     ))}
@@ -132,15 +134,15 @@ const Index = () => {
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Status</label>
+                  <label className="filter-label">{t('system.code_configuration.index.status')}</label>
                   <select
                     className="filter-select"
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
                   >
-                    <option value="">All Status</option>
-                    <option value="1">Active</option>
-                    <option value="0">Inactive</option>
+                    <option value="">{t('system.code_configuration.index.all_status')}</option>
+                    <option value="1">{t('system.code_configuration.index.active')}</option>
+                    <option value="0">{t('system.code_configuration.index.inactive')}</option>
                   </select>
                 </div>
 
@@ -156,7 +158,7 @@ const Index = () => {
                     params.set('page', '1');
                     router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
                   }}
-                  title="Reset all filters"
+                  title={t('system.code_configuration.index.reset_all_filters')}
                 >
                   <RefreshCcw size={16} />
                 </button>
@@ -169,7 +171,7 @@ const Index = () => {
           <div className="bulk-actions-bar">
             <div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div>
             <div className="bulk-actions">
-              <button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />Clear</button>
+              <button className="btn btn-sm btn-secondary" onClick={()=>{t('system.code_configuration.index.setselected')}<X size={16} />{t('system.code_configuration.index.clear')}</button>
             </div>
           </div>
         )}
@@ -179,17 +181,17 @@ const Index = () => {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginated.data.length && paginated.data.length>0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
-                  <th className="sortable"><div className="th-content">ID<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable"><div className="th-content">Code Type<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable"><div className="th-content">Code Name<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable"><div className="th-content">Company<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable"><div className="th-content">Location<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable"><div className="th-content">Format<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable"><div className="th-content">Level<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable"><div className="th-content">Next #<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable"><div className="th-content">Status<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="actions-header">Actions</th>
+                  <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginated.data.length && paginated.data.length>0} onChange={(e)=>{t('system.code_configuration.index.handleselectalletargetchecked_')}</th>
+                  <th className="sortable"><div className="th-content">{t('system.code_configuration.index.id')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable"><div className="th-content">{t('system.code_configuration.index.code_type')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable"><div className="th-content">{t('system.code_configuration.index.code_name')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable"><div className="th-content">{t('system.code_configuration.index.company')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable"><div className="th-content">{t('system.code_configuration.index.location')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable"><div className="th-content">{t('system.code_configuration.index.format')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable"><div className="th-content">{t('system.code_configuration.index.level')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable"><div className="th-content">{t('system.code_configuration.index.next_')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable"><div className="th-content">{t('system.code_configuration.index.status')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="actions-header">{t('system.code_configuration.index.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -198,15 +200,15 @@ const Index = () => {
                     <td colSpan="11" style={{ textAlign: 'center', padding: '3rem' }}>
                       <div style={{ color: '#9CA3AF', fontSize: '1rem' }}>
                         <Code size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
-                        <p style={{ fontWeight: '600', marginBottom: '0.5rem' }}>No code configurations found</p>
-                        <p style={{ fontSize: '0.875rem' }}>Create your first code configuration to get started</p>
+                        <p style={{ fontWeight: '600', marginBottom: '0.5rem' }}>{t('system.code_configuration.index.no_code_configurations_found')}</p>
+                        <p style={{ fontSize: '0.875rem' }}>{t('system.code_configuration.index.create_your_first_code_configuration_to_')}</p>
                       </div>
                     </td>
                   </tr>
                 ) : (
                   paginated.data.map(config => (
                     <tr key={config.id} className="table-row">
-                      <td><input type="checkbox" className="checkbox" checked={selected.includes(config.id)} onChange={(e)=>handleSelectRow(config.id, e.target.checked)} /></td>
+                      <td><input type="checkbox" className="checkbox" checked={selected.includes(config.id)} onChange={(e)=>{t('system.code_configuration.index.handleselectrowconfigid_etargetchecked_')}</td>
                       <td><span className="module-id">#{config.id}</span></td>
                       <td>
                         <div className="module-details">
@@ -236,10 +238,10 @@ const Index = () => {
                       <td><span className={`status-badge status-${config.is_active ? 'active' : 'inactive'}`}>{config.is_active ? 'Active' : 'Inactive'}</span></td>
                       <td>
                         <div className="actions-cell">
-                          <button className="action-btn edit" title="Edit Configuration" onClick={()=>router.get(`/system/code-configurations/${config.id}/edit`)}>
+                          <button className="action-btn edit" title={t('system.code_configuration.index.edit_configuration')} onClick={()=>router.get(`/system/code-configurations/${config.id}/edit`)}>
                             <Edit3 size={16} />
                           </button>
-                          <button className="action-btn delete" title="Delete Configuration" onClick={()=>handleDelete(config)}>
+                          <button className="action-btn delete" title={t('system.code_configuration.index.delete_configuration')} onClick={()=>handleDelete(config)}>
                             <Trash2 size={16} />
                           </button>
                         </div>
@@ -255,17 +257,17 @@ const Index = () => {
             <div className="pagination-info">
               <div className="results-info">Showing {paginated.from || 0} to {paginated.to || 0} of {paginated.total || 0} entries</div>
               <div className="page-size-selector">
-                <span>Show:</span>
+                <span>{t('system.code_configuration.index.show')}</span>
                 <select value={pageSize} onChange={(e)=>{const v=Number(e.target.value); setPageSize(v); pushQuery({ per_page:v.toString() });}} className="page-size-select">{[10,15,25,50].map(s => (<option key={s} value={s}>{s}</option>))}</select>
-                <span>per page</span>
+                <span>{t('system.code_configuration.index.per_page')}</span>
               </div>
             </div>
             <div className="pagination-controls">
-              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{setCurrentPage(1); pushQuery({ page:'1' });}} title="First">
+              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{setCurrentPage(1); pushQuery({ page:'1' });}} title={t('system.code_configuration.index.first')}>
                 <ChevronLeft size={14} />
                 <ChevronLeft size={14} />
               </button>
-              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{const p=currentPage-1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title="Prev">
+              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{const p=currentPage-1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title={t('system.code_configuration.index.prev')}>
                 <ChevronLeft size={14} />
               </button>
               <div className="page-numbers">
@@ -275,10 +277,10 @@ const Index = () => {
                   return (<button key={pageNumber} className={`pagination-btn ${currentPage===pageNumber?'active':''}`} onClick={()=>{setCurrentPage(pageNumber); pushQuery({ page:pageNumber.toString() });}}>{pageNumber}</button>);
                 })}
               </div>
-              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=currentPage+1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title="Next">
+              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=currentPage+1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title={t('system.code_configuration.index.next')}>
                 <ChevronRight size={14} />
               </button>
-              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=paginated.last_page||1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title="Last">
+              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=paginated.last_page||1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title={t('system.code_configuration.index.last')}>
                 <ChevronRight size={14} />
                 <ChevronRight size={14} />
               </button>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import AppLayout from '../../Layouts/AppLayout';
 import { ArrowLeft, Clock, User, FileText, Eye, Calendar, MapPin, Shield, Database, Hash, Building } from 'lucide-react';
 
@@ -34,6 +35,7 @@ export default function ChangeDetails({ log }) {
     };
 
     const getActionBadgeClass = (actionType) => {
+    const { t } = useTranslations();
         const classes = {
             'CREATE': 'bg-green-100 text-green-700 border-green-300',
             'UPDATE': 'bg-blue-100 text-blue-700 border-blue-300',
@@ -48,7 +50,7 @@ export default function ChangeDetails({ log }) {
 
     return (
         <AppLayout>
-            <Head title="Change Details" />
+            <Head title={t('logs.change_details.change_details')} />
 
             <div className="form-theme-system change-details-container min-h-screen p-6">
                 {/* Header */}
@@ -58,7 +60,7 @@ export default function ChangeDetails({ log }) {
                             <Link 
                                 href={route('logs.activity')} 
                                 className="back-btn"
-                                title="Back to Activity Logs"
+                                title={t('logs.change_details.back_to_activity_logs')}
                             >
                                 <ArrowLeft size={20} />
                             </Link>
@@ -90,7 +92,7 @@ export default function ChangeDetails({ log }) {
                                 <div className="flex items-start gap-4 pb-4 border-b border-gray-100">
                                     <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
                                         <Clock size={16} className="text-blue-600" />
-                                        <span className="text-sm font-semibold text-gray-800">Timestamp</span>
+                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.timestamp')}</span>
                                     </div>
                                     <div className="text-sm text-gray-700 font-medium">
                                         {formatDate(log.created_at)}
@@ -100,7 +102,7 @@ export default function ChangeDetails({ log }) {
                                 <div className="flex items-start gap-4 pb-4 border-b border-gray-100">
                                     <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
                                         <User size={16} className="text-blue-600" />
-                                        <span className="text-sm font-semibold text-gray-800">User</span>
+                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.user')}</span>
                                     </div>
                                     <div className="text-sm text-gray-700">
                                         <div className="font-semibold text-gray-800">{log.user_name || 'System Administrator'}</div>
@@ -111,7 +113,7 @@ export default function ChangeDetails({ log }) {
                                 <div className="flex items-start gap-4 pb-4 border-b border-gray-100">
                                     <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
                                         <FileText size={16} className="text-blue-600" />
-                                        <span className="text-sm font-semibold text-gray-800">Action</span>
+                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.action')}</span>
                                     </div>
                                     <div>
                                         <span className={`px-3 py-1 rounded-lg text-sm font-semibold border ${getActionBadgeClass(log.action_type)}`}>
@@ -123,7 +125,7 @@ export default function ChangeDetails({ log }) {
                                 <div className="flex items-start gap-4 pb-4 border-b border-gray-100">
                                     <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
                                         <Building size={16} className="text-blue-600" />
-                                        <span className="text-sm font-semibold text-gray-800">Module</span>
+                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.module')}</span>
                                     </div>
                                     <div>
                                         <span className="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 text-sm font-semibold border border-blue-200">
@@ -135,7 +137,7 @@ export default function ChangeDetails({ log }) {
                                 <div className="flex items-start gap-4">
                                     <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
                                         <MapPin size={16} className="text-blue-600" />
-                                        <span className="text-sm font-semibold text-gray-800">IP Address</span>
+                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.ip_address')}</span>
                                     </div>
                                     <div>
                                         <code className="bg-gray-100 px-3 py-1 rounded text-sm text-gray-800 font-mono border">
@@ -162,18 +164,18 @@ export default function ChangeDetails({ log }) {
                                     <div className="bg-gray-50 p-4 rounded-lg space-y-3">
                                         <div className="flex items-center gap-2">
                                             <Database size={16} className="text-gray-600" />
-                                            <span className="text-sm font-semibold text-gray-800">Table:</span>
+                                            <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.table')}</span>
                                             <span className="text-sm text-gray-700 font-mono">{log.table_name || 'N/A'}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Hash size={16} className="text-gray-600" />
-                                            <span className="text-sm font-semibold text-gray-800">Record ID:</span>
+                                            <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.record_id')}</span>
                                             <span className="text-sm text-gray-700 font-mono">{log.record_id || 'N/A'}</span>
                                         </div>
                                         {log.company_id && (
                                             <div className="flex items-center gap-2">
                                                 <Building size={16} className="text-gray-600" />
-                                                <span className="text-sm font-semibold text-gray-800">Company ID:</span>
+                                                <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.company_id')}</span>
                                                 <span className="text-sm text-gray-700 font-mono">{log.company_id}</span>
                                             </div>
                                         )}
@@ -238,13 +240,13 @@ export default function ChangeDetails({ log }) {
                                                 </div>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div>
-                                                        <span className="text-xs font-semibold text-red-600">OLD:</span>
+                                                        <span className="text-xs font-semibold text-red-600">{t('logs.change_details.old')}</span>
                                                         <p className="text-sm text-gray-700 font-mono bg-red-50 p-2 rounded mt-1">
                                                             {changes.old || 'N/A'}
                                                         </p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-xs font-semibold text-green-600">NEW:</span>
+                                                        <span className="text-xs font-semibold text-green-600">{t('logs.change_details.new')}</span>
                                                         <p className="text-sm text-gray-700 font-mono bg-green-50 p-2 rounded mt-1">
                                                             {changes.new || 'N/A'}
                                                         </p>
@@ -268,19 +270,19 @@ export default function ChangeDetails({ log }) {
                             <div className="p-6">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div className="space-y-2">
-                                        <span className="text-sm font-semibold text-gray-800">Session ID</span>
+                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.session_id')}</span>
                                         <code className="block bg-gray-100 p-2 rounded text-xs text-gray-700 font-mono break-all">
                                             {log.session_id || 'N/A'}
                                         </code>
                                     </div>
                                     <div className="space-y-2">
-                                        <span className="text-sm font-semibold text-gray-800">User Agent</span>
+                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.user_agent')}</span>
                                         <code className="block bg-gray-100 p-2 rounded text-xs text-gray-700 font-mono break-all">
                                             {log.user_agent || 'N/A'}
                                         </code>
                                     </div>
                                     <div className="space-y-2">
-                                        <span className="text-sm font-semibold text-gray-800">Location ID</span>
+                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.location_id')}</span>
                                         <code className="block bg-gray-100 p-2 rounded text-xs text-gray-700 font-mono">
                                             {log.location_id || 'N/A'}
                                         </code>

@@ -4,6 +4,7 @@ import PermissionAwareForm, { PermissionButton } from '../../../Components/Permi
 import { usePermissions } from '../../../hooks/usePermissions';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const EditMenuForm = () => {
   const { menu, modules } = usePage().props;
@@ -29,6 +30,7 @@ const EditMenuForm = () => {
   ], [modules, sections]);
 
   const handleSubmit = (data) => {
+  const { t } = useTranslations();
     router.post(`/system/menus/${menu.id}`, { ...data, _method: 'put' });
   };
 

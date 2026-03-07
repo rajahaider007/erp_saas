@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   DollarSign, Home, List, Clock, TrendingUp, TrendingDown,
   Calendar, Database, Minus, ArrowLeft
@@ -80,6 +81,7 @@ const CurrencyHistory = () => {
   };
 
   const getRateChangeColor = (change) => {
+  const { t } = useTranslations();
     if (change > 0) return 'text-green-600 dark:text-green-400';
     if (change < 0) return 'text-red-600 dark:text-red-400';
     return 'text-gray-600 dark:text-gray-400';
@@ -104,7 +106,7 @@ const CurrencyHistory = () => {
             <h1 className="page-title">
               {currency.symbol} {currency.name} ({currency.code})
             </h1>
-            <p className="page-subtitle">Exchange Rate History & Trends</p>
+            <p className="page-subtitle">{t('system.currencies.history.exchange_rate_history__trends')}</p>
           </div>
           <div className="page-actions">
             <button
@@ -122,7 +124,7 @@ const CurrencyHistory = () => {
           <div className="card p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Current Rate</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{t('system.currencies.history.current_rate')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {parseFloat(currency.exchange_rate).toFixed(4)}
                 </p>
@@ -134,7 +136,7 @@ const CurrencyHistory = () => {
           <div className="card p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Records</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{t('system.currencies.history.total_records')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {history.total}
                 </p>
@@ -146,7 +148,7 @@ const CurrencyHistory = () => {
           <div className="card p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{t('system.currencies.history.status')}</p>
                 <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                   {currency.is_active ? '✅ Active' : '❌ Inactive'}
                 </p>
@@ -158,7 +160,7 @@ const CurrencyHistory = () => {
           <div className="card p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Base Currency</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{t('system.currencies.history.base_currency')}</p>
                 <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                   {currency.is_base_currency ? '⭐ Yes' : 'No'}
                 </p>
@@ -204,13 +206,13 @@ const CurrencyHistory = () => {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Exchange Rate</th>
-                  <th>Previous Rate</th>
-                  <th>Change</th>
-                  <th>Source</th>
-                  <th>Provider</th>
-                  <th>Notes</th>
+                  <th>{t('system.currencies.history.date')}</th>
+                  <th>{t('system.currencies.history.exchange_rate')}</th>
+                  <th>{t('system.currencies.history.previous_rate')}</th>
+                  <th>{t('system.currencies.history.change')}</th>
+                  <th>{t('system.currencies.history.source')}</th>
+                  <th>{t('system.currencies.history.provider')}</th>
+                  <th>{t('system.currencies.history.notes')}</th>
                 </tr>
               </thead>
               <tbody>

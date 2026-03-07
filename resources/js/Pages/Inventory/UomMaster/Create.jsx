@@ -3,8 +3,10 @@ import { Home, List, Plus, Hash, Tag, Edit3, Droplet } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import App from '../../App.jsx';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const Breadcrumbs = ({ items }) => {
+const { t } = useTranslations();
   return (
     <div className="breadcrumbs-themed">
       <nav className="breadcrumbs">
@@ -38,12 +40,13 @@ const Breadcrumbs = ({ items }) => {
           </div>
         ))}
       </nav>
-      <div className="breadcrumbs-description">Configure unit of measure master data</div>
+      <div className="breadcrumbs-description">{t('inventory.uom_master.create.configure_unit_of_measure_master_data')}</div>
     </div>
   );
 };
 
 const CreateUomMasterForm = () => {
+const { t } = useTranslations();
   const {
     errors: pageErrors,
     flash,
@@ -122,7 +125,7 @@ const CreateUomMasterForm = () => {
       setErrors(pageErrors);
       setAlert({
         type: 'error',
-        message: 'Please correct the errors below and try again.',
+        message: t('inventory.uom_master.create.msg_please_correct_the_errors_below_and_try_'),
       });
     }
   }, [pageErrors]);
@@ -163,7 +166,7 @@ const CreateUomMasterForm = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setAlert({ type: 'error', message: 'Please correct the errors below and try again.' });
+      setAlert({ type: 'error', message: t('inventory.uom_master.create.msg_please_correct_the_errors_below_and_try_') });
       return;
     }
 

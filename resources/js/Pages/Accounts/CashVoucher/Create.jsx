@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   Plus, 
   Trash2, 
@@ -23,6 +24,7 @@ import StorageWarning from '../../../Components/StorageWarning.jsx';
 
 // Breadcrumbs Component
 const Breadcrumbs = ({ items }) => {
+const { t } = useTranslations();
   return (
     <div className="breadcrumbs-themed">
       <nav className="breadcrumbs">
@@ -48,7 +50,7 @@ const Breadcrumbs = ({ items }) => {
           </div>
         ))}
       </nav>
-      <div className="breadcrumbs-description">Navigate through your application modules</div>
+      <div className="breadcrumbs-description">{t('accounts.cash_voucher.create.navigate_through_your_application_module')}</div>
     </div>
   );
 };
@@ -153,6 +155,7 @@ const CashVoucherCreate = () => {
 
   // Keyboard navigation helper
   const handleKeyDown = (e, currentIndex, field) => {
+  const { t } = useTranslations();
     // Enter key to move to next field
     if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
       e.preventDefault();
@@ -222,13 +225,13 @@ const CashVoucherCreate = () => {
           updateEntry(entryIndex, 'exchange_rate', data.rate);
           setAlert({ type: 'success', message: `Exchange rate updated for entry ${entryIndex + 1}: ${data.rate}` });
         } else {
-          setAlert({ type: 'error', message: 'Failed to fetch exchange rate from API' });
+          setAlert({ type: 'error', message: t('accounts.cash_voucher.create.msg_failed_to_fetch_exchange_rate_from_api') });
         }
       } else {
-        setAlert({ type: 'error', message: 'Failed to fetch exchange rate from API' });
+        setAlert({ type: 'error', message: t('accounts.cash_voucher.create.msg_failed_to_fetch_exchange_rate_from_api') });
       }
     } catch (error) {
-      setAlert({ type: 'error', message: 'Error fetching exchange rate: ' + error.message });
+      setAlert({ type: 'error', message: t('accounts.cash_voucher.create.msg_error_fetching_exchange_rate') + error.message });
     } finally {
       setIsLoadingExchangeRate(false);
     }
@@ -296,12 +299,12 @@ const CashVoucherCreate = () => {
                           fileInput.value = '';
                         }
       } else {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        const errorData = await response.json().catch(() => ({ message: t('accounts.cash_voucher.create.msg_unknown_error') }));
         console.error('Upload failed:', errorData);
         setAlert({ type: 'error', message: errorData.message || 'Failed to upload attachments' });
       }
     } catch (error) {
-      setAlert({ type: 'error', message: 'Error uploading attachments: ' + error.message });
+      setAlert({ type: 'error', message: t('accounts.cash_voucher.create.msg_error_uploading_attachments') + error.message });
     } finally {
       setUploadingAttachments(false);
     }
@@ -309,6 +312,7 @@ const CashVoucherCreate = () => {
 
   // Remove attachment
   const removeAttachment = (attachmentId) => {
+  const { t } = useTranslations();
     setAttachments(prev => {
       if (!Array.isArray(prev)) return [];
       // Handle both object attachments and string filenames
@@ -349,7 +353,7 @@ const CashVoucherCreate = () => {
 
     // Only allow one file per entry
     if (validFiles.length > 1) {
-      setAlert({ type: 'error', message: 'Only one attachment per entry is allowed' });
+      setAlert({ type: 'error', message: t('accounts.cash_voucher.create.msg_only_one_attachment_per_entry_is_allowed') });
       return;
     }
 
@@ -383,7 +387,7 @@ const CashVoucherCreate = () => {
           )
         }));
         
-        setAlert({ type: 'success', message: 'Attachment uploaded successfully for this entry' });
+        setAlert({ type: 'success', message: t('accounts.cash_voucher.create.msg_attachment_uploaded_successfully_for_thi') });
         
         // Clear the file input
         const fileInput = document.getElementById(`entry-attachment-${entryIndex}`);
@@ -391,12 +395,12 @@ const CashVoucherCreate = () => {
           fileInput.value = '';
         }
       } else {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        const errorData = await response.json().catch(() => ({ message: t('accounts.cash_voucher.create.msg_unknown_error') }));
         console.error('Entry upload failed:', errorData);
         setAlert({ type: 'error', message: errorData.message || 'Failed to upload attachment' });
       }
     } catch (error) {
-      setAlert({ type: 'error', message: 'Error uploading attachment: ' + error.message });
+      setAlert({ type: 'error', message: t('accounts.cash_voucher.create.msg_error_uploading_attachment') + error.message });
     }
   };
 
@@ -489,6 +493,7 @@ const CashVoucherCreate = () => {
 
   // Add new entry
   const addEntry = () => {
+  const { t } = useTranslations();
     setFormData(prev => ({
       ...prev,
       entries: [...prev.entries, { 
@@ -505,8 +510,9 @@ const CashVoucherCreate = () => {
 
   // Remove entry
   const removeEntry = (index) => {
+  const { t } = useTranslations();
     if (formData.entries.length <= 1) {
-      setAlert({ type: 'error', message: 'At least 1 detail entry is required' });
+      setAlert({ type: 'error', message: t('accounts.cash_voucher.create.msg_at_least_1_detail_entry_is_required') });
       return;
     }
     
@@ -518,6 +524,7 @@ const CashVoucherCreate = () => {
 
   // Update entry
   const updateEntry = (index, field, value) => {
+  const { t } = useTranslations();
     setFormData(prev => ({
       ...prev,
       entries: prev.entries.map((entry, i) => 
@@ -603,7 +610,7 @@ const CashVoucherCreate = () => {
     if (Object.keys(newErrors).length > 0) {
       console.log('Validation failed, errors:', newErrors);
       setErrors(newErrors);
-      setAlert({ type: 'error', message: 'Please correct the errors below' });
+      setAlert({ type: 'error', message: t('accounts.cash_voucher.create.msg_please_correct_the_errors_below') });
       setIsSubmitting(false);
       return;
     }
@@ -641,7 +648,7 @@ const CashVoucherCreate = () => {
       if (isEdit) {
         router.put(`/accounts/cash-voucher/${voucher.id}`, submitData, {
           onSuccess: () => {
-            setAlert({ type: 'success', message: 'Cash voucher updated successfully!' });
+            setAlert({ type: 'success', message: t('accounts.cash_voucher.create.msg_cash_voucher_updated_successfully') });
             
             // Don't redirect automatically - let user see the success message
             // setTimeout(() => {
@@ -650,7 +657,7 @@ const CashVoucherCreate = () => {
           },
           onError: (errors) => {
             setErrors(errors);
-            setAlert({ type: 'error', message: 'Please correct the errors below' });
+            setAlert({ type: 'error', message: t('accounts.cash_voucher.create.msg_please_correct_the_errors_below') });
           },
           onFinish: () => {
             setIsSubmitting(false);
@@ -660,7 +667,7 @@ const CashVoucherCreate = () => {
         router.post('/accounts/cash-voucher', submitData, {
           onSuccess: () => {
             console.log('Form submitted successfully!');
-            setAlert({ type: 'success', message: 'Cash voucher created successfully!' });
+            setAlert({ type: 'success', message: t('accounts.cash_voucher.create.msg_cash_voucher_created_successfully') });
             
             // Don't redirect automatically - let user see the success message
             // setTimeout(() => {
@@ -670,7 +677,7 @@ const CashVoucherCreate = () => {
           onError: (errors) => {
             console.log('Server validation errors:', errors);
             setErrors(errors);
-            setAlert({ type: 'error', message: 'Please correct the errors below' });
+            setAlert({ type: 'error', message: t('accounts.cash_voucher.create.msg_please_correct_the_errors_below') });
           },
           onFinish: () => {
             setIsSubmitting(false);
@@ -741,7 +748,7 @@ const CashVoucherCreate = () => {
                   Accounting Period: {currentPeriod.period_name} (FY {currentPeriod.fiscal_year})
                 </h3>
                 <p className="text-sm mb-2">
-                  <strong>Status:</strong> {currentPeriod.status}
+                  <strong>{t('accounts.cash_voucher.create.status')}</strong> {currentPeriod.status}
                   {currentPeriod.is_adjustment_period && ' (Adjustment Period)'}
                 </p>
                 <p className="text-xs">
@@ -773,7 +780,7 @@ const CashVoucherCreate = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Voucher Details - Left Side */}
                   <div className="lg:col-span-2">
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3">Cash Voucher Master</h3>
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3">{t('accounts.cash_voucher.create.cash_voucher_master')}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="voucher_date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -783,7 +790,7 @@ const CashVoucherCreate = () => {
                           selected={formData.voucher_date ? new Date(formData.voucher_date) : null}
                           onChange={(date) => setFormData(prev => ({ ...prev, voucher_date: date ? date.toISOString().split('T')[0] : '' }))}
                           type="date"
-                          placeholder="Select voucher date"
+                          placeholder={t('accounts.cash_voucher.create.select_voucher_date')}
                           className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                             errors.voucher_date ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                           }`}
@@ -846,8 +853,8 @@ const CashVoucherCreate = () => {
                             errors.voucher_sub_type ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                           }`}
                         >
-                          <option value="Cash Payment">Cash Payment</option>
-                          <option value="Cash Receipt">Cash Receipt</option>
+                          <option value="Cash Payment">{t('accounts.cash_voucher.create.cash_payment')}</option>
+                          <option value="Cash Receipt">{t('accounts.cash_voucher.create.cash_receipt')}</option>
                         </select>
                         {errors.voucher_sub_type && (
                           <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.voucher_sub_type}</p>
@@ -866,7 +873,7 @@ const CashVoucherCreate = () => {
                           }))}
                           value={formData.Cash_account_id || ''}
                           onChange={(selectedCashId) => setFormData(prev => ({ ...prev, Cash_account_id: selectedCashId }))}
-                          placeholder="Search and select Cash account..."
+                          placeholder={t('accounts.cash_voucher.create.search_and_select_cash_account')}
                           name="Cash_account_id"
                           id="Cash_account_id"
                           error={errors.Cash_account_id}
@@ -887,7 +894,7 @@ const CashVoucherCreate = () => {
                           value={formData.reference_number}
                           onChange={(e) => setFormData(prev => ({ ...prev, reference_number: e.target.value }))}
                           onKeyDown={handleKeyDown}
-                          placeholder="Enter reference number"
+                          placeholder={t('accounts.cash_voucher.create.enter_reference_number')}
                           tabIndex={3}
                           className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         />
@@ -903,7 +910,7 @@ const CashVoucherCreate = () => {
                           value={formData.description}
                           onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                           onKeyDown={handleKeyDown}
-                          placeholder="Enter voucher description"
+                          placeholder={t('accounts.cash_voucher.create.enter_voucher_description')}
                           rows={3}
                           tabIndex={5}
                           maxLength={250}
@@ -955,7 +962,7 @@ const CashVoucherCreate = () => {
                             {uploadingAttachments ? (
                               <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
                                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                                <span className="text-sm">Uploading...</span>
+                                <span className="text-sm">{t('accounts.cash_voucher.create.uploading')}</span>
                               </div>
                             ) : (
                               <div className="flex flex-col items-center gap-2">
@@ -965,8 +972,8 @@ const CashVoucherCreate = () => {
                                   </svg>
                                 </div>
                                 <div className="text-center">
-                                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Click to upload files</p>
-                                  <p className="text-xs text-gray-500 dark:text-gray-400">Max 300KB each</p>
+                                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{t('accounts.cash_voucher.create.click_to_upload_files')}</p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">{t('accounts.cash_voucher.create.max_300kb_each')}</p>
                                 </div>
                               </div>
                             )}
@@ -976,14 +983,14 @@ const CashVoucherCreate = () => {
                         {/* Media type information */}
                         <div className="mt-2">
                           <span className="text-xs text-gray-500 dark:text-gray-400">
-                            <strong>Supported formats:</strong> PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG, GIF
+                            <strong>{t('accounts.cash_voucher.create.supported_formats')}</strong> PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG, GIF
                           </span>
                         </div>
 
                         {/* Display uploaded attachments */}
                         {Array.isArray(attachments) && attachments.length > 0 && (
                           <div className="space-y-2">
-                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Uploaded Files:</h4>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('accounts.cash_voucher.create.uploaded_files')}</h4>
                             {attachments.map((attachment, idx) => (
                               <div key={attachment.id || attachment.original_name || attachment || idx} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                 <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -1003,7 +1010,7 @@ const CashVoucherCreate = () => {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="p-1 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-colors"
-                                    title="View file"
+                                    title={t('accounts.cash_voucher.create.view_file')}
                                   >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1014,7 +1021,7 @@ const CashVoucherCreate = () => {
                                     type="button"
                                     onClick={() => removeAttachment(attachment.id || attachment)}
                                     className="p-1 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
-                                    title="Remove file"
+                                    title={t('accounts.cash_voucher.create.remove_file')}
                                   >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -1035,11 +1042,11 @@ const CashVoucherCreate = () => {
               {/* Cash Detail Entries Section - Full Width */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Cash Detail Entries</h3>
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{t('accounts.cash_voucher.create.cash_detail_entries')}</h3>
                   <button
                     type="button"
                     onClick={addEntry}
-                    title="Add Entry (Alt+A)"
+                    title={t('accounts.cash_voucher.create.add_entry_alta')}
                     className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
                   >
                     <Plus size={16} />
@@ -1064,7 +1071,7 @@ const CashVoucherCreate = () => {
                             type="button"
                             onClick={() => removeEntry(index)}
                             className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                            title="Remove Entry (Delete)"
+                            title={t('accounts.cash_voucher.create.remove_entry_delete')}
                             tabIndex={-1}
                           >
                             <Trash2 size={16} />
@@ -1103,7 +1110,7 @@ const CashVoucherCreate = () => {
                                 }
                               }
                             }}
-                            placeholder="Search and select account..."
+                            placeholder={t('accounts.cash_voucher.create.search_and_select_account')}
                             name={`account_id_${index}`}
                             id={`account_id_${index}`}
                             tabIndex={10 + (index * 6) + 1}
@@ -1134,7 +1141,7 @@ const CashVoucherCreate = () => {
                                 updateEntry(index, 'exchange_rate', 1.0);
                               }
                             }}
-                            placeholder="Search and select currency..."
+                            placeholder={t('accounts.cash_voucher.create.search_and_select_currency')}
                             name={`currency_code_${index}`}
                             id={`currency_code_${index}`}
                             tabIndex={10 + (index * 6) + 2}
@@ -1157,14 +1164,14 @@ const CashVoucherCreate = () => {
                               onKeyDown={handleKeyDown}
                               tabIndex={10 + (index * 6) + 3}
                               className="flex-1 px-2 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                              placeholder="1.000000"
+                              placeholder={t('accounts.cash_voucher.create.1000000')}
                             />
                             <button
                               type="button"
                               onClick={() => fetchExchangeRateForEntry(index, entry.currency_code)}
                               disabled={isLoadingExchangeRate || entry.currency_code === formData.base_currency_code}
                               className="px-2 py-2 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center"
-                              title="Fetch current exchange rate"
+                              title={t('accounts.cash_voucher.create.fetch_current_exchange_rate')}
                             >
                               {isLoadingExchangeRate ? (
                                 <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
@@ -1195,7 +1202,7 @@ const CashVoucherCreate = () => {
                             onPaste={(e) => handlePaste(index, 'amount', e)}
                             onKeyDown={handleKeyDown}
                             onFocus={(e) => e.target.select()}
-                            placeholder="0.00"
+                            placeholder={t('accounts.cash_voucher.create.000')}
                             tabIndex={10 + (index * 6) + 4}
                             className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                               errors[`entries.${index}.amount`] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
@@ -1219,7 +1226,7 @@ const CashVoucherCreate = () => {
                             value={entry.description}
                             onChange={(e) => updateEntry(index, 'description', e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder="Entry description (optional)"
+                            placeholder={t('accounts.cash_voucher.create.entry_description_optional')}
                             tabIndex={10 + (index * 6) + 6}
                             className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                           />
@@ -1261,7 +1268,7 @@ const CashVoucherCreate = () => {
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="p-1 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-colors"
-                                      title="View file"
+                                      title={t('accounts.cash_voucher.create.view_file')}
                                     >
                                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1272,7 +1279,7 @@ const CashVoucherCreate = () => {
                                       type="button"
                                       onClick={() => removeEntryAttachment(index)}
                                       className="p-1 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
-                                      title="Remove file"
+                                      title={t('accounts.cash_voucher.create.remove_file')}
                                     >
                                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -1288,8 +1295,8 @@ const CashVoucherCreate = () => {
                                     </svg>
                                   </div>
                                   <div className="text-center">
-                                    <p className="text-xs font-medium text-gray-900 dark:text-gray-100">Click to upload attachment</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Max 300KB - One file per entry</p>
+                                    <p className="text-xs font-medium text-gray-900 dark:text-gray-100">{t('accounts.cash_voucher.create.click_to_upload_attachment')}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{t('accounts.cash_voucher.create.max_300kb__one_file_per_entry')}</p>
                                   </div>
                                 </div>
                               )}
@@ -1297,7 +1304,7 @@ const CashVoucherCreate = () => {
                           </div>
                           <div className="mt-1">
                             <span className="text-xs text-gray-500 dark:text-gray-400">
-                              <strong>Supported:</strong> PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG, GIF
+                              <strong>{t('accounts.cash_voucher.create.supported')}</strong> PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG, GIF
                             </span>
                           </div>
                         </div>
@@ -1320,19 +1327,19 @@ const CashVoucherCreate = () => {
                   </h4>
                   <div className="grid grid-cols-3 gap-3 text-center">
                     <div>
-                      <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Detail Total</span>
+                      <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">{t('accounts.cash_voucher.create.detail_total')}</span>
                       <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
                         {totalBaseAmount.toFixed(2)} {formData.base_currency_code}
                       </span>
                     </div>
                     <div>
-                      <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Voucher Type</span>
+                      <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">{t('accounts.cash_voucher.create.voucher_type')}</span>
                       <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
                         {formData.voucher_sub_type}
                       </span>
                     </div>
                     <div className="rounded-lg px-2 py-1 bg-green-100 dark:bg-green-900/30">
-                      <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">Auto Cash Contra</span>
+                      <span className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5">{t('accounts.cash_voucher.create.auto_cash_contra')}</span>
                       <div className="flex items-center justify-center gap-1.5">
                         <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                         <span className="text-lg font-bold text-green-600 dark:text-green-400">
@@ -1364,13 +1371,13 @@ const CashVoucherCreate = () => {
                         {Object.entries(currencyBreakdown).map(([currency, amounts]) => (
                           <div key={currency} className="grid grid-cols-2 gap-3 text-center text-sm">
                             <div>
-                              <span className="block text-xs font-medium text-gray-600 dark:text-gray-400">Amount</span>
+                              <span className="block text-xs font-medium text-gray-600 dark:text-gray-400">{t('accounts.cash_voucher.create.amount')}</span>
                               <span className="font-semibold text-gray-900 dark:text-gray-100">
                                 {amounts.amount.toFixed(2)} {currency}
                               </span>
                             </div>
                             <div className="rounded px-2 py-1 bg-green-100 dark:bg-green-900/30">
-                              <span className="block text-xs font-medium text-gray-600 dark:text-gray-400">Auto Contra</span>
+                              <span className="block text-xs font-medium text-gray-600 dark:text-gray-400">{t('accounts.cash_voucher.create.auto_contra')}</span>
                               <span className="font-semibold text-green-600 dark:text-green-400">
                                 {amounts.amount.toFixed(2)}
                               </span>
@@ -1387,8 +1394,8 @@ const CashVoucherCreate = () => {
               {/* Form Actions */}
               <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">Tab</kbd> or <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">Enter</kbd> to navigate • 
-                  <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 ml-1">Alt+A</kbd> to add entry
+                  <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">{t('accounts.cash_voucher.create.tab')}</kbd>{t('accounts.cash_voucher.create.or')}<kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">{t('accounts.cash_voucher.create.enter')}</kbd> to navigate • 
+                  <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 ml-1">{t('accounts.cash_voucher.create.alta')}</kbd> to add entry
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -1413,7 +1420,7 @@ const CashVoucherCreate = () => {
                     ) : (
                       <>
                         <Save size={16} />
-                        {isEdit ? 'Update' : 'Create'} <kbd className="ml-1 px-1.5 py-0.5 bg-blue-700 rounded text-xs">Ctrl+S</kbd>
+                        {isEdit ? 'Update' : 'Create'} <kbd className="ml-1 px-1.5 py-0.5 bg-blue-700 rounded text-xs">{t('accounts.cash_voucher.create.ctrls')}</kbd>
                       </>
                     )}
                   </button>

@@ -11,5 +11,15 @@
   "no_modules_message": "ماڈیولز تک رسائی کے لیے اپنے منتظم سے رابطہ کریں۔",
   "footer_welcome": "{company} میں خوش آمدید - آپ کا بزنس مینجمنٹ حل",
   "default_description": "جامع بزنس مینجمنٹ کے لیے {name} ماڈیول تک رسائی",
-  "default_features": ["انتظام", "رپورٹس", "تجزیات", "ترتیبات"]
+  "default_features": [
+    "انتظام",
+    "رپورٹس",
+    "تجزیات",
+    "ترتیبات"
+  ],
+  "system": {
+    "dashboard": {
+      "system_administration": "سسٹم ایڈمنسٹریشن"
+    }
+  }
 }

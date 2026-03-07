@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   Plus, 
   Search, 
@@ -667,6 +668,7 @@ const JournalVoucherList = () => {
   };
 
   const getStatusColor = (status) => {
+  const { t } = useTranslations();
     switch (status.toLowerCase()) {
       case 'draft':
         return 'bg-yellow-100 text-yellow-800';
@@ -708,7 +710,7 @@ const JournalVoucherList = () => {
               <button
                 className="btn btn-icon"
                 onClick={() => window.location.reload()}
-                title="Refresh"
+                title={t('accounts.journal_voucher.list.refresh')}
                 disabled={loading}
               >
                 <RefreshCcw size={20} className={loading ? 'animate-spin' : ''} />
@@ -787,34 +789,34 @@ const JournalVoucherList = () => {
                 <input
                   type="text"
                   className="search-input"
-                  placeholder="Search vouchers..."
+                  placeholder={t('accounts.journal_voucher.list.search_vouchers')}
                   value={searchTerm}
                   onChange={(e) => handleSearch(e.target.value)}
                 />
               </div>
           
               <div className="filter-group">
-                <label className="filter-label">Date Range</label>
+                <label className="filter-label">{t('accounts.journal_voucher.list.date_range')}</label>
                 <div className="date-inputs">
                   <CustomDatePicker
                     selected={fromDate ? new Date(fromDate) : null}
                     onChange={(date) => handleFromDateFilter(date ? date.toISOString().split('T')[0] : '')}
                     type="date"
-                    placeholder="From date"
+                    placeholder={t('accounts.journal_voucher.list.from_date')}
                     className="date-input"
                   />
                   <CustomDatePicker
                     selected={toDate ? new Date(toDate) : null}
                     onChange={(date) => handleToDateFilter(date ? date.toISOString().split('T')[0] : '')}
                     type="date"
-                    placeholder="To date"
+                    placeholder={t('accounts.journal_voucher.list.to_date')}
                     className="date-input"
                   />
                 </div>
               </div>
 
               <div className="filter-group">
-                <label className="filter-label">Status</label>
+                <label className="filter-label">{t('accounts.journal_voucher.list.status')}</label>
                 <select
                   className="filter-select"
                   value={statusFilter}
@@ -829,27 +831,27 @@ const JournalVoucherList = () => {
               </div>
 
               <div className="filter-group">
-                <label className="filter-label">Quick</label>
+                <label className="filter-label">{t('accounts.journal_voucher.list.quick')}</label>
                 <select
                   className="filter-select"
                   value={getCurrentQuickFilter()}
                   onChange={(e) => handleQuickFilterChange(e.target.value)}
                 >
-                  <option value="">All Time</option>
-                  <option value="today">Today</option>
-                  <option value="thisWeek">This Week</option>
-                  <option value="thisMonth">This Month</option>
+                  <option value="">{t('accounts.journal_voucher.list.all_time')}</option>
+                  <option value="today">{t('accounts.journal_voucher.list.today')}</option>
+                  <option value="thisWeek">{t('accounts.journal_voucher.list.this_week')}</option>
+                  <option value="thisMonth">{t('accounts.journal_voucher.list.this_month')}</option>
                 </select>
               </div>
 
               <div className="filter-group">
-                <label className="filter-label">Columns</label>
+                <label className="filter-label">{t('accounts.journal_voucher.list.columns')}</label>
                 <select
                   className="filter-select"
                   value=""
                   onChange={(e) => handleColumnToggle(e.target.value)}
                 >
-                  <option value="">Show/Hide</option>
+                  <option value="">{t('accounts.journal_voucher.list.showhide')}</option>
                   {Object.entries(visibleColumns).map(([key, visible]) => (
                     <option key={key} value={key}>
                       {visible ? 'Hide' : 'Show'} {key}
@@ -872,7 +874,7 @@ const JournalVoucherList = () => {
                     preserveScroll: true
                   });
                 }}
-                title="Reset all filters"
+                title={t('accounts.journal_voucher.list.reset_all_filters')}
               >
                 <RefreshCcw size={16} />
               </button>
@@ -931,13 +933,13 @@ const JournalVoucherList = () => {
             {loading ? (
               <div className="loading-state">
                 <div className="loading-spinner"></div>
-                <p>Loading journal vouchers...</p>
+                <p>{t('accounts.journal_voucher.list.loading_journal_vouchers')}</p>
               </div>
             ) : !paginatedVouchers?.data?.length ? (
               <div className="empty-state">
                 <Database className="empty-icon" />
-                <h3>No journal vouchers found</h3>
-                <p>Try adjusting your filters or search criteria</p>
+                <h3>{t('accounts.journal_voucher.list.no_journal_vouchers_found')}</h3>
+                <p>{t('accounts.journal_voucher.list.try_adjusting_your_filters_or_search_cri')}</p>
                 {canAdd(JOURNAL_VOUCHER_ROUTE) && (
                   <a href="/accounts/journal-voucher/create" className="btn btn-primary">
                     <Plus size={20} />
@@ -1006,7 +1008,7 @@ const JournalVoucherList = () => {
                         )}
 
                         {visibleColumns.actions && (
-                          <th className="actions-header">Actions</th>
+                          <th className="actions-header">{t('accounts.journal_voucher.list.actions')}</th>
                         )}
                       </tr>
                     </thead>
@@ -1093,7 +1095,7 @@ const JournalVoucherList = () => {
                                 {/* Print Summary Button */}
                                 <button
                                   className="action-btn print-summary"
-                                  title="Print Summary"
+                                  title={t('accounts.journal_voucher.list.print_summary')}
                                   onClick={() => window.open(`/accounts/journal-voucher/${voucher.id}/print-summary`, '_blank')}
                                 >
                                   <Printer size={16} />
@@ -1102,7 +1104,7 @@ const JournalVoucherList = () => {
                                 {/* Print Detailed Button */}
                                 <button
                                   className="action-btn print-detailed"
-                                  title="Print Detailed"
+                                  title={t('accounts.journal_voucher.list.print_detailed')}
                                   onClick={() => window.open(`/accounts/journal-voucher/${voucher.id}/print-detailed`, '_blank')}
                                 >
                                   <Printer size={16} />
@@ -1113,7 +1115,7 @@ const JournalVoucherList = () => {
                                     {canEdit(JOURNAL_VOUCHER_ROUTE) && (
                                       <button
                                         className="action-btn edit"
-                                        title="Edit Voucher"
+                                        title={t('accounts.journal_voucher.list.edit_voucher')}
                                         onClick={() => handleEdit(voucher)}
                                       >
                                         <Edit3 size={16} />
@@ -1121,7 +1123,7 @@ const JournalVoucherList = () => {
                                     )}
                                     <button
                                       className="action-btn copy"
-                                      title="Post Voucher"
+                                      title={t('accounts.journal_voucher.list.post_voucher')}
                                       onClick={() => handlePost(voucher)}
                                     >
                                       <CheckCircle size={16} />
@@ -1129,7 +1131,7 @@ const JournalVoucherList = () => {
                                     {canDelete(JOURNAL_VOUCHER_ROUTE) && (
                                       <button
                                         className="action-btn delete"
-                                        title="Delete Voucher"
+                                        title={t('accounts.journal_voucher.list.delete_voucher')}
                                         onClick={() => handleDelete(voucher)}
                                       >
                                         <Trash2 size={16} />
@@ -1154,7 +1156,7 @@ const JournalVoucherList = () => {
                     </div>
 
                     <div className="page-size-selector">
-                      <span>Show:</span>
+                      <span>{t('accounts.journal_voucher.list.show')}</span>
                       <select
                         value={pageSize}
                         onChange={(e) => handlePageSizeChange(Number(e.target.value))}
@@ -1164,7 +1166,7 @@ const JournalVoucherList = () => {
                           <option key={size} value={size}>{size}</option>
                         ))}
                       </select>
-                      <span>per page</span>
+                      <span>{t('accounts.journal_voucher.list.per_page')}</span>
                     </div>
                   </div>
 
@@ -1173,7 +1175,7 @@ const JournalVoucherList = () => {
                       className="pagination-btn"
                       disabled={currentPage === 1}
                       onClick={() => handlePageChange(1)}
-                      title="First Page"
+                      title={t('accounts.journal_voucher.list.first_page')}
                     >
                       <ChevronLeft size={14} />
                       <ChevronLeft size={14} />
@@ -1183,7 +1185,7 @@ const JournalVoucherList = () => {
                       className="pagination-btn"
                       disabled={currentPage === 1}
                       onClick={() => handlePageChange(currentPage - 1)}
-                      title="Previous Page"
+                      title={t('accounts.journal_voucher.list.previous_page')}
                     >
                       <ChevronLeft size={14} />
                     </button>
@@ -1220,7 +1222,7 @@ const JournalVoucherList = () => {
                       className="pagination-btn"
                       disabled={currentPage === (paginatedVouchers.last_page || 1)}
                       onClick={() => handlePageChange(currentPage + 1)}
-                      title="Next Page"
+                      title={t('accounts.journal_voucher.list.next_page')}
                     >
                       <ChevronRight size={14} />
                     </button>
@@ -1229,7 +1231,7 @@ const JournalVoucherList = () => {
                       className="pagination-btn"
                       disabled={currentPage === (paginatedVouchers.last_page || 1)}
                       onClick={() => handlePageChange(paginatedVouchers.last_page || 1)}
-                      title="Last Page"
+                      title={t('accounts.journal_voucher.list.last_page')}
                     >
                       <ChevronRight size={14} />
                       <ChevronRight size={14} />
@@ -1237,7 +1239,7 @@ const JournalVoucherList = () => {
                   </div>
 
                   <div className="quick-jump">
-                    <span>Go to:</span>
+                    <span>{t('accounts.journal_voucher.list.go_to')}</span>
                     <input
                       type="number"
                       min="1"

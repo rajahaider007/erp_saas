@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import AppLayout from '../../Layouts/AppLayout';
 import { Shield, Search, Calendar, Filter, Eye, AlertTriangle, User, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import CustomDatePicker from '../../Components/DatePicker/DatePicker';
@@ -92,6 +93,7 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
     };
 
     const getEventBadgeClass = (eventType) => {
+    const { t } = useTranslations();
         const classes = {
             'LOGIN': 'bg-blue-100 text-blue-700 border-blue-300',
             'LOGOUT': 'bg-gray-100 text-gray-700 border-gray-300',
@@ -105,7 +107,7 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
 
     return (
         <AppLayout>
-            <Head title="Security Logs" />
+            <Head title={t('logs.security_logs.security_logs')} />
 
             <div className="form-theme-system min-h-screen p-6">
                 {/* Header */}
@@ -125,15 +127,15 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
                         <div className="header-actions">
                             <Link href={route('logs.activity')} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <Clock size={16} />
-                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Activity Logs</span>
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>{t('logs.security_logs.activity_logs')}</span>
                             </Link>
                             <Link href={route('logs.deleted-items')} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <AlertTriangle size={16} />
-                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Deleted Items</span>
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>{t('logs.security_logs.deleted_items')}</span>
                             </Link>
                             <Link href={route('logs.reports')} className="btn btn-primary btn-sm" style={{color: 'white', fontWeight: '600'}}>
                                 <Calendar size={16} />
-                                <span style={{color: 'white', fontWeight: '600'}}>Reports</span>
+                                <span style={{color: 'white', fontWeight: '600'}}>{t('logs.security_logs.reports')}</span>
                             </Link>
                         </div>
                     </div>
@@ -153,7 +155,7 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
                                 }}
                                 style={{color: '#F1F5F9', backgroundColor: 'rgba(30, 41, 59, 0.8)', border: '2px solid rgba(148, 163, 184, 0.3)', borderRadius: '12px', padding: '0.875rem 1rem', fontSize: '0.875rem', fontWeight: '500', cursor: 'pointer', width: '100%', display: 'block', boxSizing: 'border-box'}}
                             >
-                                <option value="">All Companies</option>
+                                <option value="">{t('logs.security_logs.all_companies')}</option>
                                 {companies.map(company => (
                                     <option key={company.id} value={company.id}>{company.company_name}</option>
                                 ))}
@@ -171,7 +173,7 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
                                 }}
                                 style={{color: '#F1F5F9', backgroundColor: 'rgba(30, 41, 59, 0.8)', border: '2px solid rgba(148, 163, 184, 0.3)', borderRadius: '12px', padding: '0.875rem 1rem', fontSize: '0.875rem', fontWeight: '500', cursor: 'pointer', width: '100%', display: 'block', boxSizing: 'border-box'}}
                             >
-                                <option value="">All Locations</option>
+                                <option value="">{t('logs.security_logs.all_locations')}</option>
                                 {availableLocations.map(location => (
                                     <option key={location.id} value={location.id}>{location.location_name}</option>
                                 ))}
@@ -184,7 +186,7 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
                             <input
                                 type="text"
                                 className="search-input"
-                                placeholder="Search security events..."
+                                placeholder={t('logs.security_logs.search_security_events')}
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleFilter()}
@@ -193,7 +195,7 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
 
                         {/* Event Type Filter */}
                         <div className="filter-group">
-                            <label className="filter-label">Event Type</label>
+                            <label className="filter-label">{t('logs.security_logs.event_type')}</label>
                             <select
                                 className="professional-select"
                                 value={eventType}
@@ -211,7 +213,7 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
 
                         {/* Risk Level Filter */}
                         <div className="filter-group">
-                            <label className="filter-label">Risk Level</label>
+                            <label className="filter-label">{t('logs.security_logs.risk_level')}</label>
                             <select
                                 className="professional-select"
                                 value={riskLevel}
@@ -227,7 +229,7 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
 
                         {/* User Filter */}
                         <div className="filter-group">
-                            <label className="filter-label">User</label>
+                            <label className="filter-label">{t('logs.security_logs.user')}</label>
                             <select
                                 className="professional-select"
                                 value={userId}
@@ -242,7 +244,7 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
 
                         {/* Date Range Filter */}
                         <div className="filter-group">
-                            <label className="filter-label">Date Range</label>
+                            <label className="filter-label">{t('logs.security_logs.date_range')}</label>
                             <div className="date-range-wrapper">
                                 <CustomDatePicker
                                     selected={fromDate}
@@ -250,7 +252,7 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
                                     placeholderText="From Date"
                                     className="professional-date-input"
                                 />
-                                <span className="date-separator">to</span>
+                                <span className="date-separator">{t('logs.security_logs.to')}</span>
                                 <CustomDatePicker
                                     selected={toDate}
                                     onChange={setToDate}
@@ -264,11 +266,11 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
                         <div className="filter-actions">
                             <button onClick={handleFilter} className="btn-primary-professional" style={{color: 'white', fontWeight: '600'}}>
                                 <Filter size={18} />
-                                <span style={{color: 'white', fontWeight: '600'}}>Apply Filters</span>
+                                <span style={{color: 'white', fontWeight: '600'}}>{t('logs.security_logs.apply_filters')}</span>
                             </button>
                             <button onClick={handleReset} className="btn-secondary-professional" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <Calendar size={18} />
-                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Reset</span>
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>{t('logs.security_logs.reset')}</span>
                             </button>
                         </div>
                     </div>
@@ -280,13 +282,13 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
                         <table className="data-table">
                             <thead>
                                 <tr>
-                                    <th className="w-40">Time</th>
-                                    <th className="w-48">User</th>
-                                    <th className="w-32">Event Type</th>
-                                    <th className="w-24">Risk Level</th>
-                                    <th className="min-w-64">Description</th>
-                                    <th className="w-32">IP Address</th>
-                                    <th className="w-20 text-center">Actions</th>
+                                    <th className="w-40">{t('logs.security_logs.time')}</th>
+                                    <th className="w-48">{t('logs.security_logs.user')}</th>
+                                    <th className="w-32">{t('logs.security_logs.event_type')}</th>
+                                    <th className="w-24">{t('logs.security_logs.risk_level')}</th>
+                                    <th className="min-w-64">{t('logs.security_logs.description')}</th>
+                                    <th className="w-32">{t('logs.security_logs.ip_address')}</th>
+                                    <th className="w-20 text-center">{t('logs.security_logs.actions')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -352,11 +354,11 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
                                                 <Link
                                                     href={route('logs.details', log.id)}
                                                     className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
-                                                    title="View Details"
+                                                    title={t('logs.security_logs.view_details')}
                                                     style={{color: '#2563eb', fontWeight: '500', fontSize: '0.75rem'}}
                                                 >
                                                     <Eye size={14} />
-                                                    <span style={{color: '#2563eb', fontWeight: '500', fontSize: '0.75rem'}}>View</span>
+                                                    <span style={{color: '#2563eb', fontWeight: '500', fontSize: '0.75rem'}}>{t('logs.security_logs.view')}</span>
                                                 </Link>
                                             </div>
                                         </td>
@@ -368,8 +370,8 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
                                         <td colSpan="7" className="text-center py-12">
                                             <div className="empty-state">
                                                 <Shield size={48} className="empty-icon" />
-                                                <p className="text-gray-500 mt-4">No security events found</p>
-                                                <p className="text-sm text-gray-400 mt-2">Try adjusting your filters</p>
+                                                <p className="text-gray-500 mt-4">{t('logs.security_logs.no_security_events_found')}</p>
+                                                <p className="text-sm text-gray-400 mt-2">{t('logs.security_logs.try_adjusting_your_filters')}</p>
                                             </div>
                                         </td>
                                     </tr>

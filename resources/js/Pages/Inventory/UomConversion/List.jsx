@@ -60,15 +60,15 @@ export default function List() {
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
-              <h1 className="page-title"><ArrowLeftRight className="title-icon" />UOM Conversion</h1>
+              <h1 className="page-title"><ArrowLeftRight className="title-icon" />{t('inventory.uom_conversion.list.uom_conversion')}</h1>
               <div className="stats-summary">
                 <div className="stat-item"><span>{paginatedItems?.total || 0} Total</span></div>
                 <div className="stat-item"><span>{data.filter(i=>i.is_active).length} Active</span></div>
               </div>
             </div>
             <div className="header-actions">
-              <button className="btn btn-icon" onClick={()=>window.location.reload()} title="Refresh" disabled={loading}><RefreshCcw size={20} className={loading ? 'animate-spin' : ''} /></button>
-              <a href="/inventory/uom-conversion/create" className="btn btn-primary"><Plus size={20} />Add Conversion</a>
+              <button className="btn btn-icon" onClick={()=>window.location.reload()} title={t('inventory.uom_conversion.list.refresh')} disabled={loading}><RefreshCcw size={20} className={loading ? 'animate-spin' : ''} /></button>
+              <a href="/inventory/uom-conversion/create" className="btn btn-primary"><Plus size={20} />{t('inventory.uom_conversion.list.add_conversion')}</a>
             </div>
           </div>
           <div className="modern-filters-container">
@@ -79,14 +79,14 @@ export default function List() {
                   <input
                     type="text"
                     className="search-input"
-                    placeholder="Search by From/To UOM code..."
+                    placeholder={t('inventory.uom_conversion.list.search_by_fromto_uom_code')}
                     value={searchTerm}
                     onChange={(e) => handleSearch(e.target.value)}
                   />
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Status</label>
+                  <label className="filter-label">{t('inventory.uom_conversion.list.status')}</label>
                   <select
                     className="filter-select"
                     value={statusFilter}
@@ -107,7 +107,7 @@ export default function List() {
                     params.set('page', '1');
                     router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
                   }}
-                  title="Reset all filters"
+                  title={t('inventory.uom_conversion.list.reset_all_filters')}
                 >
                   <RefreshCcw size={16} />
                 </button>
@@ -117,16 +117,16 @@ export default function List() {
           {showColumnSelector && (
             <div className="column-selector">
               <div className="column-selector-content">
-                <h3>Show/Hide Columns</h3>
+                <h3>{t('inventory.uom_conversion.list.showhide_columns')}</h3>
                 <div className="column-grid">
                   {Object.entries(visibleColumns).map(([key, visible]) => (key !== 'actions' && (
                     <label key={key} className="column-item">
                       <input type="checkbox" checked={visible} onChange={(e)=>setVisibleColumns({ ...visibleColumns, [key]: e.target.checked })} />
-                      <span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>s.toUpperCase())}</span>
+                      <span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>{t('inventory.uom_conversion.list.stouppercase')}</span>
                     </label>
                   )))}
                 </div>
-                <button className="btn btn-sm btn-secondary" onClick={()=>setShowColumnSelector(false)}>Close</button>
+                <button className="btn btn-sm btn-secondary" onClick={()=>{t('inventory.uom_conversion.list.setshowcolumnselectorfalseclose')}</button>
               </div>
             </div>
           )}
@@ -135,8 +135,8 @@ export default function List() {
           <div className="bulk-actions-bar">
             <div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div>
             <div className="bulk-actions">
-              <button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />Clear</button>
-              <button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />Delete</button>
+              <button className="btn btn-sm btn-secondary" onClick={()=>{t('inventory.uom_conversion.list.setselected')}<X size={16} />{t('inventory.uom_conversion.list.clear')}</button>
+              <button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />{t('inventory.uom_conversion.list.delete')}</button>
             </div>
           </div>
         )}
@@ -145,21 +145,21 @@ export default function List() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length === data.length && data.length > 0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
-                  {visibleColumns.id && (<th className="sortable" onClick={()=>handleSort('id')}><div className="th-content">ID<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='id'?'active':''}`} /></div></th>)}
-                  {visibleColumns.fromUom && (<th className="sortable" onClick={()=>handleSort('from_uom_id')}><div className="th-content">From UOM<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='from_uom_id'?'active':''}`} /></div></th>)}
-                  {visibleColumns.toUom && (<th className="sortable" onClick={()=>handleSort('to_uom_id')}><div className="th-content">To UOM<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='to_uom_id'?'active':''}`} /></div></th>)}
-                  {visibleColumns.conversionFactor && (<th className="sortable" onClick={()=>handleSort('conversion_factor')}><div className="th-content">Factor<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='conversion_factor'?'active':''}`} /></div></th>)}
-                  {visibleColumns.conversionDirection && (<th className="sortable" onClick={()=>handleSort('conversion_direction')}><div className="th-content">Direction<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='conversion_direction'?'active':''}`} /></div></th>)}
-                  {visibleColumns.status && (<th className="sortable" onClick={()=>handleSort('is_active')}><div className="th-content">Status<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='is_active'?'active':''}`} /></div></th>)}
-                  {visibleColumns.updatedAt && (<th className="sortable" onClick={()=>handleSort('updated_at')}><div className="th-content">Updated<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='updated_at'?'active':''}`} /></div></th>)}
-                  {visibleColumns.actions && (<th className="actions-header">Actions</th>)}
+                  <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length === data.length && data.length > 0} onChange={(e)=>{t('inventory.uom_conversion.list.handleselectalletargetchecked_')}</th>
+                  {visibleColumns.id && (<th className="sortable" onClick={()=>{t('inventory.uom_conversion.list.handlesortid')}<div className="th-content">{t('inventory.uom_conversion.list.id')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='id'?'active':''}`} /></div></th>)}
+                  {visibleColumns.fromUom && (<th className="sortable" onClick={()=>{t('inventory.uom_conversion.list.handlesortfrom_uom_id')}<div className="th-content">{t('inventory.uom_conversion.list.from_uom')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='from_uom_id'?'active':''}`} /></div></th>)}
+                  {visibleColumns.toUom && (<th className="sortable" onClick={()=>{t('inventory.uom_conversion.list.handlesortto_uom_id')}<div className="th-content">{t('inventory.uom_conversion.list.to_uom')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='to_uom_id'?'active':''}`} /></div></th>)}
+                  {visibleColumns.conversionFactor && (<th className="sortable" onClick={()=>{t('inventory.uom_conversion.list.handlesortconversion_factor')}<div className="th-content">{t('inventory.uom_conversion.list.factor')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='conversion_factor'?'active':''}`} /></div></th>)}
+                  {visibleColumns.conversionDirection && (<th className="sortable" onClick={()=>{t('inventory.uom_conversion.list.handlesortconversion_direction')}<div className="th-content">{t('inventory.uom_conversion.list.direction')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='conversion_direction'?'active':''}`} /></div></th>)}
+                  {visibleColumns.status && (<th className="sortable" onClick={()=>{t('inventory.uom_conversion.list.handlesortis_active')}<div className="th-content">{t('inventory.uom_conversion.list.status')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='is_active'?'active':''}`} /></div></th>)}
+                  {visibleColumns.updatedAt && (<th className="sortable" onClick={()=>{t('inventory.uom_conversion.list.handlesortupdated_at')}<div className="th-content">{t('inventory.uom_conversion.list.updated')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='updated_at'?'active':''}`} /></div></th>)}
+                  {visibleColumns.actions && (<th className="actions-header">{t('inventory.uom_conversion.list.actions')}</th>)}
                 </tr>
               </thead>
               <tbody>
                 {data.map((item) => (
                   <tr key={item.id} className="table-row">
-                    <td><input type="checkbox" className="checkbox" checked={selected.includes(item.id)} onChange={(e)=>handleSelectRow(item.id, e.target.checked)} /></td>
+                    <td><input type="checkbox" className="checkbox" checked={selected.includes(item.id)} onChange={(e)=>{t('inventory.uom_conversion.list.handleselectrowitemid_etargetchecked_')}</td>
                     {visibleColumns.id && (<td><span className="module-id">#{item.id}</span></td>)}
                     {visibleColumns.fromUom && (<td><div className="module-details"><div className="module-name">{item.from_uom_code}</div><div className="module-meta">{item.from_uom_name}</div></div></td>)}
                     {visibleColumns.toUom && (<td><div className="module-details"><div className="module-name">{item.to_uom_code}</div><div className="module-meta">{item.to_uom_name}</div></div></td>)}
@@ -170,10 +170,10 @@ export default function List() {
                     {visibleColumns.actions && (
                       <td>
                         <div className="actions-cell">
-                          <button className="action-btn edit" title="Edit Conversion" onClick={() => router.get(`/inventory/uom-conversion/${item.id}/edit`)}>
+                          <button className="action-btn edit" title={t('inventory.uom_conversion.list.edit_conversion')} onClick={() => router.get(`/inventory/uom-conversion/${item.id}/edit`)}>
                             <Edit3 size={16} />
                           </button>
-                          <button className="action-btn delete" title="Delete Conversion" onClick={() => handleDelete(item)}>
+                          <button className="action-btn delete" title={t('inventory.uom_conversion.list.delete_conversion')} onClick={() => handleDelete(item)}>
                             <Trash2 size={16} />
                           </button>
                         </div>
@@ -188,18 +188,18 @@ export default function List() {
             <div className="pagination-info">
               <div className="results-info">Showing {paginatedItems?.from ?? 0} to {paginatedItems?.to ?? 0} of {paginatedItems?.total ?? 0} entries</div>
               <div className="page-size-selector">
-                <span>Show:</span>
+                <span>{t('inventory.uom_conversion.list.show')}</span>
                 <select value={pageSize} onChange={(e)=>handlePageSizeChange(Number(e.target.value))} className="page-size-select">
                   {pageSizeOptions.map(size => (<option key={size} value={size}>{size}</option>))}
                 </select>
               </div>
             </div>
             <div className="pagination-buttons">
-              <button className="btn btn-sm" onClick={() => handlePageChange(1)} disabled={currentPage === 1}><ChevronLeft size={16} />First</button>
+              <button className="btn btn-sm" onClick={() => handlePageChange(1)} disabled={currentPage === 1}><ChevronLeft size={16} />{t('inventory.uom_conversion.list.first')}</button>
               <button className="btn btn-sm" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}><ChevronLeft size={16} /></button>
               <span className="pagination-current">Page {paginatedItems?.current_page ?? 1} of {paginatedItems?.last_page ?? 1}</span>
               <button className="btn btn-sm" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === (paginatedItems?.last_page ?? 1)}><ChevronRight size={16} /></button>
-              <button className="btn btn-sm" onClick={() => handlePageChange(paginatedItems?.last_page ?? 1)} disabled={currentPage === (paginatedItems?.last_page ?? 1)}>Last<ChevronRight size={16} /></button>
+              <button className="btn btn-sm" onClick={() => handlePageChange(paginatedItems?.last_page ?? 1)} disabled={currentPage === (paginatedItems?.last_page ?? 1)}>{t('inventory.uom_conversion.list.last')}<ChevronRight size={16} /></button>
             </div>
           </div>
         </div>

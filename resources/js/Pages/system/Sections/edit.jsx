@@ -5,6 +5,7 @@ import PermissionAwareForm, { PermissionButton } from '../../../Components/Permi
 import { usePermissions } from '../../../hooks/usePermissions';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // Professional Breadcrumbs Component
 const Breadcrumbs = ({ items }) => {
@@ -62,6 +63,7 @@ const Breadcrumbs = ({ items }) => {
 };
 
 const EditSectionForm = () => {
+const { t } = useTranslations();
   const { errors: pageErrors, flash, section, modules } = usePage().props;
   
   const fields = [
@@ -102,6 +104,7 @@ const EditSectionForm = () => {
   }, [flash]);
 
   const handleSubmit = (data) => {
+  const { t } = useTranslations();
     router.post(`/system/sections/${section.id}`, { ...data, _method: 'put' }, {
       onSuccess: () => {
         setAlert({

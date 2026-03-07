@@ -3,8 +3,10 @@ import { Home, List, Plus, Hash, Tag, Edit3 } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import App from '../../App.jsx';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const Breadcrumbs = ({ items }) => {
+const { t } = useTranslations();
   return (
     <div className="breadcrumbs-themed">
       <nav className="breadcrumbs">
@@ -38,12 +40,13 @@ const Breadcrumbs = ({ items }) => {
           </div>
         ))}
       </nav>
-      <div className="breadcrumbs-description">Create item categories and assign an item class</div>
+      <div className="breadcrumbs-description">{t('inventory.item_category_coding.create.create_item_categories_and_assign_an_ite')}</div>
     </div>
   );
 };
 
 const CreateItemCategoryCodingForm = () => {
+const { t } = useTranslations();
   const {
     errors: pageErrors,
     flash,
@@ -60,7 +63,7 @@ const CreateItemCategoryCodingForm = () => {
   useEffect(() => {
     if (pageErrors && Object.keys(pageErrors).length > 0) {
       setErrors(pageErrors);
-      setAlert({ type: 'error', message: 'Please correct the errors below.' });
+      setAlert({ type: 'error', message: t('inventory.item_category_coding.create.msg_please_correct_the_errors_below') });
     }
   }, [pageErrors]);
 
@@ -119,6 +122,7 @@ const CreateItemCategoryCodingForm = () => {
   ];
 
   const handleSubmit = (formData) => {
+  const { t } = useTranslations();
     setErrors({});
     setAlert(null);
 
@@ -138,7 +142,7 @@ const CreateItemCategoryCodingForm = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setAlert({ type: 'error', message: 'Please correct the errors above.' });
+      setAlert({ type: 'error', message: t('inventory.item_category_coding.create.msg_please_correct_the_errors_above') });
       return;
     }
 
@@ -155,7 +159,7 @@ const CreateItemCategoryCodingForm = () => {
         forceFormData: true,
         onError: (serverErrors) => {
           setErrors(serverErrors);
-          setAlert({ type: 'error', message: 'Failed to update category. Please check the errors.' });
+          setAlert({ type: 'error', message: t('inventory.item_category_coding.create.msg_failed_to_update_category_please_check_t') });
         },
       });
     } else {
@@ -163,7 +167,7 @@ const CreateItemCategoryCodingForm = () => {
         forceFormData: true,
         onError: (serverErrors) => {
           setErrors(serverErrors);
-          setAlert({ type: 'error', message: 'Failed to create category. Please check the errors.' });
+          setAlert({ type: 'error', message: t('inventory.item_category_coding.create.msg_failed_to_create_category_please_check_t') });
         },
       });
     }

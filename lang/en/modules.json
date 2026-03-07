@@ -11,5 +11,10 @@
   "no_modules_message": "Contact your administrator to get access to modules.",
   "footer_welcome": "Welcome to {company} - Your Business Management Solution",
   "default_description": "Access {name} module for comprehensive business management",
-  "default_features": ["Management", "Reports", "Analytics", "Settings"]
+  "default_features": ["Management", "Reports", "Analytics", "Settings"],
+  "system": {
+    "dashboard": {
+      "system_administration": "System Administration"
+    }
+  }
 }

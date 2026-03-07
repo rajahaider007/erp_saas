@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const TrialBalancePrint = () => {
     const {
@@ -45,6 +46,7 @@ const TrialBalancePrint = () => {
 
     // Render level 4 (transactional accounts)
     const renderLevel4 = (accounts) => {
+    const { t } = useTranslations();
         if (!accounts || accounts.length === 0) return null;
 
         return accounts.map((account, index) => (
@@ -53,10 +55,10 @@ const TrialBalancePrint = () => {
                     <span className="account-code">{account.account_code}</span>
                     {account.account_name}
                     {account.is_transactional === 1 && (
-                        <span className="badge badge-trans">Transactional</span>
+                        <span className="badge badge-trans">{t('accounts.trial_balance.print.transactional')}</span>
                     )}
                     {account.is_cash_account && (
-                        <span className="badge badge-cash">CASH</span>
+                        <span className="badge badge-cash">{t('accounts.trial_balance.print.cash')}</span>
                     )}
                 </td>
                 <td className="number-col">
@@ -80,6 +82,7 @@ const TrialBalancePrint = () => {
 
     // Render level 3 accounts
     const renderLevel3 = (level3Accounts) => {
+    const { t } = useTranslations();
         if (!level3Accounts || Object.keys(level3Accounts).length === 0) return null;
 
         return Object.values(level3Accounts).map((level3, index) => (
@@ -89,10 +92,10 @@ const TrialBalancePrint = () => {
                         <span className="account-code">{level3.account_code}</span>
                         {level3.account_name}
                         {level3.supports_children && (
-                            <span className="badge badge-parent">Parent</span>
+                            <span className="badge badge-parent">{t('accounts.trial_balance.print.parent')}</span>
                         )}
                         {level3.is_cash_account && (
-                            <span className="badge badge-cash">CASH</span>
+                            <span className="badge badge-cash">{t('accounts.trial_balance.print.cash')}</span>
                         )}
                     </td>
                     <td className="number-col">
@@ -118,6 +121,7 @@ const TrialBalancePrint = () => {
 
     // Render level 2 accounts
     const renderLevel2 = (level2Accounts) => {
+    const { t } = useTranslations();
         if (!level2Accounts || Object.keys(level2Accounts).length === 0) return null;
 
         return Object.values(level2Accounts).map((level2, index) => (
@@ -127,7 +131,7 @@ const TrialBalancePrint = () => {
                         <span className="account-code">{level2.account_code}</span>
                         {level2.account_name}
                         {level2.supports_children && (
-                            <span className="badge badge-parent">Parent</span>
+                            <span className="badge badge-parent">{t('accounts.trial_balance.print.parent')}</span>
                         )}
                     </td>
                     <td className="number-col">
@@ -153,6 +157,7 @@ const TrialBalancePrint = () => {
 
     // Render flat data for specific level
     const renderFlatData = () => {
+    const { t } = useTranslations();
         if (!trialBalanceData || trialBalanceData.length === 0) return null;
 
         return trialBalanceData.map((account, index) => (
@@ -168,7 +173,7 @@ const TrialBalancePrint = () => {
                         </div>
                     )}
                     {account.is_transactional === 1 && (
-                        <span className="badge badge-trans">Transactional</span>
+                        <span className="badge badge-trans">{t('accounts.trial_balance.print.transactional')}</span>
                     )}
                 </td>
                 <td className="number-col">
@@ -192,6 +197,7 @@ const TrialBalancePrint = () => {
 
     // Render level 1 accounts (hierarchical)
     const renderLevel1 = () => {
+    const { t } = useTranslations();
         if (!trialBalanceData || trialBalanceData.length === 0) return null;
 
         return trialBalanceData.map((level1, index) => (
@@ -200,7 +206,7 @@ const TrialBalancePrint = () => {
                     <td>
                         <span className="account-code">{level1.account_code}</span>
                         <strong>{level1.account_name}</strong>
-                        <span className="badge badge-parent">Parent</span>
+                        <span className="badge badge-parent">{t('accounts.trial_balance.print.parent')}</span>
                     </td>
                     <td className="number-col">
                         <span className={level1.debit_total > 0 ? 'amount-debit' : 'zero-amount'}>
@@ -505,14 +511,14 @@ const TrialBalancePrint = () => {
                     {/* Report Header */}
                     <div className="report-header">
                         <div className="company-name">{company?.company_name?.toUpperCase() || 'N/A'}</div>
-                        <div className="report-title">TRIAL BALANCE REPORT</div>
+                        <div className="report-title">{t('accounts.trial_balance.print.trial_balance_report')}</div>
                     </div>
 
                     {/* Report Info */}
                     <div className="report-info">
                         <div className="info-group">
                             <div className="info-item">
-                                <span className="info-label">PERIOD:</span>
+                                <span className="info-label">{t('accounts.trial_balance.print.period')}</span>
                                 <span className="info-value">
                                     {filters?.from_date ? formatDate(filters.from_date) : 'N/A'} to {filters?.to_date ? formatDate(filters.to_date) : 'N/A'}
                                 </span>
@@ -520,7 +526,7 @@ const TrialBalancePrint = () => {
                         </div>
                         <div className="info-group">
                             <div className="info-item">
-                                <span className="info-label">REPORT DATE:</span>
+                                <span className="info-label">{t('accounts.trial_balance.print.report_date')}</span>
                                 <span className="info-value">
                                     {new Date().toLocaleDateString('en-US', {
                                         year: 'numeric',
@@ -537,10 +543,10 @@ const TrialBalancePrint = () => {
                         <table className="report-table">
                             <thead>
                                 <tr>
-                                    <th>ACCOUNT</th>
-                                    <th className="number-col">DEBIT</th>
-                                    <th className="number-col">CREDIT</th>
-                                    <th className="number-col">BALANCE</th>
+                                    <th>{t('accounts.trial_balance.print.account')}</th>
+                                    <th className="number-col">{t('accounts.trial_balance.print.debit')}</th>
+                                    <th className="number-col">{t('accounts.trial_balance.print.credit')}</th>
+                                    <th className="number-col">{t('accounts.trial_balance.print.balance')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -548,7 +554,7 @@ const TrialBalancePrint = () => {
 
                                 {/* Grand Total Row */}
                                 <tr className="grand-total-row">
-                                    <td><strong>GRAND TOTAL</strong></td>
+                                    <td><strong>{t('accounts.trial_balance.print.grand_total')}</strong></td>
                                     <td className="number-col">
                                         <strong>{formatCurrency(grandTotalDebit)}</strong>
                                     </td>
@@ -565,7 +571,7 @@ const TrialBalancePrint = () => {
 
                     {/* Report Footer */}
                     <div className="report-footer">
-                        <div>Trial Balance Report | Generated by ERP System</div>
+                        <div>{t('accounts.trial_balance.print.trial_balance_report__generated_by_erp_s')}</div>
                         <div>Printed on: {new Date().toLocaleString('en-US', {
                             dateStyle: 'medium',
                             timeStyle: 'short'

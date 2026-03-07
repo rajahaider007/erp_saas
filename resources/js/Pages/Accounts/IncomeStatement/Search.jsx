@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import Select from 'react-select';
 import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
 import Swal from 'sweetalert2';
@@ -86,6 +87,7 @@ const IncomeStatementSearch = () => {
   };
 
   const handleReset = () => {
+  const { t } = useTranslations();
     setSelectedCompany(null);
     setSelectedLocation(null);
     setAvailableLocations([]);
@@ -168,7 +170,7 @@ const IncomeStatementSearch = () => {
               <div className="stats-summary">
                 <div className="stat-item">
                   <TrendingUp size={16} />
-                  <span>Select date range and company to view income statement</span>
+                  <span>{t('accounts.income_statement.search.select_date_range_and_company_to_view_in')}</span>
                 </div>
               </div>
             </div>
@@ -177,7 +179,7 @@ const IncomeStatementSearch = () => {
               <button
                 className="btn btn-icon"
                 onClick={handleReset}
-                title="Reset All Filters"
+                title={t('accounts.income_statement.search.reset_all_filters')}
               >
                 <RefreshCcw size={20} />
               </button>
@@ -203,7 +205,7 @@ const IncomeStatementSearch = () => {
             <div className="filter-card-header">
               <div className="flex items-center gap-2">
                 <Filter className="w-5 h-5 text-blue-400" />
-                <h2 className="text-lg font-semibold text-gray-100">Report Filters</h2>
+                <h2 className="text-lg font-semibold text-gray-100">{t('accounts.income_statement.search.report_filters')}</h2>
               </div>
               <p className="text-sm text-gray-400 mt-1">
                 Configure filters to generate your income statement report
@@ -225,7 +227,7 @@ const IncomeStatementSearch = () => {
                         value={selectedCompany}
                         onChange={handleCompanyChange}
                         styles={customSelectStyles}
-                        placeholder="Select company..."
+                        placeholder={t('accounts.income_statement.search.select_company')}
                         isClearable
                         isSearchable
                         className="react-select-container"
@@ -247,7 +249,7 @@ const IncomeStatementSearch = () => {
                           value={selectedLocation}
                           onChange={setSelectedLocation}
                           styles={customSelectStyles}
-                          placeholder="Select location..."
+                          placeholder={t('accounts.income_statement.search.select_location')}
                           isClearable
                           isSearchable
                           className="react-select-container"
@@ -269,22 +271,22 @@ const IncomeStatementSearch = () => {
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 mb-2 block">From Date</label>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('accounts.income_statement.search.from_date')}</label>
                       <CustomDatePicker
                         selected={fromDate ? new Date(fromDate) : null}
                         onChange={(date) => setFromDate(date ? date.toISOString().split('T')[0] : '')}
                         type="date"
-                        placeholder="Select from date"
+                        placeholder={t('accounts.income_statement.search.select_from_date')}
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 mb-2 block">To Date</label>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('accounts.income_statement.search.to_date')}</label>
                       <CustomDatePicker
                         selected={toDate ? new Date(toDate) : null}
                         onChange={(date) => setToDate(date ? date.toISOString().split('T')[0] : '')}
                         type="date"
-                        placeholder="Select to date"
+                        placeholder={t('accounts.income_statement.search.select_to_date')}
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                       />
                     </div>

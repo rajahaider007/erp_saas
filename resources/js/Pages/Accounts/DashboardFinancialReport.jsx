@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { FileText, Calendar, Building2 } from 'lucide-react';
 import App from '../App.jsx';
 
@@ -42,6 +43,7 @@ const DashboardFinancialReport = () => {
   };
 
   const getGeneralLedgerUrl = (accountId) => {
+  const { t } = useTranslations();
     const params = new URLSearchParams();
 
     if (accountId) params.set('account_id', String(accountId));
@@ -86,7 +88,7 @@ const DashboardFinancialReport = () => {
                 <p className="text-sm text-slate-300">{reportDescription}</p>
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs text-slate-400 mb-1">From Date</label>
+                    <label className="block text-xs text-slate-400 mb-1">{t('accounts.dashboard_financial_report.from_date')}</label>
                     <input
                       type="date"
                       value={fromDate}
@@ -95,7 +97,7 @@ const DashboardFinancialReport = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-slate-400 mb-1">To Date</label>
+                    <label className="block text-xs text-slate-400 mb-1">{t('accounts.dashboard_financial_report.to_date')}</label>
                     <input
                       type="date"
                       value={toDate}
@@ -115,15 +117,15 @@ const DashboardFinancialReport = () => {
                 </div>
                 <div className="mt-3 flex flex-wrap gap-6 text-sm">
                   <div>
-                    <span className="text-slate-400">Report Type: </span>
+                    <span className="text-slate-400">{t('accounts.dashboard_financial_report.report_type')}</span>
                     <span className="font-semibold text-white">{reportType}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400">Accounts: </span>
+                    <span className="text-slate-400">{t('accounts.dashboard_financial_report.accounts')}</span>
                     <span className="font-semibold text-white">{accounts.length}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400">Total Balance: </span>
+                    <span className="text-slate-400">{t('accounts.dashboard_financial_report.total_balance')}</span>
                     <span className="font-semibold text-emerald-400">
                       {currencySymbol}{formatAmount(totalBalance)}
                     </span>
@@ -136,10 +138,10 @@ const DashboardFinancialReport = () => {
                   <thead className="bg-slate-700/60">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">#</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">Account Code</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">Account Name</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">Account Type</th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-200">Balance</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">{t('accounts.dashboard_financial_report.account_code')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">{t('accounts.dashboard_financial_report.account_name')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">{t('accounts.dashboard_financial_report.account_type')}</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-200">{t('accounts.dashboard_financial_report.balance')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-700">

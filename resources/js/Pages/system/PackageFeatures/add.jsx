@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Package, Home, List, Plus, CheckSquare, Square } from 'lucide-react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const Breadcrumbs = ({ items }) => (
   <div className="breadcrumbs-themed">
@@ -59,6 +60,7 @@ const AddPackageFeatureForm = () => {
   };
 
   const handleSelectAll = (isEnabled) => {
+  const { t } = useTranslations();
     const newFeatures = {};
     menus.forEach(menu => {
       newFeatures[menu.id] = isEnabled;

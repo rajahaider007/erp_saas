@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   DollarSign, ArrowRightLeft, Home, List, Calculator,
   RefreshCw, TrendingUp, TrendingDown
@@ -86,6 +87,7 @@ const CurrencyConverter = () => {
   };
 
   const handleSwapCurrencies = () => {
+  const { t } = useTranslations();
     setFromCurrency(toCurrency);
     setToCurrency(fromCurrency);
     setResult(null);
@@ -108,7 +110,7 @@ const CurrencyConverter = () => {
         <div className="page-header">
           <div>
             <h1 className="page-title">💱 Currency Converter</h1>
-            <p className="page-subtitle">Convert between currencies with real-time exchange rates</p>
+            <p className="page-subtitle">{t('system.currencies.converter.convert_between_currencies_with_realtime')}</p>
           </div>
         </div>
 
@@ -129,7 +131,7 @@ const CurrencyConverter = () => {
                     setResult(null);
                   }}
                   className="w-full px-4 py-3 text-2xl font-semibold border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter amount"
+                  placeholder={t('system.currencies.converter.enter_amount')}
                   step="0.01"
                   min="0"
                 />
@@ -163,7 +165,7 @@ const CurrencyConverter = () => {
                   <button
                     onClick={handleSwapCurrencies}
                     className="p-3 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
-                    title="Swap currencies"
+                    title={t('system.currencies.converter.swap_currencies')}
                   >
                     <ArrowRightLeft className="w-6 h-6" />
                   </button>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import {
   FileText, Download, Filter, Eye, EyeOff, Calendar, 
   Building, MapPin, Settings, Search, RefreshCw, 
@@ -101,6 +102,7 @@ const CashBookReport = () => {
   };
 
   const handlePrint = () => {
+  const { t } = useTranslations();
     window.print();
   };
 
@@ -113,7 +115,7 @@ const CashBookReport = () => {
               <div className="flex items-center gap-3 text-red-800 dark:text-red-300">
                 <AlertCircle className="w-5 h-5" />
                 <div>
-                  <h3 className="font-semibold">Error</h3>
+                  <h3 className="font-semibold">{t('reports.cash_book.report.error')}</h3>
                   <p>{error}</p>
                 </div>
               </div>
@@ -153,7 +155,7 @@ const CashBookReport = () => {
               <button
                 className="report-btn"
                 onClick={handleBackToFilters}
-                title="Back to Filters"
+                title={t('reports.cash_book.report.back_to_filters')}
               >
                 <Filter size={20} />
                 Change Filters
@@ -162,7 +164,7 @@ const CashBookReport = () => {
               <button
                 className="report-btn"
                 onClick={handlePrint}
-                title="Print Report"
+                title={t('reports.cash_book.report.print_report')}
               >
                 <Printer size={20} />
                 Print
@@ -196,40 +198,40 @@ const CashBookReport = () => {
 
         {/* Applied Filters Display */}
         <div className="applied-filters-container">
-          <div className="applied-filters-title">Applied Filters:</div>
+          <div className="applied-filters-title">{t('reports.cash_book.report.applied_filters')}</div>
           <div className="applied-filters-list">
             {filters.account_id ? (
               <div className="filter-badge">
-                <span className="filter-badge-label">Account:</span>
-                <span className="filter-badge-value">Selected Account</span>
+                <span className="filter-badge-label">{t('reports.cash_book.report.account')}</span>
+                <span className="filter-badge-value">{t('reports.cash_book.report.selected_account')}</span>
               </div>
             ) : (
               <div className="filter-badge">
-                <span className="filter-badge-label">Scope:</span>
-                <span className="filter-badge-value">All Cash/Bank Accounts</span>
+                <span className="filter-badge-label">{t('reports.cash_book.report.scope')}</span>
+                <span className="filter-badge-value">{t('reports.cash_book.report.all_cashbank_accounts')}</span>
               </div>
             )}
             {filters.from_date && (
               <div className="filter-badge">
-                <span className="filter-badge-label">From:</span>
+                <span className="filter-badge-label">{t('reports.cash_book.report.from')}</span>
                 <span className="filter-badge-value">{filters.from_date}</span>
               </div>
             )}
             {filters.to_date && (
               <div className="filter-badge">
-                <span className="filter-badge-label">To:</span>
+                <span className="filter-badge-label">{t('reports.cash_book.report.to')}</span>
                 <span className="filter-badge-value">{filters.to_date}</span>
               </div>
             )}
             {filters.view_type && (
               <div className="filter-badge">
-                <span className="filter-badge-label">View:</span>
+                <span className="filter-badge-label">{t('reports.cash_book.report.view')}</span>
                 <span className="filter-badge-value">{filters.view_type}</span>
               </div>
             )}
             {filters.search && (
               <div className="filter-badge">
-                <span className="filter-badge-label">Search:</span>
+                <span className="filter-badge-label">{t('reports.cash_book.report.search')}</span>
                 <span className="filter-badge-value">{filters.search}</span>
               </div>
             )}
@@ -242,13 +244,13 @@ const CashBookReport = () => {
             {loading ? (
               <div className="loading-state">
                 <div className="loading-spinner"></div>
-                <p>Loading cash book...</p>
+                <p>{t('reports.cash_book.report.loading_cash_book')}</p>
               </div>
             ) : !initialData || initialData.length === 0 ? (
               <div className="empty-state">
                 <Database className="empty-icon" />
-                <h3>No cash or bank accounts found</h3>
-                <p>No transactions available for the selected criteria</p>
+                <h3>{t('reports.cash_book.report.no_cash_or_bank_accounts_found')}</h3>
+                <p>{t('reports.cash_book.report.no_transactions_available_for_the_select')}</p>
               </div>
             ) : (
               <>
@@ -258,7 +260,7 @@ const CashBookReport = () => {
                     <div className="bg-slate-800 rounded-lg border border-slate-700 p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-gray-400">Opening Balance</p>
+                          <p className="text-sm text-gray-400">{t('reports.cash_book.report.opening_balance')}</p>
                           <p className="text-2xl font-bold text-white">
                             {formatCurrency(totals.total_opening_balance)}
                           </p>
@@ -270,7 +272,7 @@ const CashBookReport = () => {
                     <div className="bg-slate-800 rounded-lg border border-slate-700 p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-gray-400">Total Receipts</p>
+                          <p className="text-sm text-gray-400">{t('reports.cash_book.report.total_receipts')}</p>
                           <p className="text-2xl font-bold text-green-600">
                             {formatCurrency(totals.total_receipts)}
                           </p>
@@ -282,7 +284,7 @@ const CashBookReport = () => {
                     <div className="bg-slate-800 rounded-lg border border-slate-700 p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-gray-400">Total Payments</p>
+                          <p className="text-sm text-gray-400">{t('reports.cash_book.report.total_payments')}</p>
                           <p className="text-2xl font-bold text-red-600">
                             {formatCurrency(totals.total_payments)}
                           </p>
@@ -294,7 +296,7 @@ const CashBookReport = () => {
                     <div className="bg-gradient-to-br from-blue-900 to-blue-800 rounded-lg border border-blue-700 p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-semibold text-blue-200">Closing Balance</p>
+                          <p className="text-sm font-semibold text-blue-200">{t('reports.cash_book.report.closing_balance')}</p>
                           <p className="text-2xl font-bold text-blue-100">
                             {formatCurrency(totals.total_closing_balance)}
                           </p>
@@ -319,7 +321,7 @@ const CashBookReport = () => {
                             <p className="text-sm opacity-80">Currency: {accountData.currency}</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm">Opening Balance:</p>
+                            <p className="text-sm">{t('reports.cash_book.report.opening_balance')}</p>
                             <p className="text-lg font-bold">{formatCurrency(accountData.summary.opening_balance)}</p>
                           </div>
                         </div>
@@ -328,25 +330,25 @@ const CashBookReport = () => {
                       {/* Account Summary Stats */}
                       <div className="px-6 py-4 bg-slate-750 border-b border-slate-700 grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
-                          <p className="text-xs uppercase font-semibold text-gray-400">Opening Balance</p>
+                          <p className="text-xs uppercase font-semibold text-gray-400">{t('reports.cash_book.report.opening_balance')}</p>
                           <p className="text-lg font-bold text-white">
                             {formatCurrency(accountData.summary.opening_balance)}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs uppercase font-semibold text-gray-400">Total Receipts</p>
+                          <p className="text-xs uppercase font-semibold text-gray-400">{t('reports.cash_book.report.total_receipts')}</p>
                           <p className="text-lg font-bold text-green-600">
                             {formatCurrency(accountData.summary.total_receipts)}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs uppercase font-semibold text-gray-400">Total Payments</p>
+                          <p className="text-xs uppercase font-semibold text-gray-400">{t('reports.cash_book.report.total_payments')}</p>
                           <p className="text-lg font-bold text-red-600">
                             {formatCurrency(accountData.summary.total_payments)}
                           </p>
                         </div>
                         <div className="bg-blue-900 rounded p-2">
-                          <p className="text-xs uppercase font-semibold text-blue-200">Closing Balance</p>
+                          <p className="text-xs uppercase font-semibold text-blue-200">{t('reports.cash_book.report.closing_balance')}</p>
                           <p className="text-lg font-bold text-blue-100">
                             {formatCurrency(accountData.summary.closing_balance)}
                           </p>
@@ -358,12 +360,12 @@ const CashBookReport = () => {
                         <table className="data-table bg-slate-800 text-white">
                           <thead>
                             <tr>
-                              <th style={{width: '12%'}}>Date</th>
-                              <th style={{width: '15%'}}>Reference</th>
-                              <th style={{width: '35%'}}>Description</th>
-                              <th style={{width: '14%'}} className="text-right">Receipt</th>
-                              <th style={{width: '14%'}} className="text-right">Payment</th>
-                              <th style={{width: '14%'}} className="text-right">Balance</th>
+                              <th style={{width: '12%'}}>{t('reports.cash_book.report.date')}</th>
+                              <th style={{width: '15%'}}>{t('reports.cash_book.report.reference')}</th>
+                              <th style={{width: '35%'}}>{t('reports.cash_book.report.description')}</th>
+                              <th style={{width: '14%'}} className="text-right">{t('reports.cash_book.report.receipt')}</th>
+                              <th style={{width: '14%'}} className="text-right">{t('reports.cash_book.report.payment')}</th>
+                              <th style={{width: '14%'}} className="text-right">{t('reports.cash_book.report.balance')}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -425,10 +427,10 @@ const CashBookReport = () => {
                     IAS 7 - Cash Flow Compliance
                   </h3>
                   <ul className="text-sm space-y-1 list-disc list-inside text-green-300">
-                    <li>Cash book tracks all cash and bank account movements</li>
-                    <li>Provides basis for operating, investing, and financing activities segregation</li>
-                    <li>Running balance maintained for bank reconciliation support</li>
-                    <li>All transactions recorded on cash receipt/payment basis</li>
+                    <li>{t('reports.cash_book.report.cash_book_tracks_all_cash_and_bank_accou')}</li>
+                    <li>{t('reports.cash_book.report.provides_basis_for_operating_investing_a')}</li>
+                    <li>{t('reports.cash_book.report.running_balance_maintained_for_bank_reco')}</li>
+                    <li>{t('reports.cash_book.report.all_transactions_recorded_on_cash_receip')}</li>
                   </ul>
                 </div>
               </>

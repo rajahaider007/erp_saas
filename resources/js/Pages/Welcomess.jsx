@@ -1,5 +1,6 @@
 import React from 'react';
 import { Head } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // This is a simple React component to get you started.
 // Inertia will automatically find and render this when you

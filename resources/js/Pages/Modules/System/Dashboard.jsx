@@ -1,5 +1,6 @@
 import React from 'react';
 import App from '../../App.jsx';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   Settings, 
   Users, 
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 
 export default function SystemDashboard() {
+  const { t } = useTranslations();
   const systemModules = [
     {
       name: 'User Management',
@@ -109,7 +111,7 @@ export default function SystemDashboard() {
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2 text-gray-300">
                   <TrendingUp className="h-5 w-5" />
-                  <span className="font-medium">System Administration</span>
+                  <span className="font-medium">{t('modules.system.dashboard.system_administration')}</span>
                 </div>
               </div>
             </div>
@@ -129,7 +131,7 @@ export default function SystemDashboard() {
                 <Users className="h-6 w-6" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Users</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('modules.system.dashboard.total_users')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">25</p>
               </div>
             </div>
@@ -141,7 +143,7 @@ export default function SystemDashboard() {
                 <Building2 className="h-6 w-6" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Companies</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('modules.system.dashboard.companies')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">5</p>
               </div>
             </div>
@@ -153,7 +155,7 @@ export default function SystemDashboard() {
                 <Package className="h-6 w-6" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Modules</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('modules.system.dashboard.modules')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">12</p>
               </div>
             </div>
@@ -165,7 +167,7 @@ export default function SystemDashboard() {
                 <Shield className="h-6 w-6" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Packages</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('modules.system.dashboard.packages')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">8</p>
               </div>
             </div>
@@ -174,7 +176,7 @@ export default function SystemDashboard() {
 
         {/* System Modules Grid */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">System Management Modules</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('modules.system.dashboard.system_management_modules')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {systemModules.map((module, index) => (
               <a
@@ -214,14 +216,14 @@ export default function SystemDashboard() {
 
         {/* Quick Actions */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Quick Actions</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('modules.system.dashboard.quick_actions')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <a
               href="/system/users/create"
               className="flex items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
             >
               <Users className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-3" />
-              <span className="text-blue-900 dark:text-blue-100 font-medium">Add New User</span>
+              <span className="text-blue-900 dark:text-blue-100 font-medium">{t('modules.system.dashboard.add_new_user')}</span>
             </a>
             
             <a
@@ -229,7 +231,7 @@ export default function SystemDashboard() {
               className="flex items-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
             >
               <Building2 className="h-5 w-5 text-green-600 dark:text-green-400 mr-3" />
-              <span className="text-green-900 dark:text-green-100 font-medium">Add Company</span>
+              <span className="text-green-900 dark:text-green-100 font-medium">{t('modules.system.dashboard.add_company')}</span>
             </a>
             
             <a
@@ -237,7 +239,7 @@ export default function SystemDashboard() {
               className="flex items-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
             >
               <Package className="h-5 w-5 text-purple-600 dark:text-purple-400 mr-3" />
-              <span className="text-purple-900 dark:text-purple-100 font-medium">Create Module</span>
+              <span className="text-purple-900 dark:text-purple-100 font-medium">{t('modules.system.dashboard.create_module')}</span>
             </a>
             
             <a
@@ -245,7 +247,7 @@ export default function SystemDashboard() {
               className="flex items-center p-4 bg-slate-50 dark:bg-slate-900/20 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900/30 transition-colors"
             >
               <HardDrive className="h-5 w-5 text-slate-600 dark:text-slate-400 mr-3" />
-              <span className="text-slate-900 dark:text-slate-100 font-medium">Storage & Attachments</span>
+              <span className="text-slate-900 dark:text-slate-100 font-medium">{t('modules.system.dashboard.storage__attachments')}</span>
             </a>
           </div>
         </div>

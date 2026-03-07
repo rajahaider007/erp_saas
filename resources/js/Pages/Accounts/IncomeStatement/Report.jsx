@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   Printer, 
   RefreshCcw,
@@ -47,6 +48,7 @@ function ReportContent() {
   };
 
   const formatCurrency = (value) => {
+  const { t } = useTranslations();
     return new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
@@ -219,7 +221,7 @@ function ReportContent() {
             <div className="mb-8">
               <div className={`py-2 px-4 font-bold mb-4 rounded ${
                 theme === 'dark' ? 'bg-gray-700 text-gray-100' : 'bg-gray-100 text-gray-900'
-              }`}>REVENUE</div>
+              }`}>{t('accounts.income_statement.report.revenue')}</div>
 
               <div className="ml-4 space-y-4">
                 {/* Sales Revenue */}
@@ -305,7 +307,7 @@ function ReportContent() {
                 primaryColor === 'teal' ? (theme === 'dark' ? 'bg-teal-900/30 border-teal-700 text-teal-300' : 'bg-teal-100 border-teal-600 text-teal-900') :
                 (theme === 'dark' ? 'bg-pink-900/30 border-pink-700 text-pink-300' : 'bg-pink-100 border-pink-600 text-pink-900')
               }`}>
-                <span>TOTAL REVENUE</span>
+                <span>{t('accounts.income_statement.report.total_revenue')}</span>
                 <span className="font-mono">{formatCurrency(incomeStatementData.totalRevenue)}</span>
               </div>
             </div>
@@ -315,7 +317,7 @@ function ReportContent() {
               <div className="mb-8">
                 <div className={`py-2 px-4 font-bold mb-4 rounded ${
                   theme === 'dark' ? 'bg-gray-700 text-gray-100' : 'bg-gray-100 text-gray-900'
-                }`}>COST OF GOODS SOLD</div>
+                }`}>{t('accounts.income_statement.report.cost_of_goods_sold')}</div>
 
                 <div className="ml-4 space-y-3">
                   {incomeStatementData.costOfGoodsSold.purchases.accounts.length > 0 && (
@@ -345,7 +347,7 @@ function ReportContent() {
                 <div className={`flex justify-between py-2 px-4 rounded font-semibold text-base border mt-4 ml-4 ${
                   theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-300 text-gray-900'
                 }`}>
-                  <span>TOTAL COST OF GOODS SOLD</span>
+                  <span>{t('accounts.income_statement.report.total_cost_of_goods_sold')}</span>
                   <span className="font-mono">{formatCurrency(incomeStatementData.totalCOGS)}</span>
                 </div>
 
@@ -353,7 +355,7 @@ function ReportContent() {
                 <div className={`flex justify-between py-2 px-4 rounded font-bold text-base border mt-2 ml-4 ${
                   theme === 'dark' ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-gray-200 border-gray-400 text-gray-900'
                 }`}>
-                  <span>GROSS PROFIT</span>
+                  <span>{t('accounts.income_statement.report.gross_profit')}</span>
                   <span className="font-mono">{formatCurrency(incomeStatementData.grossProfit)}</span>
                 </div>
               </div>
@@ -364,7 +366,7 @@ function ReportContent() {
               <div className="mb-8">
                 <div className={`py-2 px-4 font-bold mb-4 rounded ${
                   theme === 'dark' ? 'bg-gray-700 text-gray-100' : 'bg-gray-100 text-gray-900'
-                }`}>OPERATING EXPENSES</div>
+                }`}>{t('accounts.income_statement.report.operating_expenses')}</div>
 
                 <div className="ml-4 space-y-4">
                   {incomeStatementData.operatingExpenses.selling_distribution.accounts.length > 0 && (
@@ -438,7 +440,7 @@ function ReportContent() {
                 <div className={`flex justify-between py-2 px-4 rounded font-semibold text-base border mt-4 ml-4 ${
                   theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-300 text-gray-900'
                 }`}>
-                  <span>TOTAL OPERATING EXPENSES</span>
+                  <span>{t('accounts.income_statement.report.total_operating_expenses')}</span>
                   <span className="font-mono">{formatCurrency(incomeStatementData.totalOperatingExpenses)}</span>
                 </div>
 
@@ -446,7 +448,7 @@ function ReportContent() {
                 <div className={`flex justify-between py-2 px-4 rounded font-bold text-base border mt-2 ml-4 ${
                   theme === 'dark' ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-gray-200 border-gray-400 text-gray-900'
                 }`}>
-                  <span>OPERATING PROFIT</span>
+                  <span>{t('accounts.income_statement.report.operating_profit')}</span>
                   <span className="font-mono">{formatCurrency(incomeStatementData.operatingProfit)}</span>
                 </div>
               </div>
@@ -457,7 +459,7 @@ function ReportContent() {
               <div className="mb-8">
                 <div className={`py-2 px-4 font-bold mb-4 rounded ${
                   theme === 'dark' ? 'bg-gray-700 text-gray-100' : 'bg-gray-100 text-gray-900'
-                }`}>FINANCE ITEMS & OTHER INCOME/EXPENSES</div>
+                }`}>{t('accounts.income_statement.report.finance_items__other_incomeexpenses')}</div>
 
                 <div className="ml-4 space-y-3">
                   {incomeStatementData.financeItems.interest_revenue.accounts.length > 0 && (
@@ -529,13 +531,13 @@ function ReportContent() {
                 <div className={`flex justify-between py-1 px-4 rounded ml-4 mt-3 ${
                   theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-50 text-gray-900'
                 }`}>
-                  <span className="font-semibold">Finance Income</span>
+                  <span className="font-semibold">{t('accounts.income_statement.report.finance_income')}</span>
                   <span className="font-mono font-semibold">{formatCurrency(incomeStatementData.financeIncome)}</span>
                 </div>
                 <div className={`flex justify-between py-1 px-4 rounded ml-4 mt-2 ${
                   theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-50 text-gray-900'
                 }`}>
-                  <span className="font-semibold">Finance Expenses</span>
+                  <span className="font-semibold">{t('accounts.income_statement.report.finance_expenses')}</span>
                   <span className="font-mono font-semibold">{formatCurrency(incomeStatementData.financeExpenses)}</span>
                 </div>
               </div>
@@ -545,7 +547,7 @@ function ReportContent() {
             <div className={`flex justify-between py-3 px-4 rounded font-bold text-lg border-2 mb-8 ml-4 ${
               theme === 'dark' ? 'bg-amber-900/30 border-amber-700 text-amber-300' : 'bg-amber-100 border-amber-600 text-amber-900'
             }`}>
-              <span>PROFIT BEFORE TAX</span>
+              <span>{t('accounts.income_statement.report.profit_before_tax')}</span>
               <span className="font-mono">{formatCurrency(incomeStatementData.profitBeforeTax)}</span>
             </div>
 
@@ -554,7 +556,7 @@ function ReportContent() {
               <div className="mb-8">
                 <div className={`py-2 px-4 font-bold mb-4 rounded ${
                   theme === 'dark' ? 'bg-gray-700 text-gray-100' : 'bg-gray-100 text-gray-900'
-                }`}>INCOME TAX</div>
+                }`}>{t('accounts.income_statement.report.income_tax')}</div>
 
                 {incomeStatementData.taxAndProfit.tax_expense.accounts.length > 0 && (
                   <div className="ml-4">
@@ -572,7 +574,7 @@ function ReportContent() {
                 <div className={`flex justify-between py-2 px-4 rounded font-semibold text-base border ml-4 ${
                   theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-300 text-gray-900'
                 }`}>
-                  <span>TOTAL TAX EXPENSE</span>
+                  <span>{t('accounts.income_statement.report.total_tax_expense')}</span>
                   <span className="font-mono">{formatCurrency(incomeStatementData.taxExpense)}</span>
                 </div>
               </div>
@@ -584,7 +586,7 @@ function ReportContent() {
                 (theme === 'dark' ? 'bg-green-900/30 border-green-700 text-green-300' : 'bg-green-100 border-green-600 text-green-900') :
                 (theme === 'dark' ? 'bg-red-900/30 border-red-700 text-red-300' : 'bg-red-100 border-red-600 text-red-900')
             }`}>
-              <span>NET PROFIT / (LOSS) FOR THE PERIOD</span>
+              <span>{t('accounts.income_statement.report.net_profit__loss_for_the_period')}</span>
               <span className="font-mono">{formatCurrency(incomeStatementData.profitForPeriod)}</span>
             </div>
 
@@ -592,7 +594,7 @@ function ReportContent() {
             <div className={`mt-12 text-center text-sm border-t pt-6 ${
               theme === 'dark' ? 'border-gray-700 text-gray-500' : 'border-gray-900 text-gray-500'
             }`}>
-              <p>This report has been generated from the accounting system.</p>
+              <p>{t('accounts.income_statement.report.this_report_has_been_generated_from_the_')}</p>
               <p>Generated on: {new Date().toLocaleString()}</p>
             </div>
           </div>
@@ -603,7 +605,7 @@ function ReportContent() {
 
 export default function IncomeStatementReport() {
   return (
-    <App title="Income Statement">
+    <App title={t('accounts.income_statement.report.income_statement')}>
       <ReportContent />
     </App>
   );

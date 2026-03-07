@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Shield, Home, List, Plus, Edit, Trash2, Eye } from 'lucide-react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const Breadcrumbs = ({ items }) => (
   <div className="breadcrumbs-themed">
@@ -20,7 +21,7 @@ const Breadcrumbs = ({ items }) => (
         </div>
       ))}
     </nav>
-    <div className="breadcrumbs-description">Manage system roles</div>
+    <div className="breadcrumbs-description">{t('system.roles.index.manage_system_roles')}</div>
   </div>
 );
 
@@ -29,13 +30,14 @@ const RolesIndex = () => {
   const [alert, setAlert] = useState(null);
 
   const handleDelete = (roleId, roleName) => {
+  const { t } = useTranslations();
     if (window.confirm(`Are you sure you want to delete role "${roleName}"?`)) {
       router.delete(`/system/roles/${roleId}`, {
         onSuccess: () => {
           setAlert({ type: 'success', message: `Role "${roleName}" deleted successfully!` });
         },
         onError: () => {
-          setAlert({ type: 'error', message: 'Failed to delete role.' });
+          setAlert({ type: 'error', message: t('system.roles.index.msg_failed_to_delete_role') });
         }
       });
     }
@@ -80,7 +82,7 @@ const RolesIndex = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Roles</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('system.roles.index.roles')}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Manage system roles and permissions
           </p>

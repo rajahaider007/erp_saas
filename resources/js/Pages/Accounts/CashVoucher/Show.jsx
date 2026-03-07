@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   ArrowLeft, 
   Edit, 
@@ -18,6 +19,7 @@ import {
 import App from '../../App.jsx';
 
 const CashVoucherShow = () => {
+const { t } = useTranslations();
   const { voucher, entries = [], flash, currentPeriod = null } = usePage().props;
   const [alert, setAlert] = useState(null);
 
@@ -38,8 +40,8 @@ const CashVoucherShow = () => {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Cash Voucher Not Found</h2>
-            <p className="text-gray-600 mb-4">The Cash voucher you're looking for doesn't exist.</p>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('accounts.cash_voucher.show.cash_voucher_not_found')}</h2>
+            <p className="text-gray-600 mb-4">{t('accounts.cash_voucher.show.the_cash_voucher_youre_looking_for_doesn')}</p>
             <button
               onClick={() => router.visit('/accounts/cash-voucher')}
               className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -84,16 +86,18 @@ const CashVoucherShow = () => {
   };
 
   const handleEdit = () => {
+  const { t } = useTranslations();
     if (voucher.status !== 'Draft') {
-      setAlert({ type: 'error', message: 'Only draft vouchers can be edited' });
+      setAlert({ type: 'error', message: t('accounts.cash_voucher.show.msg_only_draft_vouchers_can_be_edited') });
       return;
     }
     router.visit(`/accounts/cash-voucher/${voucher.id}/edit`);
   };
 
   const handleDelete = () => {
+  const { t } = useTranslations();
     if (voucher.status !== 'Draft') {
-      setAlert({ type: 'error', message: 'Only draft vouchers can be deleted' });
+      setAlert({ type: 'error', message: t('accounts.cash_voucher.show.msg_only_draft_vouchers_can_be_deleted') });
       return;
     }
     
@@ -103,8 +107,9 @@ const CashVoucherShow = () => {
   };
 
   const handlePost = () => {
+  const { t } = useTranslations();
     if (voucher.status !== 'Draft') {
-      setAlert({ type: 'error', message: 'Only draft vouchers can be posted' });
+      setAlert({ type: 'error', message: t('accounts.cash_voucher.show.msg_only_draft_vouchers_can_be_posted') });
       return;
     }
     
@@ -130,8 +135,8 @@ const CashVoucherShow = () => {
                 <ArrowLeft className="h-5 w-5" />
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Cash Voucher Details</h1>
-                <p className="text-gray-600 mt-1">View Cash voucher information</p>
+                <h1 className="text-2xl font-bold text-gray-900">{t('accounts.cash_voucher.show.cash_voucher_details')}</h1>
+                <p className="text-gray-600 mt-1">{t('accounts.cash_voucher.show.view_cash_voucher_information')}</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
@@ -232,7 +237,7 @@ const CashVoucherShow = () => {
                   Accounting Period: {currentPeriod.period_name} (FY {currentPeriod.fiscal_year})
                 </h3>
                 <p className="text-sm mb-2">
-                  <strong>Status:</strong> {currentPeriod.status}
+                  <strong>{t('accounts.cash_voucher.show.status')}</strong> {currentPeriod.status}
                   {currentPeriod.is_adjustment_period && ' (Adjustment Period)'}
                 </p>
                 <p className="text-xs">
@@ -247,45 +252,45 @@ const CashVoucherShow = () => {
 
         {/* Voucher Information */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Voucher Information</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('accounts.cash_voucher.show.voucher_information')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Voucher Number</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('accounts.cash_voucher.show.voucher_number')}</label>
               <p className="text-sm text-gray-900 font-mono">{voucher.voucher_number}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Voucher Date</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('accounts.cash_voucher.show.voucher_date')}</label>
               <p className="text-sm text-gray-900">{new Date(voucher.voucher_date).toLocaleDateString()}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('accounts.cash_voucher.show.status')}</label>
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(voucher.status)}`}>
                 {getStatusIcon(voucher.status)}
                 <span className="ml-1">{voucher.status}</span>
               </span>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('accounts.cash_voucher.show.currency')}</label>
               <p className="text-sm text-gray-900">{voucher.currency_code}</p>
             </div>
           </div>
           
           {voucher.reference_number && (
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Reference Number</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('accounts.cash_voucher.show.reference_number')}</label>
               <p className="text-sm text-gray-900">{voucher.reference_number}</p>
             </div>
           )}
           
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('accounts.cash_voucher.show.description')}</label>
             <p className="text-sm text-gray-900">{voucher.description}</p>
           </div>
         </div>
 
         {/* Cash Entries */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Cash Entries</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('accounts.cash_voucher.show.cash_entries')}</h2>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -352,29 +357,29 @@ const CashVoucherShow = () => {
 
         {/* Audit Information */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Audit Information</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('accounts.cash_voucher.show.audit_information')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Created By</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('accounts.cash_voucher.show.created_by')}</label>
               <p className="text-sm text-gray-900">User ID: {voucher.created_by}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Created At</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('accounts.cash_voucher.show.created_at')}</label>
               <p className="text-sm text-gray-900">{new Date(voucher.created_at).toLocaleString()}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('accounts.cash_voucher.show.last_updated')}</label>
               <p className="text-sm text-gray-900">{new Date(voucher.updated_at).toLocaleString()}</p>
             </div>
             {voucher.posted_by && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Posted By</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('accounts.cash_voucher.show.posted_by')}</label>
                 <p className="text-sm text-gray-900">User ID: {voucher.posted_by}</p>
               </div>
             )}
             {voucher.posted_at && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Posted At</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('accounts.cash_voucher.show.posted_at')}</label>
                 <p className="text-sm text-gray-900">{new Date(voucher.posted_at).toLocaleString()}</p>
               </div>
             )}

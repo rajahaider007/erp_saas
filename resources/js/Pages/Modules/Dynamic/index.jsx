@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import App from '../../App.jsx';
 import {
   Settings,
@@ -57,6 +58,7 @@ const DynamicModuleDashboard = () => {
   }));
 
   const SectionCard = ({ section }) => {
+  const { t } = useTranslations();
     const Icon = iconMap[section.icon?.toLowerCase()] || iconMap.default;
     
     return (
@@ -177,11 +179,11 @@ const DynamicModuleDashboard = () => {
               <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                  <span>Coming Soon</span>
+                  <span>{t('modules.dynamic.index.coming_soon')}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span>In Development</span>
+                  <span>{t('modules.dynamic.index.in_development')}</span>
                 </div>
               </div>
             </div>

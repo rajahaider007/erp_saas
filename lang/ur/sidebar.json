@@ -7,5 +7,16 @@
   "footer": {
     "app_name": "ERP سسٹم v1.0",
     "edition": "پروفیشنل ایڈیشن"
+  },
+  "menus": {
+    "accounts_cash_voucher": "کیش واؤچر",
+    "accounts_bank_voucher": "بینک واؤچر",
+    "accounts_chart_of_accounts": "چارٹ آف اکاؤنٹس",
+    "accounts_journal_voucher": "جرنل واؤچر",
+    "accounts_opening_voucher": "اوپننگ واؤچر",
+    "system_users": "صارفین",
+    "system_menus": "مینو",
+    "system_companies": "کمپنیاں",
+    "system_roles": "رولز"
   }
 }

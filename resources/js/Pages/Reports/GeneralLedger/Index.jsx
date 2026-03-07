@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import AppLayout from '@/Layouts/AppLayout';
 import {
   FileText, Download, Filter, Eye, EyeOff, Calendar, 
@@ -188,6 +189,7 @@ const GeneralLedgerReport = () => {
 
   // Calculate totals
   const calculateTotals = () => {
+  const { t } = useTranslations();
     const totals = reportData.reduce((acc, row) => {
       acc.opening_balance += parseFloat(row.opening_balance || 0);
       acc.debit_total += parseFloat(row.debit_total || 0);
@@ -206,7 +208,7 @@ const GeneralLedgerReport = () => {
   }, [filters]);
 
   return (
-    <AppLayout title="General Ledger Report">
+    <AppLayout title={t('reports.general_ledger.index.general_ledger_report')}>
       
       {/* Header */}
       <div className="page-header">
@@ -266,7 +268,7 @@ const GeneralLedgerReport = () => {
       {showFilters && (
         <div className="card mb-6">
           <div className="card-header">
-            <h3 className="card-title">Report Filters</h3>
+            <h3 className="card-title">{t('reports.general_ledger.index.report_filters')}</h3>
             <button
               onClick={() => setShowFilters(false)}
               className="btn-icon btn-icon-secondary"
@@ -278,30 +280,30 @@ const GeneralLedgerReport = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Date Range */}
               <div>
-                <label className="form-label">From Date</label>
+                <label className="form-label">{t('reports.general_ledger.index.from_date')}</label>
                 <CustomDatePicker
                   selected={filters.date_from ? new Date(filters.date_from) : null}
                   onChange={(date) => setFilters({...filters, date_from: date ? date.toISOString().split('T')[0] : ''})}
                   type="date"
-                  placeholder="Select from date"
+                  placeholder={t('reports.general_ledger.index.select_from_date')}
                   className="form-input"
                 />
               </div>
               
               <div>
-                <label className="form-label">To Date</label>
+                <label className="form-label">{t('reports.general_ledger.index.to_date')}</label>
                 <CustomDatePicker
                   selected={filters.date_to ? new Date(filters.date_to) : null}
                   onChange={(date) => setFilters({...filters, date_to: date ? date.toISOString().split('T')[0] : ''})}
                   type="date"
-                  placeholder="Select to date"
+                  placeholder={t('reports.general_ledger.index.select_to_date')}
                   className="form-input"
                 />
               </div>
               
               {/* Currency */}
               <div>
-                <label className="form-label">Currency</label>
+                <label className="form-label">{t('reports.general_ledger.index.currency')}</label>
                 <select
                   value={filters.currency}
                   onChange={(e) => setFilters({...filters, currency: e.target.value})}
@@ -317,7 +319,7 @@ const GeneralLedgerReport = () => {
               
               {/* Account Types */}
               <div>
-                <label className="form-label">Account Types</label>
+                <label className="form-label">{t('reports.general_ledger.index.account_types')}</label>
                 <div className="space-y-2">
                   {accountTypes.map(type => (
                     <label key={type.value} className="flex items-center">
@@ -347,7 +349,7 @@ const GeneralLedgerReport = () => {
               
               {/* Options */}
               <div>
-                <label className="form-label">Options</label>
+                <label className="form-label">{t('reports.general_ledger.index.options')}</label>
                 <div className="space-y-2">
                   <label className="flex items-center">
                     <input
@@ -356,7 +358,7 @@ const GeneralLedgerReport = () => {
                       onChange={(e) => setFilters({...filters, include_zero_balances: e.target.checked})}
                       className="form-checkbox"
                     />
-                    <span className="ml-2 text-sm">Include Zero Balances</span>
+                    <span className="ml-2 text-sm">{t('reports.general_ledger.index.include_zero_balances')}</span>
                   </label>
                   
                   <label className="flex items-center">
@@ -366,22 +368,22 @@ const GeneralLedgerReport = () => {
                       onChange={(e) => setFilters({...filters, show_details: e.target.checked})}
                       className="form-checkbox"
                     />
-                    <span className="ml-2 text-sm">Show Transaction Details</span>
+                    <span className="ml-2 text-sm">{t('reports.general_ledger.index.show_transaction_details')}</span>
                   </label>
                 </div>
               </div>
               
               {/* Sort Options */}
               <div>
-                <label className="form-label">Sort By</label>
+                <label className="form-label">{t('reports.general_ledger.index.sort_by')}</label>
                 <select
                   value={filters.sort_by}
                   onChange={(e) => setFilters({...filters, sort_by: e.target.value})}
                   className="form-select"
                 >
-                  <option value="account_code">Account Code</option>
-                  <option value="account_name">Account Name</option>
-                  <option value="balance">Balance</option>
+                  <option value="account_code">{t('reports.general_ledger.index.account_code')}</option>
+                  <option value="account_name">{t('reports.general_ledger.index.account_name')}</option>
+                  <option value="balance">{t('reports.general_ledger.index.balance')}</option>
                 </select>
               </div>
             </div>
@@ -408,7 +410,7 @@ const GeneralLedgerReport = () => {
       {showColumnSettings && (
         <div className="card mb-6">
           <div className="card-header">
-            <h3 className="card-title">Column Settings</h3>
+            <h3 className="card-title">{t('reports.general_ledger.index.column_settings')}</h3>
             <button
               onClick={() => setShowColumnSettings(false)}
               className="btn-icon btn-icon-secondary"
@@ -442,7 +444,7 @@ const GeneralLedgerReport = () => {
         <div className="card-header">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="card-title">General Ledger Report</h3>
+              <h3 className="card-title">{t('reports.general_ledger.index.general_ledger_report')}</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Period: {filters.date_from} to {filters.date_to} | 
                 Currency: {filters.currency} | 
@@ -465,7 +467,7 @@ const GeneralLedgerReport = () => {
           {loading ? (
             <div className="flex justify-center items-center py-12">
               <RefreshCw className="w-8 h-8 animate-spin text-primary-600" />
-              <span className="ml-2">Loading report...</span>
+              <span className="ml-2">{t('reports.general_ledger.index.loading_report')}</span>
             </div>
           ) : (
             <>
@@ -534,7 +536,7 @@ const GeneralLedgerReport = () => {
                   {/* Totals Row */}
                   <tfoot>
                     <tr className="bg-gray-50 dark:bg-gray-800 font-bold">
-                      {visibleColumns.account_code && <td>Total</td>}
+                      {visibleColumns.account_code && <td>{t('reports.general_ledger.index.total')}</td>}
                       {visibleColumns.account_name && <td></td>}
                       {visibleColumns.account_type && <td></td>}
                       {visibleColumns.opening_balance && (

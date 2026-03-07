@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import App from '../../App.jsx';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 export default function List() {
   const { items, filters, config, error, flash } = usePage().props;
@@ -32,6 +33,7 @@ export default function List() {
   };
 
   const onDelete = (id) => {
+  const { t } = useTranslations();
     const confirmed = window.confirm('Are you sure you want to delete this record?');
     if (!confirmed) return;
 
@@ -62,7 +64,7 @@ export default function List() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
           <input
             className="border rounded-md p-2"
-            placeholder="Search..."
+            placeholder={t('inventory.master_data.list.search')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -71,9 +73,9 @@ export default function List() {
             value={isActive}
             onChange={(e) => setIsActive(e.target.value)}
           >
-            <option value="">All Status</option>
-            <option value="1">Active</option>
-            <option value="0">Inactive</option>
+            <option value="">{t('inventory.master_data.list.all_status')}</option>
+            <option value="1">{t('inventory.master_data.list.active')}</option>
+            <option value="0">{t('inventory.master_data.list.inactive')}</option>
           </select>
           <button
             className="px-4 py-2 rounded-md border"
@@ -87,12 +89,12 @@ export default function List() {
           <table className="min-w-full text-sm">
             <thead className="bg-gray-50">
               <tr>
-                <th className="text-left p-3">ID</th>
+                <th className="text-left p-3">{t('inventory.master_data.list.id')}</th>
                 {columns.map((column) => (
                   <th key={column.key} className="text-left p-3">{column.label}</th>
                 ))}
-                <th className="text-left p-3">Status</th>
-                <th className="text-left p-3">Actions</th>
+                <th className="text-left p-3">{t('inventory.master_data.list.status')}</th>
+                <th className="text-left p-3">{t('inventory.master_data.list.actions')}</th>
               </tr>
             </thead>
             <tbody>

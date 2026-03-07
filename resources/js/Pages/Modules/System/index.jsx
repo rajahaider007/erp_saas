@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import App from '../../App.jsx';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
@@ -84,6 +85,7 @@ const SystemDashboard = () => {
   };
 
   const SectionCard = ({ section }) => {
+  const { t } = useTranslations();
     const Icon = section.icon;
     
     return (
@@ -151,7 +153,7 @@ const SystemDashboard = () => {
               
               <div className="flex items-center space-x-4">
                 <div className="text-right">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Welcome back,</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('modules.system.index.welcome_back')}</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
                     {user?.fname ? `${user.fname} ${user.lname}`.trim() : 'Administrator'}
                   </p>
@@ -171,7 +173,7 @@ const SystemDashboard = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Modules</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('modules.system.index.total_modules')}</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">8</p>
                 </div>
                 <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-xl text-blue-600 dark:text-blue-400">
@@ -183,7 +185,7 @@ const SystemDashboard = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Active Users</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('modules.system.index.active_users')}</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">24</p>
                 </div>
                 <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-xl text-green-600 dark:text-green-400">
@@ -195,7 +197,7 @@ const SystemDashboard = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Companies</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('modules.system.index.companies')}</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">3</p>
                 </div>
                 <div className="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-xl text-purple-600 dark:text-purple-400">
@@ -207,7 +209,7 @@ const SystemDashboard = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">System Health</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('modules.system.index.system_health')}</p>
                   <p className="text-2xl font-bold text-green-600">98%</p>
                 </div>
                 <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-xl text-green-600 dark:text-green-400">
@@ -252,8 +254,8 @@ const SystemDashboard = () => {
                   <Users className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900 dark:text-white">New user registered</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">John Doe joined the system</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{t('modules.system.index.new_user_registered')}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('modules.system.index.john_doe_joined_the_system')}</p>
                 </div>
                 <span className="text-sm text-gray-500 dark:text-gray-400">2 min ago</span>
               </div>
@@ -263,8 +265,8 @@ const SystemDashboard = () => {
                   <Package className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900 dark:text-white">Module updated</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">HR module configuration changed</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{t('modules.system.index.module_updated')}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('modules.system.index.hr_module_configuration_changed')}</p>
                 </div>
                 <span className="text-sm text-gray-500 dark:text-gray-400">1 hour ago</span>
               </div>
@@ -274,8 +276,8 @@ const SystemDashboard = () => {
                   <Building className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900 dark:text-white">Company added</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">New company "Tech Corp" registered</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{t('modules.system.index.company_added')}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('modules.system.index.new_company_tech_corp_registered')}</p>
                 </div>
                 <span className="text-sm text-gray-500 dark:text-gray-400">3 hours ago</span>
               </div>

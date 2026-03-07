@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Home, Plus, Trash2, ArrowRight, AlertCircle } from 'lucide-react';
 import App from '../../App.jsx';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import InlineSearchSelect from '../../../Components/InlineSearchSelect';
 
 const Breadcrumbs = ({ items }) => (
@@ -29,11 +30,12 @@ const Breadcrumbs = ({ items }) => (
         </div>
       ))}
     </nav>
-    <div className="breadcrumbs-description">Configure unit of measure conversions (one From UOM, multiple To UOM + factor)</div>
+    <div className="breadcrumbs-description">{t('inventory.uom_conversion.create.configure_unit_of_measure_conversions_on')}</div>
   </div>
 );
 
 const CreateUomConversionForm = () => {
+const { t } = useTranslations();
   const { errors: pageErrors, flash, conversionSet = null, uoms = [], error } = usePage().props;
 
   const isEditMode = !!conversionSet;
@@ -61,7 +63,7 @@ const CreateUomConversionForm = () => {
   useEffect(() => {
     if (pageErrors && Object.keys(pageErrors).length > 0) {
       setErrors(pageErrors);
-      setAlert({ type: 'error', message: 'Please correct the errors below and try again.' });
+      setAlert({ type: 'error', message: t('inventory.uom_conversion.create.msg_please_correct_the_errors_below_and_try_') });
     }
   }, [pageErrors]);
 
@@ -75,8 +77,9 @@ const CreateUomConversionForm = () => {
   };
 
   const removeRow = (index) => {
+  const { t } = useTranslations();
     if (rows.length <= 1) {
-      setAlert({ type: 'error', message: 'At least one conversion row is required.' });
+      setAlert({ type: 'error', message: t('inventory.uom_conversion.create.msg_at_least_one_conversion_row_is_required') });
       return;
     }
     setRows((prev) => prev.filter((_, i) => i !== index));
@@ -101,6 +104,7 @@ const CreateUomConversionForm = () => {
     : formattedUoms;
 
   const handleSubmit = (e) => {
+  const { t } = useTranslations();
     e.preventDefault();
     setErrors({});
     setAlert(null);
@@ -129,7 +133,7 @@ const CreateUomConversionForm = () => {
     }
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setAlert({ type: 'error', message: 'Please correct the errors below and try again.' });
+      setAlert({ type: 'error', message: t('inventory.uom_conversion.create.msg_please_correct_the_errors_below_and_try_') });
       return;
     }
 
@@ -193,7 +197,7 @@ const CreateUomConversionForm = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Master: From UOM */}
             <div className="rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50 p-4 sm:p-5 shadow-sm">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">From Unit (Master)</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">{t('inventory.uom_conversion.create.from_unit_master')}</h3>
               <div className="max-w-md">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   From UOM <span className="text-red-500">*</span>
@@ -205,7 +209,7 @@ const CreateUomConversionForm = () => {
                     setFromUomId(val);
                     setErrors((prev) => ({ ...prev, from_uom_id: undefined }));
                   }}
-                  placeholder="Select From UOM..."
+                  placeholder={t('inventory.uom_conversion.create.select_from_uom')}
                   name="from_uom_id"
                   id="from_uom_id"
                   error={errors.from_uom_id}
@@ -221,7 +225,7 @@ const CreateUomConversionForm = () => {
             {/* Detail: Conversion rows */}
             <div className="rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50 p-4 sm:p-5 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Conversion Rows (Detail)</h3>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('inventory.uom_conversion.create.conversion_rows_detail')}</h3>
                 <button
                   type="button"
                   onClick={addRow}
@@ -242,9 +246,9 @@ const CreateUomConversionForm = () => {
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-gray-600">
                       <th className="text-left text-xs font-semibold text-gray-600 dark:text-gray-400 py-2 pr-2">#</th>
-                      <th className="text-left text-xs font-semibold text-gray-600 dark:text-gray-400 py-2 pr-2">To UOM *</th>
-                      <th className="text-left text-xs font-semibold text-gray-600 dark:text-gray-400 py-2 pr-2">Operation</th>
-                      <th className="text-left text-xs font-semibold text-gray-600 dark:text-gray-400 py-2 pr-2">Conversion factor *</th>
+                      <th className="text-left text-xs font-semibold text-gray-600 dark:text-gray-400 py-2 pr-2">{t('inventory.uom_conversion.create.to_uom_')}</th>
+                      <th className="text-left text-xs font-semibold text-gray-600 dark:text-gray-400 py-2 pr-2">{t('inventory.uom_conversion.create.operation')}</th>
+                      <th className="text-left text-xs font-semibold text-gray-600 dark:text-gray-400 py-2 pr-2">{t('inventory.uom_conversion.create.conversion_factor_')}</th>
                       <th className="w-10 py-2"></th>
                     </tr>
                   </thead>
@@ -257,7 +261,7 @@ const CreateUomConversionForm = () => {
                             options={toUomOptions}
                             value={row.to_uom_id}
                             onChange={(val) => updateRow(index, 'to_uom_id', val)}
-                            placeholder="Select To UOM..."
+                            placeholder={t('inventory.uom_conversion.create.select_to_uom')}
                             name={`to_uom_id_${index}`}
                             id={`to_uom_id_${index}`}
                             error={errors[`conversions.${index}.to_uom_id`]}
@@ -272,8 +276,8 @@ const CreateUomConversionForm = () => {
                             onChange={(e) => updateRow(index, 'operation', e.target.value)}
                             className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                           >
-                            <option value="Multiply">Multiply (×)</option>
-                            <option value="Divide">Divide (÷)</option>
+                            <option value="Multiply">{t('inventory.uom_conversion.create.multiply_')}</option>
+                            <option value="Divide">{t('inventory.uom_conversion.create.divide_')}</option>
                           </select>
                         </td>
                         <td className="py-2 pr-2">
@@ -284,7 +288,7 @@ const CreateUomConversionForm = () => {
                             max="999999.9999"
                             value={row.conversion_factor}
                             onChange={(e) => updateRow(index, 'conversion_factor', e.target.value)}
-                            placeholder="e.g. 12"
+                            placeholder={t('inventory.uom_conversion.create.eg_12')}
                             className="w-full max-w-[140px] px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                           />
                           {errors[`conversions.${index}.conversion_factor`] && (
@@ -297,7 +301,7 @@ const CreateUomConversionForm = () => {
                               type="button"
                               onClick={() => removeRow(index)}
                               className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                              title="Remove row"
+                              title={t('inventory.uom_conversion.create.remove_row')}
                             >
                               <Trash2 size={16} />
                             </button>

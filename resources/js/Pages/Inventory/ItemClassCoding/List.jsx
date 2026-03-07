@@ -57,8 +57,8 @@ export default function List() {
               </div>
             </div>
             <div className="header-actions">
-              <button className="btn btn-icon" onClick={()=>window.location.reload()} title="Refresh" disabled={loading}><RefreshCcw size={20} className={loading ? 'animate-spin' : ''} /></button>
-              <a href='/inventory/item-class-coding/create' className="btn btn-primary"><Plus size={20} />Add Item Class</a>
+              <button className="btn btn-icon" onClick={()=>window.location.reload()} title={t('inventory.item_class_coding.list.refresh')} disabled={loading}><RefreshCcw size={20} className={loading ? 'animate-spin' : ''} /></button>
+              <a href='/inventory/item-class-coding/create' className="btn btn-primary"><Plus size={20} />{t('inventory.item_class_coding.list.add_item_class')}</a>
             </div>
           </div>
           {/* Modern Compact Filters */}
@@ -70,14 +70,14 @@ export default function List() {
                   <input
                     type="text"
                     className="search-input"
-                    placeholder="Search item classes..."
+                    placeholder={t('inventory.item_class_coding.list.search_item_classes')}
                     value={searchTerm}
                     onChange={(e) => handleSearch(e.target.value)}
                   />
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Status</label>
+                  <label className="filter-label">{t('inventory.item_class_coding.list.status')}</label>
                   <select
                     className="filter-select"
                     value={statusFilter}
@@ -98,29 +98,29 @@ export default function List() {
                     params.set('page', '1');
                     router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
                   }}
-                  title="Reset all filters"
+                  title={t('inventory.item_class_coding.list.reset_all_filters')}
                 >
                   <RefreshCcw size={16} />
                 </button>
               </div>
             </div>
           </div>
-          {showColumnSelector && (<div className="column-selector"><div className="column-selector-content"><h3>Show/Hide Columns</h3><div className="column-grid">{Object.entries(visibleColumns).map(([key, visible]) => (key!=='actions' && (<label key={key} className="column-item"><input type="checkbox" checked={visible} onChange={(e)=>setVisibleColumns({ ...visibleColumns, [key]: e.target.checked })} /><span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>s.toUpperCase())}</span></label>)))}
-          </div><button className="btn btn-sm btn-secondary" onClick={()=>setShowColumnSelector(false)}>Close</button></div></div>)}
+          {showColumnSelector && (<div className="column-selector"><div className="column-selector-content"><h3>{t('inventory.item_class_coding.list.showhide_columns')}</h3><div className="column-grid">{Object.entries(visibleColumns).map(([key, visible]) => (key!=='actions' && (<label key={key} className="column-item"><input type="checkbox" checked={visible} onChange={(e)=>setVisibleColumns({ ...visibleColumns, [key]: e.target.checked })} /><span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>{t('inventory.item_class_coding.list.stouppercase')}</span></label>)))}
+          </div><button className="btn btn-sm btn-secondary" onClick={()=>{t('inventory.item_class_coding.list.setshowcolumnselectorfalseclose')}</button></div></div>)}
         </div>
-        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />Clear</button><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />Delete</button></div></div>)}
+        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>{t('inventory.item_class_coding.list.setselected')}<X size={16} />{t('inventory.item_class_coding.list.clear')}</button><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />{t('inventory.item_class_coding.list.delete')}</button></div></div>)}
         <div className="data-table-container"><div className="table-wrapper"><table className="data-table"><thead><tr>
-          <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginatedItems.data.length && paginatedItems.data.length>0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
-          {visibleColumns.id && (<th className="sortable" onClick={()=>handleSort('id')}><div className="th-content">ID<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='id'?'active':''}`} /></div></th>)}
-          {visibleColumns.classCode && (<th className="sortable" onClick={()=>handleSort('class_code')}><div className="th-content">Class Code<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='class_code'?'active':''}`} /></div></th>)}
-          {visibleColumns.className && (<th className="sortable" onClick={()=>handleSort('class_name')}><div className="th-content">Class Name<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='class_name'?'active':''}`} /></div></th>)}
-          {visibleColumns.status && (<th className="sortable" onClick={()=>handleSort('is_active')}><div className="th-content">Status<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='is_active'?'active':''}`} /></div></th>)}
-          {visibleColumns.updatedAt && (<th className="sortable" onClick={()=>handleSort('updated_at')}><div className="th-content">Updated<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='updated_at'?'active':''}`} /></div></th>)}
-          {visibleColumns.actions && (<th className="actions-header">Actions</th>)}
+          <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginatedItems.data.length && paginatedItems.data.length>0} onChange={(e)=>{t('inventory.item_class_coding.list.handleselectalletargetchecked_')}</th>
+          {visibleColumns.id && (<th className="sortable" onClick={()=>{t('inventory.item_class_coding.list.handlesortid')}<div className="th-content">{t('inventory.item_class_coding.list.id')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='id'?'active':''}`} /></div></th>)}
+          {visibleColumns.classCode && (<th className="sortable" onClick={()=>{t('inventory.item_class_coding.list.handlesortclass_code')}<div className="th-content">{t('inventory.item_class_coding.list.class_code')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='class_code'?'active':''}`} /></div></th>)}
+          {visibleColumns.className && (<th className="sortable" onClick={()=>{t('inventory.item_class_coding.list.handlesortclass_name')}<div className="th-content">{t('inventory.item_class_coding.list.class_name')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='class_name'?'active':''}`} /></div></th>)}
+          {visibleColumns.status && (<th className="sortable" onClick={()=>{t('inventory.item_class_coding.list.handlesortis_active')}<div className="th-content">{t('inventory.item_class_coding.list.status')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='is_active'?'active':''}`} /></div></th>)}
+          {visibleColumns.updatedAt && (<th className="sortable" onClick={()=>{t('inventory.item_class_coding.list.handlesortupdated_at')}<div className="th-content">{t('inventory.item_class_coding.list.updated')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='updated_at'?'active':''}`} /></div></th>)}
+          {visibleColumns.actions && (<th className="actions-header">{t('inventory.item_class_coding.list.actions')}</th>)}
         </tr></thead><tbody>
           {paginatedItems.data.map((item) => (
             <tr key={item.id} className="table-row">
-              <td><input type="checkbox" className="checkbox" checked={selected.includes(item.id)} onChange={(e)=>handleSelectRow(item.id, e.target.checked)} /></td>
+              <td><input type="checkbox" className="checkbox" checked={selected.includes(item.id)} onChange={(e)=>{t('inventory.item_class_coding.list.handleselectrowitemid_etargetchecked_')}</td>
               {visibleColumns.id && (<td><span className="module-id">#{item.id}</span></td>)}
               {visibleColumns.classCode && (<td><div className="module-details"><div className="module-name">{item.class_code}</div></div></td>)}
               {visibleColumns.className && (<td><div className="module-details"><div className="module-name">{item.class_name}</div></div></td>)}
@@ -129,10 +129,10 @@ export default function List() {
               {visibleColumns.actions && (
                 <td>
                   <div className="actions-cell">
-                    <button className="action-btn edit" title="Edit Item Class" onClick={() => router.get(`/inventory/item-class-coding/${item.id}/edit`)}>
+                    <button className="action-btn edit" title={t('inventory.item_class_coding.list.edit_item_class')} onClick={() => router.get(`/inventory/item-class-coding/${item.id}/edit`)}>
                       <Edit3 size={16} />
                     </button>
-                    <button className="action-btn delete" title="Delete Item Class" onClick={() => handleDelete(item)}>
+                    <button className="action-btn delete" title={t('inventory.item_class_coding.list.delete_item_class')} onClick={() => handleDelete(item)}>
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -145,19 +145,19 @@ export default function List() {
           <div className="pagination-info">
             <div className="results-info">Showing {paginatedItems.from || 0} to {paginatedItems.to || 0} of {paginatedItems.total || 0} entries</div>
             <div className="page-size-selector">
-              <span>Show:</span>
+              <span>{t('inventory.item_class_coding.list.show')}</span>
               <select value={pageSize} onChange={(e)=>handlePageSizeChange(Number(e.target.value))} className="page-size-select">
                 {pageSizeOptions.map(size => (<option key={size} value={size}>{size}</option>))}
               </select>
-              <span>per page</span>
+              <span>{t('inventory.item_class_coding.list.per_page')}</span>
             </div>
           </div>
           <div className="pagination-controls">
-            <button className="pagination-btn" disabled={currentPage===1} onClick={()=>handlePageChange(1)} title="First Page">
+            <button className="pagination-btn" disabled={currentPage===1} onClick={()=>handlePageChange(1)} title={t('inventory.item_class_coding.list.first_page')}>
               <ChevronLeft size={14} />
               <ChevronLeft size={14} />
             </button>
-            <button className="pagination-btn" disabled={currentPage===1} onClick={()=>handlePageChange(currentPage-1)} title="Previous Page">
+            <button className="pagination-btn" disabled={currentPage===1} onClick={()=>handlePageChange(currentPage-1)} title={t('inventory.item_class_coding.list.previous_page')}>
               <ChevronLeft size={14} />
             </button>
             <div className="page-numbers">
@@ -171,16 +171,16 @@ export default function List() {
                 );
               })}
             </div>
-            <button className="pagination-btn" disabled={currentPage===(paginatedItems.last_page||1)} onClick={()=>handlePageChange(currentPage+1)} title="Next Page">
+            <button className="pagination-btn" disabled={currentPage===(paginatedItems.last_page||1)} onClick={()=>handlePageChange(currentPage+1)} title={t('inventory.item_class_coding.list.next_page')}>
               <ChevronRight size={14} />
             </button>
-            <button className="pagination-btn" disabled={currentPage===(paginatedItems.last_page||1)} onClick={()=>handlePageChange(paginatedItems.last_page||1)} title="Last Page">
+            <button className="pagination-btn" disabled={currentPage===(paginatedItems.last_page||1)} onClick={()=>handlePageChange(paginatedItems.last_page||1)} title={t('inventory.item_class_coding.list.last_page')}>
               <ChevronRight size={14} />
               <ChevronRight size={14} />
             </button>
           </div>
           <div className="quick-jump">
-            <span>Go to:</span>
+            <span>{t('inventory.item_class_coding.list.go_to')}</span>
             <input type="number" min="1" max={paginatedItems.last_page || 1} value={currentPage} onChange={(e)=>{ const p=Math.max(1, Math.min(paginatedItems.last_page||1, Number(e.target.value))); handlePageChange(p); }} className="jump-input" />
             <span>of {paginatedItems.last_page || 1}</span>
           </div>

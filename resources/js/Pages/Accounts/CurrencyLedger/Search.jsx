@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import Select from 'react-select';
 import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
 import Swal from 'sweetalert2';
@@ -246,6 +247,7 @@ const CurrencyLedgerSearch = () => {
   };
 
   const setThisYearFilter = () => {
+  const { t } = useTranslations();
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 1);
     const endOfYear = new Date(now.getFullYear(), 11, 31);
@@ -282,7 +284,7 @@ const CurrencyLedgerSearch = () => {
                 </div>
                 <div className="stat-item">
                   <TrendingUp size={16} />
-                  <span>Multi-currency transaction report</span>
+                  <span>{t('accounts.currency_ledger.search.multicurrency_transaction_report')}</span>
                 </div>
               </div>
             </div>
@@ -291,7 +293,7 @@ const CurrencyLedgerSearch = () => {
               <button
                 className="btn btn-icon"
                 onClick={handleReset}
-                title="Reset All Filters"
+                title={t('accounts.currency_ledger.search.reset_all_filters')}
               >
                 <RefreshCcw size={20} />
               </button>
@@ -342,7 +344,7 @@ const CurrencyLedgerSearch = () => {
                         value={selectedCompany}
                         onChange={handleCompanyChange}
                         styles={customSelectStyles}
-                        placeholder="Select a company..."
+                        placeholder={t('accounts.currency_ledger.search.select_a_company')}
                         isClearable
                         isSearchable
                         className="react-select-container"
@@ -365,7 +367,7 @@ const CurrencyLedgerSearch = () => {
                           value={selectedLocation}
                           onChange={setSelectedLocation}
                           styles={customSelectStyles}
-                          placeholder="Select a location..."
+                          placeholder={t('accounts.currency_ledger.search.select_a_location')}
                           isClearable
                           isSearchable
                           className="react-select-container"
@@ -391,7 +393,7 @@ const CurrencyLedgerSearch = () => {
                     value={selectedAccount}
                     onChange={setSelectedAccount}
                     styles={customSelectStyles}
-                    placeholder="Search and select account..."
+                    placeholder={t('accounts.currency_ledger.search.search_and_select_account')}
                     isClearable
                     isSearchable
                     className="react-select-container"
@@ -413,7 +415,7 @@ const CurrencyLedgerSearch = () => {
                     value={selectedCurrency}
                     onChange={setSelectedCurrency}
                     styles={customSelectStyles}
-                    placeholder="Search and select currency..."
+                    placeholder={t('accounts.currency_ledger.search.search_and_select_currency')}
                     isClearable
                     isSearchable
                     className="react-select-container"
@@ -432,7 +434,7 @@ const CurrencyLedgerSearch = () => {
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 mb-2 block">From Date</label>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('accounts.currency_ledger.search.from_date')}</label>
                       <CustomDatePicker
                         selected={fromDate ? new Date(fromDate) : null}
                         onChange={(date) => {
@@ -461,12 +463,12 @@ const CurrencyLedgerSearch = () => {
                           setFromDate(selectedFromDate);
                         }}
                         type="date"
-                        placeholder="Select from date"
+                        placeholder={t('accounts.currency_ledger.search.select_from_date')}
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 mb-2 block">To Date</label>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('accounts.currency_ledger.search.to_date')}</label>
                       <CustomDatePicker
                         selected={toDate ? new Date(toDate) : null}
                         onChange={(date) => {
@@ -495,7 +497,7 @@ const CurrencyLedgerSearch = () => {
                           setToDate(selectedToDate);
                         }}
                         type="date"
-                        placeholder="Select to date"
+                        placeholder={t('accounts.currency_ledger.search.select_to_date')}
                         maxDate={new Date()}
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                       />
@@ -542,11 +544,11 @@ const CurrencyLedgerSearch = () => {
                     value={voucherType}
                     onChange={(e) => setVoucherType(e.target.value)}
                   >
-                    <option value="">All Voucher Types</option>
-                    <option value="Journal">Journal Voucher</option>
-                    <option value="Payment">Payment Voucher</option>
-                    <option value="Receipt">Receipt Voucher</option>
-                    <option value="Contra">Contra Voucher</option>
+                    <option value="">{t('accounts.currency_ledger.search.all_voucher_types')}</option>
+                    <option value="Journal">{t('accounts.currency_ledger.search.journal_voucher')}</option>
+                    <option value="Payment">{t('accounts.currency_ledger.search.payment_voucher')}</option>
+                    <option value="Receipt">{t('accounts.currency_ledger.search.receipt_voucher')}</option>
+                    <option value="Contra">{t('accounts.currency_ledger.search.contra_voucher')}</option>
                   </select>
                 </div>
 
@@ -577,22 +579,22 @@ const CurrencyLedgerSearch = () => {
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 mb-2 block">Minimum Amount</label>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('accounts.currency_ledger.search.minimum_amount')}</label>
                       <input
                         type="number"
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                        placeholder="0.00"
+                        placeholder={t('accounts.currency_ledger.search.000')}
                         value={minAmount}
                         onChange={(e) => setMinAmount(e.target.value)}
                         step="0.01"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 mb-2 block">Maximum Amount</label>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('accounts.currency_ledger.search.maximum_amount')}</label>
                       <input
                         type="number"
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                        placeholder="0.00"
+                        placeholder={t('accounts.currency_ledger.search.000')}
                         value={maxAmount}
                         onChange={(e) => setMaxAmount(e.target.value)}
                         step="0.01"

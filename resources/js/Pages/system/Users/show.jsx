@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   User, Mail, Phone, MapPin, Building, Users, 
   Shield, Calendar, Clock, Globe, DollarSign, 
@@ -26,6 +27,7 @@ const UserShow = () => {
   };
 
   const getRoleBadge = (role) => {
+  const { t } = useTranslations();
     const roleClasses = {
       super_admin: 'bg-purple-100 text-purple-800',
       admin: 'bg-blue-100 text-blue-800',
@@ -44,30 +46,30 @@ const UserShow = () => {
     <App>
       <div className="rounded-xl shadow-lg form-container border-slate-200">
         <div className="p-6">
-          <h1 className="form-title">User Details</h1>
+          <h1 className="form-title">{t('system.users.show.user_details')}</h1>
 
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <div className="input-group">
-                <label className="input-label">Name</label>
+                <label className="input-label">{t('system.users.show.name')}</label>
                 <div className="input-wrapper">
                   <div className="form-input">{user.fname} {user.mname} {user.lname}</div>
                 </div>
               </div>
               <div className="input-group">
-                <label className="input-label">Login ID</label>
+                <label className="input-label">{t('system.users.show.login_id')}</label>
                 <div className="input-wrapper">
                   <div className="form-input">@{user.loginid}</div>
                 </div>
               </div>
               <div className="input-group">
-                <label className="input-label">Email</label>
+                <label className="input-label">{t('system.users.show.email')}</label>
                 <div className="input-wrapper">
                   <div className="form-input">{user.email}</div>
                 </div>
               </div>
               <div className="input-group">
-                <label className="input-label">Phone</label>
+                <label className="input-label">{t('system.users.show.phone')}</label>
                 <div className="input-wrapper">
                   <div className="form-input">{user.phone || 'Not provided'}</div>
                 </div>
@@ -75,25 +77,25 @@ const UserShow = () => {
             </div>
             <div>
               <div className="input-group">
-                <label className="input-label">Role</label>
+                <label className="input-label">{t('system.users.show.role')}</label>
                 <div className="input-wrapper">
                   <div className="form-input">{getRoleBadge(user.role)}</div>
                 </div>
               </div>
               <div className="input-group">
-                <label className="input-label">Status</label>
+                <label className="input-label">{t('system.users.show.status')}</label>
                 <div className="input-wrapper">
                   <div className="form-input">{getStatusBadge(user.status)}</div>
                 </div>
               </div>
               <div className="input-group">
-                <label className="input-label">Company</label>
+                <label className="input-label">{t('system.users.show.company')}</label>
                 <div className="input-wrapper">
                   <div className="form-input">{user.company?.company_name || 'Not assigned'}</div>
                 </div>
               </div>
               <div className="input-group">
-                <label className="input-label">Location</label>
+                <label className="input-label">{t('system.users.show.location')}</label>
                 <div className="input-wrapper">
                   <div className="form-input">{user.location?.location_name || 'Not assigned'}</div>
                 </div>

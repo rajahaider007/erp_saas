@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import App from '../App.jsx';
 import FormThemeSystem from './FormThemeSystem';
 import { Grid3X3, ArrowRight, Star, Zap } from 'lucide-react';

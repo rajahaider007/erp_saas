@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { Plus, Edit, Trash2, ChevronRight, AlertCircle, CheckCircle } from 'lucide-react';
 import App from '../../App.jsx';
 
@@ -64,6 +65,7 @@ export default function ChartOfAccountCodeConfigurationIndex() {
   };
 
   const handleDeleteCode = (codeId, codeName) => {
+  const { t } = useTranslations();
     if (confirm(`Are you sure you want to delete account code "${codeName}"?`)) {
       router.delete(`/accounts/code-configuration/${codeId}`, {
         onSuccess: () => {
@@ -198,7 +200,7 @@ export default function ChartOfAccountCodeConfigurationIndex() {
                                 <button
                                   onClick={() => handleDeleteCode(code.id, code.account_code)}
                                   className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                                  title="Delete code"
+                                  title={t('accounts.chart_of_account_code_configuration.index.delete_code')}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </button>
@@ -240,7 +242,7 @@ export default function ChartOfAccountCodeConfigurationIndex() {
                     value={formData.account_code}
                     onChange={(e) => setFormData({ ...formData, account_code: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="e.g., 1010-01"
+                    placeholder={t('accounts.chart_of_account_code_configuration.index.eg_101001')}
                     required
                   />
                   {errors.account_code && <p className="text-red-600 text-xs mt-1">{errors.account_code}</p>}
@@ -255,7 +257,7 @@ export default function ChartOfAccountCodeConfigurationIndex() {
                     value={formData.account_name}
                     onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="e.g., HBL - Current Account"
+                    placeholder={t('accounts.chart_of_account_code_configuration.index.eg_hbl__current_account')}
                     required
                   />
                   {errors.account_name && <p className="text-red-600 text-xs mt-1">{errors.account_name}</p>}
@@ -270,13 +272,13 @@ export default function ChartOfAccountCodeConfigurationIndex() {
                     onChange={(e) => setFormData({ ...formData, account_type: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                   >
-                    <option value="Asset">Asset</option>
-                    <option value="Liability">Liability</option>
-                    <option value="Equity">Equity</option>
-                    <option value="Revenue">Revenue</option>
-                    <option value="Expense">Expense</option>
-                    <option value="Contra-Asset">Contra-Asset</option>
-                    <option value="Contra-Revenue">Contra-Revenue</option>
+                    <option value="Asset">{t('accounts.chart_of_account_code_configuration.index.asset')}</option>
+                    <option value="Liability">{t('accounts.chart_of_account_code_configuration.index.liability')}</option>
+                    <option value="Equity">{t('accounts.chart_of_account_code_configuration.index.equity')}</option>
+                    <option value="Revenue">{t('accounts.chart_of_account_code_configuration.index.revenue')}</option>
+                    <option value="Expense">{t('accounts.chart_of_account_code_configuration.index.expense')}</option>
+                    <option value="Contra-Asset">{t('accounts.chart_of_account_code_configuration.index.contraasset')}</option>
+                    <option value="Contra-Revenue">{t('accounts.chart_of_account_code_configuration.index.contrarevenue')}</option>
                   </select>
                 </div>
 

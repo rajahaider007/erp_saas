@@ -1,0 +1,101 @@
+{
+  "cash_book": {
+    "report": {
+      "error": "Error",
+      "back_to_filters": "Back to Filters",
+      "print_report": "Print Report",
+      "applied_filters": "Applied Filters:",
+      "account": "Account:",
+      "selected_account": "Selected Account",
+      "scope": "Scope:",
+      "all_cashbank_accounts": "All Cash/Bank Accounts",
+      "from": "From:",
+      "to": "To:",
+      "view": "View:",
+      "search": "Search:",
+      "loading_cash_book": "Loading cash book...",
+      "no_cash_or_bank_accounts_found": "No cash or bank accounts found",
+      "no_transactions_available_for_the_select": "No transactions available for the selected criteria",
+      "opening_balance": "Opening Balance",
+      "total_receipts": "Total Receipts",
+      "total_payments": "Total Payments",
+      "closing_balance": "Closing Balance",
+      "date": "Date",
+      "reference": "Reference",
+      "description": "Description",
+      "receipt": "Receipt",
+      "payment": "Payment",
+      "balance": "Balance",
+      "cash_book_tracks_all_cash_and_bank_accou": "Cash book tracks all cash and bank account movements",
+      "provides_basis_for_operating_investing_a": "Provides basis for operating, investing, and financing activities segregation",
+      "running_balance_maintained_for_bank_reco": "Running balance maintained for bank reconciliation support",
+      "all_transactions_recorded_on_cash_receip": "All transactions recorded on cash receipt/payment basis"
+    },
+    "search": {
+      "select_filters_to_generate_report": "Select filters to generate report",
+      "reset_all_filters": "Reset All Filters",
+      "select_a_company": "Select a company...",
+      "select_a_location": "Select a location...",
+      "search_and_select_account": "Search and select account...",
+      "from_date": "From Date",
+      "select_from_date": "Select from date",
+      "to_date": "To Date",
+      "select_to_date": "Select to date"
+    }
+  },
+  "chart_of_account": {
+    "report": {
+      "error": "Error",
+      "chart_of_accounts_report__print": "Chart of Accounts Report - Print",
+      "no_accounts_found": "No accounts found",
+      "code": "Code",
+      "name": "Name",
+      "type": "Type",
+      "status": "Status",
+      "back_to_filters": "Back to Filters",
+      "print_report": "Print Report",
+      "applied_filters": "Applied Filters:",
+      "level": "Level:",
+      "sort": "Sort:",
+      "advanced_filters": "Advanced Filters",
+      "search_by_code_or_name": "Search by code or name...",
+      "no_accounts_match_the_selected_criteria": "No accounts match the selected criteria",
+      "chart_follows_ias_1__presentation_of_fin": "Chart follows IAS 1 - Presentation of Financial Statements",
+      "account_hierarchy_supports_segment_repor": "Account hierarchy supports segment reporting requirements (IFRS 8)",
+      "account_levels_track_balance_sheet_and_i": "Account levels track balance sheet and income statement items",
+      "all_transactions_are_recorded_using_doub": "All transactions are recorded using double-entry principle"
+    },
+    "search": {
+      "select_filters_to_generate_report": "Select filters to generate report",
+      "ifrs_compliant_structure": "IFRS Compliant Structure",
+      "reset_all_filters": "Reset All Filters",
+      "select_a_company": "Select a company...",
+      "select_a_location": "Select a location...",
+      "hierarchical_structure": "Hierarchical Structure",
+      "ifrs_compliant": "IFRS Compliant",
+      "account_analysis": "Account Analysis"
+    }
+  },
+  "general_ledger": {
+    "index": {
+      "general_ledger_report": "General Ledger Report",
+      "report_filters": "Report Filters",
+      "from_date": "From Date",
+      "select_from_date": "Select from date",
+      "to_date": "To Date",
+      "select_to_date": "Select to date",
+      "currency": "Currency",
+      "account_types": "Account Types",
+      "options": "Options",
+      "include_zero_balances": "Include Zero Balances",
+      "show_transaction_details": "Show Transaction Details",
+      "sort_by": "Sort By",
+      "account_code": "Account Code",
+      "account_name": "Account Name",
+      "balance": "Balance",
+      "column_settings": "Column Settings",
+      "loading_report": "Loading report...",
+      "total": "Total"
+    }
+  }
+}

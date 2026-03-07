@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import AppLayout from '../../Layouts/AppLayout';
 import { Trash2, Search, RotateCcw, Eye, AlertTriangle, Clock, User, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -47,6 +48,7 @@ export default function DeletedItems({ deletedItems, filters }) {
     };
 
     const getDaysRemainingClass = (days) => {
+    const { t } = useTranslations();
         if (days <= 7) return 'text-red-600 font-bold';
         if (days <= 30) return 'text-yellow-600 font-semibold';
         return 'text-green-600';
@@ -54,7 +56,7 @@ export default function DeletedItems({ deletedItems, filters }) {
 
     return (
         <AppLayout>
-            <Head title="Deleted Items Recovery" />
+            <Head title={t('logs.deleted_items.deleted_items_recovery')} />
 
             <div className="form-theme-system min-h-screen p-6">
                 {/* Professional Header */}
@@ -66,15 +68,15 @@ export default function DeletedItems({ deletedItems, filters }) {
                                     <Trash2 size={32} className="title-icon" />
                                 </div>
                                 <div className="title-text">
-                                    <h1 className="page-title">Deleted Items Recovery</h1>
-                                    <p className="page-subtitle">Restore and manage deleted system data</p>
+                                    <h1 className="page-title">{t('logs.deleted_items.deleted_items_recovery')}</h1>
+                                    <p className="page-subtitle">{t('logs.deleted_items.restore_and_manage_deleted_system_data')}</p>
                                 </div>
                             </div>
                         </div>
                         <div className="header-right">
                             <Link href={route('logs.activity')} className="btn-secondary-professional" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <Calendar size={16} />
-                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Activity Logs</span>
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>{t('logs.deleted_items.activity_logs')}</span>
                             </Link>
                         </div>
                     </div>
@@ -87,13 +89,13 @@ export default function DeletedItems({ deletedItems, filters }) {
                             <AlertTriangle size={24} />
                         </div>
                         <div className="warning-text">
-                            <h3 className="warning-title">Automatic Deletion Notice</h3>
+                            <h3 className="warning-title">{t('logs.deleted_items.automatic_deletion_notice')}</h3>
                             <p className="warning-description">
                                 Items are automatically deleted after 90 days. Restore important data before expiry to prevent permanent loss.
                             </p>
                         </div>
                         <div className="warning-badge">
-                            <span className="badge-critical">Critical</span>
+                            <span className="badge-critical">{t('logs.deleted_items.critical')}</span>
                         </div>
                     </div>
                 </div>
@@ -106,7 +108,7 @@ export default function DeletedItems({ deletedItems, filters }) {
                         </div>
                         <div className="stat-info">
                             <div className="stat-value">{deletedItems.total}</div>
-                            <div className="stat-label">Total Items</div>
+                            <div className="stat-label">{t('logs.deleted_items.total_items')}</div>
                         </div>
                     </div>
                 </div>
@@ -121,7 +123,7 @@ export default function DeletedItems({ deletedItems, filters }) {
                                 <input
                                     type="text"
                                     className="professional-search-input"
-                                    placeholder="Search deleted items..."
+                                    placeholder={t('logs.deleted_items.search_deleted_items')}
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     onKeyPress={(e) => e.key === 'Enter' && handleFilter()}
@@ -146,11 +148,11 @@ export default function DeletedItems({ deletedItems, filters }) {
                         <div className="filter-actions">
                             <button onClick={handleFilter} className="btn-primary-professional" style={{color: 'white', fontWeight: '600'}}>
                                 <Search size={16} />
-                                <span style={{color: 'white', fontWeight: '600'}}>Search</span>
+                                <span style={{color: 'white', fontWeight: '600'}}>{t('logs.deleted_items.search')}</span>
                             </button>
                             <button onClick={() => router.get(route('logs.deleted-items'))} className="btn-secondary-professional" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
                                 <RotateCcw size={16} />
-                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>Reset</span>
+                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>{t('logs.deleted_items.reset')}</span>
                             </button>
                         </div>
                     </div>
@@ -187,7 +189,7 @@ export default function DeletedItems({ deletedItems, filters }) {
                                                 <User size={16} />
                                             </div>
                                             <div className="detail-content">
-                                                <div className="detail-label">Deleted By</div>
+                                                <div className="detail-label">{t('logs.deleted_items.deleted_by')}</div>
                                                 <div className="detail-value">{item.deleted_by_name}</div>
                                             </div>
                                         </div>
@@ -197,7 +199,7 @@ export default function DeletedItems({ deletedItems, filters }) {
                                                 <Clock size={16} />
                                             </div>
                                             <div className="detail-content">
-                                                <div className="detail-label">Deleted On</div>
+                                                <div className="detail-label">{t('logs.deleted_items.deleted_on')}</div>
                                                 <div className="detail-value">
                                                     {new Date(item.deleted_at).toLocaleString()}
                                                 </div>
@@ -247,8 +249,8 @@ export default function DeletedItems({ deletedItems, filters }) {
                                     <div className="empty-icon">
                                         <Trash2 size={64} />
                                     </div>
-                                    <div className="empty-title">No Deleted Items</div>
-                                    <div className="empty-description">All clear! No items waiting for recovery.</div>
+                                    <div className="empty-title">{t('logs.deleted_items.no_deleted_items')}</div>
+                                    <div className="empty-description">{t('logs.deleted_items.all_clear_no_items_waiting_for_recovery')}</div>
                                     <div className="empty-badge">
                                         <span className="badge-success">🛡️ System Clean</span>
                                     </div>

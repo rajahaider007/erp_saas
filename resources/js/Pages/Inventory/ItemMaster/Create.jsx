@@ -3,6 +3,7 @@ import { Home, Plus, Edit3, Package, Layers, DollarSign, Calendar, Zap, Hash } f
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import App from '../../App.jsx';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const Breadcrumbs = ({ items }) => {
   return (
@@ -44,6 +45,7 @@ const Breadcrumbs = ({ items }) => {
 };
 
 const CreateItemMasterForm = () => {
+const { t } = useTranslations();
   const {
     errors: pageErrors,
     flash,
@@ -72,7 +74,7 @@ const CreateItemMasterForm = () => {
   useEffect(() => {
     if (pageErrors && Object.keys(pageErrors).length > 0) {
       setErrors(pageErrors);
-      setAlert({ type: 'error', message: 'Please correct the errors below.' });
+      setAlert({ type: 'error', message: t('inventory.item_master.create.msg_please_correct_the_errors_below') });
     }
   }, [pageErrors]);
 
@@ -667,6 +669,7 @@ const CreateItemMasterForm = () => {
   ].filter(Boolean);
 
   const handleSubmit = (formData) => {
+  const { t } = useTranslations();
     setErrors({});
     setAlert(null);
 
@@ -748,7 +751,7 @@ const CreateItemMasterForm = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setAlert({ type: 'error', message: 'Please correct the errors above.' });
+      setAlert({ type: 'error', message: t('inventory.item_master.create.msg_please_correct_the_errors_above') });
       return;
     }
 
@@ -771,7 +774,7 @@ const CreateItemMasterForm = () => {
         forceFormData: true,
         onError: (serverErrors) => {
           setErrors(serverErrors);
-          setAlert({ type: 'error', message: 'Failed to update item. Please check the errors.' });
+          setAlert({ type: 'error', message: t('inventory.item_master.create.msg_failed_to_update_item_please_check_the_e') });
         },
       });
     } else {
@@ -779,7 +782,7 @@ const CreateItemMasterForm = () => {
         forceFormData: true,
         onError: (serverErrors) => {
           setErrors(serverErrors);
-          setAlert({ type: 'error', message: 'Failed to create item. Please check the errors.' });
+          setAlert({ type: 'error', message: t('inventory.item_master.create.msg_failed_to_create_item_please_check_the_e') });
         },
       });
     }

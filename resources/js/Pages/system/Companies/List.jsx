@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { Search, Plus, Edit3, Trash2, Download, ChevronDown, ArrowUpDown, Columns, Clock, MoreHorizontal, RefreshCcw, FileText, CheckCircle2, X, Database, Eye, Copy, ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
 
 // SweetAlert-like alert
@@ -12,6 +13,7 @@ const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, conf
 }};
 
 const List = () => {
+const { t } = useTranslations();
   const { companies: paginated, flash, filters } = usePage().props;
   const [search, setSearch] = useState(filters?.search || '');
   const [statusFilter, setStatusFilter] = useState(filters?.status || '');

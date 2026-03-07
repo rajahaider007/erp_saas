@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { router, usePage, Head } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   Printer, 
   RefreshCcw,
@@ -15,6 +16,7 @@ import axios from 'axios';
 import './print-styles.css';
 
 function PrintReportContent() {
+const { t } = useTranslations();
   const { 
     company,
     balanceSheetData,
@@ -28,7 +30,7 @@ function PrintReportContent() {
   if (error) {
     return (
       <div style={{ padding: '20px', textAlign: 'center', color: '#dc2626' }}>
-        <strong>Error:</strong> {error}
+        <strong>{t('accounts.balance_sheet.report.error')}</strong> {error}
       </div>
     );
   }
@@ -44,6 +46,7 @@ function PrintReportContent() {
   };
 
   const renderPrintHierarchy = (data) => {
+  const { t } = useTranslations();
     if (!data || !data.children || data.children.length === 0) {
       return null;
     }
@@ -173,7 +176,7 @@ function PrintReportContent() {
             <div className="print-column-wrapper">
               {/* LEFT: Capital & Liabilities */}
               <div className="print-column">
-                <div className="print-column-title">Capital & Liabilities</div>
+                <div className="print-column-title">{t('accounts.balance_sheet.report.capital__liabilities')}</div>
                 
                 {/* Equity */}
                 {balanceSheetData.equity && balanceSheetData.equity.children && balanceSheetData.equity.children.length > 0 && (
@@ -191,7 +194,7 @@ function PrintReportContent() {
                 
                 <div className="print-grand-total">
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>TOTAL CAPITAL & LIABILITIES</span>
+                    <span>{t('accounts.balance_sheet.report.total_capital__liabilities')}</span>
                     <span style={{ fontFamily: "'Courier New', monospace" }}>{formatCurrency(balanceSheetData.totalLiabilitiesAndEquityWithNetIncome)}</span>
                   </div>
                 </div>
@@ -199,7 +202,7 @@ function PrintReportContent() {
 
               {/* RIGHT: Assets */}
               <div className="print-column">
-                <div className="print-column-title">Assets</div>
+                <div className="print-column-title">{t('accounts.balance_sheet.report.assets')}</div>
                 
                 {balanceSheetData.assets && balanceSheetData.assets.children && balanceSheetData.assets.children.length > 0 && (
                   <div className="print-section">
@@ -209,7 +212,7 @@ function PrintReportContent() {
                 
                 <div className="print-grand-total">
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>TOTAL ASSETS</span>
+                    <span>{t('accounts.balance_sheet.report.total_assets')}</span>
                     <span style={{ fontFamily: "'Courier New', monospace" }}>{formatCurrency(balanceSheetData.totalAssets)}</span>
                   </div>
                 </div>
@@ -324,6 +327,7 @@ function ReportContent() {
   };
 
   const renderAccountHierarchy = (data, showTotal = true) => {
+  const { t } = useTranslations();
     if (!data || !data.children || data.children.length === 0) {
       return null;
     }
@@ -388,11 +392,11 @@ function ReportContent() {
                         <tr className={`border-b ${
                           theme === 'dark' ? 'border-gray-600' : 'border-gray-300'
                         }`}>
-                          <th className="text-left py-1 px-2">Account Code</th>
-                          <th className="text-left py-1 px-2">Account Name</th>
-                          <th className="text-right py-1 px-2">Debit</th>
-                          <th className="text-right py-1 px-2">Credit</th>
-                          <th className="text-right py-1 px-2">Balance</th>
+                          <th className="text-left py-1 px-2">{t('accounts.balance_sheet.report.account_code')}</th>
+                          <th className="text-left py-1 px-2">{t('accounts.balance_sheet.report.account_name')}</th>
+                          <th className="text-right py-1 px-2">{t('accounts.balance_sheet.report.debit')}</th>
+                          <th className="text-right py-1 px-2">{t('accounts.balance_sheet.report.credit')}</th>
+                          <th className="text-right py-1 px-2">{t('accounts.balance_sheet.report.balance')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -445,6 +449,7 @@ function ReportContent() {
 
   // Render function for print view
   const renderPrintHierarchy = (data) => {
+  const { t } = useTranslations();
     if (!data || !data.children || data.children.length === 0) {
       return null;
     }
@@ -602,15 +607,15 @@ function ReportContent() {
           <div className="flex gap-6 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-red-500 rounded"></div>
-              <span>Level 1 (Main Categories)</span>
+              <span>{t('accounts.balance_sheet.report.level_1_main_categories')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-green-500 rounded"></div>
-              <span>Level 2 (Sub-categories)</span>
+              <span>{t('accounts.balance_sheet.report.level_2_subcategories')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-gray-700 dark:bg-gray-300 rounded"></div>
-              <span>Level 3 (Accounts - Click to see details)</span>
+              <span>{t('accounts.balance_sheet.report.level_3_accounts__click_to_see_details')}</span>
             </div>
           </div>
         </div>
@@ -670,7 +675,7 @@ function ReportContent() {
                   : 'bg-orange-50 border-orange-600 text-orange-900'
               }`}>
                 <div className="flex justify-between items-center">
-                  <span>TOTAL LIABILITIES</span>
+                  <span>{t('accounts.balance_sheet.report.total_liabilities')}</span>
                   <span className="font-mono">{formatCurrency(balanceSheetData.totalLiabilities)}</span>
                 </div>
               </div>
@@ -682,7 +687,7 @@ function ReportContent() {
                   : 'bg-purple-50 border-purple-600 text-purple-900'
               }`}>
                 <div className="flex justify-between items-center">
-                  <span>TOTAL EQUITY</span>
+                  <span>{t('accounts.balance_sheet.report.total_equity')}</span>
                   <span className="font-mono">{formatCurrency(balanceSheetData.totalEquity)}</span>
                 </div>
               </div>
@@ -712,7 +717,7 @@ function ReportContent() {
                   : 'bg-orange-100 border-orange-600 text-orange-900'
               }`}>
                 <div className="flex justify-between items-center">
-                  <span>TOTAL LIABILITIES & EQUITY</span>
+                  <span>{t('accounts.balance_sheet.report.total_liabilities__equity')}</span>
                   <span className="font-mono">{formatCurrency(balanceSheetData.totalLiabilitiesAndEquityWithNetIncome)}</span>
                 </div>
               </div>
@@ -740,7 +745,7 @@ function ReportContent() {
                   : 'bg-blue-100 border-blue-600 text-blue-900'
               }`}>
                 <div className="flex justify-between items-center">
-                  <span>TOTAL ASSETS</span>
+                  <span>{t('accounts.balance_sheet.report.total_assets')}</span>
                   <span className="font-mono">{formatCurrency(balanceSheetData.totalAssets)}</span>
                 </div>
               </div>
@@ -780,14 +785,14 @@ export default function BalanceSheetReport() {
   if (isPrintView) {
     // Use Print wrapper for print view (no system UI, no layout context needed)
     return (
-      <Print title="Balance Sheet">
+      <Print title={t('accounts.balance_sheet.report.balance_sheet')}>
         <PrintReportContent />
       </Print>
     );
   }
 
   return (
-    <App title="Balance Sheet">
+    <App title={t('accounts.balance_sheet.report.balance_sheet')}>
       <ReportContent />
     </App>
   );

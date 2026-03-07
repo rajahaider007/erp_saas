@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { Search, Plus, Edit3, Trash2, Download, ChevronDown, ArrowUpDown, Columns, Clock, MoreHorizontal, RefreshCcw, FileText, CheckCircle2, X, Database, Eye, Copy, ChevronLeft, ChevronRight, User, Shield } from 'lucide-react';
 
@@ -49,6 +50,7 @@ const List = () => {
   const handleSelectAll = (checked) => { if (checked) setSelected(paginated.data.map(u=>u.id)); else setSelected([]); };
   const handleSelectRow = (id, checked) => { if (checked) setSelected(prev=>[...prev, id]); else setSelected(prev=>prev.filter(x=>x!==id)); };
   const handleBulkDelete = () => {
+  const { t } = useTranslations();
     if (!selected.length) return;
     if (!canDelete(USERS_ROUTE)) { showPermissionDeniedAlert('delete', 'users'); return; }
     CustomAlert.fire({ title:'Delete Selected Users?', text:`You are about to delete ${selected.length} user(s).`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete!', onConfirm:()=> router.post('/system/users/bulk-destroy', { ids:selected }, { onSuccess:()=>setSelected([]) }) });
@@ -69,9 +71,9 @@ const List = () => {
               </div>
             </div>
             <div className="header-actions">
-              <button className="btn btn-icon" onClick={()=>window.location.reload()} title="Refresh"><RefreshCcw size={20} /></button>
+              <button className="btn btn-icon" onClick={()=>window.location.reload()} title={t('system.users.list.refresh')}><RefreshCcw size={20} /></button>
               {canAdd(USERS_ROUTE) && (
-                <a href='/system/users/create' className="btn btn-primary"><Plus size={20} />Add User</a>
+                <a href='/system/users/create' className="btn btn-primary"><Plus size={20} />{t('system.users.list.add_user')}</a>
               )}
             </div>
           </div>
@@ -84,20 +86,20 @@ const List = () => {
                   <input
                     type="text"
                     className="search-input"
-                    placeholder="Search users..."
+                    placeholder={t('system.users.list.search_users')}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Company</label>
+                  <label className="filter-label">{t('system.users.list.company')}</label>
                   <select
                     className="filter-select"
                     value={companyId}
                     onChange={(e) => setCompanyId(e.target.value)}
                   >
-                    <option value="">All Companies</option>
+                    <option value="">{t('system.users.list.all_companies')}</option>
                     {companies?.map(company => (
                       <option key={company.id} value={company.id}>{company.company_name}</option>
                     ))}
@@ -105,13 +107,13 @@ const List = () => {
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Location</label>
+                  <label className="filter-label">{t('system.users.list.location')}</label>
                   <select
                     className="filter-select"
                     value={locationId}
                     onChange={(e) => setLocationId(e.target.value)}
                   >
-                    <option value="">All Locations</option>
+                    <option value="">{t('system.users.list.all_locations')}</option>
                     {locations?.map(location => (
                       <option key={location.id} value={location.id}>{location.location_name}</option>
                     ))}
@@ -119,13 +121,13 @@ const List = () => {
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Department</label>
+                  <label className="filter-label">{t('system.users.list.department')}</label>
                   <select
                     className="filter-select"
                     value={departmentId}
                     onChange={(e) => setDepartmentId(e.target.value)}
                   >
-                    <option value="">All Departments</option>
+                    <option value="">{t('system.users.list.all_departments')}</option>
                     {departments?.map(department => (
                       <option key={department.id} value={department.id}>{department.department_name}</option>
                     ))}
@@ -133,17 +135,17 @@ const List = () => {
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Status</label>
+                  <label className="filter-label">{t('system.users.list.status')}</label>
                   <select
                     className="filter-select"
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
                   >
-                    <option value="">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="suspended">Suspended</option>
-                    <option value="pending">Pending</option>
+                    <option value="">{t('system.users.list.all_status')}</option>
+                    <option value="active">{t('system.users.list.active')}</option>
+                    <option value="inactive">{t('system.users.list.inactive')}</option>
+                    <option value="suspended">{t('system.users.list.suspended')}</option>
+                    <option value="pending">{t('system.users.list.pending')}</option>
                   </select>
                 </div>
 
@@ -159,7 +161,7 @@ const List = () => {
                     params.set('page', '1');
                     router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
                   }}
-                  title="Reset all filters"
+                  title={t('system.users.list.reset_all_filters')}
                 >
                   <RefreshCcw size={16} />
                 </button>
@@ -168,27 +170,27 @@ const List = () => {
           </div>
         </div>
 
-        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />Clear</button><div className="dropdown"><button className="btn btn-sm btn-secondary dropdown-toggle">Change Status<ChevronDown size={12} /></button><div className="dropdown-menu"><button onClick={()=>handleBulkStatusChange('active')}>Set Active</button><button onClick={()=>handleBulkStatusChange('inactive')}>Set Inactive</button><button onClick={()=>handleBulkStatusChange('suspended')}>Set Suspended</button><button onClick={()=>handleBulkStatusChange('pending')}>Set Pending</button></div></div>{canDelete(USERS_ROUTE) && <button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />Delete</button>}</div></div>)}
+        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>{t('system.users.list.setselected')}<X size={16} />{t('system.users.list.clear')}</button><div className="dropdown"><button className="btn btn-sm btn-secondary dropdown-toggle">{t('system.users.list.change_status')}<ChevronDown size={12} /></button><div className="dropdown-menu"><button onClick={()=>{t('system.users.list.handlebulkstatuschangeactiveset_active')}</button><button onClick={()=>{t('system.users.list.handlebulkstatuschangeinactiveset_inacti')}</button><button onClick={()=>{t('system.users.list.handlebulkstatuschangesuspendedset_suspe')}</button><button onClick={()=>{t('system.users.list.handlebulkstatuschangependingset_pending')}</button></div></div>{canDelete(USERS_ROUTE) && <button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />{t('system.users.list.delete')}</button>}</div></div>)}
 
         <div className="data-table-container">
           <div className="table-wrapper">
             <table className="data-table">
               <thead>
                 <tr>
-                  <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginated.data.length && paginated.data.length>0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">ID<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">User<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Contact<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Organization<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Status<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Last Login<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="actions-header">Actions</th>
+                  <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginated.data.length && paginated.data.length>0} onChange={(e)=>{t('system.users.list.handleselectalletargetchecked_')}</th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{t('system.users.list.id')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{t('system.users.list.user')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{t('system.users.list.contact')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{t('system.users.list.organization')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{t('system.users.list.status')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{t('system.users.list.last_login')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="actions-header">{t('system.users.list.actions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {paginated.data.map(user => (
                   <tr key={user.id} className="table-row">
-                    <td><input type="checkbox" className="checkbox" checked={selected.includes(user.id)} onChange={(e)=>handleSelectRow(user.id, e.target.checked)} /></td>
+                    <td><input type="checkbox" className="checkbox" checked={selected.includes(user.id)} onChange={(e)=>{t('system.users.list.handleselectrowuserid_etargetchecked_')}</td>
                     <td><span className="module-id">#{user.id}</span></td>
                     <td>
                       <div className="module-details">
@@ -218,26 +220,26 @@ const List = () => {
                     </td>
                     <td>
                       <div className="actions-cell">
-                        <button className="action-btn view" title="View Details" onClick={()=>router.get(`/system/users/${user.id}`)}>
+                        <button className="action-btn view" title={t('system.users.list.view_details')} onClick={()=>router.get(`/system/users/${user.id}`)}>
                           <Eye size={16} />
                         </button>
                         {canEdit(USERS_ROUTE) && (
-                          <button className="action-btn edit" title="Edit User" onClick={()=>router.get(`/system/users/${user.id}/edit`)}>
+                          <button className="action-btn edit" title={t('system.users.list.edit_user')} onClick={()=>router.get(`/system/users/${user.id}/edit`)}>
                             <Edit3 size={16} />
                           </button>
                         )}
                         {canEdit(USERS_ROUTE) && (
-                          <button className="action-btn rights" title="Configure User Rights" onClick={()=>router.get(`/system/users/${user.id}/rights`)}>
+                          <button className="action-btn rights" title={t('system.users.list.configure_user_rights')} onClick={()=>router.get(`/system/users/${user.id}/rights`)}>
                             <Shield size={16} />
                           </button>
                         )}
                         {canAdd(USERS_ROUTE) && (
-                          <button className="action-btn copy" title="Duplicate" onClick={()=>router.get('/system/users/create', { duplicate: user.id })}>
+                          <button className="action-btn copy" title={t('system.users.list.duplicate')} onClick={()=>router.get('/system/users/create', { duplicate: user.id })}>
                             <Copy size={16} />
                           </button>
                         )}
                         {canDelete(USERS_ROUTE) && (
-                          <button className="action-btn delete" title="Delete User" onClick={()=>handleDelete(user)}>
+                          <button className="action-btn delete" title={t('system.users.list.delete_user')} onClick={()=>handleDelete(user)}>
                             <Trash2 size={16} />
                           </button>
                         )}
@@ -253,17 +255,17 @@ const List = () => {
             <div className="pagination-info">
               <div className="results-info">Showing {paginated.from || 0} to {paginated.to || 0} of {paginated.total || 0} entries</div>
               <div className="page-size-selector">
-                <span>Show:</span>
+                <span>{t('system.users.list.show')}</span>
                 <select value={pageSize} onChange={(e)=>{const v=Number(e.target.value); setPageSize(v); pushQuery({ per_page:v.toString() });}} className="page-size-select">{[10,25,50,100].map(s => (<option key={s} value={s}>{s}</option>))}</select>
-                <span>per page</span>
+                <span>{t('system.users.list.per_page')}</span>
               </div>
             </div>
             <div className="pagination-controls">
-              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{setCurrentPage(1); pushQuery({ page:'1' });}} title="First">
+              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{setCurrentPage(1); pushQuery({ page:'1' });}} title={t('system.users.list.first')}>
                 <ChevronLeft size={14} />
                 <ChevronLeft size={14} />
               </button>
-              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{const p=currentPage-1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title="Prev">
+              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{const p=currentPage-1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title={t('system.users.list.prev')}>
                 <ChevronLeft size={14} />
               </button>
               <div className="page-numbers">
@@ -273,16 +275,16 @@ const List = () => {
                   return (<button key={pageNumber} className={`pagination-btn ${currentPage===pageNumber?'active':''}`} onClick={()=>{setCurrentPage(pageNumber); pushQuery({ page:pageNumber.toString() });}}>{pageNumber}</button>);
                 })}
               </div>
-              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=currentPage+1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title="Next">
+              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=currentPage+1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title={t('system.users.list.next')}>
                 <ChevronRight size={14} />
               </button>
-              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=paginated.last_page||1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title="Last">
+              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=paginated.last_page||1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title={t('system.users.list.last')}>
                 <ChevronRight size={14} />
                 <ChevronRight size={14} />
               </button>
             </div>
             <div className="quick-jump">
-              <span>Go to:</span>
+              <span>{t('system.users.list.go_to')}</span>
               <input
                 type="number"
                 min="1"

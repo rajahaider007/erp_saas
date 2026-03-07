@@ -5,6 +5,7 @@ import PermissionAwareForm, { PermissionButton } from '../../../Components/Permi
 import { usePermissions } from '../../../hooks/usePermissions';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // Professional Breadcrumbs Component
 const Breadcrumbs = ({ items }) => {
@@ -69,6 +70,7 @@ const DepartmentForm = () => {
   
   // Handle company change to filter locations
   const handleCompanyChange = (companyId, formData, setFormData) => {
+  const { t } = useTranslations();
     setFormData({ ...formData, company_id: companyId, location_id: '' });
     
     if (companyId) {

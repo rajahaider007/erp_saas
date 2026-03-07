@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const PrintSummary = () => {
   const { voucher, entries = [], company } = usePage().props;
@@ -23,6 +24,7 @@ const PrintSummary = () => {
   };
 
   const formatDate = (dateString) => {
+  const { t } = useTranslations();
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -280,23 +282,23 @@ const PrintSummary = () => {
               {company?.phone && <div>Phone: {company.phone}</div>}
               {company?.email && <div>Email: {company.email}</div>}
             </div>
-            <div className="voucher-title">Bank Voucher - Summary</div>
+            <div className="voucher-title">{t('accounts.bank_voucher.print_summary.bank_voucher__summary')}</div>
           </div>
 
           {/* Voucher Information */}
           <div className="voucher-info">
             <div className="voucher-info-row">
-              <div className="voucher-info-cell voucher-info-label">Voucher No:</div>
+              <div className="voucher-info-cell voucher-info-label">{t('accounts.bank_voucher.print_summary.voucher_no')}</div>
               <div className="voucher-info-cell voucher-info-value">{voucher?.voucher_number || 'N/A'}</div>
-              <div className="voucher-info-cell voucher-info-label">Date:</div>
+              <div className="voucher-info-cell voucher-info-label">{t('accounts.bank_voucher.print_summary.date')}</div>
               <div className="voucher-info-cell voucher-info-value">{formatDate(voucher?.voucher_date)}</div>
             </div>
             <div className="voucher-info-row">
-              <div className="voucher-info-cell voucher-info-label">Status:</div>
+              <div className="voucher-info-cell voucher-info-label">{t('accounts.bank_voucher.print_summary.status')}</div>
               <div className="voucher-info-cell voucher-info-value">
                 <span className="status-badge">{voucher?.status || 'N/A'}</span>
               </div>
-              <div className="voucher-info-cell voucher-info-label">Fiscal Year:</div>
+              <div className="voucher-info-cell voucher-info-label">{t('accounts.bank_voucher.print_summary.fiscal_year')}</div>
               <div className="voucher-info-cell voucher-info-value">{voucher?.fiscal_year || 'N/A'}</div>
             </div>
           </div>
@@ -306,9 +308,9 @@ const PrintSummary = () => {
             <thead>
               <tr>
                 <th style={{width: '5%'}}>#</th>
-                <th style={{width: '45%'}}>Account Description</th>
-                <th style={{width: '25%'}} className="text-right">Debit Amount</th>
-                <th style={{width: '25%'}} className="text-right">Credit Amount</th>
+                <th style={{width: '45%'}}>{t('accounts.bank_voucher.print_summary.account_description')}</th>
+                <th style={{width: '25%'}} className="text-right">{t('accounts.bank_voucher.print_summary.debit_amount')}</th>
+                <th style={{width: '25%'}} className="text-right">{t('accounts.bank_voucher.print_summary.credit_amount')}</th>
               </tr>
             </thead>
             <tbody>
@@ -329,7 +331,7 @@ const PrintSummary = () => {
               
               {/* Summary Row */}
               <tr className="summary-row">
-                <td colSpan="2" className="text-right">TOTAL:</td>
+                <td colSpan="2" className="text-right">{t('accounts.bank_voucher.print_summary.total')}</td>
                 <td className="text-right amount-cell">{formatCurrency(totalDebit)}</td>
                 <td className="text-right amount-cell">{formatCurrency(totalCredit)}</td>
               </tr>
@@ -339,7 +341,7 @@ const PrintSummary = () => {
           {/* Narration */}
           {voucher?.narration && (
             <div className="narration-section">
-              <div className="narration-label">Narration / Description:</div>
+              <div className="narration-label">{t('accounts.bank_voucher.print_summary.narration__description')}</div>
               <div className="narration-text">{voucher.narration}</div>
             </div>
           )}
@@ -347,22 +349,22 @@ const PrintSummary = () => {
           {/* Signature Section */}
           <div className="signature-section">
             <div className="signature-box">
-              <div className="signature-line">Prepared By</div>
-              <div className="signature-label">Accountant</div>
+              <div className="signature-line">{t('accounts.bank_voucher.print_summary.prepared_by')}</div>
+              <div className="signature-label">{t('accounts.bank_voucher.print_summary.accountant')}</div>
             </div>
             <div className="signature-box">
-              <div className="signature-line">Reviewed By</div>
-              <div className="signature-label">Manager</div>
+              <div className="signature-line">{t('accounts.bank_voucher.print_summary.reviewed_by')}</div>
+              <div className="signature-label">{t('accounts.bank_voucher.print_summary.manager')}</div>
             </div>
             <div className="signature-box">
-              <div className="signature-line">Approved By</div>
-              <div className="signature-label">Director</div>
+              <div className="signature-line">{t('accounts.bank_voucher.print_summary.approved_by')}</div>
+              <div className="signature-label">{t('accounts.bank_voucher.print_summary.director')}</div>
             </div>
           </div>
 
           {/* Footer */}
           <div className="voucher-footer">
-            <div>This is a computer-generated document. No signature required.</div>
+            <div>{t('accounts.bank_voucher.print_summary.this_is_a_computergenerated_document_no_')}</div>
             <div>Printed on: {new Date().toLocaleString('en-US', { 
               dateStyle: 'medium', 
               timeStyle: 'short' 

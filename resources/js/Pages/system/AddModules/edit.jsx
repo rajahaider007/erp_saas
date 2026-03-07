@@ -4,9 +4,11 @@ import GeneralizedForm from '../../../Components/GeneralizedForm';
 import PermissionAwareForm, { PermissionButton } from '../../../Components/PermissionAwareForm';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import App from "../../App.jsx";
 
 const EditModuleForm = () => {
+const { t } = useTranslations();
   const { module: moduleProp, errors: pageErrors, flash } = usePage().props;
   const [alert, setAlert] = useState(null);
 

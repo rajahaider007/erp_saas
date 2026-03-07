@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const CurrencyLedgerPrint = () => {
   const { 
@@ -29,6 +30,7 @@ const CurrencyLedgerPrint = () => {
   };
 
   const formatDate = (dateString) => {
+  const { t } = useTranslations();
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -304,25 +306,25 @@ const CurrencyLedgerPrint = () => {
               {company?.city && company?.country && <div>{company.city}, {company.country}</div>}
               {company?.phone && <div>Tel: {company.phone} {company?.email && `| Email: ${company.email}`}</div>}
             </div>
-            <div className="report-title">Currency Ledger Report</div>
+            <div className="report-title">{t('accounts.currency_ledger.print.currency_ledger_report')}</div>
           </div>
 
           {/* Account Information */}
           <div className="account-info">
             {account && (
               <div className="account-info-row">
-                <div className="account-info-cell info-label">Account Code:</div>
+                <div className="account-info-cell info-label">{t('accounts.currency_ledger.print.account_code')}</div>
                 <div className="account-info-cell info-value">{account.account_code}</div>
-                <div className="account-info-cell info-label">Account Name:</div>
+                <div className="account-info-cell info-label">{t('accounts.currency_ledger.print.account_name')}</div>
                 <div className="account-info-cell info-value">{account.account_name}</div>
               </div>
             )}
             <div className="account-info-row">
-              <div className="account-info-cell info-label">Period:</div>
+              <div className="account-info-cell info-label">{t('accounts.currency_ledger.print.period')}</div>
               <div className="account-info-cell info-value">
                 {filters?.from_date ? formatDate(filters.from_date) : 'Beginning'} to {filters?.to_date ? formatDate(filters.to_date) : 'End'}
               </div>
-              <div className="account-info-cell info-label">Report Date:</div>
+              <div className="account-info-cell info-label">{t('accounts.currency_ledger.print.report_date')}</div>
               <div className="account-info-cell info-value">{new Date().toLocaleDateString('en-US', { dateStyle: 'long' })}</div>
             </div>
           </div>
@@ -332,17 +334,17 @@ const CurrencyLedgerPrint = () => {
             <thead>
               <tr>
                 <th style={{width: '2%'}} className="text-center">#</th>
-                <th style={{width: '8%'}}>Date</th>
-                <th style={{width: '10%'}}>Voucher No</th>
-                <th style={{width: '6%'}}>Type</th>
-                <th style={{width: '25%'}}>Description</th>
-                <th style={{width: '6%'}}>Currency</th>
-                <th style={{width: '6%'}} className="text-right">Rate</th>
-                <th style={{width: '9%'}} className="text-right">Debit</th>
-                <th style={{width: '9%'}} className="text-right">Credit</th>
-                <th style={{width: '9%'}} className="text-right">Base Debit</th>
-                <th style={{width: '9%'}} className="text-right">Base Credit</th>
-                <th style={{width: '10%'}} className="text-right">Balance</th>
+                <th style={{width: '8%'}}>{t('accounts.currency_ledger.print.date')}</th>
+                <th style={{width: '10%'}}>{t('accounts.currency_ledger.print.voucher_no')}</th>
+                <th style={{width: '6%'}}>{t('accounts.currency_ledger.print.type')}</th>
+                <th style={{width: '25%'}}>{t('accounts.currency_ledger.print.description')}</th>
+                <th style={{width: '6%'}}>{t('accounts.currency_ledger.print.currency')}</th>
+                <th style={{width: '6%'}} className="text-right">{t('accounts.currency_ledger.print.rate')}</th>
+                <th style={{width: '9%'}} className="text-right">{t('accounts.currency_ledger.print.debit')}</th>
+                <th style={{width: '9%'}} className="text-right">{t('accounts.currency_ledger.print.credit')}</th>
+                <th style={{width: '9%'}} className="text-right">{t('accounts.currency_ledger.print.base_debit')}</th>
+                <th style={{width: '9%'}} className="text-right">{t('accounts.currency_ledger.print.base_credit')}</th>
+                <th style={{width: '10%'}} className="text-right">{t('accounts.currency_ledger.print.balance')}</th>
               </tr>
             </thead>
             <tbody>
@@ -364,10 +366,10 @@ const CurrencyLedgerPrint = () => {
                     {totals.opening_balance !== 0 && (
                       <tr className="opening-balance-row">
                         <td className="text-center">-</td>
-                        <td>Opening</td>
+                        <td>{t('accounts.currency_ledger.print.opening')}</td>
                         <td>-</td>
-                        <td>Balance</td>
-                        <td>Balance brought forward</td>
+                        <td>{t('accounts.currency_ledger.print.balance')}</td>
+                        <td>{t('accounts.currency_ledger.print.balance_brought_forward')}</td>
                         <td>-</td>
                         <td className="text-right">-</td>
                         <td className="text-right">-</td>
@@ -414,8 +416,8 @@ const CurrencyLedgerPrint = () => {
 
                     {/* Account Totals */}
                     <tr className="summary-row">
-                      <td colSpan="6" className="text-right">Account Total:</td>
-                      <td className="text-right">Summary</td>
+                      <td colSpan="6" className="text-right">{t('accounts.currency_ledger.print.account_total')}</td>
+                      <td className="text-right">{t('accounts.currency_ledger.print.summary')}</td>
                       <td className="text-right">-</td>
                       <td className="text-right">-</td>
                       <td className="text-right amount-cell">{formatCurrency(totals.total_debit || 0)}</td>
@@ -425,8 +427,8 @@ const CurrencyLedgerPrint = () => {
 
                     {/* Account Closing Balance */}
                     <tr className="closing-balance">
-                      <td colSpan="6" className="text-right">Closing Balance:</td>
-                      <td className="text-right">Final Balance</td>
+                      <td colSpan="6" className="text-right">{t('accounts.currency_ledger.print.closing_balance')}</td>
+                      <td className="text-right">{t('accounts.currency_ledger.print.final_balance')}</td>
                       <td className="text-right">-</td>
                       <td className="text-right">-</td>
                       <td className="text-right">-</td>
@@ -445,8 +447,8 @@ const CurrencyLedgerPrint = () => {
               {/* Grand Totals */}
               {accounts.length > 1 && (
                 <tr className="grand-total-row">
-                  <td colSpan="6" className="text-right font-bold">GRAND TOTAL:</td>
-                  <td className="text-right font-bold">All Accounts</td>
+                  <td colSpan="6" className="text-right font-bold">{t('accounts.currency_ledger.print.grand_total')}</td>
+                  <td className="text-right font-bold">{t('accounts.currency_ledger.print.all_accounts')}</td>
                   <td className="text-right">-</td>
                   <td className="text-right">-</td>
                   <td className="text-right amount-cell font-bold">{formatCurrency(totalDebit)}</td>
@@ -460,7 +462,7 @@ const CurrencyLedgerPrint = () => {
 
           {/* Footer - Shows on each page */}
           <div className="report-footer">
-            <div>Currency Ledger Report | Generated by ERP System</div>
+            <div>{t('accounts.currency_ledger.print.currency_ledger_report__generated_by_erp')}</div>
             <div>Printed on: {new Date().toLocaleString('en-US', { 
               dateStyle: 'medium', 
               timeStyle: 'short' 

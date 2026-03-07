@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const PrintDetailed = () => {
   const { voucher, entries = [], company } = usePage().props;
@@ -23,6 +24,7 @@ const PrintDetailed = () => {
   };
 
   const formatDate = (dateString) => {
+  const { t } = useTranslations();
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -367,31 +369,31 @@ const PrintDetailed = () => {
               {company?.email && <div>Email: {company.email} {company?.website && `| Web: ${company.website}`}</div>}
               {company?.tax_number && <div>Tax ID: {company.tax_number}</div>}
             </div>
-            <div className="voucher-title">Opening Voucher - Detailed Report</div>
+            <div className="voucher-title">{t('accounts.opening_voucher.print_detailed.opening_voucher__detailed_report')}</div>
           </div>
 
           {/* Voucher Information Grid */}
           <div className="voucher-info-grid">
             <div className="voucher-info-row">
-              <div className="voucher-info-cell info-label">Voucher No:</div>
+              <div className="voucher-info-cell info-label">{t('accounts.opening_voucher.print_detailed.voucher_no')}</div>
               <div className="voucher-info-cell info-value">
                 <span className="ref-number">{voucher?.voucher_number || 'N/A'}</span>
               </div>
-              <div className="voucher-info-cell info-label">Voucher Date:</div>
+              <div className="voucher-info-cell info-label">{t('accounts.opening_voucher.print_detailed.voucher_date')}</div>
               <div className="voucher-info-cell info-value">{formatDate(voucher?.voucher_date)}</div>
             </div>
             <div className="voucher-info-row">
-              <div className="voucher-info-cell info-label">Status:</div>
+              <div className="voucher-info-cell info-label">{t('accounts.opening_voucher.print_detailed.status')}</div>
               <div className="voucher-info-cell info-value">
                 <span className="status-badge">{voucher?.status || 'N/A'}</span>
               </div>
-              <div className="voucher-info-cell info-label">Fiscal Year:</div>
+              <div className="voucher-info-cell info-label">{t('accounts.opening_voucher.print_detailed.fiscal_year')}</div>
               <div className="voucher-info-cell info-value">{voucher?.fiscal_year || 'N/A'}</div>
             </div>
             <div className="voucher-info-row">
-              <div className="voucher-info-cell info-label">Reference:</div>
+              <div className="voucher-info-cell info-label">{t('accounts.opening_voucher.print_detailed.reference')}</div>
               <div className="voucher-info-cell info-value">{voucher?.reference_no || '-'}</div>
-              <div className="voucher-info-cell info-label">Type:</div>
+              <div className="voucher-info-cell info-label">{t('accounts.opening_voucher.print_detailed.type')}</div>
               <div className="voucher-info-cell info-value">{voucher?.voucher_type || 'General Opening'}</div>
             </div>
           </div>
@@ -401,11 +403,11 @@ const PrintDetailed = () => {
             <thead>
               <tr>
                 <th style={{width: '4%'}}>#</th>
-                <th style={{width: '12%'}}>Account Code</th>
-                <th style={{width: '26%'}}>Account Name</th>
-                <th style={{width: '24%'}}>Description</th>
-                <th style={{width: '17%'}} className="text-right">Debit</th>
-                <th style={{width: '17%'}} className="text-right">Credit</th>
+                <th style={{width: '12%'}}>{t('accounts.opening_voucher.print_detailed.account_code')}</th>
+                <th style={{width: '26%'}}>{t('accounts.opening_voucher.print_detailed.account_name')}</th>
+                <th style={{width: '24%'}}>{t('accounts.opening_voucher.print_detailed.description')}</th>
+                <th style={{width: '17%'}} className="text-right">{t('accounts.opening_voucher.print_detailed.debit')}</th>
+                <th style={{width: '17%'}} className="text-right">{t('accounts.opening_voucher.print_detailed.credit')}</th>
               </tr>
             </thead>
             <tbody>
@@ -434,15 +436,15 @@ const PrintDetailed = () => {
           {/* Summary Section */}
           <div className="summary-section">
             <div className="summary-row">
-              <span className="summary-label">Total Debit Amount:</span>
+              <span className="summary-label">{t('accounts.opening_voucher.print_detailed.total_debit_amount')}</span>
               <span className="summary-value">{formatCurrency(totalDebit)}</span>
             </div>
             <div className="summary-row">
-              <span className="summary-label">Total Credit Amount:</span>
+              <span className="summary-label">{t('accounts.opening_voucher.print_detailed.total_credit_amount')}</span>
               <span className="summary-value">{formatCurrency(totalCredit)}</span>
             </div>
             <div className="summary-row summary-total">
-              <span className="summary-label">Difference:</span>
+              <span className="summary-label">{t('accounts.opening_voucher.print_detailed.difference')}</span>
               <span className="summary-value">{formatCurrency(Math.abs(totalDebit - totalCredit))}</span>
             </div>
           </div>
@@ -457,33 +459,33 @@ const PrintDetailed = () => {
           {/* Narration */}
           {voucher?.narration && (
             <div className="narration-section">
-              <div className="narration-label">Narration / Explanation:</div>
+              <div className="narration-label">{t('accounts.opening_voucher.print_detailed.narration__explanation')}</div>
               <div className="narration-text">{voucher.narration}</div>
             </div>
           )}
 
           {/* Audit Trail */}
           <div className="audit-section">
-            <div className="audit-label">Audit Trail:</div>
+            <div className="audit-label">{t('accounts.opening_voucher.print_detailed.audit_trail')}</div>
             <div className="audit-row">
-              <span>Created By:</span>
+              <span>{t('accounts.opening_voucher.print_detailed.created_by')}</span>
               <span>{voucher?.created_by || 'System'}</span>
-              <span>Created Date:</span>
+              <span>{t('accounts.opening_voucher.print_detailed.created_date')}</span>
               <span>{formatDate(voucher?.created_at)}</span>
             </div>
             {voucher?.posted_by && (
               <div className="audit-row">
-                <span>Posted By:</span>
+                <span>{t('accounts.opening_voucher.print_detailed.posted_by')}</span>
                 <span>{voucher.posted_by}</span>
-                <span>Posted Date:</span>
+                <span>{t('accounts.opening_voucher.print_detailed.posted_date')}</span>
                 <span>{formatDate(voucher.posted_at)}</span>
               </div>
             )}
             {voucher?.approved_by && (
               <div className="audit-row">
-                <span>Approved By:</span>
+                <span>{t('accounts.opening_voucher.print_detailed.approved_by')}</span>
                 <span>{voucher.approved_by}</span>
-                <span>Approved Date:</span>
+                <span>{t('accounts.opening_voucher.print_detailed.approved_date')}</span>
                 <span>{formatDate(voucher.approved_at)}</span>
               </div>
             )}
@@ -492,30 +494,30 @@ const PrintDetailed = () => {
           {/* Signature Section */}
           <div className="signature-section">
             <div className="signature-box">
-              <div className="signature-line">Prepared By</div>
-              <div className="signature-label">Accountant</div>
-              <div className="signature-date">Date: _________</div>
+              <div className="signature-line">{t('accounts.opening_voucher.print_detailed.prepared_by')}</div>
+              <div className="signature-label">{t('accounts.opening_voucher.print_detailed.accountant')}</div>
+              <div className="signature-date">{t('accounts.opening_voucher.print_detailed.date__________')}</div>
             </div>
             <div className="signature-box">
-              <div className="signature-line">Checked By</div>
-              <div className="signature-label">Senior Accountant</div>
-              <div className="signature-date">Date: _________</div>
+              <div className="signature-line">{t('accounts.opening_voucher.print_detailed.checked_by')}</div>
+              <div className="signature-label">{t('accounts.opening_voucher.print_detailed.senior_accountant')}</div>
+              <div className="signature-date">{t('accounts.opening_voucher.print_detailed.date__________')}</div>
             </div>
             <div className="signature-box">
-              <div className="signature-line">Reviewed By</div>
-              <div className="signature-label">Finance Manager</div>
-              <div className="signature-date">Date: _________</div>
+              <div className="signature-line">{t('accounts.opening_voucher.print_detailed.reviewed_by')}</div>
+              <div className="signature-label">{t('accounts.opening_voucher.print_detailed.finance_manager')}</div>
+              <div className="signature-date">{t('accounts.opening_voucher.print_detailed.date__________')}</div>
             </div>
             <div className="signature-box">
-              <div className="signature-line">Approved By</div>
-              <div className="signature-label">Director / CFO</div>
-              <div className="signature-date">Date: _________</div>
+              <div className="signature-line">{t('accounts.opening_voucher.print_detailed.approved_by')}</div>
+              <div className="signature-label">{t('accounts.opening_voucher.print_detailed.director__cfo')}</div>
+              <div className="signature-date">{t('accounts.opening_voucher.print_detailed.date__________')}</div>
             </div>
           </div>
 
           {/* Footer */}
           <div className="voucher-footer">
-            <div>This is a computer-generated document and does not require a physical signature.</div>
+            <div>{t('accounts.opening_voucher.print_detailed.this_is_a_computergenerated_document_and')}</div>
             <div>Document ID: {voucher?.id} | Generated on: {new Date().toLocaleString('en-US', { 
               dateStyle: 'full', 
               timeStyle: 'short' 

@@ -3,8 +3,10 @@ import { Home, List, Plus, Hash, Tag, Edit3 } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import App from '../../App.jsx';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const Breadcrumbs = ({ items }) => {
+const { t } = useTranslations();
   return (
     <div className="breadcrumbs-themed">
       <nav className="breadcrumbs">
@@ -38,12 +40,13 @@ const Breadcrumbs = ({ items }) => {
           </div>
         ))}
       </nav>
-      <div className="breadcrumbs-description">Configure inventory item groups</div>
+      <div className="breadcrumbs-description">{t('inventory.item_group_coding.create.configure_inventory_item_groups')}</div>
     </div>
   );
 };
 
 const CreateItemGroupCodingForm = () => {
+const { t } = useTranslations();
   const {
     errors: pageErrors,
     flash,
@@ -98,7 +101,7 @@ const CreateItemGroupCodingForm = () => {
       setErrors(pageErrors);
       setAlert({
         type: 'error',
-        message: 'Please correct the errors below and try again.',
+        message: t('inventory.item_group_coding.create.msg_please_correct_the_errors_below_and_try_'),
       });
     }
   }, [pageErrors]);
@@ -127,7 +130,7 @@ const CreateItemGroupCodingForm = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setAlert({ type: 'error', message: 'Please correct the errors below and try again.' });
+      setAlert({ type: 'error', message: t('inventory.item_group_coding.create.msg_please_correct_the_errors_below_and_try_') });
       return;
     }
 

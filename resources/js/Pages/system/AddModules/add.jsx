@@ -3,6 +3,7 @@ import { Type, Folder, Home, List, Plus } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // Debug Panel removed per requirement
 
@@ -63,6 +64,7 @@ const Breadcrumbs = ({ items }) => {
 
 // Add Modules Form Component
 const AddModulesForm = () => {
+const { t } = useTranslations();
   const { errors: pageErrors, flash } = usePage().props;
   
   const moduleFields = [
@@ -227,6 +229,7 @@ const AddModulesForm = () => {
   };
 
   const handleReset = () => {
+  const { t } = useTranslations();
     setErrors({});
     setAlert(null);
     setRequestStatus('');

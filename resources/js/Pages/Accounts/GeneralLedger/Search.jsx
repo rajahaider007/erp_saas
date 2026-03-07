@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import Select from 'react-select';
 import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
 import Swal from 'sweetalert2';
@@ -226,6 +227,7 @@ const GeneralLedgerSearch = () => {
   };
 
   const setThisYearFilter = () => {
+  const { t } = useTranslations();
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 1);
     const endOfYear = new Date(now.getFullYear(), 11, 31);
@@ -258,7 +260,7 @@ const GeneralLedgerSearch = () => {
                 </div>
                 <div className="stat-item">
                   <TrendingUp size={16} />
-                  <span>Select filters to generate report</span>
+                  <span>{t('accounts.general_ledger.search.select_filters_to_generate_report')}</span>
                 </div>
               </div>
             </div>
@@ -267,7 +269,7 @@ const GeneralLedgerSearch = () => {
               <button
                 className="btn btn-icon"
                 onClick={handleReset}
-                title="Reset All Filters"
+                title={t('accounts.general_ledger.search.reset_all_filters')}
               >
                 <RefreshCcw size={20} />
               </button>
@@ -318,7 +320,7 @@ const GeneralLedgerSearch = () => {
                         value={selectedCompany}
                         onChange={handleCompanyChange}
                         styles={customSelectStyles}
-                        placeholder="Select a company..."
+                        placeholder={t('accounts.general_ledger.search.select_a_company')}
                         isClearable
                         isSearchable
                         className="react-select-container"
@@ -341,7 +343,7 @@ const GeneralLedgerSearch = () => {
                           value={selectedLocation}
                           onChange={setSelectedLocation}
                           styles={customSelectStyles}
-                          placeholder="Select a location..."
+                          placeholder={t('accounts.general_ledger.search.select_a_location')}
                           isClearable
                           isSearchable
                           className="react-select-container"
@@ -367,7 +369,7 @@ const GeneralLedgerSearch = () => {
                     value={selectedAccount}
                     onChange={setSelectedAccount}
                     styles={customSelectStyles}
-                    placeholder="Search and select account..."
+                    placeholder={t('accounts.general_ledger.search.search_and_select_account')}
                     isClearable
                     isSearchable
                     className="react-select-container"
@@ -386,7 +388,7 @@ const GeneralLedgerSearch = () => {
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 mb-2 block">From Date</label>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('accounts.general_ledger.search.from_date')}</label>
                       <CustomDatePicker
                         selected={fromDate ? new Date(fromDate) : null}
                         onChange={(date) => {
@@ -415,12 +417,12 @@ const GeneralLedgerSearch = () => {
                           setFromDate(selectedFromDate);
                         }}
                         type="date"
-                        placeholder="Select from date"
+                        placeholder={t('accounts.general_ledger.search.select_from_date')}
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 mb-2 block">To Date</label>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('accounts.general_ledger.search.to_date')}</label>
                       <CustomDatePicker
                         selected={toDate ? new Date(toDate) : null}
                         onChange={(date) => {
@@ -449,7 +451,7 @@ const GeneralLedgerSearch = () => {
                           setToDate(selectedToDate);
                         }}
                         type="date"
-                        placeholder="Select to date"
+                        placeholder={t('accounts.general_ledger.search.select_to_date')}
                         maxDate={new Date()}
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                       />
@@ -496,11 +498,11 @@ const GeneralLedgerSearch = () => {
                     value={voucherType}
                     onChange={(e) => setVoucherType(e.target.value)}
                   >
-                    <option value="">All Voucher Types</option>
-                    <option value="Journal">Journal Voucher</option>
-                    <option value="Payment">Payment Voucher</option>
-                    <option value="Receipt">Receipt Voucher</option>
-                    <option value="Contra">Contra Voucher</option>
+                    <option value="">{t('accounts.general_ledger.search.all_voucher_types')}</option>
+                    <option value="Journal">{t('accounts.general_ledger.search.journal_voucher')}</option>
+                    <option value="Payment">{t('accounts.general_ledger.search.payment_voucher')}</option>
+                    <option value="Receipt">{t('accounts.general_ledger.search.receipt_voucher')}</option>
+                    <option value="Contra">{t('accounts.general_ledger.search.contra_voucher')}</option>
                   </select>
                 </div>
 
@@ -532,22 +534,22 @@ const GeneralLedgerSearch = () => {
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 mb-2 block">Minimum Amount</label>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('accounts.general_ledger.search.minimum_amount')}</label>
                       <input
                         type="number"
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                        placeholder="0.00"
+                        placeholder={t('accounts.general_ledger.search.000')}
                         value={minAmount}
                         onChange={(e) => setMinAmount(e.target.value)}
                         step="0.01"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-400 mb-2 block">Maximum Amount</label>
+                      <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('accounts.general_ledger.search.maximum_amount')}</label>
                       <input
                         type="number"
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                        placeholder="0.00"
+                        placeholder={t('accounts.general_ledger.search.000')}
                         value={maxAmount}
                         onChange={(e) => setMaxAmount(e.target.value)}
                         step="0.01"

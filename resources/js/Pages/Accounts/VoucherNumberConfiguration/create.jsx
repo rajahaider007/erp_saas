@@ -3,6 +3,7 @@ import { Type, Hash, Home, List, Plus, Settings, Calendar, ArrowLeft } from 'luc
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // Professional Breadcrumbs Component
 const Breadcrumbs = ({ items }) => {
@@ -61,6 +62,7 @@ const Breadcrumbs = ({ items }) => {
 
 // Create/Edit Voucher Number Configuration Form Component
 const CreateVoucherNumberConfigurationForm = () => {
+const { t } = useTranslations();
   const { errors: pageErrors, flash, id, edit_mode, editMode, configuration } = usePage().props;
   const configurationId = configuration?.id || id;
   const isEdit = (edit_mode || editMode) && !!configurationId;
@@ -143,7 +145,7 @@ const CreateVoucherNumberConfigurationForm = () => {
       setErrors(pageErrors);
       setAlert({
         type: 'error',
-        message: 'Please correct the errors below and try again.'
+        message: t('accounts.voucher_number_configuration.create.msg_please_correct_the_errors_below_and_try_')
       });
     }
   }, [pageErrors]);
@@ -192,7 +194,7 @@ const CreateVoucherNumberConfigurationForm = () => {
         setErrors(newErrors);
         setAlert({
           type: 'error',
-          message: 'Please correct the errors below and try again.'
+          message: t('accounts.voucher_number_configuration.create.msg_please_correct_the_errors_below_and_try_')
         });
         setRequestStatus('Validation failed');
         return;

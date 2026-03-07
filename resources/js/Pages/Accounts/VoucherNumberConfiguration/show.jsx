@@ -1,8 +1,10 @@
 import React from 'react';
 import App from "../../App.jsx";
 import { usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const ShowVoucherNumberConfiguration = () => {
+const { t } = useTranslations();
   const { configuration } = usePage().props;
 
   // Mock data if not provided
@@ -22,23 +24,23 @@ const ShowVoucherNumberConfiguration = () => {
     <App>
       <div className="rounded-xl shadow-lg form-container border-slate-200">
         <div className="p-6">
-          <h1 className="form-title">Voucher Configuration Details</h1>
+          <h1 className="form-title">{t('accounts.voucher_number_configuration.show.voucher_configuration_details')}</h1>
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <div className="input-group">
-                <label className="input-label">Voucher Type</label>
+                <label className="input-label">{t('accounts.voucher_number_configuration.show.voucher_type')}</label>
                 <div className="input-wrapper">
                   <div className="form-input">{config.voucher_type}</div>
                 </div>
               </div>
               <div className="input-group">
-                <label className="input-label">Prefix</label>
+                <label className="input-label">{t('accounts.voucher_number_configuration.show.prefix')}</label>
                 <div className="input-wrapper">
                   <div className="form-input">{config.prefix}</div>
                 </div>
               </div>
               <div className="input-group">
-                <label className="input-label">Number Length</label>
+                <label className="input-label">{t('accounts.voucher_number_configuration.show.number_length')}</label>
                 <div className="input-wrapper">
                   <div className="form-input">{config.number_length} digits</div>
                 </div>
@@ -46,19 +48,19 @@ const ShowVoucherNumberConfiguration = () => {
             </div>
             <div>
               <div className="input-group">
-                <label className="input-label">Reset Frequency</label>
+                <label className="input-label">{t('accounts.voucher_number_configuration.show.reset_frequency')}</label>
                 <div className="input-wrapper">
                   <div className="form-input">{config.reset_frequency}</div>
                 </div>
               </div>
               <div className="input-group">
-                <label className="input-label">Current Number</label>
+                <label className="input-label">{t('accounts.voucher_number_configuration.show.current_number')}</label>
                 <div className="input-wrapper">
                   <div className="form-input">{config.running_number}</div>
                 </div>
               </div>
               <div className="input-group">
-                <label className="input-label">Status</label>
+                <label className="input-label">{t('accounts.voucher_number_configuration.show.status')}</label>
                 <div className="input-wrapper">
                   <div className="form-input">{config.is_active ? 'Active' : 'Inactive'}</div>
                 </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Head, usePage, router, Link } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import {
   FileText, Download, Filter, Eye, EyeOff, Calendar, 
   Building, MapPin, Settings, Search, RefreshCw, 
@@ -190,6 +191,7 @@ const ChartOfAccountReport = () => {
     };
 
     const triggerPrint = () => {
+    const { t } = useTranslations();
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           setTimeout(() => {
@@ -231,7 +233,7 @@ const ChartOfAccountReport = () => {
               <div className="flex items-center gap-3 text-red-800 dark:text-red-300">
                 <AlertCircle className="w-5 h-5" />
                 <div>
-                  <h3 className="font-semibold">Error</h3>
+                  <h3 className="font-semibold">{t('reports.chart_of_account.report.error')}</h3>
                   <p>{error}</p>
                 </div>
               </div>
@@ -245,7 +247,7 @@ const ChartOfAccountReport = () => {
   if (isPrintView) {
     return (
       <>
-        <Head title="Chart of Accounts Report - Print" />
+        <Head title={t('reports.chart_of_account.report.chart_of_accounts_report__print')} />
         <style>
           {`@media print {
             @page {
@@ -305,7 +307,7 @@ const ChartOfAccountReport = () => {
 
         <div className="print-report-root">
           {filteredData.length === 0 ? (
-            <p>No accounts found</p>
+            <p>{t('reports.chart_of_account.report.no_accounts_found')}</p>
           ) : (
             <table className="print-table">
               <colgroup>
@@ -316,10 +318,10 @@ const ChartOfAccountReport = () => {
               </colgroup>
               <thead>
                 <tr>
-                  <th>Code</th>
-                  <th>Name</th>
-                  <th>Type</th>
-                  <th>Status</th>
+                  <th>{t('reports.chart_of_account.report.code')}</th>
+                  <th>{t('reports.chart_of_account.report.name')}</th>
+                  <th>{t('reports.chart_of_account.report.type')}</th>
+                  <th>{t('reports.chart_of_account.report.status')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -368,7 +370,7 @@ const ChartOfAccountReport = () => {
               <button
                 className="report-btn"
                 onClick={handleBackToFilters}
-                title="Back to Filters"
+                title={t('reports.chart_of_account.report.back_to_filters')}
               >
                 <Filter size={20} />
                 Change Filters
@@ -377,7 +379,7 @@ const ChartOfAccountReport = () => {
               <button
                 className="report-btn"
                 onClick={handlePrint}
-                title="Print Report"
+                title={t('reports.chart_of_account.report.print_report')}
               >
                 <Printer size={20} />
                 Print
@@ -407,29 +409,29 @@ const ChartOfAccountReport = () => {
 
         {/* Applied Filters Display */}
         <div className="applied-filters-container">
-          <div className="applied-filters-title">Applied Filters:</div>
+          <div className="applied-filters-title">{t('reports.chart_of_account.report.applied_filters')}</div>
           <div className="applied-filters-list">
             {filters.level && (
               <div className="filter-badge">
-                <span className="filter-badge-label">Level:</span>
+                <span className="filter-badge-label">{t('reports.chart_of_account.report.level')}</span>
                 <span className="filter-badge-value">{filters.level === 'all' ? 'All Levels' : `Level ${filters.level}`}</span>
               </div>
             )}
             {filters.account_type && (
               <div className="filter-badge">
-                <span className="filter-badge-label">Type:</span>
+                <span className="filter-badge-label">{t('reports.chart_of_account.report.type')}</span>
                 <span className="filter-badge-value">{filters.account_type}</span>
               </div>
             )}
             {filters.status && (
               <div className="filter-badge">
-                <span className="filter-badge-label">Status:</span>
+                <span className="filter-badge-label">{t('reports.chart_of_account.report.status')}</span>
                 <span className="filter-badge-value">{filters.status}</span>
               </div>
             )}
             {filters.sort_by && (
               <div className="filter-badge">
-                <span className="filter-badge-label">Sort:</span>
+                <span className="filter-badge-label">{t('reports.chart_of_account.report.sort')}</span>
                 <span className="filter-badge-value">By {filters.sort_by}</span>
               </div>
             )}
@@ -447,7 +449,7 @@ const ChartOfAccountReport = () => {
               >
                 <div className="flex items-center gap-2">
                   <Filter className="w-5 h-5 text-blue-400" />
-                  <span className="font-semibold">Advanced Filters</span>
+                  <span className="font-semibold">{t('reports.chart_of_account.report.advanced_filters')}</span>
                 </div>
                 {showFilters ? (
                   <ChevronUp className="w-5 h-5 text-gray-400" />
@@ -543,7 +545,7 @@ const ChartOfAccountReport = () => {
                       type="text"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="Search by code or name..."
+                      placeholder={t('reports.chart_of_account.report.search_by_code_or_name')}
                       className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
                     />
                   </div>
@@ -574,18 +576,18 @@ const ChartOfAccountReport = () => {
             {filteredData.length === 0 ? (
               <div className="empty-state">
                 <Database className="empty-icon" />
-                <h3>No accounts found</h3>
-                <p>No accounts match the selected criteria</p>
+                <h3>{t('reports.chart_of_account.report.no_accounts_found')}</h3>
+                <p>{t('reports.chart_of_account.report.no_accounts_match_the_selected_criteria')}</p>
               </div>
             ) : (
               <div className="table-wrapper">
                 <table className="data-table bg-slate-800 text-white">
                   <thead>
                     <tr>
-                      <th style={{width: '20%'}}>Code</th>
-                      <th style={{width: '50%'}}>Name</th>
-                      <th style={{width: '15%'}}>Type</th>
-                      <th style={{width: '15%'}}>Status</th>
+                      <th style={{width: '20%'}}>{t('reports.chart_of_account.report.code')}</th>
+                      <th style={{width: '50%'}}>{t('reports.chart_of_account.report.name')}</th>
+                      <th style={{width: '15%'}}>{t('reports.chart_of_account.report.type')}</th>
+                      <th style={{width: '15%'}}>{t('reports.chart_of_account.report.status')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -630,10 +632,10 @@ const ChartOfAccountReport = () => {
                 IFRS Compliance Notes
               </h3>
               <ul className="text-sm space-y-1 list-disc list-inside text-blue-300">
-                <li>Chart follows IAS 1 - Presentation of Financial Statements</li>
-                <li>Account hierarchy supports segment reporting requirements (IFRS 8)</li>
-                <li>Account levels track balance sheet and income statement items</li>
-                <li>All transactions are recorded using double-entry principle</li>
+                <li>{t('reports.chart_of_account.report.chart_follows_ias_1__presentation_of_fin')}</li>
+                <li>{t('reports.chart_of_account.report.account_hierarchy_supports_segment_repor')}</li>
+                <li>{t('reports.chart_of_account.report.account_levels_track_balance_sheet_and_i')}</li>
+                <li>{t('reports.chart_of_account.report.all_transactions_are_recorded_using_doub')}</li>
               </ul>
             </div>
           </div>

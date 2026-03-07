@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { Plus, Trash2, AlertCircle, Coins, ArrowLeft } from 'lucide-react';
 import App from '../../App.jsx';
 
@@ -45,6 +46,7 @@ export default function CashConfiguration() {
   };
 
   const handleDelete = (codeId, cashLocation) => {
+  const { t } = useTranslations();
     if (confirm(`Are you sure you want to delete cash account "${cashLocation}"?`)) {
       router.delete(`/accounts/code-configuration/${codeId}`);
     }
@@ -92,7 +94,7 @@ export default function CashConfiguration() {
         {cashHead && (
           <div className="mb-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
             <p className="text-sm text-yellow-800 dark:text-yellow-300">
-              <strong>Master Account:</strong> {cashHead.account_code} - {cashHead.account_name}
+              <strong>{t('accounts.chart_of_account_code_configuration.cash_configuration.master_account')}</strong> {cashHead.account_code} - {cashHead.account_name}
             </p>
           </div>
         )}
@@ -158,11 +160,11 @@ export default function CashConfiguration() {
 
                     <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-400 mt-3">
                       <div>
-                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Custodian</p>
+                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{t('accounts.chart_of_account_code_configuration.cash_configuration.custodian')}</p>
                         <p>{code.short_code || '-'}</p>
                       </div>
                       <div>
-                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Currency</p>
+                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{t('accounts.chart_of_account_code_configuration.cash_configuration.currency')}</p>
                         <p>{code.currency}</p>
                       </div>
                     </div>
@@ -186,7 +188,7 @@ export default function CashConfiguration() {
                   <button
                     onClick={() => handleDelete(code.id, code.account_name)}
                     className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                    title="Delete cash account"
+                    title={t('accounts.chart_of_account_code_configuration.cash_configuration.delete_cash_account')}
                   >
                     <Trash2 className="h-5 w-5" />
                   </button>
@@ -214,7 +216,7 @@ export default function CashConfiguration() {
                     value={formData.cash_location}
                     onChange={(e) => setFormData({ ...formData, cash_location: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-yellow-500 outline-none"
-                    placeholder="e.g., Office Cash Box - Lahore"
+                    placeholder={t('accounts.chart_of_account_code_configuration.cash_configuration.eg_office_cash_box__lahore')}
                     required
                   />
                   {errors.cash_location && <p className="text-red-600 text-xs mt-1">{errors.cash_location}</p>}
@@ -229,7 +231,7 @@ export default function CashConfiguration() {
                     value={formData.account_code}
                     onChange={(e) => setFormData({ ...formData, account_code: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-yellow-500 outline-none"
-                    placeholder="e.g., 1010-001"
+                    placeholder={t('accounts.chart_of_account_code_configuration.cash_configuration.eg_1010001')}
                     required
                   />
                   {errors.account_code && <p className="text-red-600 text-xs mt-1">{errors.account_code}</p>}
@@ -244,7 +246,7 @@ export default function CashConfiguration() {
                     value={formData.custodian}
                     onChange={(e) => setFormData({ ...formData, custodian: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-yellow-500 outline-none"
-                    placeholder="e.g., Ali Ahmed"
+                    placeholder={t('accounts.chart_of_account_code_configuration.cash_configuration.eg_ali_ahmed')}
                   />
                   {errors.custodian && <p className="text-red-600 text-xs mt-1">{errors.custodian}</p>}
                 </div>
@@ -258,11 +260,11 @@ export default function CashConfiguration() {
                     onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                   >
-                    <option value="PKR">PKR - Pakistani Rupee</option>
-                    <option value="USD">USD - US Dollar</option>
-                    <option value="EUR">EUR - Euro</option>
-                    <option value="AED">AED - UAE Dirham</option>
-                    <option value="GBP">GBP - British Pound</option>
+                    <option value="PKR">{t('accounts.chart_of_account_code_configuration.cash_configuration.pkr__pakistani_rupee')}</option>
+                    <option value="USD">{t('accounts.chart_of_account_code_configuration.cash_configuration.usd__us_dollar')}</option>
+                    <option value="EUR">{t('accounts.chart_of_account_code_configuration.cash_configuration.eur__euro')}</option>
+                    <option value="AED">{t('accounts.chart_of_account_code_configuration.cash_configuration.aed__uae_dirham')}</option>
+                    <option value="GBP">{t('accounts.chart_of_account_code_configuration.cash_configuration.gbp__british_pound')}</option>
                   </select>
                 </div>
 

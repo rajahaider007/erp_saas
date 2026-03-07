@@ -5,6 +5,7 @@ import PermissionAwareForm, { PermissionButton } from '../../../Components/Permi
 import { usePermissions } from '../../../hooks/usePermissions';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const Breadcrumbs = ({ items }) => (
   <div className="breadcrumbs-themed">
@@ -124,6 +125,7 @@ const CodeConfigurationForm = () => {
   };
 
   const handleLocationChange = (locationId) => {
+  const { t } = useTranslations();
 
     // Use the stored company ID
     const actualCompanyId = currentCompanyId;
@@ -265,7 +267,7 @@ const CodeConfigurationForm = () => {
 
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
-      setAlert({ type: 'error', message: 'Please correct the errors below and try again.' });
+      setAlert({ type: 'error', message: t('system.code_configuration.create.msg_please_correct_the_errors_below_and_try_') });
       setRequestStatus('Validation failed');
       return;
     }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import {
   User,
   Building,
@@ -183,6 +184,7 @@ export default function UserRights() {
   };
 
   const RightToggle = ({ menuId, type, icon: Icon, label }) => {
+  const { t } = useTranslations();
     const on = (rights[menuId] || DEFAULT_RIGHT)[type];
     return (
       <button
@@ -230,7 +232,7 @@ export default function UserRights() {
                 className="btn btn-primary flex items-center gap-2"
               >
                 {saving ? (
-                  <span className="animate-pulse">Saving…</span>
+                  <span className="animate-pulse">{t('system.users.user_rights.saving')}</span>
                 ) : (
                   <>
                     <Save className="h-4 w-4" />
@@ -261,7 +263,7 @@ export default function UserRights() {
 
         <div className="rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
           <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80">
-            <h2 className="text-base font-semibold text-gray-900 dark:text-white">User & context</h2>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">{t('system.users.user_rights.user__context')}</h2>
             <div className="mt-3 flex flex-wrap gap-4 sm:gap-6 text-sm">
               <span className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                 <User className="h-4 w-4 text-gray-400" />
@@ -292,26 +294,26 @@ export default function UserRights() {
 
             {/* Legend: permission icons meaning + checked state */}
             <div className="mb-6 p-4 rounded-lg bg-gray-100 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Permission buttons</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">{t('system.users.user_rights.permission_buttons')}</p>
               <div className="flex flex-wrap items-center gap-6">
                 <div className="flex items-center gap-2">
                   <span className="flex items-center justify-center w-9 h-9 rounded-md border-2 bg-emerald-500 border-emerald-600 text-white">
                     <Eye className="h-4 w-4" />
                   </span>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">View (on)</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('system.users.user_rights.view_on')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="flex items-center justify-center w-9 h-9 rounded-md border-2 border-gray-300 dark:border-gray-600 text-gray-400 bg-transparent">
                     <Eye className="h-4 w-4" />
                   </span>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">View (off)</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('system.users.user_rights.view_off')}</span>
                 </div>
                 <span className="text-gray-300 dark:text-gray-600">|</span>
                 <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                  <span><strong className="text-gray-700 dark:text-gray-300">View</strong> — open/list</span>
-                  <span><strong className="text-gray-700 dark:text-gray-300">Add</strong> — create</span>
-                  <span><strong className="text-gray-700 dark:text-gray-300">Edit</strong> — update</span>
-                  <span><strong className="text-gray-700 dark:text-gray-300">Delete</strong> — remove</span>
+                  <span><strong className="text-gray-700 dark:text-gray-300">{t('system.users.user_rights.view')}</strong> — open/list</span>
+                  <span><strong className="text-gray-700 dark:text-gray-300">{t('system.users.user_rights.add')}</strong> — create</span>
+                  <span><strong className="text-gray-700 dark:text-gray-300">{t('system.users.user_rights.edit')}</strong> — update</span>
+                  <span><strong className="text-gray-700 dark:text-gray-300">{t('system.users.user_rights.delete')}</strong> — remove</span>
                 </div>
               </div>
             </div>
@@ -319,7 +321,7 @@ export default function UserRights() {
             {menusArray.length === 0 ? (
               <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                 <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>No menus available for this user’s package. Assign a company and package first.</p>
+                <p>{t('system.users.user_rights.no_menus_available_for_this_users_packag')}</p>
                 <Link href="/system/users" className="text-primary-600 dark:text-primary-400 hover:underline mt-2 inline-block">
                   Back to Users
                 </Link>
@@ -439,13 +441,13 @@ export default function UserRights() {
                                           </button>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                          <span className="sr-only">View</span>
+                                          <span className="sr-only">{t('system.users.user_rights.view')}</span>
                                           <RightToggle menuId={menu.id} type="can_view" icon={Eye} label="View" />
-                                          <span className="sr-only">Add</span>
+                                          <span className="sr-only">{t('system.users.user_rights.add')}</span>
                                           <RightToggle menuId={menu.id} type="can_add" icon={Plus} label="Add" />
-                                          <span className="sr-only">Edit</span>
+                                          <span className="sr-only">{t('system.users.user_rights.edit')}</span>
                                           <RightToggle menuId={menu.id} type="can_edit" icon={Edit} label="Edit" />
-                                          <span className="sr-only">Delete</span>
+                                          <span className="sr-only">{t('system.users.user_rights.delete')}</span>
                                           <RightToggle menuId={menu.id} type="can_delete" icon={Trash2} label="Delete" />
                                         </div>
                                       </div>

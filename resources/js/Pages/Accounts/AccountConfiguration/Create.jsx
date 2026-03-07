@@ -3,6 +3,7 @@ import { Home, List, Plus, Database } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // Breadcrumbs Component
 const Breadcrumbs = ({ items }) => {
@@ -49,6 +50,7 @@ const Breadcrumbs = ({ items }) => {
 
 // Create/Edit Account Configuration Form
 const CreateAccountConfigurationForm = () => {
+const { t } = useTranslations();
   const { errors: pageErrors, flash, id, edit_mode, configuration, accounts = [], configTypes = {} } = usePage().props;
   
   const accountOptions = (accounts || []).map(acc => ({
@@ -105,7 +107,7 @@ const CreateAccountConfigurationForm = () => {
       setErrors(pageErrors);
       setAlert({
         type: 'error',
-        message: 'Please correct the errors below and try again.'
+        message: t('accounts.account_configuration.create.msg_please_correct_the_errors_below_and_try_')
       });
     }
   }, [pageErrors]);
@@ -138,7 +140,7 @@ const CreateAccountConfigurationForm = () => {
         setErrors(newErrors);
         setAlert({
           type: 'error',
-          message: 'Please correct the errors below and try again.'
+          message: t('accounts.account_configuration.create.msg_please_correct_the_errors_below_and_try_')
         });
         setRequestStatus('Validation failed');
         return;

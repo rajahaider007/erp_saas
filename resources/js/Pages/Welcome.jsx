@@ -1,9 +1,11 @@
 import React from 'react';
 import Header from '@/Components/Layout/Header';
 import { Head } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { Link } from '@inertiajs/react';
 
 const Welcome = () => {
+const { t } = useTranslations();
   return (
     <>
       <Head title="Welcome" />

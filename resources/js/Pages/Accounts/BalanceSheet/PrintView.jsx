@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { usePage, Head } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 export default function PrintView() {
   const { 
@@ -49,6 +50,7 @@ export default function PrintView() {
   }, []);
 
   const formatCurrency = (value) => {
+  const { t } = useTranslations();
     const absValue = Math.abs(value || 0);
     const formatted = new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,
@@ -60,7 +62,7 @@ export default function PrintView() {
 
   return (
     <>
-      <Head title="Balance Sheet - Print" />
+      <Head title={t('accounts.balance_sheet.print_view.balance_sheet__print')} />
       <style>
         {`
           @page {
@@ -242,14 +244,14 @@ export default function PrintView() {
               <div className="column-wrapper">
                 {/* LEFT: Liabilities */}
                 <div className="column">
-                  <div className="column-title">Liabilities</div>
+                  <div className="column-title">{t('accounts.balance_sheet.print_view.liabilities')}</div>
                   
                   {/* Equity */}
                   {balanceSheetData.equity && balanceSheetData.equity.children && balanceSheetData.equity.children.length > 0 && (
                     <div className="section">
                       <div className="level1-header">
                         <div className="row-content">
-                          <span className="row-label">EQUITY</span>
+                          <span className="row-label">{t('accounts.balance_sheet.print_view.equity')}</span>
                           <span className="row-amount">{formatCurrency(balanceSheetData.equity.total)}</span>
                         </div>
                       </div>
@@ -285,7 +287,7 @@ export default function PrintView() {
                     <div className="section">
                       <div className="level1-header">
                         <div className="row-content">
-                          <span className="row-label">LIABILITIES</span>
+                          <span className="row-label">{t('accounts.balance_sheet.print_view.liabilities')}</span>
                           <span className="row-amount">{formatCurrency(balanceSheetData.liabilities.total)}</span>
                         </div>
                       </div>
@@ -318,7 +320,7 @@ export default function PrintView() {
                   
                   <div className="grand-total">
                     <div className="row-content">
-                      <span className="row-label">TOTAL LIABILITIES</span>
+                      <span className="row-label">{t('accounts.balance_sheet.print_view.total_liabilities')}</span>
                       <span className="row-amount">{formatCurrency(balanceSheetData.totalLiabilitiesAndEquity)}</span>
                     </div>
                   </div>
@@ -326,13 +328,13 @@ export default function PrintView() {
 
                 {/* RIGHT: Assets */}
                 <div className="column">
-                  <div className="column-title">Assets</div>
+                  <div className="column-title">{t('accounts.balance_sheet.print_view.assets')}</div>
                   
                   {balanceSheetData.assets && balanceSheetData.assets.children && balanceSheetData.assets.children.length > 0 && (
                     <div className="section">
                       <div className="level1-header">
                         <div className="row-content">
-                          <span className="row-label">ASSETS</span>
+                          <span className="row-label">{t('accounts.balance_sheet.print_view.assets')}</span>
                           <span className="row-amount">{formatCurrency(balanceSheetData.assets.total)}</span>
                         </div>
                       </div>
@@ -365,7 +367,7 @@ export default function PrintView() {
                   
                   <div className="grand-total">
                     <div className="row-content">
-                      <span className="row-label">TOTAL ASSETS</span>
+                      <span className="row-label">{t('accounts.balance_sheet.print_view.total_assets')}</span>
                       <span className="row-amount">{formatCurrency(balanceSheetData.totalAssets)}</span>
                     </div>
                   </div>

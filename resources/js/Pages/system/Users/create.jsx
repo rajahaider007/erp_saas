@@ -9,6 +9,7 @@ import PermissionAwareForm, { PermissionButton } from '../../../Components/Permi
 import { usePermissions } from '../../../hooks/usePermissions';
 import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // Professional Breadcrumbs Component
 const Breadcrumbs = ({ items }) => {
@@ -67,6 +68,7 @@ const Breadcrumbs = ({ items }) => {
 
 // User Registration Form Component (Unified for Create and Edit)
 const UserRegistrationForm = () => {
+const { t } = useTranslations();
   const { errors: pageErrors, flash, companies, locations, departments, user, currencies } = usePage().props;
   const isEdit = !!user;
   
@@ -291,7 +293,7 @@ const UserRegistrationForm = () => {
       setErrors(pageErrors);
       setAlert({
         type: 'error',
-        message: 'Please correct the errors below and try again.'
+        message: t('system.users.create.msg_please_correct_the_errors_below_and_try_')
       });
     }
   }, [pageErrors]);
@@ -350,7 +352,7 @@ const UserRegistrationForm = () => {
           setErrors(errors);
           setAlert({
             type: 'error',
-            message: 'Please correct the errors below and try again.'
+            message: t('system.users.create.msg_please_correct_the_errors_below_and_try_')
           });
         }
       });
@@ -358,7 +360,7 @@ const UserRegistrationForm = () => {
       setRequestStatus('error');
       setAlert({
         type: 'error',
-        message: 'An unexpected error occurred. Please try again.'
+        message: t('system.users.create.msg_an_unexpected_error_occurred_please_try_')
       });
     }
   };
@@ -459,6 +461,7 @@ const UserRegistrationForm = () => {
 
 // Main Create Component
 const Create = () => {
+const { t } = useTranslations();
   const { hasRoutePermission } = usePermissions();
   const { user } = usePage().props;
   const isEdit = !!user;
@@ -477,7 +480,7 @@ const Create = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">Access Denied</h3>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">{t('system.users.create.access_denied')}</h3>
               <p className="mt-1 text-sm text-gray-500">
                 {isEdit ? "You don't have permission to edit users. Please contact your administrator." : "You don't have permission to create users. Please contact your administrator."}
               </p>

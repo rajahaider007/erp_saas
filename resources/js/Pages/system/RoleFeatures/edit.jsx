@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Shield, Home, List, Plus, CheckSquare, Square } from 'lucide-react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const Breadcrumbs = ({ items }) => (
   <div className="breadcrumbs-themed">
@@ -20,7 +21,7 @@ const Breadcrumbs = ({ items }) => (
         </div>
       ))}
     </nav>
-    <div className="breadcrumbs-description">Edit role features and menu access</div>
+    <div className="breadcrumbs-description">{t('system.role_features.edit.edit_role_features_and_menu_access')}</div>
   </div>
 );
 
@@ -52,6 +53,7 @@ const EditRoleFeatureForm = () => {
   };
 
   const handleMenuToggle = (menuId, isEnabled) => {
+  const { t } = useTranslations();
     setMenuFeatures(prev => ({
       ...prev,
       [menuId]: isEnabled
@@ -77,17 +79,17 @@ const EditRoleFeatureForm = () => {
 
       router.post('/system/role-features', formData, {
         onSuccess: () => {
-          setAlert({ type: 'success', message: 'Role features updated successfully!' });
+          setAlert({ type: 'success', message: t('system.role_features.edit.msg_role_features_updated_successfully') });
           setRequestStatus('success');
         },
         onError: (errors) => {
           setErrors(errors);
-          setAlert({ type: 'error', message: 'Please correct the errors below.' });
+          setAlert({ type: 'error', message: t('system.role_features.edit.msg_please_correct_the_errors_below') });
           setRequestStatus('error');
         }
       });
     } catch (error) {
-      setAlert({ type: 'error', message: 'An error occurred. Please try again.' });
+      setAlert({ type: 'error', message: t('system.role_features.edit.msg_an_error_occurred_please_try_again') });
       setRequestStatus('error');
     }
   };
@@ -151,7 +153,7 @@ const EditRoleFeatureForm = () => {
               onChange={(e) => handleRoleChange(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
-              <option value="">Select a role</option>
+              <option value="">{t('system.role_features.edit.select_a_role')}</option>
               {roles.map((role) => (
                 <option key={role.id} value={role.id}>
                   {role.role_name}

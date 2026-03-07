@@ -4,7 +4,13 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "i18n:extract": "node scripts/i18n-extract.js",
+        "i18n:extract:update": "node scripts/i18n-extract.js --update-json",
+        "i18n:sync-ur": "node scripts/i18n-sync-ur-keys.js",
+        "i18n:apply": "node scripts/i18n-apply.js",
+        "i18n:apply:dry": "node scripts/i18n-apply.js --dry-run",
+        "i18n:add-imports": "node scripts/i18n-add-imports.js"
     },
     "devDependencies": {
         "@headlessui/react": "^2.0.0",

@@ -5,6 +5,7 @@ import PermissionAwareForm, { PermissionButton } from '../../../Components/Permi
 import { usePermissions } from '../../../hooks/usePermissions';
 import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // Professional Breadcrumbs Component
 const Breadcrumbs = ({ items }) => {
@@ -63,6 +64,7 @@ const Breadcrumbs = ({ items }) => {
 
 // Currency Form Component (Unified for Create and Edit)
 const CreateCurrencyForm = () => {
+const { t } = useTranslations();
   const { errors: pageErrors, flash, currency } = usePage().props;
   const isEdit = !!currency;
   
@@ -143,7 +145,7 @@ const CreateCurrencyForm = () => {
       setErrors(pageErrors);
       setAlert({
         type: 'error',
-        message: 'Please correct the errors below and try again.'
+        message: t('system.currencies.create.msg_please_correct_the_errors_below_and_try_')
       });
     }
   }, [pageErrors]);
@@ -195,14 +197,14 @@ const CreateCurrencyForm = () => {
           setErrors(errors);
           setAlert({
             type: 'error',
-            message: 'Please correct the errors below and try again.'
+            message: t('system.currencies.create.msg_please_correct_the_errors_below_and_try_')
           });
         }
       });
     } catch (error) {
       setAlert({
         type: 'error',
-        message: 'An unexpected error occurred. Please try again.'
+        message: t('system.currencies.create.msg_an_unexpected_error_occurred_please_try_')
       });
     }
   };
