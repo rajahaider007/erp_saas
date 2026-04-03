@@ -11,6 +11,12 @@ class SystemSeeder extends Seeder
 {
     public function run(): void
     {
+        if (DB::table('modules')->where('id', 1)->exists()) {
+            $this->command->info('SystemSeeder skipped (already seeded).');
+
+            return;
+        }
+
         Schema::disableForeignKeyConstraints();
 
         // Empty related tables

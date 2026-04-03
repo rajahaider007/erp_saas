@@ -12,6 +12,12 @@ class ChartOfAccountsSeeder extends Seeder
      */
     public function run(): void
     {
+        if (DB::table('chart_of_accounts')->where('comp_id', 1)->where('account_code', '100000000000000')->exists()) {
+            $this->command->info('ChartOfAccountsSeeder skipped (already seeded).');
+
+            return;
+        }
+
         // Disable foreign key checks to allow inserting with explicit IDs
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('chart_of_accounts')->truncate();

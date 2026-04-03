@@ -50,8 +50,7 @@ class TaxCategorySeeder extends Seeder
             // Excise
             ['tax_code' => 'EXCISE', 'tax_name' => 'Excise Duty', 'tax_type' => 'excise', 'tax_rate' => 5.00, 'applicable_for' => 'purchase'],
             
-            // Custom
-            ['tax_code' => 'CUSTOM', 'tax_name' => 'Custom Duty', 'tax_type' => 'custom', 'tax_rate' => 10.00, 'applicable_for' => 'purchase'],
+            ['tax_code' => 'CUSTOM', 'tax_name' => 'Custom Duty', 'tax_type' => 'customs_duty', 'tax_rate' => 10.00, 'applicable_for' => 'purchase'],
         ];
 
         foreach ($companies as $company) {

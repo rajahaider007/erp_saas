@@ -113,6 +113,9 @@ class AdminSeeder extends Seeder
         ];
 
         foreach ($admins as $admin) {
+            if (DB::table('tbl_users')->where('id', $admin['id'])->exists()) {
+                continue;
+            }
             DB::table('tbl_users')->insert($admin);
         }
     }

@@ -23,18 +23,26 @@ class SampleJournalVoucherSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get default company and location
-        $company = DB::table('companies')->first();
-        $location = DB::table('locations')->first();
-        
-        if (!$company || !$location) {
-            $this->command->error('No company or location found. Please run CompanySeeder and LocationSeeder first.');
+        $company = DB::table('companies')->orderBy('id')->first();
+        $location = $company
+            ? DB::table('locations')->where('company_id', $company->id)->orderBy('id')->first()
+            : null;
+
+        if (! $company || ! $location) {
+            $this->command->error('No company or location found. Run SystemSeeder then LocationSeeder (or php artisan db:seed).');
+
             return;
         }
 
         $compId = $company->id;
+
+        if (DB::table('transactions')->where('comp_id', $compId)->where('reference_number', 'INV-SUPP-001')->exists()) {
+            $this->command->info('SampleJournalVoucherSeeder skipped (sample vouchers already present).');
+
+            return;
+        }
         $locationId = $location->id;
-        $userId = DB::table('users')->first()->id ?? 1;
+        $userId = DB::table('tbl_users')->orderBy('id')->value('id') ?? 1;
 
         $this->command->info("Creating realistic accounting entries for Company: {$company->company_name}");
 

@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             SystemSeeder::class,
             UserRightsSeeder::class,
+            LocationSeeder::class,
+            FiscalPeriodSeeder::class,
             ChartOfAccountsSeeder::class,
             SampleJournalVoucherSeeder::class,
             CountrySeeder::class,           // No dependencies
