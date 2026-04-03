@@ -37,7 +37,11 @@ class TranslationLoaderService
 
         $path = $this->langPath . DIRECTORY_SEPARATOR . $locale;
         if (! File::isDirectory($path)) {
-            return $this->loadForLocale(self::DEFAULT_LOCALE);
+            if ($locale !== self::DEFAULT_LOCALE) {
+                return $this->loadForLocale(self::DEFAULT_LOCALE);
+            }
+
+            return [];
         }
 
         $translations = [];

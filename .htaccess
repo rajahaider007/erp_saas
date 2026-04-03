@@ -1,0 +1,20 @@
+# Server: public_html/erp_saas/.htaccess (same level as /public, /app, /vendor)
+# URL: https://yourdomain.com/erp_saas/
+#
+# .env: APP_URL=https://yourdomain.com/erp_saas
+#
+# If this file has no effect (still 404), add the rules from
+# deploy/hostinger-public_html.htaccess into public_html/.htaccess instead.
+
+DirectoryIndex public/index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Skip if already routed to /erp_saas/public/ (static files, etc.)
+    RewriteCond %{REQUEST_URI} ^/erp_saas/public/ [NC]
+    RewriteRule ^ - [L]
+
+    # Internal path from document root (works when mod_rewrite runs here)
+    RewriteRule ^(.*)$ /erp_saas/public/$1 [L]
+</IfModule>

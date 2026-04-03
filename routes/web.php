@@ -36,8 +36,7 @@ Route::prefix('system/sections')->name('system.sections.')->middleware('web.auth
     Route::get('/create', [SectionController::class, 'create'])->middleware('permission:can_add,/system/sections')->name('create');
     Route::post('/', [SectionController::class, 'store'])->middleware('permission:can_add,/system/sections')->name('store');
     Route::get('/{section}/edit', [SectionController::class, 'edit'])->middleware('permission:can_edit,/system/sections')->name('edit');
-    Route::put('/{section}', [SectionController::class, 'update'])->middleware('permission:can_edit,/system/sections')->name('update');
-    Route::patch('/{section}', [SectionController::class, 'update'])->middleware('permission:can_edit,/system/sections')->name('update');
+    Route::match(['put', 'patch'], '/{section}', [SectionController::class, 'update'])->middleware('permission:can_edit,/system/sections')->name('update');
     Route::delete('/{section}', [SectionController::class, 'destroy'])->middleware('permission:can_delete,/system/sections')->name('destroy');
     // API
     Route::get('/by-module/{module}', [SectionController::class, 'listByModule'])->middleware('permission:can_view,/system/sections')->name('by-module');
@@ -53,8 +52,7 @@ Route::prefix('system/menus')->name('system.menus.')->middleware('web.auth')->gr
     Route::get('/create', [MenuController::class, 'create'])->name('create');
     Route::post('/', [MenuController::class, 'store'])->name('store');
     Route::get('/{menu}/edit', [MenuController::class, 'edit'])->name('edit');
-    Route::put('/{menu}', [MenuController::class, 'update'])->name('update');
-    Route::patch('/{menu}', [MenuController::class, 'update'])->name('update');
+    Route::match(['put', 'patch'], '/{menu}', [MenuController::class, 'update'])->name('update');
     Route::delete('/{menu}', [MenuController::class, 'destroy'])->name('destroy');
     // API
     Route::get('/by-module/{module}', [MenuController::class, 'listByModule'])->name('by-module');
@@ -540,8 +538,7 @@ Route::prefix('modules')->name('modules.')->middleware('web.auth')->group(functi
     Route::post('/', [ModuleController::class, 'store'])->name('store');
     Route::get('/{module}', [ModuleController::class, 'show'])->name('show');
     Route::get('/{module}/edit', [ModuleController::class, 'edit'])->name('edit');
-    Route::put('/{module}', [ModuleController::class, 'update'])->name('update');
-    Route::patch('/{module}', [ModuleController::class, 'update'])->name('update');
+    Route::match(['put', 'patch'], '/{module}', [ModuleController::class, 'update'])->name('update');
     Route::delete('/{module}', [ModuleController::class, 'destroy'])->name('destroy');
 
     // Bulk operations
@@ -560,8 +557,7 @@ Route::prefix('system/companies')->name('system.companies.')->middleware('web.au
     Route::post('/', [CompanyController::class, 'store'])->middleware('permission:can_add,/system/companies')->name('store');
     Route::get('/{company}', [CompanyController::class, 'show'])->middleware('permission:can_view,/system/companies')->name('show');
     Route::get('/{company}/edit', [CompanyController::class, 'edit'])->middleware('permission:can_edit,/system/companies')->name('edit');
-    Route::put('/{company}', [CompanyController::class, 'update'])->middleware('permission:can_edit,/system/companies')->name('update');
-    Route::patch('/{company}', [CompanyController::class, 'update'])->middleware('permission:can_edit,/system/companies')->name('update');
+    Route::match(['put', 'patch'], '/{company}', [CompanyController::class, 'update'])->middleware('permission:can_edit,/system/companies')->name('update');
     Route::delete('/{company}', [CompanyController::class, 'destroy'])->middleware('permission:can_delete,/system/companies')->name('destroy');
     // Bulk operations
     Route::post('/bulk-status', [CompanyController::class, 'bulkUpdateStatus'])->middleware('permission:can_edit,/system/companies')->name('bulk-status');
@@ -576,8 +572,7 @@ Route::prefix('system/packages')->name('system.packages.')->middleware('web.auth
     Route::get('/create', [PackageController::class, 'create'])->name('create');
     Route::post('/', [PackageController::class, 'store'])->name('store');
     Route::get('/{package}/edit', [PackageController::class, 'edit'])->name('edit');
-    Route::put('/{package}', [PackageController::class, 'update'])->name('update');
-    Route::patch('/{package}', [PackageController::class, 'update'])->name('update');
+    Route::match(['put', 'patch'], '/{package}', [PackageController::class, 'update'])->name('update');
     Route::delete('/{package}', [PackageController::class, 'destroy'])->name('destroy');
     // Bulk operations
     Route::post('/bulk-status', [PackageController::class, 'bulkUpdateStatus'])->name('bulk-status');
@@ -591,8 +586,7 @@ Route::prefix('system/package-features')->name('system.package-features.')->midd
     Route::get('/create', [PackageFeatureController::class, 'create'])->name('create');
     Route::post('/', [PackageFeatureController::class, 'store'])->name('store');
     Route::get('/{package}/edit', [PackageFeatureController::class, 'edit'])->name('edit');
-    Route::put('/{package}', [PackageFeatureController::class, 'update'])->name('update');
-    Route::patch('/{package}', [PackageFeatureController::class, 'update'])->name('update');
+    Route::match(['put', 'patch'], '/{package}', [PackageFeatureController::class, 'update'])->name('update');
     Route::delete('/{packageFeature}', [PackageFeatureController::class, 'destroy'])->name('destroy');
     // Bulk operations
     Route::post('/bulk-destroy', [PackageFeatureController::class, 'bulkDestroy'])->name('bulk-destroy');
@@ -604,8 +598,7 @@ Route::prefix('system/locations')->name('system.locations.')->middleware('web.au
     Route::get('/create', [LocationController::class, 'create'])->name('create');
     Route::post('/', [LocationController::class, 'store'])->name('store');
     Route::get('/{location}/edit', [LocationController::class, 'edit'])->name('edit');
-    Route::put('/{location}', [LocationController::class, 'update'])->name('update');
-    Route::patch('/{location}', [LocationController::class, 'update'])->name('update');
+    Route::match(['put', 'patch'], '/{location}', [LocationController::class, 'update'])->name('update');
     Route::delete('/{location}', [LocationController::class, 'destroy'])->name('destroy');
     // Bulk operations
     Route::post('/bulk-status', [LocationController::class, 'bulkUpdateStatus'])->name('bulk-status');
@@ -621,8 +614,7 @@ Route::prefix('system/departments')->name('system.departments.')->middleware('we
     Route::get('/create', [DepartmentController::class, 'create'])->name('create');
     Route::post('/', [DepartmentController::class, 'store'])->name('store');
     Route::get('/{department}/edit', [DepartmentController::class, 'edit'])->name('edit');
-    Route::put('/{department}', [DepartmentController::class, 'update'])->name('update');
-    Route::patch('/{department}', [DepartmentController::class, 'update'])->name('update');
+    Route::match(['put', 'patch'], '/{department}', [DepartmentController::class, 'update'])->name('update');
     Route::delete('/{department}', [DepartmentController::class, 'destroy'])->name('destroy');
     // Bulk operations
     Route::post('/bulk-status', [DepartmentController::class, 'bulkUpdateStatus'])->name('bulk-status');
@@ -641,8 +633,7 @@ Route::prefix('system/users')->name('system.users.')->middleware('web.auth')->gr
     Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
     Route::get('/{user}/rights', [UserController::class, 'rights'])->name('rights');
     Route::put('/{user}/rights', [UserController::class, 'updateRights'])->name('update-rights');
-    Route::put('/{user}', [UserController::class, 'update'])->name('update');
-    Route::patch('/{user}', [UserController::class, 'update'])->name('update');
+    Route::match(['put', 'patch'], '/{user}', [UserController::class, 'update'])->name('update');
     Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
     // Bulk operations
     Route::post('/bulk-status', [UserController::class, 'bulkUpdateStatus'])->name('bulk-status');
@@ -659,8 +650,7 @@ Route::prefix('system/code-configurations')->name('code-configurations.')->middl
     Route::post('/', [App\Http\Controllers\system\CodeConfigurationController::class, 'store'])->name('store');
     Route::get('/{codeConfiguration}', [App\Http\Controllers\system\CodeConfigurationController::class, 'show'])->name('show');
     Route::get('/{codeConfiguration}/edit', [App\Http\Controllers\system\CodeConfigurationController::class, 'edit'])->name('edit');
-    Route::put('/{codeConfiguration}', [App\Http\Controllers\system\CodeConfigurationController::class, 'update'])->name('update');
-    Route::patch('/{codeConfiguration}', [App\Http\Controllers\system\CodeConfigurationController::class, 'update'])->name('update');
+    Route::match(['put', 'patch'], '/{codeConfiguration}', [App\Http\Controllers\system\CodeConfigurationController::class, 'update'])->name('update');
     Route::delete('/{codeConfiguration}', [App\Http\Controllers\system\CodeConfigurationController::class, 'destroy'])->name('destroy');
     // API
     Route::get('/api/locations-by-company', [App\Http\Controllers\system\CodeConfigurationController::class, 'getLocationsByCompany'])->name('locations-by-company');
@@ -706,8 +696,7 @@ Route::prefix('system/currencies')->name('system.currencies.')->middleware('web.
     Route::get('/{currency}', [CurrencyController::class, 'show'])->name('show');
     Route::get('/{currency}/edit', [CurrencyController::class, 'edit'])->name('edit');
     Route::get('/{currency}/history', [CurrencyController::class, 'history'])->name('history');
-    Route::put('/{currency}', [CurrencyController::class, 'update'])->name('update');
-    Route::patch('/{currency}', [CurrencyController::class, 'update'])->name('update');
+    Route::match(['put', 'patch'], '/{currency}', [CurrencyController::class, 'update'])->name('update');
     Route::delete('/{currency}', [CurrencyController::class, 'destroy'])->name('destroy');
     // Special actions
     Route::post('/{currency}/toggle-status', [CurrencyController::class, 'toggleStatus'])->name('toggle-status');

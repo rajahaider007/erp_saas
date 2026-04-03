@@ -1,0 +1,15 @@
+# Use this ONLY if /erp_saas/.htaccess does nothing (404 on /erp_saas/).
+#
+# 1. Open Hostinger File Manager → public_html
+# 2. Edit or create .htaccess there (merge with existing content if any)
+# 3. Paste the block below (adjust folder name if not "erp_saas")
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{REQUEST_URI} ^/erp_saas/?$ [NC]
+    RewriteRule ^erp_saas/?$ erp_saas/public/index.php [L]
+
+    RewriteCond %{REQUEST_URI} ^/erp_saas/(?!public/).* [NC]
+    RewriteRule ^erp_saas/(.*)$ erp_saas/public/$1 [L]
+</IfModule>
