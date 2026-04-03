@@ -8,29 +8,59 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('uom_masters', function (Blueprint $table) {
-            $table->boolean('is_base_uom')->default(false)->after('symbol');
-            $table->unsignedTinyInteger('decimal_precision')->default(2)->after('is_base_uom');
-        });
+        if (! Schema::hasColumn('uom_masters', 'is_base_uom')) {
+            Schema::table('uom_masters', function (Blueprint $table) {
+                $table->boolean('is_base_uom')->default(false)->after('symbol');
+            });
+        }
+
+        if (! Schema::hasColumn('uom_masters', 'decimal_precision')) {
+            Schema::table('uom_masters', function (Blueprint $table) {
+                $after = Schema::hasColumn('uom_masters', 'is_base_uom') ? 'is_base_uom' : 'symbol';
+                $table->unsignedTinyInteger('decimal_precision')->default(2)->after($after);
+            });
+        }
 
         Schema::table('tax_categories', function (Blueprint $table) {
-            $table->foreignId('gl_account_id')->nullable()->after('tax_rate')->constrained('chart_of_accounts')->nullOnDelete();
-            $table->string('country_region', 100)->nullable()->after('applicable_for');
+            if (! Schema::hasColumn('tax_categories', 'gl_account_id')) {
+                $table->foreignId('gl_account_id')->nullable()->after('tax_rate')->constrained('chart_of_accounts')->nullOnDelete();
+            }
+            if (! Schema::hasColumn('tax_categories', 'country_region')) {
+                $table->string('country_region', 100)->nullable()->after('applicable_for');
+            }
         });
 
         Schema::table('countries', function (Blueprint $table) {
-            $table->foreignId('currency_id')->nullable()->after('country_name')->constrained('currencies')->nullOnDelete();
-            $table->string('tax_system', 50)->nullable()->after('iso_numeric_code');
-            $table->text('customs_rules')->nullable()->after('sub_region');
+            if (! Schema::hasColumn('countries', 'currency_id')) {
+                $table->foreignId('currency_id')->nullable()->after('country_name')->constrained('currencies')->nullOnDelete();
+            }
+            if (! Schema::hasColumn('countries', 'tax_system')) {
+                $table->string('tax_system', 50)->nullable()->after('iso_numeric_code');
+            }
+            if (! Schema::hasColumn('countries', 'customs_rules')) {
+                $table->text('customs_rules')->nullable()->after('sub_region');
+            }
         });
 
         Schema::table('vendors', function (Blueprint $table) {
-            $table->string('payment_terms', 100)->nullable()->after('address');
-            $table->foreignId('currency_id')->nullable()->after('country_id')->constrained('currencies')->nullOnDelete();
-            $table->string('tax_registration_number', 100)->nullable()->after('tax_id');
-            $table->text('bank_details')->nullable()->after('tax_registration_number');
-            $table->decimal('credit_limit', 18, 2)->nullable()->after('bank_details');
-            $table->enum('vendor_type', ['local', 'import'])->default('local')->after('credit_limit');
+            if (! Schema::hasColumn('vendors', 'payment_terms')) {
+                $table->string('payment_terms', 100)->nullable()->after('address');
+            }
+            if (! Schema::hasColumn('vendors', 'currency_id')) {
+                $table->foreignId('currency_id')->nullable()->after('country_id')->constrained('currencies')->nullOnDelete();
+            }
+            if (! Schema::hasColumn('vendors', 'tax_registration_number')) {
+                $table->string('tax_registration_number', 100)->nullable()->after('tax_id');
+            }
+            if (! Schema::hasColumn('vendors', 'bank_details')) {
+                $table->text('bank_details')->nullable()->after('tax_registration_number');
+            }
+            if (! Schema::hasColumn('vendors', 'credit_limit')) {
+                $table->decimal('credit_limit', 18, 2)->nullable()->after('bank_details');
+            }
+            if (! Schema::hasColumn('vendors', 'vendor_type')) {
+                $table->enum('vendor_type', ['local', 'import'])->default('local')->after('credit_limit');
+            }
         });
     }
 
@@ -51,8 +81,6 @@ return new class extends Migration
             $table->dropColumn(['country_region']);
         });
 
-        Schema::table('uom_masters', function (Blueprint $table) {
-            $table->dropColumn(['is_base_uom', 'decimal_precision']);
-        });
+        // uom_masters.is_base_uom / decimal_precision are defined in 2026_03_01_000001; do not drop here.
     }
 };
