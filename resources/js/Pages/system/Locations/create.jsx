@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { MapPin, Home, List, Plus, Edit, Building } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import PermissionAwareForm, { PermissionButton } from '../../../Components/PermissionAwareForm';
@@ -8,7 +8,7 @@ import { usePage, router } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
 // Professional Breadcrumbs Component
-const Breadcrumbs = ({ items }) => {
+const Breadcrumbs = ({ items, description }) => {
   return (
     <div className="breadcrumbs-themed">
       <nav className="breadcrumbs">
@@ -55,100 +55,102 @@ const Breadcrumbs = ({ items }) => {
         ))}
       </nav>
 
-      <div className="breadcrumbs-description">
-        {usePage().props.location ? 'Update location information' : 'Add a new location for your company'}
-      </div>
+      <div className="breadcrumbs-description">{description}</div>
     </div>
   );
 };
 
 // Location Form Component (Unified for Create and Edit)
 const LocationForm = () => {
-const { t } = useTranslations();
+  const { t } = useTranslations();
   const { errors: pageErrors, flash, location, companies } = usePage().props;
   const isEdit = !!location;
-  
-  const fields = [
-    { 
-      name: 'company_id', 
-      label: 'Company', 
-      type: 'select', 
-      required: true, 
-      options: companies?.map(c => ({ value: c.id, label: c.company_name })) || [],
-      icon: Building
-    },
-    { 
-      name: 'location_name', 
-      label: 'Location Name', 
-      type: 'text', 
-      required: true, 
-      placeholder: 'Enter location name (e.g., Main Office, Branch Office)', 
-      icon: MapPin 
-    },
-    { 
-      name: 'address', 
-      label: 'Address', 
-      type: 'text', 
-      required: false, 
-      placeholder: 'Street address'
-    },
-    { 
-      name: 'city', 
-      label: 'City', 
-      type: 'text', 
-      required: false, 
-      placeholder: 'City name'
-    },
-    { 
-      name: 'state', 
-      label: 'State/Province', 
-      type: 'text', 
-      required: false, 
-      placeholder: 'State or Province'
-    },
-    { 
-      name: 'country', 
-      label: 'Country', 
-      type: 'text', 
-      required: false, 
-      placeholder: 'Country name'
-    },
-    { 
-      name: 'postal_code', 
-      label: 'Postal Code', 
-      type: 'text', 
-      required: false, 
-      placeholder: 'ZIP or postal code'
-    },
-    { 
-      name: 'phone', 
-      label: 'Phone', 
-      type: 'text', 
-      required: false, 
-      placeholder: 'Contact phone number'
-    },
-    { 
-      name: 'email', 
-      label: 'Email', 
-      type: 'email', 
-      required: false, 
-      placeholder: 'Contact email address'
-    },
-    { 
-      name: 'status', 
-      label: 'Status', 
-      type: 'toggle', 
-      required: false 
-    },
-    { 
-      name: 'sort_order', 
-      label: 'Sort Order', 
-      type: 'number', 
-      required: false, 
-      min: 0,
-      placeholder: 'Display order (0 = first)'
-    },
-  ];
+  const tl = (k) => t(`system.locations.create.${k}`);
+
+  const fields = useMemo(
+    () => [
+      {
+        name: 'company_id',
+        label: tl('lbl_company'),
+        type: 'select',
+        required: true,
+        options: companies?.map((c) => ({ value: c.id, label: c.company_name })) || [],
+        icon: Building,
+      },
+      {
+        name: 'location_name',
+        label: tl('lbl_location_name'),
+        type: 'text',
+        required: true,
+        placeholder: tl('ph_location_name'),
+        icon: MapPin,
+      },
+      {
+        name: 'address',
+        label: tl('lbl_address'),
+        type: 'text',
+        required: false,
+        placeholder: tl('ph_address'),
+      },
+      {
+        name: 'city',
+        label: tl('lbl_city'),
+        type: 'text',
+        required: false,
+        placeholder: tl('ph_city'),
+      },
+      {
+        name: 'state',
+        label: tl('lbl_state'),
+        type: 'text',
+        required: false,
+        placeholder: tl('ph_state'),
+      },
+      {
+        name: 'country',
+        label: tl('lbl_country'),
+        type: 'text',
+        required: false,
+        placeholder: tl('ph_country'),
+      },
+      {
+        name: 'postal_code',
+        label: tl('lbl_postal_code'),
+        type: 'text',
+        required: false,
+        placeholder: tl('ph_postal_code'),
+      },
+      {
+        name: 'phone',
+        label: tl('lbl_phone'),
+        type: 'text',
+        required: false,
+        placeholder: tl('ph_phone'),
+      },
+      {
+        name: 'email',
+        label: tl('lbl_email'),
+        type: 'email',
+        required: false,
+        placeholder: tl('ph_email'),
+      },
+      {
+        name: 'status',
+        label: t('system.locations.list.status'),
+        type: 'toggle',
+        required: false,
+      },
+      {
+        name: 'sort_order',
+        label: tl('lbl_sort_order'),
+        type: 'number',
+        required: false,
+        min: 0,
+        placeholder: tl('ph_sort_order'),
+      },
+    ],
+    [t, companies]
+  );
 
   // State for debugging and tracking
   const [errors, setErrors] = useState({});
@@ -160,7 +162,7 @@ const { t } = useTranslations();
       setErrors(pageErrors);
       setAlert({
         type: 'error',
-        message: 'Please correct the errors below and try again.'
+        message: t('common.form_errors.please_correct'),
       });
     }
   }, [pageErrors]);
@@ -205,21 +207,21 @@ const { t } = useTranslations();
         onSuccess: (page) => {
           setAlert({
             type: 'success',
-            message: isEdit ? 'Location updated successfully!' : 'Location created successfully!'
+            message: isEdit ? tl('success_updated') : tl('success_created'),
           });
         },
         onError: (errors) => {
           setErrors(errors);
           setAlert({
             type: 'error',
-            message: 'Please correct the errors below and try again.'
+            message: t('common.form_errors.please_correct'),
           });
         }
       });
     } catch (error) {
       setAlert({
         type: 'error',
-        message: 'An unexpected error occurred. Please try again.'
+        message: t('common.form_errors.unexpected'),
       });
     }
   };
@@ -232,31 +234,34 @@ const { t } = useTranslations();
   // Breadcrumb items configuration
   const breadcrumbItems = [
     {
-      label: 'Dashboard',
+      label: t('common.breadcrumbs.dashboard'),
       icon: Home,
-      href: '/dashboard'
+      href: '/dashboard',
     },
     {
-      label: 'System',
+      label: t('common.breadcrumbs.system'),
       icon: List,
-      href: '#'
+      href: '#',
     },
     {
-      label: 'Locations',
+      label: tl('breadcrumb_locations'),
       icon: MapPin,
-      href: '/system/locations'
+      href: '/system/locations',
     },
     {
-      label: isEdit ? 'Edit Location' : 'Add Location',
+      label: isEdit ? tl('breadcrumb_edit') : tl('breadcrumb_add'),
       icon: isEdit ? Edit : Plus,
-      href: null
-    }
+      href: null,
+    },
   ];
 
   return (
     <div>
       {/* Professional Breadcrumbs */}
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs
+        items={breadcrumbItems}
+        description={isEdit ? tl('breadcrumb_desc_edit') : tl('breadcrumb_desc_create')}
+      />
 
       {/* Alert Messages */}
       {alert && (
@@ -285,12 +290,12 @@ const { t } = useTranslations();
 
       {/* Location Form */}
       <GeneralizedForm
-        title={isEdit ? "Edit Location" : "Add Location"}
-        subtitle={isEdit ? "Update location details" : "Create a new location for your company"}
+        title={isEdit ? tl('title_edit') : tl('title_add')}
+        subtitle={isEdit ? tl('subtitle_edit') : tl('subtitle_create')}
         fields={fields}
         onSubmit={handleSubmit}
-        submitText={isEdit ? "Update Location" : "Create Location"}
-        resetText="Clear Form"
+        submitText={isEdit ? tl('submit_update') : tl('submit_create')}
+        resetText={t('common.form_actions.clear_form')}
         initialData={{
           company_id: location?.company_id || '',
           location_name: location?.location_name || '',
@@ -313,7 +318,8 @@ const { t } = useTranslations();
 // Main Create Component
 const Create = () => {
   const { canAdd } = usePermissions();
-  
+  const { t } = useTranslations();
+
   return (
     <App>
       {/* Main Content Card */}
@@ -322,7 +328,7 @@ const Create = () => {
           <PermissionAwareForm
             requiredPermission="can_add"
             route="/system/locations"
-            fallbackMessage="You don't have permission to create locations. Please contact your administrator."
+            fallbackMessage={t('system.locations.create.permission_fallback')}
           >
             <LocationForm />
           </PermissionAwareForm>

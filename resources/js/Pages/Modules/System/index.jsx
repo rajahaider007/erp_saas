@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 import App from '../../App.jsx';
@@ -23,61 +23,64 @@ const SystemDashboard = () => {
   const { auth, company } = usePage().props;
   const user = auth?.user;
   const { canView } = usePermissions();
+  const { t } = useTranslations();
 
-  // System module sections and menus
-  const systemSections = [
-    {
-      id: 1,
-      name: 'Module Management',
-      description: 'Manage system modules and their configurations',
-      icon: Package,
-      color: 'blue',
-      gradient: 'from-blue-500 to-blue-600',
-      menus: [
-        { name: 'Modules', route: '/system/AddModules', icon: Package },
-        { name: 'Sections', route: '/system/sections', icon: Layers },
-        { name: 'Menus', route: '/system/menus', icon: Menu }
-      ]
-    },
-    {
-      id: 2,
-      name: 'User Management',
-      description: 'Manage users, roles, and permissions',
-      icon: Users,
-      color: 'green',
-      gradient: 'from-green-500 to-green-600',
-      menus: [
-        { name: 'Users', route: '/system/users', icon: Users },
-        { name: 'Roles', route: '/system/roles', icon: Shield },
-        { name: 'Permissions', route: '/system/permissions', icon: Shield }
-      ]
-    },
-    {
-      id: 3,
-      name: 'Organization',
-      description: 'Manage companies, locations, and departments',
-      icon: Building,
-      color: 'purple',
-      gradient: 'from-purple-500 to-purple-600',
-      menus: [
-        { name: 'Companies', route: '/system/companies', icon: Building },
-        { name: 'Locations', route: '/system/locations', icon: Building },
-        { name: 'Departments', route: '/system/departments', icon: Users }
-      ]
-    },
-    {
-      id: 4,
-      name: 'Package Management',
-      description: 'Manage packages and their features',
-      icon: Package,
-      color: 'orange',
-      gradient: 'from-orange-500 to-orange-600',
-      menus: [
-        { name: 'Packages', route: '/system/packages', icon: Package },
-        { name: 'Package Features', route: '/system/package-features', icon: Layers }
-      ]
-    }
-  ];
+  const systemSections = useMemo(
+    () => [
+      {
+        id: 1,
+        name: t('modules.system.index.sections.module_management.name'),
+        description: t('modules.system.index.sections.module_management.description'),
+        icon: Package,
+        color: 'blue',
+        gradient: 'from-blue-500 to-blue-600',
+        menus: [
+          { name: t('modules.system.index.menus.modules'), route: '/system/AddModules', icon: Package },
+          { name: t('modules.system.index.menus.sections'), route: '/system/sections', icon: Layers },
+          { name: t('modules.system.index.menus.menus'), route: '/system/menus', icon: Menu },
+        ],
+      },
+      {
+        id: 2,
+        name: t('modules.system.index.sections.user_management.name'),
+        description: t('modules.system.index.sections.user_management.description'),
+        icon: Users,
+        color: 'green',
+        gradient: 'from-green-500 to-green-600',
+        menus: [
+          { name: t('modules.system.index.menus.users'), route: '/system/users', icon: Users },
+          { name: t('modules.system.index.menus.roles'), route: '/system/roles', icon: Shield },
+          { name: t('modules.system.index.menus.permissions'), route: '/system/permissions', icon: Shield },
+        ],
+      },
+      {
+        id: 3,
+        name: t('modules.system.index.sections.organization.name'),
+        description: t('modules.system.index.sections.organization.description'),
+        icon: Building,
+        color: 'purple',
+        gradient: 'from-purple-500 to-purple-600',
+        menus: [
+          { name: t('modules.system.index.menus.companies'), route: '/system/companies', icon: Building },
+          { name: t('modules.system.index.menus.locations'), route: '/system/locations', icon: Building },
+          { name: t('modules.system.index.menus.departments'), route: '/system/departments', icon: Users },
+        ],
+      },
+      {
+        id: 4,
+        name: t('modules.system.index.sections.package_management.name'),
+        description: t('modules.system.index.sections.package_management.description'),
+        icon: Package,
+        color: 'orange',
+        gradient: 'from-orange-500 to-orange-600',
+        menus: [
+          { name: t('modules.system.index.menus.packages'), route: '/system/packages', icon: Package },
+          { name: t('modules.system.index.menus.package_features'), route: '/system/package-features', icon: Layers },
+        ],
+      },
+    ],
+    [t]
+  );
 
   const getSectionIcon = (iconComponent) => {
     const Icon = iconComponent;
@@ -142,10 +145,10 @@ const SystemDashboard = () => {
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    System Administration
+                    {t('modules.system.index.page_title')}
                   </h1>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Manage your ERP system configuration and settings
+                    {t('modules.system.index.page_subtitle')}
                   </p>
                 </div>
               </div>
@@ -154,7 +157,7 @@ const SystemDashboard = () => {
                 <div className="text-right">
                   <p className="text-sm text-gray-500 dark:text-gray-400">{t('modules.system.index.welcome_back')}</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {user?.fname ? `${user.fname} ${user.lname}`.trim() : 'Administrator'}
+                    {user?.fname ? `${user.fname} ${user.lname}`.trim() : t('modules.system.index.administrator')}
                   </p>
                 </div>
                 <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold">
@@ -225,7 +228,7 @@ const SystemDashboard = () => {
                 <Database className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white ml-3">
-                System Management
+                {t('modules.system.index.system_management_heading')}
               </h2>
             </div>
             
@@ -243,7 +246,7 @@ const SystemDashboard = () => {
                 <Clock className="h-5 w-5" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white ml-3">
-                Recent Activity
+                {t('modules.system.index.recent_activity')}
               </h3>
             </div>
             
@@ -256,7 +259,7 @@ const SystemDashboard = () => {
                   <p className="font-medium text-gray-900 dark:text-white">{t('modules.system.index.new_user_registered')}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">{t('modules.system.index.john_doe_joined_the_system')}</p>
                 </div>
-                <span className="text-sm text-gray-500 dark:text-gray-400">2 min ago</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{t('modules.system.index.time_2_min_ago')}</span>
               </div>
               
               <div className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
@@ -267,7 +270,7 @@ const SystemDashboard = () => {
                   <p className="font-medium text-gray-900 dark:text-white">{t('modules.system.index.module_updated')}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">{t('modules.system.index.hr_module_configuration_changed')}</p>
                 </div>
-                <span className="text-sm text-gray-500 dark:text-gray-400">1 hour ago</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{t('modules.system.index.time_1_hour_ago')}</span>
               </div>
               
               <div className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
@@ -278,7 +281,7 @@ const SystemDashboard = () => {
                   <p className="font-medium text-gray-900 dark:text-white">{t('modules.system.index.company_added')}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">{t('modules.system.index.new_company_tech_corp_registered')}</p>
                 </div>
-                <span className="text-sm text-gray-500 dark:text-gray-400">3 hours ago</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{t('modules.system.index.time_3_hours_ago')}</span>
               </div>
             </div>
           </div>

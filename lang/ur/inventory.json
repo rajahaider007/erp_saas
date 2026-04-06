@@ -146,8 +146,16 @@
             "no_inventory_items_yet_create_your_first": "ابھی تک کوئی انوینٹری آئٹمز نہیں ہیں۔ شروع کرنے کے لیے اپنا پہلا آئٹم بنائیں۔"
         }
     },
-    "master_data": {
-        "list": {
+  "master_data": {
+    "create": {
+      "back_to_list": "← فہرست پر واپس",
+      "title_create": "{name} بنائیں",
+      "title_edit": "{name} میں ترمیم",
+      "subtitle_create": "نیا ماسٹر ڈیٹا ریکارڈ شامل کریں",
+      "subtitle_edit": "ماسٹر ڈیٹا ریکارڈ اپ ڈیٹ کریں",
+      "fallback_title": "ماسٹر ڈیٹا"
+    },
+    "list": {
             "search": "تلاش کریں...",
             "all_status": "تمام حیثیت",
             "active": "فعال",

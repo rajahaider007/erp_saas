@@ -1,13 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Type, Settings, Layers, Home, List, Plus } from 'lucide-react';
 import App from "../../App.jsx";
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import { usePage, router } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
-// Debug Panel removed per requirement
-
-const Breadcrumbs = ({ items }) => (
+const Breadcrumbs = ({ items, description }) => (
   <div className="breadcrumbs-themed">
     <nav className="breadcrumbs">
       {items.map((item, idx) => (
@@ -24,123 +22,150 @@ const Breadcrumbs = ({ items }) => (
         </div>
       ))}
     </nav>
-    <div className="breadcrumbs-description">Navigate through your application modules</div>
+    <div className="breadcrumbs-description">{description}</div>
   </div>
 );
 
 const AddMenuForm = () => {
   const { modules } = usePage().props;
   const { t } = useTranslations();
+  const ta = (k) => t(`system.menus.add.${k}`);
   const [sections, setSections] = useState([]);
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
-  const [requestStatus, setRequestStatus] = useState('');
   const [selectedModuleId, setSelectedModuleId] = useState('');
 
-  // Load sections when module changes
   const loadSections = async (moduleId) => {
     if (!moduleId) {
       setSections([]);
       return;
     }
-    
     try {
-      console.log('Loading sections for module:', moduleId);
       const response = await fetch(`/system/sections/by-module/${moduleId}`);
       const data = await response.json();
-      console.log('Sections API response:', data);
       setSections(data?.data?.sections || []);
-    } catch (error) {
-      console.error('Failed to load sections:', error);
+    } catch {
       setSections([]);
     }
   };
 
-  // Handle module selection
   const handleModuleChange = (moduleId) => {
     setSelectedModuleId(moduleId);
     loadSections(moduleId);
   };
 
-  // Search sections function for searchable select
   const searchSections = async (searchTerm) => {
     if (!selectedModuleId) return sections;
-    
     try {
       const response = await fetch(`/system/sections/by-module/${selectedModuleId}?search=${encodeURIComponent(searchTerm)}`);
       const data = await response.json();
       return data?.data?.sections || [];
-    } catch (error) {
-      console.error('Failed to search sections:', error);
+    } catch {
       return sections;
     }
   };
 
-  const fields = useMemo(() => {
-    console.log('Rendering fields with sections:', sections);
-    return [
-      { 
-        name: 'module_id', 
-        label: 'Module', 
-        type: 'select', 
-        required: true, 
-        options: modules.map(m => ({ value: m.id, label: m.module_name })), 
+  const fields = useMemo(
+    () => [
+      {
+        name: 'module_id',
+        label: ta('lbl_module'),
+        type: 'select',
+        required: true,
+        options: modules.map((m) => ({ value: m.id, label: m.module_name })),
         icon: Settings,
-        onChange: handleModuleChange
+        onChange: handleModuleChange,
       },
-      { 
-        name: 'section_id', 
-        label: 'Section', 
-        type: 'select', 
-        required: true, 
-        options: sections.map(s => ({ value: s.id, label: s.section_name })), 
+      {
+        name: 'section_id',
+        label: ta('lbl_section'),
+        type: 'select',
+        required: true,
+        options: sections.map((s) => ({ value: s.id, label: s.section_name })),
         icon: Layers,
         searchable: true,
         onSearch: searchSections,
         disabled: !selectedModuleId,
-        placeholder: selectedModuleId ? 'Select section...' : 'Select a module first'
+        placeholder: selectedModuleId ? ta('ph_section') : ta('ph_section_wait'),
       },
-      { name: 'menu_name', label: 'Menu Name', type: 'text', required: true, placeholder: 'Enter menu name', icon: Type },
-      { name: 'route', label: 'Route', type: 'text', required: false, placeholder: '/path or named route' },
-      { name: 'icon', label: 'Icon', type: 'text', required: false, placeholder: 'settings, layers, list, ...' },
-      { name: 'status', label: 'Status', type: 'toggle', required: false },
-      { name: 'sort_order', label: 'Order', type: 'number', required: false, min: 0 },
-    ];
-  }, [modules, sections, selectedModuleId]);
+      {
+        name: 'menu_name',
+        label: ta('lbl_menu_name'),
+        type: 'text',
+        required: true,
+        placeholder: ta('ph_menu_name'),
+        icon: Type,
+      },
+      {
+        name: 'route',
+        label: ta('lbl_route'),
+        type: 'text',
+        required: false,
+        placeholder: ta('ph_route'),
+      },
+      {
+        name: 'icon',
+        label: ta('lbl_icon'),
+        type: 'text',
+        required: false,
+        placeholder: ta('ph_icon'),
+      },
+      {
+        name: 'status',
+        label: ta('lbl_status'),
+        type: 'toggle',
+        required: false,
+      },
+      {
+        name: 'sort_order',
+        label: ta('lbl_sort_order'),
+        type: 'number',
+        required: false,
+        min: 0,
+      },
+    ],
+    [modules, sections, selectedModuleId, t]
+  );
+
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
+      { label: ta('breadcrumb_menus'), icon: List, href: '/system/menus' },
+      { label: ta('breadcrumb_add'), icon: Plus, href: null },
+    ],
+    [t]
+  );
 
   const handleSubmit = async (submittedFormData) => {
-    // no debug panel
     setErrors({});
     setAlert(null);
-    setRequestStatus('Sending request...');
 
     const newErrors = {};
-    if (!submittedFormData.module_id) newErrors.module_id = 'Module is required';
-    if (!submittedFormData.section_id) newErrors.section_id = 'Section is required';
-    if (!submittedFormData.menu_name || !submittedFormData.menu_name.trim()) newErrors.menu_name = 'Menu name is required';
+    if (!submittedFormData.module_id) newErrors.module_id = ta('val_module_required');
+    if (!submittedFormData.section_id) newErrors.section_id = ta('val_section_required');
+    if (!submittedFormData.menu_name || !submittedFormData.menu_name.trim()) {
+      newErrors.menu_name = ta('val_menu_name_required');
+    }
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
-      setAlert({ type: 'error', message: 'Please correct the errors below and try again.' });
-      setRequestStatus('Validation failed');
+      setAlert({ type: 'error', message: ta('msg_please_correct_the_errors_below_and_try_') });
       return;
     }
 
     router.post('/system/menus', submittedFormData, {
-      onSuccess: () => { setRequestStatus('Success'); setAlert({ type: 'success', message: 'Menu created successfully!' }); },
-      onError: (errs) => { setErrors(errs); setAlert({ type: 'error', message: 'Failed to create menu. Please check the errors below.' }); setRequestStatus('Server validation failed'); }
+      onSuccess: () => {
+        setAlert({ type: 'success', message: ta('msg_menu_created_successfully') });
+      },
+      onError: (errs) => {
+        setErrors(errs);
+        setAlert({ type: 'error', message: ta('msg_failed_to_create_menu_please_check_the_e') });
+      },
     });
   };
 
-
-  const breadcrumbItems = [
-    { label: 'Dashboard', icon: Home, href: '/dashboard' },
-    { label: 'Menus', icon: List, href: '/system/menus' },
-    { label: 'Add Menu', icon: Plus, href: null },
-  ];
-
   return (
     <div>
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs items={breadcrumbItems} description={ta('navigate_through_your_application_module')} />
       {alert && (
         <div className={`mb-4 p-4 rounded-lg animate-slideIn ${alert.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'}`}>
           <div className="flex items-center">
@@ -156,16 +181,15 @@ const AddMenuForm = () => {
         </div>
       )}
       <GeneralizedForm
-        title="Menu Name"
-        subtitle="Create a new menu under a section"
+        title={ta('form_title')}
+        subtitle={ta('create_a_new_menu_under_a_section')}
         fields={fields}
         onSubmit={handleSubmit}
-        submitText="Create Menu"
-        resetText="Clear Form"
+        submitText={ta('submit_create')}
+        resetText={t('common.form_actions.clear_form')}
         initialData={{ module_id: '', section_id: '', menu_name: '', route: '', icon: '', status: true, sort_order: 0 }}
         showReset={true}
       />
-      {/* Debug panel removed */}
     </div>
   );
 };

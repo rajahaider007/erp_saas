@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Search, X } from 'lucide-react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 /**
  * Searchable select with dropdown always rendered below the trigger (inline).
@@ -10,7 +11,7 @@ const InlineSearchSelect = ({
   options = [],
   value = '',
   onChange = () => {},
-  placeholder = 'Select an option...',
+  placeholder,
   disabled = false,
   error = null,
   className = '',
@@ -22,6 +23,8 @@ const InlineSearchSelect = ({
   onKeyDown = () => {},
   ...props
 }) => {
+  const { t } = useTranslations();
+  const displayPlaceholder = placeholder ?? t('common.form.select_an_option');
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -157,7 +160,7 @@ const InlineSearchSelect = ({
         role="combobox"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        aria-label={placeholder}
+        aria-label={displayPlaceholder}
         className={`
           form-select w-full
           ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}
@@ -177,9 +180,9 @@ const InlineSearchSelect = ({
               color: getDisplayValue() ? 'var(--text-primary)' : 'var(--text-secondary)',
               fontWeight: getDisplayValue() ? 600 : 400,
             }}
-            title={getDisplayValue() || placeholder}
+            title={getDisplayValue() || displayPlaceholder}
           >
-            {getDisplayValue() || placeholder}
+            {getDisplayValue() || displayPlaceholder}
           </span>
           <div className="flex items-center gap-1 ml-2 flex-shrink-0">
             {allowClear && value && (
@@ -188,7 +191,7 @@ const InlineSearchSelect = ({
                 onClick={handleClear}
                 className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
                 style={{ color: 'var(--text-secondary)' }}
-                aria-label="Clear"
+                aria-label={t('common.form.clear_selection')}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -227,7 +230,7 @@ const InlineSearchSelect = ({
                 <input
                   ref={searchInputRef}
                   type="text"
-                  placeholder="Search..."
+                  placeholder={t('common.form.search_placeholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={(e) => {
@@ -307,7 +310,7 @@ const InlineSearchSelect = ({
               })
             ) : (
               <div className="px-3 py-4 text-sm text-center" style={{ color: 'var(--text-secondary)' }}>
-                No options found
+                {t('common.form.no_options_found')}
               </div>
             )}
           </div>

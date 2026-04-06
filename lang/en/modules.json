@@ -35,6 +35,58 @@
   "system": {
     "dashboard": {
       "system_administration": "System Administration"
+    },
+    "index": {
+      "page_title": "System Administration",
+      "page_subtitle": "Manage your ERP system configuration and settings",
+      "welcome_back": "Welcome back",
+      "administrator": "Administrator",
+      "total_modules": "Total Modules",
+      "active_users": "Active Users",
+      "companies": "Companies",
+      "system_health": "System Health",
+      "system_management_heading": "System Management",
+      "recent_activity": "Recent Activity",
+      "new_user_registered": "New user registered",
+      "john_doe_joined_the_system": "John Doe joined the system",
+      "module_updated": "Module updated",
+      "hr_module_configuration_changed": "HR module configuration changed",
+      "company_added": "Company added",
+      "new_company_tech_corp_registered": "New company Tech Corp registered",
+      "time_2_min_ago": "2 min ago",
+      "time_1_hour_ago": "1 hour ago",
+      "time_3_hours_ago": "3 hours ago",
+      "sections": {
+        "module_management": {
+          "name": "Module Management",
+          "description": "Manage system modules and their configurations"
+        },
+        "user_management": {
+          "name": "User Management",
+          "description": "Manage users, roles, and permissions"
+        },
+        "organization": {
+          "name": "Organization",
+          "description": "Manage companies, locations, and departments"
+        },
+        "package_management": {
+          "name": "Package Management",
+          "description": "Manage packages and their features"
+        }
+      },
+      "menus": {
+        "modules": "Modules",
+        "sections": "Sections",
+        "menus": "Menus",
+        "users": "Users",
+        "roles": "Roles",
+        "permissions": "Permissions",
+        "companies": "Companies",
+        "locations": "Locations",
+        "departments": "Departments",
+        "packages": "Packages",
+        "package_features": "Package Features"
+      }
     }
   }
 }

@@ -2,9 +2,12 @@ import React, { useMemo, useState } from 'react';
 import App from '../../App.jsx';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import { router, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 export default function Create() {
+  const { t } = useTranslations();
   const { config, options = {}, record, edit_mode = false, error, errors: pageErrors, flash } = usePage().props;
+  const mc = (k, rep = {}) => t(`inventory.master_data.create.${k}`, rep);
   const [localErrors, setLocalErrors] = useState({});
 
   const fields = useMemo(() => {
@@ -67,7 +70,9 @@ export default function Create() {
     <App>
       <div className="rounded-xl bg-white shadow p-6">
         <div className="mb-4">
-          <a className="text-blue-600 text-sm" href={`/inventory/master-data/${config?.key}`}>← Back to List</a>
+          <a className="text-blue-600 text-sm" href={`/inventory/master-data/${config?.key}`}>
+            {mc('back_to_list')}
+          </a>
         </div>
 
         {error && <div className="mb-4 rounded-md bg-red-100 p-3 text-red-700">{error}</div>}
@@ -91,11 +96,15 @@ export default function Create() {
         )}
 
         <GeneralizedForm
-          title={edit_mode ? `Edit ${config?.title || 'Master Data'}` : `Create ${config?.title || 'Master Data'}`}
-          subtitle={edit_mode ? 'Update master data record' : 'Add new master data record'}
+          title={
+            edit_mode
+              ? mc('title_edit', { name: config?.title || mc('fallback_title') })
+              : mc('title_create', { name: config?.title || mc('fallback_title') })
+          }
+          subtitle={edit_mode ? mc('subtitle_edit') : mc('subtitle_create')}
           fields={fields}
           onSubmit={onSubmit}
-          submitText={edit_mode ? 'Update' : 'Create'}
+          submitText={edit_mode ? t('common.actions.update') : t('common.actions.create')}
           showReset={!edit_mode}
           initialData={initialData}
         />

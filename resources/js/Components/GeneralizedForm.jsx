@@ -5,18 +5,25 @@ import {
   Type, Folder, Image, ToggleLeft, ToggleRight
 } from 'lucide-react';
 import InlineSearchSelect from './InlineSearchSelect';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // Generalized Form Component
 const GeneralizedForm = ({
-  title = "Form",
-  subtitle = "Please fill out the form",
+  title,
+  subtitle,
   fields = [],
   onSubmit,
-  submitText = "Submit",
-  resetText = "Reset",
+  submitText,
+  resetText,
   showReset = true,
   initialData = {},
 }) => {
+  const { t } = useTranslations();
+  const displayTitle = title ?? t('common.form.default_title');
+  const displaySubtitle = subtitle ?? t('common.form.default_subtitle');
+  const displaySubmit = submitText ?? t('common.actions.submit');
+  const displayReset = resetText ?? t('common.actions.reset');
+
   const [formData, setFormData] = useState(initialData || {});
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState(null);
@@ -59,7 +66,7 @@ const GeneralizedForm = ({
     } else {
       setAlert({
         type: 'error',
-        message: 'Please select a valid image file'
+        message: t('common.form.invalid_image'),
       });
     }
   };
@@ -102,7 +109,7 @@ const GeneralizedForm = ({
       if (!formData[field.name] || formData[field.name] === '') {
         setAlert({
           type: 'error',
-          message: `${field.label} is required`
+          message: t('common.form.field_required', { label: field.label }),
         });
         return false;
       }
@@ -122,12 +129,12 @@ const GeneralizedForm = ({
       await onSubmit(formData);
       setAlert({
         type: 'success',
-        message: 'Form submitted successfully!'
+        message: t('common.form.submit_success'),
       });
     } catch (error) {
       setAlert({
         type: 'error',
-        message: error.message || 'An error occurred'
+        message: error.message || t('common.form.submit_error'),
       });
     } finally {
       setIsLoading(false);
@@ -228,7 +235,7 @@ const GeneralizedForm = ({
                 options={field.options || []}
                 value={fieldValue}
                 onChange={(value) => handleInputChange(field.name, value, field)}
-                placeholder={field.placeholder || `Select ${field.label}`}
+                placeholder={field.placeholder || t('common.form.select_option', { label: field.label })}
                 disabled={field.disabled || false}
                 searchable={true}
               />
@@ -249,7 +256,7 @@ const GeneralizedForm = ({
                 disabled={field.disabled || false}
                 required={field.required}
               >
-                <option value="">{field.placeholder || `Select ${field.label}`}</option>
+                <option value="">{field.placeholder || t('common.form.select_option', { label: field.label })}</option>
                 {field.options && field.options.map((option, index) => {
                   const value = typeof option === 'object' ? option.value : option;
                   const label = typeof option === 'object' ? option.label : option;
@@ -322,7 +329,7 @@ const GeneralizedForm = ({
                   <ToggleLeft className="toggle-icon" size={24} />
                 )}
                 <span className="toggle-text">
-                  {fieldValue ? 'Active' : 'Inactive'}
+                  {fieldValue ? t('common.status.active') : t('common.status.inactive')}
                 </span>
               </button>
             </div>
@@ -353,7 +360,7 @@ const GeneralizedForm = ({
                   <div className="image-preview-container">
                     <img
                       src={imagePreviews[field.name]}
-                      alt="Preview"
+                      alt={t('common.form.preview_alt')}
                       className="image-preview"
                     />
                     <button
@@ -371,9 +378,9 @@ const GeneralizedForm = ({
                   <div className="file-label">
                     <Upload size={24} />
                     <span className="file-text">
-                      {field.placeholder || 'Drag & drop an image or click to select'}
+                      {field.placeholder || t('common.form.image_drop_hint')}
                     </span>
-                    <span className="file-subtext">PNG, JPG, JPEG up to 10MB</span>
+                    <span className="file-subtext">{t('common.form.image_formats_hint')}</span>
                   </div>
                 )}
               </div>
@@ -404,8 +411,8 @@ const GeneralizedForm = ({
       {/* Form Container */}
       <div className="form-container">
         <div className="form-header mb-8">
-          <h1 className="form-title">{title}</h1>
-          <p className="form-subtitle">{subtitle}</p>
+          <h1 className="form-title">{displayTitle}</h1>
+          <p className="form-subtitle">{displaySubtitle}</p>
         </div>
 
         {alert && (
@@ -429,12 +436,12 @@ const GeneralizedForm = ({
               {isLoading ? (
                 <>
                   <Loader2 className="btn-icon animate-spin" size={20} />
-                  Processing...
+                  {t('common.form.processing')}
                 </>
               ) : (
                 <>
                   <CheckCircle className="btn-icon" size={20} />
-                  {submitText}
+                  {displaySubmit}
                 </>
               )}
             </button>
@@ -447,7 +454,7 @@ const GeneralizedForm = ({
                 disabled={isLoading}
               >
                 <X className="btn-icon" size={20} />
-                {resetText}
+                {displayReset}
               </button>
             )}
           </div>

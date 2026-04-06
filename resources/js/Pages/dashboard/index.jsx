@@ -6,6 +6,8 @@ import FormThemeSystem from './FormThemeSystem';
 import { Grid3X3, ArrowRight, Star, Zap } from 'lucide-react';
 
 export default function Dashboard() {
+  const { t } = useTranslations();
+
   return (
    <App>
       <div className="space-y-8">
@@ -13,9 +15,9 @@ export default function Dashboard() {
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-8 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold mb-4">Welcome to ERP Enterprise</h1>
+              <h1 className="text-4xl font-bold mb-4">{t('common.dashboard_home.welcome_title')}</h1>
               <p className="text-xl text-blue-100 mb-6">
-                Your comprehensive business management solution
+                {t('common.dashboard_home.welcome_subtitle')}
               </p>
               <div className="flex items-center space-x-4">
                 <Link
@@ -23,12 +25,12 @@ export default function Dashboard() {
                   className="inline-flex items-center px-6 py-3 bg-white text-blue-600 rounded-xl font-semibold hover:bg-blue-50 transition-colors duration-200 shadow-lg"
                 >
                   <Grid3X3 className="h-5 w-5 mr-2" />
-                  Explore Modules
+                  {t('common.dashboard_home.explore_modules')}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Link>
                 <div className="flex items-center space-x-2 text-blue-100">
                   <Star className="h-5 w-5" />
-                  <span className="font-medium">Professional Edition</span>
+                  <span className="font-medium">{t('common.dashboard_home.professional_edition')}</span>
                 </div>
               </div>
             </div>
@@ -51,14 +53,14 @@ export default function Dashboard() {
                 <Grid3X3 className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white ml-3">
-                Modules
+                {t('common.dashboard_home.card_modules_title')}
               </h3>
             </div>
             <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-              Access all your business modules and manage your organization efficiently.
+              {t('common.dashboard_home.card_modules_desc')}
             </p>
             <div className="flex items-center text-blue-600 dark:text-blue-400 text-sm font-medium group-hover:text-blue-700">
-              Explore Modules
+              {t('common.dashboard_home.card_modules_cta')}
               <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>
@@ -69,14 +71,14 @@ export default function Dashboard() {
                 <Star className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white ml-3">
-                Analytics
+                {t('common.dashboard_home.card_analytics_title')}
               </h3>
             </div>
             <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-              View business insights and performance metrics across all modules.
+              {t('common.dashboard_home.card_analytics_desc')}
             </p>
             <div className="flex items-center text-gray-400 text-sm">
-              Coming Soon
+              {t('common.dashboard_home.coming_soon')}
             </div>
           </div>
 
@@ -86,21 +88,21 @@ export default function Dashboard() {
                 <Zap className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white ml-3">
-                Quick Actions
+                {t('common.dashboard_home.card_quick_actions_title')}
               </h3>
             </div>
             <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-              Perform common tasks and access frequently used features.
+              {t('common.dashboard_home.card_quick_actions_desc')}
             </p>
             <div className="flex items-center text-gray-400 text-sm">
-              Coming Soon
+              {t('common.dashboard_home.coming_soon')}
             </div>
           </div>
         </div>
         
         {/* Form Theme System */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Form Theme System</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">{t('common.dashboard_home.form_theme_heading')}</h2>
           <FormThemeSystem />
         </div>
       </div>

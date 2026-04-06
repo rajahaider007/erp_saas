@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Building2, Globe, Mail, Phone, MapPin, Calendar, CreditCard, Shield, FileText, Plus, Home, List, Edit, Package, Users, HardDrive } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import PermissionAwareForm, { PermissionButton } from '../../../Components/PermissionAwareForm';
@@ -8,7 +8,7 @@ import { router, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
 // Professional Breadcrumbs Component
-const Breadcrumbs = ({ items }) => {
+const Breadcrumbs = ({ items, description }) => {
   return (
     <div className="breadcrumbs-themed">
       <nav className="breadcrumbs">
@@ -55,317 +55,310 @@ const Breadcrumbs = ({ items }) => {
         ))}
       </nav>
 
-      <div className="breadcrumbs-description">
-        {usePage().props.company ? 'Update company information' : 'Register a new company in the system'}
-      </div>
+      <div className="breadcrumbs-description">{description}</div>
     </div>
   );
 };
 
 // Company Form Component (Unified for Create and Edit)
 const CreateCompanyForm = () => {
-const { t } = useTranslations();
-  const { errors: pageErrors, flash, company, currencies, isParentCompany, restrictedFields } = usePage().props;
+  const { t } = useTranslations();
+  const { errors: pageErrors, flash, company, currencies, isParentCompany, restrictedFields, packages } = usePage().props;
   const isEdit = !!company;
-  
-  const companyFields = [
-    // Company Basic Information
-    {
-      name: 'company_name',
-      label: 'Company Name',
-      type: 'text',
-      placeholder: 'Enter company name',
-      icon: Building2,
-      required: true
-    },
-    {
-      name: 'company_code',
-      label: 'Company Code',
-      type: 'text',
-      placeholder: 'Enter unique company code (optional)',
-      icon: FileText,
-      required: false
-    },
-    {
-      name: 'legal_name',
-      label: 'Legal Name',
-      type: 'text',
-      placeholder: 'Enter legal company name',
-      icon: Shield,
-      required: false
-    },
-    {
-      name: 'trading_name',
-      label: 'Trading Name',
-      type: 'text',
-      placeholder: 'Enter trading name (if different)',
-      icon: Building2,
-      required: false
-    },
-    
-    // Registration Details
-    {
-      name: 'registration_number',
-      label: 'Registration Number',
-      type: 'text',
-      placeholder: 'Enter company registration number',
-      icon: FileText,
-      required: true
-    },
-    {
-      name: 'tax_id',
-      label: 'Tax ID',
-      type: 'text',
-      placeholder: 'Enter tax identification number',
-      icon: CreditCard,
-      required: false
-    },
-    {
-      name: 'vat_number',
-      label: 'VAT Number',
-      type: 'text',
-      placeholder: 'Enter VAT number',
-      icon: CreditCard,
-      required: false
-    },
-    {
-      name: 'incorporation_date',
-      label: 'Incorporation Date',
-      type: 'date',
-      placeholder: 'Select incorporation date',
-      icon: Calendar,
-      required: false
-    },
-    {
-      name: 'company_type',
-      label: 'Company Type',
-      type: 'select',
-      placeholder: 'Select company type',
-      icon: Building2,
-      required: true,
-      options: [
-        { value: 'private_limited', label: 'Private Limited' },
-        { value: 'public_limited', label: 'Public Limited' },
-        { value: 'partnership', label: 'Partnership' },
-        { value: 'sole_proprietorship', label: 'Sole Proprietorship' },
-        { value: 'llc', label: 'Limited Liability Company (LLC)' }
-      ]
-    },
-    
-    // Contact Information
-    {
-      name: 'email',
-      label: 'Email Address',
-      type: 'email',
-      placeholder: 'Enter company email address',
-      icon: Mail,
-      required: true
-    },
-    {
-      name: 'phone',
-      label: 'Phone Number',
-      type: 'tel',
-      placeholder: 'Enter company phone number',
-      icon: Phone,
-      required: false
-    },
-    {
-      name: 'fax',
-      label: 'Fax Number',
-      type: 'tel',
-      placeholder: 'Enter fax number (optional)',
-      icon: Phone,
-      required: false
-    },
-    {
-      name: 'website',
-      label: 'Website',
-      type: 'url',
-      placeholder: 'Enter company website URL',
-      icon: Globe,
-      required: false
-    },
-    
-    // Address Information
-    {
-      name: 'address_line_1',
-      label: 'Address Line 1',
-      type: 'text',
-      placeholder: 'Enter street address',
-      icon: MapPin,
-      required: true
-    },
-    {
-      name: 'address_line_2',
-      label: 'Address Line 2',
-      type: 'text',
-      placeholder: 'Enter additional address details',
-      icon: MapPin,
-      required: false
-    },
-    {
-      name: 'city',
-      label: 'City',
-      type: 'text',
-      placeholder: 'Enter city',
-      icon: MapPin,
-      required: true
-    },
-    {
-      name: 'state_province',
-      label: 'State/Province',
-      type: 'text',
-      placeholder: 'Enter state or province',
-      icon: MapPin,
-      required: false
-    },
-    {
-      name: 'postal_code',
-      label: 'Postal Code',
-      type: 'text',
-      placeholder: 'Enter postal code',
-      icon: MapPin,
-      required: false
-    },
-    {
-      name: 'country',
-      label: 'Country',
-      type: 'text',
-      placeholder: 'Enter country',
-      icon: Globe,
-      required: true
-    },
-    
-    // Business Information
-    {
-      name: 'industry',
-      label: 'Industry',
-      type: 'text',
-      placeholder: 'Enter industry sector',
-      icon: Building2,
-      required: false
-    },
-    {
-      name: 'business_description',
-      label: 'Business Description',
-      type: 'textarea',
-      placeholder: 'Describe the company business',
-      icon: FileText,
-      required: false,
-      rows: 3
-    },
-    {
-      name: 'employee_count',
-      label: 'Employee Count',
-      type: 'number',
-      placeholder: 'Enter number of employees',
-      icon: Building2,
-      required: false,
-      min: 0
-    },
-    {
-      name: 'annual_revenue',
-      label: 'Annual Revenue',
-      type: 'number',
-      placeholder: 'Enter annual revenue',
-      icon: CreditCard,
-      required: false,
-      min: 0
-    },
-    {
-      name: 'currency',
-      label: 'Currency',
-      type: 'select',
-      placeholder: 'Select currency',
-      icon: CreditCard,
-      required: false,
-      options: currencies || []
-    },
-    
-    // Company Branding
-    {
-      name: 'logo',
-      label: 'Company Logo',
-      type: 'file-image',
-      placeholder: 'Upload company logo',
-      required: false
-    },
-    
-    // System Settings
-    {
-      name: 'status',
-      label: 'Status',
-      type: 'toggle',
-      required: false
-    },
-    {
-      name: 'auto_voucher_numbering',
-      label: 'Auto Voucher Numbering',
-      type: 'toggle',
-      required: false
-    },
-    {
-      name: 'package_id',
-      label: 'Package',
-      type: 'select',
-      placeholder: 'Select package',
-      icon: Package,
-      required: true,
-      options: usePage().props.packages?.map(pkg => ({
-        value: pkg.id,
-        label: pkg.package_name
-      })) || []
-    },
-    {
-      name: 'license_number',
-      label: 'License Number',
-      type: 'text',
-      placeholder: 'Enter license number',
-      icon: Shield,
-      required: false
-    },
-    {
-      name: 'license_start_date',
-      label: 'License Start Date',
-      type: 'date',
-      placeholder: 'Select license start date',
-      icon: Calendar,
-      required: true
-    },
-    {
-      name: 'license_end_date',
-      label: 'License End Date',
-      type: 'date',
-      placeholder: 'Select license end date',
-      icon: Calendar,
-      required: true
-    },
-    {
-      name: 'parent_comp',
-      label: 'Parent Company',
-      type: 'select',
-      placeholder: 'Is this a parent company?',
-      icon: Building2,
-      required: false,
-      options: [
-        { value: 'Yes', label: 'Yes - Parent Company' },
-        { value: 'No', label: 'No - Customer Company' }
-      ]
-    },
-    
-    // Storage Settings
-    {
-      name: 'attachment_storage_limit_mb',
-      label: 'Attachment Storage Limit (MB)',
-      type: 'number',
-      placeholder: 'Enter storage limit in MB (e.g., 1000)',
-      icon: HardDrive,
-      required: false,
-      min: 1,
-      max: 10000,
-      help: 'Maximum storage space for attachments in megabytes'
-    },
-  ];
+
+  const sl = (field) => {
+    const key = field === 'state_province' ? 'stateprovince' : field;
+    return t(`system.companies.show.${key}`);
+  };
+
+  const tc = (suffix) => t(`system.companies.create.${suffix}`);
+
+  const companyFields = useMemo(
+    () => [
+      {
+        name: 'company_name',
+        label: sl('company_name'),
+        type: 'text',
+        placeholder: tc('ph_company_name'),
+        icon: Building2,
+        required: true,
+      },
+      {
+        name: 'company_code',
+        label: sl('company_code'),
+        type: 'text',
+        placeholder: tc('ph_company_code'),
+        icon: FileText,
+        required: false,
+      },
+      {
+        name: 'legal_name',
+        label: sl('legal_name'),
+        type: 'text',
+        placeholder: tc('ph_legal_name'),
+        icon: Shield,
+        required: false,
+      },
+      {
+        name: 'trading_name',
+        label: sl('trading_name'),
+        type: 'text',
+        placeholder: tc('ph_trading_name'),
+        icon: Building2,
+        required: false,
+      },
+      {
+        name: 'registration_number',
+        label: sl('registration_number'),
+        type: 'text',
+        placeholder: tc('ph_registration_number'),
+        icon: FileText,
+        required: true,
+      },
+      {
+        name: 'tax_id',
+        label: sl('tax_id'),
+        type: 'text',
+        placeholder: tc('ph_tax_id'),
+        icon: CreditCard,
+        required: false,
+      },
+      {
+        name: 'vat_number',
+        label: sl('vat_number'),
+        type: 'text',
+        placeholder: tc('ph_vat_number'),
+        icon: CreditCard,
+        required: false,
+      },
+      {
+        name: 'incorporation_date',
+        label: sl('incorporation_date'),
+        type: 'date',
+        placeholder: tc('ph_incorporation_date'),
+        icon: Calendar,
+        required: false,
+      },
+      {
+        name: 'company_type',
+        label: sl('company_type'),
+        type: 'select',
+        placeholder: tc('ph_company_type'),
+        icon: Building2,
+        required: true,
+        options: [
+          { value: 'private_limited', label: tc('opt_private_limited') },
+          { value: 'public_limited', label: tc('opt_public_limited') },
+          { value: 'partnership', label: tc('opt_partnership') },
+          { value: 'sole_proprietorship', label: tc('opt_sole_proprietorship') },
+          { value: 'llc', label: tc('opt_llc') },
+        ],
+      },
+      {
+        name: 'email',
+        label: sl('email'),
+        type: 'email',
+        placeholder: tc('ph_email'),
+        icon: Mail,
+        required: true,
+      },
+      {
+        name: 'phone',
+        label: sl('phone'),
+        type: 'tel',
+        placeholder: tc('ph_phone'),
+        icon: Phone,
+        required: false,
+      },
+      {
+        name: 'fax',
+        label: sl('fax'),
+        type: 'tel',
+        placeholder: tc('ph_fax'),
+        icon: Phone,
+        required: false,
+      },
+      {
+        name: 'website',
+        label: sl('website'),
+        type: 'url',
+        placeholder: tc('ph_website'),
+        icon: Globe,
+        required: false,
+      },
+      {
+        name: 'address_line_1',
+        label: sl('address_line_1'),
+        type: 'text',
+        placeholder: tc('ph_address_line_1'),
+        icon: MapPin,
+        required: true,
+      },
+      {
+        name: 'address_line_2',
+        label: sl('address_line_2'),
+        type: 'text',
+        placeholder: tc('ph_address_line_2'),
+        icon: MapPin,
+        required: false,
+      },
+      {
+        name: 'city',
+        label: sl('city'),
+        type: 'text',
+        placeholder: tc('ph_city'),
+        icon: MapPin,
+        required: true,
+      },
+      {
+        name: 'state_province',
+        label: sl('state_province'),
+        type: 'text',
+        placeholder: tc('ph_state_province'),
+        icon: MapPin,
+        required: false,
+      },
+      {
+        name: 'postal_code',
+        label: sl('postal_code'),
+        type: 'text',
+        placeholder: tc('ph_postal_code'),
+        icon: MapPin,
+        required: false,
+      },
+      {
+        name: 'country',
+        label: sl('country'),
+        type: 'text',
+        placeholder: tc('ph_country'),
+        icon: Globe,
+        required: true,
+      },
+      {
+        name: 'industry',
+        label: sl('industry'),
+        type: 'text',
+        placeholder: tc('ph_industry'),
+        icon: Building2,
+        required: false,
+      },
+      {
+        name: 'business_description',
+        label: sl('business_description'),
+        type: 'textarea',
+        placeholder: tc('ph_business_description'),
+        icon: FileText,
+        required: false,
+        rows: 3,
+      },
+      {
+        name: 'employee_count',
+        label: sl('employee_count'),
+        type: 'number',
+        placeholder: tc('ph_employee_count'),
+        icon: Building2,
+        required: false,
+        min: 0,
+      },
+      {
+        name: 'annual_revenue',
+        label: sl('annual_revenue'),
+        type: 'number',
+        placeholder: tc('ph_annual_revenue'),
+        icon: CreditCard,
+        required: false,
+        min: 0,
+      },
+      {
+        name: 'currency',
+        label: sl('currency'),
+        type: 'select',
+        placeholder: tc('ph_currency'),
+        icon: CreditCard,
+        required: false,
+        options: currencies || [],
+      },
+      {
+        name: 'logo',
+        label: tc('lbl_company_logo'),
+        type: 'file-image',
+        placeholder: tc('ph_logo'),
+        required: false,
+      },
+      {
+        name: 'status',
+        label: sl('status'),
+        type: 'toggle',
+        required: false,
+      },
+      {
+        name: 'auto_voucher_numbering',
+        label: tc('lbl_auto_voucher_numbering'),
+        type: 'toggle',
+        required: false,
+      },
+      {
+        name: 'package_id',
+        label: tc('lbl_package'),
+        type: 'select',
+        placeholder: tc('ph_package'),
+        icon: Package,
+        required: true,
+        options:
+          packages?.map((pkg) => ({
+            value: pkg.id,
+            label: pkg.package_name,
+          })) || [],
+      },
+      {
+        name: 'license_number',
+        label: tc('lbl_license_number'),
+        type: 'text',
+        placeholder: tc('ph_license_number'),
+        icon: Shield,
+        required: false,
+      },
+      {
+        name: 'license_start_date',
+        label: tc('lbl_license_start_date'),
+        type: 'date',
+        placeholder: tc('ph_license_start_date'),
+        icon: Calendar,
+        required: true,
+      },
+      {
+        name: 'license_end_date',
+        label: tc('lbl_license_end_date'),
+        type: 'date',
+        placeholder: tc('ph_license_end_date'),
+        icon: Calendar,
+        required: true,
+      },
+      {
+        name: 'parent_comp',
+        label: tc('lbl_parent_company'),
+        type: 'select',
+        placeholder: tc('ph_parent_comp'),
+        icon: Building2,
+        required: false,
+        options: [
+          { value: 'Yes', label: tc('opt_yes_parent') },
+          { value: 'No', label: tc('opt_no_customer') },
+        ],
+      },
+      {
+        name: 'attachment_storage_limit_mb',
+        label: tc('lbl_attachment_storage_limit_mb'),
+        type: 'number',
+        placeholder: tc('ph_attachment_storage_limit_mb'),
+        icon: HardDrive,
+        required: false,
+        min: 1,
+        max: 10000,
+      },
+    ],
+    [t, currencies, packages]
+  );
 
   // Filter out restricted fields for customer companies
   const filteredFields = isParentCompany 
@@ -383,7 +376,7 @@ const { t } = useTranslations();
       setErrors(pageErrors);
       setAlert({
         type: 'error',
-        message: 'Please correct the errors below and try again.'
+        message: t('common.form_errors.please_correct'),
       });
     }
   }, [pageErrors]);
@@ -434,7 +427,7 @@ const { t } = useTranslations();
           setRequestStatus('success');
           setAlert({
             type: 'success',
-            message: isEdit ? 'Company updated successfully!' : 'Company registered successfully!'
+            message: isEdit ? tc('success_updated') : tc('success_registered'),
           });
         },
         onError: (errors) => {
@@ -442,7 +435,7 @@ const { t } = useTranslations();
           setErrors(errors);
           setAlert({
             type: 'error',
-            message: 'Please correct the errors below and try again.'
+            message: t('common.form_errors.please_correct'),
           });
         }
       });
@@ -450,7 +443,7 @@ const { t } = useTranslations();
       setRequestStatus('error');
       setAlert({
         type: 'error',
-        message: 'An unexpected error occurred. Please try again.'
+        message: t('common.form_errors.unexpected'),
       });
     }
   };
@@ -464,31 +457,34 @@ const { t } = useTranslations();
   // Breadcrumb items configuration
   const breadcrumbItems = [
     {
-      label: 'Dashboard',
+      label: t('common.breadcrumbs.dashboard'),
       icon: Home,
-      href: '/dashboard'
+      href: '/dashboard',
     },
     {
-      label: 'System',
+      label: t('common.breadcrumbs.system'),
       icon: List,
-      href: '#'
+      href: '#',
     },
     {
-      label: 'Companies',
+      label: tc('breadcrumb_companies'),
       icon: Building2,
-      href: '/system/companies'
+      href: '/system/companies',
     },
     {
-      label: isEdit ? 'Edit Company' : 'Register Company',
+      label: isEdit ? tc('breadcrumb_edit') : tc('breadcrumb_register'),
       icon: isEdit ? Edit : Plus,
-      href: null
-    }
+      href: null,
+    },
   ];
 
   return (
     <div>
       {/* Professional Breadcrumbs */}
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs
+        items={breadcrumbItems}
+        description={isEdit ? tc('breadcrumb_desc_edit') : tc('breadcrumb_desc_create')}
+      />
 
       {/* Alert Messages */}
       {alert && (
@@ -517,12 +513,12 @@ const { t } = useTranslations();
 
       {/* Company Form */}
       <GeneralizedForm
-        title={isEdit ? "Edit Company" : "Register New Company"}
-        subtitle={isEdit ? "Update company information and settings" : "Complete the company registration form with all required information"}
+        title={isEdit ? tc('title_edit') : tc('title_register')}
+        subtitle={isEdit ? tc('subtitle_edit') : tc('subtitle_register')}
         fields={filteredFields}
         onSubmit={handleCompanySubmit}
-        submitText={isEdit ? "Update Company" : "Register Company"}
-        resetText="Clear Form"
+        submitText={isEdit ? tc('submit_update') : tc('submit_register')}
+        resetText={t('common.form_actions.clear_form')}
         initialData={{ 
           company_name: company?.company_name || '',
           company_code: company?.company_code || '',
@@ -589,7 +585,8 @@ const formatDateForInput = (date) => {
 // Main Create Component
 const Create = () => {
   const { canAdd } = usePermissions();
-  
+  const { t } = useTranslations();
+
   return (
     <App>
       {/* Main Content Card */}
@@ -598,7 +595,7 @@ const Create = () => {
           <PermissionAwareForm
             requiredPermission="can_add"
             route="/system/companies"
-            fallbackMessage="You don't have permission to create companies. Please contact your administrator."
+            fallbackMessage={t('system.companies.create.permission_fallback')}
           >
             <CreateCompanyForm />
           </PermissionAwareForm>

@@ -147,6 +147,14 @@
     }
   },
   "master_data": {
+    "create": {
+      "back_to_list": "← Back to List",
+      "title_create": "Create {name}",
+      "title_edit": "Edit {name}",
+      "subtitle_create": "Add new master data record",
+      "subtitle_edit": "Update master data record",
+      "fallback_title": "Master Data"
+    },
     "list": {
       "search": "Search...",
       "all_status": "All Status",

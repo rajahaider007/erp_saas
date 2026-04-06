@@ -40,6 +40,58 @@
   "system": {
     "dashboard": {
       "system_administration": "سسٹم ایڈمنسٹریشن"
+    },
+    "index": {
+      "page_title": "سسٹم انتظام",
+      "page_subtitle": "اپنے ERP کی ترتیبات اور کنفیگریشن کا انتظام کریں",
+      "welcome_back": "خوش آمدید",
+      "administrator": "منتظم",
+      "total_modules": "کل ماڈیولز",
+      "active_users": "فعال صارفین",
+      "companies": "کمپنیاں",
+      "system_health": "سسٹم صحت",
+      "system_management_heading": "سسٹم مینجمنٹ",
+      "recent_activity": "حالیہ سرگرمی",
+      "new_user_registered": "نیا صارف رجسٹر ہوا",
+      "john_doe_joined_the_system": "John Doe نے سسٹم میں شمولیت اختیار کی",
+      "module_updated": "ماڈیول اپ ڈیٹ ہوا",
+      "hr_module_configuration_changed": "HR ماڈیول کی ترتیب تبدیل ہوئی",
+      "company_added": "کمپنی شامل ہوئی",
+      "new_company_tech_corp_registered": "نئی کمپنی Tech Corp رجسٹر ہوئی",
+      "time_2_min_ago": "2 منٹ پہلے",
+      "time_1_hour_ago": "1 گھنٹہ پہلے",
+      "time_3_hours_ago": "3 گھنٹے پہلے",
+      "sections": {
+        "module_management": {
+          "name": "ماڈیول مینجمنٹ",
+          "description": "سسٹم ماڈیولز اور ان کی ترتیبات"
+        },
+        "user_management": {
+          "name": "صارف مینجمنٹ",
+          "description": "صارفین، کردار اور اجازتیں"
+        },
+        "organization": {
+          "name": "ادارہ",
+          "description": "کمپنیاں، مقامات اور شعبے"
+        },
+        "package_management": {
+          "name": "پیکج مینجمنٹ",
+          "description": "پیکجز اور ان کی خصوصیات"
+        }
+      },
+      "menus": {
+        "modules": "ماڈیولز",
+        "sections": "سیکشنز",
+        "menus": "مینوز",
+        "users": "صارفین",
+        "roles": "کردار",
+        "permissions": "اجازتیں",
+        "companies": "کمپنیاں",
+        "locations": "مقامات",
+        "departments": "شعبے",
+        "packages": "پیکجز",
+        "package_features": "پیکج خصوصیات"
+      }
     }
   }
 }

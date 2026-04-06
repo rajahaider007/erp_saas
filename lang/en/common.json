@@ -7,12 +7,15 @@
     "add": "Add",
     "search": "Search",
     "submit": "Submit",
+    "create": "Create",
+    "update": "Update",
     "back": "Back",
     "next": "Next",
     "close": "Close",
     "confirm": "Confirm",
     "logout": "Logout",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "reset": "Reset"
   },
   "status": {
     "active": "Active",
@@ -24,5 +27,53 @@
     "language": "Language",
     "theme": "Theme",
     "settings": "Settings"
+  },
+  "dashboard_home": {
+    "welcome_title": "Welcome to ERP Enterprise",
+    "welcome_subtitle": "Your comprehensive business management solution",
+    "explore_modules": "Explore Modules",
+    "professional_edition": "Professional Edition",
+    "card_modules_title": "Modules",
+    "card_modules_desc": "Access all your business modules and manage your organization efficiently.",
+    "card_modules_cta": "Explore Modules",
+    "card_analytics_title": "Analytics",
+    "card_analytics_desc": "View business insights and performance metrics across all modules.",
+    "coming_soon": "Coming Soon",
+    "card_quick_actions_title": "Quick Actions",
+    "card_quick_actions_desc": "Perform common tasks and access frequently used features.",
+    "form_theme_heading": "Form Theme System"
+  },
+  "form": {
+    "default_title": "Form",
+    "default_subtitle": "Please fill out the form",
+    "processing": "Processing…",
+    "field_required": "{label} is required",
+    "invalid_image": "Please select a valid image file",
+    "submit_success": "Form submitted successfully!",
+    "submit_error": "An error occurred",
+    "select_option": "Select {label}",
+    "image_drop_hint": "Drag & drop an image or click to select",
+    "image_formats_hint": "PNG, JPG, JPEG up to 10MB",
+    "preview_alt": "Preview",
+    "select_an_option": "Select an option...",
+    "search_placeholder": "Search...",
+    "clear_selection": "Clear",
+    "no_options_found": "No options found"
+  },
+  "breadcrumbs": {
+    "dashboard": "Dashboard",
+    "system": "System"
+  },
+  "form_errors": {
+    "please_correct": "Please correct the errors below and try again.",
+    "unexpected": "An unexpected error occurred. Please try again."
+  },
+  "form_actions": {
+    "clear_form": "Clear Form"
+  },
+  "permission": {
+    "access_denied": "Access Denied",
+    "fallback_message": "You don't have permission to perform this action.",
+    "contact_administrator": "Contact Administrator"
   }
 }

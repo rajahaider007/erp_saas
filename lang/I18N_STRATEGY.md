@@ -88,3 +88,35 @@ const CashVoucherCreate = () => {
 
 - Laravel: `lang/{en,ur}/validation.php`.
 - Flash: backend se translated message bhejo ya frontend key + `t(flash.key)`.
+
+---
+
+## 4. Naye form — yahi pattern (team / future forms)
+
+### Shared components (pehle se i18n)
+
+- **`GeneralizedForm`:** Submit / Reset / validation / image zone / toggle Active–Inactive / default title–subtitle ab `common.form.*` aur `common.actions.*` / `common.status.*` se aate hain. Form-specific **title, subtitle, field labels, placeholders** parent page se `t('…')` pass karo.
+- **`PermissionAwareForm`:** “Access denied” fallback `common.permission.*` se hai; custom message ke liye `fallbackMessage={t('your.key')}` pass kar sakte ho.
+- **`InlineSearchSelect`:** Default placeholder, search box, “No options found”, clear button aria-label → `common.form.select_an_option`, `search_placeholder`, `no_options_found`, `clear_selection`. Zarurat ho to parent se `placeholder={t('…')}` bhejo.
+
+### Naya `Create.jsx` / `add.jsx` / `edit.jsx` banate waqt
+
+1. `import { useTranslations } from '@/hooks/useTranslations';`
+2. Component ke start par: `const { t } = useTranslations();`
+3. **GeneralizedForm** use ho to:
+   - `title={t('system.xxx.create.page_title')}` (ya jo bhi module namespace ho)
+   - Har field: `label: t('…')`, `placeholder: t('…')`, options ke `label` bhi `t('…')` jahan user ko dikhe
+   - `submitText={t('common.actions.save')}` agar default Submit na chaho
+4. Strings **`lang/en/<module>.json`** mein rakho (accounts, inventory, system, …); **`lang/ur/<module>.json`** mein wahi keys Urdu values ke sath.
+5. Common UI (Save, Cancel, Reset, Active, …) ke liye pehle `common.json` dekho — duplicate key na banao. **Shared:** `common.breadcrumbs.dashboard` / `system`, `common.form_errors.please_correct` / `unexpected`, `common.form_actions.clear_form`, `common.actions.create` / `update`.
+6. **Companies / Locations forms:** labels jo `system.companies.show.*` se mil jayein wahan `sl('field')` jaisa helper; baqi placeholders/options `system.companies.create.*` / `system.locations.create.*` (EN+UR `system.json` mein).
+7. Breadcrumbs / alerts / buttons jo component ke andar hardcoded hon unko bhi `t()` se nikaalo; keys usi module JSON mein rakho.
+
+### Key naming (short)
+
+- `{module}.{feature}.{page}.{snake_case_phrase}`  
+  Example: `system.companies.create.company_name`, `inventory.item_master.create.sku_placeholder`
+
+### Deploy / build
+
+- JSON edit ke baad server par `php artisan config:clear` zaroori nahi (Inertia har request par JSON load karta hai); frontend ke liye `npm run build` (production).

@@ -56,6 +56,7 @@ function groupMenusByModuleSection(menus) {
 
 export default function UserRights() {
   const { user, rightsFormMenus = [], userRights: serverRights = {}, flash } = usePage().props;
+  const { t } = useTranslations();
   const [rights, setRights] = useState(() => buildInitialRights(serverRights));
   const [expandedModules, setExpandedModules] = useState({});
   const [expandedSections, setExpandedSections] = useState({});
@@ -171,7 +172,7 @@ export default function UserRights() {
     router.put(`/system/users/${user.id}/rights`, { user_rights: payload }, {
       onSuccess: () => {
         setSaving(false);
-        setMessage({ type: 'success', text: 'User rights updated successfully.' });
+        setMessage({ type: 'success', text: t('system.users.user_rights.save_success') });
         setTimeout(() => setMessage(null), 4000);
       },
       onError: (errors) => {
@@ -184,15 +185,15 @@ export default function UserRights() {
   };
 
   const RightToggle = ({ menuId, type, icon: Icon, label }) => {
-  const { t } = useTranslations();
     const on = (rights[menuId] || DEFAULT_RIGHT)[type];
+    const statusLabel = on ? t('system.users.user_rights.status_allowed') : t('system.users.user_rights.status_denied');
     return (
       <button
         type="button"
         onClick={() => toggleRight(menuId, type)}
-        title={`${label}: ${on ? 'Allowed' : 'Denied'}`}
+        title={`${label}: ${statusLabel}`}
         aria-pressed={on}
-        aria-label={`${label} permission ${on ? 'on' : 'off'}`}
+        aria-label={`${label} — ${statusLabel}`}
         className={`min-w-[2.25rem] h-9 flex items-center justify-center rounded-md border-2 transition-all ${
           on
             ? 'bg-emerald-500 border-emerald-600 text-white shadow-sm hover:bg-emerald-600 dark:bg-emerald-600 dark:border-emerald-500'
@@ -214,7 +215,7 @@ export default function UserRights() {
             <div className="title-section">
               <h1 className="page-title">
                 <Shield className="title-icon" />
-                User Rights
+                {t('system.users.user_rights.page_title')}
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                 {fullName} · {user?.loginid}
@@ -223,7 +224,7 @@ export default function UserRights() {
             <div className="header-actions">
               <Link href="/system/users" className="btn btn-secondary flex items-center gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                Back to Users
+                {t('system.users.user_rights.back_to_users')}
               </Link>
               <button
                 type="button"
@@ -236,7 +237,7 @@ export default function UserRights() {
                 ) : (
                   <>
                     <Save className="h-4 w-4" />
-                    Save Rights
+                    {t('system.users.user_rights.save_rights')}
                   </>
                 )}
               </button>
@@ -286,10 +287,10 @@ export default function UserRights() {
 
           <div className="p-4 sm:p-6">
             <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-1">
-              Permission configuration
+              {t('system.users.user_rights.permission_configuration')}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              Configure what this user can access. Use Allow all / Deny all per section or per menu.
+              {t('system.users.user_rights.permission_configuration_desc')}
             </p>
 
             {/* Legend: permission icons meaning + checked state */}
@@ -310,10 +311,10 @@ export default function UserRights() {
                 </div>
                 <span className="text-gray-300 dark:text-gray-600">|</span>
                 <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                  <span><strong className="text-gray-700 dark:text-gray-300">{t('system.users.user_rights.view')}</strong> — open/list</span>
-                  <span><strong className="text-gray-700 dark:text-gray-300">{t('system.users.user_rights.add')}</strong> — create</span>
-                  <span><strong className="text-gray-700 dark:text-gray-300">{t('system.users.user_rights.edit')}</strong> — update</span>
-                  <span><strong className="text-gray-700 dark:text-gray-300">{t('system.users.user_rights.delete')}</strong> — remove</span>
+                  <span><strong className="text-gray-700 dark:text-gray-300">{t('system.users.user_rights.view')}</strong> — {t('system.users.user_rights.view_explainer')}</span>
+                  <span><strong className="text-gray-700 dark:text-gray-300">{t('system.users.user_rights.add')}</strong> — {t('system.users.user_rights.add_explainer')}</span>
+                  <span><strong className="text-gray-700 dark:text-gray-300">{t('system.users.user_rights.edit')}</strong> — {t('system.users.user_rights.edit_explainer')}</span>
+                  <span><strong className="text-gray-700 dark:text-gray-300">{t('system.users.user_rights.delete')}</strong> — {t('system.users.user_rights.delete_explainer')}</span>
                 </div>
               </div>
             </div>
@@ -323,7 +324,7 @@ export default function UserRights() {
                 <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <p>{t('system.users.user_rights.no_menus_available_for_this_users_packag')}</p>
                 <Link href="/system/users" className="text-primary-600 dark:text-primary-400 hover:underline mt-2 inline-block">
-                  Back to Users
+                  {t('system.users.user_rights.back_to_users')}
                 </Link>
               </div>
             ) : (
@@ -346,7 +347,7 @@ export default function UserRights() {
                           <ChevronRight className="h-5 w-5 text-gray-600 dark:text-gray-300 shrink-0" />
                         )}
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-200">
-                          Module
+                          {t('system.users.user_rights.module_badge')}
                         </span>
                         <span className="font-semibold text-gray-900 dark:text-white text-base">
                           {moduleName}
@@ -358,14 +359,14 @@ export default function UserRights() {
                           onClick={(e) => { e.stopPropagation(); setAllForModule(sections, true); }}
                           className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200 hover:bg-emerald-200 dark:hover:bg-emerald-900/70"
                         >
-                          Allow all
+                          {t('system.users.user_rights.allow_all')}
                         </button>
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setAllForModule(sections, false); }}
                           className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200 hover:bg-red-200 dark:hover:bg-red-900/70"
                         >
-                          Deny all
+                          {t('system.users.user_rights.deny_all')}
                         </button>
                       </span>
                     </button>
@@ -389,7 +390,7 @@ export default function UserRights() {
                                     <ChevronRight className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                                   )}
                                   <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">
-                                    Section
+                                    {t('system.users.user_rights.section_badge')}
                                   </span>
                                   <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
                                     {sectionName}
@@ -401,14 +402,14 @@ export default function UserRights() {
                                     onClick={(e) => { e.stopPropagation(); setAllForSection(menus, true); }}
                                     className="px-2.5 py-1 text-xs font-medium rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/60"
                                   >
-                                    Allow
+                                    {t('system.users.user_rights.allow')}
                                   </button>
                                   <button
                                     type="button"
                                     onClick={(e) => { e.stopPropagation(); setAllForSection(menus, false); }}
                                     className="px-2.5 py-1 text-xs font-medium rounded-md bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/60"
                                   >
-                                    Deny
+                                    {t('system.users.user_rights.deny')}
                                   </button>
                                 </span>
                               </button>
@@ -437,18 +438,18 @@ export default function UserRights() {
                                                 : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
                                             }`}
                                           >
-                                            {allOn ? 'Allowed' : 'Denied'}
+                                            {allOn ? t('system.users.user_rights.status_allowed') : t('system.users.user_rights.status_denied')}
                                           </button>
                                         </div>
                                         <div className="flex items-center gap-2">
                                           <span className="sr-only">{t('system.users.user_rights.view')}</span>
-                                          <RightToggle menuId={menu.id} type="can_view" icon={Eye} label="View" />
+                                          <RightToggle menuId={menu.id} type="can_view" icon={Eye} label={t('system.users.user_rights.view')} />
                                           <span className="sr-only">{t('system.users.user_rights.add')}</span>
-                                          <RightToggle menuId={menu.id} type="can_add" icon={Plus} label="Add" />
+                                          <RightToggle menuId={menu.id} type="can_add" icon={Plus} label={t('system.users.user_rights.add')} />
                                           <span className="sr-only">{t('system.users.user_rights.edit')}</span>
-                                          <RightToggle menuId={menu.id} type="can_edit" icon={Edit} label="Edit" />
+                                          <RightToggle menuId={menu.id} type="can_edit" icon={Edit} label={t('system.users.user_rights.edit')} />
                                           <span className="sr-only">{t('system.users.user_rights.delete')}</span>
-                                          <RightToggle menuId={menu.id} type="can_delete" icon={Trash2} label="Delete" />
+                                          <RightToggle menuId={menu.id} type="can_delete" icon={Trash2} label={t('system.users.user_rights.delete')} />
                                         </div>
                                       </div>
                                     );
@@ -468,7 +469,7 @@ export default function UserRights() {
             {menusArray.length > 0 && (
               <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
                 <Link href="/system/users" className="btn btn-secondary">
-                  Cancel
+                  {t('system.users.user_rights.cancel')}
                 </Link>
                 <button
                   type="button"
@@ -476,10 +477,10 @@ export default function UserRights() {
                   disabled={saving}
                   className="btn btn-primary flex items-center gap-2"
                 >
-                  {saving ? 'Saving…' : (
+                  {saving ? t('system.users.user_rights.saving') : (
                     <>
                       <Save className="h-4 w-4" />
-                      Save Rights
+                      {t('system.users.user_rights.save_rights')}
                     </>
                   )}
                 </button>
