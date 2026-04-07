@@ -948,7 +948,13 @@
       "role": "کردار",
       "status": "حیثیت",
       "company": "کمپنی",
-      "location": "مقام"
+      "location": "مقام",
+      "roles": {
+        "super_admin": "سپر ایڈمن",
+        "admin": "ایڈمن",
+        "manager": "منیجر",
+        "user": "صارف"
+      }
     },
     "user_rights": {
       "saving": "محفوظ کر رہا ہے…",

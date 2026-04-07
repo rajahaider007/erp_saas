@@ -190,7 +190,7 @@ export default function List() {
         confirmButtonText: t('common.actions.confirm'),
       });
     }
-  }, [flash, t, tl]);
+  }, [flash, t]);
 
   // Handle search and filters
   const handleSearch = useCallback((term) => {
@@ -643,16 +643,16 @@ const exportToCSV = () => {
             {loading ? (
               <div className="loading-state">
                 <div className="loading-spinner"></div>
-                <p>Loading forms...</p>
+                <p>{tl('loading_forms')}</p>
               </div>
             ) : !paginatedModules?.data?.length ? (
               <div className="empty-state">
                 <Database className="empty-icon" />
-                <h3>No modules found</h3>
-                <p>Try adjusting your filters or search criteria</p>
+                <h3>{tl('no_modules_found')}</h3>
+                <p>{tl('try_adjusting_your_filters_or_search_cri')}</p>
                 <a href="/system/AddModules/add" className="btn btn-primary">
                   <Plus size={20} />
-                  Add Your First Module
+                  {tl('add_first_module')}
                 </a>
               </div>
             ) : (
@@ -673,7 +673,7 @@ const exportToCSV = () => {
                         {visibleColumns.id && (
                           <th className="sortable" onClick={() => handleSort('id')}>
                             <div className="th-content">
-                              ID
+                              {tl('id')}
                               <ArrowUpDown size={14} className={`sort-icon ${sortConfig.key === 'id' ? 'active' : ''}`} />
                             </div>
                           </th>
@@ -682,7 +682,7 @@ const exportToCSV = () => {
                         {visibleColumns.moduleInfo && (
                           <th className="sortable" onClick={() => handleSort('module_name')}>
                             <div className="th-content">
-                              Module Info
+                              {tl('module_info')}
                               <ArrowUpDown size={14} className={`sort-icon ${sortConfig.key === 'module_name' ? 'active' : ''}`} />
                             </div>
                           </th>
@@ -691,7 +691,7 @@ const exportToCSV = () => {
                         {visibleColumns.status && (
                           <th className="sortable" onClick={() => handleSort('status')}>
                             <div className="th-content">
-                              Status
+                              {tl('status')}
                               <ArrowUpDown size={14} className={`sort-icon ${sortConfig.key === 'status' ? 'active' : ''}`} />
                             </div>
                           </th>
@@ -700,7 +700,7 @@ const exportToCSV = () => {
                         {visibleColumns.createdAt && (
                           <th className="sortable" onClick={() => handleSort('created_at')}>
                             <div className="th-content">
-                              Created
+                              {tl('created')}
                               <ArrowUpDown size={14} className={`sort-icon ${sortConfig.key === 'created_at' ? 'active' : ''}`} />
                             </div>
                           </th>
@@ -709,14 +709,14 @@ const exportToCSV = () => {
                         {visibleColumns.updatedAt && (
                           <th className="sortable" onClick={() => handleSort('updated_at')}>
                             <div className="th-content">
-                              Updated
+                              {tl('updated')}
                               <ArrowUpDown size={14} className={`sort-icon ${sortConfig.key === 'updated_at' ? 'active' : ''}`} />
                             </div>
                           </th>
                         )}
 
                         {visibleColumns.actions && (
-                          <th className="actions-header">Actions</th>
+                          <th className="actions-header">{tl('actions')}</th>
                         )}
                       </tr>
                     </thead>
@@ -799,28 +799,28 @@ const exportToCSV = () => {
                               <div className="actions-cell">
                                 <button
                                   className="action-btn view"
-                                  title="View Details"
+                                  title={tl('view_details')}
                                   onClick={() => handleView(module)}
                                 >
                                   <Eye size={16} />
                                 </button>
                                 <button
                                   className="action-btn edit"
-                                  title="Edit Module"
+                                  title={tl('edit_module')}
                                   onClick={() => handleEdit(module)}
                                 >
                                   <Edit3 size={16} />
                                 </button>
                                 <button
                                   className="action-btn copy"
-                                  title="Duplicate"
+                                  title={tl('duplicate')}
                                   onClick={() => handleDuplicate(module)}
                                 >
                                   <Copy size={16} />
                                 </button>
                                 <button
                                   className="action-btn delete"
-                                  title="Delete Module"
+                                  title={tl('delete_module')}
                                   onClick={() => handleDelete(module)}
                                 >
                                   <Trash2 size={16} />
@@ -838,11 +838,11 @@ const exportToCSV = () => {
                 <div className="pagination-container">
                   <div className="pagination-info">
                     <div className="results-info">
-                      Showing {paginatedModules.from || 0} to {paginatedModules.to || 0} of {paginatedModules.total || 0} entries
+                      {td('showing_entries', { from: paginatedModules.from || 0, to: paginatedModules.to || 0, total: paginatedModules.total || 0 })}
                     </div>
 
                     <div className="page-size-selector">
-                      <span>Show:</span>
+                      <span>{tl('show')}</span>
                       <select
                         value={pageSize}
                         onChange={(e) => handlePageSizeChange(Number(e.target.value))}
@@ -852,7 +852,7 @@ const exportToCSV = () => {
                           <option key={size} value={size}>{size}</option>
                         ))}
                       </select>
-                      <span>per page</span>
+                      <span>{tl('per_page')}</span>
                     </div>
                   </div>
 
@@ -861,7 +861,7 @@ const exportToCSV = () => {
                       className="pagination-btn"
                       disabled={currentPage === 1}
                       onClick={() => handlePageChange(1)}
-                      title="First Page"
+                      title={tl('first_page')}
                     >
                       <ChevronLeft size={14} />
                       <ChevronLeft size={14} />
@@ -871,7 +871,7 @@ const exportToCSV = () => {
                       className="pagination-btn"
                       disabled={currentPage === 1}
                       onClick={() => handlePageChange(currentPage - 1)}
-                      title="Previous Page"
+                      title={tl('previous_page')}
                     >
                       <ChevronLeft size={14} />
                     </button>
@@ -908,7 +908,7 @@ const exportToCSV = () => {
                       className="pagination-btn"
                       disabled={currentPage === (paginatedModules.last_page || 1)}
                       onClick={() => handlePageChange(currentPage + 1)}
-                      title="Next Page"
+                      title={tl('next_page')}
                     >
                       <ChevronRight size={14} />
                     </button>
@@ -917,7 +917,7 @@ const exportToCSV = () => {
                       className="pagination-btn"
                       disabled={currentPage === (paginatedModules.last_page || 1)}
                       onClick={() => handlePageChange(paginatedModules.last_page || 1)}
-                      title="Last Page"
+                      title={tl('last_page')}
                     >
                       <ChevronRight size={14} />
                       <ChevronRight size={14} />
@@ -925,7 +925,7 @@ const exportToCSV = () => {
                   </div>
 
                   <div className="quick-jump">
-                    <span>Go to:</span>
+                    <span>{tl('go_to')}</span>
                     <input
                       type="number"
                       min="1"
@@ -937,7 +937,7 @@ const exportToCSV = () => {
                       }}
                       className="jump-input"
                     />
-                    <span>of {paginatedModules.last_page || 1}</span>
+                    <span>{td('pagination_of', { total: paginatedModules.last_page || 1 })}</span>
                   </div>
                 </div>
               </>

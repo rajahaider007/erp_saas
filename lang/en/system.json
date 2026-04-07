@@ -948,7 +948,13 @@
       "role": "Role",
       "status": "Status",
       "company": "Company",
-      "location": "Location"
+      "location": "Location",
+      "roles": {
+        "super_admin": "Super admin",
+        "admin": "Admin",
+        "manager": "Manager",
+        "user": "User"
+      }
     },
     "user_rights": {
       "saving": "Saving…",

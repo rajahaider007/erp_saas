@@ -20,13 +20,18 @@
   "status": {
     "active": "Active",
     "inactive": "Inactive",
-    "restricted": "Restricted"
+    "restricted": "Restricted",
+    "suspended": "Suspended",
+    "pending": "Pending"
   },
   "labels": {
     "user": "User",
     "language": "Language",
     "theme": "Theme",
-    "settings": "Settings"
+    "settings": "Settings",
+    "not_provided": "Not provided",
+    "not_assigned": "Not assigned",
+    "default_currency": "USD"
   },
   "dashboard_home": {
     "welcome_title": "Welcome to ERP Enterprise",

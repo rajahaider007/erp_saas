@@ -22,8 +22,8 @@
 
 /* Select2 Position Fixed Utilities */
 .select2-dropdown-fixed {
-    position: fixed !important;
-    z-index: 999999 !important;
+    position: fixed;
+    z-index: 999999;
     transform: translateZ(0);
     will-change: transform, opacity;
     backface-visibility: hidden;
@@ -405,7 +405,7 @@ html.form-theme-2:not(.dark) {
         0 0 0 4px rgba(59, 130, 246, 0.1),
         0 8px 25px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
-    background: white;
+    background: var(--surface-hover);
 }
 
 .form-input:hover,
@@ -419,19 +419,16 @@ html.form-theme-2:not(.dark) {
     padding-left: 3.5rem;
 }
 
-/* Fix for select elements with input-with-icon class */
-.input-with-icon.form-select,
-.input-with-icon select {
-    width: 100% !important;
-    padding-left: 4rem !important;
-    /* Increased padding for better icon spacing */
-    padding-right: 3.5rem !important;
-    /* Add space for dropdown arrow */
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    appearance: none !important;
-    background-image: none !important;
-    /* Remove default arrow */
+/* Select + icon: layout (high specificity beats Tailwind without !important) */
+html .input-with-icon.form-select,
+html .input-with-icon select {
+    width: 100%;
+    padding-left: 4rem;
+    padding-right: 3.5rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: none;
 }
 
 /* Ensure icon doesn't overlap with select text */
@@ -441,37 +438,33 @@ html.form-theme-2:not(.dark) {
 }
 
 .input-wrapper .input-icon {
-    z-index: 10 !important;
-    pointer-events: none !important;
+    z-index: 10;
+    pointer-events: none;
 }
 
-/* Fix for dark theme select with icons */
-.form-theme-2 .input-with-icon.form-select,
-.form-theme-2 .input-with-icon select {
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 0.8) !important;
-    background-image: none !important;
+/* Theme-2: icon select matches surface tokens */
+html.form-theme-2 .input-with-icon.form-select,
+html.form-theme-2 .input-with-icon select {
+    color: var(--text-primary);
+    background: var(--surface);
+    background-image: none;
 }
 
-/* Override any inline styles for select with icons */
 select.input-with-icon[style] {
-    padding-left: 4rem !important;
-    /* Increased padding for better icon spacing */
-    padding-right: 3.5rem !important;
-    background-image: none !important;
+    padding-left: 4rem;
+    padding-right: 3.5rem;
+    background-image: none;
 }
 
-/* Ensure proper spacing for select options */
 .input-with-icon.form-select option,
 .input-with-icon select option {
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
 }
 
-/* Fix for any select element with width fill-available */
 select.input-with-icon[style*="width"] {
-    padding-left: 3.5rem !important;
-    padding-right: 3.5rem !important;
+    padding-left: 3.5rem;
+    padding-right: 3.5rem;
 }
 
 .input-icon {
@@ -543,21 +536,20 @@ select.input-with-icon[style*="width"] {
     -moz-appearance: none;
     cursor: pointer;
     padding-right: 3.5rem;
-    width: -webkit-fill-available !important;
+    width: 100%;
+    min-width: 0;
 }
 
-/* Force full width for all form selects - Highest priority */
-select[class*="form-select"],
-select.form-select,
-.form-select,
-select.input-with-icon.form-select,
-.form-select.input-with-icon,
-select[class*="input-with-icon"] {
-    width: -webkit-fill-available !important;
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
-    flex: 1 !important;
+html select[class*="form-select"],
+html select.form-select,
+html .form-select,
+html select.input-with-icon.form-select,
+html .form-select.input-with-icon,
+html select[class*="input-with-icon"] {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    flex: 1 1 auto;
 }
 
 .form-select option {
@@ -1150,123 +1142,80 @@ select[class*="input-with-icon"] {
     }
 }
 
-/* Dark mode adjustments for theme-2 */
-.form-theme-2 .form-input,
-.form-theme-2 .form-select,
-.form-theme-2 .form-textarea,
-.form-theme-2 input,
-.form-theme-2 select,
-.form-theme-2 textarea {
-    background: rgba(30, 41, 59, 0.8) !important;
-    border-color: rgba(148, 163, 184, 0.3);
-    color: #F1F5F9 !important;
+/* Theme-2 on <html>: form controls follow tokens (html.form-theme-2:not(.dark) uses light tokens; .dark uses dark tokens) */
+html.form-theme-2 .form-input,
+html.form-theme-2 .form-select,
+html.form-theme-2 .form-textarea,
+html.form-theme-2 input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="hidden"]):not([type="image"]),
+html.form-theme-2 select,
+html.form-theme-2 textarea {
+    background: var(--surface);
+    color: var(--text-primary);
+    border-color: var(--border);
+    border-style: solid;
+    border-width: 2px;
+    font-weight: 500;
 }
 
-/* Ensure all input text is visible in dark theme */
-.form-theme-2 .form-input::placeholder,
-.form-theme-2 .form-textarea::placeholder,
-.form-theme-2 input::placeholder,
-.form-theme-2 textarea::placeholder {
-    color: #CBD5E1 !important;
-    opacity: 0.8;
+html.form-theme-2 .form-input::placeholder,
+html.form-theme-2 .form-textarea::placeholder,
+html.form-theme-2 input::placeholder,
+html.form-theme-2 textarea::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.85;
 }
 
-.form-theme-2 .form-input:focus,
-.form-theme-2 .form-select:focus,
-.form-theme-2 .form-textarea:focus,
-.form-theme-2 input:focus,
-.form-theme-2 select:focus,
-.form-theme-2 textarea:focus {
-    background: rgba(30, 41, 59, 0.95) !important;
-    border-color: var(--primary-color);
-    color: #F1F5F9 !important;
+html.form-theme-2 .form-input:focus,
+html.form-theme-2 .form-select:focus,
+html.form-theme-2 .form-textarea:focus,
+html.form-theme-2 input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="hidden"]):focus,
+html.form-theme-2 select:focus,
+html.form-theme-2 textarea:focus {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+    border-color: var(--border-focus);
+    outline: none;
 }
 
-/* Additional fixes for all input types */
-.form-theme-2 input[type="text"],
-.form-theme-2 input[type="email"],
-.form-theme-2 input[type="password"],
-.form-theme-2 input[type="number"],
-.form-theme-2 input[type="date"],
-.form-theme-2 input[type="search"],
-.form-theme-2 input[type="url"],
-.form-theme-2 input[type="tel"],
-.form-theme-2 select,
-.form-theme-2 textarea {
-    background: rgba(30, 41, 59, 0.8) !important;
-    color: #F1F5F9 !important;
-    border: 2px solid rgba(148, 163, 184, 0.3);
-}
-
-/* Specific fix for select element display text */
-.form-theme-2 select {
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 0.8) !important;
-}
-
-/* Force select element to show selected text */
-.form-theme-2 select option:checked,
-.form-theme-2 select option[selected] {
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 1) !important;
-}
-
-/* Ensure select element text is always visible */
-.form-theme-2 select:not(:focus) {
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 0.8) !important;
-}
-
-.form-theme-2 input[type="text"]:focus,
-.form-theme-2 input[type="email"]:focus,
-.form-theme-2 input[type="password"]:focus,
-.form-theme-2 input[type="number"]:focus,
-.form-theme-2 input[type="date"]:focus,
-.form-theme-2 input[type="search"]:focus,
-.form-theme-2 input[type="url"]:focus,
-.form-theme-2 input[type="tel"]:focus,
-.form-theme-2 select:focus,
-.form-theme-2 textarea:focus {
-    background: rgba(30, 41, 59, 0.95) !important;
-    color: #F1F5F9 !important;
-    border-color: #8B5CF6;
-}
-
-/* Fix dark theme option visibility */
-.form-theme-2 .form-select option,
-.form-theme-2 .filter-select option {
-    background: rgba(30, 41, 59, 1) !important;
-    color: #F1F5F9 !important;
+html.form-theme-2 .form-select option,
+html.form-theme-2 .filter-select option,
+html.form-theme-2 select option {
+    background: var(--surface);
+    color: var(--text-primary);
     padding: 0.75rem;
 }
 
-.form-theme-2 .form-select option:hover,
-.form-theme-2 .filter-select option:hover {
-    background: rgba(139, 92, 246, 0.2) !important;
-    color: #F1F5F9 !important;
+html.form-theme-2 select,
+html.form-theme-2 .filter-select,
+html.form-theme-2 .form-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
-.form-theme-2 .form-select option:checked,
-.form-theme-2 .filter-select option:checked {
-    background: rgba(139, 92, 246, 0.3) !important;
-    color: #F1F5F9 !important;
+html.form-theme-2 .search-input,
+html.form-theme-2 .filter-select,
+html.form-theme-2 .date-input,
+html.form-theme-2 .text-input,
+html.form-theme-2 .number-input,
+html.form-theme-2 .select-input {
+    background: var(--surface);
+    color: var(--text-primary);
 }
 
-/* Fix dark theme for all select elements */
-.form-theme-2 select option {
-    background: rgba(30, 41, 59, 1) !important;
-    color: #F1F5F9 !important;
-    padding: 0.75rem;
+html.form-theme-2 .search-input:focus,
+html.form-theme-2 .filter-select:focus,
+html.form-theme-2 .date-input:focus,
+html.form-theme-2 .text-input:focus,
+html.form-theme-2 .number-input:focus,
+html.form-theme-2 .select-input:focus {
+    background: var(--surface-hover);
+    color: var(--text-primary);
 }
 
-.form-theme-2 select option:hover {
-    background: rgba(139, 92, 246, 0.2) !important;
-    color: #F1F5F9 !important;
-}
-
-.form-theme-2 select option:checked {
-    background: rgba(139, 92, 246, 0.3) !important;
-    color: #F1F5F9 !important;
+html.form-theme-2 .select-wrapper,
+html.form-theme-2 .dropdown-container {
+    color: var(--text-primary);
 }
 
 /* General improvements for better visibility */
@@ -1280,168 +1229,6 @@ textarea {
     font-weight: 500;
 }
 
-/* Force light text in dark theme for all elements */
-.form-theme-2 * {
-    color: inherit;
-}
-
-.form-theme-2 input,
-.form-theme-2 select,
-.form-theme-2 textarea,
-.form-theme-2 .form-input,
-.form-theme-2 .form-select,
-.form-theme-2 .form-textarea {
-    color: #F1F5F9 !important;
-}
-
-/* Override any inherited dark text */
-.form-theme-2 input[value],
-.form-theme-2 select option,
-.form-theme-2 textarea {
-    color: #F1F5F9 !important;
-}
-
-/* Comprehensive fix for all possible input scenarios */
-.form-theme-2 input,
-.form-theme-2 select,
-.form-theme-2 textarea,
-.form-theme-2 [type="text"],
-.form-theme-2 [type="email"],
-.form-theme-2 [type="password"],
-.form-theme-2 [type="number"],
-.form-theme-2 [type="date"],
-.form-theme-2 [type="search"],
-.form-theme-2 [type="url"],
-.form-theme-2 [type="tel"],
-.form-theme-2 [type="time"],
-.form-theme-2 [type="datetime-local"],
-.form-theme-2 [type="month"],
-.form-theme-2 [type="week"] {
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 0.8) !important;
-}
-
-/* Ultimate fix for select element text visibility */
-.form-theme-2 select * {
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 1) !important;
-}
-
-/* Force select element to always show light text */
-.form-theme-2 select,
-.form-theme-2 select:focus,
-.form-theme-2 select:hover,
-.form-theme-2 select:active,
-.form-theme-2 select:visited {
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 0.8) !important;
-}
-
-/* Browser-specific fixes for select text visibility */
-.form-theme-2 select::-webkit-select-text {
-    color: #F1F5F9 !important;
-}
-
-.form-theme-2 select::-moz-selection {
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 0.8) !important;
-}
-
-/* Force text color for all select elements regardless of state */
-.form-theme-2 select {
-    color: #F1F5F9 !important;
-    background-color: rgba(30, 41, 59, 0.8) !important;
-    -webkit-text-fill-color: #F1F5F9 !important;
-    -moz-text-fill-color: #F1F5F9 !important;
-}
-
-/* Override any inherited styles */
-.form-theme-2 select,
-.form-theme-2 select:not(:focus):not(:hover):not(:active) {
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 0.8) !important;
-}
-
-/* Maximum specificity override for select text visibility */
-body.form-theme-2 select,
-html body.form-theme-2 select,
-.form-theme-2 div select,
-.form-theme-2 span select,
-.form-theme-2 label select {
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 0.8) !important;
-    -webkit-text-fill-color: #F1F5F9 !important;
-    -moz-text-fill-color: #F1F5F9 !important;
-    text-fill-color: #F1F5F9 !important;
-}
-
-/* Force text visibility with inline style approach */
-.form-theme-2 select[style] {
-    color: #F1F5F9 !important;
-    -webkit-text-fill-color: #F1F5F9 !important;
-}
-
-/* Nuclear option - Reset all Tailwind CSS for select elements */
-.form-theme-2 select {
-    all: unset !important;
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 0.8) !important;
-    border: 2px solid rgba(148, 163, 184, 0.3) !important;
-    border-radius: 12px !important;
-    padding: 0.875rem 1rem !important;
-    font-size: 0.875rem !important;
-    font-weight: 500 !important;
-    cursor: pointer !important;
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    appearance: none !important;
-    -webkit-text-fill-color: #F1F5F9 !important;
-    -moz-text-fill-color: #F1F5F9 !important;
-    text-fill-color: #F1F5F9 !important;
-    display: block !important;
-}
-
-/* Force all select elements to show text properly */
-.form-theme-2 select,
-.form-theme-2 .filter-select,
-.form-theme-2 .form-select {
-    all: unset !important;
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 0.8) !important;
-    border: 2px solid rgba(148, 163, 184, 0.3) !important;
-    border-radius: 12px !important;
-    padding: 0.875rem 1rem !important;
-    font-size: 0.875rem !important;
-    font-weight: 500 !important;
-    cursor: pointer !important;
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    appearance: none !important;
-    -webkit-text-fill-color: #F1F5F9 !important;
-    -moz-text-fill-color: #F1F5F9 !important;
-    text-fill-color: #F1F5F9 !important;
-    display: block !important;
-}
-
-.form-theme-2 input:focus,
-.form-theme-2 select:focus,
-.form-theme-2 textarea:focus,
-.form-theme-2 [type="text"]:focus,
-.form-theme-2 [type="email"]:focus,
-.form-theme-2 [type="password"]:focus,
-.form-theme-2 [type="number"]:focus,
-.form-theme-2 [type="date"]:focus,
-.form-theme-2 [type="search"]:focus,
-.form-theme-2 [type="url"]:focus,
-.form-theme-2 [type="tel"]:focus,
-.form-theme-2 [type="time"]:focus,
-.form-theme-2 [type="datetime-local"]:focus,
-.form-theme-2 [type="month"]:focus,
-.form-theme-2 [type="week"]:focus {
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 0.95) !important;
-}
-
 /* Enhanced contrast for better readability */
 .form-input::placeholder,
 .form-textarea::placeholder,
@@ -1450,58 +1237,6 @@ textarea::placeholder {
     color: var(--text-secondary);
     opacity: 0.8;
     font-weight: 400;
-}
-
-/* Additional fixes for common classes */
-.form-theme-2 .search-input,
-.form-theme-2 .filter-select,
-.form-theme-2 .date-input,
-.form-theme-2 .text-input,
-.form-theme-2 .number-input,
-.form-theme-2 .select-input {
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 0.8) !important;
-}
-
-.form-theme-2 .search-input:focus,
-.form-theme-2 .filter-select:focus,
-.form-theme-2 .date-input:focus,
-.form-theme-2 .text-input:focus,
-.form-theme-2 .number-input:focus,
-.form-theme-2 .select-input:focus {
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 0.95) !important;
-}
-
-/* Critical fix for select element text visibility */
-.form-theme-2 select,
-.form-theme-2 .filter-select,
-.form-theme-2 .form-select {
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 0.8) !important;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-}
-
-/* Ensure selected text is always visible in select */
-.form-theme-2 select:valid,
-.form-theme-2 select:invalid,
-.form-theme-2 select:required,
-.form-theme-2 select:optional {
-    color: #F1F5F9 !important;
-}
-
-/* Fix for any select wrapper or container */
-.form-theme-2 .select-wrapper,
-.form-theme-2 .dropdown-container {
-    color: #F1F5F9 !important;
-}
-
-.form-theme-2 .select-wrapper select,
-.form-theme-2 .dropdown-container select {
-    color: #F1F5F9 !important;
-    background: rgba(30, 41, 59, 0.8) !important;
 }
 
 /* Better focus states for accessibility */
@@ -1555,9 +1290,10 @@ textarea::placeholder {
     }
 }
 
-.form-theme-2 .btn-secondary {
-    background: rgba(30, 41, 59, 0.8);
+html.form-theme-2 .btn-secondary {
+    background: var(--surface);
     color: var(--text-primary);
+    border-color: var(--border);
 }
 
 /* Enhanced glass effect */
@@ -2578,6 +2314,53 @@ textarea::placeholder {
     border-bottom-color: rgba(71, 85, 105, 0.55);
 }
 
+/* List tables (light app): no heavy/black lines — soft #eee grid + readable columns */
+html:not(.dark) .advanced-module-manager .data-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+html:not(.dark) .advanced-module-manager .data-table th,
+html:not(.dark) .advanced-module-manager .data-table td {
+    border: none;
+    border-bottom: 1px solid #eeeeee;
+    border-right: 1px solid #f0f0f0;
+    box-shadow: none;
+}
+
+html:not(.dark) .advanced-module-manager .data-table th:last-child,
+html:not(.dark) .advanced-module-manager .data-table td:last-child {
+    border-right: none;
+}
+
+html:not(.dark) .advanced-module-manager .data-table thead th,
+html:not(.dark) .advanced-module-manager .data-table thead td {
+    background: #f3f4f6;
+    border-bottom: 1px solid #e5e5e5;
+    color: #334155;
+}
+
+html:not(.dark) .advanced-module-manager .data-table tbody td {
+    background: #ffffff;
+    color: #1e293b;
+}
+
+html:not(.dark) .advanced-module-manager .data-table tbody tr:nth-child(even) td {
+    background: #fafafa;
+}
+
+html:not(.dark) .advanced-module-manager .data-table tbody tr:hover td {
+    background: #f1f5f9;
+}
+
+html:not(.dark) .advanced-module-manager .title-section .page-title {
+    color: #0f172a;
+}
+
+html:not(.dark) .advanced-module-manager .title-icon {
+    color: var(--primary-color);
+}
+
 .sortable {
     cursor: pointer;
     user-select: none;
@@ -2994,9 +2777,9 @@ textarea::placeholder {
 }
 
 .advanced-module-manager .pagination-container .pagination-buttons {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 0.5rem;
 }

@@ -20,13 +20,18 @@
   "status": {
     "active": "فعال",
     "inactive": "غیر فعال",
-    "restricted": "محدود"
+    "restricted": "محدود",
+    "suspended": "معطل",
+    "pending": "زیر التواء"
   },
   "labels": {
     "user": "صارف",
     "language": "زبان",
     "theme": "تھیم",
-    "settings": "ترتیبات"
+    "settings": "ترتیبات",
+    "not_provided": "فراہم نہیں",
+    "not_assigned": "تفویض نہیں",
+    "default_currency": "USD"
   },
   "dashboard_home": {
     "welcome_title": "ERP Enterprise میں خوش آمدید",

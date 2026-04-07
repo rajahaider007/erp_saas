@@ -4,8 +4,10 @@ import { useTranslations } from '@/hooks/useTranslations';
 import App from "../../App.jsx";
 
 const CompanyShow = () => {
-const { t } = useTranslations();
+  const { t } = useTranslations();
   const { company } = usePage().props;
+  const na = () => t('common.labels.not_provided');
+  const statusLabel = (on) => (on ? t('common.status.active') : t('common.status.inactive'));
 
   return (
     <App>
@@ -23,19 +25,19 @@ const { t } = useTranslations();
               <div className="input-group">
                 <label className="input-label">{t('system.companies.show.company_code')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{company.company_code || 'Not provided'}</div>
+                  <div className="form-input">{company.company_code || na()}</div>
                 </div>
               </div>
               <div className="input-group">
                 <label className="input-label">{t('system.companies.show.legal_name')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{company.legal_name || 'Not provided'}</div>
+                  <div className="form-input">{company.legal_name || na()}</div>
                 </div>
               </div>
               <div className="input-group">
                 <label className="input-label">{t('system.companies.show.trading_name')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{company.trading_name || 'Not provided'}</div>
+                  <div className="form-input">{company.trading_name || na()}</div>
                 </div>
               </div>
               <div className="input-group">

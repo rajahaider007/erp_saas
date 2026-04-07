@@ -725,9 +725,9 @@
  }
 
  .advanced-module-manager .pagination-container .pagination-buttons {
-     display: flex !important;
-     flex-direction: row !important;
-     flex-wrap: nowrap !important;
+     display: flex;
+     flex-direction: row;
+     flex-wrap: nowrap;
      align-items: center;
      gap: 0.5rem;
  }
@@ -1084,7 +1084,7 @@ html.dark .date-input:focus {
 }
 
 html.dark .filter-select {
-    background-image: none !important;
+    background-image: none;
 }
 
 html.dark .date-input::-webkit-calendar-picker-indicator {
