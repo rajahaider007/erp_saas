@@ -201,20 +201,20 @@
 .search-input {
     width: 100%;
     padding: 0.5rem 0.75rem 0.5rem 2.25rem;
-    border: 1px solid #4b5563;
+    border: 1px solid #d1d5db;
     border-radius: 8px;
     font-size: 0.8125rem;
-    background: #374151;
-    color: #f9fafb;
+    background: #ffffff;
+    color: #111827;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
     height: 36px;
 }
 
 .search-input:focus {
     outline: none;
     border-color: #60a5fa;
-    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1), 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.12), 0 4px 12px rgba(15, 23, 42, 0.08);
     transform: translateY(-1px);
 }
 
@@ -235,13 +235,14 @@
 
  .filter-select {
      padding: 0.5rem 0.75rem;
-     border: 1px solid #4b5563;
+     border: 1px solid #d1d5db;
      border-radius: 8px;
      font-size: 0.8125rem;
-     color: #f9fafb;
+     color: #111827;
+     background-color: #ffffff;
      cursor: pointer;
      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
      appearance: none;
      background-position: right 0.5rem center;
      background-repeat: no-repeat;
@@ -254,12 +255,12 @@
  .filter-select:focus {
      outline: none;
      border-color: #60a5fa;
-     box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1), 0 4px 12px rgba(0, 0, 0, 0.3);
+     box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.12), 0 4px 12px rgba(15, 23, 42, 0.08);
      transform: translateY(-1px);
  }
 
  .filter-select:hover {
-     border-color: #6b7280;
+     border-color: #94a3b8;
      transform: translateY(-1px);
  }
 
@@ -474,7 +475,7 @@
 
  .module-id {
      font-weight: 600;
-     color: #3b82f6;
+     color: #475569;
  }
 
  .module-info {
@@ -1221,15 +1222,15 @@ html.dark .pagination-btn:hover:not(:disabled) {
      outline-offset: 2px;
  }
 
-/* Modern Search Filters - International Design Patterns */
+/* Modern Search Filters - International Design Patterns (light by default; dark: html.dark … below) */
 .modern-filters-container {
-    background: rgba(30, 41, 59, 0.95);
+    background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(20px);
     border-radius: 12px;
     padding: 1rem;
     margin-bottom: 1rem;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    border: 1px solid rgba(148, 163, 184, 0.35);
 }
 
 .filters-toolbar {
@@ -1264,20 +1265,20 @@ html.dark .pagination-btn:hover:not(:disabled) {
 .search-input-wrapper .search-input {
     width: 100%;
     padding: 0.5rem 0.75rem 0.5rem 2.25rem;
-    border: 1px solid #4b5563;
+    border: 1px solid #d1d5db;
     border-radius: 8px;
     font-size: 0.8125rem;
-    background: #374151;
-    color: #f9fafb;
+    background: #ffffff;
+    color: #111827;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
     height: 36px;
 }
 
 .search-input-wrapper .search-input:focus {
     outline: none;
     border-color: #60a5fa;
-    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1), 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.12), 0 4px 12px rgba(15, 23, 42, 0.08);
     transform: translateY(-1px);
 }
 
@@ -1296,7 +1297,7 @@ html.dark .pagination-btn:hover:not(:disabled) {
 .filter-label {
     font-size: 0.75rem;
     font-weight: 600;
-    color: #94a3b8;
+    color: #475569;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 0.25rem;
@@ -1310,13 +1311,13 @@ html.dark .pagination-btn:hover:not(:disabled) {
 
 .date-input {
     padding: 0.5rem 0.75rem;
-    border: 1px solid #4b5563;
+    border: 1px solid #d1d5db;
     border-radius: 8px;
     font-size: 0.8125rem;
-    background: #374151;
-    color: #f9fafb;
+    background: #ffffff;
+    color: #111827;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
     min-width: 120px;
     height: 36px;
 }
@@ -1324,12 +1325,12 @@ html.dark .pagination-btn:hover:not(:disabled) {
 .date-input:focus {
     outline: none;
     border-color: #60a5fa;
-    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1), 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.12), 0 4px 12px rgba(15, 23, 42, 0.08);
     transform: translateY(-1px);
 }
 
 .date-input::-webkit-calendar-picker-indicator {
-    color: #9ca3af;
+    color: #64748b;
     cursor: pointer;
     padding: 0.25rem;
     border-radius: 4px;
@@ -1337,19 +1338,20 @@ html.dark .pagination-btn:hover:not(:disabled) {
 }
 
 .date-input::-webkit-calendar-picker-indicator:hover {
-    background: #4b5563;
-    color: #60a5fa;
+    background: #e2e8f0;
+    color: #2563eb;
 }
 
 .filter-select {
     padding: 0.5rem 0.75rem;
-    border: 1px solid #4b5563;
+    border: 1px solid #d1d5db;
     border-radius: 8px;
     font-size: 0.8125rem;
-    color: #f9fafb;
+    color: #111827;
+    background-color: #ffffff;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
     appearance: none;
     background-position: right 0.5rem center;
     background-repeat: no-repeat;
@@ -1362,24 +1364,24 @@ html.dark .pagination-btn:hover:not(:disabled) {
 .filter-select:focus {
     outline: none;
     border-color: #60a5fa;
-    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1), 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.12), 0 4px 12px rgba(15, 23, 42, 0.08);
     transform: translateY(-1px);
 }
 
 .filter-select:hover {
-    border-color: #6b7280;
+    border-color: #94a3b8;
     transform: translateY(-1px);
 }
 
 .reset-btn {
     padding: 0.5rem;
-    border: 1px solid #4b5563;
+    border: 1px solid #d1d5db;
     border-radius: 8px;
-    background: #374151;
-    color: #9ca3af;
+    background: #f8fafc;
+    color: #475569;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1603,44 +1605,40 @@ html.dark .pagination-btn:hover:not(:disabled) {
 }
 
 .filter-badge-value {
-    color: #f9fafb;
+    color: #334155;
 }
 
-/* Dark Mode Support for Action Buttons */
-@media (prefers-color-scheme: dark) {
-    .action-btn {
-        background: #374151;
-        color: #9ca3af;
-        border-color: #4b5563;
-    }
+/* Action button dark styling: follow app theme (html.dark), not OS prefers-color-scheme */
+html.dark .action-btn:not(.view):not(.edit):not(.copy):not(.delete):not(.rights):not(.print-summary):not(.print-detailed) {
+    background: #374151;
+    color: #9ca3af;
+    border-color: #4b5563;
+}
 
-    .action-btn:hover {
-        background: #4b5563;
-        color: #f9fafb;
-        border-color: #6b7280;
-    }
+html.dark .action-btn:not(.view):not(.edit):not(.copy):not(.delete):not(.rights):not(.print-summary):not(.print-detailed):hover {
+    background: #4b5563;
+    color: #f9fafb;
+    border-color: #6b7280;
+}
 
-    /* Print Summary Button - Green in Dark Mode */
-    .action-btn.print-summary {
-        color: #10b981;
-        border-color: #10b981;
-    }
+html.dark .action-btn.print-summary {
+    color: #10b981;
+    border-color: #10b981;
+}
 
-    .action-btn.print-summary:hover {
-        background: rgba(16, 185, 129, 0.1);
-        color: #34d399;
-        border-color: #34d399;
-    }
+html.dark .action-btn.print-summary:hover {
+    background: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+    border-color: #34d399;
+}
 
-    /* Print Detailed Button - Red in Dark Mode */
-    .action-btn.print-detailed {
-        color: #f87171;
-        border-color: #f87171;
-    }
+html.dark .action-btn.print-detailed {
+    color: #f87171;
+    border-color: #f87171;
+}
 
-    .action-btn.print-detailed:hover {
-        background: rgba(248, 113, 113, 0.1);
-        color: #fca5a5;
-        border-color: #fca5a5;
-    }
+html.dark .action-btn.print-detailed:hover {
+    background: rgba(248, 113, 113, 0.1);
+    color: #fca5a5;
+    border-color: #fca5a5;
 }

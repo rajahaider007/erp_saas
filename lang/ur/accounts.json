@@ -429,6 +429,8 @@
         }
     },
     "chart_of_accounts": {
+        "configuration_required": "ترتیب درکار ہے",
+        "go_to_dashboard": "ڈیش بورڈ پر جائیں",
         "this_account_has_child_accounts_that_mus": "اس اکاؤنٹ میں چائلڈ اکاؤنٹس ہیں جنہیں پہلے حذف کرنا ضروری ہے:",
         "child_accounts": "چائلڈ اکاؤنٹس:",
         "edit_account": "اکاؤنٹ میں ترمیم کریں۔",

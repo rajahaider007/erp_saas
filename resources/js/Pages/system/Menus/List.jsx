@@ -13,7 +13,9 @@ const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, conf
 }};
 
 const List = () => {
-const { t } = useTranslations();
+  const { t } = useTranslations();
+  const tl = (key, rep) => (rep ? t(`system.menus.list.${key}`, rep) : t(`system.menus.list.${key}`));
+  const td = (key, rep) => (rep ? t(`common.data_table.${key}`, rep) : t(`common.data_table.${key}`));
   const { menus: paginated, modules, flash, filters } = usePage().props;
   const [search, setSearch] = useState(filters?.search || '');
   const [moduleId, setModuleId] = useState(filters?.module_id || '');
@@ -37,13 +39,67 @@ const { t } = useTranslations();
   const [selected, setSelected] = useState([]);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
 
-  const handleDelete = (menu) => { CustomAlert.fire({ title:'Are you sure?', text:`You are about to delete "${menu.menu_name}". This action cannot be undone!`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete it!', cancelButtonText:'Cancel', onConfirm:()=> router.delete(`/system/menus/${menu.id}`) }); };
+  const handleDelete = (menu) => {
+    CustomAlert.fire({
+      title: td('confirm_delete_title'),
+      text: td('confirm_delete_text', { name: menu.menu_name }),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: td('confirm_delete_ok'),
+      cancelButtonText: t('common.actions.cancel'),
+      onConfirm: () => router.delete(`/system/menus/${menu.id}`),
+    });
+  };
 
   const handleSelectAll = (checked) => { if (checked) setSelected(paginated.data.map(m=>m.id)); else setSelected([]); };
   const handleSelectRow = (id, checked) => { if (checked) setSelected(prev=>[...prev, id]); else setSelected(prev=>prev.filter(x=>x!==id)); };
-  const handleBulkDelete = () => { if (!selected.length) return; CustomAlert.fire({ title:'Delete Selected Menus?', text:`You are about to delete ${selected.length} menu(s).`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete!', onConfirm:()=> router.post('/system/menus/bulk-destroy', { ids:selected }, { onSuccess:()=>setSelected([]) }) }); };
-  const handleBulkStatusChange = (status) => { if (!selected.length) return; const action = status?'activate':'deactivate'; CustomAlert.fire({ title:`${action.charAt(0).toUpperCase()+action.slice(1)} Selected Menus?`, text:`You are about to ${action} ${selected.length} menu(s).`, icon:'question', showCancelButton:true, confirmButtonText:`Yes, ${action}!`, onConfirm:()=> router.post('/system/menus/bulk-status', { ids:selected, status }, { onSuccess:()=>setSelected([]) }) }); };
-  const exportToCSV = () => { CustomAlert.fire({ title:'Export to CSV', text:'Download all menus as CSV file?', icon:'question', showCancelButton:true, confirmButtonText:'Yes, download!', onConfirm:()=> window.open('/system/menus/export-csv','_blank') }); };
+  const handleBulkDelete = () => {
+    if (!selected.length) return;
+    CustomAlert.fire({
+      title: td('bulk_delete_title'),
+      text: td('bulk_delete_text', { count: selected.length }),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: td('bulk_delete_ok'),
+      cancelButtonText: t('common.actions.cancel'),
+      onConfirm: () => router.post('/system/menus/bulk-destroy', { ids: selected }, { onSuccess: () => setSelected([]) }),
+    });
+  };
+  const handleBulkStatusChange = (status) => {
+    if (!selected.length) return;
+    if (status) {
+      CustomAlert.fire({
+        title: td('bulk_status_activate_title'),
+        text: td('bulk_status_activate_text', { count: selected.length }),
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: td('bulk_status_activate_ok'),
+        cancelButtonText: t('common.actions.cancel'),
+        onConfirm: () => router.post('/system/menus/bulk-status', { ids: selected, status }, { onSuccess: () => setSelected([]) }),
+      });
+    } else {
+      CustomAlert.fire({
+        title: td('bulk_status_deactivate_title'),
+        text: td('bulk_status_deactivate_text', { count: selected.length }),
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: td('bulk_status_deactivate_ok'),
+        cancelButtonText: t('common.actions.cancel'),
+        onConfirm: () => router.post('/system/menus/bulk-status', { ids: selected, status }, { onSuccess: () => setSelected([]) }),
+      });
+    }
+  };
+  const exportToCSV = () => {
+    CustomAlert.fire({
+      title: td('export_csv_title'),
+      text: td('export_csv_text'),
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: td('export_csv_ok'),
+      cancelButtonText: t('common.actions.cancel'),
+      onConfirm: () => window.open('/system/menus/export-csv', '_blank'),
+    });
+  };
 
   return (
     <App>
@@ -51,16 +107,16 @@ const { t } = useTranslations();
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
-              <h1 className="page-title"><Database className="title-icon" />{usePage().props?.pageTitle || 'Menus'}</h1>
+              <h1 className="page-title"><Database className="title-icon" />{usePage().props?.pageTitle || t('system.menus.add.breadcrumb_menus')}</h1>
               <div className="stats-summary">
-                <div className="stat-item"><span>{paginated?.total || 0} Total</span></div>
-                <div className="stat-item"><span>{paginated?.data?.filter(m=>m.status).length || 0} Active</span></div>
+                <div className="stat-item"><span>{td('stat_total', { count: paginated?.total || 0 })}</span></div>
+                <div className="stat-item"><span>{td('stat_active', { count: paginated?.data?.filter(m=>m.status).length || 0 })}</span></div>
               </div>
             </div>
             <div className="header-actions">
-              <button className="btn btn-icon" onClick={()=>window.location.reload()} title="Refresh"><RefreshCcw size={20} /></button>
-              <div className="dropdown"><button className="btn btn-secondary dropdown-toggle"><Download size={20} />Export<ChevronDown size={16} /></button><div className="dropdown-menu"><button onClick={exportToCSV}><FileText size={16} />Export as CSV</button></div></div>
-              <a href='/system/menus/create' className="btn btn-primary"><Plus size={20} />Add Menu</a>
+              <button className="btn btn-icon" onClick={()=>window.location.reload()} title={tl('refresh')}><RefreshCcw size={20} /></button>
+              <div className="dropdown"><button className="btn btn-secondary dropdown-toggle"><Download size={20} />{tl('export')}<ChevronDown size={16} /></button><div className="dropdown-menu"><button onClick={exportToCSV}><FileText size={16} />{tl('export_as_csv')}</button></div></div>
+              <a href='/system/menus/create' className="btn btn-primary"><Plus size={20} />{tl('add_menu')}</a>
             </div>
           </div>
           {/* Modern Compact Filters */}
@@ -72,20 +128,20 @@ const { t } = useTranslations();
                   <input
                     type="text"
                     className="search-input"
-                    placeholder="Search menus..."
+                    placeholder={tl('search_menus')}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Module</label>
+                  <label className="filter-label">{tl('module')}</label>
                   <select
                     className="filter-select"
                     value={moduleId}
                     onChange={(e) => setModuleId(e.target.value)}
                   >
-                    <option value="">All Modules</option>
+                    <option value="">{tl('all_modules')}</option>
                     {modules.map(m => (
                       <option key={m.id} value={m.id}>{m.module_name}</option>
                     ))}
@@ -93,14 +149,14 @@ const { t } = useTranslations();
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Section</label>
+                  <label className="filter-label">{tl('section')}</label>
                   <select
                     className="filter-select"
                     value={sectionId}
                     onChange={(e) => setSectionId(e.target.value)}
                     disabled={!sections.length}
                   >
-                    <option value="">All Sections</option>
+                    <option value="">{tl('all_sections')}</option>
                     {sections.map(s => (
                       <option key={s.id} value={s.id}>{s.section_name}</option>
                     ))}
@@ -118,7 +174,7 @@ const { t } = useTranslations();
                     params.set('page', '1');
                     router.get('/system/menus?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
                   }}
-                  title="Reset all filters"
+                  title={tl('reset_all_filters')}
                 >
                   <RefreshCcw size={16} />
                 </button>
@@ -127,7 +183,7 @@ const { t } = useTranslations();
           </div>
         </div>
 
-        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />Clear</button><div className="dropdown"><button className="btn btn-sm btn-secondary dropdown-toggle">Change Status<ChevronDown size={12} /></button><div className="dropdown-menu"><button onClick={()=>handleBulkStatusChange(true)}>Set Active</button><button onClick={()=>handleBulkStatusChange(false)}>Set Inactive</button></div></div><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />Delete</button></div></div>)}
+        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{td('selected_count', { count: selected.length })}</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />{tl('clear')}</button><div className="dropdown"><button className="btn btn-sm btn-secondary dropdown-toggle">{tl('change_status')}<ChevronDown size={12} /></button><div className="dropdown-menu"><button onClick={()=>handleBulkStatusChange(true)}>{td('set_active')}</button><button onClick={()=>handleBulkStatusChange(false)}>{td('set_inactive')}</button></div></div><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />{tl('delete')}</button></div></div>)}
 
         <div className="data-table-container">
           <div className="table-wrapper">
@@ -135,13 +191,13 @@ const { t } = useTranslations();
               <thead>
                 <tr>
                   <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginated.data.length && paginated.data.length>0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">ID<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Menu<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th><div className="th-content">Module</div></th>
-                  <th><div className="th-content">Section</div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Status<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Updated<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="actions-header">Actions</th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{tl('id')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{tl('menu')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th><div className="th-content">{tl('module')}</div></th>
+                  <th><div className="th-content">{tl('section')}</div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{tl('status')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{tl('updated')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="actions-header">{tl('actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -152,20 +208,20 @@ const { t } = useTranslations();
                     <td><div className="module-details"><div className="module-name">{m.menu_name}</div></div></td>
                     <td>{m.module?.module_name}</td>
                     <td>{m.section?.section_name}</td>
-                    <td><span className={`status-badge status-${m.status ? 'active' : 'inactive'}`}>{m.status ? 'Active' : 'Inactive'}</span></td>
+                    <td><span className={`status-badge status-${m.status ? 'active' : 'inactive'}`}>{m.status ? tl('active') : tl('inactive')}</span></td>
                     <td><div className="date-cell"><Clock size={14} /><span>{new Date(m.updated_at).toLocaleString()}</span></div></td>
                     <td>
                       <div className="actions-cell">
-                        <button className="action-btn view" title="View Details" onClick={()=>router.get(`/system/menus/${m.id}/edit`)}>
+                        <button className="action-btn view" title={tl('view_details')} onClick={()=>router.get(`/system/menus/${m.id}/edit`)}>
                           <Eye size={16} />
                         </button>
-                        <button className="action-btn edit" title="Edit Menu" onClick={()=>router.get(`/system/menus/${m.id}/edit`)}>
+                        <button className="action-btn edit" title={tl('edit_menu')} onClick={()=>router.get(`/system/menus/${m.id}/edit`)}>
                           <Edit3 size={16} />
                         </button>
-                        <button className="action-btn copy" title="Duplicate" onClick={()=>router.get('/system/menus/create', { duplicate: m.id })}>
+                        <button className="action-btn copy" title={tl('duplicate')} onClick={()=>router.get('/system/menus/create', { duplicate: m.id })}>
                           <Copy size={16} />
                         </button>
-                        <button className="action-btn delete" title="Delete Menu" onClick={()=>handleDelete(m)}>
+                        <button className="action-btn delete" title={tl('delete_menu')} onClick={()=>handleDelete(m)}>
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -178,19 +234,19 @@ const { t } = useTranslations();
 
           <div className="pagination-container">
             <div className="pagination-info">
-              <div className="results-info">Showing {paginated.from || 0} to {paginated.to || 0} of {paginated.total || 0} entries</div>
+              <div className="results-info">{td('showing_entries', { from: paginated.from || 0, to: paginated.to || 0, total: paginated.total || 0 })}</div>
               <div className="page-size-selector">
-                <span>Show:</span>
+                <span>{tl('show')}</span>
                 <select value={pageSize} onChange={(e)=>{const v=Number(e.target.value); setPageSize(v); pushQuery({ per_page:v.toString() });}} className="page-size-select">{[10,25,50,100].map(s => (<option key={s} value={s}>{s}</option>))}</select>
-                <span>per page</span>
+                <span>{tl('per_page')}</span>
               </div>
             </div>
             <div className="pagination-controls">
-              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{setCurrentPage(1); pushQuery({ page:'1' });}} title="First">
+              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{setCurrentPage(1); pushQuery({ page:'1' });}} title={tl('first')}>
                 <ChevronLeft size={14} />
                 <ChevronLeft size={14} />
               </button>
-              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{const p=currentPage-1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title="Prev">
+              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{const p=currentPage-1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title={tl('prev')}>
                 <ChevronLeft size={14} />
               </button>
               <div className="page-numbers">
@@ -200,16 +256,16 @@ const { t } = useTranslations();
                   return (<button key={pageNumber} className={`pagination-btn ${currentPage===pageNumber?'active':''}`} onClick={()=>{setCurrentPage(pageNumber); pushQuery({ page:pageNumber.toString() });}}>{pageNumber}</button>);
                 })}
               </div>
-              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=currentPage+1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title="Next">
+              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=currentPage+1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title={tl('next')}>
                 <ChevronRight size={14} />
               </button>
-              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=paginated.last_page||1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title="Last">
+              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=paginated.last_page||1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title={tl('last')}>
                 <ChevronRight size={14} />
                 <ChevronRight size={14} />
               </button>
             </div>
             <div className="quick-jump">
-              <span>Go to:</span>
+              <span>{tl('go_to')}</span>
               <input
                 type="number"
                 min="1"
@@ -218,7 +274,7 @@ const { t } = useTranslations();
                 onChange={(e)=>{ const p = Math.max(1, Math.min(paginated.last_page || 1, Number(e.target.value))); setCurrentPage(p); pushQuery({ page:p.toString() }); }}
                 className="jump-input"
               />
-              <span>of {paginated.last_page || 1}</span>
+              <span>{td('pagination_of', { total: paginated.last_page || 1 })}</span>
             </div>
           </div>
         </div>

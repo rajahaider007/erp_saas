@@ -42,7 +42,7 @@ class AdminSeeder extends Seeder
                 'timezone' => 'UTC',
                 'language' => 'en',
                 'currency' => 'USD',
-                'theme' => 'system',
+                'theme' => 'dark',
                 'two_factor_enabled' => false,
                 'force_password_change' => false,
                 'password_changed_at' => Carbon::now(),

@@ -40,7 +40,8 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => public_path('storage'),
+            // Store files under storage/app/public (Laravel default). Web URLs still use /storage/* via the public/storage link.
+            'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
             'throw' => false,

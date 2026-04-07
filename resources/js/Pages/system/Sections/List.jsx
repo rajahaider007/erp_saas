@@ -16,6 +16,9 @@ const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, conf
 }};
 
 export default function List() {
+  const { t } = useTranslations();
+  const tl = (key, rep) => (rep ? t(`system.sections.list.${key}`, rep) : t(`system.sections.list.${key}`));
+  const td = (key, rep) => (rep ? t(`common.data_table.${key}`, rep) : t(`common.data_table.${key}`));
   const { sections: paginatedSections, modules, filters, flash } = usePage().props;
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
@@ -30,10 +33,13 @@ export default function List() {
   const visibleColumnsInit = useMemo(() => ({ id: true, section: true, module: true, status: true, createdAt: false, updatedAt: true, actions: true }), []);
   const [visibleColumns, setVisibleColumns] = useState(visibleColumnsInit);
 
-  useEffect(() => { if (flash?.success) CustomAlert.fire({ title: 'Success!', text: flash.success, icon: 'success' }); else if (flash?.error) CustomAlert.fire({ title:'Error!', text: flash.error, icon: 'error' }); }, [flash]);
+  useEffect(() => {
+    if (flash?.success) CustomAlert.fire({ title: t('common.flash.success_title'), text: flash.success, icon: 'success' });
+    else if (flash?.error) CustomAlert.fire({ title: t('common.flash.error_title'), text: flash.error, icon: 'error' });
+  }, [flash, t]);
 
   const pushQuery = (obj) => { const params = new URLSearchParams(window.location.search); Object.entries(obj).forEach(([k,v])=>{ if(v===undefined||v===null||v===''||v==='all') params.delete(k); else params.set(k,v); }); if(!obj.page) params.set('page','1'); router.get(window.location.pathname+'?'+params.toString(), {}, { preserveState:true, preserveScroll:true }); };
-  const handleSearch = (t) => { setSearchTerm(t); pushQuery({ search:t }); };
+  const handleSearch = (value) => { setSearchTerm(value); pushQuery({ search: value }); };
   const handleStatusFilter = (s) => { setStatusFilter(s); pushQuery({ status:s }); };
   const handleModuleFilter = (m) => { setModuleFilter(m); pushQuery({ module_id:m }); };
   const handleSort = (key) => { const dir = sortConfig.key===key && sortConfig.direction==='asc'?'desc':'asc'; setSortConfig({ key, direction:dir }); pushQuery({ sort_by:key, sort_direction:dir }); };
@@ -42,12 +48,80 @@ export default function List() {
 
   const handleSelectAll = (checked) => { if (checked) setSelected(paginatedSections.data.map(s=>s.id)); else setSelected([]); };
   const handleSelectRow = (id, checked) => { if (checked) setSelected(prev=>[...prev, id]); else setSelected(prev=>prev.filter(x=>x!==id)); };
-  const handleBulkDelete = () => { if (!selected.length) return; CustomAlert.fire({ title:'Delete Selected Sections?', text:`You are about to delete ${selected.length} section(s).`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete!', onConfirm:()=>{ setLoading(true); router.post('/system/sections/bulk-destroy', { ids:selected }, { onSuccess:()=>setSelected([]), onFinish:()=>setLoading(false) }); } }); };
-  const handleBulkStatusChange = (newStatus) => { if (!selected.length) return; const action = newStatus?'activate':'deactivate'; CustomAlert.fire({ title:`${action.charAt(0).toUpperCase()+action.slice(1)} Selected Sections?`, text:`You are about to ${action} ${selected.length} section(s).`, icon:'question', showCancelButton:true, confirmButtonText:`Yes, ${action}!`, onConfirm:()=>{ setLoading(true); router.post('/system/sections/bulk-status', { ids:selected, status:newStatus }, { onSuccess:()=>setSelected([]), onFinish:()=>setLoading(false) }); } }); };
-  const exportToCSV = () => { CustomAlert.fire({ title:'Export to CSV', text:'Download all sections as CSV file?', icon:'question', showCancelButton:true, confirmButtonText:'Yes, download!', onConfirm:()=> window.open('/system/sections/export-csv','_blank') }); };
-  const handleDelete = (section) => { CustomAlert.fire({ title:'Are you sure?', text:`You are about to delete "${section.section_name}". This action cannot be undone!`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete it!', cancelButtonText:'Cancel', onConfirm:()=>{ setLoading(true); router.delete(`/system/sections/${section.id}`, { onFinish:()=>setLoading(false) }); } }); };
+  const handleBulkDelete = () => {
+    if (!selected.length) return;
+    CustomAlert.fire({
+      title: td('bulk_delete_title'),
+      text: td('bulk_delete_text', { count: selected.length }),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: td('bulk_delete_ok'),
+      cancelButtonText: t('common.actions.cancel'),
+      onConfirm: () => {
+        setLoading(true);
+        router.post('/system/sections/bulk-destroy', { ids: selected }, { onSuccess: () => setSelected([]), onFinish: () => setLoading(false) });
+      },
+    });
+  };
+  const handleBulkStatusChange = (newStatus) => {
+    if (!selected.length) return;
+    const run = () => {
+      setLoading(true);
+      router.post('/system/sections/bulk-status', { ids: selected, status: newStatus }, { onSuccess: () => setSelected([]), onFinish: () => setLoading(false) });
+    };
+    if (newStatus) {
+      CustomAlert.fire({
+        title: td('bulk_status_activate_title'),
+        text: td('bulk_status_activate_text', { count: selected.length }),
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: td('bulk_status_activate_ok'),
+        cancelButtonText: t('common.actions.cancel'),
+        onConfirm: run,
+      });
+    } else {
+      CustomAlert.fire({
+        title: td('bulk_status_deactivate_title'),
+        text: td('bulk_status_deactivate_text', { count: selected.length }),
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: td('bulk_status_deactivate_ok'),
+        cancelButtonText: t('common.actions.cancel'),
+        onConfirm: run,
+      });
+    }
+  };
+  const exportToCSV = () => {
+    CustomAlert.fire({
+      title: td('export_csv_title'),
+      text: td('export_csv_text'),
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: td('export_csv_ok'),
+      cancelButtonText: t('common.actions.cancel'),
+      onConfirm: () => window.open('/system/sections/export-csv', '_blank'),
+    });
+  };
+  const handleDelete = (section) => {
+    CustomAlert.fire({
+      title: td('confirm_delete_title'),
+      text: td('confirm_delete_text', { name: section.section_name }),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: td('confirm_delete_ok'),
+      cancelButtonText: t('common.actions.cancel'),
+      onConfirm: () => {
+        setLoading(true);
+        router.delete(`/system/sections/${section.id}`, { onFinish: () => setLoading(false) });
+      },
+    });
+  };
 
-  const statusOptions = [ { value:'all', label:'All Status' }, { value:'1', label:'Active' }, { value:'0', label:'Inactive' } ];
+  const statusOptions = useMemo(() => ([
+    { value: 'all', label: t('system.departments.list.all_status') },
+    { value: '1', label: t('common.status.active') },
+    { value: '0', label: t('common.status.inactive') },
+  ]), [t]);
   const pageSizeOptions = [10,25,50,100];
 
   return (
@@ -56,16 +130,16 @@ export default function List() {
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
-              <h1 className="page-title"><Database className="title-icon" />{usePage().props?.pageTitle || 'Sections'}</h1>
+              <h1 className="page-title"><Database className="title-icon" />{usePage().props?.pageTitle || t('system.sections.add.breadcrumb_sections')}</h1>
               <div className="stats-summary">
-                <div className="stat-item"><span>{paginatedSections?.total || 0} Total</span></div>
-                <div className="stat-item"><span>{paginatedSections?.data?.filter(s=>s.status).length || 0} Active</span></div>
+                <div className="stat-item"><span>{td('stat_total', { count: paginatedSections?.total || 0 })}</span></div>
+                <div className="stat-item"><span>{td('stat_active', { count: paginatedSections?.data?.filter(s=>s.status).length || 0 })}</span></div>
               </div>
             </div>
             <div className="header-actions">
-              <button className="btn btn-icon" onClick={()=>window.location.reload()} title="Refresh" disabled={loading}><RefreshCcw size={20} className={loading ? 'animate-spin' : ''} /></button>
-              <div className="dropdown"><button className="btn btn-secondary dropdown-toggle"><Download size={20} />Export<ChevronDown size={16} /></button><div className="dropdown-menu"><button onClick={exportToCSV}><FileText size={16} />Export as CSV</button></div></div>
-              <a href='/system/sections/create' className="btn btn-primary"><Plus size={20} />Add Section</a>
+              <button className="btn btn-icon" onClick={()=>window.location.reload()} title={tl('refresh')} disabled={loading}><RefreshCcw size={20} className={loading ? 'animate-spin' : ''} /></button>
+              <div className="dropdown"><button className="btn btn-secondary dropdown-toggle"><Download size={20} />{tl('export')}<ChevronDown size={16} /></button><div className="dropdown-menu"><button onClick={exportToCSV}><FileText size={16} />{tl('export_as_csv')}</button></div></div>
+              <a href='/system/sections/create' className="btn btn-primary"><Plus size={20} />{tl('add_section')}</a>
             </div>
           </div>
           {/* Modern Compact Filters */}
@@ -77,14 +151,14 @@ export default function List() {
                   <input
                     type="text"
                     className="search-input"
-                    placeholder="Search sections..."
+                    placeholder={tl('search_sections')}
                     value={searchTerm}
                     onChange={(e) => handleSearch(e.target.value)}
                   />
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Status</label>
+                  <label className="filter-label">{tl('status')}</label>
                   <select
                     className="filter-select"
                     value={statusFilter}
@@ -97,13 +171,13 @@ export default function List() {
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Module</label>
+                  <label className="filter-label">{tl('module')}</label>
                   <select
                     className="filter-select"
                     value={moduleFilter}
                     onChange={(e) => handleModuleFilter(e.target.value)}
                   >
-                    <option value="">All Modules</option>
+                    <option value="">{tl('all_modules')}</option>
                     {modules.map(m => (
                       <option key={m.id} value={m.id}>{m.module_name}</option>
                     ))}
@@ -120,26 +194,26 @@ export default function List() {
                     params.set('page', '1');
                     router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
                   }}
-                  title="Reset all filters"
+                  title={tl('reset_all_filters')}
                 >
                   <RefreshCcw size={16} />
                 </button>
               </div>
             </div>
           </div>
-          {showColumnSelector && (<div className="column-selector"><div className="column-selector-content"><h3>Show/Hide Columns</h3><div className="column-grid">{Object.entries(visibleColumns).map(([key, visible]) => (key!=='actions' && (<label key={key} className="column-item"><input type="checkbox" checked={visible} onChange={(e)=>setVisibleColumns({ ...visibleColumns, [key]: e.target.checked })} /><span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>s.toUpperCase())}</span></label>)))}
-          </div><button className="btn btn-sm btn-secondary" onClick={()=>setShowColumnSelector(false)}>Close</button></div></div>)}
+          {showColumnSelector && (<div className="column-selector"><div className="column-selector-content"><h3>{tl('showhide_columns')}</h3><div className="column-grid">{Object.entries(visibleColumns).map(([key, visible]) => (key!=='actions' && (<label key={key} className="column-item"><input type="checkbox" checked={visible} onChange={(e)=>setVisibleColumns({ ...visibleColumns, [key]: e.target.checked })} /><span>{key.replace(/([A-Z])/g,' $1').replace(/^./, s=>s.toUpperCase())}</span></label>)))}
+          </div><button className="btn btn-sm btn-secondary" onClick={()=>setShowColumnSelector(false)}>{t('common.actions.close')}</button></div></div>)}
         </div>
-        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />Clear</button><div className="dropdown"><button className="btn btn-sm btn-secondary dropdown-toggle">Change Status<ChevronDown size={12} /></button><div className="dropdown-menu"><button onClick={()=>handleBulkStatusChange(true)}>Set Active</button><button onClick={()=>handleBulkStatusChange(false)}>Set Inactive</button></div></div><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />Delete</button></div></div>)}
+        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{td('selected_count', { count: selected.length })}</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />{tl('clear')}</button><div className="dropdown"><button className="btn btn-sm btn-secondary dropdown-toggle">{tl('change_status')}<ChevronDown size={12} /></button><div className="dropdown-menu"><button onClick={()=>handleBulkStatusChange(true)}>{td('set_active')}</button><button onClick={()=>handleBulkStatusChange(false)}>{td('set_inactive')}</button></div></div><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />{tl('delete')}</button></div></div>)}
         <div className="data-table-container"><div className="table-wrapper"><table className="data-table"><thead><tr>
           <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginatedSections.data.length && paginatedSections.data.length>0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
-          {visibleColumns.id && (<th className="sortable" onClick={()=>handleSort('id')}><div className="th-content">ID<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='id'?'active':''}`} /></div></th>)}
-          {visibleColumns.section && (<th className="sortable" onClick={()=>handleSort('section_name')}><div className="th-content">Section<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='section_name'?'active':''}`} /></div></th>)}
-          {visibleColumns.module && (<th><div className="th-content">Module</div></th>)}
-          {visibleColumns.status && (<th className="sortable" onClick={()=>handleSort('status')}><div className="th-content">Status<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='status'?'active':''}`} /></div></th>)}
-          {visibleColumns.createdAt && (<th className="sortable" onClick={()=>handleSort('created_at')}><div className="th-content">Created<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='created_at'?'active':''}`} /></div></th>)}
-          {visibleColumns.updatedAt && (<th className="sortable" onClick={()=>handleSort('updated_at')}><div className="th-content">Updated<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='updated_at'?'active':''}`} /></div></th>)}
-          {visibleColumns.actions && (<th className="actions-header">Actions</th>)}
+          {visibleColumns.id && (<th className="sortable" onClick={()=>handleSort('id')}><div className="th-content">{tl('id')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='id'?'active':''}`} /></div></th>)}
+          {visibleColumns.section && (<th className="sortable" onClick={()=>handleSort('section_name')}><div className="th-content">{tl('section')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='section_name'?'active':''}`} /></div></th>)}
+          {visibleColumns.module && (<th><div className="th-content">{tl('module')}</div></th>)}
+          {visibleColumns.status && (<th className="sortable" onClick={()=>handleSort('status')}><div className="th-content">{tl('status')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='status'?'active':''}`} /></div></th>)}
+          {visibleColumns.createdAt && (<th className="sortable" onClick={()=>handleSort('created_at')}><div className="th-content">{tl('created')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='created_at'?'active':''}`} /></div></th>)}
+          {visibleColumns.updatedAt && (<th className="sortable" onClick={()=>handleSort('updated_at')}><div className="th-content">{tl('updated')}<ArrowUpDown size={14} className={`sort-icon ${sortConfig.key==='updated_at'?'active':''}`} /></div></th>)}
+          {visibleColumns.actions && (<th className="actions-header">{tl('actions')}</th>)}
         </tr></thead><tbody>
           {paginatedSections.data.map((s) => (
             <tr key={s.id} className="table-row">
@@ -147,22 +221,22 @@ export default function List() {
               {visibleColumns.id && (<td><span className="module-id">#{s.id}</span></td>)}
               {visibleColumns.section && (<td><div className="module-details"><div className="module-name">{s.section_name}</div></div></td>)}
               {visibleColumns.module && (<td>{s.module?.module_name}</td>)}
-              {visibleColumns.status && (<td><span className={`status-badge status-${s.status ? 'active' : 'inactive'}`}>{s.status ? 'Active' : 'Inactive'}</span></td>)}
+              {visibleColumns.status && (<td><span className={`status-badge status-${s.status ? 'active' : 'inactive'}`}>{s.status ? t('common.status.active') : t('common.status.inactive')}</span></td>)}
               {visibleColumns.createdAt && (<td><div className="date-cell"><Clock size={14} /><span>{new Date(s.created_at).toLocaleString()}</span></div></td>)}
               {visibleColumns.updatedAt && (<td><div className="date-cell"><Clock size={14} /><span>{new Date(s.updated_at).toLocaleString()}</span></div></td>)}
               {visibleColumns.actions && (
                 <td>
                   <div className="actions-cell">
-                    <button className="action-btn view" title="View Details" onClick={() => router.get(`/system/sections/${s.id}/edit`)}>
+                    <button className="action-btn view" title={tl('view_details')} onClick={() => router.get(`/system/sections/${s.id}/edit`)}>
                       <Eye size={16} />
                     </button>
-                    <button className="action-btn edit" title="Edit Section" onClick={() => router.get(`/system/sections/${s.id}/edit`)}>
+                    <button className="action-btn edit" title={tl('edit_section')} onClick={() => router.get(`/system/sections/${s.id}/edit`)}>
                       <Edit3 size={16} />
                     </button>
-                    <button className="action-btn copy" title="Duplicate" onClick={() => router.get('/system/sections/create', { duplicate: s.id })}>
+                    <button className="action-btn copy" title={tl('duplicate')} onClick={() => router.get('/system/sections/create', { duplicate: s.id })}>
                       <Copy size={16} />
                     </button>
-                    <button className="action-btn delete" title="Delete Section" onClick={() => handleDelete(s)}>
+                    <button className="action-btn delete" title={tl('delete_section')} onClick={() => handleDelete(s)}>
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -173,21 +247,21 @@ export default function List() {
         </tbody></table></div>
         <div className="pagination-container">
           <div className="pagination-info">
-            <div className="results-info">Showing {paginatedSections.from || 0} to {paginatedSections.to || 0} of {paginatedSections.total || 0} entries</div>
+            <div className="results-info">{td('showing_entries', { from: paginatedSections.from || 0, to: paginatedSections.to || 0, total: paginatedSections.total || 0 })}</div>
             <div className="page-size-selector">
-              <span>Show:</span>
+              <span>{tl('show')}</span>
               <select value={pageSize} onChange={(e)=>handlePageSizeChange(Number(e.target.value))} className="page-size-select">
                 {pageSizeOptions.map(size => (<option key={size} value={size}>{size}</option>))}
               </select>
-              <span>per page</span>
+              <span>{tl('per_page')}</span>
             </div>
           </div>
           <div className="pagination-controls">
-            <button className="pagination-btn" disabled={currentPage===1} onClick={()=>handlePageChange(1)} title="First Page">
+            <button className="pagination-btn" disabled={currentPage===1} onClick={()=>handlePageChange(1)} title={tl('first_page')}>
               <ChevronLeft size={14} />
               <ChevronLeft size={14} />
             </button>
-            <button className="pagination-btn" disabled={currentPage===1} onClick={()=>handlePageChange(currentPage-1)} title="Previous Page">
+            <button className="pagination-btn" disabled={currentPage===1} onClick={()=>handlePageChange(currentPage-1)} title={tl('previous_page')}>
               <ChevronLeft size={14} />
             </button>
             <div className="page-numbers">
@@ -201,18 +275,18 @@ export default function List() {
                 );
               })}
             </div>
-            <button className="pagination-btn" disabled={currentPage===(paginatedSections.last_page||1)} onClick={()=>handlePageChange(currentPage+1)} title="Next Page">
+            <button className="pagination-btn" disabled={currentPage===(paginatedSections.last_page||1)} onClick={()=>handlePageChange(currentPage+1)} title={tl('next_page')}>
               <ChevronRight size={14} />
             </button>
-            <button className="pagination-btn" disabled={currentPage===(paginatedSections.last_page||1)} onClick={()=>handlePageChange(paginatedSections.last_page||1)} title="Last Page">
+            <button className="pagination-btn" disabled={currentPage===(paginatedSections.last_page||1)} onClick={()=>handlePageChange(paginatedSections.last_page||1)} title={tl('last_page')}>
               <ChevronRight size={14} />
               <ChevronRight size={14} />
             </button>
           </div>
           <div className="quick-jump">
-            <span>Go to:</span>
+            <span>{tl('go_to')}</span>
             <input type="number" min="1" max={paginatedSections.last_page || 1} value={currentPage} onChange={(e)=>{ const p=Math.max(1, Math.min(paginatedSections.last_page||1, Number(e.target.value))); handlePageChange(p); }} className="jump-input" />
-            <span>of {paginatedSections.last_page || 1}</span>
+            <span>{td('pagination_of', { total: paginatedSections.last_page || 1 })}</span>
           </div>
         </div></div>
       </div>

@@ -21,20 +21,155 @@
       "pending_payments": "Pending Payments",
       "profit_margin": "Profit Margin",
       "no_recent_transactions_found": "No recent transactions found"
+    },
+    "dashboard": {
+      "page_title": "Financial Management",
+      "page_subtitle": "Manage your accounting, invoicing, and financial reporting",
+      "default_role_fallback": "Accountant",
+      "financial_snapshot_heading": "Financial Snapshot Reports",
+      "accounting_management_heading": "Accounting Management",
+      "recent_transactions": "Recent Transactions",
+      "view_all": "View All",
+      "invoices_count": "{count} invoices",
+      "payments_count": "{count} payments",
+      "profit_amount": "{amount} profit",
+      "accounts_count": "{count} account(s)",
+      "cards": {
+        "main_payable": "Main Payable",
+        "main_receivable": "Main Receivable",
+        "current_cash": "Current Cash In Hand",
+        "all_cash_codes": "All Cash Codes",
+        "bank_balances": "Bank Balances"
+      },
+      "quick_journal_title": "Create Journal Entry",
+      "quick_journal_desc": "Create a new journal voucher entry.",
+      "quick_journal_cta": "Create Now",
+      "quick_opening_title": "Opening Balance",
+      "quick_opening_desc": "Record opening balances for accounts.",
+      "quick_reports_title": "View Reports",
+      "quick_reports_desc": "Access financial reports and analytics.",
+      "no_transactions_hint": "Transactions will appear here once you start posting vouchers",
+      "sections": {
+        "general_ledger": {
+          "name": "General Ledger",
+          "description": "Manage chart of accounts and general ledger entries"
+        },
+        "financial_reports": {
+          "name": "Financial Reports",
+          "description": "Generate financial statements and reports"
+        },
+        "configuration": {
+          "name": "Configuration",
+          "description": "Configure accounting settings and fiscal year"
+        },
+        "currency_ledger": {
+          "name": "Currency & Ledger",
+          "description": "Manage currencies and currency ledger"
+        }
+      },
+      "menus": {
+        "chart_of_accounts": "Chart of Accounts",
+        "journal_voucher": "Journal Voucher",
+        "trial_balance": "Trial Balance",
+        "general_ledger": "General Ledger",
+        "balance_sheet": "Balance Sheet",
+        "income_statement": "Income Statement",
+        "fiscal_year": "Fiscal Year",
+        "voucher_configuration": "Voucher Configuration",
+        "account_configuration": "Account Configuration",
+        "code_configuration": "Code Configuration",
+        "currencies": "Currencies",
+        "currency_ledger": "Currency Ledger",
+        "opening_voucher": "Opening Voucher"
+      }
     }
   },
   "dashboard": {
-    "module_management": "Module Management"
+    "module_management": "Module Management",
+    "title_suffix": "{name} Dashboard",
+    "subtitle": "Manage your {name} module features and data",
+    "total_records": "Total Records",
+    "active_users": "Active Users",
+    "features": "Features",
+    "settings": "Settings",
+    "quick_actions": "Quick Actions",
+    "features_section_heading": "{name} Features",
+    "dev_title": "{name} Module Dashboard",
+    "dev_body": "This module dashboard is currently under development. Features and statistics will be added soon.",
+    "coming_soon_inline": "Coming Soon",
+    "view_records": "View Records",
+    "manage_users": "Manage Users",
+    "module_settings": "Module Settings"
   },
   "dynamic": {
     "index": {
       "coming_soon": "Coming Soon",
-      "in_development": "In Development"
+      "in_development": "In Development",
+      "header_subtitle": "Access {name} features and manage your business operations",
+      "features_heading": "{name} Features",
+      "features_subtitle": "Access all available features and manage your {name} operations",
+      "menu_description": "Access {name} features",
+      "open_feature": "Open Feature",
+      "no_features_title": "No Features Available",
+      "no_features_body": "This module is currently under development. We're working hard to bring you the best experience.",
+      "back_to_modules": "Back to Modules"
     }
   },
   "system": {
     "dashboard": {
-      "system_administration": "System Administration"
+      "system_administration": "System Administration",
+      "title": "System Dashboard",
+      "subtitle": "Manage your ERP system configuration and administration",
+      "total_users": "Total Users",
+      "companies": "Companies",
+      "modules": "Modules",
+      "packages": "Packages",
+      "system_management_modules": "System Management Modules",
+      "quick_actions": "Quick Actions",
+      "add_new_user": "Add New User",
+      "add_company": "Add Company",
+      "create_module": "Create Module",
+      "storage_attachments": "Storage & Attachments",
+      "label_total": "Total",
+      "label_active": "Active",
+      "modules_grid": {
+        "user_management": {
+          "name": "User Management",
+          "description": "Manage system users, roles, and permissions"
+        },
+        "company_management": {
+          "name": "Company Management",
+          "description": "Configure company settings and details"
+        },
+        "module_management": {
+          "name": "Module Management",
+          "description": "Manage system modules and features"
+        },
+        "package_management": {
+          "name": "Package Management",
+          "description": "Configure packages and features"
+        },
+        "location_management": {
+          "name": "Location Management",
+          "description": "Manage company locations and branches"
+        },
+        "department_management": {
+          "name": "Department Management",
+          "description": "Organize departments and teams"
+        },
+        "currency_management": {
+          "name": "Currency Management",
+          "description": "Manage currencies and exchange rates"
+        },
+        "menu_management": {
+          "name": "Menu Management",
+          "description": "Configure system menus and navigation"
+        },
+        "storage": {
+          "name": "Storage",
+          "description": "Manage attachments and file storage"
+        }
+      }
     },
     "index": {
       "page_title": "System Administration",

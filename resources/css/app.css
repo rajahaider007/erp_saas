@@ -320,14 +320,13 @@ html.dark .search-input:focus {
     border-color: #bfdbfe !important;
 }
 
-/* Disable Tailwind CSS for select elements specifically */
-.form-theme-2 select,
-.form-theme-2 select * {
+/* Dark app + form-theme-2: reset Tailwind on selects (light mode keeps normal styling) */
+html.dark.form-theme-2 select,
+html.dark.form-theme-2 select * {
   all: unset !important;
 }
 
-/* Re-apply our custom styles after resetting Tailwind */
-.form-theme-2 select {
+html.dark.form-theme-2 select {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.8) !important;
   border: 2px solid rgba(148, 163, 184, 0.3) !important;
@@ -347,8 +346,7 @@ html.dark .search-input:focus {
   box-sizing: border-box !important;
 }
 
-/* Custom select class to override Tailwind completely */
-.custom-select {
+html.dark .custom-select {
   all: unset !important;
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.8) !important;
@@ -369,8 +367,7 @@ html.dark .search-input:focus {
   box-sizing: border-box !important;
 }
 
-/* Filter select specific styling */
-.filter-select {
+html.dark .filter-select {
   height: 16px !important;
   width: auto !important;
   color: #F1F5F9 !important;
@@ -388,25 +385,25 @@ html.dark .search-input:focus {
   box-sizing: border-box !important;
 }
 
-.custom-select:focus {
+html.dark .custom-select:focus {
   border-color: #8B5CF6 !important;
   outline: none !important;
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
 }
 
-.filter-select:focus {
+html.dark .filter-select:focus {
   border-color: #8B5CF6 !important;
   outline: none !important;
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
 }
 
-.custom-select option {
+html.dark .custom-select option {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 1) !important;
   padding: 0.75rem !important;
 }
 
-.filter-select option {
+html.dark .filter-select option {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 1) !important;
   padding: 0.75rem !important;
@@ -1609,7 +1606,8 @@ html.dark .search-input:focus {
   gap: 0.5rem !important;
 }
 
-.page-title {
+/* Scoped: global .page-title was white-on-light for all list pages (invisible in light mode) */
+.recovery-header .page-title-section .page-title {
   color: white !important;
   font-size: 2rem !important;
   font-weight: 800 !important;
@@ -1617,7 +1615,7 @@ html.dark .search-input:focus {
   line-height: 1.2 !important;
 }
 
-.page-subtitle {
+.recovery-header .page-title-section .page-subtitle {
   color: rgba(255, 255, 255, 0.7) !important;
   font-size: 1rem !important;
   margin: 0 !important;
@@ -2039,7 +2037,7 @@ html.dark .search-input:focus {
     padding: 1.5rem !important;
   }
   
-  .page-title {
+  .recovery-header .page-title-section .page-title {
     font-size: 1.5rem !important;
   }
   
@@ -2635,30 +2633,28 @@ html.dark .search-input:focus {
   color: #f59e0b !important;
 }
 
-/* Fix for select element text visibility in dark theme */
-.form-theme-2 select,
-.form-theme-2 .filter-select,
-.form-theme-2 .form-select {
+/* Dark app theme only: force select contrast (light mode uses normal / theme variables) */
+html.dark.form-theme-2 select,
+html.dark.form-theme-2 .filter-select,
+html.dark.form-theme-2 .form-select {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.8) !important;
 }
 
-.form-theme-2 select:focus,
-.form-theme-2 .filter-select:focus,
-.form-theme-2 .form-select:focus {
+html.dark.form-theme-2 select:focus,
+html.dark.form-theme-2 .filter-select:focus,
+html.dark.form-theme-2 .form-select:focus {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.95) !important;
 }
 
-/* Ensure selected option text is visible */
-.form-theme-2 select option:checked,
-.form-theme-2 select option[selected] {
+html.dark.form-theme-2 select option:checked,
+html.dark.form-theme-2 select option[selected] {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 1) !important;
 }
 
-/* Nuclear option - force all select text to be visible */
-.form-theme-2 select {
+html.dark.form-theme-2 select {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.8) !important;
   -webkit-text-fill-color: #F1F5F9 !important;
@@ -2666,25 +2662,22 @@ html.dark .search-input:focus {
   text-fill-color: #F1F5F9 !important;
 }
 
-/* Force select element text visibility with multiple approaches */
-.form-theme-2 select,
-.form-theme-2 select:focus,
-.form-theme-2 select:hover,
-.form-theme-2 select:active,
-.form-theme-2 select:visited,
-.form-theme-2 select:not(:focus):not(:hover):not(:active) {
+html.dark.form-theme-2 select,
+html.dark.form-theme-2 select:focus,
+html.dark.form-theme-2 select:hover,
+html.dark.form-theme-2 select:active,
+html.dark.form-theme-2 select:visited,
+html.dark.form-theme-2 select:not(:focus):not(:hover):not(:active) {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.8) !important;
   -webkit-text-fill-color: #F1F5F9 !important;
 }
 
-/* Override any possible inherited text color */
-.form-theme-2 * select {
+html.dark.form-theme-2 * select {
   color: #F1F5F9 !important;
 }
 
-/* Disable Tailwind CSS for select elements */
-.form-theme-2 select {
+html.dark.form-theme-2 select {
   all: unset !important;
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.8) !important;
@@ -2702,12 +2695,11 @@ html.dark .search-input:focus {
   text-fill-color: #F1F5F9 !important;
 }
 
-/* Force select text visibility - nuclear option */
-.form-theme-2 select,
-.form-theme-2 select:focus,
-.form-theme-2 select:hover,
-.form-theme-2 select:active,
-.form-theme-2 select:visited {
+html.dark.form-theme-2 select,
+html.dark.form-theme-2 select:focus,
+html.dark.form-theme-2 select:hover,
+html.dark.form-theme-2 select:active,
+html.dark.form-theme-2 select:visited {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.8) !important;
   -webkit-text-fill-color: #F1F5F9 !important;

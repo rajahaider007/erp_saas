@@ -134,6 +134,28 @@
     --glass-border: rgba(139, 92, 246, 0.2);
 }
 
+/* App light mode + "dark form" preset: use light surfaces & dark text so lists/cards stay readable */
+html.form-theme-2:not(.dark) {
+    --primary-color: #8B5CF6;
+    --primary-hover: #7C3AED;
+    --primary-light: #EDE9FE;
+    --secondary-color: #64748B;
+    --background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    --surface: rgba(255, 255, 255, 0.95);
+    --surface-hover: rgba(255, 255, 255, 1);
+    --text-primary: #1E293B;
+    --text-secondary: #64748B;
+    --border: rgba(148, 163, 184, 0.35);
+    --border-focus: var(--primary-color);
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.12);
+    --glass-bg: rgba(255, 255, 255, 0.5);
+    --glass-border: rgba(148, 163, 184, 0.28);
+}
+
 .form-theme-3 {
     --primary-color: #06B6D4;
     --primary-hover: #0891B2;
@@ -2523,7 +2545,7 @@ textarea::placeholder {
 .data-table td {
     padding: 1rem 1.25rem;
     text-align: left;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid #eeeeee;
 }
 
 .data-table td {
@@ -2543,7 +2565,17 @@ textarea::placeholder {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 2px solid var(--border);
+    border-bottom: 2px solid #e8e8e8;
+}
+
+.dark .advanced-module-manager .data-table th,
+.dark .advanced-module-manager .data-table td {
+    border-bottom-color: rgba(71, 85, 105, 0.45);
+}
+
+.dark .advanced-module-manager .data-table thead th,
+.dark .advanced-module-manager .data-table th {
+    border-bottom-color: rgba(71, 85, 105, 0.55);
 }
 
 .sortable {
@@ -2609,8 +2641,15 @@ textarea::placeholder {
 
 .module-id {
     font-weight: 700;
-    color: var(--primary-color);
+    color: #475569;
     font-family: 'SF Mono', Monaco, monospace;
+}
+
+.dark .form-theme-system .module-id,
+.dark .form-theme-1 .module-id,
+.dark .form-theme-2 .module-id,
+.dark .form-theme-3 .module-id {
+    color: #94a3b8;
 }
 
 .module-info {
@@ -2730,7 +2769,7 @@ textarea::placeholder {
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: capitalize;
-    border: 1px solid;
+    border: 1px solid transparent;
 }
 
 .status-dot {
@@ -2840,9 +2879,9 @@ textarea::placeholder {
 }
 
 .action-btn.view {
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--primary-color);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: rgba(59, 130, 246, 0.14);
+    color: #1d4ed8;
+    border: 1px solid rgba(37, 99, 235, 0.35);
 }
 
 .action-btn.view:hover {
@@ -2852,9 +2891,9 @@ textarea::placeholder {
 }
 
 .action-btn.edit {
-    background: rgba(245, 158, 11, 0.1);
-    color: var(--warning);
-    border: 1px solid rgba(245, 158, 11, 0.2);
+    background: rgba(245, 158, 11, 0.16);
+    color: #b45309;
+    border: 1px solid rgba(217, 119, 6, 0.4);
 }
 
 .action-btn.edit:hover {
@@ -2864,9 +2903,9 @@ textarea::placeholder {
 }
 
 .action-btn.copy {
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--success);
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: rgba(16, 185, 129, 0.14);
+    color: #047857;
+    border: 1px solid rgba(5, 150, 105, 0.4);
 }
 
 .action-btn.copy:hover {
@@ -2876,9 +2915,9 @@ textarea::placeholder {
 }
 
 .action-btn.delete {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--error);
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+    border: 1px solid rgba(220, 38, 38, 0.4);
 }
 
 .action-btn.delete:hover {
@@ -2900,14 +2939,13 @@ textarea::placeholder {
 
 .pagination-container {
     padding: 1.5rem 2rem;
-    background: var(--glass-bg);
+    background: var(--surface);
     border-top: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 1.5rem;
-    backdrop-filter: blur(10px);
 }
 
 .pagination-info {
@@ -3001,9 +3039,13 @@ textarea::placeholder {
 }
 
 .pagination-btn:disabled {
-    opacity: 0.5;
+    opacity: 0.55;
     cursor: not-allowed;
-    background: var(--border);
+    background: #f3f4f6;
+}
+
+.dark .advanced-module-manager .pagination-btn:disabled {
+    background: rgba(55, 65, 81, 0.6);
 }
 
 .pagination-btn.active {
@@ -3053,29 +3095,73 @@ textarea::placeholder {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Status color variants */
+/* Status color variants — strong text vs tint background for light-mode legibility */
 .status-active {
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--success);
-    border-color: rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.18);
+    color: #047857;
+    border-color: rgba(5, 150, 105, 0.45);
 }
 
 .status-inactive {
-    background: rgba(107, 114, 128, 0.1);
-    color: var(--text-secondary);
-    border-color: rgba(107, 114, 128, 0.3);
+    background: rgba(100, 116, 139, 0.14);
+    color: #475569;
+    border-color: rgba(100, 116, 139, 0.35);
 }
 
 .status-pending {
-    background: rgba(245, 158, 11, 0.1);
-    color: var(--warning);
-    border-color: rgba(245, 158, 11, 0.3);
+    background: rgba(245, 158, 11, 0.2);
+    color: #b45309;
+    border-color: rgba(217, 119, 6, 0.45);
 }
 
 .status-error {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--error);
-    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.14);
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.4);
+}
+
+.dark .advanced-module-manager .status-active {
+    background: rgba(16, 185, 129, 0.12);
+    color: #34d399;
+    border-color: rgba(52, 211, 153, 0.35);
+}
+
+.dark .advanced-module-manager .status-inactive {
+    background: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+    border-color: rgba(148, 163, 184, 0.3);
+}
+
+.dark .advanced-module-manager .status-pending {
+    background: rgba(245, 158, 11, 0.12);
+    color: #fbbf24;
+    border-color: rgba(251, 191, 36, 0.35);
+}
+
+.dark .advanced-module-manager .status-error {
+    background: rgba(239, 68, 68, 0.12);
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.35);
+}
+
+.dark .advanced-module-manager .action-btn.view {
+    color: #60a5fa;
+    border-color: rgba(96, 165, 250, 0.35);
+}
+
+.dark .advanced-module-manager .action-btn.edit {
+    color: #fbbf24;
+    border-color: rgba(251, 191, 36, 0.35);
+}
+
+.dark .advanced-module-manager .action-btn.copy {
+    color: #34d399;
+    border-color: rgba(52, 211, 153, 0.35);
+}
+
+.dark .advanced-module-manager .action-btn.delete {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.35);
 }
 
 /* Priority color variants */

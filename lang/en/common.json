@@ -75,5 +75,53 @@
     "access_denied": "Access Denied",
     "fallback_message": "You don't have permission to perform this action.",
     "contact_administrator": "Contact Administrator"
+  },
+  "app": {
+    "name": "ERP System",
+    "head_with_page": "{page} - {app}",
+    "head_default": "ERP System"
+  },
+  "print": {
+    "default_title": "Report",
+    "head_title": "{title} - Print"
+  },
+  "welcome_page": {
+    "head_title": "Welcome",
+    "title": "Enterprise ERP System",
+    "subtitle": "Professional SAAS ERP Solution",
+    "sign_in": "Sign in"
+  },
+  "welcome_starter": {
+    "head_title": "Welcome",
+    "heading": "Hello from React!"
+  },
+  "data_table": {
+    "stat_total": "{count} Total",
+    "stat_active": "{count} Active",
+    "stat_inactive": "{count} Inactive",
+    "selected_count": "{count} selected",
+    "showing_entries": "Showing {from} to {to} of {total} entries",
+    "pagination_of": "of {total}",
+    "set_active": "Set Active",
+    "set_inactive": "Set Inactive",
+    "confirm_delete_title": "Are you sure?",
+    "confirm_delete_text": "You are about to delete \"{name}\". This action cannot be undone!",
+    "confirm_delete_ok": "Yes, delete it!",
+    "bulk_delete_title": "Delete selected?",
+    "bulk_delete_text": "You are about to delete {count} row(s).",
+    "bulk_delete_ok": "Yes, delete!",
+    "bulk_status_activate_title": "Activate selected?",
+    "bulk_status_activate_text": "You are about to activate {count} row(s).",
+    "bulk_status_activate_ok": "Yes, activate!",
+    "bulk_status_deactivate_title": "Deactivate selected?",
+    "bulk_status_deactivate_text": "You are about to deactivate {count} row(s).",
+    "bulk_status_deactivate_ok": "Yes, deactivate!",
+    "export_csv_title": "Export to CSV",
+    "export_csv_text": "Download data as a CSV file?",
+    "export_csv_ok": "Yes, download!"
+  },
+  "flash": {
+    "success_title": "Success!",
+    "error_title": "Error!"
   }
 }

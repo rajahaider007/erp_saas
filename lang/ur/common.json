@@ -75,5 +75,53 @@
     "access_denied": "رسائی مسترد",
     "fallback_message": "اس کارروائی کی اجازت آپ کو نہیں ہے۔",
     "contact_administrator": "منتظم سے رابطہ کریں"
+  },
+  "app": {
+    "name": "ERP سسٹم",
+    "head_with_page": "{page} - {app}",
+    "head_default": "ERP سسٹم"
+  },
+  "print": {
+    "default_title": "رپورٹ",
+    "head_title": "{title} - پرنٹ"
+  },
+  "welcome_page": {
+    "head_title": "خوش آمدید",
+    "title": "انٹرپرائز ERP سسٹم",
+    "subtitle": "پروفیشنل SAAS ERP حل",
+    "sign_in": "سائن ان"
+  },
+  "welcome_starter": {
+    "head_title": "خوش آمدید",
+    "heading": "React سے خوش آمدید!"
+  },
+  "data_table": {
+    "stat_total": "{count} کل",
+    "stat_active": "{count} فعال",
+    "stat_inactive": "{count} غیر فعال",
+    "selected_count": "{count} منتخب",
+    "showing_entries": "{total} میں سے {from} سے {to} تک دکھایا جا رہا ہے",
+    "pagination_of": "کل {total}",
+    "set_active": "فعال کریں",
+    "set_inactive": "غیر فعال کریں",
+    "confirm_delete_title": "کیا آپ یقین رکھتے ہیں؟",
+    "confirm_delete_text": "آپ \"{name}\" حذف کرنے والے ہیں۔ یہ واپس نہیں ہو سکتا!",
+    "confirm_delete_ok": "ہاں، حذف کریں!",
+    "bulk_delete_title": "منتخب حذف کریں؟",
+    "bulk_delete_text": "آپ {count} قطار(وں) حذف کرنے والے ہیں۔",
+    "bulk_delete_ok": "ہاں، حذف کریں!",
+    "bulk_status_activate_title": "منتخب فعال کریں؟",
+    "bulk_status_activate_text": "آپ {count} قطار(وں) کو فعال کرنے والے ہیں۔",
+    "bulk_status_activate_ok": "ہاں، فعال کریں!",
+    "bulk_status_deactivate_title": "منتخب غیر فعال کریں؟",
+    "bulk_status_deactivate_text": "آپ {count} قطار(وں) کو غیر فعال کرنے والے ہیں۔",
+    "bulk_status_deactivate_ok": "ہاں، غیر فعال کریں!",
+    "export_csv_title": "CSV برآمد",
+    "export_csv_text": "ڈیٹا CSV فائل میں ڈاؤن لوڈ کریں؟",
+    "export_csv_ok": "ہاں، ڈاؤن لوڈ!"
+  },
+  "flash": {
+    "success_title": "کامیابی!",
+    "error_title": "خرابی!"
   }
 }

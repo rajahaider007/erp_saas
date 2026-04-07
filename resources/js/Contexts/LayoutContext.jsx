@@ -45,13 +45,13 @@ export function LayoutProvider({ children }) {
     const defaults = {
       sidebarCollapsed: false,
       headerAsSidebar: false,
-      theme: 'light',
+      theme: 'dark',
       primaryColor: 'blue',
       animationsEnabled: true,
       compactMode: false,
       borderRadius: 'medium',
       fontSize: 'medium',
-      formTheme: 'theme-1',
+      formTheme: 'theme-2',
     };
 
     if (typeof window === 'undefined') {
@@ -63,10 +63,10 @@ export function LayoutProvider({ children }) {
       if (saved) {
         const parsed = JSON.parse(saved);
         const merged = { ...defaults, ...parsed };
-        // If old data had theme 'system', treat as light + theme-1
+        // Legacy 'system' / mismatched pairs: default to dark + dark forms
         if (merged.theme === 'system') {
-          merged.theme = 'light';
-          merged.formTheme = 'theme-1';
+          merged.theme = 'dark';
+          merged.formTheme = 'theme-2';
         }
         return merged;
       }
@@ -206,7 +206,7 @@ export function LayoutProvider({ children }) {
 
   const resetToDefaults = () => {
     const defaults = {
-      theme: 'light',
+      theme: 'dark',
       sidebarCollapsed: false,
       headerAsSidebar: false,
       primaryColor: 'blue',
@@ -214,7 +214,7 @@ export function LayoutProvider({ children }) {
       compactMode: false,
       borderRadius: 'medium',
       fontSize: 'medium',
-      formTheme: 'theme-1',
+      formTheme: 'theme-2',
     };
     
     setTheme(defaults.theme);

@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { Type, Home, List, Plus, Settings, Layers, CheckSquare, Square } from 'lucide-react';
+import { Type, Home, List, Plus, Settings, CheckSquare, Square } from 'lucide-react';
 import App from "../../App.jsx";
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import { usePage, router } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
-const Breadcrumbs = ({ items }) => (
+const Breadcrumbs = ({ items, description }) => (
   <div className="breadcrumbs-themed">
     <nav className="breadcrumbs">
       {items.map((item, idx) => (
@@ -22,121 +22,109 @@ const Breadcrumbs = ({ items }) => (
         </div>
       ))}
     </nav>
-    <div className="breadcrumbs-description">Create and manage package tiers</div>
+    <div className="breadcrumbs-description">{description}</div>
   </div>
 );
 
 const AddPackageForm = () => {
   const { menus } = usePage().props;
   const { t } = useTranslations();
-  const [errors, setErrors] = useState({});
+  const tp = (k) => t(`system.packages.add.${k}`);
   const [alert, setAlert] = useState(null);
-  const [requestStatus, setRequestStatus] = useState('');
   const [selectedMenus, setSelectedMenus] = useState({});
 
-  // Group menus by module for better organization
   const groupedMenus = useMemo(() => {
     const groups = {};
-    menus.forEach(menu => {
-      const moduleName = menu.module?.module_name || 'Other';
-      if (!groups[moduleName]) {
-        groups[moduleName] = [];
-      }
+    const other = tp('module_group_other');
+    menus.forEach((menu) => {
+      const moduleName = menu.module?.module_name || other;
+      if (!groups[moduleName]) groups[moduleName] = [];
       groups[moduleName].push(menu);
     });
     return groups;
-  }, [menus]);
+  }, [menus, t]);
 
   const handleMenuToggle = (menuId, isEnabled) => {
-    setSelectedMenus(prev => ({
-      ...prev,
-      [menuId]: isEnabled
-    }));
+    setSelectedMenus((prev) => ({ ...prev, [menuId]: isEnabled }));
   };
 
   const handleSelectAllMenus = (isEnabled) => {
-    const newMenus = {};
-    menus.forEach(menu => {
-      newMenus[menu.id] = isEnabled;
+    const next = {};
+    menus.forEach((menu) => {
+      next[menu.id] = isEnabled;
     });
-    setSelectedMenus(newMenus);
+    setSelectedMenus(next);
   };
 
-  const fields = [
-    { 
-      name: 'package_name', 
-      label: 'Package Name', 
-      type: 'text', 
-      required: true, 
-      placeholder: 'Enter package name (e.g., Basic, Medium, Enterprise)', 
-      icon: Type 
-    },
-    { 
-      name: 'status', 
-      label: 'Status', 
-      type: 'toggle', 
-      required: false 
-    },
-    { 
-      name: 'sort_order', 
-      label: 'Sort Order', 
-      type: 'number', 
-      required: false, 
-      min: 0,
-      placeholder: 'Display order (0 = first)'
-    },
-  ];
+  const fields = useMemo(
+    () => [
+      {
+        name: 'package_name',
+        label: tp('lbl_package_name'),
+        type: 'text',
+        required: true,
+        placeholder: tp('ph_package_name'),
+        icon: Type,
+      },
+      {
+        name: 'status',
+        label: tp('lbl_status'),
+        type: 'toggle',
+        required: false,
+      },
+      {
+        name: 'sort_order',
+        label: tp('lbl_sort_order'),
+        type: 'number',
+        required: false,
+        min: 0,
+        placeholder: tp('ph_sort_order'),
+      },
+    ],
+    [t]
+  );
+
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
+      { label: tp('breadcrumb_packages'), icon: List, href: '/system/packages' },
+      { label: tp('breadcrumb_add'), icon: Plus, href: null },
+    ],
+    [t]
+  );
+
+  const selectedCount = Object.values(selectedMenus).filter(Boolean).length;
 
   const handleSubmit = async (submittedFormData) => {
-    setErrors({});
     setAlert(null);
-    setRequestStatus('Sending request...');
 
-    const newErrors = {};
     if (!submittedFormData.package_name || !submittedFormData.package_name.trim()) {
-      newErrors.package_name = 'Package name is required';
-    }
-    
-    if (Object.keys(newErrors).length) {
-      setErrors(newErrors);
-      setAlert({ type: 'error', message: 'Please correct the errors below and try again.' });
-      setRequestStatus('Validation failed');
+      setAlert({ type: 'error', message: tp('msg_please_correct_the_errors_below_and_try_') });
       return;
     }
 
-    // Convert selected menus to array
     const menuFeatures = Object.entries(selectedMenus).map(([menuId, isEnabled]) => ({
-      menu_id: parseInt(menuId),
-      is_enabled: isEnabled
+      menu_id: parseInt(menuId, 10),
+      is_enabled: isEnabled,
     }));
 
-    const formData = {
-      ...submittedFormData,
-      menu_features: menuFeatures
-    };
-
-    router.post('/system/packages', formData, {
-      onSuccess: () => { 
-        setRequestStatus('Success'); 
-        setAlert({ type: 'success', message: 'Package created successfully!' }); 
-      },
-      onError: (errs) => { 
-        setErrors(errs); 
-        setAlert({ type: 'error', message: 'Failed to create package. Please check the errors below.' }); 
-        setRequestStatus('Server validation failed'); 
+    router.post(
+      '/system/packages',
+      { ...submittedFormData, menu_features: menuFeatures },
+      {
+        onSuccess: () => {
+          setAlert({ type: 'success', message: tp('msg_package_created_successfully') });
+        },
+        onError: () => {
+          setAlert({ type: 'error', message: tp('msg_failed_to_create_package_please_check_th') });
+        },
       }
-    });
+    );
   };
-
-  const breadcrumbItems = [
-    { label: 'Dashboard', icon: Home, href: '/dashboard' },
-    { label: 'Packages', icon: List, href: '/system/packages' },
-    { label: 'Add Package', icon: Plus, href: null },
-  ];
 
   return (
     <div>
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs items={breadcrumbItems} description={tp('create_and_manage_package_tiers')} />
       {alert && (
         <div className={`mb-4 p-4 rounded-lg animate-slideIn ${alert.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'}`}>
           <div className="flex items-center">
@@ -154,8 +142,8 @@ const AddPackageForm = () => {
       <div className="rounded-xl shadow-lg form-container border-slate-200">
         <div className="p-6">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Package Name</h1>
-            <p className="text-gray-600">Create a new package tier with specific menu features</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{tp('form_heading')}</h1>
+            <p className="text-gray-600">{tp('create_a_new_package_tier_with_specific_')}</p>
           </div>
 
           <GeneralizedForm
@@ -163,19 +151,18 @@ const AddPackageForm = () => {
             subtitle=""
             fields={fields}
             onSubmit={handleSubmit}
-            submitText="Create Package"
-            resetText="Clear Form"
+            submitText={tp('submit_create')}
+            resetText={t('common.form_actions.clear_form')}
             initialData={{ package_name: '', status: true, sort_order: 0 }}
             showReset={true}
           />
 
-          {/* Menus Selection */}
           <div className="mt-8">
             <div className="flex items-center justify-between mb-4">
-              <label className="input-label">Available Features (Menus)</label>
+              <label className="input-label">{tp('available_features_menus')}</label>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">
-                  {Object.values(selectedMenus).filter(Boolean).length} of {menus.length} selected
+                  {tp('selected_of_total', { selected: selectedCount, total: menus.length })}
                 </span>
                 <div className="flex gap-2">
                   <button
@@ -183,14 +170,14 @@ const AddPackageForm = () => {
                     onClick={() => handleSelectAllMenus(true)}
                     className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
                   >
-                    Select All
+                    {tp('select_all')}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSelectAllMenus(false)}
                     className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
                   >
-                    Clear All
+                    {tp('clear_all')}
                   </button>
                 </div>
               </div>
@@ -204,7 +191,7 @@ const AddPackageForm = () => {
                     {moduleName}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {moduleMenus.map(menu => (
+                    {moduleMenus.map((menu) => (
                       <label
                         key={menu.id}
                         className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
@@ -219,13 +206,9 @@ const AddPackageForm = () => {
                         <div className="flex items-center gap-2 flex-1">
                           <List className="w-4 h-4 text-gray-500" />
                           <div className="flex flex-col">
-                            <span className="text-sm font-medium text-gray-900">
-                              {menu.menu_name}
-                            </span>
+                            <span className="text-sm font-medium text-gray-900">{menu.menu_name}</span>
                             {menu.section && (
-                              <span className="text-xs text-gray-500">
-                                {menu.section.section_name}
-                              </span>
+                              <span className="text-xs text-gray-500">{menu.section.section_name}</span>
                             )}
                           </div>
                         </div>

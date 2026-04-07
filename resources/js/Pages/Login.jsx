@@ -10,9 +10,9 @@ const LoginPage = () => {
   const { t, locale, setLocale, supportedLocales } = useTranslations();
   const { errors: pageErrors, concurrent_sessions: concurrentSessions } = usePage().props;
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    remember_me: false,
+    email: 'admin@erpsystem.com',
+    password: 'Admin@123',
+    remember_me: true,
     terminate_other_sessions: false
   });
 

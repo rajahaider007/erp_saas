@@ -26,20 +26,155 @@
       "pending_payments": "زیر التوا ادائیگیں",
       "profit_margin": "منافع کا مارجن",
       "no_recent_transactions_found": "حالیہ لین دین نہیں ملے"
+    },
+    "dashboard": {
+      "page_title": "مالی انتظام",
+      "page_subtitle": "اکاؤنٹنگ، انوائسنگ اور مالی رپورٹنگ کا انتظام کریں",
+      "default_role_fallback": "اکاؤنٹنٹ",
+      "financial_snapshot_heading": "مالی فوری رپورٹس",
+      "accounting_management_heading": "اکاؤنٹنگ انتظام",
+      "recent_transactions": "حالیہ لین دین",
+      "view_all": "سب دیکھیں",
+      "invoices_count": "{count} انوائسز",
+      "payments_count": "{count} ادائیگیاں",
+      "profit_amount": "{amount} منافع",
+      "accounts_count": "{count} اکاؤنٹ(س)",
+      "cards": {
+        "main_payable": "کل قابل ادائیگی",
+        "main_receivable": "کل قابل وصولی",
+        "current_cash": "رواں نقد رقم",
+        "all_cash_codes": "تمام نقد کوڈز",
+        "bank_balances": "بینک بیلنس"
+      },
+      "quick_journal_title": "جرنل انٹری بنائیں",
+      "quick_journal_desc": "نیا جرنل واؤچر انٹری درج کریں۔",
+      "quick_journal_cta": "ابھی بنائیں",
+      "quick_opening_title": "افتتاحی بیلنس",
+      "quick_opening_desc": "اکاؤنٹس کے افتتاحی بیلنس ریکارڈ کریں۔",
+      "quick_reports_title": "رپورٹس دیکھیں",
+      "quick_reports_desc": "مالی رپورٹس اور تجزیہ تک رسائی۔",
+      "no_transactions_hint": "واؤچر پوسٹ کرنے پر لین دین یہاں ظاہر ہو گی",
+      "sections": {
+        "general_ledger": {
+          "name": "جنرل لیجر",
+          "description": "چارٹ آف اکاؤنٹس اور جنرل لیجر انٹریز"
+        },
+        "financial_reports": {
+          "name": "مالی رپورٹس",
+          "description": "مالی بیانات اور رپورٹس تیار کریں"
+        },
+        "configuration": {
+          "name": "کنفیگریشن",
+          "description": "اکاؤنٹنگ ترتیبات اور مالی سال"
+        },
+        "currency_ledger": {
+          "name": "کرنسی اور لیجر",
+          "description": "کرنسیاں اور کرنسی لیجر"
+        }
+      },
+      "menus": {
+        "chart_of_accounts": "چارٹ آف اکاؤنٹس",
+        "journal_voucher": "جرنل واؤچر",
+        "trial_balance": "ٹرائل بیلنس",
+        "general_ledger": "جنرل لیجر",
+        "balance_sheet": "بیلنس شیٹ",
+        "income_statement": "انکم اسٹیٹمنٹ",
+        "fiscal_year": "مالی سال",
+        "voucher_configuration": "واؤچر کنفیگریشن",
+        "account_configuration": "اکاؤنٹ کنفیگریشن",
+        "code_configuration": "کوڈ کنفیگریشن",
+        "currencies": "کرنسیاں",
+        "currency_ledger": "کرنسی لیجر",
+        "opening_voucher": "افتتاحی واؤچر"
+      }
     }
   },
   "dashboard": {
-    "module_management": "ماڈیول مینجمنٹ"
+    "module_management": "ماڈیول مینجمنٹ",
+    "title_suffix": "{name} ڈیش بورڈ",
+    "subtitle": "{name} ماڈیول کی خصوصیات اور ڈیٹا کا انتظام کریں",
+    "total_records": "کل ریکارڈز",
+    "active_users": "فعال صارفین",
+    "features": "خصوصیات",
+    "settings": "ترتیبات",
+    "quick_actions": "فوری اقدامات",
+    "features_section_heading": "{name} خصوصیات",
+    "dev_title": "{name} ماڈیول ڈیش بورڈ",
+    "dev_body": "یہ ماڈیول ڈیش بورڈ فی الوقت زیرِ تشکیل ہے۔ خصوصیات اور اعداد و شمار جلد شامل کیے جائیں گے۔",
+    "coming_soon_inline": "جلد آ رہا ہے",
+    "view_records": "ریکارڈز دیکھیں",
+    "manage_users": "صارفین کا انتظام",
+    "module_settings": "ماڈیول کی ترتیبات"
   },
   "dynamic": {
     "index": {
       "coming_soon": "جلد آ رہا ہے",
-      "in_development": "تشکیل کے تحت"
+      "in_development": "تشکیل کے تحت",
+      "header_subtitle": "{name} کی خصوصیات تک رسائی اور کاروباری آپریشنز کا انتظام",
+      "features_heading": "{name} خصوصیات",
+      "features_subtitle": "تمام خصوصیات تک رسائی اور {name} آپریشنز کا انتظام",
+      "menu_description": "{name} کی خصوصیات تک رسائی",
+      "open_feature": "خصوصیت کھولیں",
+      "no_features_title": "کوئی خصوصیت دستیاب نہیں",
+      "no_features_body": "یہ ماڈیول زیرِ تشکیل ہے۔ بہترین تجربے کے لیے ہم کام جاری رکھے ہوئے ہیں۔",
+      "back_to_modules": "ماڈیولز پر واپس"
     }
   },
   "system": {
     "dashboard": {
-      "system_administration": "سسٹم ایڈمنسٹریشن"
+      "system_administration": "سسٹم انتظامیہ",
+      "title": "سسٹم ڈیش بورڈ",
+      "subtitle": "اپنے ERP کی ترتیب اور انتظامی کنٹرول کا انتظام کریں",
+      "total_users": "کل صارفین",
+      "companies": "کمپنیاں",
+      "modules": "ماڈیولز",
+      "packages": "پیکجز",
+      "system_management_modules": "سسٹم مینجمنٹ ماڈیولز",
+      "quick_actions": "فوری اقدامات",
+      "add_new_user": "نیا صارف شامل کریں",
+      "add_company": "کمپنی شامل کریں",
+      "create_module": "ماڈیول بنائیں",
+      "storage_attachments": "اسٹوریج اور منسلکات",
+      "label_total": "کل",
+      "label_active": "فعال",
+      "modules_grid": {
+        "user_management": {
+          "name": "صارف مینجمنٹ",
+          "description": "صارفین، کردار اور اجازتوں کا انتظام"
+        },
+        "company_management": {
+          "name": "کمپنی مینجمنٹ",
+          "description": "کمپنی کی ترتیبات اور تفصیلات"
+        },
+        "module_management": {
+          "name": "ماڈیول مینجمنٹ",
+          "description": "سسٹم ماڈیولز اور خصوصیات کا انتظام"
+        },
+        "package_management": {
+          "name": "پیکج مینجمنٹ",
+          "description": "پیکجز اور خصوصیات کی ترتیب"
+        },
+        "location_management": {
+          "name": "مقام مینجمنٹ",
+          "description": "کمپنی کے مقامات اور شاخوں کا انتظام"
+        },
+        "department_management": {
+          "name": "شعبہ مینجمنٹ",
+          "description": "شعبوں اور ٹیموں کی تنظیم"
+        },
+        "currency_management": {
+          "name": "کرنسی مینجمنٹ",
+          "description": "کرنسیاں اور شرح تبادلہ"
+        },
+        "menu_management": {
+          "name": "مینو مینجمنٹ",
+          "description": "سسٹم مینوز اور نیویگیشن"
+        },
+        "storage": {
+          "name": "اسٹوریج",
+          "description": "منسلکات اور فائل اسٹوریج"
+        }
+      }
     },
     "index": {
       "page_title": "سسٹم انتظام",

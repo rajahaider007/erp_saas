@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { Type, Folder, List, Image as ImageIcon } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Type, Folder, Image as ImageIcon } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
-import PermissionAwareForm, { PermissionButton } from '../../../Components/PermissionAwareForm';
-import { usePermissions } from '../../../hooks/usePermissions';
+import PermissionAwareForm from '../../../Components/PermissionAwareForm';
 import { router, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 import App from "../../App.jsx";
 
 const EditModuleForm = () => {
-const { t } = useTranslations();
-  const { module: moduleProp, errors: pageErrors, flash } = usePage().props;
+  const { t } = useTranslations();
+  const te = (k) => t(`system.add_modules.edit.${k}`);
+  const { module: moduleProp, flash } = usePage().props;
   const [alert, setAlert] = useState(null);
 
   useEffect(() => {
@@ -17,13 +17,49 @@ const { t } = useTranslations();
     if (flash?.error) setAlert({ type: 'error', message: flash.error });
   }, [flash]);
 
-  const fields = [
-    { name: 'module_name', label: 'Module Name', type: 'text', placeholder: 'Enter module name', icon: Type, required: true },
-    { name: 'folder_name', label: 'Folder Name', type: 'text', placeholder: 'Enter folder name', icon: Folder, required: true },
-    { name: 'image', label: 'Module Image', type: 'file-image', placeholder: 'Upload new image (optional)', required: false, icon: ImageIcon },
-    { name: 'status', label: 'Status', type: 'toggle', required: false },
-    { name: 'sort_order', label: 'Order', type: 'number', placeholder: 'Enter display order', required: false, min: 0 },
-  ];
+  const fields = useMemo(
+    () => [
+      {
+        name: 'module_name',
+        label: te('lbl_module_name'),
+        type: 'text',
+        placeholder: te('ph_module_name'),
+        icon: Type,
+        required: true,
+      },
+      {
+        name: 'folder_name',
+        label: te('lbl_folder_name'),
+        type: 'text',
+        placeholder: te('ph_folder_name'),
+        icon: Folder,
+        required: true,
+      },
+      {
+        name: 'image',
+        label: te('lbl_image'),
+        type: 'file-image',
+        placeholder: te('ph_image'),
+        required: false,
+        icon: ImageIcon,
+      },
+      {
+        name: 'status',
+        label: te('lbl_status'),
+        type: 'toggle',
+        required: false,
+      },
+      {
+        name: 'sort_order',
+        label: te('lbl_sort_order'),
+        type: 'number',
+        placeholder: te('ph_sort_order'),
+        required: false,
+        min: 0,
+      },
+    ],
+    [t]
+  );
 
   const handleSubmit = async (data) => {
     const formData = new FormData();
@@ -36,20 +72,30 @@ const { t } = useTranslations();
 
     router.post(`/modules/${moduleProp.id}`, formData, {
       forceFormData: true,
-      onSuccess: () => setAlert({ type: 'success', message: 'Module updated successfully!' }),
-      onError: () => setAlert({ type: 'error', message: 'Failed to update module.' })
+      onSuccess: () => setAlert({ type: 'success', message: te('msg_module_updated_successfully') }),
+      onError: () => setAlert({ type: 'error', message: te('msg_failed_to_update_module') }),
     });
   };
 
   return (
     <div>
+      {alert && (
+        <div
+          className={`mb-4 p-4 rounded-lg animate-slideIn ${alert.type === 'success'
+            ? 'bg-green-50 border border-green-200 text-green-800'
+            : 'bg-red-50 border border-red-200 text-red-800'
+            }`}
+        >
+          <p className="text-sm font-medium">{alert.message}</p>
+        </div>
+      )}
       <GeneralizedForm
-        title={`Edit Module: ${moduleProp.module_name}`}
-        subtitle="Update module details"
+        title={te('title_edit', { name: moduleProp.module_name })}
+        subtitle={te('update_module_details')}
         fields={fields}
         onSubmit={handleSubmit}
-        submitText="Update Module"
-        resetText="Reset"
+        submitText={te('submit_update')}
+        resetText={te('reset')}
         initialData={{
           module_name: moduleProp.module_name || '',
           folder_name: moduleProp.folder_name || '',
@@ -64,17 +110,16 @@ const { t } = useTranslations();
 };
 
 const Edit = () => {
-  const { canEdit } = usePermissions();
-  
+  const { t } = useTranslations();
+
   return (
     <App>
-      {/* Main Content Card */}
       <div className="rounded-xl shadow-lg form-container border-slate-200">
         <div className="p-6">
           <PermissionAwareForm
             requiredPermission="can_edit"
             route="/system/AddModules"
-            fallbackMessage="You don't have permission to edit modules. Please contact your administrator."
+            fallbackMessage={t('system.add_modules.edit.permission_fallback')}
           >
             <EditModuleForm />
           </PermissionAwareForm>
@@ -85,5 +130,3 @@ const Edit = () => {
 };
 
 export default Edit;
-
-

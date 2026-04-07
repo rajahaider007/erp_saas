@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
 import { Head } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
-export default function Print({ title = 'Report', children }) {
+export default function Print({ title, children }) {
+  const { t } = useTranslations();
+  const resolvedTitle = title ?? t('common.print.default_title');
   useEffect(() => {
     // Auto-trigger print dialog after page loads
     let printed = false;
@@ -41,7 +44,7 @@ export default function Print({ title = 'Report', children }) {
 
   return (
     <>
-      <Head title={`${title} - Print`} />
+      <Head title={t('common.print.head_title', { title: resolvedTitle })} />
       <style>
         {`
           @page {

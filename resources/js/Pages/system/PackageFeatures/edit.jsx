@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { Package, Home, List, Plus, CheckSquare, Square, X } from 'lucide-react';
+import { Package, Home, List, CheckSquare, Square, X, Edit as EditIcon } from 'lucide-react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
-const Breadcrumbs = ({ items }) => (
+const Breadcrumbs = ({ items, description }) => (
   <div className="breadcrumbs-themed">
     <nav className="breadcrumbs">
       {items.map((item, idx) => (
@@ -21,111 +21,100 @@ const Breadcrumbs = ({ items }) => (
         </div>
       ))}
     </nav>
-    <div className="breadcrumbs-description">Edit package features and menu access</div>
+    <div className="breadcrumbs-description">{description}</div>
   </div>
 );
 
 const EditPackageFeatureForm = () => {
   const { package: packageData, packages, menus, packageFeatures } = usePage().props;
   const { t } = useTranslations();
+  const te = (k, rep) => (rep ? t(`system.package_features.edit.${k}`, rep) : t(`system.package_features.edit.${k}`));
+  const ta = (k) => t(`system.package_features.add.${k}`);
+
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
-  const [requestStatus, setRequestStatus] = useState('');
   const [selectedPackageId, setSelectedPackageId] = useState(packageData.id);
   const [menuFeatures, setMenuFeatures] = useState(packageFeatures || {});
 
-  // Group menus by section for better organization
   const groupedMenus = useMemo(() => {
     const groups = {};
-    menus.forEach(menu => {
-      const sectionName = menu.section?.module?.module_name || 'Other';
-      if (!groups[sectionName]) {
-        groups[sectionName] = [];
-      }
+    const other = te('module_group_other');
+    menus.forEach((menu) => {
+      const sectionName = menu.section?.module?.module_name || other;
+      if (!groups[sectionName]) groups[sectionName] = [];
       groups[sectionName].push(menu);
     });
     return groups;
-  }, [menus]);
+  }, [menus, t]);
+
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
+      { label: ta('package_features'), icon: List, href: '/system/package-features' },
+      { label: te('breadcrumb_edit'), icon: EditIcon, href: null },
+    ],
+    [t]
+  );
 
   const handlePackageChange = (packageId) => {
     setSelectedPackageId(packageId);
-    // Reset menu features when package changes
     setMenuFeatures({});
   };
 
   const handleMenuToggle = (menuId, isEnabled) => {
-    setMenuFeatures(prev => ({
-      ...prev,
-      [menuId]: isEnabled
-    }));
+    setMenuFeatures((prev) => ({ ...prev, [menuId]: isEnabled }));
   };
 
   const handleSelectAll = (isEnabled) => {
-    const newFeatures = {};
-    menus.forEach(menu => {
-      newFeatures[menu.id] = isEnabled;
+    const next = {};
+    menus.forEach((menu) => {
+      next[menu.id] = isEnabled;
     });
-    setMenuFeatures(newFeatures);
+    setMenuFeatures(next);
   };
+
+  const selectedCount = Object.values(menuFeatures).filter(Boolean).length;
+  const totalCount = menus.length;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
     setAlert(null);
-    setRequestStatus('Sending request...');
 
     const newErrors = {};
-    if (!selectedPackageId) {
-      newErrors.package_id = 'Please select a package';
-    }
-    
+    if (!selectedPackageId) newErrors.package_id = te('val_package_required');
     if (Object.keys(menuFeatures).length === 0) {
-      newErrors.menu_features = 'Please select at least one menu feature';
+      newErrors.menu_features = te('val_menu_features_required');
     }
-    
+
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
-      setAlert({ type: 'error', message: 'Please correct the errors below and try again.' });
-      setRequestStatus('Validation failed');
+      setAlert({ type: 'error', message: te('msg_please_correct_the_errors_below_and_try_') });
       return;
     }
 
-    // Convert menuFeatures to array format
     const menuFeaturesArray = Object.entries(menuFeatures).map(([menuId, isEnabled]) => ({
-      menu_id: parseInt(menuId),
-      is_enabled: isEnabled
+      menu_id: parseInt(menuId, 10),
+      is_enabled: isEnabled,
     }));
 
-    const formData = {
-      package_id: selectedPackageId,
-      menu_features: menuFeaturesArray
-    };
-
-    router.put(`/system/package-features/${packageData.id}`, formData, {
-      onSuccess: () => { 
-        setRequestStatus('Success'); 
-        setAlert({ type: 'success', message: 'Package features updated successfully!' }); 
-      },
-      onError: (errs) => { 
-        setErrors(errs); 
-        setAlert({ type: 'error', message: 'Failed to update package features. Please check the errors below.' }); 
-        setRequestStatus('Server validation failed'); 
+    router.put(
+      `/system/package-features/${packageData.id}`,
+      { package_id: selectedPackageId, menu_features: menuFeaturesArray },
+      {
+        onSuccess: () => {
+          setAlert({ type: 'success', message: te('msg_package_features_updated_successfully') });
+        },
+        onError: () => {
+          setAlert({ type: 'error', message: te('msg_failed_to_update_package_features_please') });
+        },
       }
-    });
+    );
   };
-
-  const breadcrumbItems = [
-    { label: 'Dashboard', icon: Home, href: '/dashboard' },
-    { label: 'Package Features', icon: List, href: '/system/package-features' },
-    { label: 'Edit Package Features', icon: Plus, href: null },
-  ];
-
-  const selectedCount = Object.values(menuFeatures).filter(Boolean).length;
-  const totalCount = menus.length;
 
   return (
     <div className="form-theme-system min-h-screen transition-all duration-500">
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs items={breadcrumbItems} description={te('edit_package_features_and_menu_access')} />
       {alert && (
         <div className={`alert ${alert.type === 'success' ? 'alert-success' : 'alert-error'}`}>
           <div className="flex items-center">
@@ -140,18 +129,17 @@ const EditPackageFeatureForm = () => {
           </div>
         </div>
       )}
-      
+
       <div className="form-container">
         <div className="form-header mb-8">
-          <h1 className="form-title">Edit Package Features: {packageData.package_name}</h1>
-          <p className="form-subtitle">Configure which menu features are available for this package</p>
+          <h1 className="form-title">{te('title_edit', { name: packageData.package_name })}</h1>
+          <p className="form-subtitle">{te('configure_which_menu_features_are_availa')}</p>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-grid">
-            {/* Package Selection */}
             <div className="input-group">
-              <label className="input-label">Package</label>
+              <label className="input-label">{te('package')}</label>
               <div className="input-wrapper">
                 <Package className="input-icon" size={20} />
                 <select
@@ -160,38 +148,27 @@ const EditPackageFeatureForm = () => {
                   onChange={(e) => handlePackageChange(e.target.value)}
                   required
                 >
-                  {packages.map(pkg => (
-                    <option key={pkg.id} value={pkg.id}>
-                      {pkg.package_name}
-                    </option>
+                  {packages.map((pkg) => (
+                    <option key={pkg.id} value={pkg.id}>{pkg.package_name}</option>
                   ))}
                 </select>
               </div>
               {errors.package_id && <p className="text-red-500 text-sm mt-1">{errors.package_id}</p>}
             </div>
 
-            {/* Menu Features Selection */}
             <div className="input-group fieldset-group">
               <div className="flex items-center justify-between mb-4">
-                <label className="input-label">Menu Features</label>
+                <label className="input-label">{te('menu_features')}</label>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm" style={{color: 'var(--text-secondary)'}}>
-                    {selectedCount} of {totalCount} selected
+                  <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    {te('selected_of_total', { selected: selectedCount, total: totalCount })}
                   </span>
                   <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleSelectAll(true)}
-                      className="btn btn-sm btn-primary"
-                    >
-                      Select All
+                    <button type="button" onClick={() => handleSelectAll(true)} className="btn btn-sm btn-primary">
+                      {te('select_all')}
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => handleSelectAll(false)}
-                      className="btn btn-sm btn-secondary"
-                    >
-                      Clear All
+                    <button type="button" onClick={() => handleSelectAll(false)} className="btn btn-sm btn-secondary">
+                      {te('clear_all')}
                     </button>
                   </div>
                 </div>
@@ -205,13 +182,13 @@ const EditPackageFeatureForm = () => {
                       {sectionName}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {sectionMenus.map(menu => (
+                      {sectionMenus.map((menu) => (
                         <label
                           key={menu.id}
                           className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
                           style={{
                             borderColor: 'var(--border)',
-                            backgroundColor: menuFeatures[menu.id] ? 'var(--primary-light)' : 'transparent'
+                            backgroundColor: menuFeatures[menu.id] ? 'var(--primary-light)' : 'transparent',
                           }}
                           onMouseEnter={(e) => {
                             if (!menuFeatures[menu.id]) {
@@ -226,13 +203,13 @@ const EditPackageFeatureForm = () => {
                         >
                           <div className="flex-shrink-0">
                             {menuFeatures[menu.id] ? (
-                              <CheckSquare className="w-5 h-5" style={{color: 'var(--primary-color)'}} />
+                              <CheckSquare className="w-5 h-5" style={{ color: 'var(--primary-color)' }} />
                             ) : (
-                              <Square className="w-5 h-5" style={{color: 'var(--text-secondary)'}} />
+                              <Square className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
                             )}
                           </div>
                           <div className="flex-1">
-                            <span className="text-sm font-medium" style={{color: 'var(--text-primary)'}}>
+                            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                               {menu.menu_name}
                             </span>
                           </div>
@@ -252,7 +229,6 @@ const EditPackageFeatureForm = () => {
             </div>
           </div>
 
-          {/* Submit Buttons */}
           <div className="button-group">
             <button
               type="button"
@@ -264,7 +240,7 @@ const EditPackageFeatureForm = () => {
               className="btn btn-secondary"
             >
               <X className="btn-icon" size={20} />
-              Reset Changes
+              {te('btn_reset')}
             </button>
             <button
               type="submit"
@@ -272,7 +248,7 @@ const EditPackageFeatureForm = () => {
               className="btn btn-primary"
             >
               <CheckSquare className="btn-icon" size={20} />
-              Update Package Features
+              {te('btn_update')}
             </button>
           </div>
         </form>

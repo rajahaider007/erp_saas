@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Code, Home, List, Plus, Edit, Building2, MapPin } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
-import PermissionAwareForm, { PermissionButton } from '../../../Components/PermissionAwareForm';
-import { usePermissions } from '../../../hooks/usePermissions';
+import PermissionAwareForm from '../../../Components/PermissionAwareForm';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
-const Breadcrumbs = ({ items }) => (
+const Breadcrumbs = ({ items, description }) => (
   <div className="breadcrumbs-themed">
     <nav className="breadcrumbs">
       {items.map((item, idx) => (
@@ -24,283 +23,262 @@ const Breadcrumbs = ({ items }) => (
         </div>
       ))}
     </nav>
-    <div className="breadcrumbs-description">
-      {usePage().props?.configuration ? 'Update code configuration' : 'Create a new code configuration'}
-    </div>
+    <div className="breadcrumbs-description">{description}</div>
   </div>
 );
 
 const CodeConfigurationForm = () => {
   const { configuration, companies, locations, codeTypes } = usePage().props;
   const { t } = useTranslations();
-  
-  // Debug logging
-  // console.log('CodeConfigurationForm Debug:', { companies: companies.length, locations: locations.length, codeTypes: codeTypes.length });
-  const [errors, setErrors] = useState({});
+  const tc = (k, rep) => (rep ? t(`system.code_configuration.create.${k}`, rep) : t(`system.code_configuration.create.${k}`));
+
   const [alert, setAlert] = useState(null);
-  const [requestStatus, setRequestStatus] = useState('');
   const [filteredLocations, setFilteredLocations] = useState([]);
-  const [loadingLocations, setLoadingLocations] = useState(false);
+  const [loadingLocations] = useState(false);
   const [accounts, setAccounts] = useState([]);
   const [loadingAccounts, setLoadingAccounts] = useState(false);
   const [currentCompanyId, setCurrentCompanyId] = useState('');
 
-  // Debug logging for accounts state changes
-  useEffect(() => {
-
-  }, [accounts, loadingAccounts]);
-
   const isEditMode = !!configuration;
 
-  // Handle initial data loading
   useEffect(() => {
     if (isEditMode && configuration?.company_id) {
-      // Set initial company ID
       setCurrentCompanyId(configuration.company_id);
-
-      // Set initial locations from props if available
       if (locations && locations.length > 0) {
-        const filtered = locations.filter(loc => loc.company_id == configuration.company_id);
-        
-        // If current location is not in filtered list, add it to ensure it's available
+        const filtered = locations.filter((loc) => loc.company_id == configuration.company_id);
         if (configuration.location_id) {
-          const currentLocation = locations.find(loc => loc.id == configuration.location_id);
-          if (currentLocation && !filtered.find(loc => loc.id == currentLocation.id)) {
+          const currentLocation = locations.find((loc) => loc.id == configuration.location_id);
+          if (currentLocation && !filtered.find((loc) => loc.id == currentLocation.id)) {
             filtered.push(currentLocation);
           }
         }
-        
         setFilteredLocations(filtered);
       }
-
-      // Load accounts for the existing company and location
       if (configuration.company_id && configuration.location_id) {
         const url = `/system/chart-of-accounts/accounts-by-company-location?company_id=${configuration.company_id}&location_id=${configuration.location_id}`;
-        
-        console.log('Loading accounts for edit mode:', { company_id: configuration.company_id, location_id: configuration.location_id, url });
         setLoadingAccounts(true);
         fetch(url)
-          .then(response => response.json())
-          .then(data => {
-            console.log('Accounts loaded for edit mode:', data.data);
+          .then((response) => response.json())
+          .then((data) => {
             setAccounts(data.data || []);
             setLoadingAccounts(false);
           })
-          .catch(error => {
-            console.error('Failed to load accounts:', error);
+          .catch(() => {
             setAccounts([]);
             setLoadingAccounts(false);
           });
       }
     } else if (!isEditMode && locations && locations.length > 0) {
-      // In create mode, show all locations initially
       setFilteredLocations(locations);
     }
   }, [isEditMode, configuration, locations]);
 
-  const handleCompanyChange = (companyId) => {
-
-
-    // Store current company ID
+  const handleCompanyChange = useCallback((companyId) => {
     setCurrentCompanyId(companyId);
-
-    // Reset location field when company changes
     const locationSelect = document.querySelector('select[name="location_id"]');
-    if (locationSelect) {
-      locationSelect.value = '';
-    }
-
-    // Reset account field
+    if (locationSelect) locationSelect.value = '';
     const accountSelect = document.querySelector('select[name="account_id"]');
     if (accountSelect) accountSelect.value = '';
     setAccounts([]);
-
     if (companyId) {
-      // Filter locations by company ID from the original locations array
-      const filtered = locations.filter(loc => loc.company_id == companyId);
-      setFilteredLocations(filtered);
+      setFilteredLocations(locations.filter((loc) => loc.company_id == companyId));
     } else {
-      // If no company selected, show all locations
       setFilteredLocations(locations || []);
     }
-  };
+  }, [locations]);
 
-  const handleLocationChange = (locationId) => {
-    // Use the stored company ID
+  const handleLocationChange = useCallback((locationId) => {
     const actualCompanyId = currentCompanyId;
-
-
-    // Reset account field
     const accountSelect = document.querySelector('select[name="account_id"]');
     if (accountSelect) accountSelect.value = '';
     setAccounts([]);
-
     if (actualCompanyId && locationId) {
-
       const url = `/system/chart-of-accounts/accounts-by-company-location?company_id=${actualCompanyId}&location_id=${locationId}`;
-
-
-      // Load all accounts (Level 2 and Level 3)
       setLoadingAccounts(true);
       fetch(url)
-        .then(response => {
-
-          return response.json();
-        })
-        .then(data => {
-
+        .then((response) => response.json())
+        .then((data) => {
           setAccounts(data.data || []);
           setLoadingAccounts(false);
         })
-        .catch(error => {
+        .catch(() => {
           setAccounts([]);
           setLoadingAccounts(false);
         });
-    } else {
     }
-  };
+  }, [currentCompanyId]);
 
-  // Map options for form fields
-  const companyOptions = companies.map(c => ({ value: c.id, label: c.name }));
-  const locationOptions = loadingLocations 
-    ? [{ value: '', label: 'Loading locations...' }]
-    : filteredLocations.map(l => {
-        return { value: l.id, label: l.name };
-      });
-  const accountOptions = loadingAccounts 
-    ? [{ value: '', label: 'Loading accounts...' }]
-    : accounts.map(acc => ({ 
-        value: acc.id, 
-        label: `${acc.account_code} - ${acc.account_name} (Level ${acc.account_level})` 
-      }));
-  const codeTypeOptions = codeTypes.map(t => ({ value: t.value, label: t.label }));
-  
+  const companyOptions = useMemo(
+    () => (companies || []).map((c) => ({ value: c.id, label: c.name })),
+    [companies]
+  );
 
-  // Define initial data before fields array
-  const initialData = isEditMode ? {
-    company_id: configuration.company_id || '',
-    location_id: configuration.location_id || '',
-    account_id: configuration.level2_account_id || configuration.level3_account_id || configuration.level4_account_id || '',
-    code_type: configuration.code_type,
-    is_active: configuration.is_active
-  } : {
-    company_id: '',
-    location_id: '',
-    account_id: '',
-    code_type: '',
-    is_active: true
-  };
-
-
-  const fields = [
-    { 
-      name: 'company_id', 
-      label: 'Company', 
-      type: 'select', 
-      required: true, 
-      options: companyOptions,
-      icon: Building2,
-      onChange: handleCompanyChange,
-      searchable: true
-    },
-    { 
-      name: 'location_id', 
-      label: 'Location', 
-      type: 'select', 
-      required: true, 
-      options: locationOptions,
-      icon: MapPin,
-      disabled: loadingLocations,
-      onChange: handleLocationChange,
-      searchable: true
-    },
-    { 
-      name: 'account_id', 
-      label: 'Account Code (Level 2, 3, or 4)', 
-      type: 'select', 
-      required: false, 
-      options: accountOptions,
-      icon: Code,
-      disabled: loadingAccounts,
-      searchable: true
-    },
-    { 
-      name: 'code_type', 
-      label: 'Code Type', 
-      type: 'select', 
-      required: true, 
-      options: codeTypeOptions,
-      icon: Code,
-      searchable: true
-    },
-    { 
-      name: 'is_active', 
-      label: 'Status', 
-      type: 'toggle', 
-      required: false 
-    },
-  ];
-
-  useEffect(() => {
-    if (isEditMode && configuration.company_id) {
-      const filtered = locations.filter(loc => loc.company_id == configuration.company_id);
-      setFilteredLocations(filtered);
+  const locationOptions = useMemo(() => {
+    if (loadingLocations) {
+      return [{ value: '', label: tc('ph_loading_locations') }];
     }
-  }, [isEditMode]);
+    return filteredLocations.map((l) => ({ value: l.id, label: l.name }));
+  }, [filteredLocations, loadingLocations, t]);
+
+  const accountOptions = useMemo(() => {
+    if (loadingAccounts) {
+      return [{ value: '', label: tc('ph_loading_accounts') }];
+    }
+    return accounts.map((acc) => ({
+      value: acc.id,
+      label: tc('account_option_label', {
+        code: acc.account_code,
+        name: acc.account_name,
+        level: acc.account_level,
+      }),
+    }));
+  }, [accounts, loadingAccounts, t]);
+
+  const codeTypeOptions = useMemo(
+    () => (codeTypes || []).map((ct) => ({ value: ct.value, label: ct.label })),
+    [codeTypes]
+  );
+
+  const initialData = useMemo(() => (
+    isEditMode
+      ? {
+          company_id: configuration.company_id || '',
+          location_id: configuration.location_id || '',
+          account_id: configuration.level2_account_id || configuration.level3_account_id || configuration.level4_account_id || '',
+          code_type: configuration.code_type,
+          is_active: configuration.is_active,
+        }
+      : {
+          company_id: '',
+          location_id: '',
+          account_id: '',
+          code_type: '',
+          is_active: true,
+        }
+  ), [isEditMode, configuration]);
+
+  const fields = useMemo(
+    () => [
+      {
+        name: 'company_id',
+        label: tc('lbl_company'),
+        type: 'select',
+        required: true,
+        options: companyOptions,
+        icon: Building2,
+        onChange: handleCompanyChange,
+        searchable: true,
+      },
+      {
+        name: 'location_id',
+        label: tc('lbl_location'),
+        type: 'select',
+        required: true,
+        options: locationOptions,
+        icon: MapPin,
+        disabled: loadingLocations,
+        onChange: handleLocationChange,
+        searchable: true,
+      },
+      {
+        name: 'account_id',
+        label: tc('lbl_account'),
+        type: 'select',
+        required: false,
+        options: accountOptions,
+        icon: Code,
+        disabled: loadingAccounts,
+        searchable: true,
+      },
+      {
+        name: 'code_type',
+        label: tc('lbl_code_type'),
+        type: 'select',
+        required: true,
+        options: codeTypeOptions,
+        icon: Code,
+        searchable: true,
+      },
+      {
+        name: 'is_active',
+        label: tc('lbl_status'),
+        type: 'toggle',
+        required: false,
+      },
+    ],
+    [
+      companyOptions,
+      locationOptions,
+      accountOptions,
+      codeTypeOptions,
+      loadingLocations,
+      loadingAccounts,
+      handleCompanyChange,
+      handleLocationChange,
+      t,
+    ]
+  );
 
   const handleSubmit = async (submittedFormData) => {
-    setErrors({});
     setAlert(null);
-    setRequestStatus('Sending request...');
 
     const newErrors = {};
     if (!submittedFormData.company_id || (typeof submittedFormData.company_id === 'string' && !submittedFormData.company_id.trim())) {
-      newErrors.company_id = 'Company is required';
+      newErrors.company_id = tc('val_company_required');
     }
     if (!submittedFormData.location_id || (typeof submittedFormData.location_id === 'string' && !submittedFormData.location_id.trim())) {
-      newErrors.location_id = 'Location is required';
+      newErrors.location_id = tc('val_location_required');
     }
     if (!submittedFormData.code_type || (typeof submittedFormData.code_type === 'string' && !submittedFormData.code_type.trim())) {
-      newErrors.code_type = 'Code type is required';
+      newErrors.code_type = tc('val_code_type_required');
     }
 
     if (Object.keys(newErrors).length) {
-      setErrors(newErrors);
-      setAlert({ type: 'error', message: t('system.code_configuration.create.msg_please_correct_the_errors_below_and_try_') });
-      setRequestStatus('Validation failed');
+      setAlert({ type: 'error', message: tc('msg_please_correct_the_errors_below_and_try_') });
       return;
     }
 
     const submitData = {
       ...submittedFormData,
-      _method: isEditMode ? 'put' : 'post'
+      _method: isEditMode ? 'put' : 'post',
     };
 
     const url = isEditMode ? `/system/code-configurations/${configuration.id}` : '/system/code-configurations';
-    const method = isEditMode ? 'post' : 'post';
 
-    router[method](url, submitData, {
+    router.post(url, submitData, {
       onSuccess: () => {
-        setRequestStatus('Success');
-        setAlert({ type: 'success', message: `Code configuration ${isEditMode ? 'updated' : 'created'} successfully!` });
+        setAlert({
+          type: 'success',
+          message: isEditMode ? tc('msg_success_updated') : tc('msg_success_created'),
+        });
       },
-      onError: (errs) => {
-        setErrors(errs);
-        setAlert({ type: 'error', message: `Failed to ${isEditMode ? 'update' : 'create'} code configuration. Please check the errors below.` });
-        setRequestStatus('Server validation failed');
-      }
+      onError: () => {
+        setAlert({
+          type: 'error',
+          message: isEditMode ? tc('msg_failed_update') : tc('msg_failed_create'),
+        });
+      },
     });
   };
 
-  const breadcrumbItems = [
-    { label: 'Dashboard', icon: Home, href: '/dashboard' },
-    { label: 'Code Configurations', icon: List, href: '/system/code-configurations' },
-    { label: isEditMode ? 'Edit Configuration' : 'Add Configuration', icon: isEditMode ? Edit : Plus, href: null },
-  ];
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
+      { label: tc('breadcrumb_list'), icon: List, href: '/system/code-configurations' },
+      {
+        label: isEditMode ? tc('breadcrumb_edit') : tc('breadcrumb_add'),
+        icon: isEditMode ? Edit : Plus,
+        href: null,
+      },
+    ],
+    [isEditMode, t]
+  );
+
+  const breadcrumbDescription = isEditMode ? tc('breadcrumb_desc_edit') : tc('breadcrumb_desc_create');
 
   return (
     <div>
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs items={breadcrumbItems} description={breadcrumbDescription} />
       {alert && (
         <div className={`mb-4 p-4 rounded-lg animate-slideIn ${alert.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'}`}>
           <div className="flex items-center">
@@ -316,12 +294,12 @@ const CodeConfigurationForm = () => {
         </div>
       )}
       <GeneralizedForm
-        title={isEditMode ? "Edit Code Configuration" : "Add Code Configuration"}
-        subtitle={isEditMode ? "Update code configuration details" : "Create a new code configuration"}
+        title={isEditMode ? tc('title_edit') : tc('title_add')}
+        subtitle={isEditMode ? tc('subtitle_edit') : tc('subtitle_add')}
         fields={fields}
         onSubmit={handleSubmit}
-        submitText={isEditMode ? "Update Configuration" : "Create Configuration"}
-        resetText="Clear Form"
+        submitText={isEditMode ? tc('submit_update') : tc('submit_create')}
+        resetText={t('common.form_actions.clear_form')}
         initialData={initialData}
         showReset={true}
       />
@@ -330,17 +308,16 @@ const CodeConfigurationForm = () => {
 };
 
 const Create = () => {
-  const { canAdd } = usePermissions();
+  const { t } = useTranslations();
 
   return (
     <App>
-      {/* Main Content Card */}
       <div className="rounded-xl shadow-lg form-container border-slate-200">
         <div className="p-6">
           <PermissionAwareForm
             requiredPermission="can_add"
             route="/system/code-configurations"
-            fallbackMessage="You don't have permission to create code configurations. Please contact your administrator."
+            fallbackMessage={t('system.code_configuration.create.permission_fallback')}
           >
             <CodeConfigurationForm />
           </PermissionAwareForm>
@@ -351,4 +328,3 @@ const Create = () => {
 };
 
 export default Create;
-

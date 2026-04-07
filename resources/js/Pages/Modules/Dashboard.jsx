@@ -22,14 +22,14 @@ export default function ModuleDashboard({ moduleName = 'Module' }) {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold mb-4 flex items-center">
-                <Package className="h-10 w-10 mr-4" />
-                {moduleName} Dashboard
+                <Package className="h-10 w-10 me-4 shrink-0" />
+                {t('modules.dashboard.title_suffix', { name: moduleName })}
               </h1>
               <p className="text-xl text-blue-100 mb-6">
-                Manage your {moduleName.toLowerCase()} module features and data
+                {t('modules.dashboard.subtitle', { name: moduleName })}
               </p>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-blue-100">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-blue-100">
                   <TrendingUp className="h-5 w-5" />
                   <span className="font-medium">{t('modules.dashboard.module_management')}</span>
                 </div>
@@ -50,7 +50,7 @@ export default function ModuleDashboard({ moduleName = 'Module' }) {
               <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-xl text-blue-600 dark:text-blue-400">
                 <FileText className="h-6 w-6" />
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('modules.dashboard.total_records')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">0</p>
               </div>
@@ -62,7 +62,7 @@ export default function ModuleDashboard({ moduleName = 'Module' }) {
               <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-xl text-green-600 dark:text-green-400">
                 <Users className="h-6 w-6" />
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('modules.dashboard.active_users')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">0</p>
               </div>
@@ -74,7 +74,7 @@ export default function ModuleDashboard({ moduleName = 'Module' }) {
               <div className="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-xl text-purple-600 dark:text-purple-400">
                 <Grid3X3 className="h-6 w-6" />
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('modules.dashboard.features')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">0</p>
               </div>
@@ -86,7 +86,7 @@ export default function ModuleDashboard({ moduleName = 'Module' }) {
               <div className="p-3 bg-orange-100 dark:bg-orange-900/20 rounded-xl text-orange-600 dark:text-orange-400">
                 <Settings className="h-6 w-6" />
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('modules.dashboard.settings')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">0</p>
               </div>
@@ -96,19 +96,21 @@ export default function ModuleDashboard({ moduleName = 'Module' }) {
 
         {/* Module Content */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{moduleName} Features</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            {t('modules.dashboard.features_section_heading', { name: moduleName })}
+          </h2>
           <div className="text-center py-12">
             <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              {moduleName} Module Dashboard
+              {t('modules.dashboard.dev_title', { name: moduleName })}
             </h3>
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              This module dashboard is currently under development. Features and statistics will be added soon.
+              {t('modules.dashboard.dev_body')}
             </p>
-            <div className="flex items-center justify-center space-x-4">
+            <div className="flex items-center justify-center gap-4">
               <div className="flex items-center text-gray-400 text-sm">
-                <TrendingUp className="h-4 w-4 mr-2" />
-                Coming Soon
+                <TrendingUp className="h-4 w-4 me-2" />
+                {t('modules.dashboard.coming_soon_inline')}
               </div>
             </div>
           </div>
@@ -119,17 +121,17 @@ export default function ModuleDashboard({ moduleName = 'Module' }) {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('modules.dashboard.quick_actions')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-3" />
+              <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400 me-3 shrink-0" />
               <span className="text-blue-900 dark:text-blue-100 font-medium">{t('modules.dashboard.view_records')}</span>
             </div>
             
             <div className="flex items-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <Users className="h-5 w-5 text-green-600 dark:text-green-400 mr-3" />
+              <Users className="h-5 w-5 text-green-600 dark:text-green-400 me-3 shrink-0" />
               <span className="text-green-900 dark:text-green-100 font-medium">{t('modules.dashboard.manage_users')}</span>
             </div>
             
             <div className="flex items-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-              <Settings className="h-5 w-5 text-purple-600 dark:text-purple-400 mr-3" />
+              <Settings className="h-5 w-5 text-purple-600 dark:text-purple-400 me-3 shrink-0" />
               <span className="text-purple-900 dark:text-purple-100 font-medium">{t('modules.dashboard.module_settings')}</span>
             </div>
           </div>

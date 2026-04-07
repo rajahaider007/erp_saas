@@ -833,14 +833,14 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
               <button
                 onClick={() => openModal('edit', account)}
                 className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors duration-200"
-                title="Edit Account"
+                title={t('accounts.chart_of_accounts.edit_account')}
               >
                 <Edit className="h-4 w-4" />
               </button>
               <button
                 onClick={() => handleDelete(account)}
                 className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200"
-                title="Delete Account"
+                title={t('accounts.chart_of_accounts.delete_account')}
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -848,7 +848,7 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
                 <button
                   onClick={() => openModal('add', null, account)}
                   className="p-2 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors duration-200"
-                  title="Add Child Account"
+                  title={t('accounts.chart_of_accounts.add_child_account')}
                 >
                   <Plus className="h-4 w-4" />
                 </button>
@@ -874,14 +874,14 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
   if (error) {
     return (
       <App>
-        <Head title="Chart of Accounts" />
+        <Head title={t('accounts.chart_of_accounts.chart_of_accounts')} />
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
           <div className="max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6">
             <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-900/20 rounded-full mb-4">
               <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white text-center mb-2">
-              Configuration Required
+              {t('accounts.chart_of_accounts.configuration_required')}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 text-center mb-4">
               {error}
@@ -891,7 +891,7 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
                 onClick={() => window.location.href = '/dashboard'}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Go to Dashboard
+                {t('accounts.chart_of_accounts.go_to_dashboard')}
               </button>
             </div>
           </div>
@@ -902,7 +902,7 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
 
   return (
     <App>
-      <Head title="Chart of Accounts" />
+      <Head title={t('accounts.chart_of_accounts.chart_of_accounts')} />
       <style jsx="true">{`
         @keyframes fadeIn {
           from { opacity: 0; }

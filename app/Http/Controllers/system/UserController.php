@@ -172,7 +172,7 @@ class UserController extends Controller
                 'timezone' => $request->timezone ?? 'UTC',
                 'language' => $request->language ?? 'en',
                 'currency' => $request->currency ?? 'USD',
-                'theme' => $request->theme ?? 'system',
+                'theme' => $request->theme ?? 'dark',
                 'created_by' => auth()->user()->loginid ?? 'system',
             ];
 
@@ -406,7 +406,7 @@ class UserController extends Controller
                 'timezone' => $request->timezone ?? 'UTC',
                 'language' => $request->language ?? 'en',
                 'currency' => $request->currency ?? 'USD',
-                'theme' => $request->theme ?? 'system',
+                'theme' => $request->theme ?? 'dark',
                 'updated_by' => auth()->user()->loginid ?? 'system',
             ];
 

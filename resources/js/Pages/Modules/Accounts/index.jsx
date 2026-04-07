@@ -24,16 +24,77 @@ import {
   Database
 } from 'lucide-react';
 
+const ACCOUNTS_SECTION_DEFS = [
+  {
+    id: 1,
+    sectionKey: 'general_ledger',
+    icon: FileText,
+    color: 'blue',
+    gradient: 'from-blue-500 to-blue-600',
+    menus: [
+      { menuKey: 'chart_of_accounts', route: '/accounts/chart-of-accounts', icon: FileText },
+      { menuKey: 'journal_voucher', route: '/accounts/journal-voucher', icon: Edit },
+      { menuKey: 'trial_balance', route: '/accounts/trial-balance', icon: BarChart3 }
+    ]
+  },
+  {
+    id: 2,
+    sectionKey: 'financial_reports',
+    icon: Receipt,
+    color: 'red',
+    gradient: 'from-red-500 to-red-600',
+    menus: [
+      { menuKey: 'general_ledger', route: '/accounts/general-ledger', icon: FileText },
+      { menuKey: 'balance_sheet', route: '/accounts/balance-sheet', icon: BarChart3 },
+      { menuKey: 'income_statement', route: '/accounts/income-statement', icon: TrendingUp }
+    ]
+  },
+  {
+    id: 3,
+    sectionKey: 'configuration',
+    icon: DollarSign,
+    color: 'green',
+    gradient: 'from-green-500 to-green-600',
+    menus: [
+      { menuKey: 'fiscal_year', route: '/accounts/fiscal-year-configuration', icon: Clock },
+      { menuKey: 'voucher_configuration', route: '/accounts/voucher-number-configuration', icon: FileText },
+      { menuKey: 'account_configuration', route: '/accounts/account-configuration', icon: Database },
+      { menuKey: 'code_configuration', route: '/accounts/code-configuration', icon: Calculator }
+    ]
+  },
+  {
+    id: 4,
+    sectionKey: 'currency_ledger',
+    icon: PieChart,
+    color: 'purple',
+    gradient: 'from-purple-500 to-purple-600',
+    menus: [
+      { menuKey: 'currencies', route: '/system/currencies', icon: DollarSign },
+      { menuKey: 'currency_ledger', route: '/accounts/currency-ledger', icon: BarChart3 },
+      { menuKey: 'opening_voucher', route: '/accounts/opening-voucher', icon: Star }
+    ]
+  }
+];
+
 const AccountsDashboard = () => {
   const { t } = useTranslations();
   const { auth, company, dashboardStats, recentTransactions, accountsSummary, currencySymbol, financialCards = [] } = usePage().props;
   const user = auth?.user;
   const { canView } = usePermissions();
 
+  const accountsSections = ACCOUNTS_SECTION_DEFS.map((s) => ({
+    ...s,
+    name: t(`modules.accounts.dashboard.sections.${s.sectionKey}.name`),
+    description: t(`modules.accounts.dashboard.sections.${s.sectionKey}.description`),
+    menus: s.menus.map((m) => ({
+      ...m,
+      name: t(`modules.accounts.dashboard.menus.${m.menuKey}`)
+    }))
+  }));
+
   const defaultFinancialCards = [
     {
       type: 'main-payable',
-      title: 'Main Payable',
       count: 0,
       currency: currencySymbol || '$',
       displayBalance: '0.00',
@@ -41,7 +102,6 @@ const AccountsDashboard = () => {
     },
     {
       type: 'main-receivable',
-      title: 'Main Receivable',
       count: 0,
       currency: currencySymbol || '$',
       displayBalance: '0.00',
@@ -49,7 +109,6 @@ const AccountsDashboard = () => {
     },
     {
       type: 'current-cash',
-      title: 'Current Cash In Hand',
       count: 0,
       currency: currencySymbol || '$',
       displayBalance: '0.00',
@@ -57,7 +116,6 @@ const AccountsDashboard = () => {
     },
     {
       type: 'all-cash-codes',
-      title: 'All Cash Codes',
       count: 0,
       currency: currencySymbol || '$',
       displayBalance: '0.00',
@@ -65,7 +123,6 @@ const AccountsDashboard = () => {
     },
     {
       type: 'bank-balances',
-      title: 'Bank Balances',
       count: 0,
       currency: currencySymbol || '$',
       displayBalance: '0.00',
@@ -160,63 +217,6 @@ const AccountsDashboard = () => {
     return colors[color] || colors.gray;
   };
 
-  // Accounts module sections and menus
-  const accountsSections = [
-    {
-      id: 1,
-      name: 'General Ledger',
-      description: 'Manage chart of accounts and general ledger entries',
-      icon: FileText,
-      color: 'blue',
-      gradient: 'from-blue-500 to-blue-600',
-      menus: [
-        { name: 'Chart of Accounts', route: '/accounts/chart-of-accounts', icon: FileText },
-        { name: 'Journal Voucher', route: '/accounts/journal-voucher', icon: Edit },
-        { name: 'Trial Balance', route: '/accounts/trial-balance', icon: BarChart3 }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Financial Reports',
-      description: 'Generate financial statements and reports',
-      icon: Receipt,
-      color: 'red',
-      gradient: 'from-red-500 to-red-600',
-      menus: [
-        { name: 'General Ledger', route: '/accounts/general-ledger', icon: FileText },
-        { name: 'Balance Sheet', route: '/accounts/balance-sheet', icon: BarChart3 },
-        { name: 'Income Statement', route: '/accounts/income-statement', icon: TrendingUp }
-      ]
-    },
-    {
-      id: 3,
-      name: 'Configuration',
-      description: 'Configure accounting settings and fiscal year',
-      icon: DollarSign,
-      color: 'green',
-      gradient: 'from-green-500 to-green-600',
-      menus: [
-        { name: 'Fiscal Year', route: '/accounts/fiscal-year-configuration', icon: Clock },
-        { name: 'Voucher Configuration', route: '/accounts/voucher-number-configuration', icon: FileText },
-        { name: 'Account Configuration', route: '/accounts/account-configuration', icon: Database },
-        { name: 'Code Configuration', route: '/accounts/code-configuration', icon: Calculator }
-      ]
-    },
-    {
-      id: 4,
-      name: 'Currency & Ledger',
-      description: 'Manage currencies and currency ledger',
-      icon: PieChart,
-      color: 'purple',
-      gradient: 'from-purple-500 to-purple-600',
-      menus: [
-        { name: 'Currencies', route: '/system/currencies', icon: DollarSign },
-        { name: 'Currency Ledger', route: '/accounts/currency-ledger', icon: BarChart3 },
-        { name: 'Opening Voucher', route: '/accounts/opening-voucher', icon: Star }
-      ]
-    }
-  ];
-
   const getSectionIcon = (iconComponent) => {
     const Icon = iconComponent;
     return <Icon className="h-6 w-6" />;
@@ -280,10 +280,10 @@ const AccountsDashboard = () => {
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    Financial Management
+                    {t('modules.accounts.dashboard.page_title')}
                   </h1>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Manage your accounting, invoicing, and financial reporting
+                    {t('modules.accounts.dashboard.page_subtitle')}
                   </p>
                 </div>
               </div>
@@ -292,7 +292,7 @@ const AccountsDashboard = () => {
                 <div className="text-right">
                   <p className="text-sm text-gray-500 dark:text-gray-400">{t('modules.accounts.index.welcome_back')}</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {user?.fname ? `${user.fname} ${user.lname}`.trim() : 'Accountant'}
+                    {user?.fname ? `${user.fname} ${user.lname}`.trim() : t('modules.accounts.dashboard.default_role_fallback')}
                   </p>
                 </div>
                 <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white font-bold">
@@ -330,7 +330,7 @@ const AccountsDashboard = () => {
                     {dashboardStats?.outstandingInvoices?.currency}{dashboardStats?.outstandingInvoices?.value || '0.00'}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {dashboardStats?.outstandingInvoices?.count || 0} invoices
+                    {t('modules.accounts.dashboard.invoices_count', { count: dashboardStats?.outstandingInvoices?.count || 0 })}
                   </p>
                 </div>
                 <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-xl text-blue-600 dark:text-blue-400">
@@ -347,7 +347,7 @@ const AccountsDashboard = () => {
                     {dashboardStats?.pendingPayments?.currency}{dashboardStats?.pendingPayments?.value || '0.00'}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {dashboardStats?.pendingPayments?.count || 0} payments
+                    {t('modules.accounts.dashboard.payments_count', { count: dashboardStats?.pendingPayments?.count || 0 })}
                   </p>
                 </div>
                 <div className="p-3 bg-orange-100 dark:bg-orange-900/20 rounded-xl text-orange-600 dark:text-orange-400">
@@ -364,7 +364,9 @@ const AccountsDashboard = () => {
                     {dashboardStats?.profitMargin?.value || '0.0'}%
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {currencySymbol}{dashboardStats?.profitMargin?.profit || '0.00'} profit
+                    {t('modules.accounts.dashboard.profit_amount', {
+                      amount: `${currencySymbol || ''}${dashboardStats?.profitMargin?.profit || '0.00'}`
+                    })}
                   </p>
                 </div>
                 <div className="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-xl text-purple-600 dark:text-purple-400">
@@ -381,7 +383,7 @@ const AccountsDashboard = () => {
                 <BarChart3 className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white ml-3">
-                Financial Snapshot Reports
+                {t('modules.accounts.dashboard.financial_snapshot_heading')}
               </h2>
             </div>
 
@@ -390,6 +392,7 @@ const AccountsDashboard = () => {
                 const Icon = cardIconMap[card.type] || FileText;
                 const color = cardColorMap[card.type] || cardColorMap['main-receivable'];
 
+                const cardTitleKey = `modules.accounts.dashboard.cards.${card.type.replace(/-/g, '_')}`;
                 return (
                   <a
                     key={card.type}
@@ -405,12 +408,12 @@ const AccountsDashboard = () => {
                       <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all" />
                     </div>
 
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{card.title}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t(cardTitleKey)}</p>
                     <p className={`text-xl font-bold ${color.text}`}>
                       {card.currency}{card.displayBalance}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {card.count} account(s)
+                      {t('modules.accounts.dashboard.accounts_count', { count: card.count })}
                     </p>
                   </a>
                 );
@@ -428,14 +431,14 @@ const AccountsDashboard = () => {
                   <Plus className="h-6 w-6" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white ml-3">
-                  Create Journal Entry
+                  {t('modules.accounts.dashboard.quick_journal_title')}
                 </h3>
               </div>
               <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-                Create a new journal voucher entry.
+                {t('modules.accounts.dashboard.quick_journal_desc')}
               </p>
               <div className="flex items-center text-blue-600 dark:text-blue-400 text-sm font-medium group-hover:text-blue-700">
-                Create Now
+                {t('modules.accounts.dashboard.quick_journal_cta')}
                 <ChevronRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
@@ -449,14 +452,14 @@ const AccountsDashboard = () => {
                   <Star className="h-6 w-6" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white ml-3">
-                  Opening Balance
+                  {t('modules.accounts.dashboard.quick_opening_title')}
                 </h3>
               </div>
               <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-                Record opening balances for accounts.
+                {t('modules.accounts.dashboard.quick_opening_desc')}
               </p>
               <div className="flex items-center text-green-600 dark:text-green-400 text-sm font-medium group-hover:text-green-700">
-                Create Now
+                {t('modules.accounts.dashboard.quick_journal_cta')}
                 <ChevronRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
@@ -470,14 +473,14 @@ const AccountsDashboard = () => {
                   <PieChart className="h-6 w-6" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white ml-3">
-                  View Reports
+                  {t('modules.accounts.dashboard.quick_reports_title')}
                 </h3>
               </div>
               <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-                Access financial reports and analytics.
+                {t('modules.accounts.dashboard.quick_reports_desc')}
               </p>
               <div className="flex items-center text-purple-600 dark:text-purple-400 text-sm font-medium group-hover:text-purple-700">
-                View Reports
+                {t('modules.accounts.dashboard.quick_reports_cta')}
                 <ChevronRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
@@ -490,7 +493,7 @@ const AccountsDashboard = () => {
                 <Calculator className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white ml-3">
-                Accounting Management
+                {t('modules.accounts.dashboard.accounting_management_heading')}
               </h2>
             </div>
             
@@ -509,14 +512,14 @@ const AccountsDashboard = () => {
                   <Activity className="h-5 w-5" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white ml-3">
-                  Recent Transactions
+                  {t('modules.accounts.dashboard.recent_transactions')}
                 </h3>
               </div>
               <Link
                 href="/accounts/journal-voucher"
                 className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium"
               >
-                View All
+                {t('modules.accounts.dashboard.view_all')}
               </Link>
             </div>
             
@@ -555,7 +558,7 @@ const AccountsDashboard = () => {
                   </div>
                   <p className="mt-4 text-gray-600 dark:text-gray-400">{t('modules.accounts.index.no_recent_transactions_found')}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
-                    Transactions will appear here once you start posting vouchers
+                    {t('modules.accounts.dashboard.no_transactions_hint')}
                   </p>
                 </div>
               )}

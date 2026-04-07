@@ -147,6 +147,8 @@ const CustomAlert = {
 export default function List() {
   const { modules: paginatedModules, filters, flash } = usePage().props;
   const { t } = useTranslations();
+  const tl = (key, rep) => (rep ? t(`system.add_modules.list.${key}`, rep) : t(`system.add_modules.list.${key}`));
+  const td = (key, rep) => (rep ? t(`common.data_table.${key}`, rep) : t(`common.data_table.${key}`));
 
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
@@ -172,24 +174,23 @@ export default function List() {
     actions: true
   });
 
-  // Show flash messages
   useEffect(() => {
     if (flash?.success) {
       CustomAlert.fire({
-        title: 'Success!',
+        title: t('common.flash.success_title'),
         text: flash.success,
         icon: 'success',
-        confirmButtonText: 'Great!'
+        confirmButtonText: tl('confirm_flash_great'),
       });
     } else if (flash?.error) {
       CustomAlert.fire({
-        title: 'Error!',
+        title: t('common.flash.error_title'),
         text: flash.error,
         icon: 'error',
-        confirmButtonText: 'OK'
+        confirmButtonText: t('common.actions.confirm'),
       });
     }
-  }, [flash]);
+  }, [flash, t, tl]);
 
   // Handle search and filters
   const handleSearch = useCallback((term) => {
@@ -264,27 +265,29 @@ export default function List() {
   
 const handleDelete = (module) => {
   CustomAlert.fire({
-    title: 'Are you sure?',
-    text: `You are about to delete "${module.module_name}". This action cannot be undone!`,
+    title: td('confirm_delete_title'),
+    text: td('confirm_delete_text', { name: module.module_name }),
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Yes, delete it!',
-    cancelButtonText: 'Cancel',
+    confirmButtonText: td('confirm_delete_ok'),
+    cancelButtonText: t('common.actions.cancel'),
     onConfirm: () => {
       setLoading(true);
       router.delete(`/modules/${module.id}`, {
         onSuccess: () => {
           CustomAlert.fire({
-            title: 'Deleted!',
-            text: `Module "${module.module_name}" has been deleted.`,
-            icon: 'success'
+            title: tl('msg_deleted_title'),
+            text: tl('msg_deleted_one', { name: module.module_name }),
+            icon: 'success',
+            confirmButtonText: tl('confirm_flash_great'),
           });
         },
         onError: () => {
           CustomAlert.fire({
-            title: 'Error!',
-            text: 'Failed to delete the module. Please try again.',
-            icon: 'error'
+            title: t('common.flash.error_title'),
+            text: tl('msg_delete_failed'),
+            icon: 'error',
+            confirmButtonText: t('common.actions.confirm'),
           });
         },
         onFinish: () => setLoading(false)
@@ -299,12 +302,12 @@ const handleView = (module) => {
 
 const handleDuplicate = (module) => {
   CustomAlert.fire({
-    title: 'Duplicate Module',
-    text: `Create a copy of "${module.module_name}"?`,
+    title: tl('duplicate_module_title'),
+    text: tl('duplicate_module_text', { name: module.module_name }),
     icon: 'question',
     showCancelButton: true,
-    confirmButtonText: 'Yes, duplicate it!',
-    cancelButtonText: 'Cancel',
+    confirmButtonText: tl('duplicate_module_confirm'),
+    cancelButtonText: t('common.actions.cancel'),
     onConfirm: () => {
       router.get('/system/AddModules/add', {
         duplicate: module.id
@@ -332,32 +335,35 @@ const handleDuplicate = (module) => {
 // Bulk actions - FIXED VERSIONS
 const handleBulkDelete = () => {
   if (selectedModules.length === 0) return;
+  const count = selectedModules.length;
 
   CustomAlert.fire({
-    title: 'Delete Selected Modules?',
-    text: `You are about to delete ${selectedModules.length} module(s). This action cannot be undone!`,
+    title: td('bulk_delete_title'),
+    text: td('bulk_delete_text', { count }),
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Yes, delete them!',
-    cancelButtonText: 'Cancel',
+    confirmButtonText: td('bulk_delete_ok'),
+    cancelButtonText: t('common.actions.cancel'),
     onConfirm: () => {
       setLoading(true);
       router.post('/modules/bulk-destroy', {
         ids: selectedModules
       }, {
-        onSuccess: (page) => {
+        onSuccess: () => {
           setSelectedModules([]);
           CustomAlert.fire({
-            title: 'Deleted!',
-            text: `${selectedModules.length} module(s) have been deleted.`,
-            icon: 'success'
+            title: tl('msg_deleted_title'),
+            text: tl('msg_bulk_deleted', { count }),
+            icon: 'success',
+            confirmButtonText: tl('confirm_flash_great'),
           });
         },
-        onError: (errors) => {
+        onError: () => {
           CustomAlert.fire({
-            title: 'Error!',
-            text: 'Failed to delete modules. Please try again.',
-            icon: 'error'
+            title: t('common.flash.error_title'),
+            text: tl('msg_bulk_delete_failed'),
+            icon: 'error',
+            confirmButtonText: t('common.actions.confirm'),
           });
         },
         onFinish: () => setLoading(false)
@@ -369,34 +375,47 @@ const handleBulkDelete = () => {
 
 const handleBulkStatusChange = (newStatus) => {
   if (selectedModules.length === 0) return;
+  const count = selectedModules.length;
+  const fireConfirm = newStatus
+    ? {
+        title: td('bulk_status_activate_title'),
+        text: td('bulk_status_activate_text', { count }),
+        confirmButtonText: td('bulk_status_activate_ok'),
+      }
+    : {
+        title: td('bulk_status_deactivate_title'),
+        text: td('bulk_status_deactivate_text', { count }),
+        confirmButtonText: td('bulk_status_deactivate_ok'),
+      };
 
-  const action = newStatus ? 'activate' : 'deactivate';
   CustomAlert.fire({
-    title: `${action.charAt(0).toUpperCase() + action.slice(1)} Selected Modules?`,
-    text: `You are about to ${action} ${selectedModules.length} module(s).`,
+    title: fireConfirm.title,
+    text: fireConfirm.text,
     icon: 'question',
     showCancelButton: true,
-    confirmButtonText: `Yes, ${action} them!`,
-    cancelButtonText: 'Cancel',
+    confirmButtonText: fireConfirm.confirmButtonText,
+    cancelButtonText: t('common.actions.cancel'),
     onConfirm: () => {
       setLoading(true);
       router.post('/modules/bulk-status', {
         ids: selectedModules,
         status: newStatus
       }, {
-        onSuccess: (page) => {
+        onSuccess: () => {
           setSelectedModules([]);
           CustomAlert.fire({
-            title: 'Updated!',
-            text: `${selectedModules.length} module(s) have been ${action}d.`,
-            icon: 'success'
+            title: tl('msg_bulk_updated_title'),
+            text: newStatus ? tl('msg_bulk_activated', { count }) : tl('msg_bulk_deactivated', { count }),
+            icon: 'success',
+            confirmButtonText: tl('confirm_flash_great'),
           });
         },
-        onError: (errors) => {
+        onError: () => {
           CustomAlert.fire({
-            title: 'Error!',
-            text: 'Failed to update modules. Please try again.',
-            icon: 'error'
+            title: t('common.flash.error_title'),
+            text: tl('msg_bulk_update_failed'),
+            icon: 'error',
+            confirmButtonText: t('common.actions.confirm'),
           });
         },
         onFinish: () => setLoading(false)
@@ -408,14 +427,13 @@ const handleBulkStatusChange = (newStatus) => {
 // Export functions - FIXED VERSION
 const exportToCSV = () => {
   CustomAlert.fire({
-    title: 'Export to CSV',
-    text: 'Download all modules as CSV file?',
+    title: td('export_csv_title'),
+    text: td('export_csv_text'),
     icon: 'question',
     showCancelButton: true,
-    confirmButtonText: 'Yes, download!',
-    cancelButtonText: 'Cancel',
+    confirmButtonText: td('export_csv_ok'),
+    cancelButtonText: t('common.actions.cancel'),
     onConfirm: () => {
-      // Open the export URL in a new window
       window.open('/modules/export-csv', '_blank');
     }
   });
@@ -436,16 +454,13 @@ const exportToCSV = () => {
     return status ? '#10B981' : '#EF4444';
   };
 
-  const getStatusLabel = (status) => {
-    return status ? 'Active' : 'Inactive';
-  };
+  const getStatusLabel = (status) => (status ? t('common.status.active') : t('common.status.inactive'));
 
-  // Status options for filtering
-  const statusOptions = [
-    { value: 'all', label: 'All Status' },
-    { value: '1', label: 'Active' },
-    { value: '0', label: 'Inactive' }
-  ];
+  const statusOptions = useMemo(() => ([
+    { value: 'all', label: t('system.departments.list.all_status') },
+    { value: '1', label: t('common.status.active') },
+    { value: '0', label: t('common.status.inactive') },
+  ]), [t]);
 
   const pageSizeOptions = [10, 25, 50, 100];
 
@@ -458,16 +473,16 @@ const exportToCSV = () => {
             <div className="title-section">
               <h1 className="page-title">
                 <Database className="title-icon" />
-                {usePage().props?.pageTitle || 'Modules'}
+                {usePage().props?.pageTitle || t('system.add_modules.add.breadcrumb_modules')}
               </h1>
               <div className="stats-summary">
                 <div className="stat-item">
                   <TrendingUp size={16} />
-                  <span>{paginatedModules?.total || 0} Total</span>
+                  <span>{td('stat_total', { count: paginatedModules?.total || 0 })}</span>
                 </div>
                 <div className="stat-item">
                   <Users size={16} />
-                  <span>{paginatedModules?.data?.filter(m => m.status).length || 0} Active</span>
+                  <span>{td('stat_active', { count: paginatedModules?.data?.filter(m => m.status).length || 0 })}</span>
                 </div>
               </div>
             </div>
@@ -476,7 +491,7 @@ const exportToCSV = () => {
               <button
                 className="btn btn-icon"
                 onClick={() => window.location.reload()}
-                title="Refresh"
+                title={tl('refresh')}
                 disabled={loading}
               >
                 <RefreshCcw size={20} className={loading ? 'animate-spin' : ''} />
@@ -486,20 +501,20 @@ const exportToCSV = () => {
               <div className="dropdown">
                 <button className="btn btn-secondary dropdown-toggle">
                   <Download size={20} />
-                  Export
+                  {tl('export')}
                   <ChevronDown size={16} />
                 </button>
                 <div className="dropdown-menu">
                   <button onClick={exportToCSV}>
                     <FileText size={16} />
-                    Export as CSV
+                    {tl('export_as_csv')}
                   </button>
                 </div>
               </div>
 
               <a href='/system/AddModules/add' className="btn btn-primary">
                 <Plus size={20} />
-                Add Module
+                {tl('add_module')}
               </a>
             </div>
           </div>
@@ -513,14 +528,14 @@ const exportToCSV = () => {
                   <input
                     type="text"
                     className="search-input"
-                    placeholder="Search modules..."
+                    placeholder={tl('search_modules')}
                     value={searchTerm}
                     onChange={(e) => handleSearch(e.target.value)}
                   />
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Status</label>
+                  <label className="filter-label">{tl('status')}</label>
                   <select
                     className="filter-select"
                     value={statusFilter}
@@ -543,7 +558,7 @@ const exportToCSV = () => {
                     params.set('page', '1');
                     router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
                   }}
-                  title="Reset all filters"
+                  title={tl('reset_all_filters')}
                 >
                   <RefreshCcw size={16} />
                 </button>
@@ -555,7 +570,7 @@ const exportToCSV = () => {
           {showColumnSelector && (
             <div className="column-selector">
               <div className="column-selector-content">
-                <h3>Show/Hide Columns</h3>
+                <h3>{tl('showhide_columns')}</h3>
                 <div className="column-grid">
                   {Object.entries(visibleColumns).map(([key, visible]) => (
                     key !== 'actions' && (
@@ -577,7 +592,7 @@ const exportToCSV = () => {
                   className="btn btn-sm btn-secondary"
                   onClick={() => setShowColumnSelector(false)}
                 >
-                  Close
+                  {t('common.actions.close')}
                 </button>
               </div>
             </div>
@@ -591,24 +606,24 @@ const exportToCSV = () => {
             <div className="bulk-actions-bar">
               <div className="selection-info">
                 <CheckCircle2 size={20} />
-                <span>{selectedModules.length} module{selectedModules.length !== 1 ? 's' : ''} selected</span>
+                <span>{td('selected_count', { count: selectedModules.length })}</span>
               </div>
 
               <div className="bulk-actions">
                 <button className="btn btn-sm btn-secondary" onClick={() => setSelectedModules([])}>
                   <X size={16} />
-                  Clear
+                  {tl('clear')}
                 </button>
 
                 <div className="dropdown">
                   <button className="btn btn-sm btn-secondary dropdown-toggle">
                     <Settings size={16} />
-                    Change Status
+                    {tl('change_status')}
                     <ChevronDown size={12} />
                   </button>
                   <div className="dropdown-menu">
-                    <button onClick={() => handleBulkStatusChange(true)}>Set Active</button>
-                    <button onClick={() => handleBulkStatusChange(false)}>Set Inactive</button>
+                    <button onClick={() => handleBulkStatusChange(true)}>{td('set_active')}</button>
+                    <button onClick={() => handleBulkStatusChange(false)}>{td('set_inactive')}</button>
                   </div>
                 </div>
 
@@ -617,7 +632,7 @@ const exportToCSV = () => {
                   onClick={handleBulkDelete}
                 >
                   <Trash2 size={16} />
-                  Delete
+                  {tl('delete')}
                 </button>
               </div>
             </div>

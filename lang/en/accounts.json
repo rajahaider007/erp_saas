@@ -429,6 +429,8 @@
     }
   },
   "chart_of_accounts": {
+    "configuration_required": "Configuration Required",
+    "go_to_dashboard": "Go to Dashboard",
     "this_account_has_child_accounts_that_mus": "This account has child accounts that must be deleted first:",
     "child_accounts": "Child Accounts:",
     "edit_account": "Edit Account",

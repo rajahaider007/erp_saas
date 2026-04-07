@@ -451,7 +451,7 @@ const { t } = useTranslations();
           timezone: user?.timezone || 'UTC',
           language: user?.language || 'en',
           currency: user?.currency || 'USD',
-          theme: user?.theme || 'light'
+          theme: user?.theme || 'dark'
         }}
         showReset={true}
       />

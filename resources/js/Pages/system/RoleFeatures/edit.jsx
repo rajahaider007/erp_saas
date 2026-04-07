@@ -1,12 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { Shield, Home, List, Plus, CheckSquare, Square } from 'lucide-react';
+import { Shield, Home, List, CheckSquare, Square, Edit as EditIcon } from 'lucide-react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
-const Breadcrumbs = ({ items }) => {
-  const { t } = useTranslations();
-  return (
+const Breadcrumbs = ({ items, description }) => (
   <div className="breadcrumbs-themed">
     <nav className="breadcrumbs">
       {items.map((item, idx) => (
@@ -23,44 +21,49 @@ const Breadcrumbs = ({ items }) => {
         </div>
       ))}
     </nav>
-    <div className="breadcrumbs-description">{t('system.role_features.edit.edit_role_features_and_menu_access')}</div>
+    <div className="breadcrumbs-description">{description}</div>
   </div>
-  );
-};
+);
 
 const EditRoleFeatureForm = () => {
   const { role: roleData, roles, menus, roleFeatures } = usePage().props;
   const { t } = useTranslations();
+  const tr = (k) => t(`system.role_features.edit.${k}`);
+
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
   const [requestStatus, setRequestStatus] = useState('');
   const [selectedRoleId, setSelectedRoleId] = useState(roleData.id);
   const [menuFeatures, setMenuFeatures] = useState(roleFeatures || {});
 
-  // Group menus by section for better organization
   const groupedMenus = useMemo(() => {
     const groups = {};
-    menus.forEach(menu => {
-      const sectionName = menu.section?.module?.module_name || 'Other';
-      if (!groups[sectionName]) {
-        groups[sectionName] = [];
-      }
+    const other = tr('module_group_other');
+    menus.forEach((menu) => {
+      const sectionName = menu.section?.module?.module_name || other;
+      if (!groups[sectionName]) groups[sectionName] = [];
       groups[sectionName].push(menu);
     });
     return groups;
-  }, [menus]);
+  }, [menus, t]);
+
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: t('common.breadcrumbs.dashboard'), href: '/dashboard', icon: Home },
+      { label: t('common.breadcrumbs.system'), href: '/system', icon: List },
+      { label: tr('breadcrumb_role_features'), href: '/system/role-features', icon: Shield },
+      { label: tr('breadcrumb_edit'), icon: EditIcon, href: null },
+    ],
+    [t]
+  );
 
   const handleRoleChange = (roleId) => {
     setSelectedRoleId(roleId);
-    // Reset menu features when role changes
     setMenuFeatures({});
   };
 
   const handleMenuToggle = (menuId, isEnabled) => {
-    setMenuFeatures(prev => ({
-      ...prev,
-      [menuId]: isEnabled
-    }));
+    setMenuFeatures((prev) => ({ ...prev, [menuId]: isEnabled }));
   };
 
   const handleSubmit = async (e) => {
@@ -71,45 +74,33 @@ const EditRoleFeatureForm = () => {
     try {
       const formData = new FormData();
       formData.append('role_id', selectedRoleId);
-      
-      // Convert menu features to array format
       const menuFeaturesArray = Object.entries(menuFeatures).map(([menuId, isEnabled]) => ({
-        menu_id: parseInt(menuId),
-        is_enabled: isEnabled
+        menu_id: parseInt(menuId, 10),
+        is_enabled: isEnabled,
       }));
-      
       formData.append('menu_features', JSON.stringify(menuFeaturesArray));
 
       router.post('/system/role-features', formData, {
         onSuccess: () => {
-          setAlert({ type: 'success', message: t('system.role_features.edit.msg_role_features_updated_successfully') });
+          setAlert({ type: 'success', message: tr('msg_role_features_updated_successfully') });
           setRequestStatus('success');
         },
-        onError: (errors) => {
-          setErrors(errors);
-          setAlert({ type: 'error', message: t('system.role_features.edit.msg_please_correct_the_errors_below') });
+        onError: (errs) => {
+          setErrors(errs || {});
+          setAlert({ type: 'error', message: tr('msg_please_correct_the_errors_below') });
           setRequestStatus('error');
-        }
+        },
       });
-    } catch (error) {
-      setAlert({ type: 'error', message: t('system.role_features.edit.msg_an_error_occurred_please_try_again') });
+    } catch {
+      setAlert({ type: 'error', message: tr('msg_an_error_occurred_please_try_again') });
       setRequestStatus('error');
     }
   };
 
-  const breadcrumbItems = [
-    { label: 'Dashboard', href: '/dashboard', icon: Home },
-    { label: 'System', href: '/system', icon: List },
-    { label: 'Role Features', href: '/system/role-features', icon: Shield },
-    { label: 'Edit', icon: Plus }
-  ];
-
   return (
     <div className="space-y-6">
-      {/* Professional Breadcrumbs */}
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs items={breadcrumbItems} description={tr('edit_role_features_and_menu_access')} />
 
-      {/* Alert Messages */}
       {alert && (
         <div className={`mb-4 p-4 rounded-lg animate-slideIn ${alert.type === 'success'
             ? 'bg-green-50 border border-green-200 text-green-800'
@@ -134,29 +125,27 @@ const EditRoleFeatureForm = () => {
         </div>
       )}
 
-      {/* Role Features Configuration Form */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            Role Features Configuration
+            {tr('section_title')}
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Configure menu access permissions for roles
+            {tr('section_subtitle')}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6">
-          {/* Role Selection */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Select Role
+              {tr('lbl_select_role')}
             </label>
             <select
               value={selectedRoleId}
               onChange={(e) => handleRoleChange(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
-              <option value="">{t('system.role_features.edit.select_a_role')}</option>
+              <option value="">{tr('select_a_role')}</option>
               {roles.map((role) => (
                 <option key={role.id} value={role.id}>
                   {role.role_name}
@@ -168,15 +157,14 @@ const EditRoleFeatureForm = () => {
             )}
           </div>
 
-          {/* Menu Features */}
           {selectedRoleId && (
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                  Menu Access Permissions
+                  {tr('menu_access_title')}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                  Select which menu items this role can access
+                  {tr('menu_access_desc')}
                 </p>
               </div>
 
@@ -216,21 +204,20 @@ const EditRoleFeatureForm = () => {
             </div>
           )}
 
-          {/* Form Actions */}
           <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700 mt-6">
             <button
               type="button"
               onClick={() => router.visit('/system/role-features')}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              Cancel
+              {tr('btn_cancel')}
             </button>
             <button
               type="submit"
               disabled={!selectedRoleId || requestStatus === 'processing'}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {requestStatus === 'processing' ? 'Saving...' : 'Save Role Features'}
+              {requestStatus === 'processing' ? tr('btn_saving') : tr('btn_save')}
             </button>
           </div>
         </form>
@@ -239,17 +226,14 @@ const EditRoleFeatureForm = () => {
   );
 };
 
-// Main Edit Component
-const Edit = () => {
-  return (
-    <App>
-      <div className="rounded-xl shadow-lg form-container border-slate-200">
-        <div className="p-6">
-          <EditRoleFeatureForm />
-        </div>
+const Edit = () => (
+  <App>
+    <div className="rounded-xl shadow-lg form-container border-slate-200">
+      <div className="p-6">
+        <EditRoleFeatureForm />
       </div>
-    </App>
-  );
-};
+    </div>
+  </App>
+);
 
 export default Edit;

@@ -472,7 +472,7 @@ class LoginController extends Controller
                 'timezone' => $user->timezone ?? 'UTC',
                 'language' => $user->language ?? 'en',
                 'currency' => $user->currency ?? 'USD',
-                'theme' => $user->theme ?? 'light',
+                'theme' => $user->theme ?? 'dark',
                 'avatar' => $user->avatar,
                 'last_login_at' => $user->last_login_at,
                 'force_password_change' => $user->force_password_change ?? false,

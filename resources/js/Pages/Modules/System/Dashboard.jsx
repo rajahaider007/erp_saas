@@ -21,78 +21,71 @@ export default function SystemDashboard() {
   const { t } = useTranslations();
   const systemModules = [
     {
-      name: 'User Management',
-      description: 'Manage system users, roles, and permissions',
+      gridKey: 'user_management',
       icon: Users,
       href: '/system/users',
       color: 'bg-blue-500',
       stats: { total: 25, active: 23 }
     },
     {
-      name: 'Company Management',
-      description: 'Configure company settings and details',
+      gridKey: 'company_management',
       icon: Building2,
       href: '/system/companies',
       color: 'bg-green-500',
       stats: { total: 5, active: 4 }
     },
     {
-      name: 'Module Management',
-      description: 'Manage system modules and features',
+      gridKey: 'module_management',
       icon: Package,
       href: '/system/AddModules',
       color: 'bg-purple-500',
       stats: { total: 12, active: 10 }
     },
     {
-      name: 'Package Management',
-      description: 'Configure packages and features',
+      gridKey: 'package_management',
       icon: Shield,
       href: '/system/packages',
       color: 'bg-orange-500',
       stats: { total: 8, active: 7 }
     },
     {
-      name: 'Location Management',
-      description: 'Manage company locations and branches',
+      gridKey: 'location_management',
       icon: Globe,
       href: '/system/locations',
       color: 'bg-teal-500',
       stats: { total: 15, active: 12 }
     },
     {
-      name: 'Department Management',
-      description: 'Organize departments and teams',
+      gridKey: 'department_management',
       icon: Grid3X3,
       href: '/system/departments',
       color: 'bg-pink-500',
       stats: { total: 20, active: 18 }
     },
     {
-      name: 'Currency Management',
-      description: 'Manage currencies and exchange rates',
+      gridKey: 'currency_management',
       icon: Database,
       href: '/system/currencies',
       color: 'bg-indigo-500',
       stats: { total: 10, active: 8 }
     },
     {
-      name: 'Menu Management',
-      description: 'Configure system menus and navigation',
+      gridKey: 'menu_management',
       icon: Key,
       href: '/system/menus',
       color: 'bg-red-500',
       stats: { total: 45, active: 42 }
     },
     {
-      name: 'Storage',
-      description: 'Manage attachments and file storage',
+      gridKey: 'storage',
       icon: HardDrive,
       href: '/system/attachment-manager',
       color: 'bg-slate-600',
       stats: { total: 0, active: 0 }
     }
   ];
+
+  const mg = (key) => `modules.system.dashboard.modules_grid.${key}`;
 
   return (
     <App>
@@ -102,14 +95,14 @@ export default function SystemDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold mb-4 flex items-center">
-                <Settings className="h-10 w-10 mr-4" />
-                System Dashboard
+                <Settings className="h-10 w-10 me-4 shrink-0" />
+                {t('modules.system.dashboard.title')}
               </h1>
               <p className="text-xl text-gray-300 mb-6">
-                Manage your ERP system configuration and administration
+                {t('modules.system.dashboard.subtitle')}
               </p>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-gray-300">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-gray-300">
                   <TrendingUp className="h-5 w-5" />
                   <span className="font-medium">{t('modules.system.dashboard.system_administration')}</span>
                 </div>
@@ -130,7 +123,7 @@ export default function SystemDashboard() {
               <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-xl text-blue-600 dark:text-blue-400">
                 <Users className="h-6 w-6" />
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('modules.system.dashboard.total_users')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">25</p>
               </div>
@@ -142,7 +135,7 @@ export default function SystemDashboard() {
               <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-xl text-green-600 dark:text-green-400">
                 <Building2 className="h-6 w-6" />
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('modules.system.dashboard.companies')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">5</p>
               </div>
@@ -154,7 +147,7 @@ export default function SystemDashboard() {
               <div className="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-xl text-purple-600 dark:text-purple-400">
                 <Package className="h-6 w-6" />
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('modules.system.dashboard.modules')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">12</p>
               </div>
@@ -166,7 +159,7 @@ export default function SystemDashboard() {
               <div className="p-3 bg-orange-100 dark:bg-orange-900/20 rounded-xl text-orange-600 dark:text-orange-400">
                 <Shield className="h-6 w-6" />
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('modules.system.dashboard.packages')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">8</p>
               </div>
@@ -188,24 +181,26 @@ export default function SystemDashboard() {
                   <div className={`p-3 ${module.color} rounded-xl text-white group-hover:scale-110 transition-transform`}>
                     <module.icon className="h-6 w-6" />
                   </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-all rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
                 </div>
                 
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {module.name}
+                  {t(`${mg(module.gridKey)}.name`)}
                 </h3>
                 
                 <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-                  {module.description}
+                  {t(`${mg(module.gridKey)}.description`)}
                 </p>
                 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 text-sm">
+                  <div className="flex items-center gap-4 text-sm">
                     <span className="text-gray-500 dark:text-gray-400">
-                      Total: <span className="font-medium text-gray-700 dark:text-gray-200">{module.stats.total}</span>
+                      {t('modules.system.dashboard.label_total')}:{' '}
+                      <span className="font-medium text-gray-700 dark:text-gray-200">{module.stats.total}</span>
                     </span>
                     <span className="text-green-600 dark:text-green-400">
-                      Active: <span className="font-medium">{module.stats.active}</span>
+                      {t('modules.system.dashboard.label_active')}:{' '}
+                      <span className="font-medium">{module.stats.active}</span>
                     </span>
                   </div>
                 </div>
@@ -222,7 +217,7 @@ export default function SystemDashboard() {
               href="/system/users/create"
               className="flex items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
             >
-              <Users className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-3" />
+              <Users className="h-5 w-5 text-blue-600 dark:text-blue-400 me-3 shrink-0" />
               <span className="text-blue-900 dark:text-blue-100 font-medium">{t('modules.system.dashboard.add_new_user')}</span>
             </a>
             
@@ -230,7 +225,7 @@ export default function SystemDashboard() {
               href="/system/companies/create"
               className="flex items-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
             >
-              <Building2 className="h-5 w-5 text-green-600 dark:text-green-400 mr-3" />
+              <Building2 className="h-5 w-5 text-green-600 dark:text-green-400 me-3 shrink-0" />
               <span className="text-green-900 dark:text-green-100 font-medium">{t('modules.system.dashboard.add_company')}</span>
             </a>
             
@@ -238,7 +233,7 @@ export default function SystemDashboard() {
               href="/system/AddModules/add"
               className="flex items-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
             >
-              <Package className="h-5 w-5 text-purple-600 dark:text-purple-400 mr-3" />
+              <Package className="h-5 w-5 text-purple-600 dark:text-purple-400 me-3 shrink-0" />
               <span className="text-purple-900 dark:text-purple-100 font-medium">{t('modules.system.dashboard.create_module')}</span>
             </a>
             
@@ -246,8 +241,8 @@ export default function SystemDashboard() {
               href="/system/attachment-manager"
               className="flex items-center p-4 bg-slate-50 dark:bg-slate-900/20 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900/30 transition-colors"
             >
-              <HardDrive className="h-5 w-5 text-slate-600 dark:text-slate-400 mr-3" />
-              <span className="text-slate-900 dark:text-slate-100 font-medium">{t('modules.system.dashboard.storage__attachments')}</span>
+              <HardDrive className="h-5 w-5 text-slate-600 dark:text-slate-400 me-3 shrink-0" />
+              <span className="text-slate-900 dark:text-slate-100 font-medium">{t('modules.system.dashboard.storage_attachments')}</span>
             </a>
           </div>
         </div>

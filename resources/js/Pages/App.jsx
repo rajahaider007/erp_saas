@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Head, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { LayoutProvider, useLayout } from '@/Contexts/LayoutContext';
 import Header from '@/Components/Layout/Header';
 import Sidebar from '@/Components/Layout/Sidebar';
@@ -23,11 +24,29 @@ const ThemeWrapper = ({ children }) => {
   return children;
 };
 
+function AppHead() {
+  const { t } = useTranslations();
+  const { pageTitle } = usePage().props;
+  const appName = t('common.app.name');
+  const headTitle = pageTitle
+    ? t('common.app.head_with_page', { page: pageTitle, app: appName })
+    : t('common.app.head_default');
+  return <Head title={headTitle} />;
+}
+
 export default function App({ children }) {
+  const { locale, supportedLocales } = usePage().props;
+
+  useEffect(() => {
+    const info = Array.isArray(supportedLocales) && supportedLocales.find((l) => l.code === locale);
+    document.documentElement.lang = locale || 'en';
+    document.documentElement.dir = (info && info.dir) || 'ltr';
+  }, [locale, supportedLocales]);
+
   return (
     <LayoutProvider>
       <ThemeWrapper>
-        <Head title={usePage().props?.pageTitle ? `${usePage().props.pageTitle} - ERP System` : 'ERP System'} />
+        <AppHead />
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <Header />
           <div className="flex">

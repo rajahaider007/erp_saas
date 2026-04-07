@@ -9,8 +9,6 @@ import {
   Bell,
   Settings,
   User,
-  Moon,
-  Sun,
   ChevronDown,
   Home,
   BarChart3,
@@ -19,7 +17,6 @@ import {
   ShoppingCart,
   FileText,
   X,
-  Monitor,
   Globe,
   Layers,
   CreditCard,
@@ -42,15 +39,12 @@ const Header = () => {
     sidebarCollapsed,
     setSidebarCollapsed,
     headerAsSidebar,
-    theme,
-    setTheme,
     openCustomizer
   } = useLayout();
 
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [profileOpen, setProfileOpen] = React.useState(false);
   const [notificationsOpen, setNotificationsOpen] = React.useState(false);
-  const [themeMenuOpen, setThemeMenuOpen] = React.useState(false);
   const [languageMenuOpen, setLanguageMenuOpen] = React.useState(false);
   const [hoveredNavItem, setHoveredNavItem] = React.useState(null);
   const [currentLanguage, setCurrentLanguage] = React.useState('default');
@@ -408,19 +402,6 @@ const Header = () => {
     }
   };
 
-  const getThemeIcon = () => {
-    switch (theme) {
-      case 'light':
-        return <Sun className="h-5 w-5" />;
-      case 'dark':
-        return <Moon className="h-5 w-5" />;
-      case 'system':
-        return <Monitor className="h-5 w-5" />;
-      default:
-        return <Sun className="h-5 w-5" />;
-    }
-  };
-
   // Render navigation item with submenu support for header
   const renderHeaderNavItem = (item) => {
     const Icon = item.icon;
@@ -660,49 +641,6 @@ const Header = () => {
               )}
             </div>
 
-            {/* Theme Toggle */}
-            <div className="relative">
-              <button
-                onClick={() => setThemeMenuOpen(!themeMenuOpen)}
-                className="inline-flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white transition-colors duration-200"
-                aria-label="Toggle theme"
-              >
-                {getThemeIcon()}
-              </button>
-
-              {/* Theme Dropdown */}
-              {themeMenuOpen && (
-                <div className="absolute right-0 mt-2 w-36 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800 z-50 notranslate">
-                  <div className="py-1">
-                    <button
-                      onClick={() => { setTheme('light'); setThemeMenuOpen(false); }}
-                      className={`w-full flex items-center px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 notranslate ${theme === 'light' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
-                        }`}
-                    >
-                      <Sun className="h-4 w-4 mr-2" />
-                      <span className="notranslate">Light</span>
-                    </button>
-                    <button
-                      onClick={() => { setTheme('dark'); setThemeMenuOpen(false); }}
-                      className={`w-full flex items-center px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 notranslate ${theme === 'dark' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
-                        }`}
-                    >
-                      <Moon className="h-4 w-4 mr-2" />
-                      <span className="notranslate">Dark</span>
-                    </button>
-                    <button
-                      onClick={() => { setTheme('system'); setThemeMenuOpen(false); }}
-                      className={`w-full flex items-center px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 notranslate ${theme === 'system' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
-                        }`}
-                    >
-                      <Monitor className="h-4 w-4 mr-2" />
-                      <span className="notranslate">System</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
             {/* Notifications */}
             <div className="relative">
               <button
@@ -797,13 +735,12 @@ const Header = () => {
 
 
       {/* Click outside handlers */}
-      {(profileOpen || notificationsOpen || themeMenuOpen || languageMenuOpen || hoveredNavItem) && (
+      {(profileOpen || notificationsOpen || languageMenuOpen || hoveredNavItem) && (
         <div
           className="fixed inset-0 z-30"
           onClick={() => {
             setProfileOpen(false);
             setNotificationsOpen(false);
-            setThemeMenuOpen(false);
             setLanguageMenuOpen(false);
             setHoveredNavItem(null);
           }}

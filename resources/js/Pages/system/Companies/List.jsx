@@ -13,7 +13,9 @@ const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, conf
 }};
 
 const List = () => {
-const { t } = useTranslations();
+  const { t } = useTranslations();
+  const tl = (key, rep) => (rep ? t(`system.companies.list.${key}`, rep) : t(`system.companies.list.${key}`));
+  const td = (key, rep) => (rep ? t(`common.data_table.${key}`, rep) : t(`common.data_table.${key}`));
   const { companies: paginated, flash, filters } = usePage().props;
   const [search, setSearch] = useState(filters?.search || '');
   const [statusFilter, setStatusFilter] = useState(filters?.status || '');
@@ -32,16 +34,60 @@ const { t } = useTranslations();
   }, [applyFilters]);
 
   useEffect(() => {
-    if (flash?.success) CustomAlert.fire({ title: 'Success!', text: flash.success, icon: 'success' }); 
-    else if (flash?.error) CustomAlert.fire({ title:'Error!', text: flash.error, icon: 'error' }); 
-  }, [flash]);
+    if (flash?.success) CustomAlert.fire({ title: t('common.flash.success_title'), text: flash.success, icon: 'success' });
+    else if (flash?.error) CustomAlert.fire({ title: t('common.flash.error_title'), text: flash.error, icon: 'error' });
+  }, [flash, t]);
 
-  const handleDelete = (company) => { CustomAlert.fire({ title:'Are you sure?', text:`You are about to delete "${company.company_name}". This action cannot be undone!`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete it!', cancelButtonText:'Cancel', onConfirm:()=> router.delete(`/system/companies/${company.id}`) }); };
+  const handleDelete = (company) => {
+    CustomAlert.fire({
+      title: td('confirm_delete_title'),
+      text: td('confirm_delete_text', { name: company.company_name }),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: td('confirm_delete_ok'),
+      cancelButtonText: t('common.actions.cancel'),
+      onConfirm: () => router.delete(`/system/companies/${company.id}`),
+    });
+  };
 
   const handleSelectAll = (checked) => { if (checked) setSelected(paginated.data.map(c=>c.id)); else setSelected([]); };
   const handleSelectRow = (id, checked) => { if (checked) setSelected(prev=>[...prev, id]); else setSelected(prev=>prev.filter(x=>x!==id)); };
-  const handleBulkDelete = () => { if (!selected.length) return; CustomAlert.fire({ title:'Delete Selected Companies?', text:`You are about to delete ${selected.length} company(ies).`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete!', onConfirm:()=> router.post('/system/companies/bulk-destroy', { ids:selected }, { onSuccess:()=>setSelected([]) }) }); };
-  const handleBulkStatusChange = (status) => { if (!selected.length) return; const action = status?'activate':'deactivate'; CustomAlert.fire({ title:`${action.charAt(0).toUpperCase()+action.slice(1)} Selected Companies?`, text:`You are about to ${action} ${selected.length} company(ies).`, icon:'question', showCancelButton:true, confirmButtonText:`Yes, ${action}!`, onConfirm:()=> router.post('/system/companies/bulk-status', { ids:selected, status }, { onSuccess:()=>setSelected([]) }) }); };
+  const handleBulkDelete = () => {
+    if (!selected.length) return;
+    CustomAlert.fire({
+      title: td('bulk_delete_title'),
+      text: td('bulk_delete_text', { count: selected.length }),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: td('bulk_delete_ok'),
+      cancelButtonText: t('common.actions.cancel'),
+      onConfirm: () => router.post('/system/companies/bulk-destroy', { ids: selected }, { onSuccess: () => setSelected([]) }),
+    });
+  };
+  const handleBulkStatusChange = (status) => {
+    if (!selected.length) return;
+    if (status) {
+      CustomAlert.fire({
+        title: td('bulk_status_activate_title'),
+        text: td('bulk_status_activate_text', { count: selected.length }),
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: td('bulk_status_activate_ok'),
+        cancelButtonText: t('common.actions.cancel'),
+        onConfirm: () => router.post('/system/companies/bulk-status', { ids: selected, status }, { onSuccess: () => setSelected([]) }),
+      });
+    } else {
+      CustomAlert.fire({
+        title: td('bulk_status_deactivate_title'),
+        text: td('bulk_status_deactivate_text', { count: selected.length }),
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: td('bulk_status_deactivate_ok'),
+        cancelButtonText: t('common.actions.cancel'),
+        onConfirm: () => router.post('/system/companies/bulk-status', { ids: selected, status }, { onSuccess: () => setSelected([]) }),
+      });
+    }
+  };
 
   return (
     <App>
@@ -49,16 +95,16 @@ const { t } = useTranslations();
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
-              <h1 className="page-title"><Building2 className="title-icon" />{usePage().props?.pageTitle || 'Companies'}</h1>
+              <h1 className="page-title"><Building2 className="title-icon" />{usePage().props?.pageTitle || t('system.companies.create.breadcrumb_companies')}</h1>
               <div className="stats-summary">
-                <div className="stat-item"><span>{paginated?.total || 0} Total</span></div>
-                <div className="stat-item"><span>{paginated?.data?.filter(c=>c.status).length || 0} Active</span></div>
-                <div className="stat-item"><span>{paginated?.data?.filter(c=>!c.status).length || 0} Inactive</span></div>
+                <div className="stat-item"><span>{td('stat_total', { count: paginated?.total || 0 })}</span></div>
+                <div className="stat-item"><span>{td('stat_active', { count: paginated?.data?.filter(c=>c.status).length || 0 })}</span></div>
+                <div className="stat-item"><span>{td('stat_inactive', { count: paginated?.data?.filter(c=>!c.status).length || 0 })}</span></div>
               </div>
             </div>
             <div className="header-actions">
-              <button className="btn btn-icon" onClick={()=>window.location.reload()} title="Refresh"><RefreshCcw size={20} /></button>
-              <a href='/system/companies/create' className="btn btn-primary"><Plus size={20} />Add Company</a>
+              <button className="btn btn-icon" onClick={()=>window.location.reload()} title={tl('refresh')}><RefreshCcw size={20} /></button>
+              <a href='/system/companies/create' className="btn btn-primary"><Plus size={20} />{tl('add_company')}</a>
             </div>
           </div>
           {/* Modern Compact Filters */}
@@ -70,22 +116,22 @@ const { t } = useTranslations();
                   <input
                     type="text"
                     className="search-input"
-                    placeholder="Search companies..."
+                    placeholder={tl('search_companies')}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Status</label>
+                  <label className="filter-label">{tl('status')}</label>
                   <select
                     className="filter-select"
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
                   >
-                    <option value="">All Status</option>
-                    <option value="1">Active</option>
-                    <option value="0">Inactive</option>
+                    <option value="">{tl('all_status')}</option>
+                    <option value="1">{tl('active')}</option>
+                    <option value="0">{tl('inactive')}</option>
                   </select>
                 </div>
 
@@ -98,7 +144,7 @@ const { t } = useTranslations();
                     params.set('page', '1');
                     router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
                   }}
-                  title="Reset all filters"
+                  title={tl('reset_all_filters')}
                 >
                   <RefreshCcw size={16} />
                 </button>
@@ -107,7 +153,7 @@ const { t } = useTranslations();
           </div>
         </div>
 
-        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />Clear</button><div className="dropdown"><button className="btn btn-sm btn-secondary dropdown-toggle">Change Status<ChevronDown size={12} /></button><div className="dropdown-menu"><button onClick={()=>handleBulkStatusChange(true)}>Set Active</button><button onClick={()=>handleBulkStatusChange(false)}>Set Inactive</button></div></div><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />Delete</button></div></div>)}
+        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{td('selected_count', { count: selected.length })}</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />{tl('clear')}</button><div className="dropdown"><button className="btn btn-sm btn-secondary dropdown-toggle">{tl('change_status')}<ChevronDown size={12} /></button><div className="dropdown-menu"><button onClick={()=>handleBulkStatusChange(true)}>{td('set_active')}</button><button onClick={()=>handleBulkStatusChange(false)}>{td('set_inactive')}</button></div></div><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />{tl('delete')}</button></div></div>)}
 
         <div className="data-table-container">
           <div className="table-wrapper">
@@ -115,13 +161,13 @@ const { t } = useTranslations();
               <thead>
                 <tr>
                   <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===paginated.data.length && paginated.data.length>0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">ID<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Company<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Contact<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Location<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Status<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Updated<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="actions-header">Actions</th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{tl('id')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{tl('company')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{tl('contact')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{tl('location')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{tl('status')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{tl('updated')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="actions-header">{tl('actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -142,20 +188,20 @@ const { t } = useTranslations();
                         <span className="text-gray-500">{company.country}</span>
                       </div>
                     </td>
-                    <td><span className={`status-badge status-${company.status ? 'active' : 'inactive'}`}>{company.status ? 'Active' : 'Inactive'}</span></td>
+                    <td><span className={`status-badge status-${company.status ? 'active' : 'inactive'}`}>{company.status ? tl('active') : tl('inactive')}</span></td>
                     <td><div className="date-cell"><Clock size={14} /><span>{new Date(company.updated_at).toLocaleString()}</span></div></td>
                     <td>
                       <div className="actions-cell">
-                        <button className="action-btn view" title="View Details" onClick={()=>router.get(`/system/companies/${company.id}`)}>
+                        <button className="action-btn view" title={tl('view_details')} onClick={()=>router.get(`/system/companies/${company.id}`)}>
                           <Eye size={16} />
                         </button>
-                        <button className="action-btn edit" title="Edit Company" onClick={()=>router.get(`/system/companies/${company.id}/edit`)}>
+                        <button className="action-btn edit" title={tl('edit_company')} onClick={()=>router.get(`/system/companies/${company.id}/edit`)}>
                           <Edit3 size={16} />
                         </button>
-                        <button className="action-btn copy" title="Duplicate" onClick={()=>router.get('/system/companies/create', { duplicate: company.id })}>
+                        <button className="action-btn copy" title={tl('duplicate')} onClick={()=>router.get('/system/companies/create', { duplicate: company.id })}>
                           <Copy size={16} />
                         </button>
-                        <button className="action-btn delete" title="Delete Company" onClick={()=>handleDelete(company)}>
+                        <button className="action-btn delete" title={tl('delete_company')} onClick={()=>handleDelete(company)}>
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -168,19 +214,19 @@ const { t } = useTranslations();
 
           <div className="pagination-container">
             <div className="pagination-info">
-              <div className="results-info">Showing {paginated.from || 0} to {paginated.to || 0} of {paginated.total || 0} entries</div>
+              <div className="results-info">{td('showing_entries', { from: paginated.from || 0, to: paginated.to || 0, total: paginated.total || 0 })}</div>
               <div className="page-size-selector">
-                <span>Show:</span>
+                <span>{tl('show')}</span>
                 <select value={pageSize} onChange={(e)=>{const v=Number(e.target.value); setPageSize(v); pushQuery({ per_page:v.toString() });}} className="page-size-select">{[10,25,50,100].map(s => (<option key={s} value={s}>{s}</option>))}</select>
-                <span>per page</span>
+                <span>{tl('per_page')}</span>
               </div>
             </div>
             <div className="pagination-controls">
-              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{setCurrentPage(1); pushQuery({ page:'1' });}} title="First">
+              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{setCurrentPage(1); pushQuery({ page:'1' });}} title={tl('first')}>
                 <ChevronLeft size={14} />
                 <ChevronLeft size={14} />
               </button>
-              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{const p=currentPage-1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title="Prev">
+              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{const p=currentPage-1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title={tl('prev')}>
                 <ChevronLeft size={14} />
               </button>
               <div className="page-numbers">
@@ -190,16 +236,16 @@ const { t } = useTranslations();
                   return (<button key={pageNumber} className={`pagination-btn ${currentPage===pageNumber?'active':''}`} onClick={()=>{setCurrentPage(pageNumber); pushQuery({ page:pageNumber.toString() });}}>{pageNumber}</button>);
                 })}
               </div>
-              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=currentPage+1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title="Next">
+              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=currentPage+1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title={tl('next')}>
                 <ChevronRight size={14} />
               </button>
-              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=paginated.last_page||1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title="Last">
+              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=paginated.last_page||1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title={tl('last')}>
                 <ChevronRight size={14} />
                 <ChevronRight size={14} />
               </button>
             </div>
             <div className="quick-jump">
-              <span>Go to:</span>
+              <span>{tl('go_to')}</span>
               <input
                 type="number"
                 min="1"
@@ -208,7 +254,7 @@ const { t } = useTranslations();
                 onChange={(e)=>{ const p = Math.max(1, Math.min(paginated.last_page || 1, Number(e.target.value))); setCurrentPage(p); pushQuery({ page:p.toString() }); }}
                 className="jump-input"
               />
-              <span>of {paginated.last_page || 1}</span>
+              <span>{td('pagination_of', { total: paginated.last_page || 1 })}</span>
             </div>
           </div>
         </div>

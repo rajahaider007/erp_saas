@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
-import { Search, Plus, Edit3, Trash2, Download, ChevronDown, ArrowUpDown, Columns, Clock, MoreHorizontal, RefreshCcw, FileText, CheckCircle2, X, Database, Eye, Copy, ChevronLeft, ChevronRight, Package } from 'lucide-react';
+import { Search, Plus, Edit3, Trash2, ChevronDown, ArrowUpDown, Clock, RefreshCcw, CheckCircle2, X, ChevronLeft, ChevronRight, Package } from 'lucide-react';
 
 // SweetAlert-like alert
 const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, confirmButtonText = 'OK', cancelButtonText = 'Cancel', onConfirm, onCancel }) => {
@@ -13,7 +13,9 @@ const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, conf
 }};
 
 const List = () => {
-const { t } = useTranslations();
+  const { t } = useTranslations();
+  const tl = (key, rep) => (rep ? t(`system.package_features.list.${key}`, rep) : t(`system.package_features.list.${key}`));
+  const td = (key, rep) => (rep ? t(`common.data_table.${key}`, rep) : t(`common.data_table.${key}`));
   const { packageFeatures: paginated, packages, flash, filters } = usePage().props;
   const [search, setSearch] = useState(filters?.search || '');
   const [packageId, setPackageId] = useState(filters?.package_id || '');
@@ -27,11 +29,11 @@ const { t } = useTranslations();
   const [selected, setSelected] = useState([]);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
 
-  // Group package features by package
   const groupedFeatures = useMemo(() => {
+    const unknown = t('system.package_features.list.unknown_package');
     const groups = {};
     paginated.data.forEach(pf => {
-      const packageName = pf.package?.package_name || 'Unknown Package';
+      const packageName = pf.package?.package_name || unknown;
       if (!groups[packageName]) {
         groups[packageName] = {
           package: pf.package,
@@ -46,22 +48,46 @@ const { t } = useTranslations();
       if (pf.is_enabled) groups[packageName].enabledFeatures++;
     });
     return Object.values(groups);
-  }, [paginated.data]);
+  }, [paginated.data, t]);
 
   useEffect(() => {
     applyFilters();
   }, [applyFilters]);
 
   useEffect(() => {
-    if (flash?.success) CustomAlert.fire({ title: 'Success!', text: flash.success, icon: 'success' }); 
-    else if (flash?.error) CustomAlert.fire({ title:'Error!', text: flash.error, icon: 'error' }); 
-  }, [flash]);
+    if (flash?.success) CustomAlert.fire({ title: t('common.flash.success_title'), text: flash.success, icon: 'success' });
+    else if (flash?.error) CustomAlert.fire({ title: t('common.flash.error_title'), text: flash.error, icon: 'error' });
+  }, [flash, t]);
 
-  const handleDelete = (group) => { CustomAlert.fire({ title:'Are you sure?', text:`You are about to delete all features for package "${group.package.package_name}". This action cannot be undone!`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete it!', cancelButtonText:'Cancel', onConfirm:()=> { const featureIds = group.features.map(f => f.id); router.post('/system/package-features/bulk-destroy', { ids: featureIds }); } }); };
+  const handleDelete = (group) => {
+    CustomAlert.fire({
+      title: td('confirm_delete_title'),
+      text: tl('confirm_delete_all_for_package', { name: group.package.package_name }),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: td('confirm_delete_ok'),
+      cancelButtonText: t('common.actions.cancel'),
+      onConfirm: () => {
+        const featureIds = group.features.map(f => f.id);
+        router.post('/system/package-features/bulk-destroy', { ids: featureIds });
+      },
+    });
+  };
 
   const handleSelectAll = (checked) => { if (checked) setSelected(groupedFeatures.map(g=>g.package.id)); else setSelected([]); };
   const handleSelectRow = (id, checked) => { if (checked) setSelected(prev=>[...prev, id]); else setSelected(prev=>prev.filter(x=>x!==id)); };
-  const handleBulkDelete = () => { if (!selected.length) return; CustomAlert.fire({ title:'Delete Selected Package Features?', text:`You are about to delete package features for ${selected.length} package(s).`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete!', onConfirm:()=> router.post('/system/package-features/bulk-destroy', { ids:selected }, { onSuccess:()=>setSelected([]) }) }); };
+  const handleBulkDelete = () => {
+    if (!selected.length) return;
+    CustomAlert.fire({
+      title: td('bulk_delete_title'),
+      text: td('bulk_delete_text', { count: selected.length }),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: td('bulk_delete_ok'),
+      cancelButtonText: t('common.actions.cancel'),
+      onConfirm: () => router.post('/system/package-features/bulk-destroy', { ids: selected }, { onSuccess: () => setSelected([]) }),
+    });
+  };
 
   return (
     <App>
@@ -69,18 +95,17 @@ const { t } = useTranslations();
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
-              <h1 className="page-title"><Package className="title-icon" />{usePage().props?.pageTitle || 'Package Features'}</h1>
+              <h1 className="page-title"><Package className="title-icon" />{usePage().props?.pageTitle || t('system.package_features.add.package_features')}</h1>
               <div className="stats-summary">
-                <div className="stat-item"><span>{groupedFeatures.length} Packages</span></div>
-                <div className="stat-item"><span>{paginated?.total || 0} Total Features</span></div>
+                <div className="stat-item"><span>{tl('stat_packages', { count: groupedFeatures.length })}</span></div>
+                <div className="stat-item"><span>{tl('stat_total_features', { count: paginated?.total || 0 })}</span></div>
               </div>
             </div>
             <div className="header-actions">
-              <button className="btn btn-icon" onClick={()=>window.location.reload()} title="Refresh"><RefreshCcw size={20} /></button>
-              <a href='/system/package-features/create' className="btn btn-primary"><Plus size={20} />Add Package Features</a>
+              <button className="btn btn-icon" onClick={()=>window.location.reload()} title={tl('refresh')}><RefreshCcw size={20} /></button>
+              <a href='/system/package-features/create' className="btn btn-primary"><Plus size={20} />{tl('add_package_features')}</a>
             </div>
           </div>
-          {/* Modern Compact Filters */}
           <div className="modern-filters-container">
             <div className="filters-toolbar">
               <div className="search-section">
@@ -89,20 +114,20 @@ const { t } = useTranslations();
                   <input
                     type="text"
                     className="search-input"
-                    placeholder="Search package features..."
+                    placeholder={tl('search_package_features')}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
 
                 <div className="filter-group">
-                  <label className="filter-label">Package</label>
+                  <label className="filter-label">{tl('package')}</label>
                   <select
                     className="filter-select"
                     value={packageId}
                     onChange={(e) => setPackageId(e.target.value)}
                   >
-                    <option value="">All Packages</option>
+                    <option value="">{tl('all_packages')}</option>
                     {packages.map(pkg => (
                       <option key={pkg.id} value={pkg.id}>{pkg.package_name}</option>
                     ))}
@@ -118,7 +143,7 @@ const { t } = useTranslations();
                     params.set('page', '1');
                     router.get(window.location.pathname + '?' + params.toString(), {}, { preserveState: true, preserveScroll: true });
                   }}
-                  title="Reset all filters"
+                  title={tl('reset_all_filters')}
                 >
                   <RefreshCcw size={16} />
                 </button>
@@ -127,7 +152,7 @@ const { t } = useTranslations();
           </div>
         </div>
 
-        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />Clear</button><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />Delete</button></div></div>)}
+        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{td('selected_count', { count: selected.length })}</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />{tl('clear')}</button><button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />{tl('delete')}</button></div></div>)}
 
         <div className="data-table-container">
           <div className="table-wrapper">
@@ -135,11 +160,11 @@ const { t } = useTranslations();
               <thead>
                 <tr>
                   <th className="checkbox-cell"><input type="checkbox" className="checkbox" checked={selected.length===groupedFeatures.length && groupedFeatures.length>0} onChange={(e)=>handleSelectAll(e.target.checked)} /></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Package<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Features<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Enabled<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="sortable" onClick={()=>{}}><div className="th-content">Created<ArrowUpDown size={14} className="sort-icon" /></div></th>
-                  <th className="actions-header">Actions</th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{tl('package')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{tl('features')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{tl('enabled')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="sortable" onClick={()=>{}}><div className="th-content">{tl('created')}<ArrowUpDown size={14} className="sort-icon" /></div></th>
+                  <th className="actions-header">{tl('actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -149,7 +174,7 @@ const { t } = useTranslations();
                     <td><div className="module-details"><div className="module-name">{group.package.package_name}</div></div></td>
                     <td>
                       <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-900">{group.totalFeatures} features</span>
+                        <span className="text-sm font-medium text-gray-900">{tl('features_count', { count: group.totalFeatures })}</span>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {group.features.slice(0, 3).map(feature => (
                             <span key={feature.id} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
@@ -158,7 +183,7 @@ const { t } = useTranslations();
                           ))}
                           {group.features.length > 3 && (
                             <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                              +{group.features.length - 3} more
+                              {tl('more_features', { count: group.features.length - 3 })}
                             </span>
                           )}
                         </div>
@@ -169,16 +194,16 @@ const { t } = useTranslations();
                         <span className={`status-badge status-${group.enabledFeatures > 0 ? 'active' : 'inactive'}`}>
                           {group.enabledFeatures}/{group.totalFeatures}
                         </span>
-                        <span className="text-xs text-gray-500">enabled</span>
+                        <span className="text-xs text-gray-500">{tl('enabled_lowercase')}</span>
                       </div>
                     </td>
                     <td><div className="date-cell"><Clock size={14} /><span>{new Date(group.created_at).toLocaleString()}</span></div></td>
                     <td>
                       <div className="actions-cell">
-                        <button className="action-btn edit" title="Edit Package Features" onClick={()=>router.get(`/system/package-features/${group.package.id}/edit`)}>
+                        <button className="action-btn edit" title={tl('edit_package_features')} onClick={()=>router.get(`/system/package-features/${group.package.id}/edit`)}>
                           <Edit3 size={16} />
                         </button>
-                        <button className="action-btn delete" title="Delete All Package Features" onClick={()=>handleDelete(group)}>
+                        <button className="action-btn delete" title={tl('delete_all_package_features')} onClick={()=>handleDelete(group)}>
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -191,19 +216,19 @@ const { t } = useTranslations();
 
           <div className="pagination-container">
             <div className="pagination-info">
-              <div className="results-info">Showing {paginated.from || 0} to {paginated.to || 0} of {paginated.total || 0} entries</div>
+              <div className="results-info">{td('showing_entries', { from: paginated.from || 0, to: paginated.to || 0, total: paginated.total || 0 })}</div>
               <div className="page-size-selector">
-                <span>Show:</span>
+                <span>{tl('show')}</span>
                 <select value={pageSize} onChange={(e)=>{const v=Number(e.target.value); setPageSize(v); pushQuery({ per_page:v.toString() });}} className="page-size-select">{[10,25,50,100].map(s => (<option key={s} value={s}>{s}</option>))}</select>
-                <span>per page</span>
+                <span>{tl('per_page')}</span>
               </div>
             </div>
             <div className="pagination-controls">
-              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{setCurrentPage(1); pushQuery({ page:'1' });}} title="First">
+              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{setCurrentPage(1); pushQuery({ page:'1' });}} title={tl('first')}>
                 <ChevronLeft size={14} />
                 <ChevronLeft size={14} />
               </button>
-              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{const p=currentPage-1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title="Prev">
+              <button className="pagination-btn" disabled={currentPage===1} onClick={()=>{const p=currentPage-1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title={tl('prev')}>
                 <ChevronLeft size={14} />
               </button>
               <div className="page-numbers">
@@ -213,16 +238,16 @@ const { t } = useTranslations();
                   return (<button key={pageNumber} className={`pagination-btn ${currentPage===pageNumber?'active':''}`} onClick={()=>{setCurrentPage(pageNumber); pushQuery({ page:pageNumber.toString() });}}>{pageNumber}</button>);
                 })}
               </div>
-              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=currentPage+1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title="Next">
+              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=currentPage+1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title={tl('next')}>
                 <ChevronRight size={14} />
               </button>
-              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=paginated.last_page||1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title="Last">
+              <button className="pagination-btn" disabled={currentPage===(paginated.last_page||1)} onClick={()=>{const p=paginated.last_page||1; setCurrentPage(p); pushQuery({ page:p.toString() });}} title={tl('last')}>
                 <ChevronRight size={14} />
                 <ChevronRight size={14} />
               </button>
             </div>
             <div className="quick-jump">
-              <span>Go to:</span>
+              <span>{tl('go_to')}</span>
               <input
                 type="number"
                 min="1"
@@ -231,7 +256,7 @@ const { t } = useTranslations();
                 onChange={(e)=>{ const p = Math.max(1, Math.min(paginated.last_page || 1, Number(e.target.value))); setCurrentPage(p); pushQuery({ page:p.toString() }); }}
                 className="jump-input"
               />
-              <span>of {paginated.last_page || 1}</span>
+              <span>{td('pagination_of', { total: paginated.last_page || 1 })}</span>
             </div>
           </div>
         </div>

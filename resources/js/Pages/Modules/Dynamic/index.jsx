@@ -106,12 +106,12 @@ const DynamicModuleDashboard = () => {
                 href="/erp-modules"
                 className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors duration-200"
               >
-                <ArrowLeft className="h-5 w-5" />
+                <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
               </Link>
               <div>
                 <h1 className="text-4xl font-bold mb-2">{module.module_name}</h1>
                 <p className="text-xl text-blue-100">
-                  Access {module.module_name} features and manage your business operations
+                  {t('modules.dynamic.index.header_subtitle', { name: module.module_name })}
                 </p>
               </div>
             </div>
@@ -127,10 +127,10 @@ const DynamicModuleDashboard = () => {
         <div className="space-y-8">
           <div className="text-center py-8">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              {module.module_name} Features
+              {t('modules.dynamic.index.features_heading', { name: module.module_name })}
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Access all available features and manage your {module.module_name.toLowerCase()} operations
+              {t('modules.dynamic.index.features_subtitle', { name: module.module_name })}
             </p>
           </div>
 
@@ -152,13 +152,13 @@ const DynamicModuleDashboard = () => {
                         {menu.menu_name}
                       </h3>
                       <p className="text-gray-600 dark:text-gray-300 text-sm">
-                        Access {menu.menu_name.toLowerCase()} features
+                        {t('modules.dynamic.index.menu_description', { name: menu.menu_name })}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-blue-600 dark:text-blue-400 text-sm font-medium group-hover:text-blue-700">
-                      Open Feature
+                      {t('modules.dynamic.index.open_feature')}
                     </span>
                     <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all duration-300" />
                   </div>
@@ -171,10 +171,10 @@ const DynamicModuleDashboard = () => {
                 <Grid3X3 className="h-20 w-20 text-blue-600 dark:text-blue-400" />
               </div>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                No Features Available
+                {t('modules.dynamic.index.no_features_title')}
               </h2>
               <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
-                This module is currently under development. We're working hard to bring you the best experience.
+                {t('modules.dynamic.index.no_features_body')}
               </p>
               <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
                 <div className="flex items-center space-x-2">
@@ -196,8 +196,8 @@ const DynamicModuleDashboard = () => {
             href="/erp-modules"
             className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Back to Modules
+            <ArrowLeft className="h-5 w-5 me-2 rtl:rotate-180" />
+            {t('modules.dynamic.index.back_to_modules')}
           </Link>
         </div>
       </div>
