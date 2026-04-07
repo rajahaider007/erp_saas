@@ -1,8 +1,17 @@
 {
   "title": "Welcome back",
-  "subtitle": "Sign in with your email and password.",
+  "subtitle": "Sign in with the credentials issued to your organization.",
   "brand": "ERP Financial Suite",
-  "tagline": "International standard financial management. One place for accounts, inventory, and reporting.",
+  "tagline": "International-standard financial control—from general ledger to inventory—with reporting stakeholders can trust.",
+  "features_heading": "What this suite covers",
+  "features": [
+    "Multi-level chart of accounts, fiscal periods, and journal vouchers",
+    "Bank, cash, and tax configuration aligned with operational finance",
+    "Inventory, units of measure, and stock visibility alongside books",
+    "Dashboards and financial reports for management and compliance",
+    "Role-based access, user rights, activity and security audit trails",
+    "English / Urdu interface and multi-currency–ready operations"
+  ],
   "footer_secure": "Secure sign-in · Your data stays in your control",
   "sign_in_continue": "Sign in to continue",
   "email_label": "Email or login ID",

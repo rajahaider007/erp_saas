@@ -10,7 +10,7 @@ const LoginPage = () => {
   const { t, locale, setLocale, supportedLocales } = useTranslations();
   const { errors: pageErrors, concurrent_sessions: concurrentSessions } = usePage().props;
   const [formData, setFormData] = useState({
-    email: 'admin@erpsystem.com',
+    email: '',
     password: '',
     remember_me: false,
     terminate_other_sessions: false
@@ -114,6 +114,9 @@ const LoginPage = () => {
     }
   };
 
+  const featureItems = t('login.features');
+  const featuresList = Array.isArray(featureItems) ? featureItems : [];
+
   const AlertComponent = ({ type, message }) => {
     const isError = type === 'error';
     const Icon = isError ? AlertCircle : CheckCircle2;
@@ -145,9 +148,24 @@ const LoginPage = () => {
           <h1 className="text-4xl xl:text-5xl font-semibold tracking-tight text-white leading-tight max-w-md">
             {t('login.brand')}
           </h1>
-          <p className="mt-4 text-lg text-slate-400 max-w-sm font-sans" style={{ fontFamily: 'Figtree, sans-serif' }}>
+          <p className="mt-4 text-lg text-slate-400 max-w-md font-sans" style={{ fontFamily: 'Figtree, sans-serif' }}>
             {t('login.tagline')}
           </p>
+          {featuresList.length > 0 && (
+            <div className="mt-8 max-w-md">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-sans mb-3" style={{ fontFamily: 'Figtree, sans-serif' }}>
+                {t('login.features_heading')}
+              </p>
+              <ul className="space-y-2.5 font-sans text-sm text-slate-300" style={{ fontFamily: 'Figtree, sans-serif' }}>
+                {featuresList.map((item, i) => (
+                  <li key={i} className="flex gap-3 items-start">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400/90 flex-shrink-0 mt-0.5" aria-hidden />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
         {/* Hero animation: robot, chips, factory */}
         <div className="relative z-10 flex-1 min-h-[200px] flex items-center justify-center">
@@ -199,6 +217,16 @@ const LoginPage = () => {
             <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-slate-900 text-white text-sm font-bold mb-4">E</div>
             <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-900">{t('login.brand')}</h1>
             <p className="text-slate-500 dark:text-slate-500 text-sm mt-1">{t('login.sign_in_continue')}</p>
+            {featuresList.length > 0 && (
+              <ul className="mt-4 space-y-2 text-sm text-slate-600 border border-slate-200 rounded-xl p-4 bg-white">
+                {featuresList.map((item, i) => (
+                  <li key={i} className="flex gap-2 items-start">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" aria-hidden />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-900 mb-1">{t('login.title')}</h2>
