@@ -16,18 +16,15 @@ const AppLayout = ({ children, title }) => {
 };
 
 const AppContent = ({ children, title }) => {
-  const { IntegratedCustomizer, sidebarCollapsed } = useLayout();
+  const { IntegratedCustomizer } = useLayout();
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       <Header />
-      <div className="flex flex-1">
+      <div className="flex min-h-0 flex-1">
         <Sidebar />
         <main
-          className={`
-    flex-1  overflow-y-auto transition-all duration-300
-    ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}
-  `}
+          className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto transition-all duration-300"
         >
           <div className="container mx-auto px-4 py-6">
             {children}

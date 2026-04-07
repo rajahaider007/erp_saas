@@ -19,10 +19,13 @@ const UserShow = () => {
       suspended: 'bg-red-100 text-red-800',
       pending: 'bg-yellow-100 text-yellow-800'
     };
-    
+    const sk = status ? `common.status.${status}` : '';
+    const translated = sk ? t(sk) : '';
+    const label = translated && translated !== sk ? translated : status || '';
+
     return (
       <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusClasses[status] || 'bg-gray-100 text-gray-800'}`}>
-        {status?.charAt(0).toUpperCase() + status?.slice(1)}
+        {label}
       </span>
     );
   };
@@ -34,10 +37,13 @@ const UserShow = () => {
       manager: 'bg-indigo-100 text-indigo-800',
       user: 'bg-gray-100 text-gray-800'
     };
-    
+    const rk = role ? `system.users.show.roles.${role}` : '';
+    const translated = rk ? t(rk) : '';
+    const label = translated && translated !== rk ? translated : role?.replace(/_/g, ' ') || '';
+
     return (
       <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${roleClasses[role] || 'bg-gray-100 text-gray-800'}`}>
-        {role?.replace('_', ' ').charAt(0).toUpperCase() + role?.replace('_', ' ').slice(1)}
+        {label}
       </span>
     );
   };
@@ -71,7 +77,7 @@ const UserShow = () => {
               <div className="input-group">
                 <label className="input-label">{t('system.users.show.phone')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{user.phone || 'Not provided'}</div>
+                  <div className="form-input">{user.phone || t('common.labels.not_provided')}</div>
                 </div>
               </div>
             </div>
@@ -91,13 +97,13 @@ const UserShow = () => {
               <div className="input-group">
                 <label className="input-label">{t('system.users.show.company')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{user.company?.company_name || 'Not assigned'}</div>
+                  <div className="form-input">{user.company?.company_name || t('common.labels.not_assigned')}</div>
                 </div>
               </div>
               <div className="input-group">
                 <label className="input-label">{t('system.users.show.location')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{user.location?.location_name || 'Not assigned'}</div>
+                  <div className="form-input">{user.location?.location_name || t('common.labels.not_assigned')}</div>
                 </div>
               </div>
             </div>

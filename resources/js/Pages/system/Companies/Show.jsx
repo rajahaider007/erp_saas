@@ -49,25 +49,25 @@ const CompanyShow = () => {
               <div className="input-group">
                 <label className="input-label">{t('system.companies.show.tax_id')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{company.tax_id || 'Not provided'}</div>
+                  <div className="form-input">{company.tax_id || na()}</div>
                 </div>
               </div>
               <div className="input-group">
                 <label className="input-label">{t('system.companies.show.vat_number')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{company.vat_number || 'Not provided'}</div>
+                  <div className="form-input">{company.vat_number || na()}</div>
                 </div>
               </div>
               <div className="input-group">
                 <label className="input-label">{t('system.companies.show.incorporation_date')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{company.incorporation_date ? new Date(company.incorporation_date).toLocaleDateString() : 'Not provided'}</div>
+                  <div className="form-input">{company.incorporation_date ? new Date(company.incorporation_date).toLocaleDateString() : na()}</div>
                 </div>
               </div>
               <div className="input-group">
                 <label className="input-label">{t('system.companies.show.company_type')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{company.company_type || 'Not provided'}</div>
+                  <div className="form-input">{company.company_type || na()}</div>
                 </div>
               </div>
             </div>
@@ -81,19 +81,19 @@ const CompanyShow = () => {
               <div className="input-group">
                 <label className="input-label">{t('system.companies.show.phone')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{company.phone || 'Not provided'}</div>
+                  <div className="form-input">{company.phone || na()}</div>
                 </div>
               </div>
               <div className="input-group">
                 <label className="input-label">{t('system.companies.show.fax')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{company.fax || 'Not provided'}</div>
+                  <div className="form-input">{company.fax || na()}</div>
                 </div>
               </div>
               <div className="input-group">
                 <label className="input-label">{t('system.companies.show.website')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{company.website || 'Not provided'}</div>
+                  <div className="form-input">{company.website || na()}</div>
                 </div>
               </div>
               <div className="input-group">
@@ -105,7 +105,7 @@ const CompanyShow = () => {
               <div className="input-group">
                 <label className="input-label">{t('system.companies.show.address_line_2')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{company.address_line_2 || 'Not provided'}</div>
+                  <div className="form-input">{company.address_line_2 || na()}</div>
                 </div>
               </div>
               <div className="input-group">
@@ -117,13 +117,13 @@ const CompanyShow = () => {
               <div className="input-group">
                 <label className="input-label">{t('system.companies.show.stateprovince')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{company.state_province || 'Not provided'}</div>
+                  <div className="form-input">{company.state_province || na()}</div>
                 </div>
               </div>
               <div className="input-group">
                 <label className="input-label">{t('system.companies.show.postal_code')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{company.postal_code || 'Not provided'}</div>
+                  <div className="form-input">{company.postal_code || na()}</div>
                 </div>
               </div>
               <div className="input-group">
@@ -143,25 +143,25 @@ const CompanyShow = () => {
                 <div className="input-group">
                   <label className="input-label">{t('system.companies.show.industry')}</label>
                   <div className="input-wrapper">
-                    <div className="form-input">{company.industry || 'Not provided'}</div>
+                    <div className="form-input">{company.industry || na()}</div>
                   </div>
                 </div>
                 <div className="input-group">
                   <label className="input-label">{t('system.companies.show.employee_count')}</label>
                   <div className="input-wrapper">
-                    <div className="form-input">{company.employee_count || 'Not provided'}</div>
+                    <div className="form-input">{company.employee_count || na()}</div>
                   </div>
                 </div>
                 <div className="input-group">
                   <label className="input-label">{t('system.companies.show.annual_revenue')}</label>
                   <div className="input-wrapper">
-                    <div className="form-input">{company.annual_revenue || 'Not provided'}</div>
+                    <div className="form-input">{company.annual_revenue || na()}</div>
                   </div>
                 </div>
                 <div className="input-group">
                   <label className="input-label">{t('system.companies.show.currency')}</label>
                   <div className="input-wrapper">
-                    <div className="form-input">{company.currency || 'USD'}</div>
+                    <div className="form-input">{company.currency || t('common.labels.default_currency')}</div>
                   </div>
                 </div>
               </div>
@@ -173,7 +173,7 @@ const CompanyShow = () => {
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         company.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
-                        {company.status ? 'Active' : 'Inactive'}
+                        {statusLabel(company.status)}
                       </span>
                     </div>
                   </div>
@@ -186,7 +186,7 @@ const CompanyShow = () => {
                         company.status ? 'bg-green-100 text-green-800' :
                         'bg-yellow-100 text-yellow-800'
                       }`}>
-                        {company.status ? 'Active' : 'Inactive'}
+                        {statusLabel(company.status)}
                       </span>
                     </div>
                   </div>

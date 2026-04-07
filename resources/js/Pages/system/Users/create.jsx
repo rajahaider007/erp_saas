@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  User, Mail, Phone, MapPin, Building, Users, 
-  Home, List, Plus, Edit, Lock, Shield, Globe, 
-  Clock, DollarSign, Palette, Eye, EyeOff
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  User, Mail, Phone, MapPin, Building, Users,
+  Home, List, Plus, Edit, Lock, Shield, Globe,
+  Clock, DollarSign, Palette
 } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
-import PermissionAwareForm, { PermissionButton } from '../../../Components/PermissionAwareForm';
 import { usePermissions } from '../../../hooks/usePermissions';
 import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
-// Professional Breadcrumbs Component
-const Breadcrumbs = ({ items }) => {
+const Breadcrumbs = ({ items, description }) => {
   return (
     <div className="breadcrumbs-themed">
       <nav className="breadcrumbs">
@@ -60,245 +58,231 @@ const Breadcrumbs = ({ items }) => {
       </nav>
 
       <div className="breadcrumbs-description">
-        {usePage().props.user ? 'Update user information and settings' : 'Register a new user in the system'}
+        {description}
       </div>
     </div>
   );
 };
 
-// User Registration Form Component (Unified for Create and Edit)
 const UserRegistrationForm = () => {
-const { t } = useTranslations();
+  const { t } = useTranslations();
   const { errors: pageErrors, flash, companies, locations, departments, user, currencies } = usePage().props;
   const isEdit = !!user;
-  
-  const userFields = [
-    // Personal Information Section
-    {
-      name: 'fname',
-      label: 'First Name',
-      type: 'text',
-      placeholder: 'Enter first name',
-      icon: User,
-      required: true
-    },
-    {
-      name: 'mname',
-      label: 'Middle Name',
-      type: 'text',
-      placeholder: 'Enter middle name (optional)',
-      icon: User,
-      required: false
-    },
-    {
-      name: 'lname',
-      label: 'Last Name',
-      type: 'text',
-      placeholder: 'Enter last name',
-      icon: User,
-      required: true
-    },
-    {
-      name: 'email',
-      label: 'Email Address',
-      type: 'email',
-      placeholder: 'Enter email address',
-      icon: Mail,
-      required: true
-    },
-    {
-      name: 'phone',
-      label: 'Phone Number',
-      type: 'tel',
-      placeholder: 'Enter phone number',
-      icon: Phone,
-      required: false
-    },
-    {
-      name: 'loginid',
-      label: 'Login ID',
-      type: 'text',
-      placeholder: 'Enter unique login ID',
-      icon: User,
-      required: true
-    },
-    {
-      name: 'pincode',
-      label: 'Pin Code',
-      type: 'text',
-      placeholder: 'Enter pin code',
-      icon: MapPin,
-      required: false
-    },
-    
-    // Organization Information Section
-    {
-      name: 'comp_id',
-      label: 'Company',
-      type: 'select',
-      placeholder: 'Select company',
-      icon: Building,
-      required: false,
-      options: companies?.map(company => ({
-        value: company.id,
-        label: company.company_name
-      })) || []
-    },
-    {
-      name: 'location_id',
-      label: 'Location',
-      type: 'select',
-      placeholder: 'Select location',
-      icon: MapPin,
-      required: false,
-      options: locations?.map(location => ({
-        value: location.id,
-        label: location.location_name
-      })) || []
-    },
-    {
-      name: 'dept_id',
-      label: 'Department',
-      type: 'select',
-      placeholder: 'Select department',
-      icon: Users,
-      required: false,
-      options: departments?.map(department => ({
-        value: department.id,
-        label: department.department_name
-      })) || []
-    },
-    
-    // Security Section
-    {
-      name: 'password',
-      label: 'Password',
-      type: 'password',
-      placeholder: isEdit ? 'Enter new password (leave blank to keep current)' : 'Enter password',
-      icon: Lock,
-      required: !isEdit
-    },
-    {
-      name: 'password_confirmation',
-      label: 'Confirm Password',
-      type: 'password',
-      placeholder: isEdit ? 'Confirm new password' : 'Confirm password',
-      icon: Lock,
-      required: !isEdit
-    },
-    
-    // Role and Status Section
-    {
-      name: 'role',
-      label: 'Role',
-      type: 'select',
-      placeholder: 'Select user role',
-      icon: Shield,
-      required: true,
-      options: [
-        { value: 'user', label: 'User' },
-        { value: 'manager', label: 'Manager' },
-        { value: 'admin', label: 'Admin' },
-        { value: 'super_admin', label: 'Super Admin' }
-      ]
-    },
-    {
-      name: 'status',
-      label: 'Status',
-      type: 'select',
-      placeholder: 'Select user status',
-      icon: Shield,
-      required: true,
-      options: [
-        { value: 'active', label: 'Active' },
-        { value: 'inactive', label: 'Inactive' },
-        { value: 'suspended', label: 'Suspended' },
-        { value: 'pending', label: 'Pending' }
-      ]
-    },
-    
-    // Preferences Section
-    {
-      name: 'timezone',
-      label: 'Timezone',
-      type: 'select',
-      placeholder: 'Select timezone',
-      icon: Clock,
-      required: false,
-      options: [
-        { value: 'UTC', label: 'UTC' },
-        { value: 'America/New_York', label: 'Eastern Time (ET)' },
-        { value: 'America/Chicago', label: 'Central Time (CT)' },
-        { value: 'America/Denver', label: 'Mountain Time (MT)' },
-        { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
-        { value: 'Europe/London', label: 'London (GMT)' },
-        { value: 'Europe/Paris', label: 'Paris (CET)' },
-        { value: 'Asia/Tokyo', label: 'Tokyo (JST)' },
-        { value: 'Asia/Shanghai', label: 'Shanghai (CST)' },
-        { value: 'Asia/Kolkata', label: 'Mumbai (IST)' }
-      ]
-    },
-    {
-      name: 'language',
-      label: 'Language',
-      type: 'select',
-      placeholder: 'Select language',
-      icon: Globe,
-      required: false,
-      options: [
-        { value: 'en', label: 'English' },
-        { value: 'es', label: 'Spanish' },
-        { value: 'fr', label: 'French' },
-        { value: 'de', label: 'German' },
-        { value: 'it', label: 'Italian' },
-        { value: 'pt', label: 'Portuguese' },
-        { value: 'ru', label: 'Russian' },
-        { value: 'ja', label: 'Japanese' },
-        { value: 'ko', label: 'Korean' },
-        { value: 'zh', label: 'Chinese' }
-      ]
-    },
-    {
-      name: 'currency',
-      label: 'Currency',
-      type: 'select',
-      placeholder: 'Select currency',
-      icon: DollarSign,
-      required: false,
-      options: currencies || []
-    },
-    {
-      name: 'theme',
-      label: 'Theme',
-      type: 'select',
-      placeholder: 'Select theme',
-      icon: Palette,
-      required: false,
-      options: [
-        { value: 'light', label: 'Light' },
-        { value: 'dark', label: 'Dark' },
-        { value: 'system', label: 'System Default' }
-      ]
-    }
-  ];
 
-  // State for debugging and tracking
-  const [errors, setErrors] = useState({});
+  const userFields = useMemo(() => {
+    const tu = (k) => t(`system.users.create.${k}`);
+    const roleValues = ['user', 'manager', 'admin', 'super_admin'];
+    const statusValues = ['active', 'inactive', 'suspended', 'pending'];
+
+    return [
+      {
+        name: 'fname',
+        label: tu('lbl_first_name'),
+        type: 'text',
+        placeholder: tu('ph_first_name'),
+        icon: User,
+        required: true
+      },
+      {
+        name: 'mname',
+        label: tu('lbl_middle_name'),
+        type: 'text',
+        placeholder: tu('ph_middle_name'),
+        icon: User,
+        required: false
+      },
+      {
+        name: 'lname',
+        label: tu('lbl_last_name'),
+        type: 'text',
+        placeholder: tu('ph_last_name'),
+        icon: User,
+        required: true
+      },
+      {
+        name: 'email',
+        label: tu('lbl_email'),
+        type: 'email',
+        placeholder: tu('ph_email'),
+        icon: Mail,
+        required: true
+      },
+      {
+        name: 'phone',
+        label: tu('lbl_phone'),
+        type: 'tel',
+        placeholder: tu('ph_phone'),
+        icon: Phone,
+        required: false
+      },
+      {
+        name: 'loginid',
+        label: tu('lbl_login_id'),
+        type: 'text',
+        placeholder: tu('ph_login_id'),
+        icon: User,
+        required: true
+      },
+      {
+        name: 'pincode',
+        label: tu('lbl_pin_code'),
+        type: 'text',
+        placeholder: tu('ph_pin_code'),
+        icon: MapPin,
+        required: false
+      },
+      {
+        name: 'comp_id',
+        label: tu('lbl_company'),
+        type: 'select',
+        placeholder: tu('ph_company'),
+        icon: Building,
+        required: false,
+        options: companies?.map(company => ({
+          value: company.id,
+          label: company.company_name
+        })) || []
+      },
+      {
+        name: 'location_id',
+        label: tu('lbl_location'),
+        type: 'select',
+        placeholder: tu('ph_location'),
+        icon: MapPin,
+        required: false,
+        options: locations?.map(location => ({
+          value: location.id,
+          label: location.location_name
+        })) || []
+      },
+      {
+        name: 'dept_id',
+        label: tu('lbl_department'),
+        type: 'select',
+        placeholder: tu('ph_department'),
+        icon: Users,
+        required: false,
+        options: departments?.map(department => ({
+          value: department.id,
+          label: department.department_name
+        })) || []
+      },
+      {
+        name: 'password',
+        label: tu('lbl_password'),
+        type: 'password',
+        placeholder: isEdit ? tu('ph_password_edit') : tu('ph_password_create'),
+        icon: Lock,
+        required: !isEdit
+      },
+      {
+        name: 'password_confirmation',
+        label: tu('lbl_password_confirmation'),
+        type: 'password',
+        placeholder: isEdit ? tu('ph_password_confirmation_edit') : tu('ph_password_confirmation_create'),
+        icon: Lock,
+        required: !isEdit
+      },
+      {
+        name: 'role',
+        label: tu('lbl_role'),
+        type: 'select',
+        placeholder: tu('ph_role'),
+        icon: Shield,
+        required: true,
+        options: roleValues.map((value) => ({
+          value,
+          label: t(`system.users.show.roles.${value}`),
+        }))
+      },
+      {
+        name: 'status',
+        label: tu('lbl_status'),
+        type: 'select',
+        placeholder: tu('ph_status'),
+        icon: Shield,
+        required: true,
+        options: statusValues.map((value) => ({
+          value,
+          label: t(`common.status.${value}`),
+        }))
+      },
+      {
+        name: 'timezone',
+        label: tu('lbl_timezone'),
+        type: 'select',
+        placeholder: tu('ph_timezone'),
+        icon: Clock,
+        required: false,
+        options: [
+          { value: 'UTC', label: tu('tz_utc') },
+          { value: 'America/New_York', label: tu('tz_america_new_york') },
+          { value: 'America/Chicago', label: tu('tz_america_chicago') },
+          { value: 'America/Denver', label: tu('tz_america_denver') },
+          { value: 'America/Los_Angeles', label: tu('tz_america_los_angeles') },
+          { value: 'Europe/London', label: tu('tz_europe_london') },
+          { value: 'Europe/Paris', label: tu('tz_europe_paris') },
+          { value: 'Asia/Tokyo', label: tu('tz_asia_tokyo') },
+          { value: 'Asia/Shanghai', label: tu('tz_asia_shanghai') },
+          { value: 'Asia/Kolkata', label: tu('tz_asia_kolkata') }
+        ]
+      },
+      {
+        name: 'language',
+        label: tu('lbl_language'),
+        type: 'select',
+        placeholder: tu('ph_language'),
+        icon: Globe,
+        required: false,
+        options: [
+          { value: 'en', label: tu('lang_en') },
+          { value: 'es', label: tu('lang_es') },
+          { value: 'fr', label: tu('lang_fr') },
+          { value: 'de', label: tu('lang_de') },
+          { value: 'it', label: tu('lang_it') },
+          { value: 'pt', label: tu('lang_pt') },
+          { value: 'ru', label: tu('lang_ru') },
+          { value: 'ja', label: tu('lang_ja') },
+          { value: 'ko', label: tu('lang_ko') },
+          { value: 'zh', label: tu('lang_zh') }
+        ]
+      },
+      {
+        name: 'currency',
+        label: tu('lbl_currency'),
+        type: 'select',
+        placeholder: tu('ph_currency'),
+        icon: DollarSign,
+        required: false,
+        options: currencies || []
+      },
+      {
+        name: 'theme',
+        label: tu('lbl_theme'),
+        type: 'select',
+        placeholder: tu('ph_theme'),
+        icon: Palette,
+        required: false,
+        options: [
+          { value: 'light', label: tu('theme_light') },
+          { value: 'dark', label: tu('theme_dark') },
+          { value: 'system', label: tu('theme_system') }
+        ]
+      }
+    ];
+  }, [t, isEdit, companies, locations, departments, currencies]);
+
   const [alert, setAlert] = useState(null);
-  const [requestStatus, setRequestStatus] = useState('');
 
-  // Handle page errors from Laravel
   useEffect(() => {
     if (pageErrors && Object.keys(pageErrors).length > 0) {
-      setErrors(pageErrors);
       setAlert({
         type: 'error',
         message: t('system.users.create.msg_please_correct_the_errors_below_and_try_')
       });
     }
-  }, [pageErrors]);
+  }, [pageErrors, t]);
 
-  // Handle flash messages
   useEffect(() => {
     if (flash?.success) {
       setAlert({
@@ -314,16 +298,13 @@ const { t } = useTranslations();
   }, [flash]);
 
   const handleUserSubmit = async (submittedFormData) => {
-    setRequestStatus('processing');
     setAlert(null);
 
     try {
       const formData = new FormData();
-      
-      // Add all form fields to FormData
+
       Object.keys(submittedFormData).forEach(key => {
         if (submittedFormData[key] !== null && submittedFormData[key] !== undefined) {
-          // Skip empty passwords in edit mode
           if (isEdit && (key === 'password' || key === 'password_confirmation') && !submittedFormData[key]) {
             return;
           }
@@ -331,7 +312,6 @@ const { t } = useTranslations();
         }
       });
 
-      // Add _method for edit operations
       if (isEdit) {
         formData.append('_method', 'put');
       }
@@ -340,16 +320,13 @@ const { t } = useTranslations();
 
       router.post(url, formData, {
         forceFormData: true,
-        onSuccess: (page) => {
-          setRequestStatus('success');
+        onSuccess: () => {
           setAlert({
             type: 'success',
-            message: isEdit ? 'User updated successfully!' : 'User registered successfully!'
+            message: isEdit ? t('system.users.create.success_updated') : t('system.users.create.success_created')
           });
         },
-        onError: (errors) => {
-          setRequestStatus('error');
-          setErrors(errors);
+        onError: (_errs) => {
           setAlert({
             type: 'error',
             message: t('system.users.create.msg_please_correct_the_errors_below_and_try_')
@@ -357,7 +334,6 @@ const { t } = useTranslations();
         }
       });
     } catch (error) {
-      setRequestStatus('error');
       setAlert({
         type: 'error',
         message: t('system.users.create.msg_an_unexpected_error_occurred_please_try_')
@@ -365,42 +341,28 @@ const { t } = useTranslations();
     }
   };
 
-  const handleReset = () => {
-    setErrors({});
-    setAlert(null);
-    setRequestStatus('');
-  };
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
+      { label: t('common.breadcrumbs.system'), icon: List, href: '#' },
+      { label: t('system.users.create.breadcrumb_users'), icon: Users, href: '/system/users' },
+      {
+        label: isEdit ? t('system.users.create.breadcrumb_edit') : t('system.users.create.breadcrumb_register'),
+        icon: isEdit ? Edit : Plus,
+        href: null
+      }
+    ],
+    [t, isEdit]
+  );
 
-  // Breadcrumb items configuration
-  const breadcrumbItems = [
-    {
-      label: 'Dashboard',
-      icon: Home,
-      href: '/dashboard'
-    },
-    {
-      label: 'System',
-      icon: List,
-      href: '#'
-    },
-    {
-      label: 'Users',
-      icon: Users,
-      href: '/system/users'
-    },
-    {
-      label: isEdit ? 'Edit User' : 'Register User',
-      icon: isEdit ? Edit : Plus,
-      href: null
-    }
-  ];
+  const breadcrumbDescription = isEdit
+    ? t('system.users.create.breadcrumb_desc_edit')
+    : t('system.users.create.breadcrumb_desc_create');
 
   return (
     <div>
-      {/* Professional Breadcrumbs */}
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs items={breadcrumbItems} description={breadcrumbDescription} />
 
-      {/* Alert Messages */}
       {alert && (
         <div className={`mb-4 p-4 rounded-lg animate-slideIn ${alert.type === 'success'
             ? 'bg-green-50 border border-green-200 text-green-800'
@@ -425,15 +387,14 @@ const { t } = useTranslations();
         </div>
       )}
 
-      {/* User Form */}
       <GeneralizedForm
-        title={isEdit ? "Edit User" : "Register New User"}
-        subtitle={isEdit ? "Update user information and settings" : "Complete the user registration form with all required information"}
+        title={isEdit ? t('system.users.create.title_edit') : t('system.users.create.title_create')}
+        subtitle={isEdit ? t('system.users.create.subtitle_edit') : t('system.users.create.subtitle_create')}
         fields={userFields}
         onSubmit={handleUserSubmit}
-        submitText={isEdit ? "Update User" : "Register User"}
-        resetText="Clear Form"
-        initialData={{ 
+        submitText={isEdit ? t('system.users.create.submit_edit') : t('system.users.create.submit_create')}
+        resetText={t('common.form_actions.clear_form')}
+        initialData={{
           fname: user?.fname || '',
           mname: user?.mname || '',
           lname: user?.lname || '',
@@ -459,16 +420,14 @@ const { t } = useTranslations();
   );
 };
 
-// Main Create Component
 const Create = () => {
-const { t } = useTranslations();
+  const { t } = useTranslations();
   const { hasRoutePermission } = usePermissions();
   const { user } = usePage().props;
   const isEdit = !!user;
-  
-  // Check permission directly
+
   const hasPermission = hasRoutePermission('/system/users', isEdit ? 'can_edit' : 'can_add');
-  
+
   if (!hasPermission) {
     return (
       <App>
@@ -482,7 +441,7 @@ const { t } = useTranslations();
               </div>
               <h3 className="mt-2 text-sm font-medium text-gray-900">{t('system.users.create.access_denied')}</h3>
               <p className="mt-1 text-sm text-gray-500">
-                {isEdit ? "You don't have permission to edit users. Please contact your administrator." : "You don't have permission to create users. Please contact your administrator."}
+                {isEdit ? t('system.users.create.permission_body_edit') : t('system.users.create.permission_body_create')}
               </p>
               <div className="mt-6">
                 <button
@@ -490,7 +449,7 @@ const { t } = useTranslations();
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   onClick={() => window.history.back()}
                 >
-                  Go Back
+                  {t('common.actions.back')}
                 </button>
               </div>
             </div>
@@ -499,10 +458,9 @@ const { t } = useTranslations();
       </App>
     );
   }
-  
+
   return (
     <App>
-      {/* Main Content Card */}
       <div className="rounded-xl shadow-lg form-container border-slate-200">
         <div className="p-6">
           <UserRegistrationForm />

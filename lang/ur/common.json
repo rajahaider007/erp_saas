@@ -127,6 +127,11 @@
   },
   "flash": {
     "success_title": "کامیابی!",
-    "error_title": "خرابی!"
+    "error_title": "خرابی!",
+    "warning_title": "انتباہ!",
+    "deleted_title": "حذف ہو گیا!",
+    "updated_title": "اپ ڈیٹ ہو گیا!",
+    "ok": "ٹھیک",
+    "great": "بہت اچھا!"
   }
 }

@@ -128,8 +128,18 @@ const CustomAlert = {
 };
 
 export default function List() {
-  const { configurations: paginatedConfigurations, filters, flash, warning, configTypes = {} } = usePage().props;
-  const { t } = useTranslations();
+  const {
+    configurations: paginatedConfigurations,
+    filters,
+    flash,
+    warning,
+    configTypes = {},
+    pageTitle,
+  } = usePage().props;
+  const { t, locale } = useTranslations();
+  const tl = (key, rep = {}) => t(`accounts.account_configuration.list.${key}`, rep);
+  const td = (key, rep = {}) => t(`common.data_table.${key}`, rep);
+  const tf = (key, rep = {}) => t(`common.flash.${key}`, rep);
 
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
@@ -243,27 +253,29 @@ export default function List() {
   
   const handleDelete = (config) => {
     CustomAlert.fire({
-      title: 'Are you sure?',
-      text: `You are about to delete "${config.account_name}" configuration. This action cannot be undone!`,
+      title: td('confirm_delete_title'),
+      text: td('confirm_delete_text', { name: config.account_name }),
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: td('confirm_delete_ok'),
+      cancelButtonText: t('common.actions.cancel'),
       onConfirm: () => {
         setLoading(true);
         router.delete(`/api/account-configuration/${config.id}`, {
           onSuccess: () => {
             CustomAlert.fire({
-              title: 'Deleted!',
-              text: `Configuration "${config.account_name}" has been deleted.`,
-              icon: 'success'
+              title: tf('deleted_title'),
+              text: tl('msg_deleted', { name: config.account_name }),
+              icon: 'success',
+              confirmButtonText: tf('ok'),
             });
           },
           onError: () => {
             CustomAlert.fire({
-              title: 'Error!',
-              text: 'Failed to delete the configuration. Please try again.',
-              icon: 'error'
+              title: tf('error_title'),
+              text: tl('msg_delete_failed'),
+              icon: 'error',
+              confirmButtonText: tf('ok'),
             });
           },
           onFinish: () => setLoading(false)
@@ -295,32 +307,36 @@ export default function List() {
 
   const handleBulkDelete = () => {
     if (selectedConfigurations.length === 0) return;
+    const bulkCount = selectedConfigurations.length;
+    const ids = [...selectedConfigurations];
 
     CustomAlert.fire({
-      title: 'Delete Selected Configurations?',
-      text: `You are about to delete ${selectedConfigurations.length} configuration(s). This action cannot be undone!`,
+      title: td('bulk_delete_title'),
+      text: td('bulk_delete_text', { count: bulkCount }),
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Yes, delete them!',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: td('bulk_delete_ok'),
+      cancelButtonText: t('common.actions.cancel'),
       onConfirm: () => {
         setLoading(true);
         router.post('/accounts/account-configuration/bulk-destroy', {
-          ids: selectedConfigurations
+          ids
         }, {
-          onSuccess: (page) => {
+          onSuccess: () => {
             setSelectedConfigurations([]);
             CustomAlert.fire({
-              title: 'Deleted!',
-              text: `${selectedConfigurations.length} configuration(s) have been deleted.`,
-              icon: 'success'
+              title: tf('deleted_title'),
+              text: tl('msg_bulk_deleted', { count: bulkCount }),
+              icon: 'success',
+              confirmButtonText: tf('ok'),
             });
           },
-          onError: (errors) => {
+          onError: () => {
             CustomAlert.fire({
-              title: 'Error!',
-              text: 'Failed to delete configurations. Please try again.',
-              icon: 'error'
+              title: tf('error_title'),
+              text: tl('msg_bulk_delete_failed'),
+              icon: 'error',
+              confirmButtonText: tf('ok'),
             });
           },
           onFinish: () => setLoading(false)
@@ -331,34 +347,51 @@ export default function List() {
 
   const handleBulkStatusChange = (newStatus) => {
     if (selectedConfigurations.length === 0) return;
+    const bulkCount = selectedConfigurations.length;
+    const ids = [...selectedConfigurations];
 
-    const action = newStatus ? 'activate' : 'deactivate';
+    const dialog = newStatus
+      ? {
+          title: td('bulk_status_activate_title'),
+          text: td('bulk_status_activate_text', { count: bulkCount }),
+          confirmButtonText: td('bulk_status_activate_ok'),
+        }
+      : {
+          title: td('bulk_status_deactivate_title'),
+          text: td('bulk_status_deactivate_text', { count: bulkCount }),
+          confirmButtonText: td('bulk_status_deactivate_ok'),
+        };
+
     CustomAlert.fire({
-      title: `${action.charAt(0).toUpperCase() + action.slice(1)} Selected Configurations?`,
-      text: `You are about to ${action} ${selectedConfigurations.length} configuration(s).`,
+      title: dialog.title,
+      text: dialog.text,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: `Yes, ${action} them!`,
-      cancelButtonText: 'Cancel',
+      confirmButtonText: dialog.confirmButtonText,
+      cancelButtonText: t('common.actions.cancel'),
       onConfirm: () => {
         setLoading(true);
         router.post('/accounts/account-configuration/bulk-status', {
-          ids: selectedConfigurations,
+          ids,
           status: newStatus
         }, {
-          onSuccess: (page) => {
+          onSuccess: () => {
             setSelectedConfigurations([]);
             CustomAlert.fire({
-              title: 'Updated!',
-              text: `${selectedConfigurations.length} configuration(s) have been ${action}d.`,
-              icon: 'success'
+              title: tf('updated_title'),
+              text: newStatus
+                ? tl('msg_bulk_activated', { count: bulkCount })
+                : tl('msg_bulk_deactivated', { count: bulkCount }),
+              icon: 'success',
+              confirmButtonText: tf('ok'),
             });
           },
-          onError: (errors) => {
+          onError: () => {
             CustomAlert.fire({
-              title: 'Error!',
-              text: 'Failed to update configurations. Please try again.',
-              icon: 'error'
+              title: tf('error_title'),
+              text: tl('msg_bulk_update_failed'),
+              icon: 'error',
+              confirmButtonText: tf('ok'),
             });
           },
           onFinish: () => setLoading(false)
@@ -367,9 +400,9 @@ export default function List() {
     });
   };
 
-  // Format functions
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    const loc = locale === 'ur' ? 'ur-PK' : undefined;
+    return new Date(dateString).toLocaleDateString(loc, {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -378,654 +411,69 @@ export default function List() {
     });
   };
 
-  // Status options for filtering
-  const statusOptions = [
-    { value: 'all', label: 'All Status' },
-    { value: '1', label: 'Active' },
-    { value: '0', label: 'Inactive' }
-  ];
+  const statusOptions = useMemo(
+    () => [
+      { value: 'all', label: tl('all_status') },
+      { value: '1', label: t('common.status.active') },
+      { value: '0', label: t('common.status.inactive') }
+    ],
+    [t]
+  );
 
-  const configTypeOptions = [
-    { value: 'all', label: 'All Types' },
-    ...Object.entries(configTypes).map(([key, label]) => ({ value: key, label }))
-  ];
+  const configTypeOptions = useMemo(
+    () => [
+      { value: 'all', label: tl('all_types') },
+      ...Object.entries(configTypes).map(([key, label]) => ({ value: key, label }))
+    ],
+    [t, configTypes]
+  );
 
   const pageSizeOptions = [10, 25, 50, 100];
 
-  // Show flash messages
   useEffect(() => {
     if (flash?.success) {
       CustomAlert.fire({
-        title: 'Success!',
+        title: tf('success_title'),
         text: flash.success,
         icon: 'success',
-        confirmButtonText: 'Great!'
+        confirmButtonText: tf('great'),
       });
     } else if (flash?.error) {
       CustomAlert.fire({
-        title: 'Error!',
+        title: tf('error_title'),
         text: flash.error,
         icon: 'error',
-        confirmButtonText: 'OK'
+        confirmButtonText: tf('ok'),
       });
     } else if (warning) {
       CustomAlert.fire({
-        title: 'Warning!',
+        title: tf('warning_title'),
         text: warning,
         icon: 'warning',
-        confirmButtonText: 'OK'
+        confirmButtonText: tf('ok'),
       });
     }
-  }, [flash, warning]);
+  }, [flash, warning, t]);
 
   return (
     <App>
-      <style>{`
-        .advanced-module-manager {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-          padding: 1.5rem;
-          background: #f9fafb;
-          border-radius: 12px;
-          min-height: calc(100vh - 200px);
-        }
-
-        .manager-header {
-          border-bottom: 2px solid #e5e7eb;
-          padding-bottom: 1.5rem;
-        }
-
-        .header-main {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-        }
-
-        .title-section {
-          flex: 1;
-        }
-
-        .page-title {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          font-size: 1.875rem;
-          font-weight: 700;
-          color: #111827;
-          margin: 0 0 0.75rem 0;
-        }
-
-        .title-icon {
-          color: #3b82f6;
-        }
-
-        .stats-summary {
-          display: flex;
-          gap: 1.5rem;
-          margin-top: 0.75rem;
-        }
-
-        .stat-item {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-size: 0.875rem;
-          color: #6b7280;
-        }
-
-        .header-actions {
-          display: flex;
-          gap: 0.75rem;
-        }
-
-        .btn {
-          padding: 0.5rem 1rem;
-          border: none;
-          border-radius: 6px;
-          font-weight: 500;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          transition: all 0.2s;
-          text-decoration: none;
-          font-size: 0.875rem;
-        }
-
-        .btn-primary {
-          background: #3b82f6;
-          color: white;
-        }
-
-        .btn-primary:hover {
-          background: #2563eb;
-          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-secondary {
-          background: #e5e7eb;
-          color: #374151;
-        }
-
-        .btn-secondary:hover {
-          background: #d1d5db;
-        }
-
-        .btn-icon {
-          width: 40px;
-          height: 40px;
-          padding: 0;
-          justify-content: center;
-          background: white;
-          border: 1px solid #d1d5db;
-        }
-
-        .btn-icon:hover {
-          background: #f3f4f6;
-        }
-
-        .btn-danger {
-          background: #ef4444;
-          color: white;
-        }
-
-        .dropdown {
-          position: relative;
-        }
-
-        .dropdown-toggle {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .dropdown-menu {
-          display: none;
-          position: absolute;
-          top: 100%;
-          right: 0;
-          mt: 0.5rem;
-          background: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 6px;
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-          z-index: 10;
-          min-width: 200px;
-        }
-
-        .dropdown:hover .dropdown-menu {
-          display: block;
-        }
-
-        .dropdown-menu button {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          width: 100%;
-          padding: 0.75rem 1rem;
-          background: none;
-          border: none;
-          text-align: left;
-          cursor: pointer;
-          color: #374151;
-          font-size: 0.875rem;
-          transition: background 0.2s;
-        }
-
-        .dropdown-menu button:hover {
-          background: #f3f4f6;
-        }
-
-        .modern-filters-container {
-          background: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          padding: 1rem;
-        }
-
-        .filters-toolbar {
-          display: flex;
-          gap: 0.75rem;
-          flex-wrap: wrap;
-          align-items: center;
-        }
-
-        .search-section {
-          display: flex;
-          gap: 0.75rem;
-          flex: 1;
-          min-width: 300px;
-          align-items: center;
-          flex-wrap: wrap;
-        }
-
-        .search-input-wrapper {
-          flex: 1;
-          min-width: 250px;
-          position: relative;
-          display: flex;
-          align-items: center;
-        }
-
-        .search-icon {
-          position: absolute;
-          left: 0.75rem;
-          color: #9ca3af;
-        }
-
-        .search-input {
-          width: 100%;
-          padding: 0.5rem 0.75rem 0.5rem 2.5rem;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          font-size: 0.875rem;
-          background: white;
-          color: #111827;
-        }
-
-        .filter-group {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .filter-label {
-          font-size: 0.875rem;
-          color: #6b7280;
-          white-space: nowrap;
-        }
-
-        .filter-select {
-          padding: 0.5rem 0.75rem;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          background: white;
-          color: #111827;
-          font-size: 0.875rem;
-          cursor: pointer;
-        }
-
-        .reset-btn {
-          padding: 0.5rem;
-          background: #f3f4f6;
-          color: #6b7280;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .reset-btn:hover {
-          background: #e5e7eb;
-        }
-
-        .bulk-actions-bar {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          background: #fffbeb;
-          padding: 1rem;
-          border-radius: 8px;
-          border: 1px solid #fbbf24;
-        }
-
-        .selection-info {
-          font-weight: 600;
-          color: #92400e;
-        }
-
-        .bulk-actions {
-          display: flex;
-          gap: 0.5rem;
-          margin-left: auto;
-        }
-
-        .btn-sm {
-          padding: 0.5rem 0.75rem;
-          font-size: 0.875rem;
-        }
-
-        .main-content {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .data-table-container {
-          background: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          overflow: hidden;
-        }
-
-        .loading-state {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 3rem;
-          color: #9ca3af;
-        }
-
-        .loading-spinner {
-          width: 40px;
-          height: 40px;
-          border: 4px solid #e5e7eb;
-          border-top-color: #3b82f6;
-          border-radius: 50%;
-          animation: spin 0.6s linear infinite;
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-
-        .empty-state {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 3rem;
-          color: #9ca3af;
-        }
-
-        .empty-icon {
-          width: 48px;
-          height: 48px;
-          margin-bottom: 1rem;
-          opacity: 0.5;
-        }
-
-        .empty-state h3 {
-          margin: 1rem 0 0.5rem 0;
-          font-size: 1.125rem;
-          color: #6b7280;
-        }
-
-        .empty-state p {
-          margin-bottom: 1.5rem;
-          font-size: 0.875rem;
-        }
-
-        .table-wrapper {
-          overflow-x: auto;
-        }
-
-        .data-table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-
-        .data-table thead {
-          background: #f3f4f6;
-          border-bottom: 2px solid #e5e7eb;
-        }
-
-        .data-table th {
-          padding: 1rem;
-          text-align: left;
-          font-weight: 600;
-          font-size: 0.875rem;
-          color: #374151;
-          white-space: nowrap;
-        }
-
-        .th-content {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .sortable {
-          cursor: pointer;
-          user-select: none;
-        }
-
-        .sortable:hover {
-          background: #e5e7eb;
-        }
-
-        .sort-icon {
-          opacity: 0.5;
-          transition: opacity 0.2s;
-        }
-
-        .sort-icon.active {
-          opacity: 1;
-          color: #3b82f6;
-        }
-
-        .data-table td {
-          padding: 1rem;
-          border-bottom: 1px solid #e5e7eb;
-          font-size: 0.875rem;
-          color: #111827;
-        }
-
-        .data-table tbody tr:hover {
-          background: #f9fafb;
-        }
-
-        .checkbox-cell {
-          width: 50px;
-        }
-
-        .checkbox {
-          width: 18px;
-          height: 18px;
-          cursor: pointer;
-        }
-
-        .module-id {
-          color: #9ca3af;
-          font-size: 0.75rem;
-          font-weight: 600;
-        }
-
-        .module-info {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
-
-        .module-avatar {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 40px;
-          height: 40px;
-          background: #f3f4f6;
-          border-radius: 8px;
-          flex-shrink: 0;
-        }
-
-        .module-details {
-          flex: 1;
-          min-width: 200px;
-        }
-
-        .module-name {
-          font-weight: 600;
-          color: #111827;
-          margin-bottom: 0.25rem;
-        }
-
-        .module-folder {
-          font-size: 0.875rem;
-          color: #6b7280;
-          margin-bottom: 0.25rem;
-        }
-
-        .module-description {
-          font-size: 0.75rem;
-          color: #9ca3af;
-        }
-
-        .status-container {
-          display: flex;
-          align-items: center;
-        }
-
-        .status-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.375rem 0.75rem;
-          border-radius: 12px;
-          font-size: 0.75rem;
-          font-weight: 600;
-        }
-
-        .status-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-        }
-
-        .date-cell {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-size: 0.875rem;
-          color: #6b7280;
-        }
-
-        .actions-cell {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        .action-btn {
-          width: 32px;
-          height: 32px;
-          padding: 0;
-          border: none;
-          border-radius: 6px;
-          background: #f3f4f6;
-          color: #6b7280;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s;
-        }
-
-        .action-btn:hover {
-          background: #e5e7eb;
-        }
-
-        .action-btn.view:hover {
-          background: #dbeafe;
-          color: #3b82f6;
-        }
-
-        .action-btn.edit:hover {
-          background: #dbeafe;
-          color: #3b82f6;
-        }
-
-        .action-btn.delete:hover {
-          background: #fee2e2;
-          color: #ef4444;
-        }
-
-        .pagination-container {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 1rem;
-          background: white;
-          border-top: 1px solid #e5e7eb;
-        }
-
-        .pagination-info {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          font-size: 0.875rem;
-          color: #6b7280;
-        }
-
-        .results-info {
-          font-weight: 500;
-        }
-
-        .page-size-selector {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .page-size-select {
-          padding: 0.375rem 0.5rem;
-          border: 1px solid #d1d5db;
-          border-radius: 4px;
-          background: white;
-          color: #111827;
-          font-size: 0.875rem;
-          cursor: pointer;
-        }
-
-        .pagination-controls {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        .pagination-btn {
-          width: 32px;
-          height: 32px;
-          padding: 0;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          background: white;
-          color: #6b7280;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s;
-          font-weight: 500;
-        }
-
-        .pagination-btn:not(:disabled):hover {
-          background: #f3f4f6;
-          border-color: #9ca3af;
-        }
-
-        .pagination-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .pagination-btn.active {
-          background: #3b82f6;
-          color: white;
-          border-color: #3b82f6;
-        }
-
-        .page-numbers {
-          display: flex;
-          gap: 0.25rem;
-        }
-      `}</style>
-
-      <div className="advanced-module-manager">
+      <div className="advanced-module-manager form-theme-system">
         {/* Enhanced Header */}
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
               <h1 className="page-title">
                 <Briefcase className="title-icon" />
-                {usePage().props?.pageTitle || 'Account Configuration'}
+                {pageTitle || tl('page_title')}
               </h1>
               <div className="stats-summary">
                 <div className="stat-item">
                   <TrendingUp size={16} />
-                  <span>{paginatedConfigurations?.total || configurations?.length || 0} Total</span>
+                  <span>{td('stat_total', { count: paginatedConfigurations?.total || configurations?.length || 0 })}</span>
                 </div>
                 <div className="stat-item">
                   <Users size={16} />
-                  <span>{configurations?.filter(c => c.is_active).length || 0} Active</span>
+                  <span>{td('stat_active', { count: configurations?.filter(c => c.is_active).length || 0 })}</span>
                 </div>
               </div>
             </div>
@@ -1042,7 +490,7 @@ export default function List() {
 
               <a href='/accounts/account-configuration/create' className="btn btn-primary">
                 <Plus size={20} />
-                Add Configuration
+                {tl('add_configuration')}
               </a>
             </div>
           </div>
@@ -1115,31 +563,31 @@ export default function List() {
         {selectedConfigurations.length > 0 && (
           <div className="bulk-actions-bar">
             <div className="selection-info">
-              <span>{selectedConfigurations.length} configuration(s) selected</span>
+              <span>{tl('bulk_selected', { count: selectedConfigurations.length })}</span>
             </div>
             <div className="bulk-actions">
               <button
-                className="btn btn-sm"
+                type="button"
+                className="btn btn-sm bulk-status-activate"
                 onClick={() => handleBulkStatusChange(true)}
-                style={{ background: '#10B981', color: 'white' }}
               >
                 <CheckCircle2 size={16} />
-                Activate
+                {tl('activate')}
               </button>
               <button
-                className="btn btn-sm"
+                type="button"
+                className="btn btn-sm bulk-status-deactivate"
                 onClick={() => handleBulkStatusChange(false)}
-                style={{ background: '#F59E0B', color: 'white' }}
               >
                 <XCircle size={16} />
-                Deactivate
+                {tl('deactivate')}
               </button>
               <button
                 className="btn btn-sm btn-danger"
                 onClick={handleBulkDelete}
               >
                 <Trash2 size={16} />
-                Delete
+                {tl('delete')}
               </button>
             </div>
           </div>
@@ -1161,7 +609,7 @@ export default function List() {
                 <p>{t('accounts.account_configuration.list.try_adjusting_your_filters_or_search_cri')}</p>
                 <a href="/accounts/account-configuration/create" className="btn btn-primary">
                   <Plus size={20} />
-                  Add Your First Configuration
+                  {tl('add_first_configuration')}
                 </a>
               </div>
             ) : (
@@ -1188,7 +636,7 @@ export default function List() {
                         {visibleColumns.id && (
                           <th className="sortable" onClick={() => handleSort('id')}>
                             <div className="th-content">
-                              ID
+                              {tl('col_id')}
                               <ArrowUpDown size={14} className={`sort-icon ${sortConfig.key === 'id' ? 'active' : ''}`} />
                             </div>
                           </th>
@@ -1197,7 +645,7 @@ export default function List() {
                         {visibleColumns.configurationInfo && (
                           <th className="sortable" onClick={() => handleSort('account_code')}>
                             <div className="th-content">
-                              Configuration Info
+                              {tl('col_configuration_info')}
                               <ArrowUpDown size={14} className={`sort-icon ${sortConfig.key === 'account_code' ? 'active' : ''}`} />
                             </div>
                           </th>
@@ -1206,7 +654,7 @@ export default function List() {
                         {visibleColumns.status && (
                           <th className="sortable" onClick={() => handleSort('is_active')}>
                             <div className="th-content">
-                              Status
+                              {tl('col_status')}
                               <ArrowUpDown size={14} className={`sort-icon ${sortConfig.key === 'is_active' ? 'active' : ''}`} />
                             </div>
                           </th>
@@ -1215,7 +663,7 @@ export default function List() {
                         {visibleColumns.updatedAt && (
                           <th className="sortable" onClick={() => handleSort('updated_at')}>
                             <div className="th-content">
-                              Updated
+                              {tl('col_updated')}
                               <ArrowUpDown size={14} className={`sort-icon ${sortConfig.key === 'updated_at' ? 'active' : ''}`} />
                             </div>
                           </th>
@@ -1254,13 +702,15 @@ export default function List() {
                           {visibleColumns.configurationInfo && (
                             <td>
                               <div className="module-info">
-                                <div className="module-avatar">
-                                  <Briefcase className="w-6 h-6 text-blue-600" />
+                                <div className="module-avatar module-avatar-icon-wrap">
+                                  <Briefcase size={24} strokeWidth={2} aria-hidden />
                                 </div>
                                 <div className="module-details">
                                   <div className="module-name">{config.account_code} - {config.account_name}</div>
-                                  <div className="module-folder">Type: {configTypes?.[config.config_type] || config.config_type}</div>
-                                  <div className="module-description">Level {config.account_level}</div>
+                                  <div className="module-folder">
+                                    {tl('row_type', { type: configTypes?.[config.config_type] || config.config_type })}
+                                  </div>
+                                  <div className="module-description">{tl('row_level', { level: config.account_level })}</div>
                                 </div>
                               </div>
                             </td>
@@ -1269,18 +719,12 @@ export default function List() {
                           {visibleColumns.status && (
                             <td>
                               <div className="status-container">
-                                <span
-                                  className={`status-badge status-${config.is_active ? 'active' : 'inactive'}`}
-                                  style={{
-                                    backgroundColor: `${config.is_active ? '#10B981' : '#EF4444'}15`,
-                                    color: config.is_active ? '#10B981' : '#EF4444'
-                                  }}
-                                >
-                                  <div
-                                    className="status-dot"
-                                    style={{ backgroundColor: config.is_active ? '#10B981' : '#EF4444' }}
-                                  ></div>
-                                  {config.is_active ? 'Active' : 'Inactive'}
+                                <span className={`status-badge status-${config.is_active ? 'active' : 'inactive'}`}>
+                                  <span
+                                    className={`status-dot ${config.is_active ? 'active' : 'inactive'}`}
+                                    aria-hidden
+                                  />
+                                  {config.is_active ? t('common.status.active') : t('common.status.inactive')}
                                 </span>
                               </div>
                             </td>
@@ -1333,7 +777,11 @@ export default function List() {
                   <div className="pagination-container">
                     <div className="pagination-info">
                       <div className="results-info">
-                        Showing {((paginatedConfigurations.current_page - 1) * paginatedConfigurations.per_page) + 1} to {Math.min(paginatedConfigurations.current_page * paginatedConfigurations.per_page, paginatedConfigurations.total)} of {paginatedConfigurations.total} results
+                        {td('showing_entries', {
+                          from: ((paginatedConfigurations.current_page - 1) * paginatedConfigurations.per_page) + 1,
+                          to: Math.min(paginatedConfigurations.current_page * paginatedConfigurations.per_page, paginatedConfigurations.total),
+                          total: paginatedConfigurations.total,
+                        })}
                       </div>
                       <div className="page-size-selector">
                         <span>{t('accounts.account_configuration.list.show')}</span>

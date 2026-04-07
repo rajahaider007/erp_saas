@@ -2,7 +2,7 @@
 @import './floating-widget.css';
 /* Reports Styles */
 @import './reports.css';
-@import './list.css';
+/* list.css merged into form-themes.css */
 /* Custom DatePicker Styles */
 @import './datepicker-custom.css';
 /* Form Themes */

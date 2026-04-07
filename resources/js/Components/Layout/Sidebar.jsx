@@ -669,8 +669,9 @@ const Sidebar = () => {
         hidden lg:flex
         relative
         z-[50]
+        min-h-0 self-stretch
       `}>
-        <div className="flex h-full flex-col overflow-hidden">
+        <div className="flex h-full min-h-0 flex-col overflow-hidden">
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto px-4 pb-4 pt-4" style={{ paddingLeft: 9 }}>
             <div className="space-y-2">

@@ -127,6 +127,11 @@
   },
   "flash": {
     "success_title": "Success!",
-    "error_title": "Error!"
+    "error_title": "Error!",
+    "warning_title": "Warning!",
+    "deleted_title": "Deleted!",
+    "updated_title": "Updated!",
+    "ok": "OK",
+    "great": "Great!"
   }
 }

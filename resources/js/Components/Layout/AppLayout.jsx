@@ -5,10 +5,8 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
 import Customizer from './Customizer';
-import { useLayout } from '../../Contexts/LayoutContext';
 
 const AppLayout = ({ children, title }) => {
-  const { sidebarCollapsed, headerAsSidebar } = useLayout();
   const { locale, supportedLocales } = usePage().props;
 
   // Set document direction and lang for RTL (e.g. Urdu) and accessibility
@@ -21,12 +19,11 @@ const AppLayout = ({ children, title }) => {
   return (
     <>
       <Head title={title} />
-      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
         <Header />
-        <div className="flex flex-1">
+        <div className="flex min-h-0 flex-1">
           <Sidebar />
-          <main className={`flex-1 overflow-x-hidden overflow-y-auto transition-all duration-300 ${!headerAsSidebar ? (sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64') : ''
-            }`}>
+          <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto transition-all duration-300">
             <div className="container mx-auto px-4 py-6">
               {children}
             </div>
