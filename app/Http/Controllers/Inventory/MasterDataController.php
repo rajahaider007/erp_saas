@@ -121,6 +121,12 @@ class MasterDataController extends Controller
             $validated['iso_numeric_code'] = $validated['iso_numeric_code'] ?? str_pad((string) (abs(crc32($validated['country_code'])) % 1000), 3, '0', STR_PAD_LEFT);
         }
 
+        if ($master === 'uom-coding') {
+            $validated['uom_code'] = strtoupper(trim($validated['uom_code']));
+            $validated['created_by'] = auth()->id();
+            $validated['updated_by'] = auth()->id();
+        }
+
         $config['model']::create($validated);
 
         return redirect()->route('inventory.master-data.list', ['master' => $master])
@@ -179,6 +185,11 @@ class MasterDataController extends Controller
         if ($master === 'country-master') {
             $validated['iso_2_code'] = $validated['iso_2_code'] ?? $record->iso_2_code ?? strtoupper(substr($validated['country_code'] ?? $record->country_code, 0, 2));
             $validated['iso_numeric_code'] = $validated['iso_numeric_code'] ?? $record->iso_numeric_code ?? str_pad((string) (abs(crc32($validated['country_code'] ?? $record->country_code)) % 1000), 3, '0', STR_PAD_LEFT);
+        }
+
+        if ($master === 'uom-coding') {
+            $validated['uom_code'] = strtoupper(trim($validated['uom_code']));
+            $validated['updated_by'] = auth()->id();
         }
 
         $record->update($validated);
@@ -304,11 +315,13 @@ class MasterDataController extends Controller
                 ['value' => 'both', 'label' => 'Both'],
             ],
             'uomTypeOptions' => [
-                ['value' => 'length', 'label' => 'Length'],
-                ['value' => 'weight', 'label' => 'Weight'],
-                ['value' => 'volume', 'label' => 'Volume'],
-                ['value' => 'quantity', 'label' => 'Quantity'],
-                ['value' => 'time', 'label' => 'Time'],
+                ['value' => 'Length', 'label' => 'Length'],
+                ['value' => 'Weight', 'label' => 'Weight'],
+                ['value' => 'Volume', 'label' => 'Volume'],
+                ['value' => 'Quantity', 'label' => 'Quantity'],
+                ['value' => 'Time', 'label' => 'Time'],
+                ['value' => 'Area', 'label' => 'Area'],
+                ['value' => 'Other', 'label' => 'Other'],
             ],
             'vendorTypeOptions' => [
                 ['value' => 'local', 'label' => 'Local'],
@@ -359,19 +372,21 @@ class MasterDataController extends Controller
                 'rules' => [
                     'uom_code' => ['required', 'string', 'max:20'],
                     'uom_name' => ['required', 'string', 'max:100'],
-                    'uom_type' => ['required', Rule::in(['length', 'weight', 'volume', 'quantity', 'time'])],
-                    'symbol' => ['nullable', 'string', 'max:10'],
+                    'uom_type' => ['required', Rule::in(['Length', 'Weight', 'Volume', 'Quantity', 'Time', 'Area', 'Other'])],
+                    'symbol' => ['required', 'string', 'max:10'],
                     'is_base_uom' => ['nullable', 'boolean'],
-                    'decimal_precision' => ['nullable', 'integer', 'min:0', 'max:6'],
+                    'decimal_precision' => ['required', 'integer', 'min:0', 'max:6'],
+                    'description' => ['nullable', 'string', 'max:200'],
                     'is_active' => ['nullable', 'boolean'],
                 ],
                 'fields' => [
                     ['name' => 'uom_code', 'label' => 'UOM Code', 'type' => 'text', 'required' => true],
                     ['name' => 'uom_name', 'label' => 'UOM Name', 'type' => 'text', 'required' => true],
+                    ['name' => 'symbol', 'label' => 'UOM Symbol', 'type' => 'text', 'required' => true],
                     ['name' => 'uom_type', 'label' => 'UOM Type', 'type' => 'select', 'required' => true, 'optionsKey' => 'uomTypeOptions'],
-                    ['name' => 'symbol', 'label' => 'Symbol', 'type' => 'text'],
+                    ['name' => 'decimal_precision', 'label' => 'Decimal Precision', 'type' => 'number', 'required' => true, 'min' => 0, 'max' => 6],
                     ['name' => 'is_base_uom', 'label' => 'Base UOM Flag', 'type' => 'toggle'],
-                    ['name' => 'decimal_precision', 'label' => 'Decimal Precision', 'type' => 'number'],
+                    ['name' => 'description', 'label' => 'Description', 'type' => 'textarea'],
                     ['name' => 'is_active', 'label' => 'Status', 'type' => 'toggle'],
                 ],
                 'list_columns' => ['uom_code' => 'UOM Code', 'uom_name' => 'UOM Name', 'uom_type' => 'Type'],

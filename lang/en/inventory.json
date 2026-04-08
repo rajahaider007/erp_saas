@@ -615,6 +615,334 @@
       "prev": "Prev",
       "next": "Next",
       "page_of": "Page {current} of {last}"
+    },
+    "masters": {
+      "uom-coding": {
+        "title": "UOM Coding",
+        "fields": {
+          "uom_code": "UOM Code",
+          "uom_name": "UOM Name",
+          "symbol": "UOM Symbol",
+          "uom_type": "UOM Type",
+          "decimal_precision": "Decimal Precision",
+          "is_base_uom": "Base UOM Flag",
+          "description": "Description",
+          "is_active": "Status"
+        },
+        "list_columns": {
+          "uom_code": "UOM Code",
+          "uom_name": "UOM Name",
+          "uom_type": "Type"
+        }
+      },
+      "uom-conversion": {
+        "title": "UOM Conversion Configuration",
+        "fields": {
+          "from_uom_id": "From UOM",
+          "to_uom_id": "To UOM",
+          "conversion_factor": "Conversion Factor",
+          "conversion_direction": "Conversion Direction",
+          "effective_date": "Effective From",
+          "is_item_specific": "Item Specific",
+          "is_active": "Status"
+        },
+        "list_columns": {
+          "from_uom_id": "From UOM",
+          "to_uom_id": "To UOM",
+          "conversion_factor": "Factor"
+        }
+      },
+      "tax-category": {
+        "title": "Tax Category Configuration",
+        "fields": {
+          "tax_code": "Tax Code",
+          "tax_name": "Tax Name",
+          "tax_type": "Tax Type",
+          "tax_rate": "Tax Rate (%)",
+          "tax_calculation_method": "Tax Calculation Method",
+          "is_compound_tax": "Compound Tax",
+          "compound_base_tax_category_id": "Compound Base Tax Code",
+          "tax_category_group": "Tax Category Group",
+          "applicable_for": "Applicable On",
+          "input_tax_gl_account_id": "Input Tax GL Account",
+          "output_tax_gl_account_id": "Output Tax GL Account",
+          "tax_payable_gl_account_id": "Tax Payable GL Account",
+          "country_id": "Country / Region",
+          "hsn_sac_required": "HSN/SAC Code Applicability",
+          "e_invoice_required": "E-Invoice Required",
+          "reverse_charge_applicable": "Reverse Charge Applicable",
+          "reverse_charge_gl_account_id": "Reverse Charge GL Account",
+          "input_tax_claimable": "Input Tax Claimable",
+          "exemption_certificate_required": "Exemption Certificate Required",
+          "effective_from_date": "Effective From Date",
+          "effective_to_date": "Effective To Date",
+          "description": "Description / Notes",
+          "is_active": "Status"
+        },
+        "list_columns": {
+          "tax_code": "Tax Code",
+          "tax_name": "Tax Name",
+          "tax_type": "Tax Type",
+          "tax_rate": "Tax Rate"
+        }
+      },
+      "vendor-master": {
+        "title": "Vendor Master",
+        "fields": {
+          "vendor_code": "Vendor Code",
+          "vendor_name": "Vendor Name (Legal)",
+          "contact_person": "Primary Contact Person",
+          "phone": "Phone",
+          "email": "Email",
+          "address": "Address",
+          "payment_terms": "Payment Terms",
+          "currency_id": "Currency",
+          "tax_registration_number": "Tax Registration Number",
+          "bank_details": "Bank Details",
+          "credit_limit": "Credit Limit",
+          "vendor_type": "Vendor Type",
+          "country_id": "Country",
+          "is_active": "Status"
+        },
+        "list_columns": {
+          "vendor_code": "Vendor Code",
+          "vendor_name": "Vendor Name",
+          "vendor_type": "Type"
+        }
+      },
+      "warehouse-master": {
+        "title": "Warehouse / Location Master",
+        "fields": {
+          "warehouse_code": "Warehouse Code",
+          "warehouse_name": "Warehouse Name",
+          "location_id": "Company / Branch",
+          "address": "Address",
+          "warehouse_type": "Warehouse Type",
+          "storage_temperature_class": "Storage Temperature Class",
+          "capacity": "Capacity",
+          "is_active": "Status"
+        },
+        "list_columns": {
+          "warehouse_code": "Warehouse Code",
+          "warehouse_name": "Warehouse Name",
+          "warehouse_type": "Type"
+        }
+      },
+      "zone-bin-master": {
+        "title": "Zone / Bin Configuration",
+        "fields": {
+          "warehouse_id": "Warehouse",
+          "zone_code": "Zone Code",
+          "zone_name": "Zone Name",
+          "aisle": "Aisle",
+          "bin_code": "Bin Code",
+          "bin_capacity": "Bin Capacity",
+          "temperature_class": "Temperature Class",
+          "is_active": "Status"
+        },
+        "list_columns": {
+          "zone_code": "Zone Code",
+          "zone_name": "Zone Name",
+          "bin_code": "Bin Code"
+        }
+      },
+      "country-master": {
+        "title": "Country Master",
+        "fields": {
+          "country_code": "Country Code (ISO)",
+          "country_name": "Country Name",
+          "currency_id": "Default Currency",
+          "tax_system": "Tax System",
+          "customs_rules": "Customs Rules",
+          "is_active": "Status"
+        },
+        "list_columns": {
+          "country_code": "Code",
+          "country_name": "Country Name",
+          "tax_system": "Tax System"
+        }
+      },
+      "brand-master": {
+        "title": "Brand Configuration",
+        "fields": {
+          "brand_code": "Brand Code",
+          "brand_name": "Brand Name",
+          "manufacturer": "Manufacturer",
+          "country_id": "Country of Origin",
+          "is_active": "Status"
+        },
+        "list_columns": {
+          "brand_code": "Brand Code",
+          "brand_name": "Brand Name",
+          "manufacturer": "Manufacturer"
+        }
+      },
+      "reason-code-master": {
+        "title": "Reason Code Configuration",
+        "fields": {
+          "reason_code": "Reason Code",
+          "reason_description": "Reason Description",
+          "reason_type": "Reason Type",
+          "default_gl_account_id": "Default GL Account",
+          "requires_approval": "Requires Approval",
+          "is_active": "Status"
+        },
+        "list_columns": {
+          "reason_code": "Reason Code",
+          "reason_description": "Description",
+          "reason_type": "Type"
+        }
+      },
+      "temperature-class-master": {
+        "title": "Temperature Class Configuration",
+        "fields": {
+          "class_code": "Class Code",
+          "class_name": "Class Name",
+          "temperature_range": "Temperature Range",
+          "storage_requirements": "Storage Requirements",
+          "monitoring_frequency": "Monitoring Frequency",
+          "is_active": "Status"
+        },
+        "list_columns": {
+          "class_code": "Class Code",
+          "class_name": "Class Name",
+          "temperature_range": "Temperature Range"
+        }
+      },
+      "transporter-master": {
+        "title": "Transporter Master",
+        "fields": {
+          "transporter_code": "Transporter Code",
+          "transporter_name": "Transporter Name",
+          "contact_details": "Contact Details",
+          "vehicle_types": "Vehicle Types",
+          "service_area": "Service Area",
+          "rating": "Rating",
+          "is_active": "Status"
+        },
+        "list_columns": {
+          "transporter_code": "Code",
+          "transporter_name": "Transporter Name",
+          "rating": "Rating"
+        }
+      },
+      "customer-master": {
+        "title": "Customer Master",
+        "fields": {
+          "customer_code": "Customer Code",
+          "customer_name": "Customer Name",
+          "contact_details": "Contact Details",
+          "credit_limit": "Credit Limit",
+          "payment_terms": "Payment Terms",
+          "tax_registration": "Tax Registration",
+          "country_id": "Country",
+          "currency_id": "Currency",
+          "is_active": "Status"
+        },
+        "list_columns": {
+          "customer_code": "Customer Code",
+          "customer_name": "Customer Name",
+          "credit_limit": "Credit Limit"
+        }
+      },
+      "package-type-master": {
+        "title": "Package Type Configuration",
+        "fields": {
+          "package_code": "Package Code",
+          "package_name": "Package Name",
+          "dimensions": "Dimensions",
+          "weight_capacity": "Weight Capacity",
+          "volume_capacity": "Volume Capacity",
+          "nesting_rule": "Nesting Rule",
+          "is_active": "Status"
+        },
+        "list_columns": {
+          "package_code": "Package Code",
+          "package_name": "Package Name",
+          "dimensions": "Dimensions"
+        }
+      },
+      "barcode-type-master": {
+        "title": "Barcode Type Configuration",
+        "fields": {
+          "barcode_type": "Barcode Type",
+          "format_pattern": "Format / Pattern",
+          "length": "Length",
+          "validation_rule": "Validation Rule",
+          "is_active": "Status"
+        },
+        "list_columns": {
+          "barcode_type": "Barcode Type",
+          "format_pattern": "Format",
+          "length": "Length"
+        }
+      }
+    },
+    "option_sets": {
+      "uomTypeOptions": {
+        "Length": "Length",
+        "Weight": "Weight",
+        "Volume": "Volume",
+        "Quantity": "Quantity",
+        "Time": "Time",
+        "Area": "Area",
+        "Other": "Other"
+      },
+      "taxTypeOptions": {
+        "gst": "GST",
+        "vat": "VAT",
+        "sales_tax": "Sales Tax",
+        "customs_duty": "Customs Duty",
+        "withholding_tax": "Withholding Tax",
+        "excise": "Excise",
+        "other": "Other"
+      },
+      "taxCalculationMethodOptions": {
+        "percentage_net": "Percentage of Net",
+        "percentage_gross": "Percentage of Gross",
+        "fixed_amount": "Fixed Amount",
+        "slab_based": "Slab-based"
+      },
+      "taxCategoryGroupOptions": {
+        "input_tax": "Input Tax",
+        "output_tax": "Output Tax",
+        "both": "Both"
+      },
+      "applicableOnOptions": {
+        "purchase": "Purchase",
+        "sales": "Sales",
+        "both": "Both"
+      },
+      "vendorTypeOptions": {
+        "local": "Local",
+        "import": "Import"
+      },
+      "warehouseTypeOptions": {
+        "main": "Main",
+        "transit": "Transit",
+        "quarantine": "Quarantine"
+      },
+      "reasonTypeOptions": {
+        "adjustment": "Adjustment",
+        "return": "Return",
+        "transfer": "Transfer",
+        "writeoff": "Write-off"
+      },
+      "taxSystemOptions": {
+        "gst": "GST",
+        "vat": "VAT",
+        "sales_tax": "Sales Tax"
+      },
+      "conversionDirectionOptions": {
+        "multiply": "Multiply",
+        "divide": "Divide"
+      },
+      "barcodeTypeOptions": {
+        "EAN-13": "EAN-13",
+        "UPC": "UPC",
+        "QR": "QR",
+        "Code128": "Code128"
+      }
     }
   },
   "uom_conversion": {
@@ -674,6 +1002,7 @@
       "bulk_delete_text": "You are about to delete {count} UOM conversion(s).",
       "confirm_delete_conversion": "Delete conversion: {from} → {to}? This cannot be undone.",
       "multiply_label": "Multiply",
+      "divide_label": "Divide",
       "col_id": "ID",
       "col_from_uom": "From UOM",
       "col_to_uom": "To UOM",

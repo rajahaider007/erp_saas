@@ -133,7 +133,9 @@ class UomConversionController extends Controller
                 return back()->withErrors(['error' => "Invalid To UOM in row (To UOM id: {$toUomId})."]);
             }
 
-            $operation = isset($row['operation']) && in_array($row['operation'], ['Multiply', 'Divide'], true) ? $row['operation'] : 'Multiply';
+            $operation = isset($row['operation']) && in_array($row['operation'], ['Multiply', 'Divide', 'multiply', 'divide'], true)
+                ? strtolower($row['operation'])
+                : 'multiply';
             UomConversion::create([
                 'company_id' => $compId,
                 'from_uom_id' => $fromUomId,
@@ -173,7 +175,9 @@ class UomConversionController extends Controller
                 'id' => $r->id,
                 'to_uom_id' => $r->to_uom_id,
                 'conversion_factor' => (string) $r->conversion_factor,
-                'operation' => in_array($r->conversion_direction, ['Multiply', 'Divide'], true) ? $r->conversion_direction : 'Multiply',
+                'operation' => in_array(strtolower((string) $r->conversion_direction), ['multiply', 'divide'], true)
+                    ? ucfirst(strtolower((string) $r->conversion_direction))
+                    : 'Multiply',
             ])
             ->toArray();
 
@@ -250,7 +254,9 @@ class UomConversionController extends Controller
                     ->where('from_uom_id', $existing->from_uom_id)
                     ->first();
                 if ($rec) {
-                    $operation = isset($row['operation']) && in_array($row['operation'], ['Multiply', 'Divide'], true) ? $row['operation'] : 'Multiply';
+                    $operation = isset($row['operation']) && in_array($row['operation'], ['Multiply', 'Divide', 'multiply', 'divide'], true)
+                        ? strtolower($row['operation'])
+                        : 'multiply';
                     $rec->update([
                         'from_uom_id' => $fromUomId,
                         'to_uom_id' => $toUomId,
@@ -260,7 +266,9 @@ class UomConversionController extends Controller
                     $submittedIds[] = $rec->id;
                 }
             } else {
-                $operation = isset($row['operation']) && in_array($row['operation'], ['Multiply', 'Divide'], true) ? $row['operation'] : 'Multiply';
+                $operation = isset($row['operation']) && in_array($row['operation'], ['Multiply', 'Divide', 'multiply', 'divide'], true)
+                    ? strtolower($row['operation'])
+                    : 'multiply';
                 $newRec = UomConversion::create([
                     'company_id' => $compId,
                     'from_uom_id' => $fromUomId,

@@ -159,9 +159,50 @@ Count Plan → Freeze → Blind Count Entry → Recount (if variance)
 > - 🔴 Mandatory | 🟡 Conditional | 🟢 Optional
 > - **[NEW]** = Gap analysis se add kiya gaya field
 
+### 5.0) Development tracker (codebase — 2026-04-08)
+
+**Masters phase:** `📋 Required Master Forms for Inventory M.txt` ke **FORM 1–17 (UOM, tax, vendor, warehouse/zone-bin, country, brand, reason codes, item class/category/group, temperature, transporter, customer, package, barcode, …)** — **complete** (team sign-off). Ab focus **main forms** = neeche wale transactional specs (is file ke FORM 3–12) + **Item Master** parity.
+
+| Form | Spec name | Implementation |
+|------|-----------|----------------|
+| **FORM 1** | Item Master | **Partial** — list/create/edit: `resources/js/Pages/Inventory/ItemMaster/`, routes `inventory/item-master/*`. Blueprint ke saath har field abhi cover nahi; agla kaam: missing fields + sub-tables align karna. |
+| **FORM 2** | Warehouse / Bin | **Done (masters phase)** — `warehouse-master`, `zone-bin-master` → `Inventory/MasterData/`. Agar blueprint mein extra fields (staging bins, Return/Scrap type) bache hon to alag polish ticket. |
+| **FORM 3** | Purchase Order | **Not started** — is route group ka koi transactional UI/controller nahi. |
+| **FORM 4** | GRN | **Not started** |
+| **FORM 5** | Landed Cost | **Not started** |
+| **FORM 6** | Stock Transfer | **Not started** |
+| **FORM 7** | Delivery / Goods Issue | **Not started** |
+| **FORM 8** | Stock Adjustment | **Not started** |
+| **FORM 9** | RTV | **Not started** |
+| **FORM 10** | RMA | **Not started** |
+| **FORM 11** | Stock Count | **Not started** |
+| **FORM 12** | Cost Revaluation / Write-down | **Not started** |
+
+**Related masters (blueprint §3.1) — required masters done**
+
+| Area | Status | Where |
+|------|--------|--------|
+| Item Class / Category / Group (coding) | **Done** | `inventory/item-class-coding`, `item-category-coding`, `item-group-coding` |
+| UOM Master & Conversion | **Done** | `inventory/uom-master` (**GeneralizedForm**); `inventory/uom-conversion` (custom UI — optional refactor). `master-data` par `uom-coding` / `uom-conversion` duplicate path. |
+| Vendor, tax category, warehouse, zone/bin, country, brand, reason codes, temperature class, transporter, customer, package type, barcode type | **Done** | `inventory/master-data/{master}` — `MasterDataController::config()` keys |
+
+**Ab agla shuru kahan se (main forms):** **FORM 3 (Purchase Order)** — P2S: PO → GRN → … Parallel mein **Item Master** (is file FORM 1) ki blueprint field parity jari rakh sakte ho; **Warehouse/Bin** (FORM 2) agar spec vs UI gap ho to tighten karo.
+
+### 5.0.1) Developer guidelines — forms (zaroori)
+
+1. **UI component:** Naye inventory forms hamesha **`GeneralizedForm`** use karein (`resources/js/Components/GeneralizedForm.jsx`). Custom ad-hoc `<form>` layouts avoid karein taake spacing, validation UX, aur field types consistent rahein.
+2. **i18n:** `useTranslations()` + `t('…')` — form-specific keys `lang/en/inventory.json` aur `lang/ur/inventory.json` mein; Save/Reset/Submit jaisi shared cheezein `lang/*/common.json` se. Tafsil: repo root `lang/I18N_STRATEGY.md`.
+3. **Theme / CSS:** `GeneralizedForm` ke andar classes pehle se set hain (`input-group`, `input-label`, `input-wrapper`, `form-input`, waghera). Page level par existing inventory pages jaisa wrap karein (e.g. `form-section`, themed breadcrumbs jahan pehle se use ho — dekhain `Inventory/UomMaster/Create.jsx`, `ItemMaster/Create.jsx`). Nayi custom CSS sirf zarurat par aur existing tokens/patterns ke sath.
+4. **Backend-driven simple masters:** `MasterData` jaisi screens par field labels abhi controller config se aa sakte hain — roadmap: labels ko bhi translation keys se map karna ya Inertia par translated config bhejna taake poora flow EN/UR ho.
+
+**Jab koi form complete ho jaye:** is file mein §5.0 table aur us FORM ki heading ke neeche wali **Dev status** line update kar dena.
+
 ---
 
 ### FORM 1: Item Master
+
+> **Dev status:** 🟡 **Partial** — core CRUD live; blueprint vs field parity baqi.
+
 
 **Header Fields:**
 
@@ -273,6 +314,8 @@ Count Plan → Freeze → Blind Count Entry → Recount (if variance)
 
 ### FORM 2: Warehouse / Bin Master
 
+> **Dev status:** ✅ **Done (masters phase)** — `warehouse-master` + `zone-bin-master` via `inventory/master-data/...`; blueprint polish agar zarurat ho to alag pass.
+
 | # | Field Name | Type | Status |
 |---|---|---|---|
 | 1 | Warehouse Code | Text (unique) | 🔴 |
@@ -293,6 +336,8 @@ Count Plan → Freeze → Blind Count Entry → Recount (if variance)
 ---
 
 ### FORM 3: Purchase Order (PO)
+
+> **Dev status:** 🔴 **Not started** — yahi se transactional inventory shuru karne ki recommendation (P2S).
 
 **Header:**
 
@@ -361,6 +406,8 @@ Count Plan → Freeze → Blind Count Entry → Recount (if variance)
 
 ### FORM 4: Goods Receipt Note (GRN)
 
+> **Dev status:** 🔴 **Not started**
+
 **Header:**
 
 | # | Field Name | Type | Validation | Status |
@@ -420,6 +467,8 @@ Count Plan → Freeze → Blind Count Entry → Recount (if variance)
 
 ### FORM 5: Landed Cost Allocation
 
+> **Dev status:** 🔴 **Not started**
+
 | # | Field Name | Type | Validation | Status |
 |---|---|---|---|---|
 | 1 | LC Document No. | Auto | — | 🔴 |
@@ -444,6 +493,8 @@ Count Plan → Freeze → Blind Count Entry → Recount (if variance)
 ---
 
 ### FORM 6: Stock Transfer
+
+> **Dev status:** 🔴 **Not started**
 
 **Header:**
 
@@ -478,6 +529,8 @@ Count Plan → Freeze → Blind Count Entry → Recount (if variance)
 
 ### FORM 7: Delivery / Goods Issue
 
+> **Dev status:** 🔴 **Not started**
+
 | # | Field Name | Type | Status |
 |---|---|---|---|
 | 1 | Delivery No. | Auto | 🔴 |
@@ -499,6 +552,8 @@ Count Plan → Freeze → Blind Count Entry → Recount (if variance)
 ---
 
 ### FORM 8: Stock Adjustment
+
+> **Dev status:** 🔴 **Not started**
 
 | # | Field Name | Type | Validation | Status |
 |---|---|---|---|---|
@@ -529,6 +584,8 @@ Count Plan → Freeze → Blind Count Entry → Recount (if variance)
 
 ### FORM 9: Return to Vendor (RTV)
 
+> **Dev status:** 🔴 **Not started**
+
 | # | Field Name | Type | Status |
 |---|---|---|---|
 | 1 | RTV No. | Auto | 🔴 |
@@ -548,6 +605,8 @@ Count Plan → Freeze → Blind Count Entry → Recount (if variance)
 
 ### FORM 10: Customer Return (RMA)
 
+> **Dev status:** 🔴 **Not started**
+
 | # | Field Name | Type | Status |
 |---|---|---|---|
 | 1 | RMA No. | Auto | 🔴 |
@@ -565,6 +624,8 @@ Count Plan → Freeze → Blind Count Entry → Recount (if variance)
 ---
 
 ### FORM 11: Stock Count Sheet
+
+> **Dev status:** 🔴 **Not started**
 
 **Header:**
 
@@ -615,6 +676,8 @@ Count Plan → Freeze → Blind Count Entry → Recount (if variance)
 ---
 
 ### FORM 12: Cost Revaluation / Write-Down Proposal
+
+> **Dev status:** 🔴 **Not started**
 
 | # | Field Name | Type | Status |
 |---|---|---|---|

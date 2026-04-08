@@ -165,8 +165,10 @@ export default function List() {
   const dateLoc = locale === 'ur' ? 'ur-PK' : undefined;
 
   const directionLabel = (dir) => {
-    if (!dir || dir === 'Multiply') return tl('multiply_label');
-    return dir;
+    const d = String(dir || '').toLowerCase();
+    if (!dir || d === 'multiply') return tl('multiply_label');
+    if (d === 'divide') return tl('divide_label');
+    return String(dir);
   };
 
   return (

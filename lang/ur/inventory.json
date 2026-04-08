@@ -615,6 +615,334 @@
       "prev": "پچھلا",
       "next": "اگلا",
       "page_of": "صفحہ {current} از {last}"
+    },
+    "masters": {
+      "uom-coding": {
+        "title": "UOM کوڈنگ",
+        "fields": {
+          "uom_code": "UOM کوڈ",
+          "uom_name": "UOM نام",
+          "symbol": "UOM علامت",
+          "uom_type": "UOM قسم",
+          "decimal_precision": "اعشاری درستگی",
+          "is_base_uom": "بنیادی UOM",
+          "description": "تفصیل",
+          "is_active": "حیثیت"
+        },
+        "list_columns": {
+          "uom_code": "UOM کوڈ",
+          "uom_name": "UOM نام",
+          "uom_type": "قسم"
+        }
+      },
+      "uom-conversion": {
+        "title": "UOM تبدیلی کی ترتیب",
+        "fields": {
+          "from_uom_id": "سے UOM",
+          "to_uom_id": "تک UOM",
+          "conversion_factor": "تبدیلی کا عنصر",
+          "conversion_direction": "سمت",
+          "effective_date": "سے مؤثر",
+          "is_item_specific": "آئٹم مخصوص",
+          "is_active": "حیثیت"
+        },
+        "list_columns": {
+          "from_uom_id": "سے UOM",
+          "to_uom_id": "تک UOM",
+          "conversion_factor": "عنصر"
+        }
+      },
+      "tax-category": {
+        "title": "ٹیکس زمرہ",
+        "fields": {
+          "tax_code": "ٹیکس کوڈ",
+          "tax_name": "ٹیکس نام",
+          "tax_type": "ٹیکس کی قسم",
+          "tax_rate": "ٹیکس شرح (%)",
+          "tax_calculation_method": "حساب کا طریقہ",
+          "is_compound_tax": "مرکب ٹیکس",
+          "compound_base_tax_category_id": "مرکب بنیاد ٹیکس",
+          "tax_category_group": "زمرہ گروپ",
+          "applicable_for": "لاگو",
+          "input_tax_gl_account_id": "ان پٹ ٹیکس GL",
+          "output_tax_gl_account_id": "آؤٹ پٹ ٹیکس GL",
+          "tax_payable_gl_account_id": "قابل ادائیگی GL",
+          "country_id": "ملک / علاقہ",
+          "hsn_sac_required": "HSN/SAC",
+          "e_invoice_required": "ای انوائس",
+          "reverse_charge_applicable": "ریورس چارج",
+          "reverse_charge_gl_account_id": "ریورس چارج GL",
+          "input_tax_claimable": "ان پٹ کلیم",
+          "exemption_certificate_required": "استثنیٰ سرٹیفکیٹ",
+          "effective_from_date": "سے مؤثر",
+          "effective_to_date": "تک مؤثر",
+          "description": "نوٹس",
+          "is_active": "حیثیت"
+        },
+        "list_columns": {
+          "tax_code": "ٹیکس کوڈ",
+          "tax_name": "نام",
+          "tax_type": "قسم",
+          "tax_rate": "شرح"
+        }
+      },
+      "vendor-master": {
+        "title": "وینڈر ماسٹر",
+        "fields": {
+          "vendor_code": "وینڈر کوڈ",
+          "vendor_name": "قانونی نام",
+          "contact_person": "رابطہ شخص",
+          "phone": "فون",
+          "email": "ای میل",
+          "address": "پتہ",
+          "payment_terms": "ادائیگی کی شرائط",
+          "currency_id": "کرنسی",
+          "tax_registration_number": "ٹیکس رجسٹریشن",
+          "bank_details": "بینک تفصیلات",
+          "credit_limit": "کریڈٹ حد",
+          "vendor_type": "وینڈر کی قسم",
+          "country_id": "ملک",
+          "is_active": "حیثیت"
+        },
+        "list_columns": {
+          "vendor_code": "کوڈ",
+          "vendor_name": "نام",
+          "vendor_type": "قسم"
+        }
+      },
+      "warehouse-master": {
+        "title": "گودام / مقام",
+        "fields": {
+          "warehouse_code": "گودام کوڈ",
+          "warehouse_name": "گودام نام",
+          "location_id": "کمپنی / برانچ",
+          "address": "پتہ",
+          "warehouse_type": "گودام کی قسم",
+          "storage_temperature_class": "درجہ حرارت کلاس",
+          "capacity": "گنجائش",
+          "is_active": "حیثیت"
+        },
+        "list_columns": {
+          "warehouse_code": "کوڈ",
+          "warehouse_name": "نام",
+          "warehouse_type": "قسم"
+        }
+      },
+      "zone-bin-master": {
+        "title": "زون / بن",
+        "fields": {
+          "warehouse_id": "گودام",
+          "zone_code": "زون کوڈ",
+          "zone_name": "زون نام",
+          "aisle": "الماری",
+          "bin_code": "بن کوڈ",
+          "bin_capacity": "بن گنجائش",
+          "temperature_class": "درجہ حرارت",
+          "is_active": "حیثیت"
+        },
+        "list_columns": {
+          "zone_code": "زون",
+          "zone_name": "نام",
+          "bin_code": "بن"
+        }
+      },
+      "country-master": {
+        "title": "ملک ماسٹر",
+        "fields": {
+          "country_code": "ملک کوڈ (ISO)",
+          "country_name": "ملک نام",
+          "currency_id": "طے شدہ کرنسی",
+          "tax_system": "ٹیکس نظام",
+          "customs_rules": "کسٹم قوانین",
+          "is_active": "حیثیت"
+        },
+        "list_columns": {
+          "country_code": "کوڈ",
+          "country_name": "ملک",
+          "tax_system": "ٹیکس"
+        }
+      },
+      "brand-master": {
+        "title": "برانڈ",
+        "fields": {
+          "brand_code": "برانڈ کوڈ",
+          "brand_name": "برانڈ نام",
+          "manufacturer": "بنانے والا",
+          "country_id": "اصل ملک",
+          "is_active": "حیثیت"
+        },
+        "list_columns": {
+          "brand_code": "کوڈ",
+          "brand_name": "نام",
+          "manufacturer": "بنانے والا"
+        }
+      },
+      "reason-code-master": {
+        "title": "وجہ کوڈ",
+        "fields": {
+          "reason_code": "وجہ کوڈ",
+          "reason_description": "تفصیل",
+          "reason_type": "قسم",
+          "default_gl_account_id": "طے شدہ GL",
+          "requires_approval": "منظوری درکار",
+          "is_active": "حیثیت"
+        },
+        "list_columns": {
+          "reason_code": "کوڈ",
+          "reason_description": "تفصیل",
+          "reason_type": "قسم"
+        }
+      },
+      "temperature-class-master": {
+        "title": "درجہ حرارت کلاس",
+        "fields": {
+          "class_code": "کلاس کوڈ",
+          "class_name": "کلاس نام",
+          "temperature_range": "درجہ حرارت رینج",
+          "storage_requirements": "اسٹوریج",
+          "monitoring_frequency": "نگرانی",
+          "is_active": "حیثیت"
+        },
+        "list_columns": {
+          "class_code": "کوڈ",
+          "class_name": "نام",
+          "temperature_range": "رینج"
+        }
+      },
+      "transporter-master": {
+        "title": "ٹرانسپورٹر",
+        "fields": {
+          "transporter_code": "کوڈ",
+          "transporter_name": "نام",
+          "contact_details": "رابطہ",
+          "vehicle_types": "گاڑی کی اقسام",
+          "service_area": "علاقہ",
+          "rating": "درجہ",
+          "is_active": "حیثیت"
+        },
+        "list_columns": {
+          "transporter_code": "کوڈ",
+          "transporter_name": "نام",
+          "rating": "درجہ"
+        }
+      },
+      "customer-master": {
+        "title": "کسٹمر ماسٹر",
+        "fields": {
+          "customer_code": "کسٹمر کوڈ",
+          "customer_name": "نام",
+          "contact_details": "رابطہ",
+          "credit_limit": "کریڈٹ حد",
+          "payment_terms": "ادائیگی",
+          "tax_registration": "ٹیکس رجسٹریشن",
+          "country_id": "ملک",
+          "currency_id": "کرنسی",
+          "is_active": "حیثیت"
+        },
+        "list_columns": {
+          "customer_code": "کوڈ",
+          "customer_name": "نام",
+          "credit_limit": "حد"
+        }
+      },
+      "package-type-master": {
+        "title": "پیکیج کی قسم",
+        "fields": {
+          "package_code": "کوڈ",
+          "package_name": "نام",
+          "dimensions": "ابعاد",
+          "weight_capacity": "وزن گنجائش",
+          "volume_capacity": "حجم",
+          "nesting_rule": "نیسٹنگ",
+          "is_active": "حیثیت"
+        },
+        "list_columns": {
+          "package_code": "کوڈ",
+          "package_name": "نام",
+          "dimensions": "ابعاد"
+        }
+      },
+      "barcode-type-master": {
+        "title": "بارکوڈ قسم",
+        "fields": {
+          "barcode_type": "قسم",
+          "format_pattern": "پیٹرن",
+          "length": "لمبائی",
+          "validation_rule": "توثیق",
+          "is_active": "حیثیت"
+        },
+        "list_columns": {
+          "barcode_type": "قسم",
+          "format_pattern": "پیٹرن",
+          "length": "لمبائی"
+        }
+      }
+    },
+    "option_sets": {
+      "uomTypeOptions": {
+        "Length": "لمبائی",
+        "Weight": "وزن",
+        "Volume": "حجم",
+        "Quantity": "مقدار",
+        "Time": "وقت",
+        "Area": "رقبہ",
+        "Other": "دیگر"
+      },
+      "taxTypeOptions": {
+        "gst": "GST",
+        "vat": "VAT",
+        "sales_tax": "سیلز ٹیکس",
+        "customs_duty": "کسٹم ڈیوٹی",
+        "withholding_tax": "روکے گئے ٹیکس",
+        "excise": "یکسائز",
+        "other": "دیگر"
+      },
+      "taxCalculationMethodOptions": {
+        "percentage_net": "خالص پر فیصد",
+        "percentage_gross": "مجموعی پر فیصد",
+        "fixed_amount": "مقررہ رقم",
+        "slab_based": "سلب"
+      },
+      "taxCategoryGroupOptions": {
+        "input_tax": "ان پٹ ٹیکس",
+        "output_tax": "آؤٹ پٹ ٹیکس",
+        "both": "دونوں"
+      },
+      "applicableOnOptions": {
+        "purchase": "خرید",
+        "sales": "فروخت",
+        "both": "دونوں"
+      },
+      "vendorTypeOptions": {
+        "local": "مقامی",
+        "import": "درآمد"
+      },
+      "warehouseTypeOptions": {
+        "main": "مرکزی",
+        "transit": "ٹرانزٹ",
+        "quarantine": "قرنطینہ"
+      },
+      "reasonTypeOptions": {
+        "adjustment": "تعدیل",
+        "return": "واپسی",
+        "transfer": "منتقلی",
+        "writeoff": "مسترد"
+      },
+      "taxSystemOptions": {
+        "gst": "GST",
+        "vat": "VAT",
+        "sales_tax": "سیلز ٹیکس"
+      },
+      "conversionDirectionOptions": {
+        "multiply": "ضرب",
+        "divide": "تقسیم"
+      },
+      "barcodeTypeOptions": {
+        "EAN-13": "EAN-13",
+        "UPC": "UPC",
+        "QR": "QR",
+        "Code128": "Code128"
+      }
     }
   },
   "uom_conversion": {
@@ -674,6 +1002,7 @@
       "bulk_delete_text": "آپ {count} تبدیلی(یاں) حذف کر رہے ہیں۔",
       "confirm_delete_conversion": "حذف: {from} → {to}؟ واپس نہیں۔",
       "multiply_label": "ضرب",
+      "divide_label": "تقسیم",
       "col_id": "ID",
       "col_from_uom": "سے UOM",
       "col_to_uom": "تا UOM",

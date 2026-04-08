@@ -11,10 +11,23 @@ export default function List() {
   const [search, setSearch] = useState(filters?.search || '');
   const [isActive, setIsActive] = useState(filters?.is_active ?? '');
 
+  const masterKey = config?.key || '';
+
+  const listTitle = useMemo(() => {
+    const k = `inventory.master_data.masters.${masterKey}.title`;
+    const v = t(k);
+    return v === k ? config?.title || ml('title_fallback') : v;
+  }, [t, masterKey, config?.title, ml]);
+
   const columns = useMemo(() => {
     const configured = config?.list_columns || {};
-    return Object.keys(configured).map((key) => ({ key, label: configured[key] }));
-  }, [config]);
+    return Object.keys(configured).map((key) => {
+      const lk = `inventory.master_data.masters.${masterKey}.list_columns.${key}`;
+      const lt = t(lk);
+      const label = lt === lk ? configured[key] : lt;
+      return { key, label };
+    });
+  }, [config, t, masterKey]);
 
   const pushQuery = (patch = {}) => {
     const params = new URLSearchParams(window.location.search);
@@ -47,7 +60,7 @@ export default function List() {
       <div className="rounded-xl bg-white shadow p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">{config?.title || ml('title_fallback')}</h1>
+            <h1 className="text-2xl font-semibold text-gray-900">{listTitle}</h1>
             <p className="text-sm text-gray-500">{ml('total_records', { count: items?.total || 0 })}</p>
           </div>
           {config?.key && (

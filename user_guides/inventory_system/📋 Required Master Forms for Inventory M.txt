@@ -1,6 +1,20 @@
 ---
 
+## ✅ Implementation status (masters phase)
+
+**Status:** Ye document ke andar wale **saray required master forms (FORM 1–17) implement ho chuke hain** — team ab **main / transactional forms** par shift ho rahi hai.
+
+**Agla focus:** `more_required_fields.md` — §5 **FORM 3 (Purchase Order)** se shuru karna (P2S flow), phir GRN, landed cost, waghera. **Item Master** wahan alag “primary item” form hai — masters complete hone ke baad uski field parity / sub-tables ab bhi priority ho sakti hai.
+
+**Cross-reference:** Technical tracker + dev guidelines → `user_guides/inventory_system/more_required_fields.md` (§5.0, §5.0.1).
+
+**UI alignment (code):** `inventory/master-data/*` screens use **`GeneralizedForm`** with **`inventory.master_data.masters.*`** + **`option_sets`** keys in `lang/en|ur/inventory.json` for labels (EN/UR). UOM master-data **FORM 1** fields match spec order: symbol, type, precision, base flag, description, status; `uom_type` values are **Length / Weight / …** (same as dedicated UOM Master page). Multi-tab vendor (FORM 4) and full warehouse (FORM 5) need future schema/UI phases beyond flat master-data.
+
+---
+
 ## 🔴 HIGH PRIORITY MASTERS
+
+*(Neeche specifications — implementation complete per status block above.)*
 
 ---
 
