@@ -6,6 +6,7 @@ Implement consistent bilingual translations (English + Urdu) across the full fro
 ## Current Status
 
 ### Completed and verified (update this list as pages pass QA EN/UR)
+- **Dashboards:** Accounts module home `resources/js/Pages/Modules/Accounts/index.jsx` (`/accounts/dashboard`; `modules.accounts.dashboard.*`, `modules.accounts.index.*`). Accounts dashboard financial drill-down `resources/js/Pages/Accounts/DashboardFinancialReport.jsx` (`accounts.dashboard_financial_report.*`, including `types.*` per `reportType` and `errors.*` for known server messages). System module home `resources/js/Pages/Modules/System/Dashboard.jsx` (`/system/dashboard`; `modules.system.dashboard.*`; top KPI numbers are static demo values). Dynamic module home `resources/js/Pages/Modules/Dynamic/index.jsx` (`/{module}/dashboard`, e.g. Inventory, Reports; shell `modules.dynamic.index.*` — **module title and menu labels come from DB**, not locale JSON).
 - Accounts reports (General Ledger, Trial Balance, Income Statement, Balance Sheet, Currency Ledger): Search + Report + Print / PrintView where applicable
 - Accounts/BankVoucher: Create + Show
 - Accounts/CashVoucher: Create + Show

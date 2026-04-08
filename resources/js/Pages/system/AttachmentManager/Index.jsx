@@ -314,10 +314,10 @@ export default function FileManagerIndex() {
   if (pageError) {
     return (
       <App>
-        <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-          <div className="bg-red-900/30 border border-red-700 rounded-lg p-6 flex items-center gap-3">
-            <AlertTriangle className="h-6 w-6 text-red-400" />
-            <p className="text-red-200">{pageError}</p>
+        <div className="min-h-[40vh] flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900">
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-6 flex items-center gap-3">
+            <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400 shrink-0" />
+            <p className="text-red-800 dark:text-red-200">{pageError}</p>
           </div>
         </div>
       </App>
@@ -326,27 +326,27 @@ export default function FileManagerIndex() {
 
   return (
     <App>
-      <div className="min-h-screen bg-gray-900 text-gray-100 flex">
+      <div className="advanced-module-manager flex min-h-[calc(100vh-10rem)] w-full overflow-hidden rounded-xl border border-gray-200 !p-0 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
         {/* Sidebar */}
-        <aside className="w-64 flex-shrink-0 bg-gray-800/80 border-r border-gray-700 flex flex-col">
-          <div className="p-4 border-b border-gray-700">
+        <aside className="w-64 flex-shrink-0 flex flex-col border-r border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/80">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
                 <User className="w-5 h-5" />
               </div>
               <div className="min-w-0">
-                <p className="font-medium truncate">{company?.company_name || t('system.attachment_manager.index.company_fallback')}</p>
-                <p className="text-xs text-gray-400 truncate">{t('system.attachment_manager.index.file_manager')}</p>
+                <p className="font-medium truncate text-gray-900 dark:text-gray-100">{company?.company_name || t('system.attachment_manager.index.company_fallback')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{t('system.attachment_manager.index.file_manager')}</p>
               </div>
             </div>
           </div>
           <nav className="p-2 flex-1 overflow-y-auto">
             <div className="flex items-center justify-between px-3 py-1.5">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('system.attachment_manager.index.folders')}</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('system.attachment_manager.index.folders')}</p>
               <button
                 type="button"
                 onClick={() => setNewFolderModalOpen(true)}
-                className="p-1.5 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white"
+                className="p-1.5 rounded-md text-gray-500 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                 title={t('system.attachment_manager.index.new_folder')}
               >
                 <FolderPlus className="w-4 h-4" />
@@ -355,7 +355,7 @@ export default function FileManagerIndex() {
             {folders.length === 0 ? (
               <button
                 onClick={() => setSelectedFolder('')}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left font-medium text-gray-300 hover:bg-gray-700"
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left font-medium text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 <FolderOpen className="w-5 h-5" />
                 {t('system.attachment_manager.index.folder_all_files')}
@@ -368,7 +368,7 @@ export default function FileManagerIndex() {
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left font-medium transition-colors ${
                     selectedFolder === folder.slug
                       ? 'bg-blue-600 text-white'
-                      : 'text-gray-300 hover:bg-gray-700'
+                      : 'text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700'
                   }`}
                 >
                   <FolderOpen className="w-5 h-5 flex-shrink-0" />
@@ -377,10 +377,10 @@ export default function FileManagerIndex() {
               ))
             )}
           </nav>
-          <div className="p-4 border-t border-gray-700 space-y-4">
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
             <div>
-              <p className="text-xs font-medium text-gray-400 mb-1">{t('system.attachment_manager.index.space')}</p>
-              <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{t('system.attachment_manager.index.space')}</p>
+              <div className="h-2 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
                 <div
                   className={`h-full rounded-full transition-all ${
                     isOverLimit ? 'bg-red-500' : isNearLimit ? 'bg-amber-500' : 'bg-blue-500'
@@ -388,44 +388,46 @@ export default function FileManagerIndex() {
                   style={{ width: `${percent}%` }}
                 />
               </div>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 {usedGiB} GiB / {limitGiB} GiB
               </p>
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-400 mb-1">{t('system.attachment_manager.index.files')}</p>
-              <p className="text-sm font-medium">{t('system.attachment_manager.index.items_count', { count: files.length })}</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{t('system.attachment_manager.index.files')}</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{t('system.attachment_manager.index.items_count', { count: files.length })}</p>
             </div>
           </div>
         </aside>
 
         {/* Main */}
-        <main className="flex-1 flex flex-col min-w-0">
-          {/* Top bar */}
-          <div className="h-14 border-b border-gray-700 flex items-center justify-between px-4 gap-4 flex-wrap">
-            <div className="relative flex-1 min-w-[200px] max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder={t('system.attachment_manager.index.search')}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+        <main className="flex min-w-0 flex-1 flex-col bg-white dark:bg-gray-900">
+          {/* Top bar — nowrap so Upload/actions stay aligned with the toolbar row, not wrapped under the table header */}
+          <div className="flex min-h-14 flex-nowrap items-center gap-3 overflow-x-auto border-b border-gray-200 px-4 py-2 dark:border-gray-700">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              <div className="relative max-w-md min-w-0 flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder={t('system.attachment_manager.index.search')}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                />
+              </div>
+              <select
+                value={fileTypeFilter}
+                onChange={(e) => setFileTypeFilter(e.target.value)}
+                className="w-[min(140px,40vw)] shrink-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 sm:w-auto sm:min-w-[120px]"
+              >
+                {fileTypeOptions.map((opt) => (
+                  <option key={opt.value || 'all'} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
             </div>
-            <select
-              value={fileTypeFilter}
-              onChange={(e) => setFileTypeFilter(e.target.value)}
-              className="px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[120px]"
-            >
-              {fileTypeOptions.map((opt) => (
-                <option key={opt.value || 'all'} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               <button
                 onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
-                className="p-2 rounded-lg hover:bg-gray-700 text-gray-400 hover:text-white"
+                className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                 title={viewMode === 'list' ? t('system.attachment_manager.index.view_grid') : t('system.attachment_manager.index.view_list')}
               >
                 {viewMode === 'list' ? <LayoutGrid className="w-5 h-5" /> : <List className="w-5 h-5" />}
@@ -433,7 +435,7 @@ export default function FileManagerIndex() {
               <button
                 onClick={() => !uploading && fileInputRef.current?.click()}
                 disabled={uploading}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium disabled:opacity-70 disabled:cursor-not-allowed"
+                className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70 sm:px-4 sm:text-base"
               >
                 {uploading ? (
                   <>
@@ -459,7 +461,7 @@ export default function FileManagerIndex() {
                 <>
                   <button
                     onClick={() => selected.forEach((fn) => { const f = files.find((x) => x.filename === fn); if (f) window.open(f.url, '_blank'); })}
-                    className="p-2 rounded-lg hover:bg-gray-700 text-gray-400 hover:text-white"
+                    className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                     title={t('system.attachment_manager.index.download_selected')}
                   >
                     <Download className="w-5 h-5" />
@@ -478,8 +480,10 @@ export default function FileManagerIndex() {
 
           {alert && (
             <div
-              className={`mx-4 mt-4 px-4 py-3 rounded-lg flex items-center justify-between ${
-                alert.type === 'success' ? 'bg-green-900/30 text-green-200' : 'bg-red-900/30 text-red-200'
+              className={`mx-4 mt-4 flex items-center justify-between rounded-lg px-4 py-3 ${
+                alert.type === 'success'
+                  ? 'bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200'
+                  : 'bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200'
               }`}
             >
               <span>{alert.message}</span>
@@ -491,18 +495,18 @@ export default function FileManagerIndex() {
 
           {/* Content */}
           <div
-            className={`flex-1 overflow-auto p-4 relative ${dragOver ? 'ring-2 ring-blue-500 ring-inset bg-blue-900/10' : ''}`}
+            className={`relative flex-1 overflow-auto p-4 ${dragOver ? 'bg-blue-50 ring-2 ring-inset ring-blue-500 dark:bg-blue-900/10' : ''}`}
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={onDrop}
           >
             {/* Full-area upload overlay so user sees upload in progress */}
             {uploading && (
-              <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-gray-900/80 backdrop-blur-sm">
-                <div className="flex flex-col items-center gap-4 p-6 bg-gray-800 rounded-2xl border border-gray-700 shadow-xl">
-                  <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                  <p className="text-lg font-medium text-white">{t('system.attachment_manager.index.uploading_files')}</p>
-                  <p className="text-sm text-gray-400">{t('system.attachment_manager.index.please_wait_do_not_close_the_page')}</p>
+              <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm dark:bg-gray-900/80">
+                <div className="flex flex-col items-center gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                  <div className="h-14 w-14 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+                  <p className="text-lg font-medium text-gray-900 dark:text-white">{t('system.attachment_manager.index.uploading_files')}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('system.attachment_manager.index.please_wait_do_not_close_the_page')}</p>
                 </div>
               </div>
             )}
@@ -513,12 +517,12 @@ export default function FileManagerIndex() {
             ) : (
               <>
                 {viewMode === 'list' ? (
-                  <div className="bg-gray-800/50 rounded-xl border border-gray-700 overflow-hidden">
+                  <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800/50">
                     <table className="w-full">
-                      <thead className="bg-gray-800 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      <thead className="bg-gray-100 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:bg-gray-800 dark:text-gray-400">
                         <tr>
                           <th className="px-4 py-3 w-10">
-                            <button onClick={selectAll} className="p-1 hover:bg-gray-700 rounded" disabled={!files.length}>
+                            <button onClick={selectAll} className="rounded p-1 hover:bg-gray-200 dark:hover:bg-gray-700" disabled={!files.length}>
                               {files.length > 0 && selected.length === files.length ? (
                                 <CheckSquare className="w-4 h-4 text-blue-400" />
                               ) : (
@@ -527,19 +531,19 @@ export default function FileManagerIndex() {
                             </button>
                           </th>
                           <th
-                            className="px-4 py-3 cursor-pointer hover:bg-gray-700"
+                            className="cursor-pointer px-4 py-3 hover:bg-gray-200 dark:hover:bg-gray-700"
                             onClick={() => { setSortBy('filename'); setSortAsc((s) => !s); }}
                           >
                             {t('system.attachment_manager.index.col_name')} {sortBy === 'filename' && (sortAsc ? '↑' : '↓')}
                           </th>
                           <th
-                            className="px-4 py-3 cursor-pointer hover:bg-gray-700 w-28"
+                            className="w-28 cursor-pointer px-4 py-3 hover:bg-gray-200 dark:hover:bg-gray-700"
                             onClick={() => { setSortBy('size'); setSortAsc((s) => !s); }}
                           >
                             {t('system.attachment_manager.index.col_size')} {sortBy === 'size' && (sortAsc ? '↑' : '↓')}
                           </th>
                           <th
-                            className="px-4 py-3 cursor-pointer hover:bg-gray-700 w-40 select-none"
+                            className="w-40 cursor-pointer select-none px-4 py-3 hover:bg-gray-200 dark:hover:bg-gray-700"
                             onClick={() => { setSortBy('last_modified'); setSortAsc((s) => !s); }}
                             title={t('system.attachment_manager.index.click_to_sort_by_last_modified')}
                           >
@@ -549,13 +553,13 @@ export default function FileManagerIndex() {
                           <th className="px-4 py-3 w-24 text-right">{t('system.attachment_manager.index.actions')}</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-700">
+                      <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                         {sortedFiles.map((f) => (
-                          <tr key={f.filename} className="hover:bg-gray-700/50">
+                          <tr key={f.filename} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                             <td className="px-4 py-2">
                               <button
                                 onClick={() => toggleSelect(f.filename)}
-                                className="p-1 hover:bg-gray-600 rounded"
+                                className="rounded p-1 hover:bg-gray-200 dark:hover:bg-gray-600"
                               >
                                 {selected.includes(f.filename) ? (
                                   <CheckSquare className="w-4 h-4 text-blue-400" />
@@ -567,25 +571,25 @@ export default function FileManagerIndex() {
                             <td className="px-4 py-2">
                               <div className="flex items-center gap-3">
                                 <span className="text-xl">{getFileIcon(f.file_type)}</span>
-                                <span className="font-medium truncate max-w-xs" title={f.filename}>
+                                <span className="max-w-xs truncate font-medium text-gray-900 dark:text-gray-100" title={f.filename}>
                                   {displayFileName(f)}
                                 </span>
                                 {f.folder_label && (
-                                  <span className="text-xs text-gray-500 truncate max-w-[120px]" title={f.folder_label}>
+                                  <span className="max-w-[120px] truncate text-xs text-gray-500" title={f.folder_label}>
                                     {f.folder_label}
                                   </span>
                                 )}
                               </div>
                             </td>
-                            <td className="px-4 py-2 text-gray-400">{formatFileSize(f.size)}</td>
-                            <td className="px-4 py-2 text-gray-400">
+                            <td className="px-4 py-2 text-gray-600 dark:text-gray-400">{formatFileSize(f.size)}</td>
+                            <td className="px-4 py-2 text-gray-600 dark:text-gray-400">
                               {formatRelativeTime(f.last_modified_ts ?? f.last_modified ?? f.voucher_date, t)}
                             </td>
                             <td className="px-4 py-2 text-right">
                               <a
                                 href={f.download_url || f.url}
                                 download
-                                className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded inline-block"
+                                className="inline-block rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
                                 title={t('system.attachment_manager.index.download')}
                               >
                                 <Download className="w-4 h-4" />
@@ -597,15 +601,15 @@ export default function FileManagerIndex() {
                     </table>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
                     {sortedFiles.map((f) => (
                       <div
                         key={f.filename}
-                        className="bg-gray-800/50 rounded-xl border border-gray-700 p-4 hover:bg-gray-700/50 flex flex-col items-center text-center"
+                        className="flex flex-col items-center rounded-xl border border-gray-200 bg-white p-4 text-center hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50 dark:hover:bg-gray-700/50"
                       >
                         <button
                           onClick={() => toggleSelect(f.filename)}
-                          className="self-start p-1 rounded hover:bg-gray-600"
+                          className="self-start rounded p-1 hover:bg-gray-200 dark:hover:bg-gray-600"
                         >
                           {selected.includes(f.filename) ? (
                             <CheckSquare className="w-4 h-4 text-blue-400" />
@@ -614,14 +618,14 @@ export default function FileManagerIndex() {
                           )}
                         </button>
                         <span className="text-4xl my-2">{getFileIcon(f.file_type)}</span>
-                        <p className="text-sm font-medium truncate w-full" title={f.filename}>
+                        <p className="w-full truncate text-sm font-medium text-gray-900 dark:text-gray-100" title={f.filename}>
                           {displayFileName(f)}
                         </p>
-                        <p className="text-xs text-gray-400 mt-1">{formatFileSize(f.size)}</p>
+                        <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">{formatFileSize(f.size)}</p>
                         <a
                           href={f.download_url || f.url}
                           download
-                          className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded mt-2 inline-block"
+                          className="mt-2 inline-block rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
                           title={t('system.attachment_manager.index.download')}
                         >
                           <Download className="w-4 h-4" />
@@ -632,10 +636,10 @@ export default function FileManagerIndex() {
                 )}
 
                 {!loading && files.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-                    <File className="w-16 h-16 mb-4 opacity-50" />
-                    <p className="text-lg font-medium">{t('system.attachment_manager.index.no_files_yet')}</p>
-                    <p className="text-sm mt-1">{t('system.attachment_manager.index.upload_files_or_they_will_appear_when_at')}</p>
+                  <div className="flex flex-col items-center justify-center py-20 text-gray-500 dark:text-gray-400">
+                    <File className="mb-4 h-16 w-16 opacity-50" />
+                    <p className="text-lg font-medium text-gray-800 dark:text-gray-200">{t('system.attachment_manager.index.no_files_yet')}</p>
+                    <p className="mt-1 text-sm">{t('system.attachment_manager.index.upload_files_or_they_will_appear_when_at')}</p>
                     <button
                       onClick={() => !uploading && fileInputRef.current?.click()}
                       disabled={uploading}
@@ -664,8 +668,8 @@ export default function FileManagerIndex() {
       {/* Upload modal (optional – we use direct input + drag-drop) */}
       {uploadModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-gray-800 rounded-xl border border-gray-700 w-full max-w-md p-6">
-            <h3 className="text-lg font-semibold mb-4">{t('system.attachment_manager.index.upload_files')}</h3>
+          <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{t('system.attachment_manager.index.upload_files')}</h3>
             <input
               type="file"
               multiple
@@ -677,13 +681,13 @@ export default function FileManagerIndex() {
                   handleUpload(Array.from(list), sub);
                 }
               }}
-              className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-600 file:text-white"
+              className="block w-full text-sm text-gray-600 file:mr-4 file:rounded file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-white dark:text-gray-400"
             />
-            {uploading && <p className="mt-2 text-sm text-gray-400">{t('system.attachment_manager.index.uploading')}</p>}
+            {uploading && <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{t('system.attachment_manager.index.uploading')}</p>}
             <div className="mt-4 flex justify-end gap-2">
               <button
                 onClick={() => setUploadModalOpen(false)}
-                className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600"
+                className="rounded-lg bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
               >
                 {t('common.actions.cancel')}
               </button>
@@ -695,9 +699,9 @@ export default function FileManagerIndex() {
       {/* New folder modal */}
       {newFolderModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => !creatingFolder && setNewFolderModalOpen(false)}>
-          <div className="bg-gray-800 rounded-xl border border-gray-700 w-full max-w-md p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <FolderPlus className="w-5 h-5" />
+          <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800" onClick={(e) => e.stopPropagation()}>
+            <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+              <FolderPlus className="h-5 w-5" />
               {t('system.attachment_manager.index.title_new_folder')}
             </h3>
             <input
@@ -705,14 +709,14 @@ export default function FileManagerIndex() {
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.target.value)}
               placeholder={t('system.attachment_manager.index.folder_name')}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
               onKeyDown={(e) => e.key === 'Enter' && handleCreateFolder()}
               autoFocus
             />
             <div className="mt-4 flex justify-end gap-2">
               <button
                 onClick={() => { setNewFolderModalOpen(false); setNewFolderName(''); }}
-                className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200"
+                className="rounded-lg bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
               >
                 {t('common.actions.cancel')}
               </button>

@@ -20,7 +20,36 @@ const DashboardFinancialReport = () => {
 
   const [fromDate, setFromDate] = useState(filters?.from_date || '');
   const [toDate, setToDate] = useState(filters?.to_date || '');
-  const { t } = useTranslations();
+  const { t, locale } = useTranslations();
+
+  const p = 'accounts.dashboard_financial_report';
+  const typeSlug = reportType ? String(reportType).replace(/-/g, '_') : '';
+  const typeFieldKey = (field) => `${p}.types.${typeSlug}.${field}`;
+  const trType = (field) => {
+    const key = typeFieldKey(field);
+    const value = t(key);
+    return value === key ? null : value;
+  };
+  const displayTitle =
+    trType('title') ?? reportTitle ?? t(`${p}.default_title`);
+  const displayDescription = trType('description') ?? reportDescription ?? '';
+  const ERROR_KEYS = {
+    'Company and Location information is required.': `${p}.errors.company_location_required`,
+    'Invalid report type requested.': `${p}.errors.invalid_report_type`,
+  };
+  const displayError = error
+    ? ERROR_KEYS[error]
+      ? t(ERROR_KEYS[error])
+      : error
+    : null;
+
+  const formatGeneratedAt = (isoOrSql) => {
+    if (!isoOrSql) return t(`${p}.generated_now`);
+    const d = new Date(isoOrSql);
+    if (Number.isNaN(d.getTime())) return t(`${p}.generated_now`);
+    const loc = locale === 'ur' ? 'ur-PK' : 'en-US';
+    return d.toLocaleString(loc, { dateStyle: 'medium', timeStyle: 'short' });
+  };
 
   const formatAmount = (amount) => {
     const value = Number(amount || 0);
@@ -61,16 +90,16 @@ const DashboardFinancialReport = () => {
             <div className="title-section">
               <h1 className="page-title">
                 <FileText className="title-icon" />
-                {reportTitle || 'Financial Report'}
+                {displayTitle}
               </h1>
               <div className="stats-summary">
                 <div className="stat-item">
                   <Building2 size={16} />
-                  <span>{company?.company_name || 'Company'}</span>
+                  <span>{company?.company_name || t(`${p}.default_company`)}</span>
                 </div>
                 <div className="stat-item">
                   <Calendar size={16} />
-                  <span>{generatedAt ? new Date(generatedAt).toLocaleString() : 'Generated now'}</span>
+                  <span>{formatGeneratedAt(generatedAt)}</span>
                 </div>
               </div>
             </div>
@@ -78,14 +107,16 @@ const DashboardFinancialReport = () => {
         </div>
 
         <div className="main-content p-6">
-          {error ? (
+          {displayError ? (
             <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300">
-              {error}
+              {displayError}
             </div>
           ) : (
             <>
               <div className="mb-6 rounded-xl border border-slate-600 bg-slate-800/40 p-4">
-                <p className="text-sm text-slate-300">{reportDescription}</p>
+                {displayDescription ? (
+                  <p className="text-sm text-slate-300">{displayDescription}</p>
+                ) : null}
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-xs text-slate-400 mb-1">{t('accounts.dashboard_financial_report.from_date')}</label>
@@ -111,7 +142,7 @@ const DashboardFinancialReport = () => {
                       onClick={handleApplyFilters}
                       className="w-full rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                     >
-                      Apply Date Filter
+                      {t(`${p}.apply_date_filter`)}
                     </button>
                   </div>
                 </div>
@@ -137,7 +168,7 @@ const DashboardFinancialReport = () => {
                 <table className="min-w-full divide-y divide-slate-600">
                   <thead className="bg-slate-700/60">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">#</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">{t(`${p}.col_number`)}</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">{t('accounts.dashboard_financial_report.account_code')}</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">{t('accounts.dashboard_financial_report.account_name')}</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">{t('accounts.dashboard_financial_report.account_type')}</th>
@@ -148,7 +179,7 @@ const DashboardFinancialReport = () => {
                     {accounts.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="px-4 py-8 text-center text-sm text-slate-400">
-                          No account data found for this report.
+                          {t(`${p}.no_accounts`)}
                         </td>
                       </tr>
                     ) : (
