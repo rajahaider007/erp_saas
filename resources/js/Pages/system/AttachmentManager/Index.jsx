@@ -17,9 +17,13 @@ import {
   Check,
   User,
   FolderPlus,
+  Pencil,
+  Save,
+  MoreVertical,
+  FilePenLine,
 } from 'lucide-react';
 import App from '../../App.jsx';
-import { router, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
 const formatFileSize = (bytes) => {
@@ -46,7 +50,7 @@ const formatRelativeTime = (dateStr, tr) => {
   return date.toLocaleDateString();
 };
 
-/** Map built-in folder slugs to i18n; custom / API folders use `label`. */
+/** Prefer i18n for well-known single-segment slugs; nested/dynamic folders use API `label` (disk paths = live public/storage tree). */
 function getAttachmentFolderLabel(folder, tr) {
   const slug = folder.slug ?? '';
   const keys = {
@@ -60,7 +64,10 @@ function getAttachmentFolderLabel(folder, tr) {
   if (Object.prototype.hasOwnProperty.call(keys, slug)) {
     return tr(keys[slug]);
   }
-  return folder.label || slug;
+  if (folder.label && String(folder.label).trim()) {
+    return folder.label;
+  }
+  return slug || tr('system.attachment_manager.index.folder_all_files');
 }
 
 const getFileIcon = (type) => {
@@ -72,6 +79,35 @@ const getFileIcon = (type) => {
   if (['zip'].includes(t)) return '📦';
   return '📎';
 };
+
+const EDITABLE_TEXT_EXT = new Set([
+  'txt', 'md', 'csv', 'json', 'xml', 'html', 'htm', 'css', 'js', 'cjs', 'mjs', 'php', 'vue', 'yaml', 'yml', 'ini', 'log', 'sql', 'sh', 'bat',
+]);
+
+const isGeneralStoragePath = (p) => typeof p === 'string' && (p === 'general' || p.startsWith('general/'));
+const fileIsEditable = (f) => EDITABLE_TEXT_EXT.has(String(f?.file_type || '').toLowerCase());
+
+/** Build user-visible message from upload API response (JSON, HTML, or parse errors). */
+function messageFromUploadResponse(data, status, parseFailed, t) {
+  if (parseFailed) {
+    if (status === 419) return t('system.attachment_manager.index.upload_error_csrf');
+    if (status === 413) return t('system.attachment_manager.index.upload_error_too_large');
+    const raw = typeof data === 'string' ? data.trim() : '';
+    if (raw.startsWith('<') || raw.includes('<!DOCTYPE')) {
+      return t('system.attachment_manager.index.upload_error_bad_response', { status });
+    }
+    return t('system.attachment_manager.index.upload_error_bad_response', { status });
+  }
+  const payload = data && typeof data === 'object' ? data : {};
+  const errVals =
+    payload.errors && typeof payload.errors === 'object'
+      ? Object.values(payload.errors).flat().filter((x) => x != null && String(x).trim() !== '')
+      : [];
+  if (errVals.length) return errVals.map(String).join(' ');
+  if (typeof payload.message === 'string' && payload.message.trim()) return payload.message.trim();
+  if (!status || status < 400) return t('system.attachment_manager.index.msg_upload_failed');
+  return t('system.attachment_manager.index.upload_error_bad_response', { status });
+}
 
 export default function FileManagerIndex() {
   const { storageInfo: initialStorage = {}, company, error: pageError } = usePage().props;
@@ -109,15 +145,18 @@ export default function FileManagerIndex() {
   const [newFolderModalOpen, setNewFolderModalOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [creatingFolder, setCreatingFolder] = useState(false);
-  const [folders, setFolders] = useState([
-    { slug: '' },
-    { slug: 'journal-voucher' },
-    { slug: 'cash-voucher' },
-    { slug: 'bank-voucher' },
-    { slug: 'opening-voucher' },
-    { slug: 'general' },
-  ]);
+  const [folders, setFolders] = useState([]);
+  const [folderMenuSlug, setFolderMenuSlug] = useState(null);
+  const [editor, setEditor] = useState({ open: false, path: '', content: '', loading: false, saving: false });
+  const [rename, setRename] = useState({ open: false, oldPath: '', isFolder: false, name: '' });
   const fileInputRef = useRef(null);
+
+  const csrfHeader = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+  const slugifyFolderSegment = (name) => {
+    const s = String(name).trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    return s || 'new-folder';
+  };
 
   const filters = { search, from_date: '', to_date: '', voucher_type: '', file_type: fileTypeFilter, folder: selectedFolder };
 
@@ -164,6 +203,13 @@ export default function FileManagerIndex() {
   useEffect(() => { loadFiles(); }, [search, selectedFolder, fileTypeFilter]);
   useEffect(() => { loadStorage(); }, [files.length]);
 
+  useEffect(() => {
+    if (folderMenuSlug === null) return undefined;
+    const onDoc = () => setFolderMenuSlug(null);
+    document.addEventListener('click', onDoc);
+    return () => document.removeEventListener('click', onDoc);
+  }, [folderMenuSlug]);
+
   const handleCreateFolder = async () => {
     const name = newFolderName.trim();
     if (!name) return;
@@ -178,7 +224,10 @@ export default function FileManagerIndex() {
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
           Accept: 'application/json',
         },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({
+          name,
+          parent: selectedFolder && selectedFolder.trim() !== '' ? selectedFolder.trim() : 'general',
+        }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -254,10 +303,12 @@ export default function FileManagerIndex() {
     }
   };
 
-  const handleUpload = async (fileList, subfolder = '') => {
+  const handleUpload = async (fileList) => {
     if (!fileList?.length) return;
+    const targetFolder =
+      selectedFolder && selectedFolder.trim() !== '' ? selectedFolder.trim() : 'general';
     const form = new FormData();
-    if (subfolder) form.append('folder', subfolder);
+    form.append('folder', targetFolder);
     for (let i = 0; i < fileList.length; i++) form.append('files[]', fileList[i]);
     setUploading(true);
     setAlert(null);
@@ -265,19 +316,49 @@ export default function FileManagerIndex() {
       const res = await fetch('/api/attachment-manager/upload', {
         method: 'POST',
         credentials: 'include',
-        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
+        headers: {
+          Accept: 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
         body: form,
       });
-      const data = await res.json();
-      if (res.ok) {
-        setAlert({ type: 'success', message: data.message });
+      const rawText = await res.text();
+      let data = null;
+      let parseFailed = false;
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        parseFailed = true;
+        data = rawText;
+      }
+
+      const success = res.ok && data && typeof data === 'object' && data.success !== false;
+
+      if (success) {
+        let msg = typeof data.message === 'string' ? data.message : '';
+        if (Array.isArray(data.errors) && data.errors.length) {
+          msg = [msg, ...data.errors].filter(Boolean).join(' — ');
+        }
+        setAlert({ type: 'success', message: msg || t('system.attachment_manager.index.msg_upload_failed') });
         setUploadModalOpen(false);
         await loadFiles();
         await loadStorage();
         if (fileInputRef.current) fileInputRef.current.value = '';
-      } else setAlert({ type: 'error', message: data.message || t('system.attachment_manager.index.msg_upload_failed') });
+      } else {
+        const detail = messageFromUploadResponse(data, res.status, parseFailed, t);
+        // Support: open DevTools → Console / Network on failure
+        console.warn('[AttachmentManager] Upload failed', {
+          httpStatus: res.status,
+          parseFailed,
+          bodyPreview: typeof rawText === 'string' ? rawText.slice(0, 500) : rawText,
+          parsed: parseFailed ? null : data,
+        });
+        setAlert({ type: 'error', message: detail });
+      }
     } catch (e) {
-      setAlert({ type: 'error', message: t('system.attachment_manager.index.msg_upload_failed') });
+      console.warn('[AttachmentManager] Upload network error', e);
+      setAlert({ type: 'error', message: t('system.attachment_manager.index.upload_error_network') });
     } finally {
       setUploading(false);
     }
@@ -286,8 +367,7 @@ export default function FileManagerIndex() {
   const onFileInputChange = (e) => {
     const list = e.target.files;
     if (list?.length) {
-      const subfolder = selectedFolder && selectedFolder.startsWith('general/') ? selectedFolder.replace(/^general\//, '') : '';
-      handleUpload(Array.from(list), subfolder);
+      handleUpload(Array.from(list));
     }
     e.target.value = '';
   };
@@ -298,8 +378,163 @@ export default function FileManagerIndex() {
     if (uploading) return;
     const list = e.dataTransfer?.files;
     if (list?.length) {
-      const subfolder = selectedFolder && selectedFolder.startsWith('general/') ? selectedFolder.replace(/^general\//, '') : '';
-      handleUpload(Array.from(list), subfolder);
+      handleUpload(Array.from(list));
+    }
+  };
+
+  const openTextEditor = async (f) => {
+    if (!fileIsEditable(f) || !isGeneralStoragePath(f.filename)) return;
+    setEditor({ open: true, path: f.filename, content: '', loading: true, saving: false });
+    try {
+      const res = await fetch(`/api/attachment-manager/file-content?${new URLSearchParams({ path: f.filename })}`, {
+        credentials: 'include',
+        headers: { Accept: 'application/json', 'X-CSRF-TOKEN': csrfHeader() },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) {
+        setAlert({ type: 'error', message: data.message || t('system.attachment_manager.index.msg_editor_load_failed') });
+        setEditor({ open: false, path: '', content: '', loading: false, saving: false });
+        return;
+      }
+      setEditor({ open: true, path: data.path || f.filename, content: data.content ?? '', loading: false, saving: false });
+    } catch {
+      setAlert({ type: 'error', message: t('system.attachment_manager.index.msg_editor_load_failed') });
+      setEditor({ open: false, path: '', content: '', loading: false, saving: false });
+    }
+  };
+
+  const saveTextEditor = async () => {
+    if (!editor.path) return;
+    setEditor((e) => ({ ...e, saving: true }));
+    try {
+      const res = await fetch('/api/attachment-manager/file-content/save', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'X-CSRF-TOKEN': csrfHeader(),
+        },
+        body: JSON.stringify({ path: editor.path, content: editor.content }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) {
+        setAlert({ type: 'error', message: data.message || t('system.attachment_manager.index.msg_editor_save_failed') });
+        setEditor((e) => ({ ...e, saving: false }));
+        return;
+      }
+      setAlert({ type: 'success', message: data.message || t('system.attachment_manager.index.msg_editor_saved') });
+      setEditor({ open: false, path: '', content: '', loading: false, saving: false });
+      loadFiles();
+    } catch {
+      setAlert({ type: 'error', message: t('system.attachment_manager.index.msg_editor_save_failed') });
+      setEditor((e) => ({ ...e, saving: false }));
+    }
+  };
+
+  const openRenameFile = (f) => {
+    if (!isGeneralStoragePath(f.filename)) return;
+    const base = f.filename.includes('/') ? f.filename.split('/').pop() : f.filename;
+    setRename({ open: true, oldPath: f.filename, isFolder: false, name: base || '' });
+  };
+
+  const openRenameFolder = (slug) => {
+    if (!slug || !slug.startsWith('general/')) return;
+    const base = slug.split('/').pop() || slug;
+    setRename({ open: true, oldPath: slug, isFolder: true, name: base || '' });
+  };
+
+  const submitRename = async () => {
+    const { oldPath, isFolder, name } = rename;
+    const parent = oldPath.includes('/') ? oldPath.slice(0, oldPath.lastIndexOf('/')) : '';
+    let segment = '';
+    if (isFolder) {
+      segment = slugifyFolderSegment(name);
+    } else {
+      segment = String(name).trim().replace(/[^a-zA-Z0-9._-]/g, '_');
+      const oldBase = oldPath.split('/').pop() || '';
+      const oldExt = oldBase.includes('.') ? oldBase.slice(oldBase.lastIndexOf('.')) : '';
+      if (oldExt && !segment.includes('.')) {
+        segment += oldExt;
+      }
+    }
+    if (!segment) {
+      setAlert({ type: 'error', message: t('system.attachment_manager.index.msg_rename_failed') });
+      return;
+    }
+    let newPath = '';
+    if (isFolder) {
+      newPath = parent ? `${parent}/${segment}` : `general/${segment}`;
+      if (!newPath.startsWith('general/')) {
+        newPath = `general/${segment}`;
+      }
+    } else {
+      const dir = oldPath.includes('/') ? oldPath.slice(0, oldPath.lastIndexOf('/')) : 'general';
+      newPath = `${dir}/${segment}`;
+    }
+    if (newPath === oldPath) {
+      setRename({ open: false, oldPath: '', isFolder: false, name: '' });
+      return;
+    }
+    try {
+      const res = await fetch('/api/attachment-manager/rename', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'X-CSRF-TOKEN': csrfHeader(),
+        },
+        body: JSON.stringify({ old_path: oldPath, new_path: newPath }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) {
+        setAlert({ type: 'error', message: data.message || t('system.attachment_manager.index.msg_rename_failed') });
+        return;
+      }
+      setAlert({ type: 'success', message: data.message || t('system.attachment_manager.index.msg_renamed') });
+      setRename({ open: false, oldPath: '', isFolder: false, name: '' });
+      if (selectedFolder === oldPath) {
+        setSelectedFolder(newPath);
+      }
+      loadFiles();
+    } catch {
+      setAlert({ type: 'error', message: t('system.attachment_manager.index.msg_rename_failed') });
+    }
+  };
+
+  const handleDeleteFolder = async (slug) => {
+    if (!slug || !slug.startsWith('general/')) return;
+    const count = files.filter((f) => f.filename === slug || f.filename.startsWith(`${slug}/`)).length;
+    const msg = count
+      ? t('system.attachment_manager.index.confirm_delete_folder_with_count', { count })
+      : t('system.attachment_manager.index.confirm_delete_folder');
+    if (!confirm(msg)) return;
+    try {
+      const res = await fetch('/api/attachment-manager/delete-folder', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'X-CSRF-TOKEN': csrfHeader(),
+        },
+        body: JSON.stringify({ path: slug }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) {
+        setAlert({ type: 'error', message: data.message || t('system.attachment_manager.index.msg_delete_folder_failed') });
+        return;
+      }
+      setAlert({ type: 'success', message: data.message || t('system.attachment_manager.index.msg_folder_deleted') });
+      setFolderMenuSlug(null);
+      if (selectedFolder === slug || selectedFolder.startsWith(`${slug}/`)) {
+        setSelectedFolder('general');
+      }
+      loadFiles();
+      loadStorage();
+    } catch {
+      setAlert({ type: 'error', message: t('system.attachment_manager.index.msg_delete_folder_failed') });
     }
   };
 
@@ -354,6 +589,7 @@ export default function FileManagerIndex() {
             </div>
             {folders.length === 0 ? (
               <button
+                type="button"
                 onClick={() => setSelectedFolder('')}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left font-medium text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700"
               >
@@ -362,18 +598,70 @@ export default function FileManagerIndex() {
               </button>
             ) : (
               folders.map((folder) => (
-                <button
-                  key={folder.slug}
-                  onClick={() => setSelectedFolder(folder.slug)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left font-medium transition-colors ${
-                    selectedFolder === folder.slug
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  <FolderOpen className="w-5 h-5 flex-shrink-0" />
-                  <span className="truncate">{getAttachmentFolderLabel(folder, t)}</span>
-                </button>
+                <div key={folder.slug ?? 'all'} className="mb-0.5 flex w-full items-center gap-0.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedFolder(folder.slug);
+                      setFolderMenuSlug(null);
+                    }}
+                    className={`flex min-w-0 flex-1 items-center gap-3 rounded-lg px-3 py-2.5 text-left font-medium transition-colors ${
+                      selectedFolder === folder.slug
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <FolderOpen className="h-5 w-5 flex-shrink-0" />
+                    <span className="truncate">{getAttachmentFolderLabel(folder, t)}</span>
+                  </button>
+                  {folder.slug && folder.slug.startsWith('general/') ? (
+                    <div className="relative shrink-0">
+                      <button
+                        type="button"
+                        title={t('system.attachment_manager.index.folder_actions')}
+                        className={`rounded-md p-1.5 ${
+                          selectedFolder === folder.slug
+                            ? 'text-white/90 hover:bg-white/10'
+                            : 'text-gray-500 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFolderMenuSlug((m) => (m === folder.slug ? null : folder.slug));
+                        }}
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </button>
+                      {folderMenuSlug === folder.slug ? (
+                        <div
+                          className="absolute right-0 z-30 mt-1 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-600 dark:bg-gray-800"
+                          onClick={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            className="block w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700"
+                            onClick={() => {
+                              openRenameFolder(folder.slug);
+                              setFolderMenuSlug(null);
+                            }}
+                          >
+                            {t('system.attachment_manager.index.rename_folder')}
+                          </button>
+                          <button
+                            type="button"
+                            className="block w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                            onClick={() => {
+                              setFolderMenuSlug(null);
+                              handleDeleteFolder(folder.slug);
+                            }}
+                          >
+                            {t('system.attachment_manager.index.delete_folder')}
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
               ))
             )}
           </nav>
@@ -550,7 +838,7 @@ export default function FileManagerIndex() {
                             {t('system.attachment_manager.index.col_last_modified')}
                             {sortBy === 'last_modified' && (sortAsc ? ' ↑' : ' ↓')}
                           </th>
-                          <th className="px-4 py-3 w-24 text-right">{t('system.attachment_manager.index.actions')}</th>
+                          <th className="px-4 py-3 w-36 text-right">{t('system.attachment_manager.index.actions')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -586,14 +874,36 @@ export default function FileManagerIndex() {
                               {formatRelativeTime(f.last_modified_ts ?? f.last_modified ?? f.voucher_date, t)}
                             </td>
                             <td className="px-4 py-2 text-right">
-                              <a
-                                href={f.download_url || f.url}
-                                download
-                                className="inline-block rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
-                                title={t('system.attachment_manager.index.download')}
-                              >
-                                <Download className="w-4 h-4" />
-                              </a>
+                              <div className="inline-flex items-center justify-end gap-0.5">
+                                <a
+                                  href={f.download_url || f.url}
+                                  download
+                                  className="inline-block rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
+                                  title={t('system.attachment_manager.index.download')}
+                                >
+                                  <Download className="h-4 w-4" />
+                                </a>
+                                {isGeneralStoragePath(f.filename) && fileIsEditable(f) ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => openTextEditor(f)}
+                                    className="inline-block rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
+                                    title={t('system.attachment_manager.index.edit_file')}
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </button>
+                                ) : null}
+                                {isGeneralStoragePath(f.filename) ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => openRenameFile(f)}
+                                    className="inline-block rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
+                                    title={t('system.attachment_manager.index.rename')}
+                                  >
+                                    <FilePenLine className="h-4 w-4" />
+                                  </button>
+                                ) : null}
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -622,14 +932,36 @@ export default function FileManagerIndex() {
                           {displayFileName(f)}
                         </p>
                         <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">{formatFileSize(f.size)}</p>
-                        <a
-                          href={f.download_url || f.url}
-                          download
-                          className="mt-2 inline-block rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
-                          title={t('system.attachment_manager.index.download')}
-                        >
-                          <Download className="w-4 h-4" />
-                        </a>
+                        <div className="mt-2 flex flex-wrap items-center justify-center gap-1">
+                          <a
+                            href={f.download_url || f.url}
+                            download
+                            className="inline-block rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
+                            title={t('system.attachment_manager.index.download')}
+                          >
+                            <Download className="h-4 w-4" />
+                          </a>
+                          {isGeneralStoragePath(f.filename) && fileIsEditable(f) ? (
+                            <button
+                              type="button"
+                              onClick={() => openTextEditor(f)}
+                              className="inline-block rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
+                              title={t('system.attachment_manager.index.edit_file')}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                          ) : null}
+                          {isGeneralStoragePath(f.filename) ? (
+                            <button
+                              type="button"
+                              onClick={() => openRenameFile(f)}
+                              className="inline-block rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
+                              title={t('system.attachment_manager.index.rename')}
+                            >
+                              <FilePenLine className="h-4 w-4" />
+                            </button>
+                          ) : null}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -639,7 +971,30 @@ export default function FileManagerIndex() {
                   <div className="flex flex-col items-center justify-center py-20 text-gray-500 dark:text-gray-400">
                     <File className="mb-4 h-16 w-16 opacity-50" />
                     <p className="text-lg font-medium text-gray-800 dark:text-gray-200">{t('system.attachment_manager.index.no_files_yet')}</p>
-                    <p className="mt-1 text-sm">{t('system.attachment_manager.index.upload_files_or_they_will_appear_when_at')}</p>
+                    <p className="mt-1 text-sm max-w-md text-center">{t('system.attachment_manager.index.upload_files_or_they_will_appear_when_at')}</p>
+                    {selectedFolder !== '' && (
+                      <>
+                        <p className="mt-4 max-w-lg px-4 text-center text-sm text-amber-800 dark:text-amber-200">
+                          {t('system.attachment_manager.index.empty_folder_filter_hint')}
+                        </p>
+                        <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedFolder('')}
+                            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
+                          >
+                            {t('system.attachment_manager.index.btn_show_all_files')}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedFolder('general')}
+                            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
+                          >
+                            {t('system.attachment_manager.index.btn_show_general_root')}
+                          </button>
+                        </div>
+                      </>
+                    )}
                     <button
                       onClick={() => !uploading && fileInputRef.current?.click()}
                       disabled={uploading}
@@ -677,8 +1032,7 @@ export default function FileManagerIndex() {
               onChange={(e) => {
                 const list = e.target.files;
                 if (list?.length) {
-                  const sub = selectedFolder && selectedFolder.startsWith('general/') ? selectedFolder.replace(/^general\//, '') : '';
-                  handleUpload(Array.from(list), sub);
+                  handleUpload(Array.from(list));
                 }
               }}
               className="block w-full text-sm text-gray-600 file:mr-4 file:rounded file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-white dark:text-gray-400"
@@ -690,6 +1044,106 @@ export default function FileManagerIndex() {
                 className="rounded-lg bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
               >
                 {t('common.actions.cancel')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Text editor modal */}
+      {editor.open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={() => !editor.saving && !editor.loading && setEditor({ open: false, path: '', content: '', loading: false, saving: false })}
+        >
+          <div
+            className="flex max-h-[90vh] w-full max-w-4xl flex-col rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+              <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+                <FileText className="h-5 w-5" />
+                {t('system.attachment_manager.index.title_edit_file')}
+                <span className="ml-2 truncate text-sm font-normal text-gray-500 dark:text-gray-400">{editor.path}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => !editor.saving && !editor.loading && setEditor({ open: false, path: '', content: '', loading: false, saving: false })}
+                className="rounded p-1 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="min-h-[200px] flex-1 overflow-hidden p-4">
+              {editor.loading ? (
+                <div className="flex justify-center py-12">
+                  <div className="h-10 w-10 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+                </div>
+              ) : (
+                <textarea
+                  value={editor.content}
+                  onChange={(e) => setEditor((ed) => ({ ...ed, content: e.target.value }))}
+                  className="h-[min(60vh,480px)] w-full resize-y rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 font-mono text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                  spellCheck={false}
+                />
+              )}
+            </div>
+            <div className="flex justify-end gap-2 border-t border-gray-200 px-4 py-3 dark:border-gray-700">
+              <button
+                type="button"
+                disabled={editor.loading || editor.saving}
+                onClick={() => setEditor({ open: false, path: '', content: '', loading: false, saving: false })}
+                className="rounded-lg bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 disabled:opacity-50"
+              >
+                {t('common.actions.cancel')}
+              </button>
+              <button
+                type="button"
+                disabled={editor.loading || editor.saving}
+                onClick={saveTextEditor}
+                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {editor.saving ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                {t('system.attachment_manager.index.btn_save_file')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rename modal */}
+      {rename.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setRename({ open: false, oldPath: '', isFolder: false, name: '' })}>
+          <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800" onClick={(e) => e.stopPropagation()}>
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{t('system.attachment_manager.index.title_rename')}</h3>
+            <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
+              {rename.isFolder ? t('system.attachment_manager.index.hint_folder_rename') : t('system.attachment_manager.index.hint_file_rename')}
+            </p>
+            <input
+              type="text"
+              value={rename.name}
+              onChange={(e) => setRename((r) => ({ ...r, name: e.target.value }))}
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+              onKeyDown={(e) => e.key === 'Enter' && submitRename()}
+              autoFocus
+            />
+            <p className="mt-2 truncate text-xs text-gray-400 dark:text-gray-500" title={rename.oldPath}>
+              {rename.oldPath}
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setRename({ open: false, oldPath: '', isFolder: false, name: '' })}
+                className="rounded-lg bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+              >
+                {t('common.actions.cancel')}
+              </button>
+              <button type="button" onClick={submitRename} className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700">
+                {t('system.attachment_manager.index.rename')}
               </button>
             </div>
           </div>

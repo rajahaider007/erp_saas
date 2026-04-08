@@ -445,6 +445,10 @@ Route::prefix('api/attachment-manager')->middleware('web.auth')->group(function 
     Route::post('/upload', [App\Http\Controllers\system\AttachmentManagerController::class, 'upload']);
     Route::post('/create-folder', [App\Http\Controllers\system\AttachmentManagerController::class, 'createFolder']);
     Route::post('/delete', [App\Http\Controllers\system\AttachmentManagerController::class, 'deleteAttachments']);
+    Route::post('/rename', [App\Http\Controllers\system\AttachmentManagerController::class, 'renameItem']);
+    Route::post('/delete-folder', [App\Http\Controllers\system\AttachmentManagerController::class, 'deleteFolder']);
+    Route::get('/file-content', [App\Http\Controllers\system\AttachmentManagerController::class, 'getFileContent']);
+    Route::post('/file-content/save', [App\Http\Controllers\system\AttachmentManagerController::class, 'saveFileContent']);
     Route::get('/storage-usage', [App\Http\Controllers\system\AttachmentManagerController::class, 'storageUsage']);
 });
 

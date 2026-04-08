@@ -91,4 +91,13 @@ return [
 
     'attachments_internal_base' => 'internal-storage',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Attachment URLs shown in the app (Attachment Manager, vouchers, upload API)
+    |--------------------------------------------------------------------------
+    | route   — https://your-app.test/attachments/serve/... (auth middleware; Laravel streams the file)
+    | storage — https://your-app.test/storage/... (same files as public/storage → storage/app/public; often used on Hostinger when the symlink is the canonical public URL)
+    */
+    'attachment_public_url_mode' => env('ATTACHMENT_PUBLIC_URL_MODE', 'route'),
+
 ];

@@ -56,8 +56,13 @@ const { t } = useTranslations();
 };
 
 const JournalVoucherCreate = () => {
-  const { accounts = [], voucher = null, entries = [], flash, currencies = [], company = null, preview_voucher_number = null, attachments: initialAttachments = [], currentPeriod = null } = usePage().props;
+  const { accounts = [], voucher = null, entries = [], flash, currencies = [], company = null, preview_voucher_number = null, attachments: initialAttachments = [], currentPeriod = null, attachmentPublicUrlMode = 'route' } = usePage().props;
   const { t } = useTranslations();
+  const attachmentFallbackHref = (att) => {
+    const p = typeof att === 'string' ? att : (att?.id || att?.filename || '');
+    if (!p) return '#';
+    return attachmentPublicUrlMode === 'storage' ? `/storage/${p}` : `/attachments/serve/${p}`;
+  };
   const isEdit = !!voucher;
   const autoVoucherNumbering = true; // Always auto-generate voucher numbers
   
@@ -954,7 +959,7 @@ const JournalVoucherCreate = () => {
                                 </div>
                                 <div className="flex items-center gap-1 flex-shrink-0">
                                   <a
-                                    href={attachment.url || `/attachments/serve/${attachment}`}
+                                    href={attachment.url || attachmentFallbackHref(attachment)}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="p-1 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-colors"

@@ -35,19 +35,33 @@ class StorageService
 
     /**
      * URL for an attachment (relative path e.g. journal-voucher/file.pdf or general/sub/file.pdf).
-     * Uses Laravel route attachments/serve/ so the request is never served by the public/storage
-     * symlink (which would 404 for paths like voucher-attachments/general/...). Prevents 404 and corrupted downloads.
+     *
+     * Mode "route" (default): /attachments/serve/... — requires auth; Laravel streams from disk.
+     * Mode "storage": /storage/... — uses the public disk URL (public/storage symlink); URLs match live paths like public/storage/general/.
      */
     public static function attachmentUrl(string $relativePath): string
     {
         $relativePath = ltrim($relativePath, '/');
+        $mode = config('filesystems.attachment_public_url_mode', 'route');
+
+        if ($mode === 'storage') {
+            if ($relativePath === '') {
+                return rtrim((string) config('filesystems.disks.public.url'), '/');
+            }
+
+            return Storage::disk('public')->url($relativePath);
+        }
+
         if ($relativePath === '') {
             return url('attachments/serve');
         }
+
         return url('attachments/serve/' . $relativePath);
     }
 
-    /** URL prefix for voucher attachment links. Use attachmentUrl() when path may be general. */
+    /**
+     * @deprecated Prefer attachmentUrl($path). Prefix alone cannot represent storage-mode URLs.
+     */
     public static function attachmentUrlPrefix(): string
     {
         return 'attachments/serve/';

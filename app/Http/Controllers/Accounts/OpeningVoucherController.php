@@ -552,7 +552,7 @@ class OpeningVoucherController extends Controller
                         $attachments[] = [
                             'id' => $attachmentId,
                             'original_name' => $attachmentId,
-                            'url' => url(StorageService::attachmentUrlPrefix() . $attachmentId),
+                            'url' => StorageService::attachmentUrl($attachmentId),
                             'size' => filesize($filePath)
                         ];
                     } else {
@@ -572,7 +572,7 @@ class OpeningVoucherController extends Controller
                                 $attachments[] = [
                                     'id' => $fileName,
                                     'original_name' => $originalFileName, // Use the original filename
-                                    'url' => url(StorageService::attachmentUrlPrefix() . $fileName),
+                                    'url' => StorageService::attachmentUrl($fileName),
                                     'size' => filesize($file)
                                 ];
                                 break;
@@ -593,7 +593,7 @@ class OpeningVoucherController extends Controller
                                     $attachments[] = [
                                         'id' => $fileName,
                                         'original_name' => $originalFileName,
-                                        'url' => url(StorageService::attachmentUrlPrefix() . $fileName),
+                                        'url' => StorageService::attachmentUrl($fileName),
                                         'size' => filesize($file)
                                     ];
                                     break;
@@ -629,7 +629,7 @@ class OpeningVoucherController extends Controller
                                 $attachments[] = [
                                     'id' => $selectedFile['name'],
                                     'original_name' => $originalFileName,
-                                    'url' => url(StorageService::attachmentUrlPrefix() . $selectedFile['name']),
+                                    'url' => StorageService::attachmentUrl($selectedFile['name']),
                                     'size' => filesize($selectedFile['file'])
                                 ];
                             }

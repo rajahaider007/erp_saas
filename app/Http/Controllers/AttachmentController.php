@@ -85,7 +85,7 @@ class AttachmentController extends Controller
                         'path' => $path,
                         'size' => $file->getSize(),
                         'mime_type' => $file->getMimeType(),
-                        'url' => url(StorageService::attachmentUrlPrefix() . $relativeId),
+                        'url' => StorageService::attachmentUrl($relativeId),
                         'form_slug' => $formSlug,
                     ];
                     
@@ -130,7 +130,7 @@ class AttachmentController extends Controller
                     'path' => $path,
                     'size' => $file->getSize(),
                     'mime_type' => $file->getMimeType(),
-                    'url' => url(StorageService::attachmentUrlPrefix() . $relativeId),
+                    'url' => StorageService::attachmentUrl($relativeId),
                     'form_slug' => $formSlug,
                 ];
                 
@@ -373,7 +373,7 @@ class AttachmentController extends Controller
                                 'id' => $attachmentId,
                                 'name' => $attachmentId,
                                 'size' => filesize($filePath),
-                                'url' => url(StorageService::attachmentUrlPrefix() . $attachmentId),
+                                'url' => StorageService::attachmentUrl($attachmentId),
                                 'download_url' => url('/attachments/download/' . $attachmentId)
                             ];
                         }

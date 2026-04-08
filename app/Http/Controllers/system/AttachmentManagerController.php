@@ -77,29 +77,7 @@ class AttachmentManagerController extends Controller
         
         try {
             $attachments = $this->getFilteredAttachments($compId, $filters);
-            $folders = [
-                ['slug' => '', 'label' => 'All files'],
-                ['slug' => 'journal-voucher', 'label' => 'Journal Voucher'],
-                ['slug' => 'cash-voucher', 'label' => 'Cash Voucher'],
-                ['slug' => 'bank-voucher', 'label' => 'Bank Voucher'],
-                ['slug' => 'opening-voucher', 'label' => 'Opening Voucher'],
-                ['slug' => 'general', 'label' => 'General / Uploads'],
-            ];
-            $generalPath = storage_path('app/public/general');
-            if (!is_dir($generalPath)) {
-                @mkdir($generalPath, 0755, true);
-            }
-            if (is_dir($generalPath)) {
-                $entries = @scandir($generalPath) ?: [];
-                foreach ($entries as $entry) {
-                    if ($entry !== '.' && $entry !== '..' && is_dir($generalPath . DIRECTORY_SEPARATOR . $entry)) {
-                        $customSlug = 'general/' . $entry;
-                        if (!in_array($customSlug, array_column($folders, 'slug'), true)) {
-                            $folders[] = ['slug' => $customSlug, 'label' => ucfirst(str_replace(['-', '_'], ' ', $entry))];
-                        }
-                    }
-                }
-            }
+            $folders = $this->buildDynamicFolderList($compId);
             return response()->json([
                 'success' => true,
                 'data' => $attachments,
@@ -200,41 +178,66 @@ class AttachmentManagerController extends Controller
 
         $uploaded = [];
         $errors = [];
-        $subfolder = $request->input('folder', '');
-        $subfolder = preg_replace('/[^a-z0-9_-]/', '', strtolower($subfolder));
-        $formSlug = $subfolder ? 'general/' . $subfolder : 'general';
+        $formSlug = self::normalizePublicSubpath($request->input('folder'), true);
+        if ($formSlug === null) {
+            return response()->json(['success' => false, 'message' => 'Invalid folder path.'], 422);
+        }
 
         foreach ($request->file('files') as $file) {
-            $check = StorageService::canUploadFile($compId, $file->getSize());
-            if (!$check['can_upload']) {
-                $errors[] = $file->getClientOriginalName() . ': Storage limit exceeded.';
-                continue;
+            try {
+                $check = StorageService::canUploadFile($compId, $file->getSize());
+                if (!$check['can_upload']) {
+                    $errors[] = $file->getClientOriginalName().': Storage limit exceeded.';
+
+                    continue;
+                }
+
+                $filename = time().'_'.uniqid().'_'.preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+                Storage::disk('public')->makeDirectory($formSlug);
+                $path = $file->storeAs($formSlug, $filename, 'public');
+                if ($path === false) {
+                    $errors[] = $file->getClientOriginalName().': Could not save file to storage.';
+
+                    continue;
+                }
+                $storageFilename = $formSlug.'/'.$filename;
+
+                CompanyFile::create([
+                    'comp_id' => $compId,
+                    'storage_filename' => $storageFilename,
+                    'original_name' => $file->getClientOriginalName(),
+                    'file_size' => $file->getSize(),
+                    'mime_type' => $file->getMimeType(),
+                ]);
+
+                $uploaded[] = [
+                    'filename' => $storageFilename,
+                    'original_name' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
+                    'url' => StorageService::attachmentUrl($storageFilename),
+                ];
+            } catch (\Throwable $e) {
+                Log::error('Attachment manager upload single file failed', [
+                    'company_id' => $compId,
+                    'original' => $file->getClientOriginalName(),
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                $errors[] = $file->getClientOriginalName().': '.$e->getMessage();
             }
+        }
 
-            $filename = time() . '_' . uniqid() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
-            Storage::disk('public')->makeDirectory($formSlug);
-            $path = $file->storeAs($formSlug, $filename, 'public');
-            $storageFilename = $formSlug . '/' . $filename;
-
-            CompanyFile::create([
-                'comp_id' => $compId,
-                'storage_filename' => $storageFilename,
-                'original_name' => $file->getClientOriginalName(),
-                'file_size' => $file->getSize(),
-                'mime_type' => $file->getMimeType(),
-            ]);
-
-            $uploaded[] = [
-                'filename' => $storageFilename,
-                'original_name' => $file->getClientOriginalName(),
-                'size' => $file->getSize(),
-                'url' => StorageService::attachmentUrl($storageFilename),
-            ];
+        if (count($uploaded) === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => count($errors) ? implode(' ', $errors) : 'No files could be saved.',
+                'errors' => $errors,
+            ], 422);
         }
 
         return response()->json([
             'success' => true,
-            'message' => count($uploaded) . ' file(s) uploaded.',
+            'message' => count($uploaded).' file(s) uploaded.',
             'uploaded' => $uploaded,
             'errors' => $errors,
         ]);
@@ -273,7 +276,9 @@ class AttachmentManagerController extends Controller
      */
     private static function folderFromFilename($filename)
     {
+        $filename = str_replace('\\', '/', (string) $filename);
         $dir = pathinfo($filename, PATHINFO_DIRNAME);
+        $dir = str_replace('\\', '/', (string) $dir);
         $slug = ($dir === '' || $dir === '.') ? 'general' : $dir;
         $labels = [
             'journal-voucher' => 'Journal Voucher',
@@ -287,7 +292,7 @@ class AttachmentManagerController extends Controller
     }
 
     /**
-     * Create a new folder under general (for file manager)
+     * Create a new folder under a parent path inside storage/app/public (same tree as public/storage on Hostinger).
      */
     public function createFolder(Request $request)
     {
@@ -302,7 +307,14 @@ class AttachmentManagerController extends Controller
         }
         $slug = preg_replace('/[^a-z0-9_-]/', '-', strtolower(trim($name)));
         $slug = trim(preg_replace('/-+/', '-', $slug), '-') ?: 'new-folder';
-        $path = 'general/' . $slug;
+
+        $parentRaw = $request->input('parent', 'general');
+        $parentPath = self::normalizePublicSubpath($parentRaw, true);
+        if ($parentPath === null || $parentPath === '') {
+            return response()->json(['success' => false, 'message' => 'Invalid parent folder'], 422);
+        }
+
+        $path = $parentPath.'/'.$slug;
         if (Storage::disk('public')->exists($path)) {
             return response()->json(['success' => false, 'message' => 'A folder with this name already exists'], 422);
         }
@@ -310,8 +322,485 @@ class AttachmentManagerController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Folder created',
-            'folder' => ['slug' => 'general/' . $slug, 'label' => trim($name)],
+            'folder' => ['slug' => $path, 'label' => trim($name)],
         ]);
+    }
+
+    /**
+     * Folders for sidebar: disk under storage/app/public + paths from this company's attachments (Hostinger: public_html/public/storage/…).
+     */
+    private function buildDynamicFolderList(?int $compId): array
+    {
+        $slugSet = [];
+        foreach ($this->collectFolderSlugsFromDisk() as $slug) {
+            self::addPathParentsToSet($slug, $slugSet);
+        }
+        foreach ($this->collectFolderSlugsFromDb($compId) as $slug) {
+            self::addPathParentsToSet($slug, $slugSet);
+        }
+        $slugSet['general'] = true;
+
+        $slugs = array_keys($slugSet);
+        natcasesort($slugs);
+        $slugs = array_values($slugs);
+
+        $folders = [['slug' => '', 'label' => 'All files']];
+        foreach ($slugs as $slug) {
+            $folders[] = [
+                'slug' => $slug,
+                'label' => self::humanizeFolderLabel($slug),
+            ];
+        }
+
+        return $folders;
+    }
+
+    private static function addPathParentsToSet(string $relPath, array &$set): void
+    {
+        $relPath = trim(str_replace('\\', '/', $relPath), '/');
+        if ($relPath === '') {
+            return;
+        }
+        $parts = explode('/', $relPath);
+        $acc = '';
+        foreach ($parts as $p) {
+            if ($p === '' || ($p[0] ?? '') === '.') {
+                return;
+            }
+            if (! preg_match('/^[a-zA-Z0-9_-]+$/', $p)) {
+                return;
+            }
+            $acc = $acc === '' ? $p : $acc.'/'.$p;
+            $set[$acc] = true;
+        }
+    }
+
+    private function collectFolderSlugsFromDisk(): array
+    {
+        $base = storage_path('app/public');
+        $out = [];
+        if (! is_dir($base)) {
+            return $out;
+        }
+        try {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($base, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::SELF_FIRST
+            );
+            foreach ($iterator as $file) {
+                if (! $file->isDir()) {
+                    continue;
+                }
+                $full = $file->getPathname();
+                $rel = substr($full, strlen($base) + 1);
+                if ($rel === false || $rel === '') {
+                    continue;
+                }
+                $rel = str_replace('\\', '/', $rel);
+                foreach (explode('/', $rel) as $seg) {
+                    if ($seg !== '' && isset($seg[0]) && $seg[0] === '.') {
+                        continue 2;
+                    }
+                }
+                if (! preg_match('#^[a-zA-Z0-9_./-]+$#', $rel)) {
+                    continue;
+                }
+                $out[] = $rel;
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Attachment folder disk scan failed', ['error' => $e->getMessage()]);
+        }
+
+        return array_unique($out);
+    }
+
+    /**
+     * @return list<string> directory slugs (no trailing slash)
+     */
+    private function collectFolderSlugsFromDb(?int $compId): array
+    {
+        if (! $compId) {
+            return [];
+        }
+        $slqs = [];
+        foreach ($this->collectAttachmentPathsForCompany($compId) as $fn) {
+            $fn = str_replace('\\', '/', (string) $fn);
+            if (! $this->attachmentPathExistsOnDisk($fn)) {
+                continue;
+            }
+            $dir = dirname($fn);
+            if ($dir === '.' || $dir === '') {
+                $slqs[] = 'general';
+            } else {
+                $slqs[] = $dir;
+            }
+        }
+
+        return array_values(array_unique($slqs));
+    }
+
+    /**
+     * True if a DB attachment path still exists on disk (avoids sidebar "Internal Storage / …" when live disk only has general/).
+     */
+    private function attachmentPathExistsOnDisk(string $relativePath): bool
+    {
+        $relativePath = ltrim(str_replace('\\', '/', $relativePath), '/');
+        if ($relativePath === '') {
+            return false;
+        }
+        if (file_exists(StorageService::attachmentFullPath($relativePath))) {
+            return true;
+        }
+        if (strpos($relativePath, '..') === false) {
+            $alt = storage_path('app/public/voucher-attachments/'.$relativePath);
+
+            return file_exists($alt);
+        }
+
+        return false;
+    }
+
+    /**
+     * File-manager operations (rename, edit, delete folder) are limited to General uploads tree so voucher/internal-storage paths are not broken accidentally.
+     */
+    private static function isGeneralManagedRelativePath(string $path): bool
+    {
+        $path = trim(str_replace('\\', '/', $path), '/');
+        if ($path === '' || str_contains($path, '..')) {
+            return false;
+        }
+        if ($path === 'general') {
+            return true;
+        }
+
+        return str_starts_with($path, 'general/');
+    }
+
+    /** @var list<string> */
+    private const EDITABLE_TEXT_EXTENSIONS = ['txt', 'md', 'csv', 'json', 'xml', 'html', 'htm', 'css', 'js', 'cjs', 'mjs', 'php', 'vue', 'yaml', 'yml', 'ini', 'log', 'sql', 'sh', 'bat'];
+
+    private const EDITABLE_FILE_MAX_BYTES = 2097152;
+
+    public function renameItem(Request $request)
+    {
+        $this->requirePermission($request, 'system.attachment-manager.index', 'can_add');
+
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        if (! $compId) {
+            return response()->json(['success' => false, 'message' => 'Company context required'], 403);
+        }
+
+        $oldRaw = $request->input('old_path');
+        $newRaw = $request->input('new_path');
+        $oldPath = self::normalizePublicStoragePath($oldRaw);
+        $newPath = self::normalizePublicStoragePath($newRaw);
+        if ($oldPath === null || $oldPath === '' || $newPath === null || $newPath === '') {
+            return response()->json(['success' => false, 'message' => 'Invalid path.'], 422);
+        }
+        if (! self::isGeneralManagedRelativePath($oldPath) || ! self::isGeneralManagedRelativePath($newPath)) {
+            return response()->json(['success' => false, 'message' => 'Rename is only allowed under General / Uploads.'], 422);
+        }
+        if ($oldPath === 'general') {
+            return response()->json(['success' => false, 'message' => 'The main “General” folder cannot be renamed.'], 422);
+        }
+
+        $disk = Storage::disk('public');
+        if ($disk->exists($newPath)) {
+            return response()->json(['success' => false, 'message' => 'A file or folder with that name already exists.'], 422);
+        }
+
+        $oldFull = storage_path('app/public/'.$oldPath);
+        if (! file_exists($oldFull)) {
+            return response()->json(['success' => false, 'message' => 'Source not found.'], 404);
+        }
+
+        try {
+            if (is_file($oldFull)) {
+                $disk->makeDirectory(dirname($newPath));
+                if (! $disk->move($oldPath, $newPath)) {
+                    return response()->json(['success' => false, 'message' => 'Could not move file.'], 500);
+                }
+                $this->rewriteAttachmentPathEverywhere($compId, $oldPath, $newPath);
+            } elseif (is_dir($oldFull)) {
+                $this->renameGeneralFolderTree($disk, $compId, $oldPath, $newPath);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Not a file or folder.'], 422);
+            }
+
+            return response()->json(['success' => true, 'message' => 'Renamed successfully.', 'path' => $newPath]);
+        } catch (\Throwable $e) {
+            Log::error('Attachment manager rename failed', ['error' => $e->getMessage(), 'old' => $oldPath, 'new' => $newPath]);
+            return response()->json(['success' => false, 'message' => 'Rename failed: '.$e->getMessage()], 500);
+        }
+    }
+
+    public function deleteFolder(Request $request)
+    {
+        $this->requirePermission($request, 'system.attachment-manager.index', 'can_delete');
+
+        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
+        if (! $compId) {
+            return response()->json(['success' => false, 'message' => 'Company context required'], 403);
+        }
+
+        $folder = self::normalizePublicStoragePath($request->input('path'));
+        if ($folder === null || $folder === '' || $folder === 'general') {
+            return response()->json(['success' => false, 'message' => 'Invalid folder or protected root.'], 422);
+        }
+        if (! str_starts_with($folder, 'general/')) {
+            return response()->json(['success' => false, 'message' => 'Only folders under General / Uploads can be deleted here.'], 422);
+        }
+
+        $full = storage_path('app/public/'.$folder);
+        if (! is_dir($full)) {
+            return response()->json(['success' => false, 'message' => 'Folder not found.'], 404);
+        }
+
+        try {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($full, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::CHILD_FIRST
+            );
+            $files = [];
+            foreach ($iterator as $file) {
+                if ($file->isFile()) {
+                    $rel = str_replace('\\', '/', substr($file->getPathname(), strlen(storage_path('app/public')) + 1));
+                    $files[] = $rel;
+                }
+            }
+            $deleted = 0;
+            foreach ($files as $rel) {
+                if ($this->deleteAttachment($compId, $rel)) {
+                    $deleted++;
+                }
+            }
+            $disk = Storage::disk('public');
+            if ($disk->exists($folder)) {
+                $disk->deleteDirectory($folder);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Folder deleted.',
+                'files_removed' => $deleted,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Attachment manager delete folder failed', ['error' => $e->getMessage(), 'folder' => $folder]);
+            return response()->json(['success' => false, 'message' => 'Could not delete folder: '.$e->getMessage()], 500);
+        }
+    }
+
+    public function getFileContent(Request $request)
+    {
+        $this->requirePermission($request, 'system.attachment-manager.index', 'can_view');
+
+        $path = self::normalizePublicStoragePath($request->query('path'));
+        if ($path === null || $path === '') {
+            return response()->json(['success' => false, 'message' => 'Invalid path.'], 422);
+        }
+        if (! self::isGeneralManagedRelativePath($path) || $path === 'general') {
+            return response()->json(['success' => false, 'message' => 'Editing is only for files under General / Uploads.'], 422);
+        }
+
+        $full = storage_path('app/public/'.$path);
+        if (! is_file($full)) {
+            return response()->json(['success' => false, 'message' => 'File not found.'], 404);
+        }
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        if ($ext === '') {
+            return response()->json(['success' => false, 'message' => 'File has no extension.'], 422);
+        }
+        if (! \in_array($ext, self::EDITABLE_TEXT_EXTENSIONS, true)) {
+            return response()->json(['success' => false, 'message' => 'This file type cannot be edited in the browser.'], 422);
+        }
+
+        $size = filesize($full);
+        if ($size > self::EDITABLE_FILE_MAX_BYTES) {
+            return response()->json(['success' => false, 'message' => 'File is too large to edit here (max 2 MB).'], 422);
+        }
+
+        $content = file_get_contents($full);
+        if ($content === false) {
+            return response()->json(['success' => false, 'message' => 'Could not read file.'], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'path' => $path,
+            'content' => $content,
+            'mime' => @mime_content_type($full) ?: 'text/plain',
+        ]);
+    }
+
+    public function saveFileContent(Request $request)
+    {
+        $this->requirePermission($request, 'system.attachment-manager.index', 'can_edit');
+
+        $path = self::normalizePublicStoragePath($request->input('path'));
+        if ($path === null || $path === '') {
+            return response()->json(['success' => false, 'message' => 'Invalid path.'], 422);
+        }
+        if (! self::isGeneralManagedRelativePath($path) || $path === 'general') {
+            return response()->json(['success' => false, 'message' => 'Saving is only for files under General / Uploads.'], 422);
+        }
+
+        $full = storage_path('app/public/'.$path);
+        if (! is_file($full)) {
+            return response()->json(['success' => false, 'message' => 'File not found.'], 404);
+        }
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        if (! \in_array($ext, self::EDITABLE_TEXT_EXTENSIONS, true)) {
+            return response()->json(['success' => false, 'message' => 'This file type cannot be saved from the editor.'], 422);
+        }
+
+        $content = $request->input('content');
+        if (! \is_string($content)) {
+            return response()->json(['success' => false, 'message' => 'Invalid content.'], 422);
+        }
+        if (strlen($content) > self::EDITABLE_FILE_MAX_BYTES) {
+            return response()->json(['success' => false, 'message' => 'Content exceeds maximum size (2 MB).'], 422);
+        }
+
+        $ok = false;
+        $tmp = $full.'.tmp.'.uniqid('', true);
+        if (file_put_contents($tmp, $content) !== false) {
+            $ok = rename($tmp, $full);
+        }
+        if (is_file($tmp)) {
+            @unlink($tmp);
+        }
+        if (! $ok) {
+            return response()->json(['success' => false, 'message' => 'Could not save file.'], 500);
+        }
+
+        return response()->json(['success' => true, 'message' => 'File saved.']);
+    }
+
+    /**
+     * @return list<string> storage paths relative to storage/app/public
+     */
+    private function collectAttachmentPathsForCompany(int $compId): array
+    {
+        $paths = [];
+        foreach (DB::table('company_files')->where('comp_id', $compId)->pluck('storage_filename') as $fn) {
+            if ($fn) {
+                $paths[] = $fn;
+            }
+        }
+        $entryIds = DB::table('transaction_entries')
+            ->join('transactions', 'transaction_entries.transaction_id', '=', 'transactions.id')
+            ->where('transactions.comp_id', $compId)
+            ->whereNotNull('transaction_entries.attachment_id')
+            ->pluck('transaction_entries.attachment_id');
+        foreach ($entryIds as $fn) {
+            if ($fn) {
+                $paths[] = $fn;
+            }
+        }
+        $jsonRows = DB::table('transactions')
+            ->where('comp_id', $compId)
+            ->whereNotNull('attachments')
+            ->pluck('attachments');
+        foreach ($jsonRows as $json) {
+            $arr = json_decode($json, true);
+            if (is_array($arr)) {
+                foreach ($arr as $fn) {
+                    if ($fn) {
+                        $paths[] = $fn;
+                    }
+                }
+            }
+        }
+
+        return $paths;
+    }
+
+    private static function humanizeFolderLabel(string $slug): string
+    {
+        $slug = str_replace('\\', '/', $slug);
+        $parts = explode('/', $slug);
+        $out = [];
+        foreach ($parts as $p) {
+            if ($p === '') {
+                continue;
+            }
+            $out[] = ucwords(str_replace(['-', '_'], ' ', $p));
+        }
+        $line = implode(' / ', $out);
+        $map = [
+            'general' => 'General / Uploads',
+            'journal-voucher' => 'Journal Voucher',
+            'cash-voucher' => 'Cash Voucher',
+            'bank-voucher' => 'Bank Voucher',
+            'opening-voucher' => 'Opening Voucher',
+        ];
+        if (isset($map[$slug])) {
+            return $map[$slug];
+        }
+
+        return $line !== '' ? $line : $slug;
+    }
+
+    /**
+     * Allowed relative path under Laravel public disk (matches live public/storage/...).
+     *
+     * @return string|null null if invalid
+     */
+    private static function normalizePublicSubpath($raw, bool $defaultToGeneral): ?string
+    {
+        $raw = trim(str_replace('\\', '/', (string) $raw), '/');
+        if ($raw === '') {
+            return $defaultToGeneral ? 'general' : '';
+        }
+        if (str_contains($raw, '..')) {
+            return null;
+        }
+        $segments = array_values(array_filter(explode('/', $raw), fn ($s) => $s !== ''));
+        if (count($segments) > 32) {
+            return null;
+        }
+        foreach ($segments as $seg) {
+            if ($seg === '' || ($seg[0] ?? '') === '.' || ! preg_match('/^[a-zA-Z0-9_-]+$/', $seg)) {
+                return null;
+            }
+        }
+
+        return implode('/', $segments);
+    }
+
+    /**
+     * Path under storage/app/public for files and folders (last segment may include dots, e.g. general/foo.pdf).
+     */
+    private static function normalizePublicStoragePath($raw): ?string
+    {
+        $raw = trim(str_replace('\\', '/', (string) $raw), '/');
+        if ($raw === '' || str_contains($raw, '..')) {
+            return null;
+        }
+        $segments = array_values(array_filter(explode('/', $raw), fn ($s) => $s !== ''));
+        if (count($segments) > 32) {
+            return null;
+        }
+        $n = count($segments);
+        foreach ($segments as $i => $seg) {
+            if ($seg === '' || ($seg[0] ?? '') === '.') {
+                return null;
+            }
+            $isLast = $i === $n - 1;
+            if ($isLast) {
+                if (! preg_match('/^[a-zA-Z0-9._-]+$/', $seg)) {
+                    return null;
+                }
+            } else {
+                if (! preg_match('/^[a-zA-Z0-9_-]+$/', $seg)) {
+                    return null;
+                }
+            }
+        }
+
+        return implode('/', $segments);
     }
 
     /**
@@ -598,6 +1087,90 @@ class AttachmentManagerController extends Controller
             }
         }
         return $out;
+    }
+
+    private function renameGeneralFolderTree(\Illuminate\Contracts\Filesystem\Filesystem $disk, int $compId, string $oldPath, string $newPath): void
+    {
+        $oldBase = storage_path('app/public/'.$oldPath);
+        if (! is_dir($oldBase)) {
+            throw new \RuntimeException('Folder not found.');
+        }
+
+        $files = [];
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($oldBase, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+        foreach ($iterator as $file) {
+            if ($file->isFile()) {
+                $rel = str_replace('\\', '/', substr($file->getPathname(), strlen(storage_path('app/public')) + 1));
+                $files[] = $rel;
+            }
+        }
+
+        if (count($files) === 0) {
+            if (! @rename($oldBase, storage_path('app/public/'.$newPath))) {
+                throw new \RuntimeException('Could not rename empty folder.');
+            }
+
+            return;
+        }
+
+        usort($files, fn ($a, $b) => strlen($b) <=> strlen($a));
+        foreach ($files as $rel) {
+            $suffix = substr($rel, strlen($oldPath));
+            $dest = $newPath.$suffix;
+            $disk->makeDirectory(dirname($dest));
+            if (! $disk->move($rel, $dest)) {
+                throw new \RuntimeException('Could not move: '.$rel);
+            }
+            $this->rewriteAttachmentPathEverywhere($compId, $rel, $dest);
+        }
+
+        if ($disk->exists($oldPath)) {
+            $disk->deleteDirectory($oldPath);
+        }
+    }
+
+    private function rewriteAttachmentPathEverywhere(int $compId, string $oldPath, string $newPath): void
+    {
+        DB::table('company_files')
+            ->where('comp_id', $compId)
+            ->where('storage_filename', $oldPath)
+            ->update(['storage_filename' => $newPath]);
+
+        $entryIds = DB::table('transaction_entries as te')
+            ->join('transactions as t', 'te.transaction_id', '=', 't.id')
+            ->where('t.comp_id', $compId)
+            ->where('te.attachment_id', $oldPath)
+            ->pluck('te.id');
+        if ($entryIds->isNotEmpty()) {
+            DB::table('transaction_entries')->whereIn('id', $entryIds)->update(['attachment_id' => $newPath]);
+        }
+
+        $transactions = DB::table('transactions')
+            ->where('comp_id', $compId)
+            ->whereNotNull('attachments')
+            ->get();
+
+        foreach ($transactions as $transaction) {
+            $attachments = json_decode($transaction->attachments, true);
+            if (! is_array($attachments)) {
+                continue;
+            }
+            $changed = false;
+            foreach ($attachments as $i => $id) {
+                if ($id === $oldPath) {
+                    $attachments[$i] = $newPath;
+                    $changed = true;
+                }
+            }
+            if ($changed) {
+                DB::table('transactions')
+                    ->where('id', $transaction->id)
+                    ->update(['attachments' => json_encode(array_values($attachments))]);
+            }
+        }
     }
 
     /**
