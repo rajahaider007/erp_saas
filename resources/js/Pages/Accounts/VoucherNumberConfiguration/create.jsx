@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Type, Hash, Home, List, Plus, Settings, Calendar, ArrowLeft } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import App from "../../App.jsx";
@@ -6,7 +6,7 @@ import { router, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
 // Professional Breadcrumbs Component
-const Breadcrumbs = ({ items }) => {
+const Breadcrumbs = ({ items, description }) => {
   return (
     <div className="breadcrumbs-themed">
       <nav className="breadcrumbs">
@@ -53,52 +53,52 @@ const Breadcrumbs = ({ items }) => {
         ))}
       </nav>
 
-      <div className="breadcrumbs-description">
-        Navigate through your application modules
-      </div>
+      <div className="breadcrumbs-description">{description}</div>
     </div>
   );
 };
 
 // Create/Edit Voucher Number Configuration Form Component
 const CreateVoucherNumberConfigurationForm = () => {
-const { t } = useTranslations();
+  const { t } = useTranslations();
   const { errors: pageErrors, flash, id, edit_mode, editMode, configuration } = usePage().props;
   const configurationId = configuration?.id || id;
   const isEdit = (edit_mode || editMode) && !!configurationId;
-  
-  const voucherFields = [
+
+  const tc = (k, rep = {}) => t(`accounts.voucher_number_configuration.create.${k}`, rep);
+
+  const voucherFields = useMemo(() => [
     {
       name: 'voucher_type',
-      label: 'Voucher Type',
+      label: tc('lbl_voucher_type'),
       type: 'select',
-      placeholder: 'Select voucher type',
+      placeholder: tc('ph_voucher_type'),
       icon: Type,
       required: true,
       options: [
-        { value: 'Journal', label: 'Journal Voucher' },
-        { value: 'Opening', label: 'Opening Voucher' },
-        { value: 'Payment', label: 'Payment Voucher' },
-        { value: 'Receipt', label: 'Receipt Voucher' },
-        { value: 'Bank Payment', label: 'Bank Payment Voucher' },
-        { value: 'Bank Receipt', label: 'Bank Receipt Voucher' },
-        { value: 'Purchase', label: 'Purchase Voucher' },
-        { value: 'Sales', label: 'Sales Voucher' }
+        { value: 'Journal', label: tc('opt_journal') },
+        { value: 'Opening', label: tc('opt_opening') },
+        { value: 'Payment', label: tc('opt_payment') },
+        { value: 'Receipt', label: tc('opt_receipt') },
+        { value: 'Bank Payment', label: tc('opt_bank_payment') },
+        { value: 'Bank Receipt', label: tc('opt_bank_receipt') },
+        { value: 'Purchase', label: tc('opt_purchase') },
+        { value: 'Sales', label: tc('opt_sales') }
       ]
     },
     {
       name: 'prefix',
-      label: 'Prefix',
+      label: tc('lbl_prefix'),
       type: 'text',
-      placeholder: 'Enter prefix (e.g., JV, PV, RV)',
+      placeholder: tc('ph_prefix'),
       icon: Hash,
       required: true
     },
     {
       name: 'number_length',
-      label: 'Number Length',
+      label: tc('lbl_number_length'),
       type: 'number',
-      placeholder: 'Enter number length',
+      placeholder: tc('ph_number_length'),
       icon: Hash,
       required: true,
       min: 1,
@@ -106,49 +106,46 @@ const { t } = useTranslations();
     },
     {
       name: 'running_number',
-      label: 'Starting Number',
+      label: tc('lbl_running_number'),
       type: 'number',
-      placeholder: 'Enter starting number',
+      placeholder: tc('ph_running_number'),
       icon: Hash,
       required: true,
       min: 1
     },
     {
       name: 'reset_frequency',
-      label: 'Reset Frequency',
+      label: tc('lbl_reset_frequency'),
       type: 'select',
-      placeholder: 'Select reset frequency',
+      placeholder: tc('ph_reset_frequency'),
       icon: Calendar,
       required: true,
       options: [
-        { value: 'Monthly', label: 'Monthly' },
-        { value: 'Yearly', label: 'Yearly' },
-        { value: 'Never', label: 'Never' }
+        { value: 'Monthly', label: tc('opt_monthly') },
+        { value: 'Yearly', label: tc('opt_yearly') },
+        { value: 'Never', label: tc('opt_never') }
       ]
     },
     {
       name: 'is_active',
-      label: 'Status',
+      label: tc('lbl_status'),
       type: 'toggle',
       required: false
     }
-  ];
+  ], [t]);
 
   // State for debugging and tracking
-  const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
-  const [requestStatus, setRequestStatus] = useState('');
 
   // Handle page errors from Laravel
   useEffect(() => {
     if (pageErrors && Object.keys(pageErrors).length > 0) {
-      setErrors(pageErrors);
       setAlert({
         type: 'error',
-        message: t('accounts.voucher_number_configuration.create.msg_please_correct_the_errors_below_and_try_')
+        message: tc('msg_please_correct_the_errors_below_and_try_')
       });
     }
-  }, [pageErrors]);
+  }, [pageErrors, t]);
 
   // Handle flash messages
   useEffect(() => {
@@ -166,37 +163,33 @@ const { t } = useTranslations();
   }, [flash]);
 
   const handleVoucherSubmit = async (submittedFormData) => {
-    setErrors({});
     setAlert(null);
-    setRequestStatus('Sending request...');
 
     try {
       // Client-side validation
       const newErrors = {};
 
       if (!submittedFormData.voucher_type || !submittedFormData.voucher_type.trim()) {
-        newErrors.voucher_type = 'Voucher type is required';
+        newErrors.voucher_type = tc('val_voucher_type_required');
       }
 
       if (!submittedFormData.prefix || !submittedFormData.prefix.trim()) {
-        newErrors.prefix = 'Prefix is required';
+        newErrors.prefix = tc('val_prefix_required');
       }
 
       if (!submittedFormData.number_length || submittedFormData.number_length < 1) {
-        newErrors.number_length = 'Number length must be at least 1';
+        newErrors.number_length = tc('val_number_length_required');
       }
 
       if (!submittedFormData.running_number || submittedFormData.running_number < 1) {
-        newErrors.running_number = 'Starting number must be at least 1';
+        newErrors.running_number = tc('val_running_number_required');
       }
 
       if (Object.keys(newErrors).length > 0) {
-        setErrors(newErrors);
         setAlert({
           type: 'error',
-          message: t('accounts.voucher_number_configuration.create.msg_please_correct_the_errors_below_and_try_')
+          message: tc('msg_please_correct_the_errors_below_and_try_')
         });
-        setRequestStatus('Validation failed');
         return;
       }
 
@@ -222,31 +215,17 @@ const { t } = useTranslations();
       return await new Promise((resolve, reject) => {
         router.post(url, formDataToSend, {
           forceFormData: true,
-          onStart: () => {
-            setRequestStatus('Request started');
-          },
-          onProgress: () => {
-            setRequestStatus('Uploading...');
-          },
           onSuccess: () => {
-            setRequestStatus('Success');
             resolve(true);
           },
-          onError: (errors) => {
-            console.log('Server validation errors:', errors);
-            setRequestStatus('Server validation failed');
-            setErrors(errors);
+          onError: (_errs) => {
             reject(new Error('Validation failed'));
           },
-          onFinish: () => {
-            setRequestStatus('Request finished');
-          }
+          onFinish: () => {}
         });
       });
 
     } catch (error) {
-      console.error('Form submission error:', error);
-      setRequestStatus('Exception: ' + error.message);
       throw error;
     }
   };
@@ -254,17 +233,17 @@ const { t } = useTranslations();
   // Breadcrumb items configuration
   const breadcrumbItems = [
     {
-      label: 'Dashboard',
+      label: t('common.breadcrumbs.dashboard'),
       icon: Home,
       href: '/dashboard'
     },
     {
-      label: 'Voucher Configuration',
+      label: tc('breadcrumb_voucher_configuration'),
       icon: List,
       href: '/accounts/voucher-number-configuration'
     },
     {
-      label: isEdit ? 'Edit Configuration' : 'Add Configuration',
+      label: isEdit ? tc('breadcrumb_edit') : tc('breadcrumb_add'),
       icon: Plus,
       href: null
     }
@@ -273,17 +252,17 @@ const { t } = useTranslations();
   return (
     <div>
       {/* Professional Breadcrumbs */}
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs items={breadcrumbItems} description={tc('navigate_through_your_application_modules')} />
 
 
       {/* FIXED: Simplified GeneralizedForm usage */}
       <GeneralizedForm
-        title={isEdit ? "Edit Voucher Configuration" : "Add Voucher Configuration"}
-        subtitle={isEdit ? "Update voucher number configuration settings" : "Create a new voucher number configuration for your application"}
+        title={isEdit ? tc('title_edit') : tc('title_add')}
+        subtitle={isEdit ? tc('subtitle_edit') : tc('subtitle_add')}
         fields={voucherFields}
         onSubmit={handleVoucherSubmit}
-        submitText={isEdit ? "Update Configuration" : "Create Configuration"}
-        resetText="Clear Form"
+        submitText={isEdit ? tc('submit_edit') : tc('submit_add')}
+        resetText={t('common.form_actions.clear_form')}
         initialData={isEdit && configuration ? {
           voucher_type: configuration.voucher_type || '',
           prefix: configuration.prefix || '',

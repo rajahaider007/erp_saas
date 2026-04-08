@@ -13,10 +13,11 @@ const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, conf
 }};
 
 const List = () => {
-  const { t } = useTranslations();
-  const tl = (key, rep) => (rep ? t(`system.companies.list.${key}`, rep) : t(`system.companies.list.${key}`));
-  const td = (key, rep) => (rep ? t(`common.data_table.${key}`, rep) : t(`common.data_table.${key}`));
-  const { companies: paginated, flash, filters } = usePage().props;
+  const { t, locale } = useTranslations();
+  const tl = (key, rep = {}) => t(`system.companies.list.${key}`, rep);
+  const td = (key, rep = {}) => t(`common.data_table.${key}`, rep);
+  const tf = (key, rep = {}) => t(`common.flash.${key}`, rep);
+  const { companies: paginated, flash, filters, pageTitle } = usePage().props;
   const [search, setSearch] = useState(filters?.search || '');
   const [statusFilter, setStatusFilter] = useState(filters?.status || '');
 
@@ -34,8 +35,21 @@ const List = () => {
   }, [applyFilters]);
 
   useEffect(() => {
-    if (flash?.success) CustomAlert.fire({ title: t('common.flash.success_title'), text: flash.success, icon: 'success' });
-    else if (flash?.error) CustomAlert.fire({ title: t('common.flash.error_title'), text: flash.error, icon: 'error' });
+    if (flash?.success) {
+      CustomAlert.fire({
+        title: tf('success_title'),
+        text: flash.success,
+        icon: 'success',
+        confirmButtonText: tf('great'),
+      });
+    } else if (flash?.error) {
+      CustomAlert.fire({
+        title: tf('error_title'),
+        text: flash.error,
+        icon: 'error',
+        confirmButtonText: tf('ok'),
+      });
+    }
   }, [flash, t]);
 
   const handleDelete = (company) => {
@@ -54,39 +68,49 @@ const List = () => {
   const handleSelectRow = (id, checked) => { if (checked) setSelected(prev=>[...prev, id]); else setSelected(prev=>prev.filter(x=>x!==id)); };
   const handleBulkDelete = () => {
     if (!selected.length) return;
+    const bulkCount = selected.length;
+    const ids = [...selected];
     CustomAlert.fire({
       title: td('bulk_delete_title'),
-      text: td('bulk_delete_text', { count: selected.length }),
+      text: td('bulk_delete_text', { count: bulkCount }),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: td('bulk_delete_ok'),
       cancelButtonText: t('common.actions.cancel'),
-      onConfirm: () => router.post('/system/companies/bulk-destroy', { ids: selected }, { onSuccess: () => setSelected([]) }),
+      onConfirm: () => router.post('/system/companies/bulk-destroy', { ids }, { onSuccess: () => setSelected([]) }),
     });
   };
   const handleBulkStatusChange = (status) => {
     if (!selected.length) return;
+    const bulkCount = selected.length;
+    const ids = [...selected];
     if (status) {
       CustomAlert.fire({
         title: td('bulk_status_activate_title'),
-        text: td('bulk_status_activate_text', { count: selected.length }),
+        text: td('bulk_status_activate_text', { count: bulkCount }),
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: td('bulk_status_activate_ok'),
         cancelButtonText: t('common.actions.cancel'),
-        onConfirm: () => router.post('/system/companies/bulk-status', { ids: selected, status }, { onSuccess: () => setSelected([]) }),
+        onConfirm: () => router.post('/system/companies/bulk-status', { ids, status }, { onSuccess: () => setSelected([]) }),
       });
     } else {
       CustomAlert.fire({
         title: td('bulk_status_deactivate_title'),
-        text: td('bulk_status_deactivate_text', { count: selected.length }),
+        text: td('bulk_status_deactivate_text', { count: bulkCount }),
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: td('bulk_status_deactivate_ok'),
         cancelButtonText: t('common.actions.cancel'),
-        onConfirm: () => router.post('/system/companies/bulk-status', { ids: selected, status }, { onSuccess: () => setSelected([]) }),
+        onConfirm: () => router.post('/system/companies/bulk-status', { ids, status }, { onSuccess: () => setSelected([]) }),
       });
     }
+  };
+
+  const formatDateTime = (iso) => {
+    if (!iso) return '';
+    const loc = locale === 'ur' ? 'ur-PK' : undefined;
+    return new Date(iso).toLocaleString(loc);
   };
 
   return (
@@ -95,7 +119,7 @@ const List = () => {
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
-              <h1 className="page-title"><Building2 className="title-icon" />{usePage().props?.pageTitle || t('system.companies.create.breadcrumb_companies')}</h1>
+              <h1 className="page-title"><Building2 className="title-icon" />{pageTitle || tl('page_title_fallback')}</h1>
               <div className="stats-summary">
                 <div className="stat-item"><span>{td('stat_total', { count: paginated?.total || 0 })}</span></div>
                 <div className="stat-item"><span>{td('stat_active', { count: paginated?.data?.filter(c=>c.status).length || 0 })}</span></div>
@@ -189,7 +213,7 @@ const List = () => {
                       </div>
                     </td>
                     <td><span className={`status-badge status-${company.status ? 'active' : 'inactive'}`}>{company.status ? tl('active') : tl('inactive')}</span></td>
-                    <td><div className="date-cell"><Clock size={14} /><span>{new Date(company.updated_at).toLocaleString()}</span></div></td>
+                    <td><div className="date-cell"><Clock size={14} /><span>{formatDateTime(company.updated_at)}</span></div></td>
                     <td>
                       <div className="actions-cell">
                         <button className="action-btn view" title={tl('view_details')} onClick={()=>router.get(`/system/companies/${company.id}`)}>

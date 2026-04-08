@@ -7,6 +7,7 @@ import { useTranslations } from '@/hooks/useTranslations';
 
 // Breadcrumbs Component
 const Breadcrumbs = ({ items }) => {
+  const { t } = useTranslations();
   return (
     <div className="breadcrumbs-themed">
       <nav className="breadcrumbs">
@@ -42,7 +43,7 @@ const Breadcrumbs = ({ items }) => {
         ))}
       </nav>
       <div className="breadcrumbs-description">
-        Configure chart of accounts for system functions
+        {t('accounts.account_configuration.create.configure_chart_of_accounts_for_system_functions')}
       </div>
     </div>
   );
@@ -66,33 +67,33 @@ const { t } = useTranslations();
   const configFields = [
     {
       name: 'account_id',
-      label: 'Select Account',
+      label: t('accounts.account_configuration.create.select_account'),
       type: 'select',
-      placeholder: 'Search and select account',
+      placeholder: t('accounts.account_configuration.create.search_and_select_account'),
       icon: Database,
       required: true,
       options: accountOptions
     },
     {
       name: 'config_type',
-      label: 'Configuration Type',
+      label: t('accounts.account_configuration.create.configuration_type'),
       type: 'select',
-      placeholder: 'What is this account used for?',
+      placeholder: t('accounts.account_configuration.create.what_is_this_account_used_for'),
       icon: Home,
       required: true,
       options: configTypeOptions
     },
     {
       name: 'description',
-      label: 'Description',
+      label: t('accounts.account_configuration.create.description'),
       type: 'textarea',
-      placeholder: 'Optional: Notes about this configuration',
+      placeholder: t('accounts.account_configuration.create.optional_notes_about_this_configuration'),
       icon: null,
       required: false
     },
     {
       name: 'is_active',
-      label: 'Status',
+      label: t('accounts.account_configuration.create.status'),
       type: 'toggle',
       required: false
     }
@@ -123,17 +124,17 @@ const { t } = useTranslations();
   const handleSubmit = async (submittedFormData) => {
     setErrors({});
     setAlert(null);
-    setRequestStatus('Sending request...');
+    setRequestStatus(t('accounts.account_configuration.create.request_sending'));
 
     try {
       const newErrors = {};
 
       if (!submittedFormData.account_id) {
-        newErrors.account_id = 'Account is required';
+        newErrors.account_id = t('accounts.account_configuration.create.msg_account_is_required');
       }
 
       if (!submittedFormData.config_type) {
-        newErrors.config_type = 'Configuration type is required';
+        newErrors.config_type = t('accounts.account_configuration.create.msg_configuration_type_is_required');
       }
 
       if (Object.keys(newErrors).length > 0) {
@@ -142,7 +143,7 @@ const { t } = useTranslations();
           type: 'error',
           message: t('accounts.account_configuration.create.msg_please_correct_the_errors_below_and_try_')
         });
-        setRequestStatus('Validation failed');
+        setRequestStatus(t('accounts.account_configuration.create.request_validation_failed'));
         return;
       }
 
@@ -161,29 +162,29 @@ const { t } = useTranslations();
 
       router.post(url, formDataToSend, {
         forceFormData: true,
-        onStart: () => setRequestStatus('Request started'),
-        onProgress: () => setRequestStatus('Uploading...'),
-        onSuccess: (page) => setRequestStatus('Success'),
+        onStart: () => setRequestStatus(t('accounts.account_configuration.create.request_started')),
+        onProgress: () => setRequestStatus(t('accounts.account_configuration.create.request_uploading')),
+        onSuccess: (page) => setRequestStatus(t('accounts.account_configuration.create.request_success')),
         onError: (errors) => {
           console.log('Server validation errors:', errors);
-          setRequestStatus('Server validation failed');
+          setRequestStatus(t('accounts.account_configuration.create.request_server_validation_failed'));
           setErrors(errors);
         },
-        onFinish: () => setRequestStatus('Request finished')
+        onFinish: () => setRequestStatus(t('accounts.account_configuration.create.request_finished'))
       });
 
     } catch (error) {
       console.error('Form submission error:', error);
-      setRequestStatus('Exception: ' + error.message);
+      setRequestStatus(`${t('accounts.account_configuration.create.request_exception_prefix')}${error.message}`);
     }
   };
 
   const isEdit = edit_mode && id;
 
   const breadcrumbItems = [
-    { label: 'Dashboard', icon: Home, href: '/dashboard' },
-    { label: 'Account Configuration', icon: List, href: '/accounts/account-configuration' },
-    { label: isEdit ? 'Edit Configuration' : 'Add Configuration', icon: Plus, href: null }
+    { label: t('accounts.account_configuration.create.dashboard'), icon: Home, href: '/dashboard' },
+    { label: t('accounts.account_configuration.create.account_configuration'), icon: List, href: '/accounts/account-configuration' },
+    { label: isEdit ? t('accounts.account_configuration.create.edit_configuration') : t('accounts.account_configuration.create.add_configuration'), icon: Plus, href: null }
   ];
 
   return (
@@ -191,12 +192,12 @@ const { t } = useTranslations();
       <Breadcrumbs items={breadcrumbItems} />
 
       <GeneralizedForm
-        title={isEdit ? "Edit Account Configuration" : "Add Account Configuration"}
-        subtitle={isEdit ? "Update account mapping for system function" : "Map a chart of account to a system function"}
+        title={isEdit ? t('accounts.account_configuration.create.edit_account_configuration') : t('accounts.account_configuration.create.add_account_configuration')}
+        subtitle={isEdit ? t('accounts.account_configuration.create.subtitle_edit') : t('accounts.account_configuration.create.subtitle_create')}
         fields={configFields}
         onSubmit={handleSubmit}
-        submitText={isEdit ? "Update Configuration" : "Create Configuration"}
-        resetText="Clear Form"
+        submitText={isEdit ? t('accounts.account_configuration.create.update_configuration') : t('accounts.account_configuration.create.create_configuration')}
+        resetText={t('accounts.account_configuration.create.clear_form')}
         initialData={isEdit && configuration ? {
           account_id: configuration.account_id || '',
           config_type: configuration.config_type || '',

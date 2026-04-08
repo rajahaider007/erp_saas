@@ -91,26 +91,26 @@ export default function SystemDashboard() {
     <App>
       <div className="space-y-8">
         {/* Header */}
-        <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl shadow-xl p-8 text-white">
+        <div className="bg-gradient-to-r from-indigo-50 via-blue-50 to-cyan-100 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-xl p-8 text-gray-900 dark:text-white">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold mb-4 flex items-center">
                 <Settings className="h-10 w-10 me-4 shrink-0" />
                 {t('modules.system.dashboard.title')}
               </h1>
-              <p className="text-xl text-gray-300 mb-6">
+              <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
                 {t('modules.system.dashboard.subtitle')}
               </p>
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-gray-300">
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                   <TrendingUp className="h-5 w-5" />
                   <span className="font-medium">{t('modules.system.dashboard.system_administration')}</span>
                 </div>
               </div>
             </div>
             <div className="hidden lg:block">
-              <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
-                <BarChart3 className="h-16 w-16 text-white" />
+              <div className="p-4 bg-white/70 dark:bg-white/10 rounded-2xl backdrop-blur-sm border border-white/60 dark:border-white/10">
+                <BarChart3 className="h-16 w-16 text-indigo-700 dark:text-white" />
               </div>
             </div>
           </div>

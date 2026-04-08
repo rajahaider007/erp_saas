@@ -6,6 +6,9 @@ import App from '../../App.jsx';
 
 export default function BankConfiguration() {
   const { bankHead, bankCodes = [], compId, locationId, flash } = usePage().props;
+  const { t } = useTranslations();
+  const tb = (key, rep = {}) => t(`accounts.chart_of_account_code_configuration.bank_configuration.${key}`, rep);
+  const ts = (key, rep = {}) => t(`accounts.chart_of_account_code_configuration.shared.${key}`, rep);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     bank_name: '',
@@ -48,10 +51,15 @@ export default function BankConfiguration() {
   };
 
   const handleDelete = (codeId, bankName) => {
-  const { t } = useTranslations();
-    if (confirm(`Are you sure you want to delete bank account "${bankName}"?`)) {
+    if (window.confirm(tb('confirm_delete', { name: bankName }))) {
       router.delete(`/accounts/code-configuration/${codeId}`);
     }
+  };
+
+  const accountStatusLabel = (status) => {
+    if (status === 'Active') return t('common.status.active');
+    if (status === 'Inactive') return t('common.status.inactive');
+    return status;
   };
 
   return (
@@ -63,7 +71,7 @@ export default function BankConfiguration() {
           className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6"
         >
           <ArrowLeft className="h-5 w-5" />
-          Back to Code Configuration
+          {ts('back_to_code_configuration')}
         </button>
 
         {/* Header */}
@@ -71,11 +79,11 @@ export default function BankConfiguration() {
           <div className="flex items-center gap-3 mb-2">
             <Building2 className="h-8 w-8 text-blue-600" />
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              Bank Account Code Configuration
+              {tb('page_title')}
             </h1>
           </div>
           <p className="text-gray-600 dark:text-gray-400">
-            Create and manage bank account codes for each bank account
+            {tb('page_subtitle')}
           </p>
         </div>
 
@@ -106,16 +114,16 @@ export default function BankConfiguration() {
             <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
             <div>
               <p className="font-semibold text-red-900 dark:text-red-300 mb-2">
-                Bank Account Master Not Found
+                {tb('master_not_found_title')}
               </p>
               <p className="text-sm text-red-800 dark:text-red-300 mb-3">
-                You need to create a "Bank Accounts" head account (Level 3) in Chart of Accounts first.
+                {tb('master_not_found_body')}
               </p>
               <a
                 href="/accounts/chart-of-accounts"
                 className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
               >
-                Go to Chart of Accounts
+                {ts('go_to_chart_of_accounts')}
               </a>
             </div>
           </div>
@@ -129,7 +137,7 @@ export default function BankConfiguration() {
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Plus className="h-5 w-5" />
-              Add Bank Account
+              {tb('add_bank_account')}
             </button>
           </div>
         )}
@@ -140,7 +148,7 @@ export default function BankConfiguration() {
             <div className="p-8 text-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600 dark:text-gray-400">
-                No bank accounts configured yet. Create one to get started.
+                {tb('empty_list')}
               </p>
             </div>
           ) : (
@@ -177,11 +185,11 @@ export default function BankConfiguration() {
                           ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                           : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                       }`}>
-                        {code.status}
+                        {accountStatusLabel(code.status)}
                       </span>
                       {code.is_transactional && (
                         <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded">
-                          Transactional
+                          {ts('transactional')}
                         </span>
                       )}
                     </div>
@@ -205,13 +213,13 @@ export default function BankConfiguration() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Create Bank Account
+                {tb('create_modal_title')}
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Bank Name *
+                    {tb('lbl_bank_name')}
                   </label>
                   <input
                     type="text"
@@ -226,7 +234,7 @@ export default function BankConfiguration() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Account Code *
+                    {tb('lbl_account_code')}
                   </label>
                   <input
                     type="text"
@@ -241,7 +249,7 @@ export default function BankConfiguration() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Account Number
+                    {tb('lbl_account_number')}
                   </label>
                   <input
                     type="text"
@@ -254,7 +262,7 @@ export default function BankConfiguration() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Branch
+                    {tb('lbl_branch')}
                   </label>
                   <input
                     type="text"
@@ -267,7 +275,7 @@ export default function BankConfiguration() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Currency *
+                    {tb('lbl_currency')}
                   </label>
                   <select
                     value={formData.currency}
@@ -291,7 +299,7 @@ export default function BankConfiguration() {
                     className="rounded"
                   />
                   <label htmlFor="is_transactional" className="text-sm text-gray-700 dark:text-gray-300">
-                    This account accepts transactions
+                    {ts('accepts_transactions')}
                   </label>
                 </div>
 
@@ -304,13 +312,13 @@ export default function BankConfiguration() {
                     }}
                     className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
-                    Cancel
+                    {t('common.actions.cancel')}
                   </button>
                   <button
                     type="submit"
                     className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    Create Account
+                    {ts('btn_create_account')}
                   </button>
                 </div>
               </form>

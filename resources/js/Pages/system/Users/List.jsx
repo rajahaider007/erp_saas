@@ -16,8 +16,11 @@ const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, conf
 const USERS_ROUTE = '/system/users';
 
 const List = () => {
-  const { users: paginated, companies, locations, departments, flash, filters } = usePage().props;
-  const { t } = useTranslations();
+  const { users: paginated, companies, locations, departments, flash, filters, pageTitle } = usePage().props;
+  const { t, locale } = useTranslations();
+  const tl = (key, rep = {}) => t(`system.users.list.${key}`, rep);
+  const td = (key, rep = {}) => t(`common.data_table.${key}`, rep);
+  const tf = (key, rep = {}) => t(`common.flash.${key}`, rep);
   const { canAdd, canEdit, canDelete, showPermissionDeniedAlert } = usePermissions();
   const [search, setSearch] = useState(filters?.search || '');
   const [companyId, setCompanyId] = useState(filters?.company_id || '');
@@ -39,13 +42,51 @@ const List = () => {
   }, [applyFilters]);
 
   useEffect(() => {
-    if (flash?.success) CustomAlert.fire({ title: 'Success!', text: flash.success, icon: 'success' }); 
-    else if (flash?.error) CustomAlert.fire({ title:'Error!', text: flash.error, icon: 'error' }); 
-  }, [flash]);
+    if (flash?.success) {
+      CustomAlert.fire({
+        title: tf('success_title'),
+        text: flash.success,
+        icon: 'success',
+        confirmButtonText: tf('great'),
+      });
+    } else if (flash?.error) {
+      CustomAlert.fire({
+        title: tf('error_title'),
+        text: flash.error,
+        icon: 'error',
+        confirmButtonText: tf('ok'),
+      });
+    }
+  }, [flash, t]);
+
+  const userStatusLabel = (status) => {
+    const map = {
+      active: tl('active'),
+      inactive: tl('inactive'),
+      suspended: tl('suspended'),
+      pending: tl('pending'),
+    };
+    return map[status] ?? status;
+  };
+
+  const formatLoginAt = (iso) => {
+    if (!iso) return tl('last_login_never');
+    const loc = locale === 'ur' ? 'ur-PK' : undefined;
+    return new Date(iso).toLocaleString(loc);
+  };
 
   const handleDelete = (user) => {
     if (!canDelete(USERS_ROUTE)) { showPermissionDeniedAlert('delete', 'users'); return; }
-    CustomAlert.fire({ title:'Are you sure?', text:`You are about to delete "${user.fname} ${user.lname}". This action cannot be undone!`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete it!', cancelButtonText:'Cancel', onConfirm:()=> router.delete(`/system/users/${user.id}`) });
+    const name = `${user.fname} ${user.lname}`.trim();
+    CustomAlert.fire({
+      title: td('confirm_delete_title'),
+      text: td('confirm_delete_text', { name }),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: td('confirm_delete_ok'),
+      cancelButtonText: t('common.actions.cancel'),
+      onConfirm: () => router.delete(`/system/users/${user.id}`),
+    });
   };
 
   const handleSelectAll = (checked) => { if (checked) setSelected(paginated.data.map(u=>u.id)); else setSelected([]); };
@@ -53,9 +94,43 @@ const List = () => {
   const handleBulkDelete = () => {
     if (!selected.length) return;
     if (!canDelete(USERS_ROUTE)) { showPermissionDeniedAlert('delete', 'users'); return; }
-    CustomAlert.fire({ title:'Delete Selected Users?', text:`You are about to delete ${selected.length} user(s).`, icon:'warning', showCancelButton:true, confirmButtonText:'Yes, delete!', onConfirm:()=> router.post('/system/users/bulk-destroy', { ids:selected }, { onSuccess:()=>setSelected([]) }) });
+    const bulkCount = selected.length;
+    const ids = [...selected];
+    CustomAlert.fire({
+      title: tl('users_bulk_delete_title'),
+      text: tl('users_bulk_delete_text', { count: bulkCount }),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: tl('users_bulk_delete_ok'),
+      cancelButtonText: t('common.actions.cancel'),
+      onConfirm: () => router.post('/system/users/bulk-destroy', { ids }, { onSuccess: () => setSelected([]) }),
+    });
   };
-  const handleBulkStatusChange = (status) => { if (!selected.length) return; const action = status === 'active' ? 'activate' : status === 'inactive' ? 'deactivate' : `set ${status}`; CustomAlert.fire({ title:`${action.charAt(0).toUpperCase()+action.slice(1)} Selected Users?`, text:`You are about to ${action} ${selected.length} user(s).`, icon:'question', showCancelButton:true, confirmButtonText:`Yes, ${action}!`, onConfirm:()=> router.post('/system/users/bulk-status', { ids:selected, status }, { onSuccess:()=>setSelected([]) }) }); };
+
+  const bulkStatusKeys = {
+    active: { title: 'bulk_status_active_title', text: 'bulk_status_active_text', ok: 'bulk_status_active_ok' },
+    inactive: { title: 'bulk_status_inactive_title', text: 'bulk_status_inactive_text', ok: 'bulk_status_inactive_ok' },
+    suspended: { title: 'bulk_status_suspended_title', text: 'bulk_status_suspended_text', ok: 'bulk_status_suspended_ok' },
+    pending: { title: 'bulk_status_pending_title', text: 'bulk_status_pending_text', ok: 'bulk_status_pending_ok' },
+  };
+
+  const handleBulkStatusChange = (status) => {
+    if (!selected.length) return;
+    const cfg = bulkStatusKeys[status];
+    if (!cfg) return;
+    const bulkCount = selected.length;
+    const ids = [...selected];
+    CustomAlert.fire({
+      title: tl(cfg.title),
+      text: tl(cfg.text, { count: bulkCount }),
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: tl(cfg.ok),
+      cancelButtonText: t('common.actions.cancel'),
+      onConfirm: () =>
+        router.post('/system/users/bulk-status', { ids, status }, { onSuccess: () => setSelected([]) }),
+    });
+  };
 
   return (
     <App>
@@ -63,11 +138,11 @@ const List = () => {
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
-              <h1 className="page-title"><User className="title-icon" />{usePage().props?.pageTitle || 'Users'}</h1>
+              <h1 className="page-title"><User className="title-icon" />{pageTitle || tl('page_title_fallback')}</h1>
               <div className="stats-summary">
-                <div className="stat-item"><span>{paginated?.total || 0} Total</span></div>
-                <div className="stat-item"><span>{paginated?.data?.filter(u=>u.status === 'active').length || 0} Active</span></div>
-                <div className="stat-item"><span>{paginated?.data?.filter(u=>u.status === 'inactive').length || 0} Inactive</span></div>
+                <div className="stat-item"><span>{tl('stat_total', { count: paginated?.total || 0 })}</span></div>
+                <div className="stat-item"><span>{tl('stat_active', { count: paginated?.data?.filter(u => u.status === 'active').length || 0 })}</span></div>
+                <div className="stat-item"><span>{tl('stat_inactive', { count: paginated?.data?.filter(u => u.status === 'inactive').length || 0 })}</span></div>
               </div>
             </div>
             <div className="header-actions">
@@ -170,7 +245,36 @@ const List = () => {
           </div>
         </div>
 
-        {selected.length>0 && (<div className="bulk-actions-bar"><div className="selection-info"><CheckCircle2 size={20} /><span>{selected.length} selected</span></div><div className="bulk-actions"><button className="btn btn-sm btn-secondary" onClick={()=>setSelected([])}><X size={16} />{t('system.users.list.clear')}</button><div className="dropdown"><button className="btn btn-sm btn-secondary dropdown-toggle">{t('system.users.list.change_status')}<ChevronDown size={12} /></button><div className="dropdown-menu"><button onClick={()=>handleBulkStatusChange('active')}>{t('system.users.list.active')}</button><button onClick={()=>handleBulkStatusChange('inactive')}>{t('system.users.list.inactive')}</button><button onClick={()=>handleBulkStatusChange('suspended')}>{t('system.users.list.suspended')}</button><button onClick={()=>handleBulkStatusChange('pending')}>{t('system.users.list.pending')}</button></div></div>{canDelete(USERS_ROUTE) && <button className="btn btn-sm btn-danger" onClick={handleBulkDelete}><Trash2 size={16} />{t('system.users.list.delete')}</button>}</div></div>)}
+        {selected.length > 0 && (
+          <div className="bulk-actions-bar">
+            <div className="selection-info">
+              <CheckCircle2 size={20} />
+              <span>{tl('bulk_selected', { count: selected.length })}</span>
+            </div>
+            <div className="bulk-actions">
+              <button type="button" className="btn btn-sm btn-secondary" onClick={() => setSelected([])}>
+                <X size={16} />{tl('clear')}
+              </button>
+              <div className="dropdown">
+                <button type="button" className="btn btn-sm btn-secondary dropdown-toggle">
+                  {tl('change_status')}
+                  <ChevronDown size={12} />
+                </button>
+                <div className="dropdown-menu">
+                  <button type="button" onClick={() => handleBulkStatusChange('active')}>{tl('active')}</button>
+                  <button type="button" onClick={() => handleBulkStatusChange('inactive')}>{tl('inactive')}</button>
+                  <button type="button" onClick={() => handleBulkStatusChange('suspended')}>{tl('suspended')}</button>
+                  <button type="button" onClick={() => handleBulkStatusChange('pending')}>{tl('pending')}</button>
+                </div>
+              </div>
+              {canDelete(USERS_ROUTE) && (
+                <button type="button" className="btn btn-sm btn-danger" onClick={handleBulkDelete}>
+                  <Trash2 size={16} />{tl('delete')}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="data-table-container">
           <div className="table-wrapper">
@@ -211,11 +315,11 @@ const List = () => {
                         {user.location?.location_name && <span className="text-gray-500 text-xs">{user.location.location_name}</span>}
                       </div>
                     </td>
-                    <td><span className={`status-badge status-${user.status === 'active' ? 'active' : user.status === 'suspended' ? 'error' : user.status === 'pending' ? 'warning' : 'inactive'}`}>{user.status}</span></td>
+                    <td><span className={`status-badge status-${user.status === 'active' ? 'active' : user.status === 'suspended' ? 'error' : user.status === 'pending' ? 'warning' : 'inactive'}`}>{userStatusLabel(user.status)}</span></td>
                     <td>
                       <div className="date-cell">
                         <Clock size={14} />
-                        <span>{user.last_login_at ? new Date(user.last_login_at).toLocaleString() : 'Never'}</span>
+                        <span>{formatLoginAt(user.last_login_at)}</span>
                       </div>
                     </td>
                     <td>
@@ -253,7 +357,13 @@ const List = () => {
 
           <div className="pagination-container">
             <div className="pagination-info">
-              <div className="results-info">Showing {paginated.from || 0} to {paginated.to || 0} of {paginated.total || 0} entries</div>
+              <div className="results-info">
+                {td('showing_entries', {
+                  from: paginated.from || 0,
+                  to: paginated.to || 0,
+                  total: paginated.total || 0,
+                })}
+              </div>
               <div className="page-size-selector">
                 <span>{t('system.users.list.show')}</span>
                 <select value={pageSize} onChange={(e)=>{const v=Number(e.target.value); setPageSize(v); pushQuery({ per_page:v.toString() });}} className="page-size-select">{[10,25,50,100].map(s => (<option key={s} value={s}>{s}</option>))}</select>
@@ -293,7 +403,7 @@ const List = () => {
                 onChange={(e)=>{ const p = Math.max(1, Math.min(paginated.last_page || 1, Number(e.target.value))); setCurrentPage(p); pushQuery({ page:p.toString() }); }}
                 className="jump-input"
               />
-              <span>of {paginated.last_page || 1}</span>
+              <span>{tl('pagination_of', { total: paginated.last_page || 1 })}</span>
             </div>
           </div>
         </div>

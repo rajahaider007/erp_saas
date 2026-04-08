@@ -4,10 +4,28 @@ import { useTranslations } from '@/hooks/useTranslations';
 import App from "../../App.jsx";
 
 const CompanyShow = () => {
-  const { t } = useTranslations();
+  const { t, locale } = useTranslations();
   const { company } = usePage().props;
   const na = () => t('common.labels.not_provided');
   const statusLabel = (on) => (on ? t('common.status.active') : t('common.status.inactive'));
+  const loc = locale === 'ur' ? 'ur-PK' : undefined;
+
+  const formatDate = (d) => {
+    if (!d) return na();
+    return new Date(d).toLocaleDateString(loc);
+  };
+  const formatDateTime = (d) => {
+    if (!d) return na();
+    return new Date(d).toLocaleString(loc);
+  };
+
+  const companyTypeLabel = (type) => {
+    if (!type) return na();
+    const key = `system.companies.create.opt_${type}`;
+    const translated = t(key);
+    if (translated === key) return type;
+    return translated;
+  };
 
   return (
     <App>
@@ -61,13 +79,13 @@ const CompanyShow = () => {
               <div className="input-group">
                 <label className="input-label">{t('system.companies.show.incorporation_date')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{company.incorporation_date ? new Date(company.incorporation_date).toLocaleDateString() : na()}</div>
+                  <div className="form-input">{formatDate(company.incorporation_date)}</div>
                 </div>
               </div>
               <div className="input-group">
                 <label className="input-label">{t('system.companies.show.company_type')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{company.company_type || na()}</div>
+                  <div className="form-input">{companyTypeLabel(company.company_type)}</div>
                 </div>
               </div>
             </div>
@@ -194,13 +212,13 @@ const CompanyShow = () => {
                 <div className="input-group">
                   <label className="input-label">{t('system.companies.show.created_at')}</label>
                   <div className="input-wrapper">
-                    <div className="form-input">{new Date(company.created_at).toLocaleString()}</div>
+                    <div className="form-input">{formatDateTime(company.created_at)}</div>
                   </div>
                 </div>
                 <div className="input-group">
                   <label className="input-label">{t('system.companies.show.last_updated')}</label>
                   <div className="input-wrapper">
-                    <div className="form-input">{new Date(company.updated_at).toLocaleString()}</div>
+                    <div className="form-input">{formatDateTime(company.updated_at)}</div>
                   </div>
                 </div>
               </div>

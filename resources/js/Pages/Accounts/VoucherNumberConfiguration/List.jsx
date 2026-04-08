@@ -128,8 +128,11 @@ const CustomAlert = {
 };
 
 export default function List() {
-  const { configurations: paginatedConfigurations, filters, flash, warning } = usePage().props;
-  const { t } = useTranslations();
+  const { configurations: paginatedConfigurations, filters, flash, warning, pageTitle } = usePage().props;
+  const { t, locale } = useTranslations();
+  const tl = (key, rep = {}) => t(`accounts.voucher_number_configuration.list.${key}`, rep);
+  const td = (key, rep = {}) => t(`common.data_table.${key}`, rep);
+  const tf = (key, rep = {}) => t(`common.flash.${key}`, rep);
 
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
@@ -229,29 +232,35 @@ export default function List() {
     router.get(`/accounts/voucher-number-configuration/${config.id}/edit`);
   };
   
+  const voucherDisplayName = (config) =>
+    `${config.voucher_type} ${tl('voucher_suffix')}`;
+
   const handleDelete = (config) => {
+    const name = voucherDisplayName(config);
     CustomAlert.fire({
-      title: 'Are you sure?',
-      text: `You are about to delete "${config.voucher_type} Voucher" configuration. This action cannot be undone!`,
+      title: td('confirm_delete_title'),
+      text: td('confirm_delete_text', { name }),
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: td('confirm_delete_ok'),
+      cancelButtonText: t('common.actions.cancel'),
       onConfirm: () => {
         setLoading(true);
         router.delete(`/api/voucher-number-configuration/${config.id}`, {
           onSuccess: () => {
             CustomAlert.fire({
-              title: 'Deleted!',
-              text: `Configuration "${config.voucher_type} Voucher" has been deleted.`,
-              icon: 'success'
+              title: tf('deleted_title'),
+              text: tl('msg_deleted', { name }),
+              icon: 'success',
+              confirmButtonText: tf('ok'),
             });
           },
           onError: () => {
             CustomAlert.fire({
-              title: 'Error!',
-              text: 'Failed to delete the configuration. Please try again.',
-              icon: 'error'
+              title: tf('error_title'),
+              text: tl('msg_delete_failed'),
+              icon: 'error',
+              confirmButtonText: tf('ok'),
             });
           },
           onFinish: () => setLoading(false)
@@ -283,32 +292,36 @@ export default function List() {
 
   const handleBulkDelete = () => {
     if (selectedConfigurations.length === 0) return;
+    const bulkCount = selectedConfigurations.length;
+    const ids = [...selectedConfigurations];
 
     CustomAlert.fire({
-      title: 'Delete Selected Configurations?',
-      text: `You are about to delete ${selectedConfigurations.length} configuration(s). This action cannot be undone!`,
+      title: td('bulk_delete_title'),
+      text: td('bulk_delete_text', { count: bulkCount }),
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Yes, delete them!',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: td('bulk_delete_ok'),
+      cancelButtonText: t('common.actions.cancel'),
       onConfirm: () => {
         setLoading(true);
         router.post('/accounts/voucher-number-configuration/bulk-destroy', {
-          ids: selectedConfigurations
+          ids
         }, {
-          onSuccess: (page) => {
+          onSuccess: () => {
             setSelectedConfigurations([]);
             CustomAlert.fire({
-              title: 'Deleted!',
-              text: `${selectedConfigurations.length} configuration(s) have been deleted.`,
-              icon: 'success'
+              title: tf('deleted_title'),
+              text: tl('msg_bulk_deleted', { count: bulkCount }),
+              icon: 'success',
+              confirmButtonText: tf('ok'),
             });
           },
-          onError: (errors) => {
+          onError: () => {
             CustomAlert.fire({
-              title: 'Error!',
-              text: 'Failed to delete configurations. Please try again.',
-              icon: 'error'
+              title: tf('error_title'),
+              text: tl('msg_bulk_delete_failed'),
+              icon: 'error',
+              confirmButtonText: tf('ok'),
             });
           },
           onFinish: () => setLoading(false)
@@ -319,34 +332,51 @@ export default function List() {
 
   const handleBulkStatusChange = (newStatus) => {
     if (selectedConfigurations.length === 0) return;
+    const bulkCount = selectedConfigurations.length;
+    const ids = [...selectedConfigurations];
 
-    const action = newStatus ? 'activate' : 'deactivate';
+    const dialog = newStatus
+      ? {
+          title: td('bulk_status_activate_title'),
+          text: td('bulk_status_activate_text', { count: bulkCount }),
+          confirmButtonText: td('bulk_status_activate_ok'),
+        }
+      : {
+          title: td('bulk_status_deactivate_title'),
+          text: td('bulk_status_deactivate_text', { count: bulkCount }),
+          confirmButtonText: td('bulk_status_deactivate_ok'),
+        };
+
     CustomAlert.fire({
-      title: `${action.charAt(0).toUpperCase() + action.slice(1)} Selected Configurations?`,
-      text: `You are about to ${action} ${selectedConfigurations.length} configuration(s).`,
+      title: dialog.title,
+      text: dialog.text,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: `Yes, ${action} them!`,
-      cancelButtonText: 'Cancel',
+      confirmButtonText: dialog.confirmButtonText,
+      cancelButtonText: t('common.actions.cancel'),
       onConfirm: () => {
         setLoading(true);
         router.post('/accounts/voucher-number-configuration/bulk-status', {
-          ids: selectedConfigurations,
+          ids,
           status: newStatus
         }, {
-          onSuccess: (page) => {
+          onSuccess: () => {
             setSelectedConfigurations([]);
             CustomAlert.fire({
-              title: 'Updated!',
-              text: `${selectedConfigurations.length} configuration(s) have been ${action}d.`,
-              icon: 'success'
+              title: tf('updated_title'),
+              text: newStatus
+                ? tl('msg_bulk_activated', { count: bulkCount })
+                : tl('msg_bulk_deactivated', { count: bulkCount }),
+              icon: 'success',
+              confirmButtonText: tf('ok'),
             });
           },
-          onError: (errors) => {
+          onError: () => {
             CustomAlert.fire({
-              title: 'Error!',
-              text: 'Failed to update configurations. Please try again.',
-              icon: 'error'
+              title: tf('error_title'),
+              text: tl('msg_bulk_update_failed'),
+              icon: 'error',
+              confirmButtonText: tf('ok'),
             });
           },
           onFinish: () => setLoading(false)
@@ -358,22 +388,21 @@ export default function List() {
   // Export functions
   const exportToCSV = () => {
     CustomAlert.fire({
-      title: 'Export to CSV',
-      text: 'Download all configurations as CSV file?',
+      title: td('export_csv_title'),
+      text: td('export_csv_text'),
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Yes, download!',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: td('export_csv_ok'),
+      cancelButtonText: t('common.actions.cancel'),
       onConfirm: () => {
-        // Open the export URL in a new window
         window.open('/api/voucher-number-configuration/export-csv', '_blank');
       }
     });
   };
 
-  // Format functions
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    const loc = locale === 'ur' ? 'ur-PK' : undefined;
+    return new Date(dateString).toLocaleDateString(loc, {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -382,20 +411,14 @@ export default function List() {
     });
   };
 
-  const getStatusColor = (status) => {
-    return status ? '#10B981' : '#EF4444';
-  };
-
-  const getStatusLabel = (status) => {
-    return status ? 'Active' : 'Inactive';
-  };
-
-  // Status options for filtering
-  const statusOptions = [
-    { value: 'all', label: 'All Status' },
-    { value: '1', label: 'Active' },
-    { value: '0', label: 'Inactive' }
-  ];
+  const statusOptions = useMemo(
+    () => [
+      { value: 'all', label: tl('all_status') },
+      { value: '1', label: t('common.status.active') },
+      { value: '0', label: t('common.status.inactive') }
+    ],
+    [t, tl]
+  );
 
   const pageSizeOptions = [10, 25, 50, 100];
 
@@ -403,27 +426,27 @@ export default function List() {
   useEffect(() => {
     if (flash?.success) {
       CustomAlert.fire({
-        title: 'Success!',
+        title: tf('success_title'),
         text: flash.success,
         icon: 'success',
-        confirmButtonText: 'Great!'
+        confirmButtonText: tf('great'),
       });
     } else if (flash?.error) {
       CustomAlert.fire({
-        title: 'Error!',
+        title: tf('error_title'),
         text: flash.error,
         icon: 'error',
-        confirmButtonText: 'OK'
+        confirmButtonText: tf('ok'),
       });
     } else if (warning) {
       CustomAlert.fire({
-        title: 'Warning!',
+        title: tf('warning_title'),
         text: warning,
         icon: 'warning',
-        confirmButtonText: 'OK'
+        confirmButtonText: tf('ok'),
       });
     }
-  }, [flash, warning]);
+  }, [flash, warning, t]);
 
   return (
     <App>
@@ -434,16 +457,16 @@ export default function List() {
             <div className="title-section">
               <h1 className="page-title">
                 <Database className="title-icon" />
-                {usePage().props?.pageTitle || 'Voucher Number Configuration'}
+                {pageTitle || tl('page_title_fallback')}
               </h1>
               <div className="stats-summary">
                 <div className="stat-item">
                   <TrendingUp size={16} />
-                  <span>{paginatedConfigurations?.total || configurations?.length || 0} Total</span>
+                  <span>{td('stat_total', { count: paginatedConfigurations?.total || configurations?.length || 0 })}</span>
                 </div>
                 <div className="stat-item">
                   <Users size={16} />
-                  <span>{configurations?.filter(c => c.is_active).length || 0} Active</span>
+                  <span>{td('stat_active', { count: configurations?.filter(c => c.is_active).length || 0 })}</span>
                 </div>
               </div>
             </div>
@@ -462,20 +485,20 @@ export default function List() {
               <div className="dropdown">
                 <button className="btn btn-secondary dropdown-toggle">
                   <Download size={20} />
-                  Export
+                  {tl('export')}
                   <ChevronDown size={16} />
                 </button>
                 <div className="dropdown-menu">
                   <button onClick={exportToCSV}>
                     <FileText size={16} />
-                    Export as CSV
+                    {tl('export_as_csv')}
                   </button>
                 </div>
               </div>
 
               <a href='/accounts/voucher-number-configuration/create' className="btn btn-primary">
                 <Plus size={20} />
-                Add Configuration
+                {tl('add_configuration')}
               </a>
             </div>
           </div>
@@ -532,7 +555,7 @@ export default function List() {
         {selectedConfigurations.length > 0 && (
           <div className="bulk-actions-bar">
             <div className="selection-info">
-              <span>{selectedConfigurations.length} configuration(s) selected</span>
+              <span>{tl('bulk_selected', { count: selectedConfigurations.length })}</span>
             </div>
             <div className="bulk-actions">
               <button
@@ -541,7 +564,7 @@ export default function List() {
                 style={{ background: '#10B981', color: 'white' }}
               >
                 <CheckCircle2 size={16} />
-                Activate
+                {tl('activate')}
               </button>
               <button
                 className="btn btn-sm"
@@ -549,14 +572,14 @@ export default function List() {
                 style={{ background: '#F59E0B', color: 'white' }}
               >
                 <XCircle size={16} />
-                Deactivate
+                {tl('deactivate')}
               </button>
               <button
                 className="btn btn-sm btn-danger"
                 onClick={handleBulkDelete}
               >
                 <Trash2 size={16} />
-                Delete
+                {tl('delete')}
               </button>
             </div>
           </div>
@@ -578,7 +601,7 @@ export default function List() {
                 <p>{t('accounts.voucher_number_configuration.list.try_adjusting_your_filters_or_search_cri')}</p>
                 <a href="/accounts/voucher-number-configuration/create" className="btn btn-primary">
                   <Plus size={20} />
-                  Add Your First Configuration
+                  {tl('add_first_configuration')}
                 </a>
               </div>
             ) : (
@@ -605,7 +628,7 @@ export default function List() {
                         {visibleColumns.id && (
                           <th className="sortable" onClick={() => handleSort('id')}>
                             <div className="th-content">
-                              ID
+                              {tl('col_id')}
                               <ArrowUpDown size={14} className={`sort-icon ${sortConfig.key === 'id' ? 'active' : ''}`} />
                             </div>
                           </th>
@@ -614,7 +637,7 @@ export default function List() {
                         {visibleColumns.configurationInfo && (
                           <th className="sortable" onClick={() => handleSort('voucher_type')}>
                             <div className="th-content">
-                              Configuration Info
+                              {tl('col_configuration_info')}
                               <ArrowUpDown size={14} className={`sort-icon ${sortConfig.key === 'voucher_type' ? 'active' : ''}`} />
                             </div>
                           </th>
@@ -623,7 +646,7 @@ export default function List() {
                         {visibleColumns.status && (
                           <th className="sortable" onClick={() => handleSort('is_active')}>
                             <div className="th-content">
-                              Status
+                              {tl('col_status')}
                               <ArrowUpDown size={14} className={`sort-icon ${sortConfig.key === 'is_active' ? 'active' : ''}`} />
                             </div>
                           </th>
@@ -632,7 +655,7 @@ export default function List() {
                         {visibleColumns.updatedAt && (
                           <th className="sortable" onClick={() => handleSort('updated_at')}>
                             <div className="th-content">
-                              Updated
+                              {tl('col_updated')}
                               <ArrowUpDown size={14} className={`sort-icon ${sortConfig.key === 'updated_at' ? 'active' : ''}`} />
                             </div>
                           </th>
@@ -675,9 +698,9 @@ export default function List() {
                                   <Hash className="w-6 h-6 text-blue-600" />
                                 </div>
                                 <div className="module-details">
-                                  <div className="module-name">{config.voucher_type} Voucher</div>
-                                  <div className="module-folder">Prefix: {config.prefix} | Length: {config.number_length}</div>
-                                  <div className="module-description">Reset: {config.reset_frequency}</div>
+                                  <div className="module-name">{voucherDisplayName(config)}</div>
+                                  <div className="module-folder">{tl('row_prefix_length', { prefix: config.prefix, length: config.number_length })}</div>
+                                  <div className="module-description">{tl('row_reset', { frequency: config.reset_frequency })}</div>
                                 </div>
                               </div>
                             </td>
@@ -697,7 +720,7 @@ export default function List() {
                                     className="status-dot"
                                     style={{ backgroundColor: config.is_active ? '#10B981' : '#EF4444' }}
                                   ></div>
-                                  {config.is_active ? 'Active' : 'Inactive'}
+                                  {config.is_active ? t('common.status.active') : t('common.status.inactive')}
                                 </span>
                               </div>
                             </td>
@@ -750,7 +773,11 @@ export default function List() {
                   <div className="pagination-container">
                     <div className="pagination-info">
                       <div className="results-info">
-                        Showing {((paginatedConfigurations.current_page - 1) * paginatedConfigurations.per_page) + 1} to {Math.min(paginatedConfigurations.current_page * paginatedConfigurations.per_page, paginatedConfigurations.total)} of {paginatedConfigurations.total} results
+                        {td('showing_entries', {
+                          from: ((paginatedConfigurations.current_page - 1) * paginatedConfigurations.per_page) + 1,
+                          to: Math.min(paginatedConfigurations.current_page * paginatedConfigurations.per_page, paginatedConfigurations.total),
+                          total: paginatedConfigurations.total,
+                        })}
                       </div>
                       <div className="page-size-selector">
                         <span>{t('accounts.voucher_number_configuration.list.show')}</span>

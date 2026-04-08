@@ -7,6 +7,8 @@ import App from '../../App.jsx';
 export default function CashConfiguration() {
   const { cashHead, cashCodes = [], compId, locationId, flash } = usePage().props;
   const { t } = useTranslations();
+  const tc = (key, rep = {}) => t(`accounts.chart_of_account_code_configuration.cash_configuration.${key}`, rep);
+  const ts = (key, rep = {}) => t(`accounts.chart_of_account_code_configuration.shared.${key}`, rep);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     cash_location: '',
@@ -47,9 +49,15 @@ export default function CashConfiguration() {
   };
 
   const handleDelete = (codeId, cashLocation) => {
-    if (confirm(`Are you sure you want to delete cash account "${cashLocation}"?`)) {
+    if (window.confirm(tc('confirm_delete', { name: cashLocation }))) {
       router.delete(`/accounts/code-configuration/${codeId}`);
     }
+  };
+
+  const accountStatusLabel = (status) => {
+    if (status === 'Active') return t('common.status.active');
+    if (status === 'Inactive') return t('common.status.inactive');
+    return status;
   };
 
   return (
@@ -61,7 +69,7 @@ export default function CashConfiguration() {
           className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6"
         >
           <ArrowLeft className="h-5 w-5" />
-          Back to Code Configuration
+          {ts('back_to_code_configuration')}
         </button>
 
         {/* Header */}
@@ -69,11 +77,11 @@ export default function CashConfiguration() {
           <div className="flex items-center gap-3 mb-2">
             <Coins className="h-8 w-8 text-yellow-600" />
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              Cash Account Code Configuration
+              {tc('page_title')}
             </h1>
           </div>
           <p className="text-gray-600 dark:text-gray-400">
-            Create and manage cash account codes for different locations or custodians
+            {tc('page_subtitle')}
           </p>
         </div>
 
@@ -104,16 +112,16 @@ export default function CashConfiguration() {
             <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
             <div>
               <p className="font-semibold text-red-900 dark:text-red-300 mb-2">
-                Cash Account Master Not Found
+                {tc('master_not_found_title')}
               </p>
               <p className="text-sm text-red-800 dark:text-red-300 mb-3">
-                You need to create a "Cash Accounts" head account (Level 3) in Chart of Accounts first.
+                {tc('master_not_found_body')}
               </p>
               <a
                 href="/accounts/chart-of-accounts"
                 className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
               >
-                Go to Chart of Accounts
+                {ts('go_to_chart_of_accounts')}
               </a>
             </div>
           </div>
@@ -127,7 +135,7 @@ export default function CashConfiguration() {
               className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
             >
               <Plus className="h-5 w-5" />
-              Add Cash Account
+              {tc('add_cash_account')}
             </button>
           </div>
         )}
@@ -138,7 +146,7 @@ export default function CashConfiguration() {
             <div className="p-8 text-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <Coins className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600 dark:text-gray-400">
-                No cash accounts configured yet. Create one to get started.
+                {tc('empty_list')}
               </p>
             </div>
           ) : (
@@ -175,11 +183,11 @@ export default function CashConfiguration() {
                           ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                           : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                       }`}>
-                        {code.status}
+                        {accountStatusLabel(code.status)}
                       </span>
                       {code.is_transactional && (
                         <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded">
-                          Transactional
+                          {ts('transactional')}
                         </span>
                       )}
                     </div>
@@ -203,13 +211,13 @@ export default function CashConfiguration() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Create Cash Account
+                {tc('create_modal_title')}
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Cash Location/Description *
+                    {tc('lbl_cash_location')}
                   </label>
                   <input
                     type="text"
@@ -224,7 +232,7 @@ export default function CashConfiguration() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Account Code *
+                    {tc('lbl_account_code')}
                   </label>
                   <input
                     type="text"
@@ -239,7 +247,7 @@ export default function CashConfiguration() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Custodian / Responsible Person
+                    {tc('lbl_custodian')}
                   </label>
                   <input
                     type="text"
@@ -253,7 +261,7 @@ export default function CashConfiguration() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Currency *
+                    {tc('lbl_currency')}
                   </label>
                   <select
                     value={formData.currency}
@@ -277,7 +285,7 @@ export default function CashConfiguration() {
                     className="rounded"
                   />
                   <label htmlFor="is_transactional" className="text-sm text-gray-700 dark:text-gray-300">
-                    This account accepts transactions
+                    {ts('accepts_transactions')}
                   </label>
                 </div>
 
@@ -290,13 +298,13 @@ export default function CashConfiguration() {
                     }}
                     className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
-                    Cancel
+                    {t('common.actions.cancel')}
                   </button>
                   <button
                     type="submit"
                     className="flex-1 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
                   >
-                    Create Account
+                    {ts('btn_create_account')}
                   </button>
                 </div>
               </form>

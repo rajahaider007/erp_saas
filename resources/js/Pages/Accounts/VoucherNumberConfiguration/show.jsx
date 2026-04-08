@@ -4,7 +4,7 @@ import { usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
 const ShowVoucherNumberConfiguration = () => {
-const { t } = useTranslations();
+  const { t } = useTranslations();
   const { configuration } = usePage().props;
 
   // Mock data if not provided
@@ -42,7 +42,7 @@ const { t } = useTranslations();
               <div className="input-group">
                 <label className="input-label">{t('accounts.voucher_number_configuration.show.number_length')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{config.number_length} digits</div>
+                  <div className="form-input">{t('accounts.voucher_number_configuration.show.suffix_digits', { count: config.number_length })}</div>
                 </div>
               </div>
             </div>
@@ -62,7 +62,7 @@ const { t } = useTranslations();
               <div className="input-group">
                 <label className="input-label">{t('accounts.voucher_number_configuration.show.status')}</label>
                 <div className="input-wrapper">
-                  <div className="form-input">{config.is_active ? 'Active' : 'Inactive'}</div>
+                  <div className="form-input">{config.is_active ? t('common.status.active') : t('common.status.inactive')}</div>
                 </div>
               </div>
             </div>

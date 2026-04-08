@@ -24,7 +24,7 @@ function PageContent() {
     currentFiscalYear,
     flash = {}
   } = usePage().props;
-  const { t } = useTranslations();
+  const { t, locale } = useTranslations();
   const { theme, primaryColor } = useLayout();
 
   const [loading, setLoading] = useState(false);
@@ -48,6 +48,23 @@ function PageContent() {
         setLoading(false);
       }
     });
+  };
+
+  const fy = (key, rep = {}) => t(`accounts.fiscal_year_configuration.index.${key}`, rep);
+
+  const formatPeriodDate = (dateStr) => {
+    const loc = locale === 'ur' ? 'ur-PK' : undefined;
+    return new Date(dateStr).toLocaleDateString(loc, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
+  const periodStatusLabel = (status) => {
+    const map = { Open: 'period_status_open', Locked: 'period_status_locked', Closed: 'period_status_closed' };
+    const k = map[status];
+    return k ? fy(k) : status;
   };
 
   const handleUpdatePeriodStatus = (periodId, status) => {
@@ -87,10 +104,10 @@ function PageContent() {
               primaryColor === 'teal' ? 'text-teal-600 dark:text-teal-400' :
               'text-pink-600 dark:text-pink-400'
             }`} />
-            Fiscal Year Configuration
+            {fy('fiscal_year_configuration')}
           </h1>
           <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
-            Manage fiscal years and accounting periods according to IAS 1 standards
+            {fy('manage_fiscal_years_subtitle')}
           </p>
         </div>
 
@@ -156,9 +173,9 @@ function PageContent() {
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    FY {year}
+                    {fy('fy_label', { year })}
                     {year === currentFiscalYear && (
-                      <span className="text-xs ml-2">(Current)</span>
+                      <span className="text-xs ml-2">{fy('current_fiscal_year_badge')}</span>
                     )}
                   </button>
                 ))}
@@ -171,7 +188,7 @@ function PageContent() {
                 <label className={`block text-sm font-medium mb-2 ${
                   theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                 }`}>
-                  Create New Year
+                  {fy('create_new_year')}
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -226,7 +243,7 @@ function PageContent() {
               <h2 className={`text-lg font-semibold mb-6 ${
                 theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
               }`}>
-                Fiscal Year {selectedYear} - Periods
+                {fy('periods_section_title', { year: selectedYear })}
               </h2>
 
               <div className="overflow-x-auto">
@@ -237,7 +254,7 @@ function PageContent() {
                     }`}>
                       <th className={`text-left py-3 px-4 font-semibold ${
                         theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                      }`}>#</th>
+                      }`}>{fy('col_number')}</th>
                       <th className={`text-left py-3 px-4 font-semibold ${
                         theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                       }`}>{t('accounts.fiscal_year_configuration.index.period_name')}</th>
@@ -295,7 +312,7 @@ function PageContent() {
                           <td className={`py-4 px-4 text-sm ${
                             theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                           }`}>
-                            {new Date(period.start_date).toLocaleDateString()} - {new Date(period.end_date).toLocaleDateString()}
+                            {formatPeriodDate(period.start_date)} - {formatPeriodDate(period.end_date)}
                           </td>
                           <td className="py-4 px-4 text-center">
                             <span className={`inline-block px-3 py-1 text-xs rounded-full font-medium ${
@@ -305,7 +322,7 @@ function PageContent() {
                                 (theme === 'dark' ? 'bg-yellow-900/50 text-yellow-200' : 'bg-yellow-100 text-yellow-800') :
                                 (theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-800')
                             }`}>
-                              {period.status}
+                              {periodStatusLabel(period.status)}
                             </span>
                           </td>
                           <td className="py-4 px-4 text-center">
@@ -321,7 +338,7 @@ function PageContent() {
                                 title={t('accounts.fiscal_year_configuration.index.lock_period_for_review')}
                               >
                                 <Lock className="w-3 h-3" />
-                                Lock
+                                {fy('btn_lock')}
                               </button>
                             )}
                             {period.status === 'Locked' && !period.is_adjustment_period && (
@@ -336,7 +353,7 @@ function PageContent() {
                                 title={t('accounts.fiscal_year_configuration.index.close_period_permanently')}
                               >
                                 <CheckCircle2 className="w-3 h-3" />
-                                Close
+                                {fy('btn_close')}
                               </button>
                             )}
                           </td>
@@ -347,7 +364,7 @@ function PageContent() {
                         <td colSpan="6" className={`py-8 text-center ${
                           theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
                         }`}>
-                          No periods configured. Create a fiscal year first.
+                          {t('accounts.fiscal_year_configuration.index.no_periods_configured_create_fiscal_year_first')}
                         </td>
                       </tr>
                     )}
@@ -365,14 +382,14 @@ function PageContent() {
                   theme === 'dark' ? 'text-blue-300' : 'text-blue-900'
                 }`}>
                   <AlertCircle className="w-4 h-4" />
-                  Period Management Information
+                  {t('accounts.fiscal_year_configuration.index.period_management_information')}
                 </h3>
                 <ul className={`text-sm space-y-1 ml-6 list-disc ${
                   theme === 'dark' ? 'text-blue-300' : 'text-blue-800'
                 }`}>
                   <li>{t('accounts.fiscal_year_configuration.index.periods_are_automatically_created_when_a')}</li>
                   <li><strong>{t('accounts.fiscal_year_configuration.index.open')}</strong>{t('accounts.fiscal_year_configuration.index.period_is_active_and_transactions_can_be')}</li>
-                  <li><strong>{t('accounts.fiscal_year_configuration.index.locked')}</strong> Period is under review, no new transactions can be posted but existing entries can be modified</li>
+                  <li><strong>{t('accounts.fiscal_year_configuration.index.locked')}</strong>{t('accounts.fiscal_year_configuration.index.locked_period_under_review_no_new_transactions')}</li>
                   <li><strong>{t('accounts.fiscal_year_configuration.index.closed')}</strong>{t('accounts.fiscal_year_configuration.index.period_is_permanently_closed_no_changes_')}</li>
                   <li>{t('accounts.fiscal_year_configuration.index.adjustment_periods_allow_for_yearend_acc')}</li>
                   <li>{t('accounts.fiscal_year_configuration.index.all_transactions_must_be_posted_before_c')}</li>
@@ -386,6 +403,7 @@ function PageContent() {
 }
 
 export default function FiscalYearConfiguration() {
+  const { t } = useTranslations();
   return (
     <App title={t('accounts.fiscal_year_configuration.index.fiscal_year_configuration')}>
       <PageContent />

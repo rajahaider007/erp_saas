@@ -47,7 +47,7 @@ const { t } = useTranslations();
               className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Journal Vouchers
+              {t('accounts.journal_voucher.show.back_to_vouchers')}
             </button>
           </div>
         </div>
@@ -99,7 +99,7 @@ const { t } = useTranslations();
       return;
     }
     
-    if (confirm('Are you sure you want to delete this journal voucher?')) {
+    if (confirm(t('accounts.journal_voucher.show.confirm_delete'))) {
       router.delete(`/accounts/journal-voucher/${voucher.id}`);
     }
   };
@@ -110,7 +110,7 @@ const { t } = useTranslations();
       return;
     }
     
-    if (confirm('Are you sure you want to post this journal voucher? This action cannot be undone.')) {
+    if (confirm(t('accounts.journal_voucher.show.confirm_post'))) {
       router.post(`/accounts/journal-voucher/${voucher.id}/post`);
     }
   };
@@ -140,7 +140,7 @@ const { t } = useTranslations();
               <div className="relative group">
                 <button className="inline-flex items-center px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
                   <Printer className="h-4 w-4 mr-2" />
-                  Print
+                  {t('accounts.journal_voucher.show.print')}
                 </button>
                 <div className="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
                   <button
@@ -148,20 +148,20 @@ const { t } = useTranslations();
                     className="w-full text-left px-4 py-2 hover:bg-gray-50 rounded-t-lg flex items-center"
                   >
                     <FileText className="h-4 w-4 mr-2" />
-                    Print Summary
+                    {t('accounts.journal_voucher.show.print_summary')}
                   </button>
                   <button
                     onClick={() => window.open(`/accounts/journal-voucher/${voucher.id}/print-detailed`, '_blank')}
                     className="w-full text-left px-4 py-2 hover:bg-gray-50 rounded-b-lg flex items-center"
                   >
                     <FileText className="h-4 w-4 mr-2" />
-                    Print Detailed
+                    {t('accounts.journal_voucher.show.print_detailed')}
                   </button>
                 </div>
               </div>
               <button className="inline-flex items-center px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
                 <Download className="h-4 w-4 mr-2" />
-                Export PDF
+                {t('accounts.journal_voucher.show.export_pdf')}
               </button>
               {voucher.status === 'Draft' && (
                 <>
@@ -170,21 +170,21 @@ const { t } = useTranslations();
                     className="inline-flex items-center px-3 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
                   >
                     <Edit className="h-4 w-4 mr-2" />
-                    Edit
+                    {t('accounts.journal_voucher.show.edit')}
                   </button>
                   <button
                     onClick={handlePost}
                     className="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    Post
+                    {t('accounts.journal_voucher.show.post')}
                   </button>
                   <button
                     onClick={handleDelete}
                     className="inline-flex items-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
+                    {t('accounts.journal_voucher.show.delete')}
                   </button>
                 </>
               )}
@@ -231,16 +231,16 @@ const { t } = useTranslations();
               </div>
               <div className="flex-1">
                 <h3 className="text-sm font-semibold mb-1">
-                  Accounting Period: {currentPeriod.period_name} (FY {currentPeriod.fiscal_year})
+                  {t('accounts.journal_voucher.show.accounting_period')}: {currentPeriod.period_name} (FY {currentPeriod.fiscal_year})
                 </h3>
                 <p className="text-sm mb-2">
                   <strong>{t('accounts.journal_voucher.show.status')}</strong> {currentPeriod.status}
-                  {currentPeriod.is_adjustment_period && ' (Adjustment Period)'}
+                  {currentPeriod.is_adjustment_period && ` (${t('accounts.journal_voucher.show.adjustment_period')})`}
                 </p>
                 <p className="text-xs">
-                  {currentPeriod.status === 'Open' && 'This period is active. You can create and post new transactions.'}
-                  {currentPeriod.status === 'Locked' && 'This period is under review. You cannot post new transactions, but existing entries can be modified.'}
-                  {currentPeriod.status === 'Closed' && 'This period is permanently closed. No transactions can be posted or modified without administrator intervention.'}
+                  {currentPeriod.status === 'Open' && t('accounts.journal_voucher.show.period_open_description')}
+                  {currentPeriod.status === 'Locked' && t('accounts.journal_voucher.show.period_locked_description')}
+                  {currentPeriod.status === 'Closed' && t('accounts.journal_voucher.show.period_closed_description')}
                 </p>
               </div>
             </div>
@@ -293,19 +293,19 @@ const { t } = useTranslations();
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Line
+                    {t('accounts.journal_voucher.show.line')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Account
+                    {t('accounts.journal_voucher.show.account')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Description
+                    {t('accounts.journal_voucher.show.description')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Debit
+                    {t('accounts.journal_voucher.show.debit')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Credit
+                    {t('accounts.journal_voucher.show.credit')}
                   </th>
                 </tr>
               </thead>
@@ -338,7 +338,7 @@ const { t } = useTranslations();
               <tfoot className="bg-gray-50">
                 <tr>
                   <td colSpan="3" className="px-6 py-4 text-sm font-medium text-gray-900">
-                    Total
+                    {t('accounts.journal_voucher.show.total')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right text-gray-900">
                     {voucher.currency_code} {totalDebit.toLocaleString()}
@@ -358,7 +358,7 @@ const { t } = useTranslations();
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t('accounts.journal_voucher.show.created_by')}</label>
-              <p className="text-sm text-gray-900">User ID: {voucher.created_by}</p>
+              <p className="text-sm text-gray-900">{t('accounts.journal_voucher.show.user_id_prefix')}: {voucher.created_by}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t('accounts.journal_voucher.show.created_at')}</label>
@@ -371,7 +371,7 @@ const { t } = useTranslations();
             {voucher.posted_by && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('accounts.journal_voucher.show.posted_by')}</label>
-                <p className="text-sm text-gray-900">User ID: {voucher.posted_by}</p>
+                <p className="text-sm text-gray-900">{t('accounts.journal_voucher.show.user_id_prefix')}: {voucher.posted_by}</p>
               </div>
             )}
             {voucher.posted_at && (

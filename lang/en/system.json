@@ -295,7 +295,8 @@
       "prev": "Prev",
       "next": "Next",
       "last": "Last",
-      "go_to": "Go to:"
+      "go_to": "Go to:",
+      "page_title_fallback": "Companies"
     },
     "show": {
       "company_details": "Company Details",
@@ -1013,7 +1014,29 @@
       "prev": "Prev",
       "next": "Next",
       "last": "Last",
-      "go_to": "Go to:"
+      "go_to": "Go to:",
+      "page_title_fallback": "Users",
+      "stat_total": "{count} Total",
+      "stat_active": "{count} Active",
+      "stat_inactive": "{count} Inactive",
+      "bulk_selected": "{count} selected",
+      "last_login_never": "Never",
+      "pagination_of": "of {total}",
+      "bulk_status_active_title": "Activate selected users?",
+      "bulk_status_active_text": "You are about to activate {count} user(s).",
+      "bulk_status_active_ok": "Yes, activate!",
+      "bulk_status_inactive_title": "Deactivate selected users?",
+      "bulk_status_inactive_text": "You are about to deactivate {count} user(s).",
+      "bulk_status_inactive_ok": "Yes, deactivate!",
+      "bulk_status_suspended_title": "Suspend selected users?",
+      "bulk_status_suspended_text": "You are about to suspend {count} user(s).",
+      "bulk_status_suspended_ok": "Yes, suspend!",
+      "bulk_status_pending_title": "Set selected users to pending?",
+      "bulk_status_pending_text": "You are about to set {count} user(s) to pending.",
+      "bulk_status_pending_ok": "Yes, confirm!",
+      "users_bulk_delete_title": "Delete selected users?",
+      "users_bulk_delete_text": "You are about to delete {count} user(s). This cannot be undone!",
+      "users_bulk_delete_ok": "Yes, delete!"
     },
     "show": {
       "user_details": "User Details",

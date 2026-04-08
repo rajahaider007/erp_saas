@@ -147,7 +147,7 @@ const GeneralLedgerSearch = () => {
   }));
 
   const accountOptions = [
-    { value: '', label: 'All Accounts (Consolidated Report)' },
+    { value: '', label: t('accounts.general_ledger.search.all_accounts_consolidated_report') },
     ...accounts.map(account => ({
       value: account.id,
       label: `${account.account_code} - ${account.account_name}`
@@ -236,10 +236,10 @@ const GeneralLedgerSearch = () => {
   };
 
   const statusOptions = [
-    { value: '', label: 'All Status' },
-    { value: 'Posted', label: 'Posted' },
-    { value: 'Approved', label: 'Approved' },
-    { value: 'Draft', label: 'Draft' }
+    { value: '', label: t('accounts.general_ledger.search.all_status') },
+    { value: 'Posted', label: t('accounts.general_ledger.search.posted') },
+    { value: 'Approved', label: t('accounts.general_ledger.search.approved') },
+    { value: 'Draft', label: t('accounts.general_ledger.search.draft') }
   ];
 
   return (
@@ -251,12 +251,12 @@ const GeneralLedgerSearch = () => {
             <div className="title-section">
               <h1 className="page-title">
                 <BookOpen className="title-icon" />
-                General Ledger - Report Filters
+                {t('accounts.general_ledger.search.page_title')}
               </h1>
               <div className="stats-summary">
                 <div className="stat-item">
                   <Database size={16} />
-                  <span>{accounts?.length || 0} Accounts Available</span>
+                  <span>{t('accounts.general_ledger.search.accounts_available', { count: accounts?.length || 0 })}</span>
                 </div>
                 <div className="stat-item">
                   <TrendingUp size={16} />
@@ -298,10 +298,10 @@ const GeneralLedgerSearch = () => {
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                   <Filter className="inline-block mr-2" size={20} />
-                  Select Report Filters
+                  {t('accounts.general_ledger.search.select_report_filters')}
                 </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Choose the filters below to generate your General Ledger report. All filters are optional.
+                  {t('accounts.general_ledger.search.choose_filters_description')}
                 </p>
               </div>
 
@@ -313,7 +313,7 @@ const GeneralLedgerSearch = () => {
                     <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                       <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                         <Database size={16} />
-                        Company Selection
+                        {t('accounts.general_ledger.search.company_selection')}
                       </label>
                       <Select
                         options={companyOptions}
@@ -327,7 +327,7 @@ const GeneralLedgerSearch = () => {
                         classNamePrefix="react-select"
                       />
                       <p className="text-xs text-gray-400 mt-2">
-                        Select a company to filter data
+                        {t('accounts.general_ledger.search.select_company_to_filter_data')}
                       </p>
                     </div>
 
@@ -336,7 +336,7 @@ const GeneralLedgerSearch = () => {
                       <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                         <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                           <Database size={16} />
-                          Location Selection
+                          {t('accounts.general_ledger.search.location_selection')}
                         </label>
                         <Select
                           options={locationOptions}
@@ -351,7 +351,7 @@ const GeneralLedgerSearch = () => {
                           isDisabled={!selectedCompany}
                         />
                         <p className="text-xs text-gray-400 mt-2">
-                          Select a location within the selected company
+                          {t('accounts.general_ledger.search.select_location_within_selected_company')}
                         </p>
                       </div>
                     )}
@@ -362,7 +362,7 @@ const GeneralLedgerSearch = () => {
                 <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                   <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                     <Database size={16} />
-                    Account Selection
+                    {t('accounts.general_ledger.search.account_selection')}
                   </label>
                   <Select
                     options={accountOptions}
@@ -376,7 +376,7 @@ const GeneralLedgerSearch = () => {
                     classNamePrefix="react-select"
                   />
                   <p className="text-xs text-gray-400 mt-2">
-                    Leave blank to generate consolidated report for all accounts
+                    {t('accounts.general_ledger.search.leave_blank_for_all_accounts')}
                   </p>
                 </div>
 
@@ -384,7 +384,7 @@ const GeneralLedgerSearch = () => {
                 <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                   <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                     <Calendar size={16} />
-                    Date Range
+                    {t('accounts.general_ledger.search.date_range')}
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -398,10 +398,10 @@ const GeneralLedgerSearch = () => {
                           
                           if (selectedFromDate && toDateObj && fromDateObj > toDateObj) {
                             Swal.fire({
-                              title: 'Invalid Date Range',
-                              text: 'From Date cannot be later than To Date. Please select a valid date range.',
+                              title: t('accounts.general_ledger.search.invalid_date_range_title'),
+                              text: t('accounts.general_ledger.search.invalid_date_range_from_later'),
                               icon: 'warning',
-                              confirmButtonText: 'OK',
+                              confirmButtonText: t('accounts.general_ledger.search.ok'),
                               confirmButtonColor: '#3b82f6',
                               background: '#1e293b',
                               color: '#f1f5f9',
@@ -432,10 +432,10 @@ const GeneralLedgerSearch = () => {
                           
                           if (selectedToDate && fromDateObj && toDateObj < fromDateObj) {
                             Swal.fire({
-                              title: 'Invalid Date Range',
-                              text: 'To Date cannot be earlier than From Date. Please select a valid date range.',
+                              title: t('accounts.general_ledger.search.invalid_date_range_title'),
+                              text: t('accounts.general_ledger.search.invalid_date_range_to_earlier'),
                               icon: 'warning',
-                              confirmButtonText: 'OK',
+                              confirmButtonText: t('accounts.general_ledger.search.ok'),
                               confirmButtonColor: '#3b82f6',
                               background: '#1e293b',
                               color: '#f1f5f9',
@@ -464,25 +464,25 @@ const GeneralLedgerSearch = () => {
                       onClick={setTodayFilter}
                       className="px-3 py-1.5 bg-slate-600 hover:bg-blue-600 text-gray-300 hover:text-white rounded-lg text-xs font-medium transition-all"
                     >
-                      Today
+                      {t('accounts.general_ledger.search.today')}
                     </button>
                     <button
                       onClick={setThisWeekFilter}
                       className="px-3 py-1.5 bg-slate-600 hover:bg-blue-600 text-gray-300 hover:text-white rounded-lg text-xs font-medium transition-all"
                     >
-                      This Week
+                      {t('accounts.general_ledger.search.this_week')}
                     </button>
                     <button
                       onClick={setThisMonthFilter}
                       className="px-3 py-1.5 bg-slate-600 hover:bg-blue-600 text-gray-300 hover:text-white rounded-lg text-xs font-medium transition-all"
                     >
-                      This Month
+                      {t('accounts.general_ledger.search.this_month')}
                     </button>
                     <button
                       onClick={setThisYearFilter}
                       className="px-3 py-1.5 bg-slate-600 hover:bg-blue-600 text-gray-300 hover:text-white rounded-lg text-xs font-medium transition-all"
                     >
-                      This Year
+                      {t('accounts.general_ledger.search.this_year')}
                     </button>
                   </div>
                 </div>
@@ -491,7 +491,7 @@ const GeneralLedgerSearch = () => {
                 <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                   <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                     <FileText size={16} />
-                    Voucher Type
+                    {t('accounts.general_ledger.search.voucher_type')}
                   </label>
                   <select
                     className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -510,7 +510,7 @@ const GeneralLedgerSearch = () => {
                 <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                   <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                     <Filter size={16} />
-                    Transaction Status
+                    {t('accounts.general_ledger.search.transaction_status')}
                   </label>
                   <select
                     className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -530,7 +530,7 @@ const GeneralLedgerSearch = () => {
                 <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                   <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                     <TrendingUp size={16} />
-                    Amount Range (Optional)
+                    {t('accounts.general_ledger.search.amount_range_optional')}
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -565,14 +565,14 @@ const GeneralLedgerSearch = () => {
                     className="px-6 py-3 bg-slate-600 hover:bg-slate-500 text-gray-200 rounded-lg font-medium transition-all flex items-center gap-2"
                   >
                     <RefreshCcw size={18} />
-                    Reset Filters
+                    {t('accounts.general_ledger.search.reset_filters')}
                   </button>
                   <button
                     onClick={handleGenerateReport}
                     className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all flex items-center gap-2 shadow-lg hover:shadow-blue-500/50"
                   >
                     <SearchIcon size={18} />
-                    Generate Report
+                    {t('accounts.general_ledger.search.generate_report')}
                     <ChevronRight size={18} />
                   </button>
                 </div>

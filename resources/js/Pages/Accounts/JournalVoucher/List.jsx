@@ -176,17 +176,17 @@ const JournalVoucherList = () => {
   useEffect(() => {
     if (flash?.success) {
       CustomAlert.fire({
-        title: 'Success!',
+        title: t('common.flash.success_title'),
         text: flash.success,
         icon: 'success',
-        confirmButtonText: 'Great!'
+        confirmButtonText: t('common.flash.great')
       });
     } else if (flash?.error) {
       CustomAlert.fire({
-        title: 'Error!',
+        title: t('common.flash.error_title'),
         text: flash.error,
         icon: 'error',
-        confirmButtonText: 'OK'
+        confirmButtonText: t('common.flash.ok')
       });
     }
   }, [flash]);
@@ -450,8 +450,8 @@ const JournalVoucherList = () => {
     }
     if (voucher.status !== 'Draft') {
       CustomAlert.fire({
-        title: 'Cannot Edit',
-        text: 'Only draft vouchers can be edited',
+        title: t('common.flash.warning_title'),
+        text: t('accounts.journal_voucher.show.msg_only_draft_vouchers_can_be_edited'),
         icon: 'error'
       });
       return;
@@ -466,20 +466,20 @@ const JournalVoucherList = () => {
     }
     if (voucher.status !== 'Draft') {
       CustomAlert.fire({
-        title: 'Cannot Delete',
-        text: 'Only draft vouchers can be deleted',
+        title: t('common.flash.warning_title'),
+        text: t('accounts.journal_voucher.show.msg_only_draft_vouchers_can_be_deleted'),
         icon: 'error'
       });
       return;
     }
     
     CustomAlert.fire({
-      title: 'Are you sure?',
-      text: `You are about to delete voucher "${voucher.voucher_number}". This action cannot be undone!`,
+      title: t('common.data_table.confirm_delete_title'),
+      text: t('common.data_table.confirm_delete_text', { name: voucher.voucher_number }),
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: t('common.data_table.confirm_delete_ok'),
+      cancelButtonText: t('common.actions.cancel'),
       onConfirm: () => {
         setLoading(true);
         router.delete(`/accounts/journal-voucher/${voucher.id}`, {
@@ -492,20 +492,20 @@ const JournalVoucherList = () => {
   const handlePost = (voucher) => {
     if (voucher.status !== 'Draft') {
       CustomAlert.fire({
-        title: 'Cannot Post',
-        text: 'Only draft vouchers can be posted',
+        title: t('common.flash.warning_title'),
+        text: t('accounts.journal_voucher.show.msg_only_draft_vouchers_can_be_posted'),
         icon: 'error'
       });
       return;
     }
     
     CustomAlert.fire({
-      title: 'Post Voucher?',
-      text: `You are about to post voucher "${voucher.voucher_number}". This action cannot be undone.`,
+      title: t('common.data_table.confirm_post_title'),
+      text: t('common.data_table.confirm_post_text', { name: voucher.voucher_number }),
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Yes, post it!',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: t('common.data_table.confirm_post_ok'),
+      cancelButtonText: t('common.actions.cancel'),
       onConfirm: () => {
         setLoading(true);
         router.post(`/accounts/journal-voucher/${voucher.id}/post`, {}, {
@@ -518,8 +518,8 @@ const JournalVoucherList = () => {
   const handleBulkAction = (action) => {
     if (selectedVouchers.length === 0) {
       CustomAlert.fire({
-        title: 'No Selection',
-        text: 'Please select vouchers to perform bulk action',
+        title: t('common.data_table.no_selection_title'),
+        text: t('common.data_table.no_selection_text'),
         icon: 'warning'
       });
       return;
@@ -531,12 +531,12 @@ const JournalVoucherList = () => {
         return;
       }
       CustomAlert.fire({
-        title: 'Delete Selected Vouchers?',
-        text: `You are about to delete ${selectedVouchers.length} journal voucher(s). This action cannot be undone!`,
+        title: t('common.data_table.bulk_delete_title'),
+        text: t('common.data_table.bulk_delete_text', { count: selectedVouchers.length }),
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Yes, delete them!',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: t('common.data_table.bulk_delete_ok'),
+        cancelButtonText: t('common.actions.cancel'),
         onConfirm: () => {
           setLoading(true);
           selectedVouchers.forEach(id => {
@@ -555,7 +555,7 @@ const JournalVoucherList = () => {
       
       if (nonDraftVouchers.length > 0) {
         CustomAlert.fire({
-          title: 'Cannot Post Selected Vouchers',
+          title: t('common.data_table.cannot_post_selected_title'),
           text: `${nonDraftVouchers.length} voucher(s) are not in Draft status and cannot be posted. Only Draft vouchers can be posted.`,
           icon: 'error'
         });
@@ -563,12 +563,12 @@ const JournalVoucherList = () => {
       }
 
       CustomAlert.fire({
-        title: 'Post Selected Vouchers?',
-        text: `You are about to post ${selectedVouchers.length} journal voucher(s). This action cannot be undone!`,
+        title: t('common.data_table.bulk_post_title'),
+        text: t('common.data_table.bulk_post_text', { count: selectedVouchers.length }),
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'Yes, post them!',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: t('common.data_table.bulk_post_ok'),
+        cancelButtonText: t('common.actions.cancel'),
         onConfirm: () => {
           setLoading(true);
           router.post('/accounts/journal-voucher/bulk-post', {
@@ -577,15 +577,15 @@ const JournalVoucherList = () => {
             onSuccess: (page) => {
               setSelectedVouchers([]);
               CustomAlert.fire({
-                title: 'Success!',
+                title: t('common.flash.success_title'),
                 text: `Successfully posted ${selectedVouchers.length} voucher(s).`,
                 icon: 'success'
               });
             },
             onError: (errors) => {
               CustomAlert.fire({
-                title: 'Error!',
-                text: 'Failed to post some vouchers. Please try again.',
+                title: t('common.flash.error_title'),
+                text: t('common.data_table.partial_post_error'),
                 icon: 'error'
               });
             },
@@ -599,12 +599,12 @@ const JournalVoucherList = () => {
   // Export functions
   const exportToCSV = () => {
     CustomAlert.fire({
-      title: 'Export to CSV',
-      text: 'Download all journal vouchers as CSV file?',
+      title: t('common.data_table.export_csv_title'),
+      text: t('common.data_table.export_csv_text'),
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Yes, download!',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: t('common.data_table.export_pdf_ok'),
+      cancelButtonText: t('common.actions.cancel'),
       onConfirm: () => {
         // Build query parameters for current filters
         const params = new URLSearchParams(window.location.search);
@@ -616,12 +616,12 @@ const JournalVoucherList = () => {
 
   const exportToExcel = () => {
     CustomAlert.fire({
-      title: 'Export to Excel',
-      text: 'Download all journal vouchers as Excel file?',
+      title: t('common.data_table.export_excel_title'),
+      text: t('common.data_table.export_excel_text'),
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Yes, download!',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: t('common.data_table.export_pdf_ok'),
+      cancelButtonText: t('common.actions.cancel'),
       onConfirm: () => {
         // Build query parameters for current filters
         const params = new URLSearchParams(window.location.search);
@@ -633,12 +633,12 @@ const JournalVoucherList = () => {
 
   const exportToPDF = () => {
     CustomAlert.fire({
-      title: 'Export to PDF',
-      text: 'Download all journal vouchers as PDF file?',
+      title: t('common.data_table.export_pdf_title'),
+      text: t('common.data_table.export_pdf_text'),
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Yes, download!',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: t('common.data_table.export_pdf_ok'),
+      cancelButtonText: t('common.actions.cancel'),
       onConfirm: () => {
         // Build query parameters for current filters
         const params = new URLSearchParams(window.location.search);
@@ -1264,3 +1264,6 @@ const JournalVoucherList = () => {
 };
 
 export default JournalVoucherList;
+
+
+

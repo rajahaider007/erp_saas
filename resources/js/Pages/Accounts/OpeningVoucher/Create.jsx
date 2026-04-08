@@ -209,7 +209,7 @@ const OpeningVoucherCreate = () => {
         const data = await response.json();
         if (data.success && data.rate) {
           updateEntry(entryIndex, 'exchange_rate', data.rate);
-          setAlert({ type: 'success', message: `Exchange rate updated for entry ${entryIndex + 1}: ${data.rate}` });
+          setAlert({ type: 'success', message: t('accounts.opening_voucher.create.msg_exchange_rate_updated_for_entry', { entry: entryIndex + 1, rate: data.rate }) });
         } else {
           setAlert({ type: 'error', message: t('accounts.opening_voucher.create.msg_failed_to_fetch_exchange_rate_from_api') });
         }
@@ -241,7 +241,7 @@ const OpeningVoucherCreate = () => {
     }
 
     if (invalidFiles.length > 0) {
-      setAlert({ type: 'error', message: `Files too large: ${invalidFiles.join(', ')}` });
+      setAlert({ type: 'error', message: t('accounts.opening_voucher.create.msg_files_too_large', { files: invalidFiles.join(', ') }) });
       return;
     }
 
@@ -277,7 +277,7 @@ const OpeningVoucherCreate = () => {
           const newAttachments = Array.isArray(data.attachments) ? data.attachments : [];
           return [...currentAttachments, ...newAttachments];
         });
-                        setAlert({ type: 'success', message: `${validFiles.length} attachment(s) uploaded successfully` });
+                        setAlert({ type: 'success', message: t('accounts.opening_voucher.create.msg_attachments_uploaded_successfully', { count: validFiles.length }) });
                         
                         // Clear the file input
                         const fileInput = document.getElementById('attachment-upload');
@@ -287,7 +287,7 @@ const OpeningVoucherCreate = () => {
       } else {
         const errorData = await response.json().catch(() => ({ message: t('accounts.opening_voucher.create.msg_unknown_error') }));
         console.error('Upload failed:', errorData);
-        setAlert({ type: 'error', message: errorData.message || 'Failed to upload attachments' });
+        setAlert({ type: 'error', message: errorData.message || t('accounts.opening_voucher.create.msg_failed_to_upload_attachments') });
       }
     } catch (error) {
       setAlert({ type: 'error', message: t('accounts.opening_voucher.create.msg_error_uploading_attachments') + error.message });
@@ -553,13 +553,13 @@ const OpeningVoucherCreate = () => {
     const newErrors = {};
 
     if (!formData.voucher_date) {
-      newErrors.voucher_date = 'Voucher date is required';
+      newErrors.voucher_date = t('accounts.opening_voucher.create.msg_voucher_date_required');
     }
 
     // Validate voucher number if manual numbering is enabled
     if (!autoVoucherNumbering && !isEdit) {
       if (!formData.voucher_number || !formData.voucher_number.trim()) {
-        newErrors.voucher_number = 'Voucher number is required';
+        newErrors.voucher_number = t('accounts.opening_voucher.create.msg_voucher_number_required');
       }
     }
 
@@ -568,7 +568,7 @@ const OpeningVoucherCreate = () => {
     console.log('Balance check:', { totalBaseDebit, totalBaseCredit, isBaseBalanced });
     
     if (!isBaseBalanced) {
-      newErrors.entries = 'Total debits must equal total credits in base currency';
+      newErrors.entries = t('accounts.opening_voucher.create.msg_total_debits_must_equal_total_credits_in_base_currency');
       console.log('Balance validation failed:', Math.abs(totalBaseDebit - totalBaseCredit));
     }
 
@@ -577,17 +577,17 @@ const OpeningVoucherCreate = () => {
       console.log(`Validating entry ${index}:`, entry);
       
       if (!entry.account_id) {
-        newErrors[`entries.${index}.account_id`] = 'Account is required';
+        newErrors[`entries.${index}.account_id`] = t('accounts.opening_voucher.create.msg_account_is_required');
         console.log(`Entry ${index}: Missing account_id`);
       }
       
       if (!entry.currency_code) {
-        newErrors[`entries.${index}.currency_code`] = 'Currency is required';
+        newErrors[`entries.${index}.currency_code`] = t('accounts.opening_voucher.create.msg_currency_is_required');
         console.log(`Entry ${index}: Missing currency_code`);
       }
       
       if (!entry.exchange_rate || entry.exchange_rate <= 0) {
-        newErrors[`entries.${index}.exchange_rate`] = 'Valid exchange rate is required';
+        newErrors[`entries.${index}.exchange_rate`] = t('accounts.opening_voucher.create.msg_valid_exchange_rate_is_required');
         console.log(`Entry ${index}: Invalid exchange_rate:`, entry.exchange_rate);
       }
       
@@ -597,12 +597,12 @@ const OpeningVoucherCreate = () => {
       console.log(`Entry ${index} amounts:`, { debit, credit });
       
       if (debit === 0 && credit === 0) {
-        newErrors[`entries.${index}.amount`] = 'Either debit or credit amount is required';
+        newErrors[`entries.${index}.amount`] = t('accounts.opening_voucher.create.msg_either_debit_or_credit_amount_is_required');
         console.log(`Entry ${index}: Both amounts are zero`);
       }
       
       if (debit > 0 && credit > 0) {
-        newErrors[`entries.${index}.amount`] = 'Cannot have both debit and credit amounts';
+        newErrors[`entries.${index}.amount`] = t('accounts.opening_voucher.create.msg_cannot_have_both_debit_and_credit_amounts');
         console.log(`Entry ${index}: Both amounts are non-zero`);
       }
     });
@@ -685,15 +685,15 @@ const OpeningVoucherCreate = () => {
         });
       }
     } catch (error) {
-      setAlert({ type: 'error', message: `An error occurred while ${isEdit ? 'updating' : 'creating'} the Opening voucher` });
+      setAlert({ type: 'error', message: t('accounts.opening_voucher.create.msg_error_while_saving_voucher', { action: isEdit ? t('accounts.opening_voucher.create.action_updating') : t('accounts.opening_voucher.create.action_creating') }) });
       setIsSubmitting(false);
     }
   };
 
   const breadcrumbItems = [
-    { label: 'Dashboard', icon: Home, href: '/dashboard' },
-    { label: 'Opening Vouchers', icon: List, href: '/accounts/opening-voucher' },
-    { label: isEdit ? 'Edit Opening Voucher' : 'Create Opening Voucher', icon: FileText, href: null }
+    { label: t('accounts.opening_voucher.create.dashboard'), icon: Home, href: '/dashboard' },
+    { label: t('accounts.opening_voucher.create.opening_vouchers'), icon: List, href: '/accounts/opening-voucher' },
+    { label: isEdit ? t('accounts.opening_voucher.create.edit_opening_voucher') : t('accounts.opening_voucher.create.create_opening_voucher'), icon: FileText, href: null }
   ];
 
   return (
@@ -745,16 +745,16 @@ const OpeningVoucherCreate = () => {
               </div>
               <div className="flex-1">
                 <h3 className="text-sm font-semibold mb-1">
-                  Accounting Period: {currentPeriod.period_name} (FY {currentPeriod.fiscal_year})
+                  {t('accounts.opening_voucher.create.accounting_period')}: {currentPeriod.period_name} (FY {currentPeriod.fiscal_year})
                 </h3>
                 <p className="text-sm mb-2">
                   <strong>{t('accounts.opening_voucher.create.status')}</strong> {currentPeriod.status}
-                  {currentPeriod.is_adjustment_period && ' (Adjustment Period)'}
+                  {currentPeriod.is_adjustment_period && ` (${t('accounts.opening_voucher.create.adjustment_period')})`}
                 </p>
                 <p className="text-xs">
-                  {currentPeriod.status === 'Open' && 'This period is active. You can create and post new transactions.'}
-                  {currentPeriod.status === 'Locked' && 'This period is under review. You cannot post new transactions, but you can modify existing entries.'}
-                  {currentPeriod.status === 'Closed' && 'This period is permanently closed. No transactions can be posted or modified without administrator intervention.'}
+                  {currentPeriod.status === 'Open' && t('accounts.opening_voucher.create.period_open_description')}
+                  {currentPeriod.status === 'Locked' && t('accounts.opening_voucher.create.period_locked_description')}
+                  {currentPeriod.status === 'Closed' && t('accounts.opening_voucher.create.period_closed_description')}
                 </p>
               </div>
             </div>
@@ -768,10 +768,10 @@ const OpeningVoucherCreate = () => {
               {/* Form Header */}
               <div className="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
                 <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  {isEdit ? 'Edit Opening Voucher' : 'Create Opening Voucher'}
+                  {isEdit ? t('accounts.opening_voucher.create.edit_opening_voucher') : t('accounts.opening_voucher.create.create_opening_voucher')}
                 </h1>
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                  {isEdit ? 'Update Opening voucher information' : 'Use Tab or Enter to navigate, Alt+A to add entry'}
+                  {isEdit ? t('accounts.opening_voucher.create.subtitle_edit') : t('accounts.opening_voucher.create.subtitle_create')}
                 </p>
               </div>
 
@@ -784,7 +784,7 @@ const OpeningVoucherCreate = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="voucher_date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                          Voucher Date *
+                          {t('accounts.opening_voucher.create.voucher_date_required_label')}
                         </label>
                         <CustomDatePicker
                           selected={formData.voucher_date ? new Date(formData.voucher_date) : null}
@@ -803,7 +803,7 @@ const OpeningVoucherCreate = () => {
 
                       <div>
                         <label htmlFor="voucher_number" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                          Voucher Number {!autoVoucherNumbering && !isEdit && '*'}
+                          {t('accounts.opening_voucher.create.voucher_number_label')} {!autoVoucherNumbering && !isEdit && '*'}
                         </label>
                         <input
                           type="text"
@@ -812,7 +812,7 @@ const OpeningVoucherCreate = () => {
                           value={formData.voucher_number}
                           onChange={(e) => setFormData(prev => ({ ...prev, voucher_number: e.target.value }))}
                           onKeyDown={handleKeyDown}
-                          placeholder={autoVoucherNumbering ? (formData.voucher_number || 'Auto-generated') : 'Enter voucher number'}
+                          placeholder={autoVoucherNumbering ? (formData.voucher_number || t('accounts.opening_voucher.create.auto_generated')) : t('accounts.opening_voucher.create.enter_voucher_number')}
                           disabled={autoVoucherNumbering || isEdit}
                           tabIndex={autoVoucherNumbering || isEdit ? -1 : 2}
                           className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
@@ -823,7 +823,7 @@ const OpeningVoucherCreate = () => {
                         />
                         {autoVoucherNumbering && (
                           <p className="mt-0.5 text-xs text-blue-600 dark:text-blue-400">
-                            {formData.voucher_number ? `Voucher Number: ${formData.voucher_number}` : 'Auto-generated'}
+                            {formData.voucher_number ? t('accounts.opening_voucher.create.voucher_number_display', { number: formData.voucher_number }) : t('accounts.opening_voucher.create.auto_generated')}
                           </p>
                         )}
                         {errors.voucher_number && (
@@ -833,7 +833,7 @@ const OpeningVoucherCreate = () => {
 
                       <div>
                         <label htmlFor="reference_number" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                          Reference Number
+                          {t('accounts.opening_voucher.create.reference_number_label')}
                         </label>
                         <input
                           type="text"
@@ -850,7 +850,7 @@ const OpeningVoucherCreate = () => {
 
                       <div className="md:col-span-2">
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                          Description
+                          {t('accounts.opening_voucher.create.description_label')}
                         </label>
                         <textarea
                           id="description"
@@ -876,7 +876,7 @@ const OpeningVoucherCreate = () => {
                             <span className={formData.description.length > 200 ? 'text-orange-500' : formData.description.length > 230 ? 'text-red-500' : ''}>
                               {formData.description.length}
                             </span>
-                            /250 characters
+                            {t('accounts.opening_voucher.create.characters_count', { count: 250 })}
                           </div>
                         </div>
                       </div>
@@ -890,7 +890,7 @@ const OpeningVoucherCreate = () => {
                         <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                         </svg>
-                        Attachments
+                        {t('accounts.opening_voucher.create.attachments_label')}
                       </h3>
                       
                       <div className="space-y-3">
@@ -931,7 +931,7 @@ const OpeningVoucherCreate = () => {
                         {/* Media type information */}
                         <div className="mt-2">
                           <span className="text-xs text-gray-500 dark:text-gray-400">
-                            <strong>{t('accounts.opening_voucher.create.supported_formats')}</strong> PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG, GIF
+                            <strong>{t('accounts.opening_voucher.create.supported_formats')}</strong> {t('accounts.opening_voucher.create.supported_file_types')}
                           </span>
                         </div>
 
@@ -998,7 +998,7 @@ const OpeningVoucherCreate = () => {
                     className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
                   >
                     <Plus size={16} />
-                    Add Entry
+                    {t('accounts.opening_voucher.create.add_entry')}
                   </button>
                 </div>
 
@@ -1013,7 +1013,7 @@ const OpeningVoucherCreate = () => {
                   {formData.entries.map((entry, index) => (
                     <div key={index} className="border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-gray-50 dark:bg-gray-700/50">
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300">Entry {index + 1}</h4>
+                        <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300">{t('accounts.opening_voucher.create.entry_number', { number: index + 1 })}</h4>
                         {formData.entries.length > 2 && (
                           <button
                             type="button"
@@ -1030,7 +1030,7 @@ const OpeningVoucherCreate = () => {
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                         <div className="md:col-span-2">
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Account *
+                            {t('accounts.opening_voucher.create.account_required_label')}
                           </label>
                           <InlineSearchSelect
                             options={accounts.map(account => ({
@@ -1070,7 +1070,7 @@ const OpeningVoucherCreate = () => {
 
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Currency
+                            {t('accounts.opening_voucher.create.currency_label')}
                           </label>
                           <InlineSearchSelect
                             options={currencies.length > 0 ? currencies.map(currency => ({
@@ -1097,7 +1097,7 @@ const OpeningVoucherCreate = () => {
 
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Exchange Rate
+                            {t('accounts.opening_voucher.create.exchange_rate_label')}
                           </label>
                           <div className="flex gap-1">
                             <input
@@ -1130,14 +1130,14 @@ const OpeningVoucherCreate = () => {
                               {entry.currency_code !== formData.base_currency_code ? (
                                 `1 ${entry.currency_code} = ${(1/entry.exchange_rate).toFixed(6)} ${formData.base_currency_code}`
                               ) : (
-                                'Base currency'
+                                t('accounts.opening_voucher.create.base_currency')
                               )}
                             </div>
                         </div>
 
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Debit Amount ({entry.currency_code})
+                            {t('accounts.opening_voucher.create.debit_amount')} ({entry.currency_code})
                           </label>
                           <input
                             type="number"
@@ -1156,14 +1156,14 @@ const OpeningVoucherCreate = () => {
                           />
                           {entry.debit_amount && entry.currency_code !== formData.base_currency_code && (
                             <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                              Base: {entry.base_debit_amount} {formData.base_currency_code}
+                              {t('accounts.opening_voucher.create.base_value')}: {entry.base_debit_amount} {formData.base_currency_code}
                             </div>
                           )}
                         </div>
 
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Credit Amount ({entry.currency_code})
+                            {t('accounts.opening_voucher.create.credit_amount')} ({entry.currency_code})
                           </label>
                           <input
                             type="number"
@@ -1182,7 +1182,7 @@ const OpeningVoucherCreate = () => {
                           />
                           {entry.credit_amount && entry.currency_code !== formData.base_currency_code && (
                             <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                              Base: {entry.base_credit_amount} {formData.base_currency_code}
+                              {t('accounts.opening_voucher.create.base_value')}: {entry.base_credit_amount} {formData.base_currency_code}
                             </div>
                           )}
                         </div>
@@ -1293,7 +1293,7 @@ const OpeningVoucherCreate = () => {
               <div className="mb-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
                 <div className="mb-3">
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                    Base Currency Summary ({formData.base_currency_code})
+                    {t('accounts.opening_voucher.create.base_currency_summary')} ({formData.base_currency_code})
                   </h4>
                   <div className="grid grid-cols-3 gap-3 text-center">
                     <div>
@@ -1346,7 +1346,7 @@ const OpeningVoucherCreate = () => {
                   return Object.keys(currencyBreakdown).length > 1 && (
                     <div>
                       <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                        Multi-Currency Breakdown
+                        {t('accounts.opening_voucher.create.multi_currency_breakdown')}
                       </h4>
                       <div className="space-y-2">
                         {Object.entries(currencyBreakdown).map(([currency, amounts]) => (
@@ -1389,8 +1389,8 @@ const OpeningVoucherCreate = () => {
               {/* Form Actions */}
               <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">{t('accounts.opening_voucher.create.tab')}</kbd>{t('accounts.opening_voucher.create.or')}<kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">{t('accounts.opening_voucher.create.enter')}</kbd> to navigate • 
-                  <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 ml-1">{t('accounts.opening_voucher.create.alta')}</kbd> to add entry
+                  <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">{t('accounts.opening_voucher.create.tab')}</kbd>{t('accounts.opening_voucher.create.or')}<kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">{t('accounts.opening_voucher.create.enter')}</kbd> {t('accounts.opening_voucher.create.to_navigate')} • 
+                  <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 ml-1">{t('accounts.opening_voucher.create.alta')}</kbd> {t('accounts.opening_voucher.create.to_add_entry')}
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -1400,7 +1400,7 @@ const OpeningVoucherCreate = () => {
                     tabIndex={-1}
                   >
                     <ArrowLeft size={16} />
-                    Cancel
+                    {t('accounts.opening_voucher.create.cancel')}
                   </button>
                   <button
                     type="submit"
@@ -1410,12 +1410,12 @@ const OpeningVoucherCreate = () => {
                     {isSubmitting ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        {isEdit ? 'Updating...' : 'Creating...'}
+                        {isEdit ? t('accounts.opening_voucher.create.updating') : t('accounts.opening_voucher.create.creating')}
                       </>
                     ) : (
                       <>
                         <Save size={16} />
-                        {isEdit ? 'Update' : 'Create'} <kbd className="ml-1 px-1.5 py-0.5 bg-blue-700 rounded text-xs">{t('accounts.opening_voucher.create.ctrls')}</kbd>
+                        {isEdit ? t('accounts.opening_voucher.create.update') : t('accounts.opening_voucher.create.create')} <kbd className="ml-1 px-1.5 py-0.5 bg-blue-700 rounded text-xs">{t('accounts.opening_voucher.create.ctrls')}</kbd>
                       </>
                     )}
                   </button>

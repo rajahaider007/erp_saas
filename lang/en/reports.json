@@ -40,7 +40,11 @@
       "from_date": "From Date",
       "select_from_date": "Select from date",
       "to_date": "To Date",
-      "select_to_date": "Select to date"
+      "select_to_date": "Select to date",
+      "date_range": "Date Range",
+      "invalid_date_range_title": "Invalid Date Range",
+      "invalid_from_after_to": "From Date cannot be later than To Date. Please select a valid date range.",
+      "invalid_to_before_from": "To Date cannot be earlier than From Date. Please select a valid date range."
     }
   },
   "chart_of_account": {

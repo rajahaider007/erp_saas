@@ -227,9 +227,9 @@ const BankVoucherCreate = () => {
       const response = await fetch(`/api/exchange-rate/${formData.base_currency_code}/${currencyCode}`);
       if (response.ok) {
         const data = await response.json();
-        if (data.success && data.rate) {
-          updateEntry(entryIndex, 'exchange_rate', data.rate);
-          setAlert({ type: 'success', message: `Exchange rate updated for entry ${entryIndex + 1}: ${data.rate}` });
+            if (data.success && data.rate) {
+              updateEntry(entryIndex, 'exchange_rate', data.rate);
+              setAlert({ type: 'success', message: t('accounts.bank_voucher.create.msg_exchange_rate_updated_for_entry', { entry: entryIndex + 1, rate: data.rate }) });
         } else {
           setAlert({ type: 'error', message: t('accounts.bank_voucher.create.msg_failed_to_fetch_exchange_rate_from_api') });
         }
@@ -261,7 +261,7 @@ const BankVoucherCreate = () => {
     }
 
     if (invalidFiles.length > 0) {
-      setAlert({ type: 'error', message: `Files too large: ${invalidFiles.join(', ')}` });
+      setAlert({ type: 'error', message: t('accounts.bank_voucher.create.msg_files_too_large', { files: invalidFiles.join(', ') }) });
       return;
     }
 
@@ -297,17 +297,17 @@ const BankVoucherCreate = () => {
           const newAttachments = Array.isArray(data.attachments) ? data.attachments : [];
           return [...currentAttachments, ...newAttachments];
         });
-                        setAlert({ type: 'success', message: `${validFiles.length} attachment(s) uploaded successfully` });
-                        
-                        // Clear the file input
-                        const fileInput = document.getElementById('attachment-upload');
-                        if (fileInput) {
-                          fileInput.value = '';
-                        }
+        setAlert({ type: 'success', message: t('accounts.bank_voucher.create.msg_attachments_uploaded_successfully', { count: validFiles.length }) });
+
+        // Clear the file input
+        const fileInput = document.getElementById('attachment-upload');
+        if (fileInput) {
+          fileInput.value = '';
+        }
       } else {
         const errorData = await response.json().catch(() => ({ message: t('accounts.bank_voucher.create.msg_unknown_error') }));
         console.error('Upload failed:', errorData);
-        setAlert({ type: 'error', message: errorData.message || 'Failed to upload attachments' });
+        setAlert({ type: 'error', message: errorData.message || t('accounts.bank_voucher.create.msg_failed_to_upload_attachments') });
       }
     } catch (error) {
       setAlert({ type: 'error', message: t('accounts.bank_voucher.create.msg_error_uploading_attachments') + error.message });
@@ -322,7 +322,6 @@ const BankVoucherCreate = () => {
       if (!Array.isArray(prev)) return [];
       // Handle both object attachments and string filenames
       if (typeof attachmentId === 'string' && !prev.some(att => att.id === attachmentId)) {
-        // If attachmentId is a filename, filter by filename
         return prev.filter(att => att !== attachmentId && att.original_name !== attachmentId);
       }
       return prev.filter(att => att && att.id !== attachmentId);
@@ -347,7 +346,7 @@ const BankVoucherCreate = () => {
     }
 
     if (invalidFiles.length > 0) {
-      setAlert({ type: 'error', message: `Files too large: ${invalidFiles.join(', ')}` });
+      setAlert({ type: 'error', message: t('accounts.bank_voucher.create.msg_files_too_large', { files: invalidFiles.join(', ') }) });
       return;
     }
 
@@ -402,7 +401,7 @@ const BankVoucherCreate = () => {
       } else {
         const errorData = await response.json().catch(() => ({ message: t('accounts.bank_voucher.create.msg_unknown_error') }));
         console.error('Entry upload failed:', errorData);
-        setAlert({ type: 'error', message: errorData.message || 'Failed to upload attachment' });
+        setAlert({ type: 'error', message: errorData.message || t('accounts.bank_voucher.create.msg_failed_to_upload_attachment') });
       }
     } catch (error) {
       setAlert({ type: 'error', message: t('accounts.bank_voucher.create.msg_error_uploading_attachment') + error.message });
@@ -554,28 +553,28 @@ const BankVoucherCreate = () => {
     const newErrors = {};
 
     if (!formData.voucher_date) {
-      newErrors.voucher_date = 'Voucher date is required';
+      newErrors.voucher_date = t('accounts.bank_voucher.create.msg_voucher_date_required');
     }
 
     // Validate voucher number if manual numbering is enabled
     if (!autoVoucherNumbering && !isEdit) {
       if (!formData.voucher_number || !formData.voucher_number.trim()) {
-        newErrors.voucher_number = 'Voucher number is required';
+        newErrors.voucher_number = t('accounts.bank_voucher.create.msg_voucher_number_required');
       }
     }
 
     // Description is optional - no validation needed
 
     if (!formData.voucher_sub_type) {
-      newErrors.voucher_sub_type = 'Voucher type is required';
+      newErrors.voucher_sub_type = t('accounts.bank_voucher.create.msg_voucher_type_required');
     }
 
     if (!formData.bank_account_id) {
-      newErrors.bank_account_id = 'Bank account is required';
+      newErrors.bank_account_id = t('accounts.bank_voucher.create.msg_bank_account_required');
     }
 
     if (totalBaseAmount <= 0) {
-      newErrors.entries = 'At least one detail amount is required';
+      newErrors.entries = t('accounts.bank_voucher.create.msg_at_least_one_detail_amount_is_required');
     }
 
     // Validate entries
@@ -583,17 +582,17 @@ const BankVoucherCreate = () => {
       console.log(`Validating entry ${index}:`, entry);
       
       if (!entry.account_id) {
-        newErrors[`entries.${index}.account_id`] = 'Account is required';
+        newErrors[`entries.${index}.account_id`] = t('accounts.bank_voucher.create.msg_account_is_required');
         console.log(`Entry ${index}: Missing account_id`);
       }
       
       if (!entry.currency_code) {
-        newErrors[`entries.${index}.currency_code`] = 'Currency is required';
+        newErrors[`entries.${index}.currency_code`] = t('accounts.bank_voucher.create.msg_currency_is_required');
         console.log(`Entry ${index}: Missing currency_code`);
       }
       
       if (!entry.exchange_rate || entry.exchange_rate <= 0) {
-        newErrors[`entries.${index}.exchange_rate`] = 'Valid exchange rate is required';
+        newErrors[`entries.${index}.exchange_rate`] = t('accounts.bank_voucher.create.msg_valid_exchange_rate_is_required');
         console.log(`Entry ${index}: Invalid exchange_rate:`, entry.exchange_rate);
       }
       
@@ -602,11 +601,11 @@ const BankVoucherCreate = () => {
       console.log(`Entry ${index} amount:`, { amount });
       
       if (amount <= 0) {
-        newErrors[`entries.${index}.amount`] = 'Amount is required';
+        newErrors[`entries.${index}.amount`] = t('accounts.bank_voucher.create.msg_amount_is_required');
       }
       
       if (formData.bank_account_id && parseInt(entry.account_id) === parseInt(formData.bank_account_id)) {
-        newErrors[`entries.${index}.account_id`] = 'Detail account cannot be the selected bank account';
+        newErrors[`entries.${index}.account_id`] = t('accounts.bank_voucher.create.msg_detail_account_cannot_be_the_selected_bank_account');
       }
     });
 
@@ -693,15 +692,15 @@ const BankVoucherCreate = () => {
         });
       }
     } catch (error) {
-      setAlert({ type: 'error', message: `An error occurred while ${isEdit ? 'updating' : 'creating'} the bank voucher` });
+      setAlert({ type: 'error', message: t('accounts.bank_voucher.create.msg_error_while_saving_voucher', { action: isEdit ? t('accounts.bank_voucher.create.action_updating') : t('accounts.bank_voucher.create.action_creating') }) });
       setIsSubmitting(false);
     }
   };
 
   const breadcrumbItems = [
-    { label: 'Dashboard', icon: Home, href: '/dashboard' },
-    { label: 'Bank Vouchers', icon: List, href: '/accounts/bank-voucher' },
-    { label: isEdit ? 'Edit Bank Voucher' : 'Create Bank Voucher', icon: FileText, href: null }
+    { label: t('accounts.bank_voucher.create.dashboard'), icon: Home, href: '/dashboard' },
+    { label: t('accounts.bank_voucher.create.bank_vouchers'), icon: List, href: '/accounts/bank-voucher' },
+        { label: isEdit ? t('accounts.bank_voucher.create.edit_bank_voucher') : t('accounts.bank_voucher.create.create_bank_voucher'), icon: FileText, href: null }
   ];
 
   return (
@@ -753,16 +752,16 @@ const BankVoucherCreate = () => {
               </div>
               <div className="flex-1">
                 <h3 className="text-sm font-semibold mb-1">
-                  Accounting Period: {currentPeriod.period_name} (FY {currentPeriod.fiscal_year})
+                  {t('accounts.bank_voucher.create.accounting_period')}: {currentPeriod.period_name} (FY {currentPeriod.fiscal_year})
                 </h3>
                 <p className="text-sm mb-2">
                   <strong>{t('accounts.bank_voucher.create.status')}</strong> {currentPeriod.status}
-                  {currentPeriod.is_adjustment_period && ' (Adjustment Period)'}
+                  {currentPeriod.is_adjustment_period && ` (${t('accounts.bank_voucher.create.adjustment_period')})`}
                 </p>
                 <p className="text-xs">
-                  {currentPeriod.status === 'Open' && 'This period is active. You can create and post new transactions.'}
-                  {currentPeriod.status === 'Locked' && 'This period is under review. You cannot post new transactions, but you can modify existing entries.'}
-                  {currentPeriod.status === 'Closed' && 'This period is permanently closed. No transactions can be posted or modified without administrator intervention.'}
+                  {currentPeriod.status === 'Open' && t('accounts.bank_voucher.create.period_open_description')}
+                  {currentPeriod.status === 'Locked' && t('accounts.bank_voucher.create.period_locked_description')}
+                  {currentPeriod.status === 'Closed' && t('accounts.bank_voucher.create.period_closed_description')}
                 </p>
               </div>
             </div>
@@ -776,10 +775,10 @@ const BankVoucherCreate = () => {
               {/* Form Header */}
               <div className="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
                 <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  {isEdit ? 'Edit Bank Voucher' : 'Create Bank Voucher'}
+                  {isEdit ? t('accounts.bank_voucher.create.edit_bank_voucher') : t('accounts.bank_voucher.create.create_bank_voucher')}
                 </h1>
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                  {isEdit ? 'Update bank voucher information' : 'Use Tab or Enter to navigate, Alt+A to add detail entry'}
+                  {isEdit ? t('accounts.bank_voucher.create.subtitle_edit') : t('accounts.bank_voucher.create.subtitle_create')}
                 </p>
               </div>
 
@@ -792,7 +791,7 @@ const BankVoucherCreate = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="voucher_date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                          Voucher Date *
+                          {t('accounts.bank_voucher.create.voucher_date_required_label')}
                         </label>
                         <CustomDatePicker
                           selected={formData.voucher_date ? new Date(formData.voucher_date) : null}
@@ -811,7 +810,7 @@ const BankVoucherCreate = () => {
 
                       <div>
                         <label htmlFor="voucher_number" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                          Voucher Number {!autoVoucherNumbering && !isEdit && '*'}
+                          {t('accounts.bank_voucher.create.voucher_number_label')} {!autoVoucherNumbering && !isEdit && '*'}
                         </label>
                         <input
                           type="text"
@@ -820,7 +819,7 @@ const BankVoucherCreate = () => {
                           value={formData.voucher_number}
                           onChange={(e) => setFormData(prev => ({ ...prev, voucher_number: e.target.value }))}
                           onKeyDown={handleKeyDown}
-                          placeholder={autoVoucherNumbering ? (formData.voucher_number || 'Auto-generated') : 'Enter voucher number'}
+                          placeholder={autoVoucherNumbering ? (formData.voucher_number || t('accounts.bank_voucher.create.auto_generated')) : t('accounts.bank_voucher.create.enter_voucher_number')}
                           disabled={autoVoucherNumbering || isEdit}
                           tabIndex={autoVoucherNumbering || isEdit ? -1 : 2}
                           className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
@@ -831,7 +830,9 @@ const BankVoucherCreate = () => {
                         />
                         {autoVoucherNumbering && (
                           <p className="mt-0.5 text-xs text-blue-600 dark:text-blue-400">
-                            {formData.voucher_number ? `Voucher Number: ${formData.voucher_number}` : 'Auto-generated'}
+                            {formData.voucher_number
+                              ? t('accounts.bank_voucher.create.voucher_number_display', { number: formData.voucher_number })
+                              : t('accounts.bank_voucher.create.auto_generated')}
                           </p>
                         )}
                         {errors.voucher_number && (
@@ -841,7 +842,7 @@ const BankVoucherCreate = () => {
 
                       <div>
                         <label htmlFor="voucher_sub_type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                          Voucher Type *
+                          {t('accounts.bank_voucher.create.voucher_type_required_label')}
                         </label>
                         <select
                           id="voucher_sub_type"
@@ -871,7 +872,7 @@ const BankVoucherCreate = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                          Bank Account *
+                          {t('accounts.bank_voucher.create.bank_account_required_label')}
                         </label>
                         <InlineSearchSelect
                           options={bankAccounts.map(account => ({
@@ -893,7 +894,7 @@ const BankVoucherCreate = () => {
 
                       <div>
                         <label htmlFor="reference_number" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                          Reference Number
+                          {t('accounts.bank_voucher.create.reference_number_label')}
                         </label>
                         <input
                           type="text"
@@ -910,7 +911,7 @@ const BankVoucherCreate = () => {
 
                       <div className="md:col-span-2">
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                          Description
+                          {t('accounts.bank_voucher.create.description_label')}
                         </label>
                         <textarea
                           id="description"
@@ -936,7 +937,7 @@ const BankVoucherCreate = () => {
                             <span className={formData.description.length > 200 ? 'text-orange-500' : formData.description.length > 230 ? 'text-red-500' : ''}>
                               {formData.description.length}
                             </span>
-                            /250 characters
+                            {t('accounts.bank_voucher.create.characters_count', { count: 250 })}
                           </div>
                         </div>
                       </div>
@@ -950,7 +951,7 @@ const BankVoucherCreate = () => {
                         <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                         </svg>
-                        Attachments
+                        {t('accounts.bank_voucher.create.attachments_label')}
                       </h3>
                       
                       <div className="space-y-3">
@@ -991,7 +992,7 @@ const BankVoucherCreate = () => {
                         {/* Media type information */}
                         <div className="mt-2">
                           <span className="text-xs text-gray-500 dark:text-gray-400">
-                            <strong>{t('accounts.bank_voucher.create.supported_formats')}</strong> PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG, GIF
+                            <strong>{t('accounts.bank_voucher.create.supported_formats')}</strong> {t('accounts.bank_voucher.create.supported_file_types')}
                           </span>
                         </div>
 
@@ -1058,7 +1059,7 @@ const BankVoucherCreate = () => {
                     className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
                   >
                     <Plus size={16} />
-                    Add Entry
+                    {t('accounts.bank_voucher.create.add_entry')}
                   </button>
                 </div>
 
@@ -1073,7 +1074,7 @@ const BankVoucherCreate = () => {
                   {formData.entries.map((entry, index) => (
                     <div key={index} className="border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-gray-50 dark:bg-gray-700/50">
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300">Entry {index + 1}</h4>
+                        <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300">{t('accounts.bank_voucher.create.entry_number', { number: index + 1 })}</h4>
                         {formData.entries.length > 1 && (
                           <button
                             type="button"
@@ -1090,7 +1091,7 @@ const BankVoucherCreate = () => {
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                         <div className="md:col-span-2">
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Account *
+                            {t('accounts.bank_voucher.create.account_required_label')}
                           </label>
                           <InlineSearchSelect
                             options={accounts
@@ -1132,7 +1133,7 @@ const BankVoucherCreate = () => {
 
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Currency
+                            {t('accounts.bank_voucher.create.currency_label')}
                           </label>
                           <InlineSearchSelect
                             options={currencies.length > 0 ? currencies.map(currency => ({
@@ -1159,7 +1160,7 @@ const BankVoucherCreate = () => {
 
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Exchange Rate
+                            {t('accounts.bank_voucher.create.exchange_rate_label')}
                           </label>
                           <div className="flex gap-1">
                             <input
@@ -1192,14 +1193,14 @@ const BankVoucherCreate = () => {
                               {entry.currency_code !== formData.base_currency_code ? (
                                 `1 ${entry.currency_code} = ${(1/entry.exchange_rate).toFixed(6)} ${formData.base_currency_code}`
                               ) : (
-                                'Base currency'
+                                t('accounts.bank_voucher.create.base_currency')
                               )}
                             </div>
                         </div>
 
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Amount ({entry.currency_code}) *
+                            {t('accounts.bank_voucher.create.amount_with_currency', { currency: entry.currency_code })}
                           </label>
                           <input
                             type="number"
@@ -1218,14 +1219,14 @@ const BankVoucherCreate = () => {
                           />
                           {entry.amount && entry.currency_code !== formData.base_currency_code && (
                             <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                              Base: {entry.base_amount} {formData.base_currency_code}
+                              {t('accounts.bank_voucher.create.base_amount')}: {entry.base_amount} {formData.base_currency_code}
                             </div>
                           )}
                         </div>
 
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Cheque No.
+                            {t('accounts.bank_voucher.create.cheque_no_label')}
                           </label>
                           <input
                             type="text"
@@ -1239,7 +1240,7 @@ const BankVoucherCreate = () => {
 
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Cheque Date
+                            {t('accounts.bank_voucher.create.cheque_date_label')}
                           </label>
                           <CustomDatePicker
                             selected={entry.cheque_date ? new Date(entry.cheque_date) : null}
@@ -1252,7 +1253,7 @@ const BankVoucherCreate = () => {
 
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Slip No.
+                            {t('accounts.bank_voucher.create.slip_no_label')}
                           </label>
                           <input
                             type="text"
@@ -1266,7 +1267,7 @@ const BankVoucherCreate = () => {
 
                         <div className="md:col-span-4">
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Description
+                            {t('accounts.bank_voucher.create.description_label')}
                           </label>
                           <input
                             type="text"
@@ -1282,7 +1283,7 @@ const BankVoucherCreate = () => {
                         {/* Entry Attachment Section */}
                         <div className="md:col-span-4">
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Attachment (Optional)
+                            {t('accounts.bank_voucher.create.attachment_optional_label')}
                           </label>
                           <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-3">
                             <input
@@ -1351,7 +1352,7 @@ const BankVoucherCreate = () => {
                           </div>
                           <div className="mt-1">
                             <span className="text-xs text-gray-500 dark:text-gray-400">
-                              <strong>{t('accounts.bank_voucher.create.supported')}</strong> PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG, GIF
+                              <strong>{t('accounts.bank_voucher.create.supported')}</strong> {t('accounts.bank_voucher.create.supported_file_types')}
                             </span>
                           </div>
                         </div>
@@ -1370,7 +1371,7 @@ const BankVoucherCreate = () => {
               <div className="mb-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
                 <div className="mb-3">
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                    Base Currency Summary ({formData.base_currency_code})
+                    {t('accounts.bank_voucher.create.base_currency_summary', { currency: formData.base_currency_code })}
                   </h4>
                   <div className="grid grid-cols-3 gap-3 text-center">
                     <div>
@@ -1412,7 +1413,7 @@ const BankVoucherCreate = () => {
                   return Object.keys(currencyBreakdown).length > 1 && (
                     <div>
                       <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                        Multi-Currency Breakdown
+                        {t('accounts.bank_voucher.create.multi_currency_breakdown')}
                       </h4>
                       <div className="space-y-2">
                         {Object.entries(currencyBreakdown).map(([currency, amounts]) => (
@@ -1441,8 +1442,8 @@ const BankVoucherCreate = () => {
               {/* Form Actions */}
               <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">{t('accounts.bank_voucher.create.tab')}</kbd>{t('accounts.bank_voucher.create.or')}<kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">{t('accounts.bank_voucher.create.enter')}</kbd> to navigate • 
-                  <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 ml-1">{t('accounts.bank_voucher.create.alta')}</kbd> to add entry
+                  <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">{t('accounts.bank_voucher.create.tab')}</kbd>{t('accounts.bank_voucher.create.or')}<kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">{t('accounts.bank_voucher.create.enter')}</kbd> {t('accounts.bank_voucher.create.to_navigate')} • 
+                  <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 ml-1">{t('accounts.bank_voucher.create.alta')}</kbd> {t('accounts.bank_voucher.create.to_add_entry')}
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -1452,7 +1453,7 @@ const BankVoucherCreate = () => {
                     tabIndex={-1}
                   >
                     <ArrowLeft size={16} />
-                    Cancel
+                    {t('accounts.bank_voucher.create.cancel')}
                   </button>
                   <button
                     type="submit"
@@ -1462,12 +1463,12 @@ const BankVoucherCreate = () => {
                     {isSubmitting ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        {isEdit ? 'Updating...' : 'Creating...'}
+                        {isEdit ? t('accounts.bank_voucher.create.updating') : t('accounts.bank_voucher.create.creating')}
                       </>
                     ) : (
                       <>
                         <Save size={16} />
-                        {isEdit ? 'Update' : 'Create'} <kbd className="ml-1 px-1.5 py-0.5 bg-blue-700 rounded text-xs">{t('accounts.bank_voucher.create.ctrls')}</kbd>
+                        {isEdit ? t('accounts.bank_voucher.create.update') : t('accounts.bank_voucher.create.create')} <kbd className="ml-1 px-1.5 py-0.5 bg-blue-700 rounded text-xs">{t('accounts.bank_voucher.create.ctrls')}</kbd>
                       </>
                     )}
                   </button>

@@ -295,7 +295,8 @@
       "prev": "پچھلا",
       "next": "اگلا",
       "last": "آخری",
-      "go_to": "پر جائیں:"
+      "go_to": "پر جائیں:",
+      "page_title_fallback": "کمپنیاں"
     },
     "show": {
       "company_details": "کمپنی کی تفصیلات",
@@ -1013,7 +1014,29 @@
       "prev": "پچھلا",
       "next": "اگلا",
       "last": "آخری",
-      "go_to": "پر جائیں:"
+      "go_to": "پر جائیں:",
+      "page_title_fallback": "صارفین",
+      "stat_total": "{count} کل",
+      "stat_active": "{count} فعال",
+      "stat_inactive": "{count} غیر فعال",
+      "bulk_selected": "{count} منتخب",
+      "last_login_never": "کبھی نہیں",
+      "pagination_of": "کُل {total}",
+      "bulk_status_active_title": "منتخب صارفین فعال کریں؟",
+      "bulk_status_active_text": "آپ {count} صارف(ین) فعال کرنے والے ہیں۔",
+      "bulk_status_active_ok": "ہاں، فعال کریں!",
+      "bulk_status_inactive_title": "منتخب صارفین غیر فعال کریں؟",
+      "bulk_status_inactive_text": "آپ {count} صارف(ین) غیر فعال کرنے والے ہیں۔",
+      "bulk_status_inactive_ok": "ہاں، غیر فعال کریں!",
+      "bulk_status_suspended_title": "منتخب صارفین معطل کریں؟",
+      "bulk_status_suspended_text": "آپ {count} صارف(ین) معطل کرنے والے ہیں۔",
+      "bulk_status_suspended_ok": "ہاں، معطل کریں!",
+      "bulk_status_pending_title": "منتخب کو زیر التواء کریں؟",
+      "bulk_status_pending_text": "آپ {count} صارف(ین) کو زیر التواء کرنے والے ہیں۔",
+      "bulk_status_pending_ok": "ہاں، تصدیق کریں!",
+      "users_bulk_delete_title": "منتخب صارف حذف کریں؟",
+      "users_bulk_delete_text": "آپ {count} صارف(ین) حذف کرنے والے ہیں۔ یہ واپس نہیں ہوگا!",
+      "users_bulk_delete_ok": "ہاں، حذف کریں!"
     },
     "show": {
       "user_details": "صارف کی تفصیلات",

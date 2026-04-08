@@ -499,10 +499,10 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
         if (modalMode === 'add') {
           await Swal.fire({
             icon: 'success',
-            title: 'Success!',
-            text: 'Account has been added successfully.',
+            title: t('common.flash.success_title'),
+            text: t('accounts.chart_of_accounts.msg_account_added'),
             confirmButtonColor: '#3B82F6',
-            confirmButtonText: 'OK',
+            confirmButtonText: t('common.flash.ok'),
             background: 'rgba(30, 41, 59, 0.95)',
             color: '#F1F5F9',
             backdrop: 'rgba(0, 0, 0, 0.8)',
@@ -516,10 +516,10 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
         } else {
           await Swal.fire({
             icon: 'success',
-            title: 'Updated!',
-            text: 'Account has been updated successfully.',
+            title: t('common.flash.updated_title'),
+            text: t('accounts.chart_of_accounts.msg_account_updated'),
             confirmButtonColor: '#3B82F6',
-            confirmButtonText: 'OK',
+            confirmButtonText: t('common.flash.ok'),
             background: 'rgba(30, 41, 59, 0.95)',
             color: '#F1F5F9',
             backdrop: 'rgba(0, 0, 0, 0.8)',
@@ -551,11 +551,11 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
       } else {
         // If it's a validation error, throw it with the response data
         if (result.errors) {
-          const validationError = new Error('Validation failed');
+          const validationError = new Error(t('accounts.chart_of_accounts.msg_validation_failed'));
           validationError.response = result;
           throw validationError;
         }
-        throw new Error(result.message || 'Operation failed');
+        throw new Error(result.message || t('accounts.chart_of_accounts.msg_operation_failed'));
       }
 
     } catch (error) {
@@ -563,20 +563,20 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
 
       // Check if it's a validation error
       if (error.message && error.message.includes('Validation failed') && error.response) {
-        let errorMessage = 'Please check the form data and try again.';
+        let errorMessage = t('accounts.chart_of_accounts.msg_please_check_form_data');
         
         // Try to extract specific validation errors from the response
         if (error.response && error.response.errors) {
           const errorDetails = Object.values(error.response.errors).flat().join(', ');
-          errorMessage = `Validation errors: ${errorDetails}`;
+          errorMessage = t('accounts.chart_of_accounts.msg_validation_errors', { details: errorDetails });
         }
         
         await Swal.fire({
           icon: 'error',
-          title: 'Validation Error!',
+          title: t('accounts.chart_of_accounts.validation_error'),
           text: errorMessage,
           confirmButtonColor: '#EF4444',
-          confirmButtonText: 'OK',
+          confirmButtonText: t('common.flash.ok'),
           background: 'rgba(30, 41, 59, 0.95)',
           color: '#F1F5F9',
           backdrop: 'rgba(0, 0, 0, 0.8)',
@@ -590,10 +590,10 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
       } else {
         await Swal.fire({
           icon: 'error',
-          title: 'Error!',
-          text: error.message || 'Something went wrong. Please try again.',
+          title: t('common.flash.error_title'),
+          text: error.message || t('accounts.chart_of_accounts.msg_something_went_wrong'),
           confirmButtonColor: '#EF4444',
-          confirmButtonText: 'OK',
+          confirmButtonText: t('common.flash.ok'),
           background: 'rgba(30, 41, 59, 0.95)',
           color: '#F1F5F9',
           backdrop: 'rgba(0, 0, 0, 0.8)',
@@ -617,10 +617,10 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
       if (account.account_level === 1) {
         await Swal.fire({
           icon: 'error',
-          title: 'Cannot Delete!',
-          text: 'Main account categories (Level 1) cannot be deleted. These are fundamental accounting categories.',
+          title: t('accounts.chart_of_accounts.cannot_delete'),
+          text: t('accounts.chart_of_accounts.msg_main_categories_cannot_delete'),
           confirmButtonColor: '#EF4444',
-          confirmButtonText: 'OK',
+          confirmButtonText: t('common.flash.ok'),
           background: 'rgba(30, 41, 59, 0.95)',
           color: '#F1F5F9',
           backdrop: 'rgba(0, 0, 0, 0.8)',
@@ -643,21 +643,21 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
 
         await Swal.fire({
           icon: 'warning',
-          title: 'Cannot Delete Parent Account!',
+          title: t('accounts.chart_of_accounts.cannot_delete_parent'),
           html: `
             <div class="text-left">
-              <p class="mb-3">This account has child accounts that must be deleted first:</p>
+              <p class="mb-3">${t('accounts.chart_of_accounts.this_account_has_child_accounts_that_mus')}</p>
               <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg mb-3">
-                <strong>Child Accounts:</strong><br/>
+                <strong>${t('accounts.chart_of_accounts.child_accounts')}</strong><br/>
                 ${childNames}
               </div>
               <p class="text-sm text-gray-600 dark:text-gray-400">
-                Please delete all child accounts first, then you can delete this parent account.
+                ${t('accounts.chart_of_accounts.msg_delete_children_first')}
               </p>
             </div>
           `,
           confirmButtonColor: '#3B82F6',
-          confirmButtonText: 'I Understand',
+          confirmButtonText: t('accounts.chart_of_accounts.i_understand'),
           background: 'rgba(30, 41, 59, 0.95)',
           color: '#F1F5F9',
           backdrop: 'rgba(0, 0, 0, 0.8)',
@@ -673,14 +673,14 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
 
       // Proceed with deletion for accounts without children
       const result = await Swal.fire({
-        title: 'Are you sure?',
-        text: `You are about to delete "${account.account_name}". This action cannot be undone!`,
+        title: t('common.data_table.confirm_delete_title'),
+        text: t('common.data_table.confirm_delete_text', { name: account.account_name }),
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#EF4444',
         cancelButtonColor: '#6B7280',
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: t('common.data_table.confirm_delete_ok'),
+        cancelButtonText: t('common.actions.cancel'),
         background: 'rgba(30, 41, 59, 0.95)',
         color: '#F1F5F9',
         backdrop: 'rgba(0, 0, 0, 0.8)',
@@ -700,7 +700,7 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
           window.Laravel?.csrfToken;
 
         if (!csrfToken) {
-          throw new Error('CSRF token not found. Please refresh the page and try again.');
+          throw new Error(t('accounts.chart_of_accounts.msg_csrf_not_found'));
         }
 
         // Make API call
@@ -720,10 +720,10 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
         if (result.success) {
           await Swal.fire({
             icon: 'success',
-            title: 'Deleted!',
-            text: 'Account has been deleted successfully.',
+            title: t('common.flash.deleted_title'),
+            text: t('accounts.chart_of_accounts.msg_account_deleted'),
             confirmButtonColor: '#3B82F6',
-            confirmButtonText: 'OK',
+            confirmButtonText: t('common.flash.ok'),
             background: 'rgba(30, 41, 59, 0.95)',
             color: '#F1F5F9',
             backdrop: 'rgba(0, 0, 0, 0.8)',
@@ -740,17 +740,17 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
             prevAccounts.filter(acc => acc.id !== account.id)
           );
         } else {
-          throw new Error(result.message || 'Delete failed');
+          throw new Error(result.message || t('accounts.chart_of_accounts.msg_delete_failed'));
         }
       }
     } catch (error) {
       console.error('Error:', error);
       await Swal.fire({
         icon: 'error',
-        title: 'Error!',
-        text: error.message || 'Something went wrong. Please try again.',
+        title: t('common.flash.error_title'),
+        text: error.message || t('accounts.chart_of_accounts.msg_something_went_wrong'),
         confirmButtonColor: '#EF4444',
-        confirmButtonText: 'OK',
+        confirmButtonText: t('common.flash.ok'),
         background: 'rgba(30, 41, 59, 0.95)',
         color: '#F1F5F9',
         backdrop: 'rgba(0, 0, 0, 0.8)',
@@ -936,10 +936,10 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Chart of Accounts
+                  {t('accounts.chart_of_accounts.chart_of_accounts')}
                 </h1>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Manage your accounting structure and account hierarchy
+                  {t('accounts.chart_of_accounts.manage_structure')}
                 </p>
               </div>
             </div>
@@ -950,14 +950,14 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
                 className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
               >
                 <Expand className="h-4 w-4" />
-                <span>Expand All</span>
+                <span>{t('accounts.chart_of_accounts.expand_all')}</span>
               </button>
               <button
                 onClick={collapseAll}
                 className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
               >
                 <Minimize className="h-4 w-4" />
-                <span>Collapse All</span>
+                <span>{t('accounts.chart_of_accounts.collapse_all')}</span>
               </button>
             </div>
           </div>
@@ -1010,17 +1010,17 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
                           <FileText className="h-8 w-8 text-gray-400" />
                         </div>
                         <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                          No accounts in this category
+                          {t('accounts.chart_of_accounts.no_accounts_in_category')}
                         </h4>
                         <p className="text-gray-500 dark:text-gray-400 mb-4">
-                          Start by adding your first account to this category
+                          {t('accounts.chart_of_accounts.start_by_adding_first_account')}
                         </p>
                         <button
                           onClick={() => openModal('add')}
                           className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors duration-200 mx-auto"
                         >
                           <Plus className="h-4 w-4" />
-                          <span>Add Account</span>
+                          <span>{t('accounts.chart_of_accounts.add_account')}</span>
                         </button>
                       </div>
                     )}
@@ -1038,7 +1038,7 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100 opacity-100 animate-slideUp">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {modalMode === 'add' ? 'Add New Account' : 'Edit Account'}
+                {modalMode === 'add' ? t('accounts.chart_of_accounts.add_new_account') : t('accounts.chart_of_accounts.edit_account')}
               </h3>
               <button
                 onClick={closeModal}
@@ -1053,7 +1053,7 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
               {modalMode === 'add' && selectedAccount && (
                 <div className="md:col-span-2 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
                   <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
-                    Adding under: <span className="font-semibold">{selectedAccount.account_name} ({selectedAccount.account_code})</span>
+                    {t('accounts.chart_of_accounts.adding_under')}: <span className="font-semibold">{selectedAccount.account_name} ({selectedAccount.account_code})</span>
                   </p>
                 </div>
               )}
@@ -1061,34 +1061,34 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Account Code
+                    {t('accounts.chart_of_accounts.account_code')}
                   </label>
                   <input
                     type="text"
                     value={formData.account_code}
                     onChange={(e) => setFormData({ ...formData, account_code: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    placeholder="Enter account code"
+                    placeholder={t('accounts.chart_of_accounts.enter_account_code')}
                     required
                     readOnly={modalMode === 'add'}
                   />
                   {modalMode === 'add' && formData.parent_account_id && (
                     <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                      Auto-generated under parent account
+                      {t('accounts.chart_of_accounts.auto_generated_under_parent')}
                     </p>
                   )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Account Name
+                    {t('accounts.chart_of_accounts.account_name')}
                   </label>
                   <input
                     type="text"
                     value={formData.account_name}
                     onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    placeholder="Enter account name"
+                    placeholder={t('accounts.chart_of_accounts.enter_account_name')}
                     required
                   />
                 </div>
@@ -1097,24 +1097,24 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Short Code (Optional)
+                    {t('accounts.chart_of_accounts.short_code_optional')}
                   </label>
                   <input
                     type="text"
                     value={formData.short_code}
                     onChange={(e) => setFormData({ ...formData, short_code: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    placeholder="e.g., CASH, BANK, AR"
+                    placeholder={t('accounts.chart_of_accounts.eg_cash_bank_ar')}
                     maxLength={20}
                   />
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Company-specific short code for easy reference
+                    {t('accounts.chart_of_accounts.company_specific_short_code_help')}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Currency
+                    {t('accounts.chart_of_accounts.currency')}
                   </label>
                   <select
                     value={formData.currency}
@@ -1136,13 +1136,13 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
                 <div className="flex items-center space-x-2 mb-2">
                   <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
-                    Auto-Detected Properties
+                    {t('accounts.chart_of_accounts.auto_detected_properties')}
                   </span>
                 </div>
                 <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                  <p>• <strong>Account Type:</strong> Automatically inherited from parent account</p>
-                  <p>• <strong>Company & Location:</strong> Auto-detected from current user session</p>
-                  <p>• <strong>Transactional Status:</strong> Auto-determined (Level 4 accounts only)</p>
+                  <p>• <strong>{t('accounts.chart_of_accounts.account_type')}</strong> {t('accounts.chart_of_accounts.automatically_inherited_from_parent_acco')}</p>
+                  <p>• <strong>{t('accounts.chart_of_accounts.company__location')}</strong> {t('accounts.chart_of_accounts.autodetected_from_current_user_session')}</p>
+                  <p>• <strong>{t('accounts.chart_of_accounts.transactional_status')}</strong> {t('accounts.chart_of_accounts.autodetermined_level_4_accounts_only')}</p>
                 </div>
               </div>
 
@@ -1152,7 +1152,7 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
                   onClick={closeModal}
                   className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
                 >
-                  Cancel
+                  {t('common.actions.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -1160,7 +1160,7 @@ const generateAccountCode = (parentCode = '', level = 1, parentId = null) => {
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors duration-200 flex items-center space-x-2"
                 >
                   {loading && <RefreshCw className="h-4 w-4 animate-spin" />}
-                  <span>{modalMode === 'add' ? 'Add Account' : 'Update Account'}</span>
+                  <span>{modalMode === 'add' ? t('accounts.chart_of_accounts.add_account') : t('common.actions.update')}</span>
                 </button>
               </div>
             </form>

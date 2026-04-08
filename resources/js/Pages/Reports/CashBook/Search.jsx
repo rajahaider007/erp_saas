@@ -327,7 +327,7 @@ const CashBookSearch = () => {
                 <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                   <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                     <Calendar size={16} />
-                    Date Range
+                    {t('reports.cash_book.search.date_range')}
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -341,10 +341,10 @@ const CashBookSearch = () => {
                           
                           if (selectedFromDate && toDateObj && fromDateObj > toDateObj) {
                             Swal.fire({
-                              title: 'Invalid Date Range',
-                              text: 'From Date cannot be later than To Date. Please select a valid date range.',
+                              title: t('reports.cash_book.search.invalid_date_range_title'),
+                              text: t('reports.cash_book.search.invalid_from_after_to'),
                               icon: 'warning',
-                              confirmButtonText: 'OK',
+                              confirmButtonText: t('common.flash.ok'),
                               confirmButtonColor: '#3b82f6',
                               background: '#1e293b',
                               color: '#f1f5f9',
@@ -375,10 +375,10 @@ const CashBookSearch = () => {
                           
                           if (selectedToDate && fromDateObj && toDateObj < fromDateObj) {
                             Swal.fire({
-                              title: 'Invalid Date Range',
-                              text: 'To Date cannot be earlier than From Date. Please select a valid date range.',
+                              title: t('reports.cash_book.search.invalid_date_range_title'),
+                              text: t('reports.cash_book.search.invalid_to_before_from'),
                               icon: 'warning',
-                              confirmButtonText: 'OK',
+                              confirmButtonText: t('common.flash.ok'),
                               confirmButtonColor: '#3b82f6',
                               background: '#1e293b',
                               color: '#f1f5f9',
@@ -458,3 +458,4 @@ const CashBookSearch = () => {
 };
 
 export default CashBookSearch;
+
