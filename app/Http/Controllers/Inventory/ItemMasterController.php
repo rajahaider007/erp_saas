@@ -3,30 +3,37 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
-use App\Models\InventoryItem;
-use App\Models\InventoryItemClass;
-use App\Models\InventoryItemCategory;
-use App\Models\InventoryItemGroup;
-use App\Models\UomMaster;
-use App\Models\TaxCategory;
+use App\Models\AccountConfiguration;
 use App\Models\ChartOfAccount;
-use App\Models\Vendor;
 use App\Models\Country;
+use App\Models\InventoryItem;
+use App\Models\InventoryItemCategory;
+use App\Models\InventoryItemClass;
+use App\Models\InventoryItemGroup;
+use App\Models\TaxCategory;
+use App\Models\UomMaster;
+use App\Models\Vendor;
+use App\Services\Inventory\ItemCategoryCostingAccountService;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 
 class ItemMasterController extends Controller
 {
+    public function __construct(
+        private ItemCategoryCostingAccountService $categoryCostingAccounts
+    ) {}
+
     /**
      * Display list of items
      */
     public function list(Request $request)
     {
-        $compId = $request->input('comp_id') ?? $request->session()->get('comp_id');
-        $locationId = $request->input('location_id') ?? $request->session()->get('location_id');
+        $compId = $this->resolvedCompId($request);
+        $locationId = $this->resolvedLocationId($request);
 
-        if (!$compId || !$locationId) {
+        if (! $compId || ! $locationId) {
             return Inertia::render('Inventory/ItemMaster/List', [
                 'error' => 'Company and Location information is required.',
                 'items' => [],
@@ -45,8 +52,8 @@ class ItemMasterController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('item_code', 'like', "%{$search}%")
-                  ->orWhere('item_name_short', 'like', "%{$search}%")
-                  ->orWhere('item_name_long', 'like', "%{$search}%");
+                    ->orWhere('item_name_short', 'like', "%{$search}%")
+                    ->orWhere('item_name_long', 'like', "%{$search}%");
             });
         }
 
@@ -73,51 +80,87 @@ class ItemMasterController extends Controller
     /**
      * Show create form
      */
-    public function create(Request $request)
+    public function create(Request $request, ?InventoryItem $itemForGlOptions = null)
     {
-        $compId = $request->input('comp_id') ?? $request->session()->get('comp_id');
-        $locationId = $request->input('location_id') ?? $request->session()->get('location_id');
+        $compId = $this->resolvedCompId($request);
+        $locationId = $this->resolvedLocationId($request);
 
-        if (!$compId || !$locationId) {
+        if (! $compId || ! $locationId) {
             return Inertia::render('Inventory/ItemMaster/Create', [
                 'error' => 'Company and Location information is required.',
                 'itemClassOptions' => [],
                 'itemCategoryOptions' => [],
+                'itemCategoryCoaById' => [],
                 'itemGroupOptions' => [],
                 'itemTypeOptions' => [],
                 'uomOptions' => [],
                 'taxCategoryOptions' => [],
                 'glAccountOptions' => [],
+                'glAccountOptionsInventory' => [],
+                'glAccountOptionsPurchase' => [],
+                'glAccountOptionsCogs' => [],
+                'glAccountOptionsSales' => [],
+                'glAccountOptionsWriteoff' => [],
+                'glAccountOptionsVariance' => [],
             ]);
         }
 
         $itemClassOptions = InventoryItemClass::byCompanyAndLocation($compId, $locationId)
             ->active()
-            ->orderBy('display_order')
+            ->orderBy('class_code')
             ->get(['id', 'class_code', 'class_name'])
             ->map(fn ($itemClass) => [
                 'value' => (string) $itemClass->id,
-                'label' => $itemClass->class_code . ' - ' . $itemClass->class_name,
+                'label' => $itemClass->class_code.' - '.$itemClass->class_name,
             ])
             ->values();
 
-        $itemCategoryOptions = InventoryItemCategory::byCompanyAndLocation($compId, $locationId)
+        $itemCategories = InventoryItemCategory::byCompanyAndLocation($compId, $locationId)
             ->active()
-            ->orderBy('display_order')
-            ->get(['id', 'category_code', 'category_name'])
+            ->with([
+                'inventoryGlAccount:id,account_code,account_name',
+                'purchaseGlAccount:id,account_code,account_name',
+                'salesGlAccount:id,account_code,account_name',
+                'cogsGlAccount:id,account_code,account_name',
+            ])
+            ->orderBy('category_code')
+            ->get();
+
+        $itemCategoryOptions = $itemCategories
             ->map(fn ($category) => [
                 'value' => (string) $category->id,
-                'label' => $category->category_code . ' - ' . $category->category_name,
+                'label' => $category->category_code.' - '.$category->category_name,
             ])
             ->values();
+
+        $itemCategoryCoaById = $itemCategories->mapWithKeys(function ($category) {
+            $fmt = fn ($acc) => $acc ? [
+                'id' => (int) $acc->id,
+                'code' => $acc->account_code,
+                'name' => $acc->account_name,
+            ] : null;
+
+            return [
+                (string) $category->id => [
+                    'inventory_gl_account_id' => $category->inventory_gl_account_id,
+                    'purchase_gl_account_id' => $category->purchase_gl_account_id,
+                    'sales_gl_account_id' => $category->sales_gl_account_id,
+                    'cogs_gl_account_id' => $category->cogs_gl_account_id,
+                    'inventory' => $fmt($category->inventoryGlAccount),
+                    'purchase' => $fmt($category->purchaseGlAccount),
+                    'sales' => $fmt($category->salesGlAccount),
+                    'cogs' => $fmt($category->cogsGlAccount),
+                ],
+            ];
+        })->all();
 
         $itemGroupOptions = InventoryItemGroup::byCompanyAndLocation($compId, $locationId)
             ->active()
-            ->orderBy('display_order')
+            ->orderBy('group_code')
             ->get(['id', 'group_code', 'group_name'])
             ->map(fn ($group) => [
                 'value' => (string) $group->id,
-                'label' => $group->group_code . ' - ' . $group->group_name,
+                'label' => $group->group_code.' - '.$group->group_name,
             ])
             ->values();
 
@@ -127,7 +170,7 @@ class ItemMasterController extends Controller
             ->get(['id', 'uom_code', 'uom_name'])
             ->map(fn ($uom) => [
                 'value' => (string) $uom->id,
-                'label' => $uom->uom_code . ' - ' . $uom->uom_name,
+                'label' => $uom->uom_code.' - '.$uom->uom_name,
             ])
             ->values();
 
@@ -136,25 +179,75 @@ class ItemMasterController extends Controller
             ->get(['id', 'tax_code', 'tax_name', 'tax_rate'])
             ->map(fn ($tax) => [
                 'value' => (string) $tax->id,
-                'label' => $tax->tax_code . ' - ' . $tax->tax_name . ' (' . number_format($tax->tax_rate, 2) . '%)',
+                'label' => $tax->tax_code.' - '.$tax->tax_name.' ('.number_format($tax->tax_rate, 2).'%)',
             ])
             ->values();
 
-        $glAccountOptions = ChartOfAccount::where('comp_id', $compId)
-            ->where('location_id', $locationId)
-            ->where('status', true)
-            ->get(['id', 'account_code', 'account_name'])
-            ->map(fn ($account) => [
-                'value' => (string) $account->id,
-                'label' => $account->account_code . ' - ' . $account->account_name,
-            ])
-            ->values();
+        $categoryInventoryIds = $itemCategories->pluck('inventory_gl_account_id')->filter()->unique();
+        $categoryPurchaseIds = $itemCategories->pluck('purchase_gl_account_id')->filter()->unique();
+        $categorySalesIds = $itemCategories->pluck('sales_gl_account_id')->filter()->unique();
+        $categoryCogsIds = $itemCategories->pluck('cogs_gl_account_id')->filter()->unique();
+
+        $glAccountOptionsInventory = $this->glOptionsForItemField(
+            $compId,
+            $locationId,
+            ['inventory'],
+            $categoryInventoryIds,
+            $itemForGlOptions?->inventory_gl_account_id
+        );
+        $glAccountOptionsPurchase = $this->glOptionsForItemField(
+            $compId,
+            $locationId,
+            ['purchase'],
+            $categoryPurchaseIds,
+            $itemForGlOptions?->purchase_gl_account_id
+        );
+        $glAccountOptionsCogs = $this->glOptionsForItemField(
+            $compId,
+            $locationId,
+            ['cost_of_goods_sold'],
+            $categoryCogsIds,
+            $itemForGlOptions?->cogs_gl_account_id
+        );
+        $glAccountOptionsSales = $this->glOptionsForItemField(
+            $compId,
+            $locationId,
+            ['sales', 'service_income'],
+            $categorySalesIds,
+            $itemForGlOptions?->sales_gl_account_id
+        );
+        $glAccountOptionsWriteoff = $this->glOptionsForItemField(
+            $compId,
+            $locationId,
+            ['other_expense', 'office_expense', 'maintenance_expense'],
+            collect(),
+            $itemForGlOptions?->writeoff_gl_account_id
+        );
+        $glAccountOptionsVariance = $this->glOptionsForItemField(
+            $compId,
+            $locationId,
+            ['other_expense', 'office_expense', 'cost_of_goods_sold'],
+            collect(),
+            $itemForGlOptions?->price_variance_gl_account_id
+        );
+
+        $glAccountOptions = collect()
+            ->concat($glAccountOptionsInventory)
+            ->concat($glAccountOptionsPurchase)
+            ->concat($glAccountOptionsCogs)
+            ->concat($glAccountOptionsSales)
+            ->concat($glAccountOptionsWriteoff)
+            ->concat($glAccountOptionsVariance)
+            ->unique('value')
+            ->sortBy('label')
+            ->values()
+            ->all();
 
         $countryOptions = Country::active()
             ->get(['id', 'country_code', 'country_name'])
             ->map(fn ($country) => [
                 'value' => (string) $country->id,
-                'label' => $country->country_code . ' - ' . $country->country_name,
+                'label' => $country->country_code.' - '.$country->country_name,
             ])
             ->values();
 
@@ -163,13 +256,14 @@ class ItemMasterController extends Controller
             ->get(['id', 'vendor_code', 'vendor_name'])
             ->map(fn ($vendor) => [
                 'value' => (string) $vendor->id,
-                'label' => $vendor->vendor_code . ' - ' . $vendor->vendor_name,
+                'label' => $vendor->vendor_code.' - '.$vendor->vendor_name,
             ])
             ->values();
 
         return Inertia::render('Inventory/ItemMaster/Create', [
             'itemClassOptions' => $itemClassOptions,
             'itemCategoryOptions' => $itemCategoryOptions,
+            'itemCategoryCoaById' => $itemCategoryCoaById,
             'itemGroupOptions' => $itemGroupOptions,
             'itemTypeOptions' => [
                 ['value' => 'raw_material', 'label' => 'Raw Material'],
@@ -206,6 +300,12 @@ class ItemMasterController extends Controller
             'countryOptions' => $countryOptions,
             'vendorOptions' => $vendorOptions,
             'glAccountOptions' => $glAccountOptions,
+            'glAccountOptionsInventory' => $glAccountOptionsInventory,
+            'glAccountOptionsPurchase' => $glAccountOptionsPurchase,
+            'glAccountOptionsCogs' => $glAccountOptionsCogs,
+            'glAccountOptionsSales' => $glAccountOptionsSales,
+            'glAccountOptionsWriteoff' => $glAccountOptionsWriteoff,
+            'glAccountOptionsVariance' => $glAccountOptionsVariance,
             'abcClassificationOptions' => [
                 ['value' => 'a', 'label' => 'A (High Value)'],
                 ['value' => 'b', 'label' => 'B (Medium Value)'],
@@ -221,12 +321,12 @@ class ItemMasterController extends Controller
      */
     public function store(Request $request)
     {
-        $compId = $request->input('comp_id') ?? $request->session()->get('comp_id');
-        $locationId = $request->input('location_id') ?? $request->session()->get('location_id');
+        $compId = $this->resolvedCompId($request);
+        $locationId = $this->resolvedLocationId($request);
 
-        if (!$compId || !$locationId) {
+        if (! $compId || ! $locationId) {
             return back()->withErrors([
-                'error' => 'Company and Location information is required.'
+                'error' => 'Company and Location information is required.',
             ]);
         }
 
@@ -269,16 +369,31 @@ class ItemMasterController extends Controller
             'hs_tariff_code' => 'nullable|string|max:10',
             'country_of_origin_id' => 'nullable|exists:countries,id',
             'barcode_gtin' => 'nullable|string|max:20|unique:inventory_items,barcode_gtin',
-            'inventory_gl_account_id' => 'required|exists:chart_of_accounts,id',
-            'cogs_gl_account_id' => 'required|exists:chart_of_accounts,id',
+            'inventory_gl_account_id' => 'nullable|exists:chart_of_accounts,id',
+            'purchase_gl_account_id' => 'nullable|exists:chart_of_accounts,id',
+            'sales_gl_account_id' => 'nullable|exists:chart_of_accounts,id',
+            'cogs_gl_account_id' => 'nullable|exists:chart_of_accounts,id',
             'writeoff_gl_account_id' => 'required|exists:chart_of_accounts,id',
             'price_variance_gl_account_id' => 'nullable|exists:chart_of_accounts,id',
             'abc_classification' => 'nullable|in:a,b,c',
             'slow_moving_threshold_days' => 'nullable|integer|min:0',
         ]);
 
+        $this->categoryCostingAccounts->applyCategoryGlToItemPayload(
+            $validated,
+            (int) $validated['item_category_id'],
+            (int) $compId,
+            (int) $locationId
+        );
+
+        if (empty($validated['inventory_gl_account_id']) || empty($validated['cogs_gl_account_id'])) {
+            return back()->withErrors([
+                'item_category_id' => 'Set up costing accounts on the item category (save the category again) or choose Inventory and COGS GL accounts manually.',
+            ])->withInput();
+        }
+
         try {
-            $item = new InventoryItem();
+            $item = new InventoryItem;
             $item->fill($validated);
             $item->comp_id = $compId;
             $item->location_id = $locationId;
@@ -289,7 +404,7 @@ class ItemMasterController extends Controller
                 ->with('success', 'Item created successfully!');
         } catch (\Exception $e) {
             return back()->withErrors([
-                'error' => 'Failed to create item: ' . $e->getMessage()
+                'error' => 'Failed to create item: '.$e->getMessage(),
             ]);
         }
     }
@@ -299,19 +414,23 @@ class ItemMasterController extends Controller
      */
     public function edit($id, Request $request)
     {
-        $compId = $request->input('comp_id') ?? $request->session()->get('comp_id');
-        $locationId = $request->input('location_id') ?? $request->session()->get('location_id');
+        $compId = $this->resolvedCompId($request);
+        $locationId = $this->resolvedLocationId($request);
+
+        if (! $compId || ! $locationId) {
+            return redirect('/inventory/item-master')
+                ->with('error', 'Company and Location information is required.');
+        }
 
         $item = InventoryItem::byCompanyAndLocation($compId, $locationId)
             ->find($id);
 
-        if (!$item) {
+        if (! $item) {
             return redirect('/inventory/item-master')
                 ->with('error', 'Item not found.');
         }
 
-        // Reuse create() logic to get options
-        return $this->create($request)->with([
+        return $this->create($request, $item)->with([
             'item' => $item,
             'edit_mode' => true,
         ]);
@@ -322,19 +441,23 @@ class ItemMasterController extends Controller
      */
     public function update($id, Request $request)
     {
-        $compId = $request->input('comp_id') ?? $request->session()->get('comp_id');
-        $locationId = $request->input('location_id') ?? $request->session()->get('location_id');
+        $compId = $this->resolvedCompId($request);
+        $locationId = $this->resolvedLocationId($request);
+
+        if (! $compId || ! $locationId) {
+            return back()->withErrors(['error' => 'Company and Location information is required.']);
+        }
 
         $item = InventoryItem::byCompanyAndLocation($compId, $locationId)
             ->find($id);
 
-        if (!$item) {
+        if (! $item) {
             return back()->withErrors(['error' => 'Item not found.']);
         }
 
         // Validate input (exclude item_code from unique check on this specific ID)
         $validated = $request->validate([
-            'item_code' => 'required|string|max:50|unique:inventory_items,item_code,' . $id,
+            'item_code' => 'required|string|max:50|unique:inventory_items,item_code,'.$id,
             'item_name_short' => 'required|string|max:50',
             'item_name_long' => 'nullable|string|max:250',
             'item_status' => 'required|in:active,inactive,discontinued,blocked',
@@ -370,14 +493,29 @@ class ItemMasterController extends Controller
             'hsn_code' => 'nullable|string|max:20',
             'hs_tariff_code' => 'nullable|string|max:10',
             'country_of_origin_id' => 'nullable|exists:countries,id',
-            'barcode_gtin' => 'nullable|string|max:20|unique:inventory_items,barcode_gtin,' . $id,
-            'inventory_gl_account_id' => 'required|exists:chart_of_accounts,id',
-            'cogs_gl_account_id' => 'required|exists:chart_of_accounts,id',
+            'barcode_gtin' => 'nullable|string|max:20|unique:inventory_items,barcode_gtin,'.$id,
+            'inventory_gl_account_id' => 'nullable|exists:chart_of_accounts,id',
+            'purchase_gl_account_id' => 'nullable|exists:chart_of_accounts,id',
+            'sales_gl_account_id' => 'nullable|exists:chart_of_accounts,id',
+            'cogs_gl_account_id' => 'nullable|exists:chart_of_accounts,id',
             'writeoff_gl_account_id' => 'required|exists:chart_of_accounts,id',
             'price_variance_gl_account_id' => 'nullable|exists:chart_of_accounts,id',
             'abc_classification' => 'nullable|in:a,b,c',
             'slow_moving_threshold_days' => 'nullable|integer|min:0',
         ]);
+
+        $this->categoryCostingAccounts->applyCategoryGlToItemPayload(
+            $validated,
+            (int) $validated['item_category_id'],
+            (int) $compId,
+            (int) $locationId
+        );
+
+        if (empty($validated['inventory_gl_account_id']) || empty($validated['cogs_gl_account_id'])) {
+            return back()->withErrors([
+                'item_category_id' => 'Set up costing accounts on the item category (save the category again) or choose Inventory and COGS GL accounts manually.',
+            ])->withInput();
+        }
 
         try {
             $item->fill($validated);
@@ -388,7 +526,7 @@ class ItemMasterController extends Controller
                 ->with('success', 'Item updated successfully!');
         } catch (\Exception $e) {
             return back()->withErrors([
-                'error' => 'Failed to update item: ' . $e->getMessage()
+                'error' => 'Failed to update item: '.$e->getMessage(),
             ]);
         }
     }
@@ -398,23 +536,28 @@ class ItemMasterController extends Controller
      */
     public function destroy($id, Request $request)
     {
-        $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
-        $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
+        $compId = $this->resolvedCompId($request);
+        $locationId = $this->resolvedLocationId($request);
+
+        if (! $compId || ! $locationId) {
+            return back()->withErrors(['error' => 'Company and Location information is required.']);
+        }
 
         $item = InventoryItem::byCompanyAndLocation($compId, $locationId)
             ->find($id);
 
-        if (!$item) {
+        if (! $item) {
             return back()->withErrors(['error' => 'Item not found.']);
         }
 
         try {
             $item->delete();
+
             return redirect('/inventory/item-master')
                 ->with('success', 'Item deleted successfully!');
         } catch (\Exception $e) {
             return back()->withErrors([
-                'error' => 'Failed to delete item: ' . $e->getMessage()
+                'error' => 'Failed to delete item: '.$e->getMessage(),
             ]);
         }
     }
@@ -424,8 +567,12 @@ class ItemMasterController extends Controller
      */
     public function bulkDestroy(Request $request)
     {
-        $compId = $request->input('comp_id') ?? $request->session()->get('comp_id');
-        $locationId = $request->input('location_id') ?? $request->session()->get('location_id');
+        $compId = $this->resolvedCompId($request);
+        $locationId = $this->resolvedLocationId($request);
+
+        if (! $compId || ! $locationId) {
+            return back()->withErrors(['error' => 'Company and Location information is required.']);
+        }
 
         $ids = $request->input('ids', []);
 
@@ -439,10 +586,10 @@ class ItemMasterController extends Controller
                 ->delete();
 
             return redirect('/inventory/item-master')
-                ->with('success', count($ids) . ' item(s) deleted successfully!');
+                ->with('success', count($ids).' item(s) deleted successfully!');
         } catch (\Exception $e) {
             return back()->withErrors([
-                'error' => 'Failed to delete items: ' . $e->getMessage()
+                'error' => 'Failed to delete items: '.$e->getMessage(),
             ]);
         }
     }
@@ -452,8 +599,13 @@ class ItemMasterController extends Controller
      */
     public function exportCsv(Request $request)
     {
-        $compId = $request->input('comp_id') ?? $request->session()->get('comp_id');
-        $locationId = $request->input('location_id') ?? $request->session()->get('location_id');
+        $compId = $this->resolvedCompId($request);
+        $locationId = $this->resolvedLocationId($request);
+
+        if (! $compId || ! $locationId) {
+            return redirect('/inventory/item-master')
+                ->with('error', 'Company and Location information is required.');
+        }
 
         $items = InventoryItem::byCompanyAndLocation($compId, $locationId)
             ->with('itemClass', 'itemCategory')
@@ -467,10 +619,10 @@ class ItemMasterController extends Controller
 
         $callback = function () use ($items) {
             $file = fopen('php://output', 'w');
-            
+
             // Header row
             fputcsv($file, ['Item Code', 'Item Name', 'Type', 'Class', 'Category', 'Costing Method', 'Status']);
-            
+
             // Data rows
             foreach ($items as $item) {
                 fputcsv($file, [
@@ -483,10 +635,169 @@ class ItemMasterController extends Controller
                     $item->is_active ? 'Active' : 'Inactive',
                 ]);
             }
-            
+
             fclose($file);
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Select options for one Item Master GL field: accounts from account_configurations (by config_type),
+     * plus category costing account ids and the current item's saved account (edit).
+     *
+     * @param  list<string>  $configTypes
+     */
+    private function glOptionsForItemField(
+        int $compId,
+        int $locationId,
+        array $configTypes,
+        Collection $categoryAccountIds,
+        ?int $itemAccountId
+    ): array {
+        $accounts = $this->chartAccountsResolvedFromAccountConfiguration($compId, $locationId, $configTypes);
+        $accounts = $this->mergeExtraChartAccountsByIds($accounts, $compId, $locationId, $categoryAccountIds);
+        if ($itemAccountId) {
+            $accounts = $this->mergeExtraChartAccountsByIds($accounts, $compId, $locationId, [$itemAccountId]);
+        }
+
+        return $this->chartAccountsToSelectOptions($accounts)->all();
+    }
+
+    /**
+     * Resolve configured account_id rows into posting accounts (Level 4 under Level 3 parents when applicable).
+     *
+     * @param  list<string>  $configTypes
+     * @return Collection<int, ChartOfAccount>
+     */
+    private function chartAccountsResolvedFromAccountConfiguration(int $compId, int $locationId, array $configTypes): Collection
+    {
+        if ($configTypes === [] || ! Schema::hasTable('account_configurations')) {
+            return collect();
+        }
+
+        $accountIds = AccountConfiguration::query()
+            ->active()
+            ->byCompanyAndLocation($compId, $locationId)
+            ->whereIn('config_type', $configTypes)
+            ->whereNotNull('account_id')
+            ->pluck('account_id')
+            ->unique()
+            ->filter()
+            ->all();
+
+        if ($accountIds === []) {
+            return collect();
+        }
+
+        $roots = ChartOfAccount::query()
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('status', 'Active')
+            ->whereIn('id', $accountIds)
+            ->get();
+
+        $out = collect();
+        foreach ($roots as $acc) {
+            $level = (int) $acc->account_level;
+            if ($level === 4) {
+                $out->push($acc);
+
+                continue;
+            }
+            if ($level === 3) {
+                $children = ChartOfAccount::query()
+                    ->where('comp_id', $compId)
+                    ->where('location_id', $locationId)
+                    ->where('parent_account_id', $acc->id)
+                    ->where('account_level', 4)
+                    ->where('status', 'Active')
+                    ->orderBy('account_code')
+                    ->get();
+                if ($children->isNotEmpty()) {
+                    foreach ($children as $child) {
+                        $out->push($child);
+                    }
+                } else {
+                    $out->push($acc);
+                }
+            }
+        }
+
+        return $out->unique('id')->values();
+    }
+
+    /**
+     * @param  iterable<int|string|null>  $ids
+     * @return Collection<int, ChartOfAccount>
+     */
+    private function mergeExtraChartAccountsByIds(Collection $accounts, int $compId, int $locationId, iterable $ids): Collection
+    {
+        $existing = $accounts->keyBy('id');
+        foreach ($ids as $rawId) {
+            $id = (int) $rawId;
+            if ($id <= 0 || $existing->has($id)) {
+                continue;
+            }
+            $acc = ChartOfAccount::query()
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->where('id', $id)
+                ->where('status', 'Active')
+                ->first();
+            if ($acc) {
+                $existing->put($id, $acc);
+            }
+        }
+
+        return $existing->values();
+    }
+
+    /**
+     * @param  Collection<int, ChartOfAccount>  $accounts
+     * @return Collection<int, array{value: string, label: string}>
+     */
+    private function chartAccountsToSelectOptions(Collection $accounts): Collection
+    {
+        return $accounts
+            ->sortBy('account_code')
+            ->values()
+            ->map(fn (ChartOfAccount $a) => [
+                'value' => (string) $a->id,
+                'label' => $a->account_code.' - '.$a->account_name,
+            ]);
+    }
+
+    /**
+     * Align with login session (user_comp_id / user_location_id) and MasterDataController.
+     */
+    private function resolvedCompId(Request $request): ?int
+    {
+        $raw = $request->input('comp_id')
+            ?? $request->session()->get('comp_id')
+            ?? $request->input('user_comp_id')
+            ?? $request->session()->get('user_comp_id')
+            ?? $request->user()?->comp_id;
+
+        if ($raw === null || $raw === '') {
+            return null;
+        }
+
+        return (int) $raw;
+    }
+
+    private function resolvedLocationId(Request $request): ?int
+    {
+        $raw = $request->input('location_id')
+            ?? $request->session()->get('location_id')
+            ?? $request->input('user_location_id')
+            ?? $request->session()->get('user_location_id')
+            ?? $request->user()?->location_id;
+
+        if ($raw === null || $raw === '') {
+            return null;
+        }
+
+        return (int) $raw;
     }
 }

@@ -53,6 +53,7 @@ const CreateItemMasterForm = () => {
     flash,
     itemClassOptions = [],
     itemCategoryOptions = [],
+    itemCategoryCoaById = {},
     itemGroupOptions = [],
     itemTypeOptions = [],
     itemStatusOptions = [],
@@ -62,6 +63,12 @@ const CreateItemMasterForm = () => {
     temperatureClassOptions = [],
     countryOptions = [],
     glAccountOptions = [],
+    glAccountOptionsInventory = [],
+    glAccountOptionsPurchase = [],
+    glAccountOptionsCogs = [],
+    glAccountOptionsSales = [],
+    glAccountOptionsWriteoff = [],
+    glAccountOptionsVariance = [],
     item = null,
     edit_mode = false,
     error,
@@ -90,7 +97,8 @@ const CreateItemMasterForm = () => {
   // ============================================
   // SECTION A: Header Fields
   // ============================================
-  const headerFields = [
+  const headerFields = useMemo(
+    () => [
     {
       name: 'item_code',
       label: fld('item_code', 'label'),
@@ -165,7 +173,27 @@ const CreateItemMasterForm = () => {
       placeholder: fld('item_category_id', 'placeholder'),
       required: true,
       options: itemCategoryOptions,
-      help: fld('item_category_id', 'help')
+      help: fld('item_category_id', 'help'),
+      onFormDataPatch: (value) => {
+        const row = itemCategoryCoaById?.[value];
+        if (!row) {
+          return {};
+        }
+        const patch = {};
+        if (row.inventory_gl_account_id) {
+          patch.inventory_gl_account_id = String(row.inventory_gl_account_id);
+        }
+        if (row.purchase_gl_account_id) {
+          patch.purchase_gl_account_id = String(row.purchase_gl_account_id);
+        }
+        if (row.sales_gl_account_id) {
+          patch.sales_gl_account_id = String(row.sales_gl_account_id);
+        }
+        if (row.cogs_gl_account_id) {
+          patch.cogs_gl_account_id = String(row.cogs_gl_account_id);
+        }
+        return patch;
+      },
     },
     {
       name: 'item_group_id',
@@ -194,7 +222,9 @@ const CreateItemMasterForm = () => {
       accept: 'image/jpeg,image/png',
       help: fld('item_image', 'help')
     },
-  ];
+  ],
+    [fld, itemClassOptions, itemCategoryOptions, itemCategoryCoaById, itemGroupOptions, itemStatusOptions, itemTypeOptions]
+  );
 
   // ============================================
   // SECTION B: Tracking & UOM Configuration
@@ -565,15 +595,25 @@ const CreateItemMasterForm = () => {
   // ============================================
   // SECTION H: GL Account Mapping
   // ============================================
-  const glFields = [
+  const glFields = useMemo(
+    () => [
     {
       name: 'inventory_gl_account_id',
       label: fld('inventory_gl_account_id', 'label'),
       type: 'select',
       placeholder: fld('inventory_gl_account_id', 'placeholder'),
       required: true,
-      options: glAccountOptions,
+      options: glAccountOptionsInventory,
       help: fld('inventory_gl_account_id', 'help')
+    },
+    {
+      name: 'purchase_gl_account_id',
+      label: fld('purchase_gl_account_id', 'label'),
+      type: 'select',
+      placeholder: fld('purchase_gl_account_id', 'placeholder'),
+      required: false,
+      options: glAccountOptionsPurchase,
+      help: fld('purchase_gl_account_id', 'help')
     },
     {
       name: 'cogs_gl_account_id',
@@ -581,8 +621,17 @@ const CreateItemMasterForm = () => {
       type: 'select',
       placeholder: fld('cogs_gl_account_id', 'placeholder'),
       required: true,
-      options: glAccountOptions,
+      options: glAccountOptionsCogs,
       help: fld('cogs_gl_account_id', 'help')
+    },
+    {
+      name: 'sales_gl_account_id',
+      label: fld('sales_gl_account_id', 'label'),
+      type: 'select',
+      placeholder: fld('sales_gl_account_id', 'placeholder'),
+      required: false,
+      options: glAccountOptionsSales,
+      help: fld('sales_gl_account_id', 'help')
     },
     {
       name: 'writeoff_gl_account_id',
@@ -590,7 +639,7 @@ const CreateItemMasterForm = () => {
       type: 'select',
       placeholder: fld('writeoff_gl_account_id', 'placeholder'),
       required: true,
-      options: glAccountOptions,
+      options: glAccountOptionsWriteoff,
       help: fld('writeoff_gl_account_id', 'help')
     },
     {
@@ -599,10 +648,20 @@ const CreateItemMasterForm = () => {
       type: 'select',
       placeholder: fld('price_variance_gl_account_id', 'placeholder'),
       required: false,
-      options: glAccountOptions,
+      options: glAccountOptionsVariance,
       help: fld('price_variance_gl_account_id', 'help')
     },
-  ];
+  ],
+    [
+      fld,
+      glAccountOptionsInventory,
+      glAccountOptionsPurchase,
+      glAccountOptionsCogs,
+      glAccountOptionsSales,
+      glAccountOptionsWriteoff,
+      glAccountOptionsVariance,
+    ]
+  );
 
   // ============================================
   // SECTION I: Additional Classification & Analytics
@@ -635,39 +694,47 @@ const CreateItemMasterForm = () => {
   // ============================================
   // Advanced Fields Collections
   // ============================================
-  const allFields = [
-    // Section A
+  const allFields = useMemo(
+    () => [
     ...headerFields,
-    // Section B
-    ...(isEditMode ? [] : trackingFields),  // Tracking UOM fields
-    // Section C
+    ...(isEditMode ? [] : trackingFields),
     ...costingFields,
-    // Section D - Expiry fields (conditional)
     ...expiryFields,
-    // Section E
     ...physicalFields,
-    // Section F
     ...taxFields,
-    // Section G
     ...identifiersFields,
-    // Section H
     ...glFields,
-    // Section I
     ...analyticsFields,
-  ];
+  ],
+    [
+      headerFields,
+      isEditMode,
+      trackingFields,
+      costingFields,
+      expiryFields,
+      physicalFields,
+      taxFields,
+      identifiersFields,
+      glFields,
+      analyticsFields,
+    ]
+  );
 
-  // Section groupings for display with icons and descriptions
-  const sectionGroups = [
-    { title: sec('header', 'title'), icon: Package, description: sec('header', 'description'), fields: headerFields },
-    !isEditMode && { title: sec('tracking', 'title'), icon: Layers, description: sec('tracking', 'description'), fields: trackingFields },
-    { title: sec('costing', 'title'), icon: DollarSign, description: sec('costing', 'description'), fields: costingFields },
-    { title: sec('expiry', 'title'), icon: Calendar, description: sec('expiry', 'description'), fields: expiryFields },
-    { title: sec('physical', 'title'), icon: Package, description: sec('physical', 'description'), fields: physicalFields },
-    { title: sec('tax', 'title'), icon: Hash, description: sec('tax', 'description'), fields: taxFields },
-    { title: sec('identifiers', 'title'), icon: Hash, description: sec('identifiers', 'description'), fields: identifiersFields },
-    { title: sec('gl', 'title'), icon: DollarSign, description: sec('gl', 'description'), fields: glFields },
-    { title: sec('analytics', 'title'), icon: Zap, description: sec('analytics', 'description'), fields: analyticsFields },
-  ].filter(Boolean);
+  const sectionGroups = useMemo(
+    () =>
+      [
+        { title: sec('header', 'title'), icon: Package, description: sec('header', 'description'), fields: headerFields },
+        !isEditMode && { title: sec('tracking', 'title'), icon: Layers, description: sec('tracking', 'description'), fields: trackingFields },
+        { title: sec('costing', 'title'), icon: DollarSign, description: sec('costing', 'description'), fields: costingFields },
+        { title: sec('expiry', 'title'), icon: Calendar, description: sec('expiry', 'description'), fields: expiryFields },
+        { title: sec('physical', 'title'), icon: Package, description: sec('physical', 'description'), fields: physicalFields },
+        { title: sec('tax', 'title'), icon: Hash, description: sec('tax', 'description'), fields: taxFields },
+        { title: sec('identifiers', 'title'), icon: Hash, description: sec('identifiers', 'description'), fields: identifiersFields },
+        { title: sec('gl', 'title'), icon: DollarSign, description: sec('gl', 'description'), fields: glFields },
+        { title: sec('analytics', 'title'), icon: Zap, description: sec('analytics', 'description'), fields: analyticsFields },
+      ].filter(Boolean),
+    [sec, headerFields, isEditMode, trackingFields, costingFields, expiryFields, physicalFields, taxFields, identifiersFields, glFields, analyticsFields]
+  );
 
   const handleSubmit = (formData) => {
     setErrors({});
@@ -833,7 +900,9 @@ const CreateItemMasterForm = () => {
     country_of_origin_id: item?.country_of_origin_id ? String(item.country_of_origin_id) : '',
     barcode_gtin: item?.barcode_gtin || '',
     inventory_gl_account_id: item?.inventory_gl_account_id ? String(item.inventory_gl_account_id) : '',
+    purchase_gl_account_id: item?.purchase_gl_account_id ? String(item.purchase_gl_account_id) : '',
     cogs_gl_account_id: item?.cogs_gl_account_id ? String(item.cogs_gl_account_id) : '',
+    sales_gl_account_id: item?.sales_gl_account_id ? String(item.sales_gl_account_id) : '',
     writeoff_gl_account_id: item?.writeoff_gl_account_id ? String(item.writeoff_gl_account_id) : '',
     price_variance_gl_account_id: item?.price_variance_gl_account_id ? String(item.price_variance_gl_account_id) : '',
     abc_classification: item?.abc_classification || 'b',

@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
-import { Search, Plus, Edit3, Trash2, RefreshCcw, Database } from 'lucide-react';
+import Breadcrumbs from '../../../Components/Breadcrumbs';
+import { Search, Plus, Edit3, Trash2, RefreshCcw, Database, Home, List as ListIcon } from 'lucide-react';
 
 const CustomAlert = {
   fire: ({ title, text, icon, showCancelButton = false, confirmButtonText = 'OK', cancelButtonText = 'Cancel', onConfirm, onCancel }) => {
@@ -34,7 +35,6 @@ export default function List() {
   const { t } = useTranslations();
   const tl = useCallback((k, r = {}) => t(`inventory.item_master.list.${k}`, r), [t]);
   const td = useCallback((k, r = {}) => t(`common.data_table.${k}`, r), [t]);
-  const tf = useCallback((k, r = {}) => t(`common.flash.${k}`, r), [t]);
   const ts = useCallback((k) => t(`common.status.${k}`), [t]);
 
   const [loading, setLoading] = useState(false);
@@ -47,14 +47,6 @@ export default function List() {
   const [currentPage, setCurrentPage] = useState(paginatedItems?.current_page || 1);
   const [pageSize, setPageSize] = useState(filters?.per_page || 25);
   const [selected, setSelected] = useState([]);
-
-  useEffect(() => {
-    if (flash?.success) {
-      CustomAlert.fire({ title: tf('success_title'), text: flash.success, icon: 'success', confirmButtonText: tf('great') });
-    } else if (flash?.error) {
-      CustomAlert.fire({ title: tf('error_title'), text: flash.error, icon: 'error', confirmButtonText: tf('ok') });
-    }
-  }, [flash, tf]);
 
   const pushQuery = (obj) => {
     const params = new URLSearchParams(window.location.search);
@@ -134,9 +126,35 @@ export default function List() {
   );
   const pageSizeOptions = [10, 25, 50, 100];
 
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
+      { label: pageTitle || tl('page_title_fallback'), icon: ListIcon, href: null },
+    ],
+    [t, pageTitle, tl]
+  );
+
   return (
     <App>
-      <div className="advanced-module-manager">
+      <div className="rounded-xl shadow-lg form-container border-slate-200">
+        <div className="p-6">
+          <Breadcrumbs items={breadcrumbItems} description={t('inventory.shared.list_browse_description')} />
+          {flash?.success && (
+            <div className="alert-success-themed mb-4" role="status">
+              <p className="m-0">{flash.success}</p>
+            </div>
+          )}
+          {flash?.error && (
+            <div className="alert-error-themed mb-4" role="alert">
+              <p className="m-0">{flash.error}</p>
+            </div>
+          )}
+          {error && (
+            <div className="alert-error-themed mb-4" role="alert">
+              <p className="m-0">{error}</p>
+            </div>
+          )}
+          <div className="advanced-module-manager">
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
@@ -220,12 +238,6 @@ export default function List() {
             )}
           </div>
         </div>
-
-        {error && (
-          <div className="alert-error-themed mb-4">
-            <p>{error}</p>
-          </div>
-        )}
 
         <div className="table-container">
           {paginatedItems?.data?.length > 0 ? (
@@ -326,6 +338,8 @@ export default function List() {
             )}
           </div>
         )}
+      </div>
+        </div>
       </div>
     </App>
   );

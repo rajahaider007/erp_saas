@@ -1,29 +1,28 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\LoginController;
-use Inertia\Inertia;
-use App\Http\Controllers\system\ModuleController;
-use App\Http\Controllers\system\SectionController;
-use App\Http\Controllers\system\MenuController;
-use App\Http\Controllers\system\CompanyController;
-use App\Http\Controllers\system\PackageController;
-use App\Http\Controllers\system\PackageFeatureController;
-use App\Http\Controllers\system\LocationController;
-use App\Http\Controllers\system\DepartmentController;
-use App\Http\Controllers\system\UserController;
-use App\Http\Controllers\system\CurrencyController;
 use App\Http\Controllers\Inventory\ItemCategoryCodingController;
 use App\Http\Controllers\Inventory\ItemClassCodingController;
 use App\Http\Controllers\Inventory\ItemGroupCodingController;
 use App\Http\Controllers\Inventory\ItemMasterController;
 use App\Http\Controllers\Inventory\MasterDataController;
-use App\Http\Controllers\Inventory\UomMasterController;
 use App\Http\Controllers\Inventory\UomConversionController;
+use App\Http\Controllers\Inventory\UomMasterController;
+use App\Http\Controllers\system\CompanyController;
+use App\Http\Controllers\system\CurrencyController;
+use App\Http\Controllers\system\DepartmentController;
+use App\Http\Controllers\system\LocationController;
+use App\Http\Controllers\system\MenuController;
+use App\Http\Controllers\system\ModuleController;
+use App\Http\Controllers\system\PackageController;
+use App\Http\Controllers\system\PackageFeatureController;
+use App\Http\Controllers\system\SectionController;
+use App\Http\Controllers\system\UserController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 // Public routes
 Route::get('/', function () {
@@ -71,6 +70,7 @@ Route::get('/login', function (Request $request) {
             return redirect('/erp-modules');
         }
     }
+
     return Inertia::render('Login');
 })->name('login');
 
@@ -84,6 +84,7 @@ Route::post('/locale', function (Request $request) {
     if (in_array($locale, \App\Services\TranslationLoaderService::LOCALES, true)) {
         $request->session()->put('locale', $locale);
     }
+
     return back();
 })->name('locale.set');
 
@@ -116,7 +117,7 @@ Route::prefix('inventory/item-category-coding')->name('inventory.item-category-c
 });
 
 Route::prefix('inventory/item-class-coding')->name('inventory.item-class-coding.')->middleware('web.auth')->group(function () {
-    Route::get('/', [ItemClassCodingController::class, 'list'])->name('list');    
+    Route::get('/', [ItemClassCodingController::class, 'list'])->name('list');
     Route::get('/create', [ItemClassCodingController::class, 'create'])->name('create');
     Route::post('/', [ItemClassCodingController::class, 'store'])->name('store');
     Route::get('/{id}/edit', [ItemClassCodingController::class, 'edit'])->name('edit');
@@ -126,7 +127,7 @@ Route::prefix('inventory/item-class-coding')->name('inventory.item-class-coding.
 });
 
 Route::prefix('inventory/item-group-coding')->name('inventory.item-group-coding.')->middleware('web.auth')->group(function () {
-    Route::get('/', [ItemGroupCodingController::class, 'list'])->name('list');    
+    Route::get('/', [ItemGroupCodingController::class, 'list'])->name('list');
     Route::get('/create', [ItemGroupCodingController::class, 'create'])->name('create');
     Route::post('/', [ItemGroupCodingController::class, 'store'])->name('store');
     Route::get('/{id}/edit', [ItemGroupCodingController::class, 'edit'])->name('edit');
@@ -137,7 +138,7 @@ Route::prefix('inventory/item-group-coding')->name('inventory.item-group-coding.
 
 // Inventory Module - UOM Master
 Route::prefix('inventory/uom-master')->name('inventory.uom-master.')->middleware('web.auth')->group(function () {
-    Route::get('/', [UomMasterController::class, 'list'])->name('list');    
+    Route::get('/', [UomMasterController::class, 'list'])->name('list');
     Route::get('/create', [UomMasterController::class, 'create'])->name('create');
     Route::post('/', [UomMasterController::class, 'store'])->name('store');
     Route::get('/{id}/edit', [UomMasterController::class, 'edit'])->name('edit');
@@ -148,7 +149,7 @@ Route::prefix('inventory/uom-master')->name('inventory.uom-master.')->middleware
 
 // Inventory Module - UOM Conversion
 Route::prefix('inventory/uom-conversion')->name('inventory.uom-conversion.')->middleware('web.auth')->group(function () {
-    Route::get('/', [UomConversionController::class, 'list'])->name('list');    
+    Route::get('/', [UomConversionController::class, 'list'])->name('list');
     Route::get('/create', [UomConversionController::class, 'create'])->name('create');
     Route::post('/', [UomConversionController::class, 'store'])->name('store');
     Route::get('/{id}/edit', [UomConversionController::class, 'edit'])->name('edit');
@@ -170,6 +171,7 @@ Route::prefix('inventory/item-master')->name('inventory.item-master.')->middlewa
 });
 
 Route::prefix('inventory/master-data')->name('inventory.master-data.')->middleware('web.auth')->group(function () {
+    Route::get('/next-level4-preview', [MasterDataController::class, 'nextLevel4Preview'])->name('next-level4-preview');
     Route::get('/{master}', [MasterDataController::class, 'list'])->name('list');
     Route::get('/{master}/create', [MasterDataController::class, 'create'])->name('create');
     Route::post('/{master}', [MasterDataController::class, 'store'])->name('store');
@@ -393,7 +395,7 @@ Route::prefix('accounts/income-statement')->name('accounts.income-statement.')->
 Route::prefix('api/exchange-rate')->middleware('web.auth')->group(function () {
     Route::get('/{fromCurrency}/{toCurrency}', function (Request $request, $fromCurrency, $toCurrency) {
         try {
-            $exchangeRateService = new \App\Services\ExchangeRateService();
+            $exchangeRateService = new \App\Services\ExchangeRateService;
             $result = $exchangeRateService->convert(1, $fromCurrency, $toCurrency);
 
             if ($result) {
@@ -403,18 +405,18 @@ Route::prefix('api/exchange-rate')->middleware('web.auth')->group(function () {
                     'from_currency' => $result['from_currency'],
                     'to_currency' => $result['to_currency'],
                     'from_amount' => $result['from_amount'],
-                    'to_amount' => $result['to_amount']
+                    'to_amount' => $result['to_amount'],
                 ]);
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unable to fetch exchange rate'
+                    'message' => 'Unable to fetch exchange rate',
                 ], 400);
             }
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error fetching exchange rate: ' . $e->getMessage()
+                'message' => 'Error fetching exchange rate: '.$e->getMessage(),
             ], 500);
         }
     });
@@ -468,7 +470,6 @@ Route::post('/transactions', [App\Http\Controllers\TestController::class, 'getTr
 
 Route::post('/create-voucher', [App\Http\Controllers\TestController::class, 'createVoucher']);
 
-
 // Set selected module in session
 Route::post('/set-current-module', [App\Http\Controllers\ModuleController::class, 'setCurrentModule'])->middleware('web.auth');
 
@@ -476,11 +477,11 @@ Route::post('/set-current-module', [App\Http\Controllers\ModuleController::class
 Route::get('/get-current-module', function (Request $request) {
     $currentModule = session('current_module');
 
-    if (!$currentModule) {
+    if (! $currentModule) {
         return response()->json([
             'success' => false,
             'message' => 'No module selected',
-            'data' => null
+            'data' => null,
         ]);
     }
 
@@ -500,6 +501,7 @@ Route::get('/get-current-module', function (Request $request) {
             ->get();
 
         $section->menus = $menus;
+
         return $section;
     });
 
@@ -507,8 +509,8 @@ Route::get('/get-current-module', function (Request $request) {
         'success' => true,
         'data' => [
             'module' => $currentModule,
-            'sections' => $sectionsWithMenus
-        ]
+            'sections' => $sectionsWithMenus,
+        ],
     ]);
 })->middleware('web.auth');
 

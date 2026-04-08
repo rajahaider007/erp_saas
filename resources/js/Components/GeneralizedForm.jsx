@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Upload, X, CheckCircle, AlertCircle, Loader2, Eye, EyeOff,
   Search, Calendar, Clock, ChevronDown, Mail, Lock, Shield,
@@ -17,6 +17,9 @@ const GeneralizedForm = ({
   resetText,
   showReset = true,
   initialData = {},
+  formContainerClassName = '',
+  formGridClassName = '',
+  suggestedPartyCode = null,
 }) => {
   const { t } = useTranslations();
   const displayTitle = title ?? t('common.form.default_title');
@@ -25,31 +28,55 @@ const GeneralizedForm = ({
   const displayReset = resetText ?? t('common.actions.reset');
 
   const [formData, setFormData] = useState(initialData || {});
+  const lastAutoPartyCodeRef = useRef('');
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState(null);
   const [showPasswords, setShowPasswords] = useState({});
   const [dragActive, setDragActive] = useState({});
   const [imagePreviews, setImagePreviews] = useState({});
   const fileInputRefs = useRef({});
-  // Add this to your GeneralizedForm component's handleInputChange function:
+
+  useEffect(() => {
+    const field = suggestedPartyCode?.field;
+    const value = suggestedPartyCode?.value;
+    if (!field || !value || String(value).trim() === '') {
+      return;
+    }
+    const v = String(value).trim();
+    setFormData((prev) => {
+      const cur = String(prev[field] ?? '').trim();
+      if (cur === '' || cur === lastAutoPartyCodeRef.current) {
+        lastAutoPartyCodeRef.current = v;
+        return { ...prev, [field]: v };
+      }
+      return prev;
+    });
+  }, [suggestedPartyCode?.field, suggestedPartyCode?.value]);
 
   const handleInputChange = (fieldName, value, field) => {
-    setFormData(prev => ({ ...prev, [fieldName]: value }));
     setAlert(null);
+    setFormData((prev) => {
+      let next = { ...prev, [fieldName]: value };
 
-    // Auto-generate folder name from module name
-    if (fieldName === 'module_name' && value) {
-      const folderName = value.toLowerCase()
-        .replace(/[^a-zA-Z0-9\s]/g, '')
-        .replace(/\s+/g, '_')
-        .trim();
-      setFormData(prev => ({
-        ...prev,
-        folder_name: folderName
-      }));
-    }
+      if (fieldName === 'module_name' && value) {
+        const folderName = value
+          .toLowerCase()
+          .replace(/[^a-zA-Z0-9\s]/g, '')
+          .replace(/\s+/g, '_')
+          .trim();
+        next = { ...next, folder_name: folderName };
+      }
 
-    // Call custom onChange if provided
+      if (field && typeof field.onFormDataPatch === 'function') {
+        const patch = field.onFormDataPatch(value, next, prev);
+        if (patch && typeof patch === 'object') {
+          next = { ...next, ...patch };
+        }
+      }
+
+      return next;
+    });
+
     if (field && field.onChange) {
       field.onChange(value);
     }
@@ -153,7 +180,7 @@ const GeneralizedForm = ({
   };
 
   const renderField = (field) => {
-    const fieldValue = formData[field.name] || '';
+    const fieldValue = formData[field.name] ?? '';
     const Icon = field.icon;
 
     switch (field.type) {
@@ -172,11 +199,13 @@ const GeneralizedForm = ({
                 type={field.type}
                 className={`form-input ${Icon ? 'input-with-icon' : ''}`}
                 placeholder={field.placeholder}
+                title={field.inputTitle || undefined}
                 value={fieldValue}
-                onChange={(e) => handleInputChange(field.name, e.target.value)}
+                onChange={(e) => handleInputChange(field.name, e.target.value, field)}
                 min={field.min}
                 max={field.max}
                 required={field.required}
+                disabled={field.disabled || false}
               />
             </div>
           </div>
@@ -192,9 +221,11 @@ const GeneralizedForm = ({
                 type={showPasswords[field.name] ? "text" : "password"}
                 className={`form-input ${Icon ? 'input-with-icon' : ''}`}
                 placeholder={field.placeholder}
+                title={field.inputTitle || undefined}
                 value={fieldValue}
-                onChange={(e) => handleInputChange(field.name, e.target.value)}
+                onChange={(e) => handleInputChange(field.name, e.target.value, field)}
                 required={field.required}
+                disabled={field.disabled || false}
               />
               <button
                 type="button"
@@ -215,10 +246,12 @@ const GeneralizedForm = ({
               <textarea
                 className="form-textarea"
                 placeholder={field.placeholder}
+                title={field.inputTitle || undefined}
                 rows={field.rows || 4}
                 value={fieldValue}
-                onChange={(e) => handleInputChange(field.name, e.target.value)}
+                onChange={(e) => handleInputChange(field.name, e.target.value, field)}
                 required={field.required}
+                disabled={field.disabled || false}
               />
             </div>
           </div>
@@ -238,6 +271,7 @@ const GeneralizedForm = ({
                 placeholder={field.placeholder || t('common.form.select_option', { label: field.label })}
                 disabled={field.disabled || false}
                 searchable={true}
+                usePortal
               />
             </div>
           </div>
@@ -396,11 +430,12 @@ const GeneralizedForm = ({
   const AlertComponent = ({ type, message }) => {
     const isError = type === 'error';
     const Icon = isError ? AlertCircle : CheckCircle;
+    const tone = isError ? 'error' : 'success';
 
     return (
-      <div className={`alert ${isError ? 'alert-error' : 'alert-success'}`}>
-        <Icon className="alert-icon" size={20} />
-        <p className="alert-message">{message}</p>
+      <div className={`alert-${tone}-themed flex items-start gap-2`} role={isError ? 'alert' : 'status'}>
+        <Icon className="shrink-0 mt-0.5" size={20} aria-hidden />
+        <p className="m-0">{message}</p>
       </div>
     );
   };
@@ -409,7 +444,7 @@ const GeneralizedForm = ({
     <div className="form-theme-system min-h-screen transition-all duration-500">
 
       {/* Form Container */}
-      <div className="form-container">
+      <div className={`form-container ${formContainerClassName}`.trim()}>
         <div className="form-header mb-8">
           <h1 className="form-title">{displayTitle}</h1>
           <p className="form-subtitle">{displaySubtitle}</p>
@@ -422,8 +457,27 @@ const GeneralizedForm = ({
         )}
 
         <form onSubmit={handleSubmit}>
-          <div className="form-grid">
-            {fields.map(renderField)}
+          <div className={`form-grid ${formGridClassName}`.trim()}>
+            {fields.map((field, index) => {
+              const showSection =
+                field.section &&
+                (index === 0 || fields[index - 1].section !== field.section);
+              return (
+                <React.Fragment key={field.name}>
+                  {showSection && (
+                    <div className="textarea-group">
+                      <h3
+                        className="m-0 text-xs font-semibold uppercase tracking-wider"
+                        style={{ color: 'var(--text-secondary)' }}
+                      >
+                        {field.section}
+                      </h3>
+                    </div>
+                  )}
+                  {renderField(field)}
+                </React.Fragment>
+              );
+            })}
           </div>
 
           {/* Submit Buttons */}

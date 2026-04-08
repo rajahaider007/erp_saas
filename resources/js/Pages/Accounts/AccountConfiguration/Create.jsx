@@ -55,7 +55,7 @@ const { t } = useTranslations();
   const { errors: pageErrors, flash, id, edit_mode, configuration, accounts = [], configTypes = {} } = usePage().props;
   
   const accountOptions = (accounts || []).map(acc => ({
-    value: acc.value,
+    value: String(acc.value),
     label: acc.label
   }));
 
@@ -69,6 +69,7 @@ const { t } = useTranslations();
       name: 'account_id',
       label: t('accounts.account_configuration.create.select_account'),
       type: 'select',
+      searchable: true,
       placeholder: t('accounts.account_configuration.create.search_and_select_account'),
       icon: Database,
       required: true,
@@ -192,6 +193,7 @@ const { t } = useTranslations();
       <Breadcrumbs items={breadcrumbItems} />
 
       <GeneralizedForm
+        key={isEdit && id ? `account-config-edit-${id}` : 'account-config-create'}
         title={isEdit ? t('accounts.account_configuration.create.edit_account_configuration') : t('accounts.account_configuration.create.add_account_configuration')}
         subtitle={isEdit ? t('accounts.account_configuration.create.subtitle_edit') : t('accounts.account_configuration.create.subtitle_create')}
         fields={configFields}
@@ -199,10 +201,10 @@ const { t } = useTranslations();
         submitText={isEdit ? t('accounts.account_configuration.create.update_configuration') : t('accounts.account_configuration.create.create_configuration')}
         resetText={t('accounts.account_configuration.create.clear_form')}
         initialData={isEdit && configuration ? {
-          account_id: configuration.account_id || '',
+          account_id: configuration.account_id != null && configuration.account_id !== '' ? String(configuration.account_id) : '',
           config_type: configuration.config_type || '',
           description: configuration.description || '',
-          is_active: configuration.is_active || true
+          is_active: configuration.is_active !== undefined ? Boolean(configuration.is_active) : true
         } : {
           account_id: '',
           config_type: '',

@@ -5,19 +5,24 @@ namespace App\Http\Controllers\Inventory;
 use App\Http\Controllers\Controller;
 use App\Models\InventoryItemCategory;
 use App\Models\InventoryItemClass;
+use App\Services\Inventory\ItemCategoryCostingAccountService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class ItemCategoryCodingController extends Controller
 {
+    public function __construct(
+        private ItemCategoryCostingAccountService $categoryCostingAccounts
+    ) {}
+
     // Display list of item categories
     public function list(Request $request)
     {
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
 
-        if (!$compId || !$locationId) {
+        if (! $compId || ! $locationId) {
             return Inertia::render('Inventory/ItemCategoryCoding/List', [
                 'error' => 'Company and Location information is required.',
                 'categories' => [],
@@ -31,12 +36,18 @@ class ItemCategoryCodingController extends Controller
         $perPage = $request->input('per_page', 25);
 
         $query = InventoryItemCategory::byCompanyAndLocation($compId, $locationId)
-            ->with('itemClass:id,class_code,class_name');
+            ->with([
+                'itemClass:id,class_code,class_name',
+                'inventoryGlAccount:id,account_code,account_name',
+                'purchaseGlAccount:id,account_code,account_name',
+                'salesGlAccount:id,account_code,account_name',
+                'cogsGlAccount:id,account_code,account_name',
+            ]);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('category_code', 'like', "%{$search}%")
-                  ->orWhere('category_name', 'like', "%{$search}%");
+                    ->orWhere('category_name', 'like', "%{$search}%");
             });
         }
 
@@ -66,10 +77,11 @@ class ItemCategoryCodingController extends Controller
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
 
-        if (!$compId || !$locationId) {
+        if (! $compId || ! $locationId) {
             return Inertia::render('Inventory/ItemCategoryCoding/Create', [
                 'error' => 'Company and Location information is required.',
                 'itemClassOptions' => [],
+                'costingConfigurationStatus' => [],
             ]);
         }
 
@@ -78,7 +90,7 @@ class ItemCategoryCodingController extends Controller
             ->get(['id', 'class_code', 'class_name'])
             ->map(fn ($itemClass) => [
                 'value' => (string) $itemClass->id,
-                'label' => $itemClass->class_code . ' - ' . $itemClass->class_name,
+                'label' => $itemClass->class_code.' - '.$itemClass->class_name,
             ])
             ->values();
 
@@ -86,6 +98,7 @@ class ItemCategoryCodingController extends Controller
             'itemClassOptions' => $itemClassOptions,
             'edit_mode' => false,
             'category' => null,
+            'costingConfigurationStatus' => $this->categoryCostingAccounts->costingConfigurationStatus((int) $compId, (int) $locationId),
         ]);
     }
 
@@ -95,9 +108,9 @@ class ItemCategoryCodingController extends Controller
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
 
-        if (!$compId || !$locationId) {
+        if (! $compId || ! $locationId) {
             return back()->withErrors([
-                'error' => 'Company and Location information is required.'
+                'error' => 'Company and Location information is required.',
             ]);
         }
 
@@ -136,10 +149,15 @@ class ItemCategoryCodingController extends Controller
             'is_active' => $validated['is_active'] ?? true,
         ]);
 
-        $message = 'Item category created successfully.';
+        try {
+            $this->categoryCostingAccounts->ensureCostingHeads($category);
+        } catch (\Throwable $e) {
+            return redirect()->route('inventory.item-category-coding.list')
+                ->with('error', 'Category was saved, but Chart of Accounts costing heads were not created. '.$e->getMessage());
+        }
 
         return redirect()->route('inventory.item-category-coding.list')
-            ->with('success', $message);
+            ->with('success', 'Item category created successfully. Costing accounts were added to Chart of Accounts and linked.');
     }
 
     // Show edit form
@@ -149,6 +167,12 @@ class ItemCategoryCodingController extends Controller
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
 
         $category = InventoryItemCategory::byCompanyAndLocation($compId, $locationId)
+            ->with([
+                'inventoryGlAccount:id,account_code,account_name',
+                'purchaseGlAccount:id,account_code,account_name',
+                'salesGlAccount:id,account_code,account_name',
+                'cogsGlAccount:id,account_code,account_name',
+            ])
             ->findOrFail($id);
 
         $itemClassOptions = InventoryItemClass::byCompanyAndLocation($compId, $locationId)
@@ -156,7 +180,7 @@ class ItemCategoryCodingController extends Controller
             ->get(['id', 'class_code', 'class_name'])
             ->map(fn ($itemClass) => [
                 'value' => (string) $itemClass->id,
-                'label' => $itemClass->class_code . ' - ' . $itemClass->class_name,
+                'label' => $itemClass->class_code.' - '.$itemClass->class_name,
             ])
             ->values();
 
@@ -164,6 +188,7 @@ class ItemCategoryCodingController extends Controller
             'category' => $category,
             'itemClassOptions' => $itemClassOptions,
             'edit_mode' => true,
+            'costingConfigurationStatus' => $this->categoryCostingAccounts->costingConfigurationStatus((int) $compId, (int) $locationId),
         ]);
     }
 
@@ -209,8 +234,15 @@ class ItemCategoryCodingController extends Controller
             'is_active' => $validated['is_active'] ?? true,
         ]);
 
+        try {
+            $this->categoryCostingAccounts->ensureCostingHeads($category->fresh());
+        } catch (\Throwable $e) {
+            return redirect()->route('inventory.item-category-coding.list')
+                ->with('error', 'Category was updated, but costing accounts were not created or refreshed. '.$e->getMessage());
+        }
+
         return redirect()->route('inventory.item-category-coding.list')
-            ->with('success', 'Item category updated successfully.');
+            ->with('success', 'Item category updated successfully. Costing accounts are linked; items in this category were synced where applicable.');
     }
 
     // Delete category

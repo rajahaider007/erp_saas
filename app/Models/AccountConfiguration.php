@@ -42,6 +42,11 @@ class AccountConfiguration extends Model
         return $this->belongsTo(Location::class, 'location_id');
     }
 
+    public function chartAccount()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'account_id');
+    }
+
     // Scopes
     public function scopeActive($query)
     {
@@ -83,7 +88,7 @@ class AccountConfiguration extends Model
             'employee_advance' => 'Employee Advance',
             'deferred_tax_asset' => 'Deferred Tax Asset',
             'other_asset' => 'Other Asset',
-            
+
             // Liabilities
             'accounts_payable' => 'Accounts Payable',
             'accrued_expense' => 'Accrued Expense',
@@ -92,18 +97,18 @@ class AccountConfiguration extends Model
             'tax_payable' => 'Tax Payable',
             'unearned_revenue' => 'Unearned Revenue',
             'other_liability' => 'Other Liability',
-            
+
             // Equity
             'capital' => 'Capital/Equity',
             'drawings' => 'Drawings',
             'retained_earnings' => 'Retained Earnings',
-            
+
             // Income
             'sales' => 'Sales Revenue',
             'service_income' => 'Service Income',
             'interest_income' => 'Interest Income',
             'other_income' => 'Other Income',
-            
+
             // Expense
             'purchase' => 'Purchase',
             'cost_of_goods_sold' => 'Cost of Goods Sold (COGS)',
@@ -123,7 +128,7 @@ class AccountConfiguration extends Model
             // Legacy aliases (kept for backward compatibility)
             'output_tax' => 'Output Tax (VAT/GST Payable)',
             'investment' => 'Investment',
-            'other' => 'Other'
+            'other' => 'Other',
         ];
     }
 }

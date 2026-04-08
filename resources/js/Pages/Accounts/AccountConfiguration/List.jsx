@@ -164,6 +164,21 @@ export default function List() {
 
   const configurations = paginatedConfigurations?.data || [];
 
+  const rowAccountLabel = (config) => {
+    const code = config.account_code ?? config.chart_account?.account_code ?? '';
+    const name = config.account_name ?? config.chart_account?.account_name ?? '';
+    if (code && name) {
+      return `${code} - ${name}`;
+    }
+    if (name) {
+      return name;
+    }
+    if (code) {
+      return code;
+    }
+    return '—';
+  };
+
   // Handle search and filters
   const handleSearch = useCallback((term) => {
     setSearchTerm(term);
@@ -254,7 +269,7 @@ export default function List() {
   const handleDelete = (config) => {
     CustomAlert.fire({
       title: td('confirm_delete_title'),
-      text: td('confirm_delete_text', { name: config.account_name }),
+      text: td('confirm_delete_text', { name: rowAccountLabel(config) }),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: td('confirm_delete_ok'),
@@ -265,7 +280,7 @@ export default function List() {
           onSuccess: () => {
             CustomAlert.fire({
               title: tf('deleted_title'),
-              text: tl('msg_deleted', { name: config.account_name }),
+              text: tl('msg_deleted', { name: rowAccountLabel(config) }),
               icon: 'success',
               confirmButtonText: tf('ok'),
             });
@@ -706,11 +721,11 @@ export default function List() {
                                   <Briefcase size={24} strokeWidth={2} aria-hidden />
                                 </div>
                                 <div className="module-details">
-                                  <div className="module-name">{config.account_code} - {config.account_name}</div>
+                                  <div className="module-name">{rowAccountLabel(config)}</div>
                                   <div className="module-folder">
                                     {tl('row_type', { type: configTypes?.[config.config_type] || config.config_type })}
                                   </div>
-                                  <div className="module-description">{tl('row_level', { level: config.account_level })}</div>
+                                  <div className="module-description">{tl('row_level', { level: config.account_level ?? config.chart_account?.account_level ?? '—' })}</div>
                                 </div>
                               </div>
                             </td>

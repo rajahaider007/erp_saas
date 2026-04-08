@@ -170,14 +170,14 @@ const CreateItemGroupCodingForm = () => {
       <Breadcrumbs items={breadcrumbItems} description={tc('configure_inventory_item_groups')} />
 
       {alert && (
-        <div className={`mb-4 p-3 rounded-lg ${alert.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-          {alert.message}
+        <div className={`alert-${alert.type}-themed mb-4`}>
+          <p>{alert.message}</p>
         </div>
       )}
 
       {Object.keys(errors).length > 0 && (
-        <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700">
-          <ul className="list-disc ml-5 space-y-1">
+        <div className="alert-error-themed mb-4">
+          <ul className="list-disc pl-5 space-y-1">
             {Object.entries(errors).map(([key, value]) => (
               <li key={key}>{Array.isArray(value) ? value[0] : value}</li>
             ))}

@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\Vendor;
 use App\Models\Company;
 use App\Models\Country;
+use App\Models\Vendor;
+use Illuminate\Database\Seeder;
 
 class VendorSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Optional demo vendors (VND001–VND007). Not run from DatabaseSeeder so lists show only data you create.
+     * Run manually when needed: php artisan db:seed --class=VendorSeeder
      */
     public function run(): void
     {
@@ -19,6 +19,7 @@ class VendorSeeder extends Seeder
 
         if ($companies->isEmpty()) {
             $this->command->info('No companies found. Please seed companies first.');
+
             return;
         }
 

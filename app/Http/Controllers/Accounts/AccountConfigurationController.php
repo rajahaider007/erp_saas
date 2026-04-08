@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\CheckUserPermissions;
 use App\Models\AccountConfiguration;
 use App\Models\Company;
-use App\Helpers\CompanyHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -17,6 +16,41 @@ class AccountConfigurationController extends Controller
     use CheckUserPermissions;
 
     /**
+     * Level-3 (control) and level-4 (transactional) COA rows used for account mapping.
+     */
+    private function chartAccountSelectOptions(int $compId, int $locationId, ?int $ensureAccountId = null)
+    {
+        $rows = DB::table('chart_of_accounts')
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->whereIn('account_level', [3, 4])
+            ->orderBy('account_code')
+            ->get(['id', 'account_code', 'account_name', 'account_level', 'account_type']);
+
+        $mapRow = function ($account) {
+            return [
+                'value' => (int) $account->id,
+                'label' => "{$account->account_code} - {$account->account_name}",
+            ];
+        };
+
+        $options = $rows->map($mapRow)->values();
+
+        if ($ensureAccountId && ! $rows->pluck('id')->contains((int) $ensureAccountId)) {
+            $extra = DB::table('chart_of_accounts')
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->where('id', $ensureAccountId)
+                ->first(['id', 'account_code', 'account_name', 'account_level', 'account_type']);
+            if ($extra) {
+                $options = collect([$mapRow($extra)])->concat($options)->values();
+            }
+        }
+
+        return $options;
+    }
+
+    /**
      * Display a listing of account configurations
      */
     public function index(Request $request)
@@ -24,11 +58,11 @@ class AccountConfigurationController extends Controller
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
 
-        if (!$compId || !$locationId) {
+        if (! $compId || ! $locationId) {
             return Inertia::render('Accounts/AccountConfiguration/List', [
                 'configurations' => [],
                 'filters' => [],
-                'error' => 'Company and Location information is required.'
+                'error' => 'Company and Location information is required.',
             ]);
         }
 
@@ -50,13 +84,13 @@ class AccountConfigurationController extends Controller
 
         $companies = [];
         $locations = [];
-        
+
         if ($isParentCompany) {
             $companies = DB::table('companies')
                 ->where('status', true)
                 ->orderBy('company_name')
                 ->get(['id', 'company_name']);
-            
+
             if ($compId) {
                 $locations = DB::table('locations')
                     ->where('company_id', $compId)
@@ -66,8 +100,9 @@ class AccountConfigurationController extends Controller
             }
         }
 
-        // Build query
+        // Build query (eager-load COA for rows missing denormalized code/name, e.g. L4 seeds)
         $query = AccountConfiguration::query()
+            ->with('chartAccount')
             ->where('comp_id', $compId)
             ->where('location_id', $locationId);
 
@@ -75,8 +110,12 @@ class AccountConfigurationController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('account_code', 'like', "%{$search}%")
-                  ->orWhere('account_name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('account_name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhereHas('chartAccount', function ($cq) use ($search) {
+                        $cq->where('account_code', 'like', "%{$search}%")
+                            ->orWhere('account_name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -109,10 +148,10 @@ class AccountConfigurationController extends Controller
                 'account_level' => $accountLevel,
                 'sort_by' => $sortBy,
                 'sort_direction' => $sortDirection,
-                'per_page' => $perPage
+                'per_page' => $perPage,
             ],
             'configTypes' => AccountConfiguration::getConfigTypes(),
-            'pageTitle' => 'Account Configuration'
+            'pageTitle' => 'Account Configuration',
         ]);
     }
 
@@ -124,32 +163,19 @@ class AccountConfigurationController extends Controller
         $compId = $request->input('user_comp_id') ?? $request->session()->get('user_comp_id');
         $locationId = $request->input('user_location_id') ?? $request->session()->get('user_location_id');
 
-        if (!$compId || !$locationId) {
+        if (! $compId || ! $locationId) {
             return Inertia::render('Accounts/AccountConfiguration/Create', [
-                'error' => 'Company and Location information is required.'
+                'error' => 'Company and Location information is required.',
             ]);
         }
 
-        // Get level 3 accounts only
-        $accounts = DB::table('chart_of_accounts')
-            ->where('comp_id', $compId)
-            ->where('location_id', $locationId)
-            ->where('account_level', 3)
-            ->orderBy('account_code')
-            ->get(['id', 'account_code', 'account_name', 'account_level', 'account_type'])
-            ->map(function ($account) {
-                return [
-                    'value' => $account->id,
-                    'label' => "{$account->account_code} - {$account->account_name}"
-                ];
-            })
-            ->values();
+        $accounts = $this->chartAccountSelectOptions($compId, $locationId);
 
         return Inertia::render('Accounts/AccountConfiguration/Create', [
             'accounts' => $accounts,
             'configTypes' => AccountConfiguration::getConfigTypes(),
             'edit_mode' => false,
-            'configuration' => null
+            'configuration' => null,
         ]);
     }
 
@@ -163,8 +189,8 @@ class AccountConfigurationController extends Controller
 
         $validated = $request->validate([
             'account_id' => 'required|integer|exists:chart_of_accounts,id',
-            'config_type' => 'required|in:' . implode(',', array_keys(AccountConfiguration::getConfigTypes())),
-            'description' => 'nullable|string|max:500'
+            'config_type' => 'required|in:'.implode(',', array_keys(AccountConfiguration::getConfigTypes())),
+            'description' => 'nullable|string|max:500',
         ]);
 
         try {
@@ -175,8 +201,8 @@ class AccountConfigurationController extends Controller
                 ->where('location_id', $locationId)
                 ->first();
 
-            if (!$account) {
-                return back()->withErrors(['account_id' => 'Selected account not found.']);
+            if (! $account || ! in_array((int) $account->account_level, [3, 4], true)) {
+                return back()->withErrors(['account_id' => 'Selected account not found or is not a valid mapping account (level 3 or 4).']);
             }
 
             // Check if configuration already exists
@@ -200,18 +226,18 @@ class AccountConfigurationController extends Controller
                 'account_level' => $account->account_level,
                 'config_type' => $validated['config_type'],
                 'description' => $validated['description'] ?? null,
-                'is_active' => true
+                'is_active' => true,
             ]);
 
-            return redirect("/accounts/account-configuration")
+            return redirect('/accounts/account-configuration')
                 ->with('success', "Configuration for {$account->account_name} created successfully.");
 
         } catch (\Exception $e) {
             Log::error('Error creating account configuration', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return back()->withErrors(['error' => 'An error occurred while creating the configuration.']);
         }
     }
@@ -229,33 +255,24 @@ class AccountConfigurationController extends Controller
             ->where('location_id', $locationId)
             ->first();
 
-        if (!$configuration) {
+        if (! $configuration) {
             return Inertia::render('Accounts/AccountConfiguration/Create', [
-                'error' => 'Configuration not found.'
+                'error' => 'Configuration not found.',
             ]);
         }
 
-        // Get level 3 accounts only
-        $accounts = DB::table('chart_of_accounts')
-            ->where('comp_id', $compId)
-            ->where('location_id', $locationId)
-            ->where('account_level', 3)
-            ->orderBy('account_code')
-            ->get(['id', 'account_code', 'account_name', 'account_level', 'account_type'])
-            ->map(function ($account) {
-                return [
-                    'value' => $account->id,
-                    'label' => "{$account->account_code} - {$account->account_name}"
-                ];
-            })
-            ->values();
+        $accounts = $this->chartAccountSelectOptions(
+            $compId,
+            $locationId,
+            $configuration->account_id ? (int) $configuration->account_id : null
+        );
 
         return Inertia::render('Accounts/AccountConfiguration/Create', [
             'accounts' => $accounts,
             'configTypes' => AccountConfiguration::getConfigTypes(),
             'configuration' => $configuration,
             'edit_mode' => true,
-            'id' => $id
+            'id' => $id,
         ]);
     }
 
@@ -272,15 +289,15 @@ class AccountConfigurationController extends Controller
             ->where('location_id', $locationId)
             ->first();
 
-        if (!$configuration) {
+        if (! $configuration) {
             return back()->withErrors(['error' => 'Configuration not found.']);
         }
 
         $validated = $request->validate([
             'account_id' => 'required|integer|exists:chart_of_accounts,id',
-            'config_type' => 'required|in:' . implode(',', array_keys(AccountConfiguration::getConfigTypes())),
+            'config_type' => 'required|in:'.implode(',', array_keys(AccountConfiguration::getConfigTypes())),
             'description' => 'nullable|string|max:500',
-            'is_active' => 'nullable|boolean'
+            'is_active' => 'nullable|boolean',
         ]);
 
         try {
@@ -291,8 +308,8 @@ class AccountConfigurationController extends Controller
                 ->where('location_id', $locationId)
                 ->first();
 
-            if (!$account) {
-                return back()->withErrors(['account_id' => 'Selected account not found.']);
+            if (! $account || ! in_array((int) $account->account_level, [3, 4], true)) {
+                return back()->withErrors(['account_id' => 'Selected account not found or is not a valid mapping account (level 3 or 4).']);
             }
 
             // Check if configuration already exists for different account
@@ -315,18 +332,18 @@ class AccountConfigurationController extends Controller
                 'account_level' => $account->account_level,
                 'config_type' => $validated['config_type'],
                 'description' => $validated['description'] ?? null,
-                'is_active' => $validated['is_active'] ?? true
+                'is_active' => $validated['is_active'] ?? true,
             ]);
 
-            return redirect("/accounts/account-configuration")
-                ->with('success', "Configuration updated successfully.");
+            return redirect('/accounts/account-configuration')
+                ->with('success', 'Configuration updated successfully.');
 
         } catch (\Exception $e) {
             Log::error('Error updating account configuration', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return back()->withErrors(['error' => 'An error occurred while updating the configuration.']);
         }
     }
@@ -344,7 +361,7 @@ class AccountConfigurationController extends Controller
             ->where('location_id', $locationId)
             ->first();
 
-        if (!$configuration) {
+        if (! $configuration) {
             return response()->json(['error' => 'Configuration not found.'], 404);
         }
 
@@ -354,15 +371,15 @@ class AccountConfigurationController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "Configuration for {$accountName} deleted successfully."
+                'message' => "Configuration for {$accountName} deleted successfully.",
             ]);
 
         } catch (\Exception $e) {
             Log::error('Error deleting account configuration', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return response()->json(['error' => 'An error occurred while deleting the configuration.'], 500);
         }
     }
@@ -389,15 +406,15 @@ class AccountConfigurationController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => count($ids) . ' configuration(s) deleted successfully.'
+                'message' => count($ids).' configuration(s) deleted successfully.',
             ]);
 
         } catch (\Exception $e) {
             Log::error('Error bulk deleting account configurations', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return response()->json(['error' => 'An error occurred while deleting configurations.'], 500);
         }
     }
@@ -425,15 +442,15 @@ class AccountConfigurationController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => count($ids) . ' configuration(s) updated successfully.'
+                'message' => count($ids).' configuration(s) updated successfully.',
             ]);
 
         } catch (\Exception $e) {
             Log::error('Error updating account configuration status', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return response()->json(['error' => 'An error occurred while updating configurations.'], 500);
         }
     }

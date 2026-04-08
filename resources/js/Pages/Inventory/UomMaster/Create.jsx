@@ -1,51 +1,17 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Home, List, Plus, Hash, Tag, Edit3, Droplet } from 'lucide-react';
+import { Home, List, Plus, Hash, Tag, Edit3, Type } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
+import Breadcrumbs from '../../../Components/Breadcrumbs';
 import App from '../../App.jsx';
 import { router, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
-
-const Breadcrumbs = ({ items, description }) => (
-  <div className="breadcrumbs-themed">
-    <nav className="breadcrumbs">
-      {items.map((item, index) => (
-        <div key={index} className="breadcrumb-item">
-          <div className="breadcrumb-item-content">
-            {item.icon && (
-              <item.icon className={`breadcrumb-icon ${item.href ? 'breadcrumb-icon-link' : 'breadcrumb-icon-current'}`} />
-            )}
-            {item.href ? (
-              <a href={item.href} className="breadcrumb-link-themed">
-                {item.label}
-              </a>
-            ) : (
-              <span className="breadcrumb-current-themed">{item.label}</span>
-            )}
-          </div>
-          {index < items.length - 1 && (
-            <div className="breadcrumb-separator breadcrumb-separator-themed">
-              <svg viewBox="0 0 20 20" fill="currentColor" className="w-full h-full">
-                <path
-                  fillRule="evenodd"
-                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-          )}
-        </div>
-      ))}
-    </nav>
-    {description && <div className="breadcrumbs-description">{description}</div>}
-  </div>
-);
 
 const CreateUomMasterForm = () => {
   const { t } = useTranslations();
   const tc = useCallback((k, r = {}) => t(`inventory.uom_master.create.${k}`, r), [t]);
   const { errors: pageErrors, flash, uom = null, uomTypes = [], error } = usePage().props;
 
-  const isEditMode = !!uom;
+  const isEditMode = !!uom?.id;
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
 
@@ -79,6 +45,8 @@ const CreateUomMasterForm = () => {
         name: 'uom_type',
         label: tc('lbl_uom_type'),
         type: 'select',
+        placeholder: tc('lbl_uom_type'),
+        icon: Type,
         options: formattedUomTypes,
         required: true,
       },
@@ -87,6 +55,7 @@ const CreateUomMasterForm = () => {
         label: tc('lbl_symbol'),
         type: 'text',
         placeholder: tc('ph_symbol'),
+        icon: Hash,
         required: true,
       },
       {
@@ -101,6 +70,7 @@ const CreateUomMasterForm = () => {
         label: tc('lbl_decimal_precision'),
         type: 'number',
         placeholder: tc('ph_decimal_precision'),
+        icon: Hash,
         required: true,
       },
       {
@@ -137,6 +107,30 @@ const CreateUomMasterForm = () => {
     }
   }, [flash]);
 
+  const initialData = useMemo(
+    () =>
+      isEditMode && uom
+        ? {
+            uom_code: uom.uom_code || '',
+            uom_name: uom.uom_name || '',
+            uom_type: uom.uom_type || '',
+            symbol: uom.symbol || '',
+            description: uom.description || '',
+            decimal_precision: uom.decimal_precision ?? 0,
+            is_active: uom.is_active ?? true,
+          }
+        : {
+            uom_code: '',
+            uom_name: '',
+            uom_type: '',
+            symbol: '',
+            description: '',
+            decimal_precision: 0,
+            is_active: true,
+          },
+    [isEditMode, uom]
+  );
+
   const handleSubmit = async (submittedFormData) => {
     setErrors({});
     setAlert(null);
@@ -159,7 +153,7 @@ const CreateUomMasterForm = () => {
       newErrors.symbol = tc('val_symbol');
     }
 
-    if (submittedFormData.decimal_precision === '' || submittedFormData.decimal_precision === null) {
+    if (submittedFormData.decimal_precision === '' || submittedFormData.decimal_precision === null || submittedFormData.decimal_precision === undefined) {
       newErrors.decimal_precision = tc('val_decimal_precision');
     }
 
@@ -175,75 +169,78 @@ const CreateUomMasterForm = () => {
     formDataToSend.append('uom_type', submittedFormData.uom_type || '');
     formDataToSend.append('symbol', submittedFormData.symbol || '');
     formDataToSend.append('description', submittedFormData.description || '');
-    formDataToSend.append('decimal_precision', submittedFormData.decimal_precision || 0);
+    formDataToSend.append('decimal_precision', submittedFormData.decimal_precision ?? 0);
     formDataToSend.append('is_active', submittedFormData.is_active ? '1' : '0');
 
+    const url = isEditMode ? `/inventory/uom-master/${uom.id}` : '/inventory/uom-master';
     if (isEditMode) {
       formDataToSend.append('_method', 'PUT');
-      router.post(`/inventory/uom-master/${uom.id}`, formDataToSend, {
-        forceFormData: true,
-        onError: (serverErrors) => {
-          setErrors(serverErrors);
-        },
-      });
-    } else {
-      router.post('/inventory/uom-master', formDataToSend, {
-        forceFormData: true,
-        onError: (serverErrors) => {
-          setErrors(serverErrors);
-        },
-      });
     }
+
+    const msg = tc('msg_please_correct_the_errors_below_and_try_');
+    return await new Promise((resolve, reject) => {
+      router.post(url, formDataToSend, {
+        forceFormData: true,
+        onSuccess: () => resolve(true),
+        onError: (serverErrors) => {
+          setErrors(serverErrors || {});
+          reject(new Error(msg));
+        },
+      });
+    });
   };
 
   const breadcrumbItems = useMemo(
     () => [
-      { label: t('inventory.shared.breadcrumb_home'), icon: Home, href: '/' },
-      { label: t('inventory.shared.breadcrumb_inventory'), href: '/inventory' },
+      { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
       { label: tc('breadcrumb_uom_master'), icon: List, href: '/inventory/uom-master' },
-      { label: isEditMode ? tc('breadcrumb_edit') : tc('breadcrumb_create'), icon: isEditMode ? Edit3 : Plus },
+      { label: isEditMode ? tc('breadcrumb_edit') : tc('breadcrumb_create'), icon: isEditMode ? Edit3 : Plus, href: null },
     ],
     [t, tc, isEditMode]
   );
 
   return (
-    <App>
-      <div className="form-container">
-        <Breadcrumbs items={breadcrumbItems} description={tc('configure_unit_of_measure_master_data')} />
+    <div>
+      <Breadcrumbs items={breadcrumbItems} description={tc('configure_unit_of_measure_master_data')} />
 
-        <div className="form-section">
-          <div className="form-header">
-            <div className="header-info">
-              <h2 className="form-title">
-                <Droplet size={24} className="title-icon" />
-                {isEditMode ? tc('title_edit') : tc('title_create')}
-              </h2>
-              <p className="form-description">{isEditMode ? tc('desc_edit') : tc('desc_create')}</p>
-            </div>
-          </div>
-
-          {alert && (
-            <div className={`alert alert-${alert.type}`}>
-              <span>{alert.message}</span>
-              <button type="button" onClick={() => setAlert(null)} className="alert-close">
-                ×
-              </button>
-            </div>
-          )}
-
-          <GeneralizedForm
-            fields={uomFields}
-            onSubmit={handleSubmit}
-            initialData={uom}
-            errors={errors}
-            submitButtonLabel={isEditMode ? tc('submit_update') : tc('submit_create')}
-            cancelButtonLabel={t('common.actions.cancel')}
-            onCancel={() => window.history.back()}
-          />
+      {alert && (
+        <div className={`alert-${alert.type}-themed mb-4`}>
+          <p className="m-0">{alert.message}</p>
         </div>
-      </div>
-    </App>
+      )}
+
+      {Object.keys(errors).length > 0 && (
+        <div className="alert-error-themed mb-4">
+          <ul className="m-0 list-disc pl-5 space-y-1">
+            {Object.entries(errors).map(([key, value]) => (
+              <li key={key}>{Array.isArray(value) ? value[0] : value}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <GeneralizedForm
+        title={isEditMode ? tc('title_edit') : tc('title_create')}
+        subtitle={isEditMode ? tc('desc_edit') : tc('desc_create')}
+        fields={uomFields}
+        onSubmit={handleSubmit}
+        submitText={isEditMode ? tc('submit_update') : tc('submit_create')}
+        resetText={t('common.form_actions.clear_form')}
+        showReset={!isEditMode}
+        initialData={initialData}
+      />
+    </div>
   );
 };
 
-export default CreateUomMasterForm;
+const Create = () => (
+  <App>
+    <div className="rounded-xl shadow-lg form-container border-slate-200">
+      <div className="p-6">
+        <CreateUomMasterForm />
+      </div>
+    </div>
+  </App>
+);
+
+export default Create;

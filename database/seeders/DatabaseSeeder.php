@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             CountrySeeder::class,           // No dependencies
             UomMasterSeeder::class,         // Depends on Company
             TaxCategorySeeder::class,       // Depends on Company
-            VendorSeeder::class,            // Depends on Company and Country
+            InventoryMasterCodingMenusSeeder::class,
         ]);
     }
 }

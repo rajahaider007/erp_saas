@@ -19,6 +19,10 @@ class InventoryItemCategory extends Model
         'item_class_id',
         'description',
         'is_active',
+        'inventory_gl_account_id',
+        'purchase_gl_account_id',
+        'sales_gl_account_id',
+        'cogs_gl_account_id',
     ];
 
     protected $casts = [
@@ -26,11 +30,35 @@ class InventoryItemCategory extends Model
         'location_id' => 'integer',
         'item_class_id' => 'integer',
         'is_active' => 'boolean',
+        'inventory_gl_account_id' => 'integer',
+        'purchase_gl_account_id' => 'integer',
+        'sales_gl_account_id' => 'integer',
+        'cogs_gl_account_id' => 'integer',
     ];
 
     public function itemClass()
     {
         return $this->belongsTo(InventoryItemClass::class, 'item_class_id');
+    }
+
+    public function inventoryGlAccount()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'inventory_gl_account_id');
+    }
+
+    public function purchaseGlAccount()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'purchase_gl_account_id');
+    }
+
+    public function salesGlAccount()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'sales_gl_account_id');
+    }
+
+    public function cogsGlAccount()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'cogs_gl_account_id');
     }
 
     public function classes()

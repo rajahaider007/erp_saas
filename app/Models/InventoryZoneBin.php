@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class InventoryZoneBin extends Model
@@ -14,7 +15,7 @@ class InventoryZoneBin extends Model
 
     protected $fillable = [
         'company_id',
-        'warehouse_id',
+        'location_id',
         'zone_code',
         'zone_name',
         'aisle',
@@ -37,5 +38,10 @@ class InventoryZoneBin extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
     }
 }

@@ -12,10 +12,13 @@ class Vendor extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'vendors';
+
     protected $fillable = [
         'company_id',
+        'chart_of_account_id',
         'vendor_code',
         'vendor_name',
+        'short_code',
         'contact_person',
         'email',
         'phone',
@@ -25,6 +28,7 @@ class Vendor extends Model
         'state',
         'postal_code',
         'country_id',
+        'country_label',
         'currency_id',
         'tax_id',
         'tax_registration_number',
@@ -32,7 +36,7 @@ class Vendor extends Model
         'credit_limit',
         'vendor_type',
         'notes',
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [
@@ -40,10 +44,24 @@ class Vendor extends Model
         'credit_limit' => 'decimal:2',
     ];
 
+    protected $appends = [
+        'gl_account_code',
+    ];
+
     // Relationships
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function chartOfAccount(): BelongsTo
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'chart_of_account_id');
+    }
+
+    public function getGlAccountCodeAttribute(): ?string
+    {
+        return $this->chartOfAccount?->account_code;
     }
 
     public function country(): BelongsTo

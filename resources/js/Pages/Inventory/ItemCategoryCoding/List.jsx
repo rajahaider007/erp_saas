@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
-import { Search, Plus, Edit3, Trash2, ArrowUpDown, Clock, RefreshCcw, CheckCircle2, X, Database, ChevronLeft, ChevronRight } from 'lucide-react';
+import Breadcrumbs from '../../../Components/Breadcrumbs';
+import { Search, Plus, Edit3, Trash2, ArrowUpDown, Clock, RefreshCcw, CheckCircle2, X, Database, ChevronLeft, ChevronRight, Home, List as ListIcon } from 'lucide-react';
 
 const CustomAlert = {
   fire: ({ title, text, icon, showCancelButton = false, confirmButtonText = 'OK', cancelButtonText = 'Cancel', onConfirm, onCancel }) => {
@@ -34,6 +35,7 @@ const COLUMN_LABEL_KEYS = {
   categoryCode: 'col_category_code',
   categoryName: 'col_category_name',
   itemClass: 'col_item_class',
+  costingCoa: 'col_costing_coa',
   status: 'col_status',
   updatedAt: 'col_updated_at',
 };
@@ -43,7 +45,6 @@ export default function List() {
   const { t, locale } = useTranslations();
   const tl = useCallback((k, r = {}) => t(`inventory.item_category_coding.list.${k}`, r), [t]);
   const td = useCallback((k, r = {}) => t(`common.data_table.${k}`, r), [t]);
-  const tf = useCallback((k, r = {}) => t(`common.flash.${k}`, r), [t]);
   const ts = useCallback((k) => t(`common.status.${k}`), [t]);
 
   const [loading, setLoading] = useState(false);
@@ -59,18 +60,45 @@ export default function List() {
   const [showColumnSelector, setShowColumnSelector] = useState(false);
 
   const visibleColumnsInit = useMemo(
-    () => ({ id: true, categoryCode: true, categoryName: true, itemClass: true, status: true, updatedAt: true, actions: true }),
+    () => ({
+      id: true,
+      categoryCode: true,
+      categoryName: true,
+      itemClass: true,
+      costingCoa: true,
+      status: true,
+      updatedAt: true,
+      actions: true,
+    }),
     []
   );
-  const [visibleColumns, setVisibleColumns] = useState(visibleColumnsInit);
 
-  useEffect(() => {
-    if (flash?.success) {
-      CustomAlert.fire({ title: tf('success_title'), text: flash.success, icon: 'success', confirmButtonText: tf('great') });
-    } else if (flash?.error) {
-      CustomAlert.fire({ title: tf('error_title'), text: flash.error, icon: 'error', confirmButtonText: tf('ok') });
+  const formatCostingCoaCell = (category) => {
+    const rows = [];
+    if (category.inventory_gl_account?.account_code) {
+      rows.push(`Inv: ${category.inventory_gl_account.account_code}`);
     }
-  }, [flash, tf]);
+    if (category.purchase_gl_account?.account_code) {
+      rows.push(`Pur: ${category.purchase_gl_account.account_code}`);
+    }
+    if (category.cogs_gl_account?.account_code) {
+      rows.push(`COGS: ${category.cogs_gl_account.account_code}`);
+    }
+    if (category.sales_gl_account?.account_code) {
+      rows.push(`Sal: ${category.sales_gl_account.account_code}`);
+    }
+    if (!rows.length) {
+      return '—';
+    }
+    return (
+      <div className="text-xs leading-snug space-y-0.5">
+        {rows.map((line, idx) => (
+          <div key={idx}>{line}</div>
+        ))}
+      </div>
+    );
+  };
+  const [visibleColumns, setVisibleColumns] = useState(visibleColumnsInit);
 
   const pushQuery = (obj) => {
     const params = new URLSearchParams(window.location.search);
@@ -158,9 +186,30 @@ export default function List() {
 
   const dateLoc = locale === 'ur' ? 'ur-PK' : undefined;
 
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
+      { label: pageTitle || tl('page_title_fallback'), icon: ListIcon, href: null },
+    ],
+    [t, pageTitle, tl]
+  );
+
   return (
     <App>
-      <div className="advanced-module-manager">
+      <div className="rounded-xl shadow-lg form-container border-slate-200">
+        <div className="p-6">
+          <Breadcrumbs items={breadcrumbItems} description={t('inventory.shared.list_browse_description')} />
+          {flash?.success && (
+            <div className="alert-success-themed mb-4" role="status">
+              <p className="m-0">{flash.success}</p>
+            </div>
+          )}
+          {flash?.error && (
+            <div className="alert-error-themed mb-4" role="alert">
+              <p className="m-0">{flash.error}</p>
+            </div>
+          )}
+          <div className="advanced-module-manager">
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
@@ -316,6 +365,11 @@ export default function List() {
                       <div className="th-content">{tl('item_class')}</div>
                     </th>
                   )}
+                  {visibleColumns.costingCoa && (
+                    <th>
+                      <div className="th-content">{colLabel('costingCoa')}</div>
+                    </th>
+                  )}
                   {visibleColumns.status && (
                     <th className="sortable" onClick={() => handleSort('is_active')}>
                       <div className="th-content">
@@ -368,6 +422,7 @@ export default function List() {
                     {visibleColumns.itemClass && (
                       <td>{category.item_class ? `${category.item_class.class_code} - ${category.item_class.class_name}` : '-'}</td>
                     )}
+                    {visibleColumns.costingCoa && <td>{formatCostingCoaCell(category)}</td>}
                     {visibleColumns.status && (
                       <td>
                         <span className={`status-badge status-${category.is_active ? 'active' : 'inactive'}`}>
@@ -491,6 +546,8 @@ export default function List() {
               <span>{tl('page_of_total', { total: paginatedCategories.last_page || 1 })}</span>
             </div>
           </div>
+        </div>
+      </div>
         </div>
       </div>
     </App>

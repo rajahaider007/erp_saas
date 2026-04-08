@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
+use App\Models\AccountConfiguration;
 use App\Models\ChartOfAccount;
 use App\Models\Country;
 use App\Models\Currency;
@@ -13,7 +14,6 @@ use App\Models\InventoryPackageType;
 use App\Models\InventoryReasonCode;
 use App\Models\InventoryTemperatureClass;
 use App\Models\InventoryTransporter;
-use App\Models\InventoryWarehouse;
 use App\Models\InventoryZoneBin;
 use App\Models\Location;
 use App\Models\TaxCategory;
@@ -23,34 +23,52 @@ use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class MasterDataController extends Controller
 {
+    /** Master-data keys that create a Level 4 chart_of_accounts row under a chosen Level 3 parent */
+    private const PARTY_MASTERS_WITH_COA = [
+        'vendor-master',
+        'customer-master',
+        'transporter-master',
+    ];
+
     public function list(Request $request, string $master)
     {
         $config = $this->config($master);
         $companyId = $this->companyId($request);
 
-        if (!$config || !$companyId) {
+        if (! $config || ! $companyId) {
             return Inertia::render('Inventory/MasterData/List', [
                 'items' => [],
                 'filters' => [],
                 'config' => $config,
-                'error' => !$companyId ? 'Company information is required.' : 'Invalid master selected.',
+                'error' => ! $companyId ? 'Company information is required.' : 'Invalid master selected.',
             ]);
         }
 
         $query = $config['model']::query()->where('company_id', $companyId);
 
+        if (in_array($master, self::PARTY_MASTERS_WITH_COA, true)) {
+            $query->with(['chartOfAccount:id,account_code']);
+        }
+
+        if ($master === 'zone-bin-master') {
+            $query->with('location:id,location_name');
+        }
+
         if ($request->filled('search')) {
-            $search = '%' . $request->input('search') . '%';
+            $search = '%'.$request->input('search').'%';
             $query->where(function ($q) use ($config, $search) {
                 foreach ($config['search'] as $index => $column) {
                     if ($index === 0) {
                         $q->where($column, 'like', $search);
+
                         continue;
                     }
                     $q->orWhere($column, 'like', $search);
@@ -65,6 +83,14 @@ class MasterDataController extends Controller
         $sortBy = $request->input('sort_by', $config['default_sort'] ?? $config['key_field']);
         $sortOrder = $request->input('sort_order', 'asc');
         $items = $query->orderBy($sortBy, $sortOrder)->paginate(15)->appends($request->query());
+
+        if ($master === 'zone-bin-master') {
+            $items->getCollection()->transform(function ($row) {
+                $row->setAttribute('location_label', $row->location?->location_name ?? '');
+
+                return $row;
+            });
+        }
 
         return Inertia::render('Inventory/MasterData/List', [
             'items' => $items,
@@ -83,10 +109,10 @@ class MasterDataController extends Controller
         $config = $this->config($master);
         $companyId = $this->companyId($request);
 
-        if (!$config || !$companyId) {
+        if (! $config || ! $companyId) {
             return Inertia::render('Inventory/MasterData/Create', [
                 'config' => $config,
-                'error' => !$companyId ? 'Company information is required.' : 'Invalid master selected.',
+                'error' => ! $companyId ? 'Company information is required.' : 'Invalid master selected.',
             ]);
         }
 
@@ -103,11 +129,11 @@ class MasterDataController extends Controller
         $config = $this->config($master);
         $companyId = $this->companyId($request);
 
-        if (!$config || !$companyId) {
+        if (! $config || ! $companyId) {
             return back()->withErrors(['error' => 'Invalid request context.']);
         }
 
-        $validated = $request->validate($this->rules($config, $companyId));
+        $validated = $request->validate($this->rules($config, $companyId, null, $master));
         $validated['company_id'] = $companyId;
 
         if ($master === 'tax-category') {
@@ -127,10 +153,37 @@ class MasterDataController extends Controller
             $validated['updated_by'] = auth()->id();
         }
 
+        if (in_array($master, self::PARTY_MASTERS_WITH_COA, true)) {
+            $this->normalizePartyMasterAttributes($validated);
+            $this->ensurePartyMasterCoaInput($validated, null);
+            $locationId = $this->locationId($request);
+            $coaFields = $this->pullPartyCoaRequestFields($validated);
+            try {
+                DB::beginTransaction();
+                $coa = $this->createPartyChartOfAccount(
+                    $master,
+                    $validated,
+                    $coaFields['level3_parent_id'],
+                    $companyId,
+                    $locationId
+                );
+                $validated['chart_of_account_id'] = $coa->id;
+                $validated[$this->partyCodeFieldForMaster($master)] = $coa->account_code;
+                $config['model']::create($validated);
+                DB::commit();
+            } catch (\Throwable $e) {
+                DB::rollBack();
+                throw $e;
+            }
+
+            return redirect()->route('inventory.master-data.list', ['master' => $master])
+                ->with('success', $config['title'].' created successfully.');
+        }
+
         $config['model']::create($validated);
 
         return redirect()->route('inventory.master-data.list', ['master' => $master])
-            ->with('success', $config['title'] . ' created successfully.');
+            ->with('success', $config['title'].' created successfully.');
     }
 
     public function edit(Request $request, string $master, int $id)
@@ -138,7 +191,7 @@ class MasterDataController extends Controller
         $config = $this->config($master);
         $companyId = $this->companyId($request);
 
-        if (!$config || !$companyId) {
+        if (! $config || ! $companyId) {
             return back()->withErrors(['error' => 'Invalid request context.']);
         }
 
@@ -146,8 +199,37 @@ class MasterDataController extends Controller
             ->where('company_id', $companyId)
             ->find($id);
 
-        if (!$record) {
+        if (! $record) {
             return back()->withErrors(['error' => 'Record not found.']);
+        }
+
+        if (in_array($master, self::PARTY_MASTERS_WITH_COA, true)) {
+            $record->loadMissing([
+                'chartOfAccount:id,account_code,account_name,parent_account_id',
+            ]);
+            if ($record->chartOfAccount) {
+                $record->setAttribute('coa_level3_parent_id', (string) $record->chartOfAccount->parent_account_id);
+                $record->setAttribute('coa_gl_account_code', $record->chartOfAccount->account_code);
+                $codeField = match ($master) {
+                    'vendor-master' => 'vendor_code',
+                    'customer-master' => 'customer_code',
+                    'transporter-master' => 'transporter_code',
+                    default => null,
+                };
+                if ($codeField) {
+                    $existing = trim((string) ($record->{$codeField} ?? ''));
+                    $glCode = trim((string) ($record->chartOfAccount->account_code ?? ''));
+                    if ($glCode !== '' && $existing === '') {
+                        $record->setAttribute($codeField, $glCode);
+                    }
+                }
+            }
+            if ($record->currency_id && empty($record->country_label)) {
+                $cur = Currency::query()->find($record->currency_id);
+                if ($cur?->country) {
+                    $record->setAttribute('country_label', trim((string) $cur->country));
+                }
+            }
         }
 
         return Inertia::render('Inventory/MasterData/Create', [
@@ -163,7 +245,7 @@ class MasterDataController extends Controller
         $config = $this->config($master);
         $companyId = $this->companyId($request);
 
-        if (!$config || !$companyId) {
+        if (! $config || ! $companyId) {
             return back()->withErrors(['error' => 'Invalid request context.']);
         }
 
@@ -171,11 +253,11 @@ class MasterDataController extends Controller
             ->where('company_id', $companyId)
             ->find($id);
 
-        if (!$record) {
+        if (! $record) {
             return back()->withErrors(['error' => 'Record not found.']);
         }
 
-        $validated = $request->validate($this->rules($config, $companyId, $record->id));
+        $validated = $request->validate($this->rules($config, $companyId, $record->id, $master));
 
         if ($master === 'tax-category') {
             $this->applyTaxCategoryRules($validated, $record->id);
@@ -192,10 +274,46 @@ class MasterDataController extends Controller
             $validated['updated_by'] = auth()->id();
         }
 
+        if (in_array($master, self::PARTY_MASTERS_WITH_COA, true)) {
+            $this->normalizePartyMasterAttributes($validated);
+            $this->ensurePartyMasterCoaInput($validated, $record);
+            $locationId = $this->locationId($request);
+            $coaFields = $this->pullPartyCoaRequestFields($validated);
+            $hadLedger = (bool) $record->chart_of_account_id;
+            $partyCodeField = $this->partyCodeFieldForMaster($master);
+            if ($hadLedger) {
+                unset($validated[$partyCodeField]);
+            }
+            try {
+                DB::beginTransaction();
+                if (! $record->chart_of_account_id) {
+                    $coa = $this->createPartyChartOfAccount(
+                        $master,
+                        $validated,
+                        $coaFields['level3_parent_id'],
+                        $companyId,
+                        $locationId
+                    );
+                    $validated['chart_of_account_id'] = $coa->id;
+                    $validated[$partyCodeField] = $coa->account_code;
+                }
+                $record->update($validated);
+                $record->refresh();
+                $this->syncPartyMasterLedgerName($master, $record, $validated, $companyId);
+                DB::commit();
+            } catch (\Throwable $e) {
+                DB::rollBack();
+                throw $e;
+            }
+
+            return redirect()->route('inventory.master-data.list', ['master' => $master])
+                ->with('success', $config['title'].' updated successfully.');
+        }
+
         $record->update($validated);
 
         return redirect()->route('inventory.master-data.list', ['master' => $master])
-            ->with('success', $config['title'] . ' updated successfully.');
+            ->with('success', $config['title'].' updated successfully.');
     }
 
     public function destroy(Request $request, string $master, int $id)
@@ -203,19 +321,51 @@ class MasterDataController extends Controller
         $config = $this->config($master);
         $companyId = $this->companyId($request);
 
-        if (!$config || !$companyId) {
+        if (! $config || ! $companyId) {
             return back()->withErrors(['error' => 'Invalid request context.']);
         }
 
         $record = $config['model']::query()->where('company_id', $companyId)->find($id);
-        if (!$record) {
+        if (! $record) {
             return back()->withErrors(['error' => 'Record not found.']);
         }
 
         $record->delete();
 
         return redirect()->route('inventory.master-data.list', ['master' => $master])
-            ->with('success', $config['title'] . ' deleted successfully.');
+            ->with('success', $config['title'].' deleted successfully.');
+    }
+
+    /**
+     * Next auto Level 4 account code for a Level 3 parent (for party master forms, real-time preview).
+     */
+    public function nextLevel4Preview(Request $request)
+    {
+        $request->validate([
+            'parent_id' => ['required', 'integer', 'exists:chart_of_accounts,id'],
+        ]);
+
+        $companyId = $this->companyId($request);
+        $locationId = $this->locationId($request);
+        if (! $companyId || ! $locationId) {
+            return response()->json(['message' => 'Company and location required.'], 400);
+        }
+
+        $parent = ChartOfAccount::query()
+            ->where('id', $request->integer('parent_id'))
+            ->where('comp_id', $companyId)
+            ->where('location_id', $locationId)
+            ->where('account_level', 3)
+            ->where('status', 'Active')
+            ->first();
+
+        if (! $parent) {
+            return response()->json(['message' => 'Invalid Level 3 account for this company and location.'], 422);
+        }
+
+        return response()->json([
+            'next_code' => $this->nextLevel4AccountCode($parent),
+        ]);
     }
 
     private function companyId(Request $request): ?int
@@ -234,11 +384,11 @@ class MasterDataController extends Controller
             ?? $request->session()->get('user_location_id');
     }
 
-    private function rules(array $config, int $companyId, ?int $id = null): array
+    private function rules(array $config, int $companyId, ?int $id = null, ?string $master = null): array
     {
         $rules = $config['rules'];
 
-        if (!empty($config['unique'])) {
+        if (! empty($config['unique'])) {
             foreach ($config['unique'] as $column) {
                 $rule = Rule::unique($config['table'], $column)
                     ->where(fn ($query) => $query->where('company_id', $companyId)->whereNull('deleted_at'));
@@ -251,42 +401,83 @@ class MasterDataController extends Controller
             }
         }
 
+        if ($master === 'zone-bin-master') {
+            $rules['location_id'] = [
+                'required',
+                'integer',
+                Rule::exists('locations', 'id')->where(fn ($q) => $q->where('company_id', $companyId)),
+            ];
+        }
+
+        // Party / GL code is assigned on the server from the Level 3 parent sequence; ignore client input on create.
+        if ($master && in_array($master, self::PARTY_MASTERS_WITH_COA, true) && ! $id) {
+            foreach (['vendor_code', 'customer_code', 'transporter_code'] as $partyCodeCol) {
+                if (isset($rules[$partyCodeCol])) {
+                    $rules[$partyCodeCol] = ['nullable', 'string', 'max:15'];
+                }
+            }
+        }
+
         return $rules;
     }
 
     private function options(string $master, int $companyId, ?int $locationId): array
     {
         $uomOptions = UomMaster::byCompany($companyId)->active()->get(['id', 'uom_code', 'uom_name'])
-            ->map(fn ($row) => ['value' => (string) $row->id, 'label' => $row->uom_code . ' - ' . $row->uom_name])->values();
+            ->map(fn ($row) => ['value' => (string) $row->id, 'label' => $row->uom_code.' - '.$row->uom_name])->values();
 
         $countryOptions = Country::active()->get(['id', 'country_code', 'country_name'])
-            ->map(fn ($row) => ['value' => (string) $row->id, 'label' => $row->country_code . ' - ' . $row->country_name])->values();
+            ->map(fn ($row) => ['value' => (string) $row->id, 'label' => $row->country_code.' - '.$row->country_name])->values();
 
         $currencyOptions = Currency::active()->get(['id', 'code', 'name'])
-            ->map(fn ($row) => ['value' => (string) $row->id, 'label' => $row->code . ' - ' . $row->name])->values();
+            ->map(fn ($row) => ['value' => (string) $row->id, 'label' => $row->code.' - '.$row->name])->values();
+
+        $currencyCountryMeta = $this->currencyCountryMeta();
 
         $glAccountOptions = ChartOfAccount::query()
             ->where('comp_id', $companyId)
             ->when($locationId, fn ($q) => $q->where('location_id', $locationId))
-            ->where('status', true)
+            ->where('status', 'Active')
+            ->orderBy('account_code')
             ->get(['id', 'account_code', 'account_name'])
-            ->map(fn ($row) => ['value' => (string) $row->id, 'label' => $row->account_code . ' - ' . $row->account_name])->values();
+            ->map(fn ($row) => ['value' => (string) $row->id, 'label' => $row->account_code.' - '.$row->account_name])->values();
 
-        $warehouseOptions = InventoryWarehouse::byCompany($companyId)->active()->get(['id', 'warehouse_code', 'warehouse_name'])
-            ->map(fn ($row) => ['value' => (string) $row->id, 'label' => $row->warehouse_code . ' - ' . $row->warehouse_name])->values();
+        $fallbackLevel3 = $this->allActiveLevel3ChartOptions($companyId, $locationId);
+
+        $level3VendorChartOptions = $this->level3OptionsFromAccountConfiguration($companyId, $locationId, ['accounts_payable']);
+        if ($level3VendorChartOptions->isEmpty()) {
+            $level3VendorChartOptions = $fallbackLevel3;
+        }
+
+        $level3CustomerChartOptions = $this->level3OptionsFromAccountConfiguration($companyId, $locationId, ['accounts_receivable']);
+        if ($level3CustomerChartOptions->isEmpty()) {
+            $level3CustomerChartOptions = $fallbackLevel3;
+        }
+
+        $level3TransporterChartOptions = $this->level3OptionsFromAccountConfiguration($companyId, $locationId, ['accrued_expense']);
+        if ($level3TransporterChartOptions->isEmpty()) {
+            $level3TransporterChartOptions = $this->level3OptionsFromAccountConfiguration($companyId, $locationId, ['accounts_payable']);
+        }
+        if ($level3TransporterChartOptions->isEmpty()) {
+            $level3TransporterChartOptions = $fallbackLevel3;
+        }
 
         $locationOptions = Location::where('company_id', $companyId)->where('status', true)->get(['id', 'location_name'])
             ->map(fn ($row) => ['value' => (string) $row->id, 'label' => $row->location_name])->values();
 
         $taxCategoryOptions = TaxCategory::byCompany($companyId)->active()->get(['id', 'tax_code', 'tax_name'])
-            ->map(fn ($row) => ['value' => (string) $row->id, 'label' => $row->tax_code . ' - ' . $row->tax_name])->values();
+            ->map(fn ($row) => ['value' => (string) $row->id, 'label' => $row->tax_code.' - '.$row->tax_name])->values();
 
         return [
             'uomOptions' => $uomOptions,
             'countryOptions' => $countryOptions,
             'currencyOptions' => $currencyOptions,
+            'currencyCountryOptions' => $currencyCountryMeta['currencyCountryOptions'],
+            'currencyDefaultByCountry' => $currencyCountryMeta['currencyDefaultByCountry'],
             'glAccountOptions' => $glAccountOptions,
-            'warehouseOptions' => $warehouseOptions,
+            'level3VendorChartOptions' => $level3VendorChartOptions,
+            'level3CustomerChartOptions' => $level3CustomerChartOptions,
+            'level3TransporterChartOptions' => $level3TransporterChartOptions,
             'locationOptions' => $locationOptions,
             'taxCategoryOptions' => $taxCategoryOptions,
             'taxTypeOptions' => [
@@ -327,11 +518,6 @@ class MasterDataController extends Controller
                 ['value' => 'local', 'label' => 'Local'],
                 ['value' => 'import', 'label' => 'Import'],
             ],
-            'warehouseTypeOptions' => [
-                ['value' => 'main', 'label' => 'Main'],
-                ['value' => 'transit', 'label' => 'Transit'],
-                ['value' => 'quarantine', 'label' => 'Quarantine'],
-            ],
             'reasonTypeOptions' => [
                 ['value' => 'adjustment', 'label' => 'Adjustment'],
                 ['value' => 'return', 'label' => 'Return'],
@@ -353,6 +539,40 @@ class MasterDataController extends Controller
                 ['value' => 'QR', 'label' => 'QR'],
                 ['value' => 'Code128', 'label' => 'Code128'],
             ],
+        ];
+    }
+
+    /**
+     * Distinct country names from the currencies table (with default currency id per country for forms).
+     *
+     * @return array{currencyCountryOptions: list<array{value: string, label: string}>, currencyDefaultByCountry: array<string, string>}
+     */
+    private function currencyCountryMeta(): array
+    {
+        $rows = Currency::active()
+            ->whereNotNull('country')
+            ->where('country', '!=', '')
+            ->orderBy('sort_order')
+            ->orderBy('code')
+            ->get(['id', 'country']);
+
+        $defaultByCountry = [];
+        $options = [];
+
+        foreach ($rows as $row) {
+            $country = trim((string) $row->country);
+            if ($country === '') {
+                continue;
+            }
+            if (! array_key_exists($country, $defaultByCountry)) {
+                $defaultByCountry[$country] = (string) $row->id;
+                $options[] = ['value' => $country, 'label' => $country];
+            }
+        }
+
+        return [
+            'currencyCountryOptions' => $options,
+            'currencyDefaultByCountry' => $defaultByCountry,
         ];
     }
 
@@ -490,11 +710,13 @@ class MasterDataController extends Controller
                 'table' => 'vendors',
                 'key_field' => 'vendor_code',
                 'name_field' => 'vendor_name',
-                'search' => ['vendor_code', 'vendor_name', 'contact_person', 'email'],
+                'search' => ['vendor_code', 'short_code', 'vendor_name', 'contact_person', 'email'],
                 'default_sort' => 'vendor_code',
                 'unique' => ['vendor_code'],
                 'rules' => [
-                    'vendor_code' => ['required', 'string', 'max:20'],
+                    'coa_level3_parent_id' => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
+                    'vendor_code' => ['required', 'string', 'max:15'],
+                    'short_code' => ['nullable', 'string', 'max:30'],
                     'vendor_name' => ['required', 'string', 'max:150'],
                     'contact_person' => ['nullable', 'string', 'max:100'],
                     'phone' => ['nullable', 'string', 'max:20'],
@@ -506,58 +728,28 @@ class MasterDataController extends Controller
                     'bank_details' => ['nullable', 'string'],
                     'credit_limit' => ['nullable', 'numeric', 'min:0'],
                     'vendor_type' => ['required', Rule::in(['local', 'import'])],
-                    'country_id' => ['nullable', 'exists:countries,id'],
+                    'country_label' => ['nullable', 'string', 'max:150'],
                     'is_active' => ['nullable', 'boolean'],
                 ],
                 'fields' => [
-                    ['name' => 'vendor_code', 'label' => 'Vendor Code', 'type' => 'text', 'required' => true],
-                    ['name' => 'vendor_name', 'label' => 'Vendor Name', 'type' => 'text', 'required' => true],
-                    ['name' => 'contact_person', 'label' => 'Contact Person', 'type' => 'text'],
-                    ['name' => 'phone', 'label' => 'Phone', 'type' => 'text'],
-                    ['name' => 'email', 'label' => 'Email', 'type' => 'email'],
-                    ['name' => 'address', 'label' => 'Address', 'type' => 'textarea'],
-                    ['name' => 'payment_terms', 'label' => 'Payment Terms', 'type' => 'text'],
-                    ['name' => 'currency_id', 'label' => 'Currency', 'type' => 'select', 'optionsKey' => 'currencyOptions'],
-                    ['name' => 'tax_registration_number', 'label' => 'Tax Registration Number', 'type' => 'text'],
-                    ['name' => 'bank_details', 'label' => 'Bank Details', 'type' => 'textarea'],
-                    ['name' => 'credit_limit', 'label' => 'Credit Limit', 'type' => 'number'],
-                    ['name' => 'vendor_type', 'label' => 'Vendor Type', 'type' => 'select', 'required' => true, 'optionsKey' => 'vendorTypeOptions'],
-                    ['name' => 'country_id', 'label' => 'Country', 'type' => 'select', 'optionsKey' => 'countryOptions'],
-                    ['name' => 'is_active', 'label' => 'Status', 'type' => 'toggle'],
+                    ['name' => 'coa_level3_parent_id', 'label' => 'Payable — Level 3 parent (from Account Configuration)', 'type' => 'select', 'required' => true, 'searchable' => true, 'optionsKey' => 'level3VendorChartOptions', 'section' => 'Chart of accounts', 'placeholder' => 'Select Level 3 parent'],
+                    ['name' => 'vendor_code', 'label' => 'Vendor / GL account code', 'type' => 'text', 'required' => false, 'placeholder' => 'Auto-assigned from Level 3 parent', 'inputTitle' => 'Generated automatically as the next Level 4 code under the selected parent. Same value is saved on the vendor and in Chart of Accounts.', 'section' => 'Chart of accounts'],
+                    ['name' => 'short_code', 'label' => 'Short code', 'type' => 'text', 'placeholder' => 'Optional', 'section' => 'Identity'],
+                    ['name' => 'vendor_name', 'label' => 'Vendor name (legal)', 'type' => 'text', 'required' => true, 'section' => 'Identity'],
+                    ['name' => 'contact_person', 'label' => 'Primary contact person', 'type' => 'text', 'section' => 'Contact'],
+                    ['name' => 'phone', 'label' => 'Phone', 'type' => 'text', 'section' => 'Contact'],
+                    ['name' => 'email', 'label' => 'Email', 'type' => 'email', 'section' => 'Contact'],
+                    ['name' => 'address', 'label' => 'Address', 'type' => 'textarea', 'section' => 'Contact'],
+                    ['name' => 'country_label', 'label' => 'Country (from currencies)', 'type' => 'select', 'searchable' => true, 'optionsKey' => 'currencyCountryOptions', 'section' => 'Commercial', 'placeholder' => 'Select country'],
+                    ['name' => 'currency_id', 'label' => 'Currency', 'type' => 'select', 'optionsKey' => 'currencyOptions', 'section' => 'Commercial', 'placeholder' => 'Select currency'],
+                    ['name' => 'payment_terms', 'label' => 'Payment terms', 'type' => 'text', 'section' => 'Commercial'],
+                    ['name' => 'vendor_type', 'label' => 'Vendor type', 'type' => 'select', 'required' => true, 'optionsKey' => 'vendorTypeOptions', 'section' => 'Commercial', 'placeholder' => 'Select type'],
+                    ['name' => 'tax_registration_number', 'label' => 'Tax registration number', 'type' => 'text', 'section' => 'Commercial'],
+                    ['name' => 'bank_details', 'label' => 'Bank details', 'type' => 'textarea', 'section' => 'Commercial'],
+                    ['name' => 'credit_limit', 'label' => 'Credit limit', 'type' => 'number', 'section' => 'Commercial'],
+                    ['name' => 'is_active', 'label' => 'Status', 'type' => 'toggle', 'section' => 'Commercial'],
                 ],
-                'list_columns' => ['vendor_code' => 'Vendor Code', 'vendor_name' => 'Vendor Name', 'vendor_type' => 'Type'],
-            ],
-            'warehouse-master' => [
-                'key' => 'warehouse-master',
-                'title' => 'Warehouse / Location Master',
-                'model' => InventoryWarehouse::class,
-                'table' => 'inventory_warehouses',
-                'key_field' => 'warehouse_code',
-                'name_field' => 'warehouse_name',
-                'search' => ['warehouse_code', 'warehouse_name', 'warehouse_type'],
-                'default_sort' => 'warehouse_code',
-                'unique' => ['warehouse_code'],
-                'rules' => [
-                    'warehouse_code' => ['required', 'string', 'max:30'],
-                    'warehouse_name' => ['required', 'string', 'max:150'],
-                    'location_id' => ['nullable', 'exists:locations,id'],
-                    'address' => ['nullable', 'string'],
-                    'warehouse_type' => ['required', 'string', 'max:40'],
-                    'storage_temperature_class' => ['nullable', 'string', 'max:50'],
-                    'capacity' => ['nullable', 'numeric', 'min:0'],
-                    'is_active' => ['nullable', 'boolean'],
-                ],
-                'fields' => [
-                    ['name' => 'warehouse_code', 'label' => 'Warehouse Code', 'type' => 'text', 'required' => true],
-                    ['name' => 'warehouse_name', 'label' => 'Warehouse Name', 'type' => 'text', 'required' => true],
-                    ['name' => 'location_id', 'label' => 'Company/Branch', 'type' => 'select', 'optionsKey' => 'locationOptions'],
-                    ['name' => 'address', 'label' => 'Address', 'type' => 'textarea'],
-                    ['name' => 'warehouse_type', 'label' => 'Warehouse Type', 'type' => 'select', 'required' => true, 'optionsKey' => 'warehouseTypeOptions'],
-                    ['name' => 'storage_temperature_class', 'label' => 'Storage Temperature Class', 'type' => 'text'],
-                    ['name' => 'capacity', 'label' => 'Capacity', 'type' => 'number'],
-                    ['name' => 'is_active', 'label' => 'Status', 'type' => 'toggle'],
-                ],
-                'list_columns' => ['warehouse_code' => 'Warehouse Code', 'warehouse_name' => 'Warehouse Name', 'warehouse_type' => 'Type'],
+                'list_columns' => ['vendor_code' => 'Vendor Code', 'short_code' => 'Short', 'vendor_name' => 'Vendor Name', 'gl_account_code' => 'GL Code', 'vendor_type' => 'Type'],
             ],
             'zone-bin-master' => [
                 'key' => 'zone-bin-master',
@@ -570,7 +762,7 @@ class MasterDataController extends Controller
                 'default_sort' => 'zone_code',
                 'unique' => [],
                 'rules' => [
-                    'warehouse_id' => ['required', 'exists:inventory_warehouses,id'],
+                    'location_id' => ['required', 'integer'],
                     'zone_code' => ['required', 'string', 'max:30'],
                     'zone_name' => ['required', 'string', 'max:120'],
                     'aisle' => ['nullable', 'string', 'max:40'],
@@ -580,7 +772,7 @@ class MasterDataController extends Controller
                     'is_active' => ['nullable', 'boolean'],
                 ],
                 'fields' => [
-                    ['name' => 'warehouse_id', 'label' => 'Warehouse Link', 'type' => 'select', 'required' => true, 'optionsKey' => 'warehouseOptions'],
+                    ['name' => 'location_id', 'label' => 'Branch / location', 'type' => 'select', 'required' => true, 'optionsKey' => 'locationOptions', 'searchable' => true],
                     ['name' => 'zone_code', 'label' => 'Zone Code', 'type' => 'text', 'required' => true],
                     ['name' => 'zone_name', 'label' => 'Zone Name', 'type' => 'text', 'required' => true],
                     ['name' => 'aisle', 'label' => 'Aisle', 'type' => 'text'],
@@ -589,7 +781,7 @@ class MasterDataController extends Controller
                     ['name' => 'temperature_class', 'label' => 'Temperature Class', 'type' => 'text'],
                     ['name' => 'is_active', 'label' => 'Status', 'type' => 'toggle'],
                 ],
-                'list_columns' => ['zone_code' => 'Zone Code', 'zone_name' => 'Zone Name', 'bin_code' => 'Bin Code'],
+                'list_columns' => ['location_label' => 'Branch / location', 'zone_code' => 'Zone Code', 'zone_name' => 'Zone Name', 'bin_code' => 'Bin Code'],
             ],
             'country-master' => [
                 'key' => 'country-master',
@@ -712,28 +904,36 @@ class MasterDataController extends Controller
                 'table' => 'inventory_transporters',
                 'key_field' => 'transporter_code',
                 'name_field' => 'transporter_name',
-                'search' => ['transporter_code', 'transporter_name', 'service_area'],
+                'search' => ['transporter_code', 'short_code', 'transporter_name', 'service_area'],
                 'default_sort' => 'transporter_code',
                 'unique' => ['transporter_code'],
                 'rules' => [
-                    'transporter_code' => ['required', 'string', 'max:30'],
+                    'coa_level3_parent_id' => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
+                    'transporter_code' => ['required', 'string', 'max:15'],
+                    'short_code' => ['nullable', 'string', 'max:30'],
                     'transporter_name' => ['required', 'string', 'max:150'],
                     'contact_details' => ['nullable', 'string', 'max:255'],
                     'vehicle_types' => ['nullable', 'string', 'max:255'],
                     'service_area' => ['nullable', 'string', 'max:255'],
+                    'country_label' => ['nullable', 'string', 'max:150'],
+                    'currency_id' => ['nullable', 'exists:currencies,id'],
                     'rating' => ['nullable', 'numeric', 'min:0', 'max:5'],
                     'is_active' => ['nullable', 'boolean'],
                 ],
                 'fields' => [
-                    ['name' => 'transporter_code', 'label' => 'Transporter Code', 'type' => 'text', 'required' => true],
-                    ['name' => 'transporter_name', 'label' => 'Transporter Name', 'type' => 'text', 'required' => true],
-                    ['name' => 'contact_details', 'label' => 'Contact Details', 'type' => 'textarea'],
-                    ['name' => 'vehicle_types', 'label' => 'Vehicle Types', 'type' => 'text'],
-                    ['name' => 'service_area', 'label' => 'Service Area', 'type' => 'text'],
-                    ['name' => 'rating', 'label' => 'Rating', 'type' => 'number'],
-                    ['name' => 'is_active', 'label' => 'Status', 'type' => 'toggle'],
+                    ['name' => 'coa_level3_parent_id', 'label' => 'Accrued / Payable — Level 3 parent (from Account Configuration)', 'type' => 'select', 'required' => true, 'searchable' => true, 'optionsKey' => 'level3TransporterChartOptions', 'section' => 'Chart of accounts', 'placeholder' => 'Select Level 3 parent'],
+                    ['name' => 'transporter_code', 'label' => 'Transporter / GL account code', 'type' => 'text', 'required' => false, 'placeholder' => 'Auto-assigned from Level 3 parent', 'inputTitle' => 'Generated automatically as the next Level 4 code under the selected parent.', 'section' => 'Chart of accounts'],
+                    ['name' => 'short_code', 'label' => 'Short code', 'type' => 'text', 'placeholder' => 'Optional', 'section' => 'Identity'],
+                    ['name' => 'transporter_name', 'label' => 'Transporter name', 'type' => 'text', 'required' => true, 'section' => 'Identity'],
+                    ['name' => 'contact_details', 'label' => 'Contact details', 'type' => 'textarea', 'section' => 'Contact & operations'],
+                    ['name' => 'vehicle_types', 'label' => 'Vehicle types', 'type' => 'text', 'section' => 'Contact & operations'],
+                    ['name' => 'service_area', 'label' => 'Service area', 'type' => 'text', 'section' => 'Contact & operations'],
+                    ['name' => 'country_label', 'label' => 'Country (from currencies)', 'type' => 'select', 'searchable' => true, 'optionsKey' => 'currencyCountryOptions', 'section' => 'Commercial', 'placeholder' => 'Select country'],
+                    ['name' => 'currency_id', 'label' => 'Currency', 'type' => 'select', 'optionsKey' => 'currencyOptions', 'section' => 'Commercial', 'placeholder' => 'Select currency'],
+                    ['name' => 'rating', 'label' => 'Rating', 'type' => 'number', 'section' => 'Commercial'],
+                    ['name' => 'is_active', 'label' => 'Status', 'type' => 'toggle', 'section' => 'Commercial'],
                 ],
-                'list_columns' => ['transporter_code' => 'Code', 'transporter_name' => 'Transporter Name', 'rating' => 'Rating'],
+                'list_columns' => ['transporter_code' => 'Code', 'short_code' => 'Short', 'transporter_name' => 'Transporter Name', 'gl_account_code' => 'GL Code', 'rating' => 'Rating'],
             ],
             'customer-master' => [
                 'key' => 'customer-master',
@@ -742,32 +942,36 @@ class MasterDataController extends Controller
                 'table' => 'inventory_customers',
                 'key_field' => 'customer_code',
                 'name_field' => 'customer_name',
-                'search' => ['customer_code', 'customer_name', 'contact_details'],
+                'search' => ['customer_code', 'short_code', 'customer_name', 'contact_details'],
                 'default_sort' => 'customer_code',
                 'unique' => ['customer_code'],
                 'rules' => [
-                    'customer_code' => ['required', 'string', 'max:30'],
+                    'coa_level3_parent_id' => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
+                    'customer_code' => ['required', 'string', 'max:15'],
+                    'short_code' => ['nullable', 'string', 'max:30'],
                     'customer_name' => ['required', 'string', 'max:150'],
                     'contact_details' => ['nullable', 'string', 'max:255'],
                     'credit_limit' => ['nullable', 'numeric', 'min:0'],
                     'payment_terms' => ['nullable', 'string', 'max:100'],
                     'tax_registration' => ['nullable', 'string', 'max:100'],
-                    'country_id' => ['nullable', 'exists:countries,id'],
+                    'country_label' => ['nullable', 'string', 'max:150'],
                     'currency_id' => ['nullable', 'exists:currencies,id'],
                     'is_active' => ['nullable', 'boolean'],
                 ],
                 'fields' => [
-                    ['name' => 'customer_code', 'label' => 'Customer Code', 'type' => 'text', 'required' => true],
-                    ['name' => 'customer_name', 'label' => 'Customer Name', 'type' => 'text', 'required' => true],
-                    ['name' => 'contact_details', 'label' => 'Contact Details', 'type' => 'textarea'],
-                    ['name' => 'credit_limit', 'label' => 'Credit Limit', 'type' => 'number'],
-                    ['name' => 'payment_terms', 'label' => 'Payment Terms', 'type' => 'text'],
-                    ['name' => 'tax_registration', 'label' => 'Tax Registration', 'type' => 'text'],
-                    ['name' => 'country_id', 'label' => 'Country', 'type' => 'select', 'optionsKey' => 'countryOptions'],
-                    ['name' => 'currency_id', 'label' => 'Currency', 'type' => 'select', 'optionsKey' => 'currencyOptions'],
-                    ['name' => 'is_active', 'label' => 'Status', 'type' => 'toggle'],
+                    ['name' => 'coa_level3_parent_id', 'label' => 'Receivable — Level 3 parent (from Account Configuration)', 'type' => 'select', 'required' => true, 'searchable' => true, 'optionsKey' => 'level3CustomerChartOptions', 'section' => 'Chart of accounts', 'placeholder' => 'Select Level 3 parent'],
+                    ['name' => 'customer_code', 'label' => 'Customer / GL account code', 'type' => 'text', 'required' => false, 'placeholder' => 'Auto-assigned from Level 3 parent', 'inputTitle' => 'Generated automatically as the next Level 4 code under the selected parent.', 'section' => 'Chart of accounts'],
+                    ['name' => 'short_code', 'label' => 'Short code', 'type' => 'text', 'placeholder' => 'Optional', 'section' => 'Identity'],
+                    ['name' => 'customer_name', 'label' => 'Customer name', 'type' => 'text', 'required' => true, 'section' => 'Identity'],
+                    ['name' => 'contact_details', 'label' => 'Contact details', 'type' => 'textarea', 'section' => 'Contact'],
+                    ['name' => 'country_label', 'label' => 'Country (from currencies)', 'type' => 'select', 'searchable' => true, 'optionsKey' => 'currencyCountryOptions', 'section' => 'Commercial', 'placeholder' => 'Select country'],
+                    ['name' => 'currency_id', 'label' => 'Currency', 'type' => 'select', 'optionsKey' => 'currencyOptions', 'section' => 'Commercial', 'placeholder' => 'Select currency'],
+                    ['name' => 'credit_limit', 'label' => 'Credit limit', 'type' => 'number', 'section' => 'Commercial'],
+                    ['name' => 'payment_terms', 'label' => 'Payment terms', 'type' => 'text', 'section' => 'Commercial'],
+                    ['name' => 'tax_registration', 'label' => 'Tax registration', 'type' => 'text', 'section' => 'Commercial'],
+                    ['name' => 'is_active', 'label' => 'Status', 'type' => 'toggle', 'section' => 'Commercial'],
                 ],
-                'list_columns' => ['customer_code' => 'Customer Code', 'customer_name' => 'Customer Name', 'credit_limit' => 'Credit Limit'],
+                'list_columns' => ['customer_code' => 'Customer Code', 'short_code' => 'Short', 'customer_name' => 'Customer Name', 'gl_account_code' => 'GL Code', 'credit_limit' => 'Credit Limit'],
             ],
             'package-type-master' => [
                 'key' => 'package-type-master',
@@ -830,6 +1034,317 @@ class MasterDataController extends Controller
         return $configs[$master] ?? null;
     }
 
+    /**
+     * @return \Illuminate\Support\Collection<int, array{value: string, label: string}>
+     */
+    private function allActiveLevel3ChartOptions(int $companyId, ?int $locationId)
+    {
+        return ChartOfAccount::query()
+            ->where('comp_id', $companyId)
+            ->when($locationId, fn ($q) => $q->where('location_id', $locationId))
+            ->where('account_level', 3)
+            ->where('status', 'Active')
+            ->orderBy('account_code')
+            ->get(['id', 'account_code', 'account_name'])
+            ->map(fn ($row) => [
+                'value' => (string) $row->id,
+                'label' => $row->account_code.' - '.$row->account_name,
+            ])
+            ->values();
+    }
+
+    /**
+     * Level 3 accounts registered in account_configurations for the given config types (e.g. accounts_payable).
+     *
+     * @param  list<string>  $configTypes
+     * @return \Illuminate\Support\Collection<int, array{value: string, label: string}>
+     */
+    private function level3OptionsFromAccountConfiguration(int $companyId, ?int $locationId, array $configTypes)
+    {
+        if (! $locationId || $configTypes === [] || ! Schema::hasTable('account_configurations')) {
+            return collect();
+        }
+
+        return AccountConfiguration::query()
+            ->active()
+            ->byCompanyAndLocation($companyId, $locationId)
+            ->whereIn('config_type', $configTypes)
+            ->where('account_level', 3)
+            ->whereNotNull('account_id')
+            ->whereHas('chartAccount', function ($q) use ($companyId, $locationId) {
+                $q->where('comp_id', $companyId)
+                    ->where('location_id', $locationId)
+                    ->where('account_level', 3)
+                    ->where('status', 'Active');
+            })
+            ->with(['chartAccount:id,account_code,account_name'])
+            ->orderBy('account_code')
+            ->get()
+            ->map(function (AccountConfiguration $row) {
+                $coa = $row->chartAccount;
+
+                return [
+                    'value' => (string) $row->account_id,
+                    'label' => ($coa?->account_code ?? $row->account_code).' - '.($coa?->account_name ?? $row->account_name),
+                ];
+            })
+            ->unique('value')
+            ->values();
+    }
+
+    /** @return list<string> */
+    private function accountConfigTypesForPartyMaster(string $master): array
+    {
+        return match ($master) {
+            'vendor-master' => ['accounts_payable'],
+            'customer-master' => ['accounts_receivable'],
+            'transporter-master' => ['accrued_expense', 'accounts_payable'],
+            default => [],
+        };
+    }
+
+    private function assertLevel3AllowedForPartyMaster(
+        ChartOfAccount $level3,
+        int $companyId,
+        int $locationId,
+        string $master
+    ): void {
+        $types = $this->accountConfigTypesForPartyMaster($master);
+        if ($types === [] || ! Schema::hasTable('account_configurations')) {
+            return;
+        }
+
+        $configured = AccountConfiguration::query()
+            ->active()
+            ->byCompanyAndLocation($companyId, $locationId)
+            ->whereIn('config_type', $types)
+            ->where('account_level', 3)
+            ->exists();
+
+        if (! $configured) {
+            return;
+        }
+
+        $allowed = AccountConfiguration::query()
+            ->active()
+            ->byCompanyAndLocation($companyId, $locationId)
+            ->whereIn('config_type', $types)
+            ->where('account_level', 3)
+            ->where('account_id', $level3->id)
+            ->exists();
+
+        if (! $allowed) {
+            throw ValidationException::withMessages([
+                'coa_level3_parent_id' => 'This Level 3 account is not allowed for this party type in Account Configuration.',
+            ]);
+        }
+    }
+
+    private function normalizePartyMasterAttributes(array &$validated): void
+    {
+        $validated['short_code'] = isset($validated['short_code']) && trim((string) $validated['short_code']) !== ''
+            ? trim((string) $validated['short_code'])
+            : null;
+        $validated['country_label'] = isset($validated['country_label']) && trim((string) $validated['country_label']) !== ''
+            ? trim((string) $validated['country_label'])
+            : null;
+    }
+
+    private function ensurePartyMasterCoaInput(array $validated, $record): void
+    {
+        $hasLedger = $record && (int) $record->chart_of_account_id > 0;
+        if ($hasLedger) {
+            return;
+        }
+        if (empty($validated['coa_level3_parent_id'])) {
+            throw ValidationException::withMessages([
+                'coa_level3_parent_id' => 'Select a Level 3 Chart of Account parent. A Level 4 ledger account will be created under it.',
+            ]);
+        }
+    }
+
+    /**
+     * @return array{level3_parent_id: ?int}
+     */
+    private function pullPartyCoaRequestFields(array &$validated): array
+    {
+        $level3 = isset($validated['coa_level3_parent_id']) && $validated['coa_level3_parent_id'] !== ''
+            ? (int) $validated['coa_level3_parent_id']
+            : null;
+        unset($validated['coa_level3_parent_id'], $validated['coa_gl_account_code']);
+
+        return [
+            'level3_parent_id' => $level3,
+        ];
+    }
+
+    private function partyCodeFieldForMaster(string $master): string
+    {
+        return match ($master) {
+            'vendor-master' => 'vendor_code',
+            'customer-master' => 'customer_code',
+            'transporter-master' => 'transporter_code',
+            default => 'vendor_code',
+        };
+    }
+
+    private function partyDisplayNameForMaster(string $master, array $validated): string
+    {
+        return match ($master) {
+            'vendor-master' => (string) ($validated['vendor_name'] ?? ''),
+            'customer-master' => (string) ($validated['customer_name'] ?? ''),
+            'transporter-master' => (string) ($validated['transporter_name'] ?? ''),
+            default => 'Party',
+        };
+    }
+
+    private function partyLedgerShortCodeForMaster(string $master, array $validated): string
+    {
+        $explicit = trim((string) ($validated['short_code'] ?? ''));
+        if ($explicit !== '') {
+            $clean = preg_replace('/[^A-Za-z0-9]/', '', $explicit);
+
+            return $clean !== '' ? $clean : 'PARTY';
+        }
+
+        $raw = match ($master) {
+            'vendor-master' => (string) ($validated['vendor_code'] ?? ''),
+            'customer-master' => (string) ($validated['customer_code'] ?? ''),
+            'transporter-master' => (string) ($validated['transporter_code'] ?? ''),
+            default => 'PARTY',
+        };
+
+        return preg_replace('/[^A-Za-z0-9]/', '', $raw) ?: 'PARTY';
+    }
+
+    /**
+     * Ledger short_code on create: optional explicit short_code, else derived from generated account code.
+     */
+    private function partyLedgerShortCodeForPartyCreate(array $validated, string $accountCode): string
+    {
+        $explicit = trim((string) ($validated['short_code'] ?? ''));
+        if ($explicit !== '') {
+            $clean = preg_replace('/[^A-Za-z0-9]/', '', $explicit);
+
+            return $clean !== '' ? $clean : 'PARTY';
+        }
+
+        $raw = preg_replace('/[^A-Za-z0-9]/', '', $accountCode);
+
+        return $raw !== '' ? $raw : 'PARTY';
+    }
+
+    private function resolveLevel3ChartParent(int $level3Id, int $companyId, int $locationId): ChartOfAccount
+    {
+        $acct = ChartOfAccount::query()
+            ->where('id', $level3Id)
+            ->where('comp_id', $companyId)
+            ->where('location_id', $locationId)
+            ->where('account_level', 3)
+            ->where('status', 'Active')
+            ->first();
+
+        if (! $acct) {
+            throw ValidationException::withMessages([
+                'coa_level3_parent_id' => 'The selected account is not a valid Level 3 Chart of Account for this company and location.',
+            ]);
+        }
+
+        return $acct;
+    }
+
+    private function nextLevel4AccountCode(ChartOfAccount $level3): string
+    {
+        $code = (string) $level3->account_code;
+        $prefix = strlen($code) >= 9 ? substr($code, 0, 9) : str_pad($code, 9, '0', STR_PAD_RIGHT);
+
+        $maxSuffix = (int) ChartOfAccount::query()
+            ->where('parent_account_id', $level3->id)
+            ->where('account_level', 4)
+            ->pluck('account_code')
+            ->map(fn ($c) => (int) substr((string) $c, -6))
+            ->max();
+
+        return $prefix.str_pad((string) ($maxSuffix + 1), 6, '0', STR_PAD_LEFT);
+    }
+
+    private function createPartyChartOfAccount(
+        string $master,
+        array $validated,
+        ?int $level3Id,
+        int $companyId,
+        ?int $locationId
+    ): ChartOfAccount {
+        if (! $level3Id) {
+            throw ValidationException::withMessages([
+                'coa_level3_parent_id' => 'Level 3 Chart of Account parent is required.',
+            ]);
+        }
+        if (! $locationId) {
+            throw ValidationException::withMessages([
+                'coa_level3_parent_id' => 'Location is required to create a Chart of Account code.',
+            ]);
+        }
+
+        $level3 = $this->resolveLevel3ChartParent($level3Id, $companyId, $locationId);
+        $this->assertLevel3AllowedForPartyMaster($level3, $companyId, $locationId, $master);
+        $codeField = $this->partyCodeFieldForMaster($master);
+        $accountCode = $this->nextLevel4AccountCode($level3);
+
+        if (strlen($accountCode) > 15) {
+            throw ValidationException::withMessages([
+                $codeField => 'Generated account code exceeds Chart of Accounts length limit.',
+            ]);
+        }
+
+        if (ChartOfAccount::where('account_code', $accountCode)->exists()) {
+            throw ValidationException::withMessages([
+                $codeField => 'The next sequence code already exists in Chart of Accounts. Refresh and try again.',
+            ]);
+        }
+
+        $partyName = $this->partyDisplayNameForMaster($master, $validated);
+        $shortCode = $this->partyLedgerShortCodeForPartyCreate($validated, $accountCode);
+
+        return ChartOfAccount::create([
+            'account_code' => $accountCode,
+            'account_name' => Str::limit($partyName, 100, ''),
+            'account_type' => $level3->account_type,
+            'parent_account_id' => $level3->id,
+            'account_level' => 4,
+            'is_transactional' => true,
+            'currency' => $level3->currency ?? 'PKR',
+            'status' => 'Active',
+            'short_code' => Str::limit($shortCode, 20, ''),
+            'comp_id' => $companyId,
+            'location_id' => $locationId,
+        ]);
+    }
+
+    private function syncPartyMasterLedgerName(string $master, $record, array $validated, int $companyId): void
+    {
+        if (! $record->chart_of_account_id) {
+            return;
+        }
+        $name = $this->partyDisplayNameForMaster($master, $validated);
+        $updates = [];
+        if ($name !== '') {
+            $updates['account_name'] = Str::limit($name, 100, '');
+        }
+        $short = $this->partyLedgerShortCodeForMaster($master, $validated);
+        if ($short !== '' && $short !== 'PARTY') {
+            $updates['short_code'] = Str::limit($short, 20, '');
+        }
+        if ($updates === []) {
+            return;
+        }
+        ChartOfAccount::query()
+            ->where('id', $record->chart_of_account_id)
+            ->where('comp_id', $companyId)
+            ->where('account_level', 4)
+            ->update($updates);
+    }
+
     private function applyTaxCategoryRules(array &$validated, ?int $recordId = null): void
     {
         $validated['tax_code'] = strtoupper(trim($validated['tax_code']));
@@ -840,11 +1355,11 @@ class MasterDataController extends Controller
             ]);
         }
 
-        if (!($validated['is_compound_tax'] ?? false)) {
+        if (! ($validated['is_compound_tax'] ?? false)) {
             $validated['compound_base_tax_category_id'] = null;
         }
 
-        if (!empty($validated['compound_base_tax_category_id']) && $recordId && (int) $validated['compound_base_tax_category_id'] === $recordId) {
+        if (! empty($validated['compound_base_tax_category_id']) && $recordId && (int) $validated['compound_base_tax_category_id'] === $recordId) {
             throw ValidationException::withMessages([
                 'compound_base_tax_category_id' => 'Compound tax base code cannot self-reference.',
             ]);
@@ -856,7 +1371,7 @@ class MasterDataController extends Controller
             ]);
         }
 
-        if (!($validated['reverse_charge_applicable'] ?? false)) {
+        if (! ($validated['reverse_charge_applicable'] ?? false)) {
             $validated['reverse_charge_gl_account_id'] = null;
         }
 
@@ -880,13 +1395,13 @@ class MasterDataController extends Controller
             }
         }
 
-        if (((float) ($validated['tax_rate'] ?? 0)) === 0.0 && !($validated['exemption_certificate_required'] ?? false)) {
+        if (((float) ($validated['tax_rate'] ?? 0)) === 0.0 && ! ($validated['exemption_certificate_required'] ?? false)) {
             throw ValidationException::withMessages([
                 'tax_rate' => 'Tax rate 0.00 is allowed only for exempt/zero-rated taxes with exemption certificate required.',
             ]);
         }
 
-        if ($recordId && isset($validated['is_active']) && !$validated['is_active']) {
+        if ($recordId && isset($validated['is_active']) && ! $validated['is_active']) {
             $hasOpenUsage = DB::table('inventory_items')->where('tax_category_id', $recordId)->exists();
             if ($hasOpenUsage) {
                 throw ValidationException::withMessages([

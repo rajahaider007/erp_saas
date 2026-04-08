@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
-import { Search, Plus, Edit3, Trash2, ArrowUpDown, Clock, RefreshCcw, CheckCircle2, X, Database, ChevronLeft, ChevronRight } from 'lucide-react';
+import Breadcrumbs from '../../../Components/Breadcrumbs';
+import { Search, Plus, Edit3, Trash2, ArrowUpDown, Clock, RefreshCcw, CheckCircle2, X, Database, ChevronLeft, ChevronRight, Home, List as ListIcon } from 'lucide-react';
 
 const CustomAlert = {
   fire: ({ title, text, icon, showCancelButton = false, confirmButtonText = 'OK', cancelButtonText = 'Cancel', onConfirm, onCancel }) => {
@@ -42,7 +43,6 @@ export default function List() {
   const { t, locale } = useTranslations();
   const tl = useCallback((k, r = {}) => t(`inventory.item_group_coding.list.${k}`, r), [t]);
   const td = useCallback((k, r = {}) => t(`common.data_table.${k}`, r), [t]);
-  const tf = useCallback((k, r = {}) => t(`common.flash.${k}`, r), [t]);
   const ts = useCallback((k) => t(`common.status.${k}`), [t]);
 
   const [loading, setLoading] = useState(false);
@@ -59,14 +59,6 @@ export default function List() {
 
   const visibleColumnsInit = useMemo(() => ({ id: true, groupCode: true, groupName: true, status: true, updatedAt: true, actions: true }), []);
   const [visibleColumns, setVisibleColumns] = useState(visibleColumnsInit);
-
-  useEffect(() => {
-    if (flash?.success) {
-      CustomAlert.fire({ title: tf('success_title'), text: flash.success, icon: 'success', confirmButtonText: tf('great') });
-    } else if (flash?.error) {
-      CustomAlert.fire({ title: tf('error_title'), text: flash.error, icon: 'error', confirmButtonText: tf('ok') });
-    }
-  }, [flash, tf]);
 
   const pushQuery = (obj) => {
     const params = new URLSearchParams(window.location.search);
@@ -152,9 +144,30 @@ export default function List() {
   const colLabel = (key) => tl(COLUMN_LABEL_KEYS[key] || key);
   const dateLoc = locale === 'ur' ? 'ur-PK' : undefined;
 
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
+      { label: pageTitle || tl('page_title_fallback'), icon: ListIcon, href: null },
+    ],
+    [t, pageTitle, tl]
+  );
+
   return (
     <App>
-      <div className="advanced-module-manager">
+      <div className="rounded-xl shadow-lg form-container border-slate-200">
+        <div className="p-6">
+          <Breadcrumbs items={breadcrumbItems} description={t('inventory.shared.list_browse_description')} />
+          {flash?.success && (
+            <div className="alert-success-themed mb-4" role="status">
+              <p className="m-0">{flash.success}</p>
+            </div>
+          )}
+          {flash?.error && (
+            <div className="alert-error-themed mb-4" role="alert">
+              <p className="m-0">{flash.error}</p>
+            </div>
+          )}
+          <div className="advanced-module-manager">
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
@@ -472,6 +485,8 @@ export default function List() {
               <span>{tl('page_of_total', { total: paginatedItems.last_page || 1 })}</span>
             </div>
           </div>
+        </div>
+      </div>
         </div>
       </div>
     </App>

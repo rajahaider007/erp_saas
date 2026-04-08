@@ -53,6 +53,8 @@ class InventoryItem extends Model
         'country_of_origin_id',
         'barcode_gtin',
         'inventory_gl_account_id',
+        'purchase_gl_account_id',
+        'sales_gl_account_id',
         'cogs_gl_account_id',
         'writeoff_gl_account_id',
         'price_variance_gl_account_id',
@@ -84,7 +86,7 @@ class InventoryItem extends Model
     public function scopeByCompanyAndLocation($query, $compId, $locationId)
     {
         return $query->where('comp_id', $compId)
-                     ->where('location_id', $locationId);
+            ->where('location_id', $locationId);
     }
 
     public function scopeActive($query)
@@ -151,6 +153,16 @@ class InventoryItem extends Model
     public function inventoryGlAccount()
     {
         return $this->belongsTo(ChartOfAccount::class, 'inventory_gl_account_id');
+    }
+
+    public function purchaseGlAccount()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'purchase_gl_account_id');
+    }
+
+    public function salesGlAccount()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'sales_gl_account_id');
     }
 
     public function cogsGlAccount()

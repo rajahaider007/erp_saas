@@ -178,6 +178,10 @@ const Header = () => {
       .filter(section => {
         if (!section || !section.section_name) return false;
         if (user?.role === 'super_admin') return true;
+        const sectionMenus = section.menus || [];
+        if (sectionMenus.some(m => m && m.menu_name && canView(m.id))) {
+          return true;
+        }
         return canView(`/${currentModuleData.module.folder_name}/${section.slug || ''}`);
       })
       .map(section => ({

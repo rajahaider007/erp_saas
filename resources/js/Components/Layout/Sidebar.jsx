@@ -281,8 +281,12 @@ const Sidebar = () => {
         // Check if section has required properties
         if (!section || !section.section_name) return false;
         
-        // Check if user has permission to view this section
+        // Show section if user can view any menu in it (section slug path rarely matches a real menu route)
         if (user?.role === 'super_admin') {
+          return true;
+        }
+        const sectionMenus = section.menus || [];
+        if (sectionMenus.some(m => m && m.menu_name && canView(m.id))) {
           return true;
         }
         return canView(`/${currentModuleData.module.folder_name}/${section.slug || ''}`);

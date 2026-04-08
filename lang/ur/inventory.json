@@ -3,7 +3,8 @@
     "breadcrumb_home": "ہوم",
     "breadcrumb_inventory": "انوینٹری",
     "filter_all_status": "تمام حیثیت",
-    "filter_all_types": "تمام اقسام"
+    "filter_all_types": "تمام اقسام",
+    "list_browse_description": "اس فہرست میں ریکارڈز تلاش، فلٹر اور منظم کریں۔"
   },
   "item_category_coding": {
     "create": {
@@ -32,7 +33,17 @@
       "submit_edit": "زمرہ اپ ڈیٹ",
       "breadcrumb_module": "آئٹم زمرہ کوڈنگ",
       "breadcrumb_create": "زمرہ بنائیں",
-      "breadcrumb_edit": "زمرہ میں ترمیم"
+      "breadcrumb_edit": "زمرہ میں ترمیم",
+      "linked_coa_title": "منسلک لاگت اکاؤنٹس (چارٹ آف اکاؤنٹس)",
+      "linked_coa_empty": "ابھی کوئی لاگت اکاؤنٹ نہیں۔ اکاؤنٹ کنفیگریشن مکمل ہونے پر زمرہ محفوظ کرنے سے انوینٹری، خرید، COGS اور فروخت کے اکاؤنٹ بنیں گے۔",
+      "linked_coa_line": "{label}: {code} — {name}",
+      "costing_prereq_title": "خودکار COA کے لیے اکاؤنٹ کنفیگریشن",
+      "costing_prereq_intro": "زمرہ محفوظ کرتے وقت چارٹ آف اکاؤنٹس میں سر بنانے کے لیے، ہر قسم کے لیے فعال اکاؤنٹ کنفیگریشن (یہ کمپنی و لوکیشن) درکار ہے۔ ہر قطار COA اکاؤنٹ سے منسلک ہو (لیول 3 کنٹرول، یا لیول 4 جس کا لیول 3 والد ہو)۔",
+      "costing_prereq_missing": "ابھی کمی:",
+      "costing_prereq_type_inventory": "inventory — اسٹاک / اثاثہ کنٹرول",
+      "costing_prereq_type_purchase": "purchase — خرید / خرچ کنٹرول",
+      "costing_prereq_type_sales": "sales — آمدن کنٹرول",
+      "costing_prereq_type_cost_of_goods_sold": "cost_of_goods_sold — COGS کنٹرول"
     },
     "list": {
       "page_title_fallback": "آئٹم زمرہ کوڈنگ",
@@ -67,7 +78,8 @@
       "col_category_name": "زمرہ نام",
       "col_item_class": "آئٹم کلاس",
       "col_status": "حیثیت",
-      "col_updated_at": "تازہ"
+      "col_updated_at": "تازہ",
+      "col_costing_coa": "لاگت COA (انوینٹری / خرید / COGS / فروخت)"
     }
   },
   "item_class_coding": {
@@ -233,7 +245,7 @@
         },
         "gl": {
           "title": "H: GL میپنگ",
-          "description": "اکاؤنٹس"
+          "description": "صرف وہ اکاؤنٹس جو اکاؤنٹ کنفیگریشن میں منسلک ہیں (قسم: انوینٹری، خرید، فروخت، COGS وغیرہ)، اور زمرے کی لاگت والے اکاؤنٹس۔ رائیٹ آف اور فرق کے لیے منتخب اخراج قسم کی کنفیگریشن۔"
         },
         "analytics": {
           "title": "I: تجزیہ",
@@ -339,7 +351,7 @@
         "item_category_id": {
           "label": "آئٹم زمرہ",
           "placeholder": "زمرہ منتخب کریں",
-          "help": "آئٹم کلاس کی ذیلی سطح"
+          "help": "آئٹم کلاس کی ذیلی سطح۔ زمرے پر لاگت کے چار سر (انوینٹری، خرید، COGS، فروخت) GL فیلڈز خود بھر دیتے ہیں۔"
         },
         "item_group_id": {
           "label": "آئٹم گروپ",
@@ -534,12 +546,22 @@
         "inventory_gl_account_id": {
           "label": "انوینٹری GL اکاؤنٹ",
           "placeholder": "اکاؤنٹ منتخب کریں",
-          "help": "بیلنس شیٹ اثاثہ"
+          "help": "بیلنس شیٹ اسٹاک (زمرے سے جب دستیاب ہو)"
+        },
+        "purchase_gl_account_id": {
+          "label": "خرید GL اکاؤنٹ",
+          "placeholder": "اکاؤنٹ منتخب کریں",
+          "help": "خرید / خرچ میپنگ (زمرے سے جب دستیاب ہو)"
         },
         "cogs_gl_account_id": {
           "label": "COGS GL اکاؤنٹ",
           "placeholder": "اکاؤنٹ منتخب کریں",
-          "help": "P&L خرچ"
+          "help": "فروخت شدہ مال کی لاگت (زمرے سے جب دستیاب ہو)"
+        },
+        "sales_gl_account_id": {
+          "label": "فروخت / آمدن GL اکاؤنٹ",
+          "placeholder": "اکاؤنٹ منتخب کریں",
+          "help": "اس آئٹم کی فروخت کی آمدن (زمرے سے جب دستیاب ہو)"
         },
         "writeoff_gl_account_id": {
           "label": "رائیٹ آف GL اکاؤنٹ",
@@ -591,14 +613,25 @@
   },
   "master_data": {
     "create": {
+      "breadcrumbs_description": "انوینٹری ماسٹر فہرست کے لیے کوڈنگ ریکارڈ بنائیں یا ترمیم کریں۔",
+      "breadcrumb_create": "نیا ریکارڈ",
+      "breadcrumb_edit": "ترمیم",
       "back_to_list": "← فہرست پر واپس",
       "title_create": "{name} بنائیں",
       "title_edit": "{name} میں ترمیم",
       "subtitle_create": "نیا ماسٹر ریکارڈ",
       "subtitle_edit": "ریکارڈ اپ ڈیٹ",
-      "fallback_title": "ماسٹر ڈیٹا"
+      "fallback_title": "ماسٹر ڈیٹا",
+      "level4_preview_loading": "اگلا لیول 4 کوڈ نکالا جا رہا ہے…",
+      "level4_preview_auto": "اگلا لیول 4 کوڈ (محفوظ پر تفویض):",
+      "level4_preview_hint": "لیول 3 والد منتخب کریں تاکہ اگلا لیول 4 کوڈ دکھے۔",
+      "level4_preview_note": "محفوظ کرنے پر یہ کوڈ چارٹ آف اکاؤنٹس میں منتخب لیول 3 کے تحت بنے گا۔",
+      "level4_preview_note_party_code": "وینڈر / کسٹمر / ٹرانسپورٹر / GL کوڈ منتخب لیول 3 کے تحت اگلے سلسلے سے خودکار ملے گا۔ نیچے پیش نظارہ ہے جو محفوظ کرتے وقت استعمال ہوگا۔",
+      "level4_linked_code": "منسلک چارٹ آف اکاؤنٹس کوڈ:"
     },
     "list": {
+      "refresh": "تازہ کریں",
+      "reset_all_filters": "فلٹر صاف",
       "search": "تلاش...",
       "all_status": "تمام حیثیت",
       "active": "فعال",
@@ -689,8 +722,10 @@
       "vendor-master": {
         "title": "وینڈر ماسٹر",
         "fields": {
-          "vendor_code": "وینڈر کوڈ",
+          "vendor_code": "وینڈر / جی ایل اکاؤنٹ کوڈ",
+          "short_code": "مختصر کوڈ",
           "vendor_name": "قانونی نام",
+          "coa_level3_parent_id": "قابل ادائیگی — لیول 3 والد (اکاؤنٹ کنفیگریشن)",
           "contact_person": "رابطہ شخص",
           "phone": "فون",
           "email": "ای میل",
@@ -701,37 +736,21 @@
           "bank_details": "بینک تفصیلات",
           "credit_limit": "کریڈٹ حد",
           "vendor_type": "وینڈر کی قسم",
-          "country_id": "ملک",
+          "country_label": "ملک (کرنسی ٹیبل سے)",
           "is_active": "حیثیت"
         },
         "list_columns": {
           "vendor_code": "کوڈ",
+          "short_code": "مختصر",
           "vendor_name": "نام",
+          "gl_account_code": "جی ایل کوڈ",
           "vendor_type": "قسم"
-        }
-      },
-      "warehouse-master": {
-        "title": "گودام / مقام",
-        "fields": {
-          "warehouse_code": "گودام کوڈ",
-          "warehouse_name": "گودام نام",
-          "location_id": "کمپنی / برانچ",
-          "address": "پتہ",
-          "warehouse_type": "گودام کی قسم",
-          "storage_temperature_class": "درجہ حرارت کلاس",
-          "capacity": "گنجائش",
-          "is_active": "حیثیت"
-        },
-        "list_columns": {
-          "warehouse_code": "کوڈ",
-          "warehouse_name": "نام",
-          "warehouse_type": "قسم"
         }
       },
       "zone-bin-master": {
         "title": "زون / بن",
         "fields": {
-          "warehouse_id": "گودام",
+          "location_id": "برانچ / مقام",
           "zone_code": "زون کوڈ",
           "zone_name": "زون نام",
           "aisle": "الماری",
@@ -741,6 +760,7 @@
           "is_active": "حیثیت"
         },
         "list_columns": {
+          "location_label": "برانچ / مقام",
           "zone_code": "زون",
           "zone_name": "نام",
           "bin_code": "بن"
@@ -812,36 +832,46 @@
       "transporter-master": {
         "title": "ٹرانسپورٹر",
         "fields": {
-          "transporter_code": "کوڈ",
+          "transporter_code": "ٹرانسپورٹر / جی ایل اکاؤنٹ کوڈ",
+          "short_code": "مختصر کوڈ",
           "transporter_name": "نام",
+          "coa_level3_parent_id": "تاخیر واجب الادا / قابل ادائیگی — لیول 3 والد",
           "contact_details": "رابطہ",
           "vehicle_types": "گاڑی کی اقسام",
           "service_area": "علاقہ",
+          "country_label": "ملک (کرنسی ٹیبل سے)",
+          "currency_id": "کرنسی",
           "rating": "درجہ",
           "is_active": "حیثیت"
         },
         "list_columns": {
           "transporter_code": "کوڈ",
+          "short_code": "مختصر",
           "transporter_name": "نام",
+          "gl_account_code": "جی ایل کوڈ",
           "rating": "درجہ"
         }
       },
       "customer-master": {
         "title": "کسٹمر ماسٹر",
         "fields": {
-          "customer_code": "کسٹمر کوڈ",
+          "customer_code": "کسٹمر / جی ایل اکاؤنٹ کوڈ",
+          "short_code": "مختصر کوڈ",
           "customer_name": "نام",
+          "coa_level3_parent_id": "قابل وصولی — لیول 3 والد (اکاؤنٹ کنفیگریشن)",
           "contact_details": "رابطہ",
           "credit_limit": "کریڈٹ حد",
           "payment_terms": "ادائیگی",
           "tax_registration": "ٹیکس رجسٹریشن",
-          "country_id": "ملک",
+          "country_label": "ملک (کرنسی ٹیبل سے)",
           "currency_id": "کرنسی",
           "is_active": "حیثیت"
         },
         "list_columns": {
           "customer_code": "کوڈ",
+          "short_code": "مختصر",
           "customer_name": "نام",
+          "gl_account_code": "جی ایل کوڈ",
           "credit_limit": "حد"
         }
       },
@@ -916,11 +946,6 @@
       "vendorTypeOptions": {
         "local": "مقامی",
         "import": "درآمد"
-      },
-      "warehouseTypeOptions": {
-        "main": "مرکزی",
-        "transit": "ٹرانزٹ",
-        "quarantine": "قرنطینہ"
       },
       "reasonTypeOptions": {
         "adjustment": "تعدیل",

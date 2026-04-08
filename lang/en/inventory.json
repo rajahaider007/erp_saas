@@ -3,7 +3,8 @@
     "breadcrumb_home": "Home",
     "breadcrumb_inventory": "Inventory",
     "filter_all_status": "All Status",
-    "filter_all_types": "All Types"
+    "filter_all_types": "All Types",
+    "list_browse_description": "Search, filter, and manage records in this list."
   },
   "item_category_coding": {
     "create": {
@@ -32,7 +33,17 @@
       "submit_edit": "Update Category",
       "breadcrumb_module": "Item Category Coding",
       "breadcrumb_create": "Create Category",
-      "breadcrumb_edit": "Edit Category"
+      "breadcrumb_edit": "Edit Category",
+      "linked_coa_title": "Linked costing accounts (Chart of Accounts)",
+      "linked_coa_empty": "No costing accounts yet. Saving this category will create inventory, purchase, COGS, and sales accounts when Account Configuration is set up.",
+      "linked_coa_line": "{label}: {code} — {name}",
+      "costing_prereq_title": "Account Configuration required for automatic COA",
+      "costing_prereq_intro": "To create Chart of Accounts heads when you save this category, add active Account Configuration rows (this company & location) for every type below. Each row must link to a COA account (Level 3 control account, or Level 4 with a Level 3 parent).",
+      "costing_prereq_missing": "Still missing:",
+      "costing_prereq_type_inventory": "inventory — stock / asset control",
+      "costing_prereq_type_purchase": "purchase — purchase / expense control",
+      "costing_prereq_type_sales": "sales — revenue control",
+      "costing_prereq_type_cost_of_goods_sold": "cost_of_goods_sold — COGS control"
     },
     "list": {
       "page_title_fallback": "Item Category Coding",
@@ -67,7 +78,8 @@
       "col_category_name": "Category Name",
       "col_item_class": "Item Class",
       "col_status": "Status",
-      "col_updated_at": "Updated"
+      "col_updated_at": "Updated",
+      "col_costing_coa": "Costing COA (Inv / Pur / COGS / Sales)"
     }
   },
   "item_class_coding": {
@@ -233,7 +245,7 @@
         },
         "gl": {
           "title": "Section H: GL Account Mapping",
-          "description": "Accounting mappings for inventory and expenses"
+          "description": "Lists only accounts tied to Account Configuration (by type: inventory, purchase, sales, COGS, etc.), plus this category’s costing accounts. Write-off and variance use selected expense-type configurations."
         },
         "analytics": {
           "title": "Section I: Classification & Analytics",
@@ -339,7 +351,7 @@
         "item_category_id": {
           "label": "Item Category",
           "placeholder": "Select item category",
-          "help": "Child of Item Class"
+          "help": "Child of Item Class. Category costing accounts (inventory, purchase, COGS, sales) auto-fill GL fields when configured on the category."
         },
         "item_group_id": {
           "label": "Item Group",
@@ -534,12 +546,22 @@
         "inventory_gl_account_id": {
           "label": "Inventory GL Account",
           "placeholder": "Select GL account",
-          "help": "Balance sheet asset account"
+          "help": "Balance sheet stock account (from category when available)"
+        },
+        "purchase_gl_account_id": {
+          "label": "Purchase GL Account",
+          "placeholder": "Select GL account",
+          "help": "Purchase / expense mapping (from category when available)"
         },
         "cogs_gl_account_id": {
           "label": "COGS GL Account",
           "placeholder": "Select GL account",
-          "help": "P&L expense account"
+          "help": "Cost of goods sold (from category when available)"
+        },
+        "sales_gl_account_id": {
+          "label": "Sales / Revenue GL Account",
+          "placeholder": "Select GL account",
+          "help": "Revenue account for sales of this item (from category when available)"
         },
         "writeoff_gl_account_id": {
           "label": "Write-Off GL Account",
@@ -591,14 +613,25 @@
   },
   "master_data": {
     "create": {
+      "breadcrumbs_description": "Create or edit a coding record for this inventory master list.",
+      "breadcrumb_create": "Add record",
+      "breadcrumb_edit": "Edit record",
       "back_to_list": "← Back to List",
       "title_create": "Create {name}",
       "title_edit": "Edit {name}",
       "subtitle_create": "Add new master data record",
       "subtitle_edit": "Update master data record",
-      "fallback_title": "Master Data"
+      "fallback_title": "Master Data",
+      "level4_preview_loading": "Calculating next Level 4 code…",
+      "level4_preview_auto": "Next Level 4 code (assigned on save):",
+      "level4_preview_hint": "Choose a Level 3 parent to see the next Level 4 account code.",
+      "level4_preview_note": "Saving creates this code in Chart of Accounts under the selected Level 3 parent.",
+      "level4_preview_note_party_code": "The Vendor / Customer / Transporter / GL code is assigned automatically from the next sequence under the selected Level 3 parent. The preview below shows what will be used when you save.",
+      "level4_linked_code": "Linked Chart of Accounts code:"
     },
     "list": {
+      "refresh": "Refresh",
+      "reset_all_filters": "Reset filters",
       "search": "Search...",
       "all_status": "All Status",
       "active": "Active",
@@ -689,49 +722,35 @@
       "vendor-master": {
         "title": "Vendor Master",
         "fields": {
-          "vendor_code": "Vendor Code",
-          "vendor_name": "Vendor Name (Legal)",
-          "contact_person": "Primary Contact Person",
+          "vendor_code": "Vendor / GL account code",
+          "short_code": "Short code",
+          "vendor_name": "Vendor name (legal)",
+          "coa_level3_parent_id": "Payable — Level 3 parent (from Account Configuration)",
+          "contact_person": "Primary contact person",
           "phone": "Phone",
           "email": "Email",
           "address": "Address",
-          "payment_terms": "Payment Terms",
+          "payment_terms": "Payment terms",
           "currency_id": "Currency",
-          "tax_registration_number": "Tax Registration Number",
-          "bank_details": "Bank Details",
-          "credit_limit": "Credit Limit",
-          "vendor_type": "Vendor Type",
-          "country_id": "Country",
+          "tax_registration_number": "Tax registration number",
+          "bank_details": "Bank details",
+          "credit_limit": "Credit limit",
+          "vendor_type": "Vendor type",
+          "country_label": "Country (from currencies)",
           "is_active": "Status"
         },
         "list_columns": {
           "vendor_code": "Vendor Code",
+          "short_code": "Short",
           "vendor_name": "Vendor Name",
+          "gl_account_code": "GL Code",
           "vendor_type": "Type"
-        }
-      },
-      "warehouse-master": {
-        "title": "Warehouse / Location Master",
-        "fields": {
-          "warehouse_code": "Warehouse Code",
-          "warehouse_name": "Warehouse Name",
-          "location_id": "Company / Branch",
-          "address": "Address",
-          "warehouse_type": "Warehouse Type",
-          "storage_temperature_class": "Storage Temperature Class",
-          "capacity": "Capacity",
-          "is_active": "Status"
-        },
-        "list_columns": {
-          "warehouse_code": "Warehouse Code",
-          "warehouse_name": "Warehouse Name",
-          "warehouse_type": "Type"
         }
       },
       "zone-bin-master": {
         "title": "Zone / Bin Configuration",
         "fields": {
-          "warehouse_id": "Warehouse",
+          "location_id": "Branch / location",
           "zone_code": "Zone Code",
           "zone_name": "Zone Name",
           "aisle": "Aisle",
@@ -741,6 +760,7 @@
           "is_active": "Status"
         },
         "list_columns": {
+          "location_label": "Branch / location",
           "zone_code": "Zone Code",
           "zone_name": "Zone Name",
           "bin_code": "Bin Code"
@@ -812,36 +832,46 @@
       "transporter-master": {
         "title": "Transporter Master",
         "fields": {
-          "transporter_code": "Transporter Code",
-          "transporter_name": "Transporter Name",
-          "contact_details": "Contact Details",
-          "vehicle_types": "Vehicle Types",
-          "service_area": "Service Area",
+          "transporter_code": "Transporter / GL account code",
+          "short_code": "Short code",
+          "transporter_name": "Transporter name",
+          "coa_level3_parent_id": "Accrued / Payable — Level 3 parent (from Account Configuration)",
+          "contact_details": "Contact details",
+          "vehicle_types": "Vehicle types",
+          "service_area": "Service area",
+          "country_label": "Country (from currencies)",
+          "currency_id": "Currency",
           "rating": "Rating",
           "is_active": "Status"
         },
         "list_columns": {
           "transporter_code": "Code",
+          "short_code": "Short",
           "transporter_name": "Transporter Name",
+          "gl_account_code": "GL Code",
           "rating": "Rating"
         }
       },
       "customer-master": {
         "title": "Customer Master",
         "fields": {
-          "customer_code": "Customer Code",
-          "customer_name": "Customer Name",
-          "contact_details": "Contact Details",
-          "credit_limit": "Credit Limit",
-          "payment_terms": "Payment Terms",
-          "tax_registration": "Tax Registration",
-          "country_id": "Country",
+          "customer_code": "Customer / GL account code",
+          "short_code": "Short code",
+          "customer_name": "Customer name",
+          "coa_level3_parent_id": "Receivable — Level 3 parent (from Account Configuration)",
+          "contact_details": "Contact details",
+          "credit_limit": "Credit limit",
+          "payment_terms": "Payment terms",
+          "tax_registration": "Tax registration",
+          "country_label": "Country (from currencies)",
           "currency_id": "Currency",
           "is_active": "Status"
         },
         "list_columns": {
           "customer_code": "Customer Code",
+          "short_code": "Short",
           "customer_name": "Customer Name",
+          "gl_account_code": "GL Code",
           "credit_limit": "Credit Limit"
         }
       },
@@ -916,11 +946,6 @@
       "vendorTypeOptions": {
         "local": "Local",
         "import": "Import"
-      },
-      "warehouseTypeOptions": {
-        "main": "Main",
-        "transit": "Transit",
-        "quarantine": "Quarantine"
       },
       "reasonTypeOptions": {
         "adjustment": "Adjustment",

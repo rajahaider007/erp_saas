@@ -49,10 +49,16 @@ const CreateItemCategoryCodingForm = () => {
     itemClassOptions = [],
     category = null,
     edit_mode = false,
+    costingConfigurationStatus = [],
     error,
   } = usePage().props;
 
   const isEditMode = !!edit_mode;
+
+  const costingMissing = useMemo(
+    () => (costingConfigurationStatus || []).filter((row) => !row.ready),
+    [costingConfigurationStatus]
+  );
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
 
@@ -180,8 +186,21 @@ const CreateItemCategoryCodingForm = () => {
   );
 
   return (
-    <div className="form-page-wrapper">
+    <div>
       <Breadcrumbs items={breadcrumbItems} description={tc('create_item_categories_and_assign_an_ite')} />
+
+      {costingMissing.length > 0 && (
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100">
+          <p className="m-0 font-semibold">{tc('costing_prereq_title')}</p>
+          <p className="mt-2 mb-0 text-sm opacity-90">{tc('costing_prereq_intro')}</p>
+          <p className="mt-3 mb-1 text-sm font-medium">{tc('costing_prereq_missing')}</p>
+          <ul className="mb-0 mt-0 list-disc pl-5 text-sm">
+            {costingMissing.map((row) => (
+              <li key={row.config_type}>{tc(`costing_prereq_type_${row.config_type}`)}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {error && (
         <div className="alert-error-themed mb-4">
@@ -198,6 +217,57 @@ const CreateItemCategoryCodingForm = () => {
                 <li key={key}>{Array.isArray(value) ? value[0] : value}</li>
               ))}
             </ul>
+          )}
+        </div>
+      )}
+
+      {isEditMode && category && (
+        <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50/80 p-4 text-slate-800">
+          <p className="m-0 text-sm font-semibold text-slate-700">{tc('linked_coa_title')}</p>
+          {category.inventory_gl_account ||
+          category.purchase_gl_account ||
+          category.sales_gl_account ||
+          category.cogs_gl_account ? (
+            <ul className="mt-2 list-none space-y-1 p-0 text-sm">
+              {category.inventory_gl_account && (
+                <li>
+                  {tc('linked_coa_line', {
+                    label: 'Inventory',
+                    code: category.inventory_gl_account.account_code,
+                    name: category.inventory_gl_account.account_name,
+                  })}
+                </li>
+              )}
+              {category.purchase_gl_account && (
+                <li>
+                  {tc('linked_coa_line', {
+                    label: 'Purchase',
+                    code: category.purchase_gl_account.account_code,
+                    name: category.purchase_gl_account.account_name,
+                  })}
+                </li>
+              )}
+              {category.cogs_gl_account && (
+                <li>
+                  {tc('linked_coa_line', {
+                    label: 'COGS',
+                    code: category.cogs_gl_account.account_code,
+                    name: category.cogs_gl_account.account_name,
+                  })}
+                </li>
+              )}
+              {category.sales_gl_account && (
+                <li>
+                  {tc('linked_coa_line', {
+                    label: 'Sales',
+                    code: category.sales_gl_account.account_code,
+                    name: category.sales_gl_account.account_name,
+                  })}
+                </li>
+              )}
+            </ul>
+          ) : (
+            <p className="mt-2 m-0 text-sm text-slate-600">{tc('linked_coa_empty')}</p>
           )}
         </div>
       )}

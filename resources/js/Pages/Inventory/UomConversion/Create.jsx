@@ -1,44 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Home, Plus, Trash2, ArrowRight, AlertCircle } from 'lucide-react';
+import { Home, List, Plus, Trash2, Edit3, AlertCircle, CheckCircle } from 'lucide-react';
 import App from '../../App.jsx';
 import { router, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 import InlineSearchSelect from '../../../Components/InlineSearchSelect';
-
-const Breadcrumbs = ({ items, description }) => (
-  <div className="breadcrumbs-themed">
-    <nav className="breadcrumbs">
-      {items.map((item, index) => (
-        <div key={index} className="breadcrumb-item">
-          <div className="breadcrumb-item-content">
-            {item.icon && (
-              <item.icon className={`breadcrumb-icon ${item.href ? 'breadcrumb-icon-link' : 'breadcrumb-icon-current'}`} />
-            )}
-            {item.href ? (
-              <a href={item.href} className="breadcrumb-link-themed">
-                {item.label}
-              </a>
-            ) : (
-              <span className="breadcrumb-current-themed">{item.label}</span>
-            )}
-          </div>
-          {index < items.length - 1 && (
-            <div className="breadcrumb-separator breadcrumb-separator-themed">
-              <svg viewBox="0 0 20 20" fill="currentColor" className="w-full h-full">
-                <path
-                  fillRule="evenodd"
-                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-          )}
-        </div>
-      ))}
-    </nav>
-    {description && <div className="breadcrumbs-description">{description}</div>}
-  </div>
-);
+import Breadcrumbs from '../../../Components/Breadcrumbs';
 
 const CreateUomConversionForm = () => {
   const { t } = useTranslations();
@@ -163,124 +129,126 @@ const CreateUomConversionForm = () => {
 
   const breadcrumbItems = useMemo(
     () => [
-      { label: t('inventory.shared.breadcrumb_home'), icon: Home, href: '/' },
-      { label: t('inventory.shared.breadcrumb_inventory'), href: '/inventory' },
-      { label: tc('breadcrumb_uom_conversion'), href: '/inventory/uom-conversion' },
-      { label: isEditMode ? tc('breadcrumb_edit') : tc('breadcrumb_create') },
+      { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
+      { label: tc('breadcrumb_uom_conversion'), icon: List, href: '/inventory/uom-conversion' },
+      {
+        label: isEditMode ? tc('breadcrumb_edit') : tc('breadcrumb_create'),
+        icon: isEditMode ? Edit3 : Plus,
+        href: null,
+      },
     ],
     [t, tc, isEditMode]
   );
 
   return (
-    <App>
-      <div className="form-container">
-        <Breadcrumbs items={breadcrumbItems} description={tc('configure_unit_of_measure_conversions_on')} />
+    <div>
+      <Breadcrumbs items={breadcrumbItems} description={tc('configure_unit_of_measure_conversions_on')} />
 
-        <div className="form-section">
-          <div className="form-header">
-            <div className="header-info">
-              <h2 className="form-title">
-                <ArrowRight size={24} className="title-icon" />
-                {isEditMode ? tc('title_edit') : tc('title_create')}
-              </h2>
-              <p className="form-description">{isEditMode ? tc('desc_edit') : tc('desc_create')}</p>
-            </div>
+      {alert && (
+        <div className={`alert-${alert.type}-themed mb-4`}>
+          <p className="m-0">{alert.message}</p>
+        </div>
+      )}
+
+      <div className="form-theme-system min-h-0 transition-all duration-500 overflow-visible">
+        <div className="form-container">
+          <div className="form-header mb-8">
+            <h1 className="form-title">{isEditMode ? tc('title_edit') : tc('title_create')}</h1>
+            <p className="form-subtitle mt-2">{isEditMode ? tc('desc_edit') : tc('desc_create')}</p>
           </div>
 
-          {alert && (
-            <div className={`alert alert-${alert.type}`}>
-              <span>{alert.message}</span>
-              <button type="button" onClick={() => setAlert(null)} className="alert-close">
-                ×
-              </button>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50 p-4 sm:p-5 shadow-sm">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">{tc('from_unit_master')}</h3>
-              <div className="max-w-md">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <form onSubmit={handleSubmit} className="space-y-0">
+            <div className="relative z-30 mb-10 overflow-visible">
+              <h3 className="subpanel-title">{tc('from_unit_master')}</h3>
+              <div className="input-group max-w-xl gap-3">
+                <label className="input-label mb-0">
                   {tc('lbl_from_uom_required')} <span className="text-red-500">*</span>
                 </label>
-                <InlineSearchSelect
-                  options={formattedUoms}
-                  value={fromUomId}
-                  onChange={(val) => {
-                    setFromUomId(val);
-                    setErrors((prev) => ({ ...prev, from_uom_id: undefined }));
-                  }}
-                  placeholder={tc('select_from_uom')}
-                  name="from_uom_id"
-                  id="from_uom_id"
-                  error={errors.from_uom_id}
-                />
+                <div className="input-wrapper min-h-[3.125rem]" style={{ overflow: 'visible', position: 'relative' }}>
+                  <InlineSearchSelect
+                    usePortal
+                    options={formattedUoms}
+                    value={fromUomId}
+                    onChange={(val) => {
+                      setFromUomId(val);
+                      setErrors((prev) => ({ ...prev, from_uom_id: undefined }));
+                    }}
+                    placeholder={tc('select_from_uom')}
+                    name="from_uom_id"
+                    id="from_uom_id"
+                    error={errors.from_uom_id}
+                  />
+                </div>
                 {errors.from_uom_id && (
-                  <p className="mt-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
-                    <AlertCircle className="h-3.5 w-3.5" /> {errors.from_uom_id}
+                  <p className="text-sm flex items-center gap-1 m-0" style={{ color: 'var(--error)' }}>
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {errors.from_uom_id}
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50 p-4 sm:p-5 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{tc('conversion_rows_detail')}</h3>
-                <button
-                  type="button"
-                  onClick={addRow}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors"
-                >
+            <div className="relative z-10 mb-8 overflow-visible">
+              <div
+                className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b"
+                style={{ borderColor: 'var(--glass-border)' }}
+              >
+                <h3 className="subpanel-title mb-0">{tc('conversion_rows_detail')}</h3>
+                <button type="button" onClick={addRow} className="btn btn-primary btn-sm inline-flex items-center gap-1.5 shrink-0">
                   <Plus size={16} /> {tc('add_row')}
                 </button>
               </div>
               {errors.conversions && typeof errors.conversions === 'string' && (
-                <div className="mb-3 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-red-600 dark:text-red-400">{errors.conversions}</p>
+                <div className="alert-error-themed mb-3 flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <p className="text-sm m-0">{errors.conversions}</p>
                 </div>
               )}
 
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px] border-collapse">
+              <div className="table-wrapper overflow-x-auto overflow-y-visible">
+                <table className="data-table uom-conversion-table w-full min-w-[640px]">
                   <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-600">
-                      <th className="text-left text-xs font-semibold text-gray-600 dark:text-gray-400 py-2 pr-2">#</th>
-                      <th className="text-left text-xs font-semibold text-gray-600 dark:text-gray-400 py-2 pr-2">{tc('to_uom_')}</th>
-                      <th className="text-left text-xs font-semibold text-gray-600 dark:text-gray-400 py-2 pr-2">{tc('operation')}</th>
-                      <th className="text-left text-xs font-semibold text-gray-600 dark:text-gray-400 py-2 pr-2">{tc('conversion_factor_')}</th>
-                      <th className="w-10 py-2" />
+                    <tr>
+                      <th className="col-num">#</th>
+                      <th className="col-to-uom">{tc('to_uom_')}</th>
+                      <th className="col-op">{tc('operation')}</th>
+                      <th className="col-factor">{tc('conversion_factor_')}</th>
+                      <th className="col-actions" aria-label={tc('remove_row')} />
                     </tr>
                   </thead>
                   <tbody>
                     {rows.map((row, index) => (
-                      <tr key={index} className="border-b border-gray-100 dark:border-gray-700/70">
-                        <td className="py-2 pr-2 text-sm text-gray-500 dark:text-gray-400">{index + 1}</td>
-                        <td className="py-2 pr-2">
-                          <InlineSearchSelect
-                            options={toUomOptions}
-                            value={row.to_uom_id}
-                            onChange={(val) => updateRow(index, 'to_uom_id', val)}
-                            placeholder={tc('select_to_uom')}
-                            name={`to_uom_id_${index}`}
-                            id={`to_uom_id_${index}`}
-                            error={errors[`conversions.${index}.to_uom_id`]}
-                          />
+                      <tr key={index} className="table-row">
+                        <td className="col-num pt-4">{index + 1}</td>
+                        <td className="col-to-uom">
+                          <div className="input-wrapper min-h-[3.125rem]" style={{ overflow: 'visible', position: 'relative' }}>
+                            <InlineSearchSelect
+                              usePortal
+                              options={toUomOptions}
+                              value={row.to_uom_id}
+                              onChange={(val) => updateRow(index, 'to_uom_id', val)}
+                              placeholder={tc('select_to_uom')}
+                              name={`to_uom_id_${index}`}
+                              id={`to_uom_id_${index}`}
+                              error={errors[`conversions.${index}.to_uom_id`]}
+                            />
+                          </div>
                           {errors[`conversions.${index}.to_uom_id`] && (
-                            <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors[`conversions.${index}.to_uom_id`]}</p>
+                            <p className="mt-1 text-xs" style={{ color: 'var(--error)' }}>
+                              {errors[`conversions.${index}.to_uom_id`]}
+                            </p>
                           )}
                         </td>
-                        <td className="py-2 pr-2">
+                        <td className="col-op">
                           <select
                             value={row.operation || 'Multiply'}
                             onChange={(e) => updateRow(index, 'operation', e.target.value)}
-                            className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            className="form-select w-full max-w-[200px]"
                           >
                             <option value="Multiply">{tc('multiply_')}</option>
                             <option value="Divide">{tc('divide_')}</option>
                           </select>
                         </td>
-                        <td className="py-2 pr-2">
+                        <td className="col-factor">
                           <input
                             type="number"
                             step="0.0001"
@@ -289,18 +257,20 @@ const CreateUomConversionForm = () => {
                             value={row.conversion_factor}
                             onChange={(e) => updateRow(index, 'conversion_factor', e.target.value)}
                             placeholder={tc('eg_12')}
-                            className="w-full max-w-[140px] px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            className="form-input w-full max-w-[200px]"
                           />
                           {errors[`conversions.${index}.conversion_factor`] && (
-                            <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors[`conversions.${index}.conversion_factor`]}</p>
+                            <p className="mt-1 text-xs" style={{ color: 'var(--error)' }}>
+                              {errors[`conversions.${index}.conversion_factor`]}
+                            </p>
                           )}
                         </td>
-                        <td className="py-2">
+                        <td className="col-actions pt-3">
                           {rows.length > 1 && (
                             <button
                               type="button"
                               onClick={() => removeRow(index)}
-                              className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                              className="action-btn delete"
                               title={tc('remove_row')}
                             >
                               <Trash2 size={16} />
@@ -314,26 +284,30 @@ const CreateUomConversionForm = () => {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="submit"
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-              >
+            <div className="button-group">
+              <button type="submit" className="btn btn-primary">
+                <CheckCircle className="btn-icon" size={20} />
                 {isEditMode ? tc('submit_update') : tc('submit_save')}
               </button>
-              <button
-                type="button"
-                onClick={() => window.history.back()}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
+              <button type="button" onClick={() => window.history.back()} className="btn btn-secondary">
                 {t('common.actions.cancel')}
               </button>
             </div>
           </form>
         </div>
       </div>
-    </App>
+    </div>
   );
 };
 
-export default CreateUomConversionForm;
+const Create = () => (
+  <App>
+    <div className="rounded-xl shadow-lg form-container border-slate-200 overflow-visible">
+      <div className="p-6 overflow-visible">
+        <CreateUomConversionForm />
+      </div>
+    </div>
+  </App>
+);
+
+export default Create;

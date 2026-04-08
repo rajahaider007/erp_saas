@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import App from "../../App.jsx";
 import { usePage, router } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
-import { Search, Plus, Edit3, Trash2, ArrowUpDown, Clock, RefreshCcw, CheckCircle2, X, ChevronLeft, ChevronRight, ArrowLeftRight } from 'lucide-react';
+import Breadcrumbs from '../../../Components/Breadcrumbs';
+import { Search, Plus, Edit3, Trash2, ArrowUpDown, Clock, RefreshCcw, CheckCircle2, X, ChevronLeft, ChevronRight, ArrowLeftRight, Home, List as ListIcon } from 'lucide-react';
 
 const CustomAlert = {
   fire: ({ title, text, icon, showCancelButton = false, confirmButtonText = 'OK', cancelButtonText = 'Cancel', onConfirm, onCancel }) => {
@@ -44,7 +45,6 @@ export default function List() {
   const { t, locale } = useTranslations();
   const tl = useCallback((k, r = {}) => t(`inventory.uom_conversion.list.${k}`, r), [t]);
   const td = useCallback((k, r = {}) => t(`common.data_table.${k}`, r), [t]);
-  const tf = useCallback((k, r = {}) => t(`common.flash.${k}`, r), [t]);
   const ts = useCallback((k) => t(`common.status.${k}`), [t]);
 
   const [loading, setLoading] = useState(false);
@@ -70,14 +70,6 @@ export default function List() {
     []
   );
   const [visibleColumns, setVisibleColumns] = useState(visibleColumnsInit);
-
-  useEffect(() => {
-    if (flash?.success) {
-      CustomAlert.fire({ title: tf('success_title'), text: flash.success, icon: 'success', confirmButtonText: tf('great') });
-    } else if (flash?.error) {
-      CustomAlert.fire({ title: tf('error_title'), text: flash.error, icon: 'error', confirmButtonText: tf('ok') });
-    }
-  }, [flash, tf]);
 
   const pushQuery = (obj) => {
     const params = new URLSearchParams(window.location.search);
@@ -171,9 +163,30 @@ export default function List() {
     return String(dir);
   };
 
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
+      { label: tl('uom_conversion'), icon: ListIcon, href: null },
+    ],
+    [t, tl]
+  );
+
   return (
     <App>
-      <div className="advanced-module-manager">
+      <div className="rounded-xl shadow-lg form-container border-slate-200">
+        <div className="p-6">
+          <Breadcrumbs items={breadcrumbItems} description={t('inventory.shared.list_browse_description')} />
+          {flash?.success && (
+            <div className="alert-success-themed mb-4" role="status">
+              <p className="m-0">{flash.success}</p>
+            </div>
+          )}
+          {flash?.error && (
+            <div className="alert-error-themed mb-4" role="alert">
+              <p className="m-0">{flash.error}</p>
+            </div>
+          )}
+          <div className="advanced-module-manager">
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
@@ -468,6 +481,8 @@ export default function List() {
               </button>
             </div>
           </div>
+        </div>
+      </div>
         </div>
       </div>
     </App>
