@@ -64,7 +64,8 @@ export default function Create() {
     return v === k ? config?.title || mc('fallback_title') : v;
   }, [t, masterKey, config?.title, mc]);
 
-  const hasLinkedPartyCoa = edit_mode && record?.chart_of_account_id;
+  const hasLinkedPartyCoa =
+    edit_mode && PARTY_MASTERS_WITH_COA.includes(masterKey) && Boolean(record?.party_type);
 
   const partyCodeFieldName = useMemo(() => {
     if (masterKey === 'vendor-master') return 'vendor_code';

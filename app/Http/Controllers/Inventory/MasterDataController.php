@@ -9,17 +9,14 @@ use App\Models\Country;
 use App\Models\Currency;
 use App\Models\InventoryBarcodeType;
 use App\Models\InventoryBrand;
-use App\Models\InventoryCustomer;
 use App\Models\InventoryPackageType;
 use App\Models\InventoryReasonCode;
 use App\Models\InventoryTemperatureClass;
-use App\Models\InventoryTransporter;
 use App\Models\InventoryZoneBin;
 use App\Models\Location;
 use App\Models\TaxCategory;
 use App\Models\UomConversion;
 use App\Models\UomMaster;
-use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -52,10 +49,12 @@ class MasterDataController extends Controller
             ]);
         }
 
-        $query = $config['model']::query()->where('company_id', $companyId);
+        $query = $this->baseQueryForMaster($config, $companyId, $master, $this->locationId($request));
 
         if (in_array($master, self::PARTY_MASTERS_WITH_COA, true)) {
-            $query->with(['chartOfAccount:id,account_code']);
+            $sortBy = $request->input('sort_by', $config['default_sort'] ?? $config['key_field']);
+            $sortBy = $this->remapPartyListSortColumn($master, $sortBy);
+            $request->merge(['sort_by' => $sortBy]);
         }
 
         if ($master === 'zone-bin-master') {
@@ -77,12 +76,22 @@ class MasterDataController extends Controller
         }
 
         if ($request->filled('is_active')) {
-            $query->where('is_active', $request->boolean('is_active'));
+            if (in_array($master, self::PARTY_MASTERS_WITH_COA, true)) {
+                $query->where('status', $request->boolean('is_active') ? 'Active' : 'Inactive');
+            } else {
+                $query->where('is_active', $request->boolean('is_active'));
+            }
         }
 
         $sortBy = $request->input('sort_by', $config['default_sort'] ?? $config['key_field']);
         $sortOrder = $request->input('sort_order', 'asc');
         $items = $query->orderBy($sortBy, $sortOrder)->paginate(15)->appends($request->query());
+
+        if (in_array($master, self::PARTY_MASTERS_WITH_COA, true)) {
+            $items->getCollection()->transform(function ($row) use ($master) {
+                return $this->decoratePartyCoaRowForList($master, $row);
+            });
+        }
 
         if ($master === 'zone-bin-master') {
             $items->getCollection()->transform(function ($row) {
@@ -160,16 +169,13 @@ class MasterDataController extends Controller
             $coaFields = $this->pullPartyCoaRequestFields($validated);
             try {
                 DB::beginTransaction();
-                $coa = $this->createPartyChartOfAccount(
+                $this->createPartyChartOfAccount(
                     $master,
                     $validated,
                     $coaFields['level3_parent_id'],
                     $companyId,
                     $locationId
                 );
-                $validated['chart_of_account_id'] = $coa->id;
-                $validated[$this->partyCodeFieldForMaster($master)] = $coa->account_code;
-                $config['model']::create($validated);
                 DB::commit();
             } catch (\Throwable $e) {
                 DB::rollBack();
@@ -195,41 +201,14 @@ class MasterDataController extends Controller
             return back()->withErrors(['error' => 'Invalid request context.']);
         }
 
-        $record = $config['model']::query()
-            ->where('company_id', $companyId)
-            ->find($id);
+        $record = $this->masterRecordQuery($config, $companyId, $master, $this->locationId($request))->find($id);
 
         if (! $record) {
             return back()->withErrors(['error' => 'Record not found.']);
         }
 
         if (in_array($master, self::PARTY_MASTERS_WITH_COA, true)) {
-            $record->loadMissing([
-                'chartOfAccount:id,account_code,account_name,parent_account_id',
-            ]);
-            if ($record->chartOfAccount) {
-                $record->setAttribute('coa_level3_parent_id', (string) $record->chartOfAccount->parent_account_id);
-                $record->setAttribute('coa_gl_account_code', $record->chartOfAccount->account_code);
-                $codeField = match ($master) {
-                    'vendor-master' => 'vendor_code',
-                    'customer-master' => 'customer_code',
-                    'transporter-master' => 'transporter_code',
-                    default => null,
-                };
-                if ($codeField) {
-                    $existing = trim((string) ($record->{$codeField} ?? ''));
-                    $glCode = trim((string) ($record->chartOfAccount->account_code ?? ''));
-                    if ($glCode !== '' && $existing === '') {
-                        $record->setAttribute($codeField, $glCode);
-                    }
-                }
-            }
-            if ($record->currency_id && empty($record->country_label)) {
-                $cur = Currency::query()->find($record->currency_id);
-                if ($cur?->country) {
-                    $record->setAttribute('country_label', trim((string) $cur->country));
-                }
-            }
+            $this->decoratePartyCoaRecordForForm($master, $record);
         }
 
         return Inertia::render('Inventory/MasterData/Create', [
@@ -249,9 +228,7 @@ class MasterDataController extends Controller
             return back()->withErrors(['error' => 'Invalid request context.']);
         }
 
-        $record = $config['model']::query()
-            ->where('company_id', $companyId)
-            ->find($id);
+        $record = $this->masterRecordQuery($config, $companyId, $master, $this->locationId($request))->find($id);
 
         if (! $record) {
             return back()->withErrors(['error' => 'Record not found.']);
@@ -277,29 +254,12 @@ class MasterDataController extends Controller
         if (in_array($master, self::PARTY_MASTERS_WITH_COA, true)) {
             $this->normalizePartyMasterAttributes($validated);
             $this->ensurePartyMasterCoaInput($validated, $record);
-            $locationId = $this->locationId($request);
-            $coaFields = $this->pullPartyCoaRequestFields($validated);
-            $hadLedger = (bool) $record->chart_of_account_id;
+            $this->pullPartyCoaRequestFields($validated);
             $partyCodeField = $this->partyCodeFieldForMaster($master);
-            if ($hadLedger) {
-                unset($validated[$partyCodeField]);
-            }
+            unset($validated[$partyCodeField]);
             try {
                 DB::beginTransaction();
-                if (! $record->chart_of_account_id) {
-                    $coa = $this->createPartyChartOfAccount(
-                        $master,
-                        $validated,
-                        $coaFields['level3_parent_id'],
-                        $companyId,
-                        $locationId
-                    );
-                    $validated['chart_of_account_id'] = $coa->id;
-                    $validated[$partyCodeField] = $coa->account_code;
-                }
-                $record->update($validated);
-                $record->refresh();
-                $this->syncPartyMasterLedgerName($master, $record, $validated, $companyId);
+                $this->applyPartyMasterUpdatesToCoa($master, $record, $validated, $companyId);
                 DB::commit();
             } catch (\Throwable $e) {
                 DB::rollBack();
@@ -325,7 +285,7 @@ class MasterDataController extends Controller
             return back()->withErrors(['error' => 'Invalid request context.']);
         }
 
-        $record = $config['model']::query()->where('company_id', $companyId)->find($id);
+        $record = $this->masterRecordQuery($config, $companyId, $master, $this->locationId($request))->find($id);
         if (! $record) {
             return back()->withErrors(['error' => 'Record not found.']);
         }
@@ -390,8 +350,9 @@ class MasterDataController extends Controller
 
         if (! empty($config['unique'])) {
             foreach ($config['unique'] as $column) {
+                $companyCol = ($config['table'] ?? '') === 'chart_of_accounts' ? 'comp_id' : 'company_id';
                 $rule = Rule::unique($config['table'], $column)
-                    ->where(fn ($query) => $query->where('company_id', $companyId)->whereNull('deleted_at'));
+                    ->where(fn ($query) => $query->where($companyCol, $companyId)->whereNull('deleted_at'));
 
                 if ($id) {
                     $rule = $rule->ignore($id);
@@ -399,6 +360,15 @@ class MasterDataController extends Controller
 
                 $rules[$column] = Arr::prepend((array) ($rules[$column] ?? []), $rule);
             }
+        }
+
+        if ($master && in_array($master, self::PARTY_MASTERS_WITH_COA, true)) {
+            $codeField = $this->partyCodeFieldForMaster($master);
+            $uniqueRule = Rule::unique('chart_of_accounts', 'account_code')->whereNull('deleted_at');
+            if ($id) {
+                $uniqueRule = $uniqueRule->ignore($id);
+            }
+            $rules[$codeField] = array_merge((array) ($rules[$codeField] ?? []), [$uniqueRule]);
         }
 
         if ($master === 'zone-bin-master') {
@@ -706,13 +676,14 @@ class MasterDataController extends Controller
             'vendor-master' => [
                 'key' => 'vendor-master',
                 'title' => 'Vendor Master',
-                'model' => Vendor::class,
-                'table' => 'vendors',
+                'party_type' => 'vendor',
+                'model' => ChartOfAccount::class,
+                'table' => 'chart_of_accounts',
                 'key_field' => 'vendor_code',
                 'name_field' => 'vendor_name',
-                'search' => ['vendor_code', 'short_code', 'vendor_name', 'contact_person', 'email'],
-                'default_sort' => 'vendor_code',
-                'unique' => ['vendor_code'],
+                'search' => ['account_code', 'short_code', 'account_name', 'contact_person', 'email'],
+                'default_sort' => 'account_code',
+                'unique' => [],
                 'rules' => [
                     'coa_level3_parent_id' => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
                     'vendor_code' => ['required', 'string', 'max:15'],
@@ -733,7 +704,7 @@ class MasterDataController extends Controller
                 ],
                 'fields' => [
                     ['name' => 'coa_level3_parent_id', 'label' => 'Payable — Level 3 parent (from Account Configuration)', 'type' => 'select', 'required' => true, 'searchable' => true, 'optionsKey' => 'level3VendorChartOptions', 'section' => 'Chart of accounts', 'placeholder' => 'Select Level 3 parent'],
-                    ['name' => 'vendor_code', 'label' => 'Vendor / GL account code', 'type' => 'text', 'required' => false, 'placeholder' => 'Auto-assigned from Level 3 parent', 'inputTitle' => 'Generated automatically as the next Level 4 code under the selected parent. Same value is saved on the vendor and in Chart of Accounts.', 'section' => 'Chart of accounts'],
+                    ['name' => 'vendor_code', 'label' => 'Vendor / GL account code', 'type' => 'text', 'required' => false, 'placeholder' => 'Auto-assigned from Level 3 parent', 'inputTitle' => 'Generated automatically as the next Level 4 code under the selected parent and stored on this Chart of Accounts row.', 'section' => 'Chart of accounts'],
                     ['name' => 'short_code', 'label' => 'Short code', 'type' => 'text', 'placeholder' => 'Optional', 'section' => 'Identity'],
                     ['name' => 'vendor_name', 'label' => 'Vendor name (legal)', 'type' => 'text', 'required' => true, 'section' => 'Identity'],
                     ['name' => 'contact_person', 'label' => 'Primary contact person', 'type' => 'text', 'section' => 'Contact'],
@@ -900,13 +871,14 @@ class MasterDataController extends Controller
             'transporter-master' => [
                 'key' => 'transporter-master',
                 'title' => 'Transporter Master',
-                'model' => InventoryTransporter::class,
-                'table' => 'inventory_transporters',
+                'party_type' => 'transporter',
+                'model' => ChartOfAccount::class,
+                'table' => 'chart_of_accounts',
                 'key_field' => 'transporter_code',
                 'name_field' => 'transporter_name',
-                'search' => ['transporter_code', 'short_code', 'transporter_name', 'service_area'],
-                'default_sort' => 'transporter_code',
-                'unique' => ['transporter_code'],
+                'search' => ['account_code', 'short_code', 'account_name', 'service_area', 'contact_details'],
+                'default_sort' => 'account_code',
+                'unique' => [],
                 'rules' => [
                     'coa_level3_parent_id' => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
                     'transporter_code' => ['required', 'string', 'max:15'],
@@ -938,13 +910,14 @@ class MasterDataController extends Controller
             'customer-master' => [
                 'key' => 'customer-master',
                 'title' => 'Customer Master',
-                'model' => InventoryCustomer::class,
-                'table' => 'inventory_customers',
+                'party_type' => 'customer',
+                'model' => ChartOfAccount::class,
+                'table' => 'chart_of_accounts',
                 'key_field' => 'customer_code',
                 'name_field' => 'customer_name',
-                'search' => ['customer_code', 'short_code', 'customer_name', 'contact_details'],
-                'default_sort' => 'customer_code',
-                'unique' => ['customer_code'],
+                'search' => ['account_code', 'short_code', 'account_name', 'contact_details'],
+                'default_sort' => 'account_code',
+                'unique' => [],
                 'rules' => [
                     'coa_level3_parent_id' => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
                     'customer_code' => ['required', 'string', 'max:15'],
@@ -1103,6 +1076,63 @@ class MasterDataController extends Controller
         };
     }
 
+    /**
+     * Level 3 COA ids whose Level 4 children are listed in this party master (with Account Configuration when set;
+     * otherwise all active Level 3 for the company, matching {@see options()} fallback).
+     *
+     * @return list<int>
+     */
+    private function level3ParentIdsForPartyMasterList(int $companyId, ?int $locationId, string $master): array
+    {
+        $types = $this->accountConfigTypesForPartyMaster($master);
+        if ($types === []) {
+            return [];
+        }
+
+        $activeLevel3Ids = ChartOfAccount::query()
+            ->where('comp_id', $companyId)
+            ->when($locationId, fn ($q) => $q->where('location_id', $locationId))
+            ->where('account_level', 3)
+            ->where('status', 'Active')
+            ->pluck('id')
+            ->all();
+
+        if (! Schema::hasTable('account_configurations')) {
+            return $activeLevel3Ids;
+        }
+
+        if (! $locationId) {
+            return ChartOfAccount::query()
+                ->where('comp_id', $companyId)
+                ->where('account_level', 3)
+                ->where('status', 'Active')
+                ->pluck('id')
+                ->all();
+        }
+
+        $configured = AccountConfiguration::query()
+            ->active()
+            ->byCompanyAndLocation($companyId, $locationId)
+            ->whereIn('config_type', $types)
+            ->where('account_level', 3)
+            ->exists();
+
+        if (! $configured) {
+            return $activeLevel3Ids;
+        }
+
+        return AccountConfiguration::query()
+            ->active()
+            ->byCompanyAndLocation($companyId, $locationId)
+            ->whereIn('config_type', $types)
+            ->where('account_level', 3)
+            ->whereNotNull('account_id')
+            ->pluck('account_id')
+            ->unique()
+            ->values()
+            ->all();
+    }
+
     private function assertLevel3AllowedForPartyMaster(
         ChartOfAccount $level3,
         int $companyId,
@@ -1152,7 +1182,9 @@ class MasterDataController extends Controller
 
     private function ensurePartyMasterCoaInput(array $validated, $record): void
     {
-        $hasLedger = $record && (int) $record->chart_of_account_id > 0;
+        $hasLedger = $record instanceof ChartOfAccount
+            && (int) $record->account_level === 4
+            && (int) ($record->parent_account_id ?? 0) > 0;
         if ($hasLedger) {
             return;
         }
@@ -1306,7 +1338,9 @@ class MasterDataController extends Controller
         $partyName = $this->partyDisplayNameForMaster($master, $validated);
         $shortCode = $this->partyLedgerShortCodeForPartyCreate($validated, $accountCode);
 
-        return ChartOfAccount::create([
+        $status = ($validated['is_active'] ?? true) ? 'Active' : 'Inactive';
+
+        return ChartOfAccount::create(array_merge([
             'account_code' => $accountCode,
             'account_name' => Str::limit($partyName, 100, ''),
             'account_type' => $level3->account_type,
@@ -1314,34 +1348,193 @@ class MasterDataController extends Controller
             'account_level' => 4,
             'is_transactional' => true,
             'currency' => $level3->currency ?? 'PKR',
-            'status' => 'Active',
+            'status' => $status,
             'short_code' => Str::limit($shortCode, 20, ''),
             'comp_id' => $companyId,
             'location_id' => $locationId,
-        ]);
+            'party_type' => $this->partyTypeForMaster($master),
+        ], $this->partySpecificCoaAttributes($master, $validated)));
     }
 
-    private function syncPartyMasterLedgerName(string $master, $record, array $validated, int $companyId): void
+    /**
+     * Single-record fetch for edit / update / destroy (party masters use comp_id + party_type).
+     */
+    private function masterRecordQuery(array $config, int $companyId, string $master, ?int $locationId = null)
     {
-        if (! $record->chart_of_account_id) {
-            return;
+        $query = $config['model']::query();
+
+        if (in_array($master, self::PARTY_MASTERS_WITH_COA, true)) {
+            $partyType = $config['party_type'];
+            $level3Ids = $this->level3ParentIdsForPartyMasterList($companyId, $locationId, $master);
+
+            return $query
+                ->where('comp_id', $companyId)
+                ->where(function ($q) use ($partyType, $level3Ids) {
+                    $q->where('party_type', $partyType);
+                    if ($level3Ids !== []) {
+                        $q->orWhere(function ($q2) use ($partyType, $level3Ids) {
+                            $q2->where('account_level', 4)
+                                ->whereIn('parent_account_id', $level3Ids)
+                                ->where(function ($q3) use ($partyType) {
+                                    $q3->whereNull('party_type')->orWhere('party_type', $partyType);
+                                });
+                        });
+                    }
+                });
         }
+
+        return $query->where('company_id', $companyId);
+    }
+
+    private function baseQueryForMaster(array $config, int $companyId, string $master, ?int $locationId = null)
+    {
+        if (in_array($master, self::PARTY_MASTERS_WITH_COA, true)) {
+            $partyType = $config['party_type'];
+            $level3Ids = $this->level3ParentIdsForPartyMasterList($companyId, $locationId, $master);
+
+            return $config['model']::query()
+                ->where('comp_id', $companyId)
+                ->where(function ($q) use ($partyType, $level3Ids) {
+                    $q->where('party_type', $partyType);
+                    if ($level3Ids !== []) {
+                        $q->orWhere(function ($q2) use ($partyType, $level3Ids) {
+                            $q2->where('account_level', 4)
+                                ->whereIn('parent_account_id', $level3Ids)
+                                ->where(function ($q3) use ($partyType) {
+                                    $q3->whereNull('party_type')->orWhere('party_type', $partyType);
+                                });
+                        });
+                    }
+                });
+        }
+
+        return $config['model']::query()->where('company_id', $companyId);
+    }
+
+    private function remapPartyListSortColumn(string $master, string $sortBy): string
+    {
+        return match ($master) {
+            'vendor-master' => match ($sortBy) {
+                'vendor_code' => 'account_code',
+                'vendor_name' => 'account_name',
+                default => $sortBy,
+            },
+            'customer-master' => match ($sortBy) {
+                'customer_code' => 'account_code',
+                'customer_name' => 'account_name',
+                default => $sortBy,
+            },
+            'transporter-master' => match ($sortBy) {
+                'transporter_code' => 'account_code',
+                'transporter_name' => 'account_name',
+                'rating' => 'transporter_rating',
+                default => $sortBy,
+            },
+            default => $sortBy,
+        };
+    }
+
+    private function decoratePartyCoaRowForList(string $master, $row)
+    {
+        $row->setAttribute('gl_account_code', $row->account_code);
+        if ($master === 'vendor-master') {
+            $row->setAttribute('vendor_code', $row->account_code);
+            $row->setAttribute('vendor_name', $row->account_name);
+            $row->setAttribute('is_active', $row->status === 'Active');
+        } elseif ($master === 'customer-master') {
+            $row->setAttribute('customer_code', $row->account_code);
+            $row->setAttribute('customer_name', $row->account_name);
+            $row->setAttribute('is_active', $row->status === 'Active');
+        } elseif ($master === 'transporter-master') {
+            $row->setAttribute('transporter_code', $row->account_code);
+            $row->setAttribute('transporter_name', $row->account_name);
+            $row->setAttribute('rating', $row->transporter_rating);
+            $row->setAttribute('is_active', $row->status === 'Active');
+        }
+
+        return $row;
+    }
+
+    private function decoratePartyCoaRecordForForm(string $master, ChartOfAccount $record): void
+    {
+        $this->decoratePartyCoaRowForList($master, $record);
+        $record->setAttribute('coa_level3_parent_id', $record->parent_account_id ? (string) $record->parent_account_id : '');
+        $record->setAttribute('coa_gl_account_code', $record->account_code);
+        if ($master === 'customer-master') {
+            $record->setAttribute('tax_registration', $record->tax_registration_number);
+        }
+        if ($record->currency_id && empty($record->country_label)) {
+            $cur = Currency::query()->find($record->currency_id);
+            if ($cur?->country) {
+                $record->setAttribute('country_label', trim((string) $cur->country));
+            }
+        }
+    }
+
+    private function partyTypeForMaster(string $master): string
+    {
+        return match ($master) {
+            'vendor-master' => 'vendor',
+            'customer-master' => 'customer',
+            'transporter-master' => 'transporter',
+            default => '',
+        };
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function partySpecificCoaAttributes(string $master, array $validated): array
+    {
+        return match ($master) {
+            'vendor-master' => [
+                'contact_person' => $validated['contact_person'] ?? null,
+                'email' => $validated['email'] ?? null,
+                'phone' => $validated['phone'] ?? null,
+                'address' => $validated['address'] ?? null,
+                'payment_terms' => $validated['payment_terms'] ?? null,
+                'currency_id' => $validated['currency_id'] ?? null,
+                'tax_registration_number' => $validated['tax_registration_number'] ?? null,
+                'bank_details' => $validated['bank_details'] ?? null,
+                'credit_limit' => $validated['credit_limit'] ?? null,
+                'vendor_type' => $validated['vendor_type'] ?? null,
+                'country_label' => $validated['country_label'] ?? null,
+            ],
+            'customer-master' => [
+                'contact_details' => $validated['contact_details'] ?? null,
+                'credit_limit' => $validated['credit_limit'] ?? null,
+                'payment_terms' => $validated['payment_terms'] ?? null,
+                'tax_registration_number' => $validated['tax_registration'] ?? null,
+                'country_label' => $validated['country_label'] ?? null,
+                'currency_id' => $validated['currency_id'] ?? null,
+            ],
+            'transporter-master' => [
+                'contact_details' => $validated['contact_details'] ?? null,
+                'vehicle_types' => $validated['vehicle_types'] ?? null,
+                'service_area' => $validated['service_area'] ?? null,
+                'country_label' => $validated['country_label'] ?? null,
+                'currency_id' => $validated['currency_id'] ?? null,
+                'transporter_rating' => $validated['rating'] ?? null,
+            ],
+            default => [],
+        };
+    }
+
+    private function applyPartyMasterUpdatesToCoa(string $master, ChartOfAccount $record, array $validated, int $companyId): void
+    {
         $name = $this->partyDisplayNameForMaster($master, $validated);
-        $updates = [];
-        if ($name !== '') {
-            $updates['account_name'] = Str::limit($name, 100, '');
-        }
+        $updates = array_merge([
+            'account_name' => Str::limit($name, 100, ''),
+            'status' => ($validated['is_active'] ?? true) ? 'Active' : 'Inactive',
+            'party_type' => $this->partyTypeForMaster($master),
+        ], $this->partySpecificCoaAttributes($master, $validated));
         $short = $this->partyLedgerShortCodeForMaster($master, $validated);
         if ($short !== '' && $short !== 'PARTY') {
             $updates['short_code'] = Str::limit($short, 20, '');
         }
-        if ($updates === []) {
-            return;
-        }
         ChartOfAccount::query()
-            ->where('id', $record->chart_of_account_id)
+            ->where('id', $record->id)
             ->where('comp_id', $companyId)
-            ->where('account_level', 4)
             ->update($updates);
     }
 

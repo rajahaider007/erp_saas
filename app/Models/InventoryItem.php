@@ -147,7 +147,7 @@ class InventoryItem extends Model
 
     public function defaultVendor()
     {
-        return $this->belongsTo(Vendor::class, 'default_vendor_id');
+        return $this->belongsTo(ChartOfAccount::class, 'default_vendor_id');
     }
 
     public function inventoryGlAccount()

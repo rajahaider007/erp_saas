@@ -12,9 +12,9 @@ use App\Models\InventoryItemClass;
 use App\Models\InventoryItemGroup;
 use App\Models\TaxCategory;
 use App\Models\UomMaster;
-use App\Models\Vendor;
 use App\Services\Inventory\ItemCategoryCostingAccountService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
@@ -251,12 +251,15 @@ class ItemMasterController extends Controller
             ])
             ->values();
 
-        $vendorOptions = Vendor::byCompany($compId)
-            ->active()
-            ->get(['id', 'vendor_code', 'vendor_name'])
-            ->map(fn ($vendor) => [
-                'value' => (string) $vendor->id,
-                'label' => $vendor->vendor_code.' - '.$vendor->vendor_name,
+        $vendorOptions = ChartOfAccount::query()
+            ->where('comp_id', $compId)
+            ->where('party_type', 'vendor')
+            ->where('status', 'Active')
+            ->orderBy('account_code')
+            ->get(['id', 'account_code', 'account_name'])
+            ->map(fn ($row) => [
+                'value' => (string) $row->id,
+                'label' => $row->account_code.' - '.$row->account_name,
             ])
             ->values();
 
@@ -353,7 +356,10 @@ class ItemMasterController extends Controller
             'safety_stock' => 'nullable|numeric|min:0',
             'maximum_stock_level' => 'nullable|numeric|min:0',
             'lead_time_days' => 'nullable|integer|min:0',
-            'default_vendor_id' => 'nullable|exists:vendors,id',
+            'default_vendor_id' => [
+                'nullable',
+                Rule::exists('chart_of_accounts', 'id')->where(fn ($q) => $q->where('party_type', 'vendor')->where('comp_id', $compId)),
+            ],
             'expiry_tracking' => 'boolean',
             'shelf_life_days' => 'nullable|integer|min:0',
             'expiry_basis' => 'nullable|in:manufacturing_date,receipt_date',
@@ -478,7 +484,10 @@ class ItemMasterController extends Controller
             'safety_stock' => 'nullable|numeric|min:0',
             'maximum_stock_level' => 'nullable|numeric|min:0',
             'lead_time_days' => 'nullable|integer|min:0',
-            'default_vendor_id' => 'nullable|exists:vendors,id',
+            'default_vendor_id' => [
+                'nullable',
+                Rule::exists('chart_of_accounts', 'id')->where(fn ($q) => $q->where('party_type', 'vendor')->where('comp_id', $compId)),
+            ],
             'expiry_tracking' => 'boolean',
             'shelf_life_days' => 'nullable|integer|min:0',
             'expiry_basis' => 'nullable|in:manufacturing_date,receipt_date',

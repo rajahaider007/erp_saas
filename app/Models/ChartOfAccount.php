@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ChartOfAccount extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'chart_of_accounts';
 
@@ -23,6 +24,28 @@ class ChartOfAccount extends Model
         'short_code',
         'comp_id',
         'location_id',
+        'party_type',
+        'contact_person',
+        'email',
+        'phone',
+        'address',
+        'city',
+        'state',
+        'postal_code',
+        'country_id',
+        'country_label',
+        'currency_id',
+        'payment_terms',
+        'tax_id',
+        'tax_registration_number',
+        'bank_details',
+        'credit_limit',
+        'vendor_type',
+        'party_notes',
+        'contact_details',
+        'vehicle_types',
+        'service_area',
+        'transporter_rating',
     ];
 
     protected $casts = [
@@ -31,6 +54,10 @@ class ChartOfAccount extends Model
         'is_transactional' => 'boolean',
         'comp_id' => 'integer',
         'location_id' => 'integer',
+        'country_id' => 'integer',
+        'currency_id' => 'integer',
+        'credit_limit' => 'decimal:2',
+        'transporter_rating' => 'decimal:2',
     ];
 
     /**
@@ -196,5 +223,20 @@ class ChartOfAccount extends Model
     public function scopeParent($query)
     {
         return $query->whereIn('account_level', [1, 2, 3]);
+    }
+
+    public function scopePartyVendors($query)
+    {
+        return $query->where('party_type', 'vendor');
+    }
+
+    public function scopePartyCustomers($query)
+    {
+        return $query->where('party_type', 'customer');
+    }
+
+    public function scopePartyTransporters($query)
+    {
+        return $query->where('party_type', 'transporter');
     }
 }
