@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Head, usePage, router, Link } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 import {
@@ -23,6 +23,27 @@ import App from '../../App.jsx';
 const ChartOfAccountReport = () => {
   const { auth, chartOfAccountData: initialData, filters: initialFilters, totals, company, error } = usePage().props;
   const { t } = useTranslations();
+
+  const translateAccountType = (type) => {
+    const map = {
+      Assets: 'reports.chart_of_account.report.type_assets',
+      Liabilities: 'reports.chart_of_account.report.type_liabilities',
+      Equity: 'reports.chart_of_account.report.type_equity',
+      Revenue: 'reports.chart_of_account.report.type_revenue',
+      Expenses: 'reports.chart_of_account.report.type_expenses',
+    };
+    const key = map[type];
+    return key ? t(key) : type;
+  };
+
+  const translateStatus = (status) => {
+    const map = {
+      Active: 'reports.chart_of_account.report.status_active',
+      Inactive: 'reports.chart_of_account.report.status_inactive',
+    };
+    const key = map[status];
+    return key ? t(key) : status;
+  };
   
   const [filters, setFilters] = useState({
     level: initialFilters?.level || 'all',
@@ -37,38 +58,34 @@ const ChartOfAccountReport = () => {
   const [loading, setLoading] = useState(false);
   const isPrintView = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('print_view') === '1';
 
-  // Account levels
-  const levels = [
-    { value: 'all', label: 'All Levels' },
-    { value: '1', label: 'Level 1 (Main Categories)' },
-    { value: '2', label: 'Level 2 (Categories)' },
-    { value: '3', label: 'Level 3 (Subcategories)' },
-    { value: '4', label: 'Level 4 (Transactional)' },
-  ];
+  const levels = useMemo(() => [
+    { value: 'all', label: t('reports.chart_of_account.report.level_all') },
+    { value: '1', label: t('reports.chart_of_account.report.level_1') },
+    { value: '2', label: t('reports.chart_of_account.report.level_2') },
+    { value: '3', label: t('reports.chart_of_account.report.level_3') },
+    { value: '4', label: t('reports.chart_of_account.report.level_4') },
+  ], [t]);
 
-  // Account types
-  const accountTypes = [
-    { value: '', label: 'All Types' },
-    { value: 'Assets', label: 'Assets' },
-    { value: 'Liabilities', label: 'Liabilities' },
-    { value: 'Equity', label: 'Equity' },
-    { value: 'Revenue', label: 'Revenue' },
-    { value: 'Expenses', label: 'Expenses' },
-  ];
+  const accountTypes = useMemo(() => [
+    { value: '', label: t('reports.chart_of_account.report.type_all') },
+    { value: 'Assets', label: t('reports.chart_of_account.report.type_assets') },
+    { value: 'Liabilities', label: t('reports.chart_of_account.report.type_liabilities') },
+    { value: 'Equity', label: t('reports.chart_of_account.report.type_equity') },
+    { value: 'Revenue', label: t('reports.chart_of_account.report.type_revenue') },
+    { value: 'Expenses', label: t('reports.chart_of_account.report.type_expenses') },
+  ], [t]);
 
-  // Account statuses
-  const statusOptions = [
-    { value: '', label: 'All Statuses' },
-    { value: 'Active', label: 'Active' },
-    { value: 'Inactive', label: 'Inactive' },
-  ];
+  const statusOptions = useMemo(() => [
+    { value: '', label: t('reports.chart_of_account.report.status_all') },
+    { value: 'Active', label: t('reports.chart_of_account.report.status_active') },
+    { value: 'Inactive', label: t('reports.chart_of_account.report.status_inactive') },
+  ], [t]);
 
-  // Sort options
-  const sortOptions = [
-    { value: 'code', label: 'By Code' },
-    { value: 'name', label: 'By Name' },
-    { value: 'balance', label: 'By Balance' },
-  ];
+  const sortOptions = useMemo(() => [
+    { value: 'code', label: t('reports.chart_of_account.report.sort_code') },
+    { value: 'name', label: t('reports.chart_of_account.report.sort_name') },
+    { value: 'balance', label: t('reports.chart_of_account.report.sort_balance') },
+  ], [t]);
 
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
@@ -329,8 +346,8 @@ const ChartOfAccountReport = () => {
                   <tr key={account.id}>
                     <td>{account.account_code}</td>
                     <td>{account.account_name}</td>
-                    <td>{account.account_type}</td>
-                    <td>{account.status}</td>
+                    <td>{translateAccountType(account.account_type)}</td>
+                    <td>{translateStatus(account.status)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -350,12 +367,12 @@ const ChartOfAccountReport = () => {
             <div className="report-title-section">
               <h1 className="report-title">
                 <FileText className="report-title-icon" />
-                Chart of Accounts Report
+                {t('reports.chart_of_account.report.title')}
               </h1>
               <div className="report-stats-summary">
                 <div className="report-stat-item">
                   <List size={16} />
-                  <span>{filteredData?.length || 0} Accounts</span>
+                  <span>{t('reports.chart_of_account.report.accounts_count', { count: filteredData?.length || 0 })}</span>
                 </div>
                 {company && (
                   <div className="report-stat-item">
@@ -373,7 +390,7 @@ const ChartOfAccountReport = () => {
                 title={t('reports.chart_of_account.report.back_to_filters')}
               >
                 <Filter size={20} />
-                Change Filters
+                {t('reports.chart_of_account.report.change_filters')}
               </button>
 
               <button
@@ -382,24 +399,24 @@ const ChartOfAccountReport = () => {
                 title={t('reports.chart_of_account.report.print_report')}
               >
                 <Printer size={20} />
-                Print
+                {t('reports.chart_of_account.report.print')}
               </button>
 
               {/* Export Dropdown */}
               <div className="dropdown">
                 <button className="report-btn dropdown-toggle">
                   <Download size={20} />
-                  Export
+                  {t('reports.chart_of_account.report.export')}
                   <ChevronDown size={16} />
                 </button>
                 <div className="dropdown-menu bg-slate-700 border-slate-600">
                   <button className="text-white hover:bg-slate-600" onClick={handleExportExcel}>
                     <FileSpreadsheet size={16} />
-                    Export as Excel
+                    {t('reports.chart_of_account.report.export_excel')}
                   </button>
                   <button className="text-white hover:bg-slate-600" onClick={handleExportCSV}>
                     <FileText size={16} />
-                    Export as CSV
+                    {t('reports.chart_of_account.report.export_csv')}
                   </button>
                 </div>
               </div>
@@ -414,25 +431,35 @@ const ChartOfAccountReport = () => {
             {filters.level && (
               <div className="filter-badge">
                 <span className="filter-badge-label">{t('reports.chart_of_account.report.level')}</span>
-                <span className="filter-badge-value">{filters.level === 'all' ? 'All Levels' : `Level ${filters.level}`}</span>
+                <span className="filter-badge-value">
+                  {filters.level === 'all'
+                    ? t('reports.chart_of_account.report.level_badge_all')
+                    : t('reports.chart_of_account.report.level_badge_n', { n: filters.level })}
+                </span>
               </div>
             )}
             {filters.account_type && (
               <div className="filter-badge">
                 <span className="filter-badge-label">{t('reports.chart_of_account.report.type')}</span>
-                <span className="filter-badge-value">{filters.account_type}</span>
+                <span className="filter-badge-value">{translateAccountType(filters.account_type)}</span>
               </div>
             )}
             {filters.status && (
               <div className="filter-badge">
                 <span className="filter-badge-label">{t('reports.chart_of_account.report.status')}</span>
-                <span className="filter-badge-value">{filters.status}</span>
+                <span className="filter-badge-value">{translateStatus(filters.status)}</span>
               </div>
             )}
             {filters.sort_by && (
               <div className="filter-badge">
                 <span className="filter-badge-label">{t('reports.chart_of_account.report.sort')}</span>
-                <span className="filter-badge-value">By {filters.sort_by}</span>
+                <span className="filter-badge-value">
+                  {filters.sort_by === 'name'
+                    ? t('reports.chart_of_account.report.sort_value_name')
+                    : filters.sort_by === 'balance'
+                      ? t('reports.chart_of_account.report.sort_value_balance')
+                      : t('reports.chart_of_account.report.sort_value_code')}
+                </span>
               </div>
             )}
           </div>
@@ -464,7 +491,7 @@ const ChartOfAccountReport = () => {
                     {/* Level Filter */}
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Account Level
+                        {t('reports.chart_of_account.report.label_account_level')}
                       </label>
                       <select
                         value={filters.level}
@@ -482,7 +509,7 @@ const ChartOfAccountReport = () => {
                     {/* Account Type Filter */}
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Account Type
+                        {t('reports.chart_of_account.report.label_account_type')}
                       </label>
                       <select
                         value={filters.account_type}
@@ -500,7 +527,7 @@ const ChartOfAccountReport = () => {
                     {/* Status Filter */}
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Status
+                        {t('reports.chart_of_account.report.label_status')}
                       </label>
                       <select
                         value={filters.status}
@@ -518,7 +545,7 @@ const ChartOfAccountReport = () => {
                     {/* Sort By */}
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Sort By
+                        {t('reports.chart_of_account.report.label_sort_by')}
                       </label>
                       <select
                         value={filters.sort_by}
@@ -539,7 +566,7 @@ const ChartOfAccountReport = () => {
                   <div className="mt-4">
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       <Search className="inline-block w-4 h-4 mr-1" />
-                      Search Accounts
+                      {t('reports.chart_of_account.report.label_search_accounts')}
                     </label>
                     <input
                       type="text"
@@ -557,13 +584,13 @@ const ChartOfAccountReport = () => {
                       disabled={loading}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
                     >
-                      {loading ? 'Applying...' : 'Apply Filters'}
+                      {loading ? t('reports.chart_of_account.report.applying') : t('reports.chart_of_account.report.apply_filters')}
                     </button>
                     <button
                       onClick={handleResetFilters}
                       className="px-4 py-2 bg-slate-600 text-gray-200 rounded-lg hover:bg-slate-500 transition-colors"
                     >
-                      Reset
+                      {t('reports.chart_of_account.report.reset')}
                     </button>
                   </div>
                 </div>
@@ -610,12 +637,12 @@ const ChartOfAccountReport = () => {
                             account.account_type === 'Revenue' ? 'bg-purple-900 text-purple-200' :
                             'bg-orange-900 text-orange-200'
                           }`}>
-                            {account.account_type}
+                            {translateAccountType(account.account_type)}
                           </span>
                         </td>
                         <td>
                           <span className={getStatusBadge(account.status)}>
-                            {account.status}
+                            {translateStatus(account.status)}
                           </span>
                         </td>
                       </tr>
@@ -629,7 +656,7 @@ const ChartOfAccountReport = () => {
             <div className="mt-6 bg-blue-900 text-white rounded-lg border border-blue-800 p-4">
               <h3 className="font-semibold mb-2 text-blue-200">
                 <FileText className="inline-block w-5 h-5 mr-2" />
-                IFRS Compliance Notes
+                {t('reports.chart_of_account.report.ifrs_notes_title')}
               </h3>
               <ul className="text-sm space-y-1 list-disc list-inside text-blue-300">
                 <li>{t('reports.chart_of_account.report.chart_follows_ias_1__presentation_of_fin')}</li>

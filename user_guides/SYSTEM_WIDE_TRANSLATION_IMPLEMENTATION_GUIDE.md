@@ -6,6 +6,7 @@ Implement consistent bilingual translations (English + Urdu) across the full fro
 ## Current Status
 
 ### Completed and verified (update this list as pages pass QA EN/UR)
+- Accounts reports (General Ledger, Trial Balance, Income Statement, Balance Sheet, Currency Ledger): Search + Report + Print / PrintView where applicable
 - Accounts/BankVoucher: Create + Show
 - Accounts/CashVoucher: Create + Show
 - Accounts/JournalVoucher: Create + Show
@@ -16,6 +17,14 @@ Implement consistent bilingual translations (English + Urdu) across the full fro
 - Accounts/ChartOfAccountCodeConfiguration: Index + CashConfiguration + BankConfiguration
 - System “high-risk” entrypoints: `CodeConfiguration/Edit.jsx`, `RoleFeatures/create.jsx`, `Users/index.jsx` (thin re-exports; i18n on `Create.jsx`, `RoleFeatures/edit.jsx`, `Users/List.jsx`)
 - System/Companies: Create + List + Show (`system.companies.*`)
+- System/Currencies: Create + Index (`system.currencies.create.*`, `system.currencies.index.*`)
+- System/Locations: create + List (`system.locations.create.*`, `system.locations.list.*`)
+- System/Departments: create + List (`system.departments.create.*`, `system.departments.list.*`)
+- System/Users: create + List + show (`system.users.create.*`, `system.users.list.*`, `system.users.show.*`)
+- System/AttachmentManager: Index (`system.attachment_manager.index.*`)
+- System/AddModules: add + List + edit + show; Menus: add + List + edit; Packages: add + List + edit; PackageFeatures: add + List + edit; Sections: add + List + edit; RoleFeatures: index + create (re-export) + edit; Roles: index; CodeConfiguration: Create + Index + Edit (re-export → Create)
+- Inventory: ItemCategoryCoding, ItemClassCoding, ItemGroupCoding (Create + List); ItemMaster (Create + List); MasterData (Create + List; keys `inventory.master_data.*`); UomConversion, UomMaster (Create + List; `lang/en/inventory.json`, `lang/ur/inventory.json`)
+- Reports module: CashBook (Search + Report), ChartOfAccount (Search + Report), GeneralLedger Index (`lang/en/reports.json`, `lang/ur/reports.json`; keys `reports.cash_book.*`, `reports.chart_of_account.*`, `reports.general_ledger.index.*`)
 
 ## Translation Structure
 - Locale files:
@@ -25,6 +34,8 @@ Implement consistent bilingual translations (English + Urdu) across the full fro
   - `lang/ur/common.json`
   - `lang/en/reports.json`
   - `lang/ur/reports.json`
+  - `lang/en/inventory.json`
+  - `lang/ur/inventory.json`
 - Translation usage in pages:
   - `useTranslations()` hook
   - `t('namespace.key')`
@@ -59,75 +70,81 @@ Use `[x]` = done (keys + UI covered), `[ ]` = still to do.
 1. [x] `resources/js/Pages/system/Companies/Create.jsx`
 2. [x] `resources/js/Pages/system/Companies/List.jsx`
 3. [x] `resources/js/Pages/system/Companies/Show.jsx`
-4. `resources/js/Pages/system/Currencies/Create.jsx`
-5. `resources/js/Pages/system/Currencies/Index.jsx`
-6. `resources/js/Pages/system/Locations/create.jsx`
-7. `resources/js/Pages/system/Locations/List.jsx`
-8. `resources/js/Pages/system/Departments/create.jsx`
-9. `resources/js/Pages/system/Departments/List.jsx`
-10. `resources/js/Pages/system/Users/create.jsx`
-11. `resources/js/Pages/system/Users/List.jsx`
-12. `resources/js/Pages/system/Users/show.jsx`
-13. `resources/js/Pages/system/AttachmentManager/Index.jsx`
-14. `resources/js/Pages/system/AddModules/List.jsx`
-15. `resources/js/Pages/system/AddModules/edit.jsx`
-16. `resources/js/Pages/system/AddModules/show.jsx`
-17. `resources/js/Pages/system/Menus/List.jsx`
-18. `resources/js/Pages/system/Menus/edit.jsx`
-19. `resources/js/Pages/system/Packages/List.jsx`
-20. `resources/js/Pages/system/Packages/edit.jsx`
-21. `resources/js/Pages/system/PackageFeatures/List.jsx`
-22. `resources/js/Pages/system/PackageFeatures/edit.jsx`
-23. `resources/js/Pages/system/Sections/List.jsx`
-24. `resources/js/Pages/system/Sections/edit.jsx`
-25. `resources/js/Pages/system/RoleFeatures/index.jsx`
-26. `resources/js/Pages/system/RoleFeatures/create.jsx`
-27. `resources/js/Pages/system/RoleFeatures/edit.jsx`
-28. `resources/js/Pages/system/Roles/index.jsx`
-29. `resources/js/Pages/system/CodeConfiguration/Create.jsx`
-30. `resources/js/Pages/system/CodeConfiguration/Index.jsx`
-31. `resources/js/Pages/system/CodeConfiguration/Edit.jsx`
+4. [x] `resources/js/Pages/system/Currencies/Create.jsx`
+5. [x] `resources/js/Pages/system/Currencies/Index.jsx`
+6. [x] `resources/js/Pages/system/Locations/create.jsx`
+7. [x] `resources/js/Pages/system/Locations/List.jsx`
+8. [x] `resources/js/Pages/system/Departments/create.jsx`
+9. [x] `resources/js/Pages/system/Departments/List.jsx`
+10. [x] `resources/js/Pages/system/Users/create.jsx`
+11. [x] `resources/js/Pages/system/Users/List.jsx`
+12. [x] `resources/js/Pages/system/Users/show.jsx`
+13. [x] `resources/js/Pages/system/AttachmentManager/Index.jsx`
+14. [x] `resources/js/Pages/system/AddModules/List.jsx`
+15. [x] `resources/js/Pages/system/AddModules/edit.jsx`
+16. [x] `resources/js/Pages/system/AddModules/show.jsx`
+17. [x] `resources/js/Pages/system/Menus/List.jsx`
+18. [x] `resources/js/Pages/system/Menus/edit.jsx`
+19. [x] `resources/js/Pages/system/Packages/List.jsx`
+20. [x] `resources/js/Pages/system/Packages/edit.jsx`
+21. [x] `resources/js/Pages/system/PackageFeatures/List.jsx`
+22. [x] `resources/js/Pages/system/PackageFeatures/edit.jsx`
+23. [x] `resources/js/Pages/system/Sections/List.jsx`
+24. [x] `resources/js/Pages/system/Sections/edit.jsx`
+25. [x] `resources/js/Pages/system/RoleFeatures/index.jsx`
+26. [x] `resources/js/Pages/system/RoleFeatures/create.jsx`
+27. [x] `resources/js/Pages/system/RoleFeatures/edit.jsx`
+28. [x] `resources/js/Pages/system/Roles/index.jsx`
+29. [x] `resources/js/Pages/system/CodeConfiguration/Create.jsx`
+30. [x] `resources/js/Pages/system/CodeConfiguration/Index.jsx`
+31. [x] `resources/js/Pages/system/CodeConfiguration/Edit.jsx`
+
+**Priority 2 (System Forms) is complete.**
 
 ### Priority 3: Inventory Forms
-1. `resources/js/Pages/Inventory/ItemCategoryCoding/Create.jsx`
-2. `resources/js/Pages/Inventory/ItemCategoryCoding/List.jsx`
-3. `resources/js/Pages/Inventory/ItemClassCoding/Create.jsx`
-4. `resources/js/Pages/Inventory/ItemClassCoding/List.jsx`
-5. `resources/js/Pages/Inventory/ItemGroupCoding/Create.jsx`
-6. `resources/js/Pages/Inventory/ItemGroupCoding/List.jsx`
-7. `resources/js/Pages/Inventory/ItemMaster/Create.jsx`
-8. `resources/js/Pages/Inventory/ItemMaster/List.jsx`
-9. `resources/js/Pages/Inventory/MasterData/Create.jsx`
-10. `resources/js/Pages/Inventory/MasterData/List.jsx`
-11. `resources/js/Pages/Inventory/UomConversion/Create.jsx`
-12. `resources/js/Pages/Inventory/UomConversion/List.jsx`
-13. `resources/js/Pages/Inventory/UomMaster/Create.jsx`
-14. `resources/js/Pages/Inventory/UomMaster/List.jsx`
+1. [x] `resources/js/Pages/Inventory/ItemCategoryCoding/Create.jsx`
+2. [x] `resources/js/Pages/Inventory/ItemCategoryCoding/List.jsx`
+3. [x] `resources/js/Pages/Inventory/ItemClassCoding/Create.jsx`
+4. [x] `resources/js/Pages/Inventory/ItemClassCoding/List.jsx`
+5. [x] `resources/js/Pages/Inventory/ItemGroupCoding/Create.jsx`
+6. [x] `resources/js/Pages/Inventory/ItemGroupCoding/List.jsx`
+7. [x] `resources/js/Pages/Inventory/ItemMaster/Create.jsx`
+8. [x] `resources/js/Pages/Inventory/ItemMaster/List.jsx`
+9. [x] `resources/js/Pages/Inventory/MasterData/Create.jsx`
+10. [x] `resources/js/Pages/Inventory/MasterData/List.jsx`
+11. [x] `resources/js/Pages/Inventory/UomConversion/Create.jsx`
+12. [x] `resources/js/Pages/Inventory/UomConversion/List.jsx`
+13. [x] `resources/js/Pages/Inventory/UomMaster/Create.jsx`
+14. [x] `resources/js/Pages/Inventory/UomMaster/List.jsx`
+
+**Priority 3 (Inventory Forms) is complete.**
 
 ## Next Reports Queue
 
-### Priority 1: Accounts Reports
-1. `resources/js/Pages/Accounts/GeneralLedger/Search.jsx`
-2. `resources/js/Pages/Accounts/GeneralLedger/Report.jsx`
-3. `resources/js/Pages/Accounts/GeneralLedger/Print.jsx`
-4. `resources/js/Pages/Accounts/TrialBalance/Search.jsx`
-5. `resources/js/Pages/Accounts/TrialBalance/Report.jsx`
-6. `resources/js/Pages/Accounts/TrialBalance/Print.jsx`
-7. `resources/js/Pages/Accounts/IncomeStatement/Search.jsx`
-8. `resources/js/Pages/Accounts/IncomeStatement/Report.jsx`
-9. `resources/js/Pages/Accounts/BalanceSheet/Search.jsx`
-10. `resources/js/Pages/Accounts/BalanceSheet/Report.jsx`
-11. `resources/js/Pages/Accounts/BalanceSheet/PrintView.jsx`
-12. `resources/js/Pages/Accounts/CurrencyLedger/Search.jsx`
-13. `resources/js/Pages/Accounts/CurrencyLedger/Report.jsx`
-14. `resources/js/Pages/Accounts/CurrencyLedger/Print.jsx`
+### Priority 1: Accounts Reports ✓ (keys + UI wired; QA EN/UR recommended)
+1. [x] `resources/js/Pages/Accounts/GeneralLedger/Search.jsx`
+2. [x] `resources/js/Pages/Accounts/GeneralLedger/Report.jsx`
+3. [x] `resources/js/Pages/Accounts/GeneralLedger/Print.jsx`
+4. [x] `resources/js/Pages/Accounts/TrialBalance/Search.jsx`
+5. [x] `resources/js/Pages/Accounts/TrialBalance/Report.jsx`
+6. [x] `resources/js/Pages/Accounts/TrialBalance/Print.jsx`
+7. [x] `resources/js/Pages/Accounts/IncomeStatement/Search.jsx`
+8. [x] `resources/js/Pages/Accounts/IncomeStatement/Report.jsx`
+9. [x] `resources/js/Pages/Accounts/BalanceSheet/Search.jsx`
+10. [x] `resources/js/Pages/Accounts/BalanceSheet/Report.jsx`
+11. [x] `resources/js/Pages/Accounts/BalanceSheet/PrintView.jsx`
+12. [x] `resources/js/Pages/Accounts/CurrencyLedger/Search.jsx`
+13. [x] `resources/js/Pages/Accounts/CurrencyLedger/Report.jsx`
+14. [x] `resources/js/Pages/Accounts/CurrencyLedger/Print.jsx`
 
 ### Priority 2: Reports Module
-1. `resources/js/Pages/Reports/CashBook/Search.jsx`
-2. `resources/js/Pages/Reports/CashBook/Report.jsx`
-3. `resources/js/Pages/Reports/ChartOfAccount/Search.jsx`
-4. `resources/js/Pages/Reports/ChartOfAccount/Report.jsx`
-5. `resources/js/Pages/Reports/GeneralLedger/Index.jsx`
+1. [x] `resources/js/Pages/Reports/CashBook/Search.jsx`
+2. [x] `resources/js/Pages/Reports/CashBook/Report.jsx`
+3. [x] `resources/js/Pages/Reports/ChartOfAccount/Search.jsx`
+4. [x] `resources/js/Pages/Reports/ChartOfAccount/Report.jsx`
+5. [x] `resources/js/Pages/Reports/GeneralLedger/Index.jsx`
+
+**Priority 2 (Reports Module) is complete.**
 
 ## High-Risk Files (barrel / thin entrypoints)
 **Done (2026-04-08).** These three files are re-exports only (no UI). Comments in each file point to the real component:

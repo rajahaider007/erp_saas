@@ -79,7 +79,7 @@ const { t } = useTranslations();
 
             <div style={{ fontSize: '10pt', fontWeight: '600', padding: '3px 0 3px 10px', borderTop: '1px solid #000', marginTop: '2px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Total {level2.name}</span>
+                <span>{t('accounts.balance_sheet.report.total_level2_line', { name: level2.name })}</span>
                 <span style={{ fontFamily: "'Courier New', monospace", textAlign: 'right', minWidth: '120px' }}>{formatCurrency(level2.total)}</span>
               </div>
             </div>
@@ -165,8 +165,12 @@ const { t } = useTranslations();
 
       <div className="print-header">
         <div className="print-company-name">{company?.company_name}</div>
-        <div className="print-report-title">Balance Sheet as at {new Date(asAtDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
-        <div className="print-report-info">Currency: {currencyCode}</div>
+        <div className="print-report-title">
+          {t('accounts.balance_sheet.report.print_balance_sheet_as_at', {
+            date: new Date(asAtDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+          })}
+        </div>
+        <div className="print-report-info">{t('accounts.balance_sheet.report.currency_line', { code: currencyCode })}</div>
       </div>
 
       {balanceSheetData && (
@@ -220,8 +224,12 @@ const { t } = useTranslations();
           </div>
 
           <div className="print-footer">
-            <p>This report has been prepared in accordance with International Accounting Standards (IAS 1).</p>
-            <p>Generated on: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+            <p>{t('accounts.balance_sheet.report.print_footer_ias1')}</p>
+            <p>
+              {t('accounts.balance_sheet.report.print_generated_on', {
+                datetime: new Date().toLocaleString(undefined, { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+              })}
+            </p>
           </div>
         </>
       )}
@@ -237,6 +245,7 @@ function ReportContent() {
     currencyCode,
     error
   } = usePage().props;
+  const { t } = useTranslations();
   const { theme, primaryColor } = useLayout();
 
   const [selectedDate, setSelectedDate] = useState(asAtDate);
@@ -290,7 +299,7 @@ function ReportContent() {
       setDrillDownData(response.data.accounts);
     } catch (err) {
       console.error('Error fetching Level 4 details:', err);
-      alert('Failed to load account details');
+      alert(t('accounts.balance_sheet.report.failed_load_level4_details'));
     } finally {
       setDrillDownLoading(false);
     }
@@ -422,7 +431,7 @@ function ReportContent() {
                 theme === 'dark' ? 'border-green-700' : 'border-green-500'
               }`}>
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold">Total {level2.name}</span>
+                  <span className="font-semibold">{t('accounts.balance_sheet.report.total_level2_line', { name: level2.name })}</span>
                   <span className="font-mono font-semibold">{formatCurrency(level2.total)}</span>
                 </div>
               </div>
@@ -436,7 +445,7 @@ function ReportContent() {
             theme === 'dark' ? 'border-red-700' : 'border-red-500'
           }`}>
             <div className="flex justify-between items-center">
-              <span className="font-bold uppercase">Total {data.name}</span>
+              <span className="font-bold uppercase">{t('accounts.balance_sheet.report.total_level2_line', { name: data.name })}</span>
               <span className="font-mono font-bold">{formatCurrency(data.total)}</span>
             </div>
           </div>
@@ -485,7 +494,7 @@ function ReportContent() {
             {/* Level 2 Total */}
             <div className="level-2-total">
               <div className="account-row">
-                <span>Total {level2.name}</span>
+                <span>{t('accounts.balance_sheet.report.total_level2_line', { name: level2.name })}</span>
                 <span className="amount">{formatCurrency(level2.total)}</span>
               </div>
             </div>
@@ -534,10 +543,10 @@ function ReportContent() {
             primaryColor === 'teal' ? 'text-teal-600 dark:text-teal-400' :
             'text-pink-600 dark:text-pink-400'
           }`} />
-          Balance Sheet (Statement of Financial Position)
+          {t('accounts.balance_sheet.report.page_title_long')}
         </h1>
         <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
-          International Accounting Standards - IAS 1 Format
+          {t('accounts.balance_sheet.report.page_subtitle_ias1')}
         </p>
       </div>
 
@@ -552,7 +561,7 @@ function ReportContent() {
             <label className={`block text-sm font-medium mb-2 ${
               theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
             }`}>
-              As At Date
+              {t('accounts.balance_sheet.report.as_at_date_label')}
             </label>
             <input
               type="date"
@@ -577,7 +586,7 @@ function ReportContent() {
               } disabled:opacity-50`}
             >
               <RefreshCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              Generate
+              {t('accounts.balance_sheet.report.btn_generate')}
             </button>
           </div>
 
@@ -592,7 +601,7 @@ function ReportContent() {
               }`}
             >
               <Printer className="w-4 h-4" />
-              Print
+              {t('accounts.balance_sheet.report.btn_print')}
             </button>
           </div>
         </form>
@@ -634,9 +643,13 @@ function ReportContent() {
             }`}>{company?.company_name}</h2>
             <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>{company?.legal_name}</p>
             <p className={`text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-              Balance Sheet as at {new Date(asAtDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              {t('accounts.balance_sheet.report.balance_sheet_as_at', {
+                date: new Date(asAtDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+              })}
             </p>
-            <p className={`text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Currency: {currencyCode}</p>
+            <p className={`text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+              {t('accounts.balance_sheet.report.currency_line', { code: currencyCode })}
+            </p>
           </div>
 
           {/* Horizontal Two-Column Layout */}
@@ -648,7 +661,7 @@ function ReportContent() {
               <h3 className={`text-xl font-bold mb-6 pb-2 border-b-2 text-center ${
                 theme === 'dark' ? 'border-orange-700 text-orange-400' : 'border-orange-500 text-orange-700'
               }`}>
-                CAPITAL & LIABILITIES
+                {t('accounts.balance_sheet.report.report_heading_capital_liabilities')}
               </h3>
 
               {/* Equity */}
@@ -701,7 +714,7 @@ function ReportContent() {
                         : 'bg-red-50 border-red-600 text-red-900')
                 }`}>
                   <div className="flex justify-between items-center">
-                    <span>{balanceSheetData.netIncome >= 0 ? 'NET PROFIT (Retained Earnings)' : 'NET LOSS'}</span>
+                    <span>{balanceSheetData.netIncome >= 0 ? t('accounts.balance_sheet.report.net_profit_retained') : t('accounts.balance_sheet.report.net_loss_label')}</span>
                     <span className="font-mono">{formatCurrency(balanceSheetData.netIncome)}</span>
                   </div>
                 </div>
@@ -725,7 +738,7 @@ function ReportContent() {
               <h3 className={`text-xl font-bold mb-6 pb-2 border-b-2 text-center ${
                 theme === 'dark' ? 'border-blue-700 text-blue-400' : 'border-blue-500 text-blue-700'
               }`}>
-                ASSETS
+                {t('accounts.balance_sheet.report.report_heading_assets')}
               </h3>
 
               {/* Assets */}
@@ -757,7 +770,7 @@ function ReportContent() {
                 : 'bg-red-50 border-red-200 text-red-800'
             }`}>
               <AlertCircle className="w-5 h-5" />
-              Balance sheet does not balance. Difference: {formatCurrency(balanceSheetData.balancingCheck)}
+              {t('accounts.balance_sheet.report.not_balanced', { amount: formatCurrency(balanceSheetData.balancingCheck) })}
             </div>
           )}
 
@@ -767,8 +780,8 @@ function ReportContent() {
               ? 'border-gray-700 text-gray-500'
               : 'border-gray-900 text-gray-500'
           }`}>
-            <p>This report has been prepared in accordance with International Accounting Standards (IAS 1).</p>
-            <p>Generated on: {new Date().toLocaleString()}</p>
+            <p>{t('accounts.balance_sheet.report.footer_ias1_note')}</p>
+            <p>{t('accounts.balance_sheet.report.generated_on', { datetime: new Date().toLocaleString() })}</p>
           </div>
         </div>
       )}
@@ -777,6 +790,7 @@ function ReportContent() {
 }
 
 export default function BalanceSheetReport() {
+  const { t } = useTranslations();
   const isPrintView = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('print_view') === '1';
 
   if (isPrintView) {

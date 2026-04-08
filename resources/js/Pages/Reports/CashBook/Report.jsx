@@ -36,11 +36,10 @@ const CashBookReport = () => {
   const [expandedAccounts, setExpandedAccounts] = useState(new Set());
   const [loading, setLoading] = useState(false);
 
-  // View type options
-  const viewTypes = [
-    { value: 'summary', label: 'Summary View' },
-    { value: 'detailed', label: 'Detailed View' },
-  ];
+  const viewTypeLabel = (v) =>
+    v === 'detailed'
+      ? t('reports.cash_book.report.view_type_detailed')
+      : t('reports.cash_book.report.view_type_summary');
 
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
@@ -135,12 +134,12 @@ const CashBookReport = () => {
             <div className="report-title-section">
               <h1 className="report-title">
                 <CreditCard className="report-title-icon" />
-                Cash Book Report
+                {t('reports.cash_book.report.title')}
               </h1>
               <div className="report-stats-summary">
                 <div className="report-stat-item">
                   <DollarSign size={16} />
-                  <span>{initialData?.length || 0} Accounts</span>
+                  <span>{t('reports.cash_book.report.accounts_count', { count: initialData?.length || 0 })}</span>
                 </div>
                 {company && (
                   <div className="report-stat-item">
@@ -158,7 +157,7 @@ const CashBookReport = () => {
                 title={t('reports.cash_book.report.back_to_filters')}
               >
                 <Filter size={20} />
-                Change Filters
+                {t('reports.cash_book.report.change_filters')}
               </button>
 
               <button
@@ -167,28 +166,28 @@ const CashBookReport = () => {
                 title={t('reports.cash_book.report.print_report')}
               >
                 <Printer size={20} />
-                Print
+                {t('reports.cash_book.report.print')}
               </button>
 
               {/* Export Dropdown */}
               <div className="dropdown">
                 <button className="report-btn dropdown-toggle">
                   <Download size={20} />
-                  Export
+                  {t('reports.cash_book.report.export')}
                   <ChevronDown size={16} />
                 </button>
                 <div className="dropdown-menu bg-slate-700 border-slate-600">
                   <button className="text-white hover:bg-slate-600">
                     <FileSpreadsheet size={16} />
-                    Export as Excel
+                    {t('reports.cash_book.report.export_excel')}
                   </button>
                   <button className="text-white hover:bg-slate-600">
                     <FileBarChart size={16} />
-                    Export as PDF
+                    {t('reports.cash_book.report.export_pdf')}
                   </button>
                   <button className="text-white hover:bg-slate-600">
                     <FileText size={16} />
-                    Export as CSV
+                    {t('reports.cash_book.report.export_csv')}
                   </button>
                 </div>
               </div>
@@ -226,7 +225,7 @@ const CashBookReport = () => {
             {filters.view_type && (
               <div className="filter-badge">
                 <span className="filter-badge-label">{t('reports.cash_book.report.view')}</span>
-                <span className="filter-badge-value">{filters.view_type}</span>
+                <span className="filter-badge-value">{viewTypeLabel(filters.view_type)}</span>
               </div>
             )}
             {filters.search && (
@@ -318,7 +317,7 @@ const CashBookReport = () => {
                             <h3 className="text-xl font-bold">
                               {accountData.account_code} - {accountData.account_name}
                             </h3>
-                            <p className="text-sm opacity-80">Currency: {accountData.currency}</p>
+                            <p className="text-sm opacity-80">{t('reports.cash_book.report.currency_label')} {accountData.currency}</p>
                           </div>
                           <div className="text-right">
                             <p className="text-sm">{t('reports.cash_book.report.opening_balance')}</p>
@@ -372,7 +371,7 @@ const CashBookReport = () => {
                             {accountData.transactions && accountData.transactions.length === 0 ? (
                               <tr>
                                 <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                                  No transactions found for this account
+                                  {t('reports.cash_book.report.no_transactions_this_account')}
                                 </td>
                               </tr>
                             ) : (
@@ -384,7 +383,7 @@ const CashBookReport = () => {
                                     <div>
                                       <p className="font-medium">{transaction.description}</p>
                                       {transaction.reference_number && (
-                                        <p className="text-xs text-gray-500">Ref: {transaction.reference_number}</p>
+                                        <p className="text-xs text-gray-500">{t('reports.cash_book.report.ref_prefix')} {transaction.reference_number}</p>
                                       )}
                                     </div>
                                   </td>
@@ -424,7 +423,7 @@ const CashBookReport = () => {
                 {/* IAS 7 Compliance Notes */}
                 <div className="mt-6 bg-green-900 text-white rounded-lg border border-green-800 p-4">
                   <h3 className="font-semibold mb-2 text-green-200">
-                    IAS 7 - Cash Flow Compliance
+                    {t('reports.cash_book.report.ias7_title')}
                   </h3>
                   <ul className="text-sm space-y-1 list-disc list-inside text-green-300">
                     <li>{t('reports.cash_book.report.cash_book_tracks_all_cash_and_bank_accou')}</li>

@@ -13,10 +13,11 @@ const CustomAlert = { fire: ({ title, text, icon, showCancelButton = false, conf
 }};
 
 const List = () => {
-  const { t } = useTranslations();
-  const tl = (key, rep) => (rep ? t(`system.departments.list.${key}`, rep) : t(`system.departments.list.${key}`));
-  const td = (key, rep) => (rep ? t(`common.data_table.${key}`, rep) : t(`common.data_table.${key}`));
-  const { departments: paginated, companies, locations, flash, filters } = usePage().props;
+  const { t, locale } = useTranslations();
+  const tl = (key, rep = {}) => t(`system.departments.list.${key}`, rep);
+  const td = (key, rep = {}) => t(`common.data_table.${key}`, rep);
+  const tf = (key, rep = {}) => t(`common.flash.${key}`, rep);
+  const { departments: paginated, companies, locations, flash, filters, pageTitle } = usePage().props;
   const [search, setSearch] = useState(filters?.search || '');
   const [companyId, setCompanyId] = useState(filters?.company_id || '');
   const [locationId, setLocationId] = useState(filters?.location_id || '');
@@ -36,9 +37,28 @@ const List = () => {
   }, [applyFilters]);
 
   useEffect(() => {
-    if (flash?.success) CustomAlert.fire({ title: t('common.flash.success_title'), text: flash.success, icon: 'success' });
-    else if (flash?.error) CustomAlert.fire({ title: t('common.flash.error_title'), text: flash.error, icon: 'error' });
-  }, [flash, t]);
+    if (flash?.success) {
+      CustomAlert.fire({
+        title: tf('success_title'),
+        text: flash.success,
+        icon: 'success',
+        confirmButtonText: tf('great'),
+      });
+    } else if (flash?.error) {
+      CustomAlert.fire({
+        title: tf('error_title'),
+        text: flash.error,
+        icon: 'error',
+        confirmButtonText: tf('ok'),
+      });
+    }
+  }, [flash, tf]);
+
+  const formatDateTime = (iso) => {
+    if (!iso) return '';
+    const loc = locale === 'ur' ? 'ur-PK' : undefined;
+    return new Date(iso).toLocaleString(loc);
+  };
 
   const handleDelete = (department) => {
     CustomAlert.fire({
@@ -97,10 +117,11 @@ const List = () => {
         <div className="manager-header">
           <div className="header-main">
             <div className="title-section">
-              <h1 className="page-title"><Users className="title-icon" />{usePage().props?.pageTitle || t('system.departments.create.breadcrumb_departments')}</h1>
+              <h1 className="page-title"><Users className="title-icon" />{pageTitle || tl('page_title_fallback')}</h1>
               <div className="stats-summary">
                 <div className="stat-item"><span>{td('stat_total', { count: paginated?.total || 0 })}</span></div>
                 <div className="stat-item"><span>{td('stat_active', { count: paginated?.data?.filter(d=>d.status).length || 0 })}</span></div>
+                <div className="stat-item"><span>{td('stat_inactive', { count: paginated?.data?.filter(d=>!d.status).length || 0 })}</span></div>
               </div>
             </div>
             <div className="header-actions">
@@ -159,8 +180,8 @@ const List = () => {
                     onChange={(e) => setStatusFilter(e.target.value)}
                   >
                     <option value="">{tl('all_status')}</option>
-                    <option value="1">{tl('active')}</option>
-                    <option value="0">{tl('inactive')}</option>
+                    <option value="1">{t('common.status.active')}</option>
+                    <option value="0">{t('common.status.inactive')}</option>
                   </select>
                 </div>
 
@@ -216,8 +237,8 @@ const List = () => {
                         {department.manager_email && <span className="text-gray-500 text-xs">{department.manager_email}</span>}
                       </div>
                     </td>
-                    <td><span className={`status-badge status-${department.status ? 'active' : 'inactive'}`}>{department.status ? tl('active') : tl('inactive')}</span></td>
-                    <td><div className="date-cell"><Clock size={14} /><span>{new Date(department.updated_at).toLocaleString()}</span></div></td>
+                    <td><span className={`status-badge status-${department.status ? 'active' : 'inactive'}`}>{department.status ? t('common.status.active') : t('common.status.inactive')}</span></td>
+                    <td><div className="date-cell"><Clock size={14} /><span>{formatDateTime(department.updated_at)}</span></div></td>
                     <td>
                       <div className="actions-cell">
                         <button className="action-btn view" title={tl('view_details')} onClick={()=>router.get(`/system/departments/${department.id}/edit`)}>

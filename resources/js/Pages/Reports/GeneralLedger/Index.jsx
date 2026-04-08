@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 import AppLayout from '@/Layouts/AppLayout';
@@ -13,6 +13,24 @@ import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
 const GeneralLedgerReport = () => {
   const { auth, company, currencies } = usePage().props;
   const { t } = useTranslations();
+
+  const translateLedgerAccountType = (type) => {
+    if (type == null || type === '') return type;
+    const lower = String(type).trim().toLowerCase();
+    const keyBy = {
+      asset: 'type_asset',
+      assets: 'type_asset',
+      liability: 'type_liability',
+      liabilities: 'type_liability',
+      equity: 'type_equity',
+      revenue: 'type_revenue',
+      expense: 'type_expense',
+      expenses: 'type_expense',
+    };
+    const idx = keyBy[lower];
+    return idx ? t(`reports.general_ledger.index.${idx}`) : type;
+  };
+
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState([]);
   const [filters, setFilters] = useState({
@@ -44,27 +62,25 @@ const GeneralLedgerReport = () => {
   const [showColumnSettings, setShowColumnSettings] = useState(false);
   const [exporting, setExporting] = useState(false);
 
-  // Account types for filtering
-  const accountTypes = [
-    { value: 'asset', label: 'Assets' },
-    { value: 'liability', label: 'Liabilities' },
-    { value: 'equity', label: 'Equity' },
-    { value: 'revenue', label: 'Revenue' },
-    { value: 'expense', label: 'Expenses' }
-  ];
+  const accountTypes = useMemo(() => [
+    { value: 'asset', label: t('reports.general_ledger.index.type_asset') },
+    { value: 'liability', label: t('reports.general_ledger.index.type_liability') },
+    { value: 'equity', label: t('reports.general_ledger.index.type_equity') },
+    { value: 'revenue', label: t('reports.general_ledger.index.type_revenue') },
+    { value: 'expense', label: t('reports.general_ledger.index.type_expense') }
+  ], [t]);
 
-  // Column definitions
-  const columns = [
-    { key: 'account_code', label: 'Account Code', width: '120px', type: 'text' },
-    { key: 'account_name', label: 'Account Name', width: '200px', type: 'text' },
-    { key: 'account_type', label: 'Type', width: '100px', type: 'text' },
-    { key: 'opening_balance', label: 'Opening Balance', width: '150px', type: 'currency' },
-    { key: 'debit_total', label: 'Debit Total', width: '150px', type: 'currency' },
-    { key: 'credit_total', label: 'Credit Total', width: '150px', type: 'currency' },
-    { key: 'closing_balance', label: 'Closing Balance', width: '150px', type: 'currency' },
-    { key: 'transactions_count', label: 'Transactions', width: '100px', type: 'number' },
-    { key: 'last_transaction_date', label: 'Last Transaction', width: '150px', type: 'date' }
-  ];
+  const columns = useMemo(() => [
+    { key: 'account_code', label: t('reports.general_ledger.index.col_account_code'), width: '120px', type: 'text' },
+    { key: 'account_name', label: t('reports.general_ledger.index.col_account_name'), width: '200px', type: 'text' },
+    { key: 'account_type', label: t('reports.general_ledger.index.col_type'), width: '100px', type: 'text' },
+    { key: 'opening_balance', label: t('reports.general_ledger.index.col_opening_balance'), width: '150px', type: 'currency' },
+    { key: 'debit_total', label: t('reports.general_ledger.index.col_debit_total'), width: '150px', type: 'currency' },
+    { key: 'credit_total', label: t('reports.general_ledger.index.col_credit_total'), width: '150px', type: 'currency' },
+    { key: 'closing_balance', label: t('reports.general_ledger.index.col_closing_balance'), width: '150px', type: 'currency' },
+    { key: 'transactions_count', label: t('reports.general_ledger.index.col_transactions'), width: '100px', type: 'number' },
+    { key: 'last_transaction_date', label: t('reports.general_ledger.index.col_last_transaction'), width: '150px', type: 'date' }
+  ], [t]);
 
   // Load report data
   const loadReportData = async () => {
@@ -216,10 +232,10 @@ const GeneralLedgerReport = () => {
           <FileText className="w-6 h-6 mr-3" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              General Ledger Report
+              {t('reports.general_ledger.index.general_ledger_report')}
             </h1>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Comprehensive financial report following international standards
+              {t('reports.general_ledger.index.subtitle')}
             </p>
           </div>
         </div>
@@ -230,7 +246,7 @@ const GeneralLedgerReport = () => {
             className="btn btn-secondary mr-2"
           >
             <Filter className="w-4 h-4 mr-2" />
-            Filters
+            {t('reports.general_ledger.index.filters')}
           </button>
           
           <button
@@ -238,26 +254,26 @@ const GeneralLedgerReport = () => {
             className="btn btn-secondary mr-2"
           >
             <Columns className="w-4 h-4 mr-2" />
-            Columns
+            {t('reports.general_ledger.index.columns')}
           </button>
           
           <div className="dropdown">
             <button className="btn btn-primary dropdown-toggle">
               <Download className="w-4 h-4 mr-2" />
-              Export
+              {t('reports.general_ledger.index.export')}
             </button>
             <div className="dropdown-menu">
               <button onClick={exportToPDF} disabled={exporting} className="dropdown-item">
                 <FileBarChart className="w-4 h-4 mr-2" />
-                Export to PDF
+                {t('reports.general_ledger.index.export_pdf')}
               </button>
               <button onClick={exportToExcel} disabled={exporting} className="dropdown-item">
                 <FileSpreadsheet className="w-4 h-4 mr-2" />
-                Export to Excel
+                {t('reports.general_ledger.index.export_excel')}
               </button>
               <button onClick={exportToCSV} disabled={exporting} className="dropdown-item">
                 <FileText className="w-4 h-4 mr-2" />
-                Export to CSV
+                {t('reports.general_ledger.index.export_csv')}
               </button>
             </div>
           </div>
@@ -335,7 +351,7 @@ const GeneralLedgerReport = () => {
                           } else {
                             setFilters({
                               ...filters, 
-                              account_types: filters.account_types.filter(t => t !== type.value)
+                              account_types: filters.account_types.filter((at) => at !== type.value)
                             });
                           }
                         }}
@@ -399,7 +415,7 @@ const GeneralLedgerReport = () => {
                 ) : (
                   <Search className="w-4 h-4 mr-2" />
                 )}
-                Generate Report
+                {loading ? t('reports.general_ledger.index.generating_report') : t('reports.general_ledger.index.generate_report')}
               </button>
             </div>
           </div>
@@ -446,9 +462,11 @@ const GeneralLedgerReport = () => {
             <div>
               <h3 className="card-title">{t('reports.general_ledger.index.general_ledger_report')}</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Period: {filters.date_from} to {filters.date_to} | 
-                Currency: {filters.currency} | 
-                Generated: {new Date().toLocaleDateString()}
+                {t('reports.general_ledger.index.period_line', { from: filters.date_from, to: filters.date_to })}
+                {' | '}
+                {t('reports.general_ledger.index.currency_line', { currency: filters.currency })}
+                {' | '}
+                {t('reports.general_ledger.index.generated_line', { date: new Date().toLocaleDateString() })}
               </p>
             </div>
             <div className="flex space-x-2">
@@ -457,7 +475,7 @@ const GeneralLedgerReport = () => {
                 className="btn btn-secondary"
               >
                 <Printer className="w-4 h-4 mr-2" />
-                Print
+                {t('reports.general_ledger.index.print')}
               </button>
             </div>
           </div>
@@ -497,7 +515,7 @@ const GeneralLedgerReport = () => {
                         {visibleColumns.account_type && (
                           <td>
                             <span className="badge badge-secondary">
-                              {row.account_type}
+                              {translateLedgerAccountType(row.account_type)}
                             </span>
                           </td>
                         )}
@@ -574,7 +592,7 @@ const GeneralLedgerReport = () => {
                       {reportData.length}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Total Accounts
+                      {t('reports.general_ledger.index.total_accounts')}
                     </div>
                   </div>
                   <div className="text-center">
@@ -582,7 +600,7 @@ const GeneralLedgerReport = () => {
                       {formatCurrency(totals.debit_total)}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Total Debits
+                      {t('reports.general_ledger.index.total_debits')}
                     </div>
                   </div>
                   <div className="text-center">
@@ -590,7 +608,7 @@ const GeneralLedgerReport = () => {
                       {formatCurrency(totals.credit_total)}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Total Credits
+                      {t('reports.general_ledger.index.total_credits')}
                     </div>
                   </div>
                 </div>

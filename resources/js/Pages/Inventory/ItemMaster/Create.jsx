@@ -1,51 +1,53 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Home, Plus, Edit3, Package, Layers, DollarSign, Calendar, Zap, Hash } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import App from '../../App.jsx';
 import { router, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
-const Breadcrumbs = ({ items }) => {
-  return (
-    <div className="breadcrumbs-themed">
-      <nav className="breadcrumbs">
-        {items.map((item, index) => (
-          <div key={index} className="breadcrumb-item">
-            <div className="breadcrumb-item-content">
-              {item.icon && (
-                <item.icon className={`breadcrumb-icon ${item.href ? 'breadcrumb-icon-link' : 'breadcrumb-icon-current'}`} />
-              )}
-
-              {item.href ? (
-                <a href={item.href} className="breadcrumb-link-themed">
-                  {item.label}
-                </a>
-              ) : (
-                <span className="breadcrumb-current-themed">{item.label}</span>
-              )}
-            </div>
-
-            {index < items.length - 1 && (
-              <div className="breadcrumb-separator breadcrumb-separator-themed">
-                <svg viewBox="0 0 20 20" fill="currentColor" className="w-full h-full">
-                  <path
-                    fillRule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
+const Breadcrumbs = ({ items, description }) => (
+  <div className="breadcrumbs-themed">
+    <nav className="breadcrumbs">
+      {items.map((item, index) => (
+        <div key={index} className="breadcrumb-item">
+          <div className="breadcrumb-item-content">
+            {item.icon && (
+              <item.icon className={`breadcrumb-icon ${item.href ? 'breadcrumb-icon-link' : 'breadcrumb-icon-current'}`} />
+            )}
+            {item.href ? (
+              <a href={item.href} className="breadcrumb-link-themed">
+                {item.label}
+              </a>
+            ) : (
+              <span className="breadcrumb-current-themed">{item.label}</span>
             )}
           </div>
-        ))}
-      </nav>
-      <div className="breadcrumbs-description">Create and maintain product masters with complete costing, tracking, and compliance data</div>
-    </div>
-  );
-};
+          {index < items.length - 1 && (
+            <div className="breadcrumb-separator breadcrumb-separator-themed">
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-full h-full">
+                <path
+                  fillRule="evenodd"
+                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+          )}
+        </div>
+      ))}
+    </nav>
+    <div className="breadcrumbs-description">{description}</div>
+  </div>
+);
 
 const CreateItemMasterForm = () => {
-const { t } = useTranslations();
+  const { t } = useTranslations();
+  const fld = useCallback((name, part) => t(`inventory.item_master.create.fields.${name}.${part}`), [t]);
+  const opt = useCallback((g, v) => t(`inventory.item_master.create.options.${g}.${v}`), [t]);
+  const sec = useCallback((k, p) => t(`inventory.item_master.create.sections.${k}.${p}`), [t]);
+  const val = useCallback((k) => t(`inventory.item_master.create.validation.${k}`), [t]);
+  const tc = useCallback((k, r = {}) => t(`inventory.item_master.create.${k}`, r), [t]);
+  const tf = useCallback((k, r = {}) => t(`inventory.item_master.create.form.${k}`, r), [t]);
   const {
     errors: pageErrors,
     flash,
@@ -69,14 +71,13 @@ const { t } = useTranslations();
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
   const [expiryTrackingEnabled, setExpiryTrackingEnabled] = useState(false);
-  const [standardCostMethod, setStandardCostMethod] = useState(false);
 
   useEffect(() => {
     if (pageErrors && Object.keys(pageErrors).length > 0) {
       setErrors(pageErrors);
-      setAlert({ type: 'error', message: t('inventory.item_master.create.msg_please_correct_the_errors_below') });
+      setAlert({ type: 'error', message: tc('msg_please_correct_the_errors_below') });
     }
-  }, [pageErrors]);
+  }, [pageErrors, tc]);
 
   useEffect(() => {
     if (flash?.success) {
@@ -92,106 +93,106 @@ const { t } = useTranslations();
   const headerFields = [
     {
       name: 'item_code',
-      label: 'Item Code',
+      label: fld('item_code', 'label'),
       type: 'text',
-      placeholder: 'Auto-generated or enter manually',
+      placeholder: fld('item_code', 'placeholder'),
       icon: Hash,
       required: true,
       maxLength: 50,
-      help: 'Unique identifier - no spaces, alphanumeric + dashes allowed'
+      help: fld('item_code', 'help')
     },
     {
       name: 'item_name_short',
-      label: 'Item Name (Short)',
+      label: fld('item_name_short', 'label'),
       type: 'text',
-      placeholder: 'Max 50 characters',
+      placeholder: fld('item_name_short', 'placeholder'),
       icon: Package,
       required: true,
       maxLength: 50,
-      help: 'Display name in pick lists'
+      help: fld('item_name_short', 'help')
     },
     {
       name: 'item_name_long',
-      label: 'Item Name (Long/Description)',
+      label: fld('item_name_long', 'label'),
       type: 'textarea',
-      placeholder: 'Full product description',
+      placeholder: fld('item_name_long', 'placeholder'),
       required: false,
       maxLength: 250,
-      help: 'Complete product description'
+      help: fld('item_name_long', 'help')
     },
     {
       name: 'item_status',
-      label: 'Item Status',
+      label: fld('item_status', 'label'),
       type: 'select',
-      placeholder: 'Select status',
+      placeholder: fld('item_status', 'placeholder'),
       required: true,
       options: itemStatusOptions || [
-        { value: 'active', label: 'Active' },
-        { value: 'inactive', label: 'Inactive' },
-        { value: 'discontinued', label: 'Discontinued' },
-        { value: 'blocked', label: 'Blocked' }
+        { value: 'active', label: opt('item_status', 'active') },
+        { value: 'inactive', label: opt('item_status', 'inactive') },
+        { value: 'discontinued', label: opt('item_status', 'discontinued') },
+        { value: 'blocked', label: opt('item_status', 'blocked') },
       ],
-      help: 'Inactive items cannot be used in new transactions'
+      help: fld('item_status', 'help')
     },
     {
       name: 'item_type',
-      label: 'Item Type',
+      label: fld('item_type', 'label'),
       type: 'select',
-      placeholder: 'Select item type',
+      placeholder: fld('item_type', 'placeholder'),
       required: true,
       options: itemTypeOptions || [
-        { value: 'raw_material', label: 'Raw Material' },
-        { value: 'finished_good', label: 'Finished Good' },
-        { value: 'trading', label: 'Trading' },
-        { value: 'consumable', label: 'Consumable' },
-        { value: 'service', label: 'Service (Non-Stock)' }
+        { value: 'raw_material', label: opt('item_type', 'raw_material') },
+        { value: 'finished_good', label: opt('item_type', 'finished_good') },
+        { value: 'trading', label: opt('item_type', 'trading') },
+        { value: 'consumable', label: opt('item_type', 'consumable') },
+        { value: 'service', label: opt('item_type', 'service') },
       ],
-      help: 'Determines GL account category'
+      help: fld('item_type', 'help')
     },
     {
       name: 'item_class_id',
-      label: 'Item Class',
+      label: fld('item_class_id', 'label'),
       type: 'select',
-      placeholder: 'Select item class',
+      placeholder: fld('item_class_id', 'placeholder'),
       required: true,
       options: itemClassOptions,
-      help: 'E.g., Electronics, Chemicals, Textiles'
+      help: fld('item_class_id', 'help')
     },
     {
       name: 'item_category_id',
-      label: 'Item Category',
+      label: fld('item_category_id', 'label'),
       type: 'select',
-      placeholder: 'Select item category',
+      placeholder: fld('item_category_id', 'placeholder'),
       required: true,
       options: itemCategoryOptions,
-      help: 'Child of Item Class'
+      help: fld('item_category_id', 'help')
     },
     {
       name: 'item_group_id',
-      label: 'Item Group',
+      label: fld('item_group_id', 'label'),
       type: 'select',
-      placeholder: 'Select item group',
+      placeholder: fld('item_group_id', 'placeholder'),
       required: false,
       options: itemGroupOptions,
-      help: 'Further sub-classification'
+      help: fld('item_group_id', 'help')
     },
     {
       name: 'brand',
-      label: 'Brand',
+      label: fld('brand', 'label'),
       type: 'text',
-      placeholder: 'Brand name or select from master',
+      placeholder: fld('brand', 'placeholder'),
       required: false,
       maxLength: 100,
-      help: 'For reporting and sales analytics'
+      help: fld('brand', 'help')
     },
     {
       name: 'item_image',
-      label: 'Item Image',
+      label: fld('item_image', 'label'),
       type: 'file',
-      placeholder: 'Upload JPG/PNG (max 5 MB)',
+      placeholder: fld('item_image', 'placeholder'),
       required: false,
       accept: 'image/jpeg,image/png',
-      help: 'For mobile app display'
+      help: fld('item_image', 'help')
     },
   ];
 
@@ -201,61 +202,61 @@ const { t } = useTranslations();
   const trackingFields = [
     {
       name: 'tracking_mode',
-      label: 'Tracking Mode',
+      label: fld('tracking_mode', 'label'),
       type: 'select',
-      placeholder: 'Select tracking mode',
+      placeholder: fld('tracking_mode', 'placeholder'),
       required: true,
       options: trackingModeOptions || [
-        { value: 'none', label: 'None' },
-        { value: 'lot', label: 'Lot / Batch' },
-        { value: 'serial', label: 'Serial Number' }
+        { value: 'none', label: opt('tracking_mode', 'none') },
+        { value: 'lot', label: opt('tracking_mode', 'lot') },
+        { value: 'serial', label: opt('tracking_mode', 'serial') },
       ],
-      help: 'Determines GRN line-item requirements'
+      help: fld('tracking_mode', 'help')
     },
     {
       name: 'stock_uom_id',
-      label: 'Stock UOM',
+      label: fld('stock_uom_id', 'label'),
       type: 'select',
-      placeholder: 'Select stock UOM',
+      placeholder: fld('stock_uom_id', 'placeholder'),
       required: true,
       options: uomOptions,
-      help: 'Base unit for quantity ledger (e.g., Unit, Box, kg, Liter)'
+      help: fld('stock_uom_id', 'help')
     },
     {
       name: 'purchase_uom_id',
-      label: 'Purchase UOM',
+      label: fld('purchase_uom_id', 'label'),
       type: 'select',
-      placeholder: 'Select purchase UOM',
+      placeholder: fld('purchase_uom_id', 'placeholder'),
       required: true,
       options: uomOptions,
-      help: 'Vendor billing unit - may differ from Stock UOM'
+      help: fld('purchase_uom_id', 'help')
     },
     {
       name: 'sales_uom_id',
-      label: 'Sales UOM',
+      label: fld('sales_uom_id', 'label'),
       type: 'select',
-      placeholder: 'Select sales UOM',
+      placeholder: fld('sales_uom_id', 'placeholder'),
       required: true,
       options: uomOptions,
-      help: 'Customer invoicing unit - may differ from Stock UOM'
+      help: fld('sales_uom_id', 'help')
     },
     {
       name: 'uom_conversion_table',
-      label: 'UOM Conversion Table',
+      label: fld('uom_conversion_table', 'label'),
       type: 'textarea',
-      placeholder: 'Example: 12 pcs = 1 box; 1 box = 1 stock unit',
+      placeholder: fld('uom_conversion_table', 'placeholder'),
       required: false,
       maxLength: 500,
-      help: 'Purchase → Stock → Sales conversion with decimal factors (Sub-table implementation pending)'
+      help: fld('uom_conversion_table', 'help')
     },
     {
       name: 'packaging_hierarchy',
-      label: 'Packaging Hierarchy',
+      label: fld('packaging_hierarchy', 'label'),
       type: 'textarea',
-      placeholder: 'Unit / Box / Case / Pallet with qty per level',
+      placeholder: fld('packaging_hierarchy', 'placeholder'),
       required: false,
       maxLength: 500,
-      help: 'For WMS and shipping optimization (Sub-table implementation pending)'
+      help: fld('packaging_hierarchy', 'help')
     },
   ];
 
@@ -265,97 +266,97 @@ const { t } = useTranslations();
   const costingFields = [
     {
       name: 'costing_method',
-      label: 'Costing Method',
+      label: fld('costing_method', 'label'),
       type: 'select',
-      placeholder: 'Select costing method',
+      placeholder: fld('costing_method', 'placeholder'),
       required: true,
       options: [
-        { value: 'fifo', label: 'FIFO (First In First Out)' },
-        { value: 'weighted_avg', label: 'Moving Weighted Average' },
-        { value: 'standard_cost', label: 'Standard Cost' }
+        { value: 'fifo', label: opt('costing_method', 'fifo') },
+        { value: 'weighted_avg', label: opt('costing_method', 'weighted_avg') },
+        { value: 'standard_cost', label: opt('costing_method', 'standard_cost') },
       ],
-      help: 'Per IAS 2 policy. LIFO feature-flagged by country'
+      help: fld('costing_method', 'help')
     },
     {
       name: 'standard_cost',
-      label: 'Standard Cost',
+      label: fld('standard_cost', 'label'),
       type: 'decimal',
-      placeholder: 'Enter standard cost',
+      placeholder: fld('standard_cost', 'placeholder'),
       required: false,
       min: 0,
-      help: 'Required if Standard Cost method selected. Fixed reference cost for variance tracking'
+      help: fld('standard_cost', 'help')
     },
     {
       name: 'last_purchase_price',
-      label: 'Last Purchase Price',
+      label: fld('last_purchase_price', 'label'),
       type: 'decimal',
-      placeholder: 'Auto-updated from GRN',
+      placeholder: fld('last_purchase_price', 'placeholder'),
       required: false,
       readOnly: true,
-      help: 'Auto-updated, read-only for reference'
+      help: fld('last_purchase_price', 'help')
     },
     {
       name: 'minimum_order_qty',
-      label: 'Minimum Order Qty (MOQ)',
+      label: fld('minimum_order_qty', 'label'),
       type: 'decimal',
-      placeholder: 'Enter MOQ',
+      placeholder: fld('minimum_order_qty', 'placeholder'),
       required: false,
       min: 0,
-      help: 'Vendor minimum requirement'
+      help: fld('minimum_order_qty', 'help')
     },
     {
       name: 'reorder_point',
-      label: 'Reorder Point',
+      label: fld('reorder_point', 'label'),
       type: 'decimal',
-      placeholder: 'Enter reorder point',
+      placeholder: fld('reorder_point', 'placeholder'),
       required: false,
       min: 0,
-      help: 'When stock falls below this, alert is triggered'
+      help: fld('reorder_point', 'help')
     },
     {
       name: 'safety_stock',
-      label: 'Safety Stock',
+      label: fld('safety_stock', 'label'),
       type: 'decimal',
-      placeholder: 'Enter safety stock',
+      placeholder: fld('safety_stock', 'placeholder'),
       required: false,
       min: 0,
-      help: 'Buffer stock level'
+      help: fld('safety_stock', 'help')
     },
     {
       name: 'maximum_stock_level',
-      label: 'Maximum Stock Level',
+      label: fld('maximum_stock_level', 'label'),
       type: 'decimal',
-      placeholder: 'Enter maximum level',
+      placeholder: fld('maximum_stock_level', 'placeholder'),
       required: false,
       min: 0,
-      help: 'Upper limit before overstock alert'
+      help: fld('maximum_stock_level', 'help')
     },
     {
       name: 'lead_time_days',
-      label: 'Lead Time (days)',
+      label: fld('lead_time_days', 'label'),
       type: 'integer',
-      placeholder: 'Days from PO to GRN',
+      placeholder: fld('lead_time_days', 'placeholder'),
       required: false,
       min: 0,
-      help: 'For reorder planning'
+      help: fld('lead_time_days', 'help')
     },
     {
       name: 'default_vendor_id',
-      label: 'Default Vendor',
+      label: fld('default_vendor_id', 'label'),
       type: 'select',
-      placeholder: 'Auto-populate in PO if selected',
+      placeholder: fld('default_vendor_id', 'placeholder'),
       required: false,
       options: [],
-      help: 'Select from vendor master'
+      help: fld('default_vendor_id', 'help')
     },
     {
       name: 'substitute_items',
-      label: 'Substitute Items',
+      label: fld('substitute_items', 'label'),
       type: 'text',
-      placeholder: 'Enter substitute item codes (comma-separated)',
+      placeholder: fld('substitute_items', 'placeholder'),
       required: false,
       maxLength: 500,
-      help: 'Other items that can substitute if stockout (Multi-select implementation pending)'
+      help: fld('substitute_items', 'help')
     },
   ];
 
@@ -365,63 +366,63 @@ const { t } = useTranslations();
   const expiryFields = [
     {
       name: 'expiry_tracking',
-      label: 'Expiry Tracking',
+      label: fld('expiry_tracking', 'label'),
       type: 'toggle',
       required: true,
       defaultValue: false,
-      help: 'If enabled, fields below become mandatory'
+      help: fld('expiry_tracking', 'help')
     },
     {
       name: 'shelf_life_days',
-      label: 'Shelf Life (days)',
+      label: fld('shelf_life_days', 'label'),
       type: 'integer',
-      placeholder: 'Days from manufacturing to expiry',
+      placeholder: fld('shelf_life_days', 'placeholder'),
       required: expiryTrackingEnabled ? true : false,
       min: 0,
-      help: 'Required only if Expiry Tracking is enabled'
+      help: fld('shelf_life_days', 'help')
     },
     {
       name: 'expiry_basis',
-      label: 'Expiry Basis',
+      label: fld('expiry_basis', 'label'),
       type: 'select',
-      placeholder: 'Select expiry calculation basis',
+      placeholder: fld('expiry_basis', 'placeholder'),
       required: expiryTrackingEnabled ? true : false,
       options: [
-        { value: 'manufacturing_date', label: 'Manufacturing Date' },
-        { value: 'receipt_date', label: 'Receipt Date' }
+        { value: 'manufacturing_date', label: opt('expiry_basis', 'manufacturing_date') },
+        { value: 'receipt_date', label: opt('expiry_basis', 'receipt_date') },
       ],
-      help: 'Start point for shelf life calculation'
+      help: fld('expiry_basis', 'help')
     },
     {
       name: 'near_expiry_alert_days',
-      label: 'Near-Expiry Alert (days)',
+      label: fld('near_expiry_alert_days', 'label'),
       type: 'integer',
-      placeholder: 'E.g., 30 for alert 30 days before expiry',
+      placeholder: fld('near_expiry_alert_days', 'placeholder'),
       required: expiryTrackingEnabled ? true : false,
       min: 0,
-      help: 'Triggers stock report warning'
+      help: fld('near_expiry_alert_days', 'help')
     },
     {
       name: 'storage_temperature_class',
-      label: 'Storage Temperature Class',
+      label: fld('storage_temperature_class', 'label'),
       type: 'select',
-      placeholder: 'Select storage class',
+      placeholder: fld('storage_temperature_class', 'placeholder'),
       required: false,
       options: temperatureClassOptions || [
-        { value: 'ambient', label: 'Ambient (15-25°C)' },
-        { value: 'chilled', label: 'Chilled (0-8°C)' },
-        { value: 'frozen', label: 'Frozen (<-15°C)' },
-        { value: 'controlled', label: 'Controlled (Other)' }
+        { value: 'ambient', label: opt('storage_temperature_class', 'ambient') },
+        { value: 'chilled', label: opt('storage_temperature_class', 'chilled') },
+        { value: 'frozen', label: opt('storage_temperature_class', 'frozen') },
+        { value: 'controlled', label: opt('storage_temperature_class', 'controlled') },
       ],
-      help: 'Affects warehouse bin assignment'
+      help: fld('storage_temperature_class', 'help')
     },
     {
       name: 'hazardous_material',
-      label: 'Hazardous Material Flag',
+      label: fld('hazardous_material', 'label'),
       type: 'toggle',
       required: false,
       defaultValue: false,
-      help: 'Triggers compliance checks and special storage'
+      help: fld('hazardous_material', 'help')
     },
   ];
 
@@ -431,42 +432,42 @@ const { t } = useTranslations();
   const physicalFields = [
     {
       name: 'gross_weight_kg',
-      label: 'Gross Weight (kg)',
+      label: fld('gross_weight_kg', 'label'),
       type: 'decimal',
-      placeholder: 'Weight in kilograms',
+      placeholder: fld('gross_weight_kg', 'placeholder'),
       required: false,
       min: 0,
       step: 0.001,
-      help: 'For freight cost calculations'
+      help: fld('gross_weight_kg', 'help')
     },
     {
       name: 'net_weight_kg',
-      label: 'Net Weight (kg)',
+      label: fld('net_weight_kg', 'label'),
       type: 'decimal',
-      placeholder: 'Actual product weight',
+      placeholder: fld('net_weight_kg', 'placeholder'),
       required: false,
       min: 0,
       step: 0.001,
-      help: 'Must be <= Gross Weight'
+      help: fld('net_weight_kg', 'help')
     },
     {
       name: 'volume_cbm',
-      label: 'Volume (CBM)',
+      label: fld('volume_cbm', 'label'),
       type: 'decimal',
-      placeholder: 'Cubic meters',
+      placeholder: fld('volume_cbm', 'placeholder'),
       required: false,
       min: 0,
       step: 0.001,
-      help: 'For container & logistics planning'
+      help: fld('volume_cbm', 'help')
     },
     {
       name: 'dimensions',
-      label: 'Dimensions (L×W×H cm)',
+      label: fld('dimensions', 'label'),
       type: 'text',
-      placeholder: 'Format: 10x20x5',
+      placeholder: fld('dimensions', 'placeholder'),
       required: false,
       maxLength: 50,
-      help: 'For picking/packing efficiency'
+      help: fld('dimensions', 'help')
     },
   ];
 
@@ -476,57 +477,57 @@ const { t } = useTranslations();
   const taxFields = [
     {
       name: 'tax_category_id',
-      label: 'Tax Category',
+      label: fld('tax_category_id', 'label'),
       type: 'select',
-      placeholder: 'Select tax category',
+      placeholder: fld('tax_category_id', 'placeholder'),
       required: true,
       options: taxCategoryOptions,
-      help: 'Determines output tax on sales'
+      help: fld('tax_category_id', 'help')
     },
     {
       name: 'hsn_code',
-      label: 'HSN Code / SAC Code',
+      label: fld('hsn_code', 'label'),
       type: 'text',
-      placeholder: 'GST/VAT format',
+      placeholder: fld('hsn_code', 'placeholder'),
       required: false,
       maxLength: 20,
-      help: 'India GST classification'
+      help: fld('hsn_code', 'help')
     },
     {
       name: 'hs_tariff_code',
-      label: 'HS Tariff Code',
+      label: fld('hs_tariff_code', 'label'),
       type: 'text',
-      placeholder: '6-8 digit international code',
+      placeholder: fld('hs_tariff_code', 'placeholder'),
       required: false,
       maxLength: 10,
-      help: 'Customs classification for imports'
+      help: fld('hs_tariff_code', 'help')
     },
     {
       name: 'country_of_origin_id',
-      label: 'Country of Origin',
+      label: fld('country_of_origin_id', 'label'),
       type: 'select',
-      placeholder: 'Select country',
+      placeholder: fld('country_of_origin_id', 'placeholder'),
       required: false,
       options: countryOptions,
-      help: 'For import/export documentation'
+      help: fld('country_of_origin_id', 'help')
     },
     {
       name: 'barcode_gtin',
-      label: 'Barcode / GTIN',
+      label: fld('barcode_gtin', 'label'),
       type: 'text',
-      placeholder: 'GS1 format (13-digit EAN or 12-digit UPC)',
+      placeholder: fld('barcode_gtin', 'placeholder'),
       required: false,
       maxLength: 20,
-      help: 'Unique for supply chain'
+      help: fld('barcode_gtin', 'help')
     },
     {
       name: 'alternate_barcodes',
-      label: 'Alternate Barcodes',
+      label: fld('alternate_barcodes', 'label'),
       type: 'textarea',
-      placeholder: 'Code, Type (EAN/UPC/QR), Vendor, Supplier Code',
+      placeholder: fld('alternate_barcodes', 'placeholder'),
       required: false,
       maxLength: 500,
-      help: 'Multiple symbologies support (Sub-table implementation pending)'
+      help: fld('alternate_barcodes', 'help')
     },
   ];
 
@@ -536,28 +537,28 @@ const { t } = useTranslations();
   const identifiersFields = [
     {
       name: 'alternate_item_codes',
-      label: 'Alternate Item Codes',
+      label: fld('alternate_item_codes', 'label'),
       type: 'textarea',
-      placeholder: 'Code / Type (Supplier/Customer/Internal) / Vendor Link',
+      placeholder: fld('alternate_item_codes', 'placeholder'),
       required: false,
       maxLength: 500,
-      help: 'Map vendor SKU, customer part number (Sub-table implementation pending)'
+      help: fld('alternate_item_codes', 'help')
     },
     {
       name: 'inspection_required',
-      label: 'Inspection Required',
+      label: fld('inspection_required', 'label'),
       type: 'toggle',
       required: false,
       defaultValue: false,
-      help: 'Triggers QC workflow on GRN receipt'
+      help: fld('inspection_required', 'help')
     },
     {
       name: 'consignment_item_flag',
-      label: 'Consignment Item Flag',
+      label: fld('consignment_item_flag', 'label'),
       type: 'toggle',
       required: false,
       defaultValue: false,
-      help: 'For vendor-owned inventory tracking'
+      help: fld('consignment_item_flag', 'help')
     },
   ];
 
@@ -567,39 +568,39 @@ const { t } = useTranslations();
   const glFields = [
     {
       name: 'inventory_gl_account_id',
-      label: 'Inventory GL Account',
+      label: fld('inventory_gl_account_id', 'label'),
       type: 'select',
-      placeholder: 'Select GL account',
+      placeholder: fld('inventory_gl_account_id', 'placeholder'),
       required: true,
       options: glAccountOptions,
-      help: 'Balance sheet asset account'
+      help: fld('inventory_gl_account_id', 'help')
     },
     {
       name: 'cogs_gl_account_id',
-      label: 'COGS GL Account',
+      label: fld('cogs_gl_account_id', 'label'),
       type: 'select',
-      placeholder: 'Select GL account',
+      placeholder: fld('cogs_gl_account_id', 'placeholder'),
       required: true,
       options: glAccountOptions,
-      help: 'P&L expense account'
+      help: fld('cogs_gl_account_id', 'help')
     },
     {
       name: 'writeoff_gl_account_id',
-      label: 'Write-Off GL Account',
+      label: fld('writeoff_gl_account_id', 'label'),
       type: 'select',
-      placeholder: 'Select GL account',
+      placeholder: fld('writeoff_gl_account_id', 'placeholder'),
       required: true,
       options: glAccountOptions,
-      help: 'For adjustments/write-downs'
+      help: fld('writeoff_gl_account_id', 'help')
     },
     {
       name: 'price_variance_gl_account_id',
-      label: 'Price Variance GL Account',
+      label: fld('price_variance_gl_account_id', 'label'),
       type: 'select',
-      placeholder: 'Select GL account',
+      placeholder: fld('price_variance_gl_account_id', 'placeholder'),
       required: false,
       options: glAccountOptions,
-      help: 'Standard cost variance tracking - required if using Standard Cost method'
+      help: fld('price_variance_gl_account_id', 'help')
     },
   ];
 
@@ -609,25 +610,25 @@ const { t } = useTranslations();
   const analyticsFields = [
     {
       name: 'abc_classification',
-      label: 'ABC Classification',
+      label: fld('abc_classification', 'label'),
       type: 'select',
-      placeholder: 'Select classification',
+      placeholder: fld('abc_classification', 'placeholder'),
       required: false,
       options: [
-        { value: 'a', label: 'A (High Value)' },
-        { value: 'b', label: 'B (Medium Value)' },
-        { value: 'c', label: 'C (Low Value)' }
+        { value: 'a', label: opt('abc_classification', 'a') },
+        { value: 'b', label: opt('abc_classification', 'b') },
+        { value: 'c', label: opt('abc_classification', 'c') },
       ],
-      help: 'For inventory management focus'
+      help: fld('abc_classification', 'help')
     },
     {
       name: 'slow_moving_threshold_days',
-      label: 'Slow-Moving Threshold (days)',
+      label: fld('slow_moving_threshold_days', 'label'),
       type: 'integer',
-      placeholder: 'Default 180 days',
+      placeholder: fld('slow_moving_threshold_days', 'placeholder'),
       required: false,
       min: 0,
-      help: 'Days without movement = flag item'
+      help: fld('slow_moving_threshold_days', 'help')
     },
   ];
 
@@ -657,15 +658,15 @@ const { t } = useTranslations();
 
   // Section groupings for display with icons and descriptions
   const sectionGroups = [
-    { title: 'Section A: Header Information', icon: Package, description: 'Basic product identification and classification', fields: headerFields },
-    !isEditMode && { title: 'Section B: Tracking & UOM Configuration', icon: Layers, description: 'Define tracking mode and unit of measure conversions', fields: trackingFields },
-    { title: 'Section C: Costing & Procurement', icon: DollarSign, description: 'Valuation method, reorder points, and vendor information', fields: costingFields },
-    { title: 'Section D: Expiry & Storage', icon: Calendar, description: 'Shelf life management and storage requirements', fields: expiryFields },
-    { title: 'Section E: Physical Attributes', icon: Package, description: 'Weight, volume, and dimension specifications', fields: physicalFields },
-    { title: 'Section F: Tax & Trade Compliance', icon: Hash, description: 'Tax codes and international trade information', fields: taxFields },
-    { title: 'Section G: Identifiers & Alternate Codes', icon: Hash, description: 'Alternate identifiers, inspection and consignment flags', fields: identifiersFields },
-    { title: 'Section H: GL Account Mapping', icon: DollarSign, description: 'Accounting mappings for inventory and expenses', fields: glFields },
-    { title: 'Section I: Classification & Analytics', icon: Zap, description: 'ABC classification and slow-moving tracking', fields: analyticsFields }
+    { title: sec('header', 'title'), icon: Package, description: sec('header', 'description'), fields: headerFields },
+    !isEditMode && { title: sec('tracking', 'title'), icon: Layers, description: sec('tracking', 'description'), fields: trackingFields },
+    { title: sec('costing', 'title'), icon: DollarSign, description: sec('costing', 'description'), fields: costingFields },
+    { title: sec('expiry', 'title'), icon: Calendar, description: sec('expiry', 'description'), fields: expiryFields },
+    { title: sec('physical', 'title'), icon: Package, description: sec('physical', 'description'), fields: physicalFields },
+    { title: sec('tax', 'title'), icon: Hash, description: sec('tax', 'description'), fields: taxFields },
+    { title: sec('identifiers', 'title'), icon: Hash, description: sec('identifiers', 'description'), fields: identifiersFields },
+    { title: sec('gl', 'title'), icon: DollarSign, description: sec('gl', 'description'), fields: glFields },
+    { title: sec('analytics', 'title'), icon: Zap, description: sec('analytics', 'description'), fields: analyticsFields },
   ].filter(Boolean);
 
   const handleSubmit = (formData) => {
@@ -676,81 +677,80 @@ const { t } = useTranslations();
 
     // Validate mandatory fields
     if (!formData.item_code?.trim()) {
-      newErrors.item_code = 'Item code is required';
+      newErrors.item_code = val('item_code');
     }
 
     if (!formData.item_name_short?.trim()) {
-      newErrors.item_name_short = 'Item name (short) is required';
+      newErrors.item_name_short = val('item_name_short');
     }
 
     if (!formData.item_type) {
-      newErrors.item_type = 'Item type is required';
+      newErrors.item_type = val('item_type');
     }
 
     if (!formData.item_class_id) {
-      newErrors.item_class_id = 'Item class is required';
+      newErrors.item_class_id = val('item_class_id');
     }
 
     if (!formData.item_category_id) {
-      newErrors.item_category_id = 'Item category is required';
+      newErrors.item_category_id = val('item_category_id');
     }
 
     if (!formData.stock_uom_id) {
-      newErrors.stock_uom_id = 'Stock UOM is required';
+      newErrors.stock_uom_id = val('stock_uom_id');
     }
 
     if (!formData.purchase_uom_id) {
-      newErrors.purchase_uom_id = 'Purchase UOM is required';
+      newErrors.purchase_uom_id = val('purchase_uom_id');
     }
 
     if (!formData.sales_uom_id) {
-      newErrors.sales_uom_id = 'Sales UOM is required';
+      newErrors.sales_uom_id = val('sales_uom_id');
     }
 
     if (!formData.tracking_mode) {
-      newErrors.tracking_mode = 'Tracking mode is required';
+      newErrors.tracking_mode = val('tracking_mode');
     }
 
     if (!formData.costing_method) {
-      newErrors.costing_method = 'Costing method is required';
+      newErrors.costing_method = val('costing_method');
     }
 
     if (formData.costing_method === 'standard_cost' && !formData.standard_cost) {
-      newErrors.standard_cost = 'Standard cost is required for Standard Cost method';
+      newErrors.standard_cost = val('standard_cost');
     }
 
     if (!formData.tax_category_id) {
-      newErrors.tax_category_id = 'Tax category is required';
+      newErrors.tax_category_id = val('tax_category_id');
     }
 
     if (!formData.inventory_gl_account_id) {
-      newErrors.inventory_gl_account_id = 'Inventory GL account is required';
+      newErrors.inventory_gl_account_id = val('inventory_gl_account_id');
     }
 
     if (!formData.cogs_gl_account_id) {
-      newErrors.cogs_gl_account_id = 'COGS GL account is required';
+      newErrors.cogs_gl_account_id = val('cogs_gl_account_id');
     }
 
     if (!formData.writeoff_gl_account_id) {
-      newErrors.writeoff_gl_account_id = 'Write-off GL account is required';
+      newErrors.writeoff_gl_account_id = val('writeoff_gl_account_id');
     }
 
-    // Conditional validation for expiry
     if (formData.expiry_tracking) {
       if (!formData.shelf_life_days) {
-        newErrors.shelf_life_days = 'Shelf life days is required when expiry tracking is enabled';
+        newErrors.shelf_life_days = val('shelf_life_days');
       }
       if (!formData.expiry_basis) {
-        newErrors.expiry_basis = 'Expiry basis is required when expiry tracking is enabled';
+        newErrors.expiry_basis = val('expiry_basis');
       }
       if (!formData.near_expiry_alert_days) {
-        newErrors.near_expiry_alert_days = 'Near-expiry alert days is required when expiry tracking is enabled';
+        newErrors.near_expiry_alert_days = val('near_expiry_alert_days');
       }
     }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setAlert({ type: 'error', message: t('inventory.item_master.create.msg_please_correct_the_errors_above') });
+      setAlert({ type: 'error', message: tc('msg_please_correct_the_errors_above') });
       return;
     }
 
@@ -773,7 +773,7 @@ const { t } = useTranslations();
         forceFormData: true,
         onError: (serverErrors) => {
           setErrors(serverErrors);
-          setAlert({ type: 'error', message: t('inventory.item_master.create.msg_failed_to_update_item_please_check_the_e') });
+          setAlert({ type: 'error', message: tc('msg_failed_to_update_item_please_check_the_e') });
         },
       });
     } else {
@@ -781,17 +781,20 @@ const { t } = useTranslations();
         forceFormData: true,
         onError: (serverErrors) => {
           setErrors(serverErrors);
-          setAlert({ type: 'error', message: t('inventory.item_master.create.msg_failed_to_create_item_please_check_the_e') });
+          setAlert({ type: 'error', message: tc('msg_failed_to_create_item_please_check_the_e') });
         },
       });
     }
   };
 
-  const breadcrumbItems = [
-    { label: 'Dashboard', icon: Home, href: '/dashboard' },
-    { label: 'Item Master', icon: Package, href: '/inventory/item-master' },
-    { label: isEditMode ? 'Edit Item' : 'Create Item', icon: isEditMode ? Edit3 : Plus },
-  ];
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
+      { label: tc('breadcrumbs.item_master'), icon: Package, href: '/inventory/item-master' },
+      { label: isEditMode ? tc('breadcrumbs.edit_item') : tc('breadcrumbs.create_item'), icon: isEditMode ? Edit3 : Plus },
+    ],
+    [t, tc, isEditMode]
+  );
 
   const initialData = {
     item_code: item?.item_code || '',
@@ -839,7 +842,7 @@ const { t } = useTranslations();
 
   return (
     <div>
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs items={breadcrumbItems} description={tc('breadcrumb_desc')} />
 
       {error && (
         <div className="alert-error-themed mb-4">
@@ -861,12 +864,12 @@ const { t } = useTranslations();
       )}
 
       <GeneralizedForm
-        title={isEditMode ? "Complete Item Master Record" : "Create New Item"}
-        subtitle={isEditMode ? "Update all item details and parameters" : "Define complete product master with all required specifications"}
+        title={isEditMode ? tf('title_edit') : tf('title_create')}
+        subtitle={isEditMode ? tf('subtitle_edit') : tf('subtitle_create')}
         fields={allFields}
         onSubmit={handleSubmit}
-        submitText={isEditMode ? "Update Item" : "Create Item"}
-        resetText="Clear Form"
+        submitText={isEditMode ? tf('submit_edit') : tf('submit_create')}
+        resetText={t('common.form_actions.clear_form')}
         showReset={!isEditMode}
         initialData={initialData}
         fieldGroups={sectionGroups}

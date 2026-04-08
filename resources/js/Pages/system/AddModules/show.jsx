@@ -4,22 +4,22 @@ import { usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
 const Show = () => {
-const { t } = useTranslations();
+  const { t } = useTranslations();
   const { module } = usePage().props;
   return (
     <App>
       <div className="rounded-xl shadow-lg form-container border-slate-200">
         <div className="p-6">
-          <h1 className="form-title">Module Details</h1>
+          <h1 className="form-title">{t('system.add_modules.show.module_details')}</h1>
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <div className="input-group"><label className="input-label">Name</label><div className="input-wrapper"><div className="form-input">{module.module_name}</div></div></div>
-              <div className="input-group"><label className="input-label">Folder</label><div className="input-wrapper"><div className="form-input">{module.folder_name}</div></div></div>
-              <div className="input-group"><label className="input-label">Slug</label><div className="input-wrapper"><div className="form-input">{module.slug}</div></div></div>
+              <div className="input-group"><label className="input-label">{t('system.add_modules.show.name')}</label><div className="input-wrapper"><div className="form-input">{module.module_name}</div></div></div>
+              <div className="input-group"><label className="input-label">{t('system.add_modules.show.folder')}</label><div className="input-wrapper"><div className="form-input">{module.folder_name}</div></div></div>
+              <div className="input-group"><label className="input-label">{t('system.add_modules.show.slug')}</label><div className="input-wrapper"><div className="form-input">{module.slug}</div></div></div>
             </div>
             <div>
-              <div className="input-group"><label className="input-label">Order</label><div className="input-wrapper"><div className="form-input">{module.sort_order ?? 0}</div></div></div>
-              <div className="input-group"><label className="input-label">Status</label><div className="input-wrapper"><div className="form-input">{module.status ? 'Active' : 'Inactive'}</div></div></div>
+              <div className="input-group"><label className="input-label">{t('system.add_modules.show.order')}</label><div className="input-wrapper"><div className="form-input">{module.sort_order ?? 0}</div></div></div>
+              <div className="input-group"><label className="input-label">{t('system.add_modules.show.status')}</label><div className="input-wrapper"><div className="form-input">{module.status ? t('common.status.active') : t('common.status.inactive')}</div></div></div>
               {module.image_url && (
                 <div className="mt-4">
                   <img src={module.image_url} alt={module.module_name} className="h-20" />

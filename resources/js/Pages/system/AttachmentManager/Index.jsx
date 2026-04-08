@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Trash2,
   Download,
@@ -30,7 +30,7 @@ const formatFileSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-const formatRelativeTime = (dateStr) => {
+const formatRelativeTime = (dateStr, tr) => {
   if (dateStr == null) return '—';
   // Support Unix timestamp (seconds) so timezone is correct; otherwise ISO/date string
   const date = typeof dateStr === 'number' ? new Date(dateStr * 1000) : new Date(dateStr);
@@ -39,12 +39,29 @@ const formatRelativeTime = (dateStr) => {
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
-  if (diffMins < 1) return 'Just now';
-  if (diffMins < 60) return `${diffMins} min ago`;
-  if (diffHours < 24) return `${diffHours} hours ago`;
-  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffMins < 1) return tr('system.attachment_manager.index.rel_just_now');
+  if (diffMins < 60) return tr('system.attachment_manager.index.rel_minutes_ago', { count: diffMins });
+  if (diffHours < 24) return tr('system.attachment_manager.index.rel_hours_ago', { count: diffHours });
+  if (diffDays < 7) return tr('system.attachment_manager.index.rel_days_ago', { count: diffDays });
   return date.toLocaleDateString();
 };
+
+/** Map built-in folder slugs to i18n; custom / API folders use `label`. */
+function getAttachmentFolderLabel(folder, tr) {
+  const slug = folder.slug ?? '';
+  const keys = {
+    '': 'system.attachment_manager.index.folder_all_files',
+    'journal-voucher': 'system.attachment_manager.index.folder_journal_voucher',
+    'cash-voucher': 'system.attachment_manager.index.folder_cash_voucher',
+    'bank-voucher': 'system.attachment_manager.index.folder_bank_voucher',
+    'opening-voucher': 'system.attachment_manager.index.folder_opening_voucher',
+    general: 'system.attachment_manager.index.folder_general_uploads',
+  };
+  if (Object.prototype.hasOwnProperty.call(keys, slug)) {
+    return tr(keys[slug]);
+  }
+  return folder.label || slug;
+}
 
 const getFileIcon = (type) => {
   const t = (type || '').toLowerCase();
@@ -56,23 +73,25 @@ const getFileIcon = (type) => {
   return '📎';
 };
 
-const FILE_TYPE_OPTIONS = [
-  { value: '', label: 'All types' },
-  { value: 'pdf', label: 'PDF' },
-  { value: 'doc', label: 'DOC' },
-  { value: 'docx', label: 'DOCX' },
-  { value: 'xls', label: 'XLS' },
-  { value: 'xlsx', label: 'XLSX' },
-  { value: 'jpg', label: 'JPG' },
-  { value: 'jpeg', label: 'JPEG' },
-  { value: 'png', label: 'PNG' },
-  { value: 'gif', label: 'GIF' },
-  { value: 'zip', label: 'ZIP' },
-];
-
 export default function FileManagerIndex() {
   const { storageInfo: initialStorage = {}, company, error: pageError } = usePage().props;
   const { t } = useTranslations();
+  const fileTypeOptions = useMemo(
+    () => [
+      { value: '', label: t('system.attachment_manager.index.filter_all_types') },
+      { value: 'pdf', label: 'PDF' },
+      { value: 'doc', label: 'DOC' },
+      { value: 'docx', label: 'DOCX' },
+      { value: 'xls', label: 'XLS' },
+      { value: 'xlsx', label: 'XLSX' },
+      { value: 'jpg', label: 'JPG' },
+      { value: 'jpeg', label: 'JPEG' },
+      { value: 'png', label: 'PNG' },
+      { value: 'gif', label: 'GIF' },
+      { value: 'zip', label: 'ZIP' },
+    ],
+    [t]
+  );
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [storageInfo, setStorageInfo] = useState(initialStorage);
@@ -91,12 +110,12 @@ export default function FileManagerIndex() {
   const [newFolderName, setNewFolderName] = useState('');
   const [creatingFolder, setCreatingFolder] = useState(false);
   const [folders, setFolders] = useState([
-    { slug: '', label: 'All files' },
-    { slug: 'journal-voucher', label: 'Journal Voucher' },
-    { slug: 'cash-voucher', label: 'Cash Voucher' },
-    { slug: 'bank-voucher', label: 'Bank Voucher' },
-    { slug: 'opening-voucher', label: 'Opening Voucher' },
-    { slug: 'general', label: 'General / Uploads' },
+    { slug: '' },
+    { slug: 'journal-voucher' },
+    { slug: 'cash-voucher' },
+    { slug: 'bank-voucher' },
+    { slug: 'opening-voucher' },
+    { slug: 'general' },
   ]);
   const fileInputRef = useRef(null);
 
@@ -119,7 +138,7 @@ export default function FileManagerIndex() {
         setFiles(Array.isArray(data.data) ? data.data : []);
         setFolders(Array.isArray(data.folders) ? data.folders : []);
       } else {
-        setAlert({ type: 'error', message: data.message || 'Failed to load files' });
+        setAlert({ type: 'error', message: data.message || t('system.attachment_manager.index.msg_failed_to_load_files') });
       }
     } catch (e) {
       setAlert({ type: 'error', message: t('system.attachment_manager.index.msg_failed_to_load_files') });
@@ -169,7 +188,7 @@ export default function FileManagerIndex() {
         await loadFiles();
         if (data.folder?.slug) setSelectedFolder(data.folder.slug);
       } else {
-        setAlert({ type: 'error', message: data.message || 'Could not create folder' });
+        setAlert({ type: 'error', message: data.message || t('system.attachment_manager.index.msg_could_not_create_folder') });
       }
     } catch (e) {
       setAlert({ type: 'error', message: t('system.attachment_manager.index.msg_could_not_create_folder') });
@@ -211,7 +230,7 @@ export default function FileManagerIndex() {
 
   const handleDelete = async () => {
     if (selected.length === 0) return;
-    if (!confirm(`Delete ${selected.length} file(s)? This cannot be undone.`)) return;
+    if (!confirm(t('system.attachment_manager.index.confirm_delete_files', { count: selected.length }))) return;
     try {
       const res = await fetch('/api/attachment-manager/delete', {
         method: 'POST',
@@ -229,7 +248,7 @@ export default function FileManagerIndex() {
         setSelected([]);
         loadFiles();
         loadStorage();
-      } else setAlert({ type: 'error', message: data.message || 'Delete failed' });
+      } else setAlert({ type: 'error', message: data.message || t('system.attachment_manager.index.msg_delete_failed') });
     } catch (e) {
       setAlert({ type: 'error', message: t('system.attachment_manager.index.msg_delete_failed') });
     }
@@ -256,7 +275,7 @@ export default function FileManagerIndex() {
         await loadFiles();
         await loadStorage();
         if (fileInputRef.current) fileInputRef.current.value = '';
-      } else setAlert({ type: 'error', message: data.message || 'Upload failed' });
+      } else setAlert({ type: 'error', message: data.message || t('system.attachment_manager.index.msg_upload_failed') });
     } catch (e) {
       setAlert({ type: 'error', message: t('system.attachment_manager.index.msg_upload_failed') });
     } finally {
@@ -316,7 +335,7 @@ export default function FileManagerIndex() {
                 <User className="w-5 h-5" />
               </div>
               <div className="min-w-0">
-                <p className="font-medium truncate">{company?.company_name || 'Company'}</p>
+                <p className="font-medium truncate">{company?.company_name || t('system.attachment_manager.index.company_fallback')}</p>
                 <p className="text-xs text-gray-400 truncate">{t('system.attachment_manager.index.file_manager')}</p>
               </div>
             </div>
@@ -339,7 +358,7 @@ export default function FileManagerIndex() {
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left font-medium text-gray-300 hover:bg-gray-700"
               >
                 <FolderOpen className="w-5 h-5" />
-                All files
+                {t('system.attachment_manager.index.folder_all_files')}
               </button>
             ) : (
               folders.map((folder) => (
@@ -353,7 +372,7 @@ export default function FileManagerIndex() {
                   }`}
                 >
                   <FolderOpen className="w-5 h-5 flex-shrink-0" />
-                  <span className="truncate">{folder.label}</span>
+                  <span className="truncate">{getAttachmentFolderLabel(folder, t)}</span>
                 </button>
               ))
             )}
@@ -375,7 +394,7 @@ export default function FileManagerIndex() {
             </div>
             <div>
               <p className="text-xs font-medium text-gray-400 mb-1">{t('system.attachment_manager.index.files')}</p>
-              <p className="text-sm font-medium">{files.length} items</p>
+              <p className="text-sm font-medium">{t('system.attachment_manager.index.items_count', { count: files.length })}</p>
             </div>
           </div>
         </aside>
@@ -399,7 +418,7 @@ export default function FileManagerIndex() {
               onChange={(e) => setFileTypeFilter(e.target.value)}
               className="px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[120px]"
             >
-              {FILE_TYPE_OPTIONS.map((opt) => (
+              {fileTypeOptions.map((opt) => (
                 <option key={opt.value || 'all'} value={opt.value}>{opt.label}</option>
               ))}
             </select>
@@ -407,7 +426,7 @@ export default function FileManagerIndex() {
               <button
                 onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
                 className="p-2 rounded-lg hover:bg-gray-700 text-gray-400 hover:text-white"
-                title={viewMode === 'list' ? 'Grid view' : 'List view'}
+                title={viewMode === 'list' ? t('system.attachment_manager.index.view_grid') : t('system.attachment_manager.index.view_list')}
               >
                 {viewMode === 'list' ? <LayoutGrid className="w-5 h-5" /> : <List className="w-5 h-5" />}
               </button>
@@ -419,12 +438,12 @@ export default function FileManagerIndex() {
                 {uploading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Uploading…
+                    {t('system.attachment_manager.index.uploading')}
                   </>
                 ) : (
                   <>
                     <Upload className="w-4 h-4" />
-                    Upload
+                    {t('system.attachment_manager.index.btn_upload')}
                   </>
                 )}
               </button>
@@ -450,7 +469,7 @@ export default function FileManagerIndex() {
                     className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-medium"
                   >
                     <Trash2 className="w-4 h-4" />
-                    Delete ({selected.length})
+                    {t('system.attachment_manager.index.btn_delete_selected', { count: selected.length })}
                   </button>
                 </>
               )}
@@ -511,20 +530,21 @@ export default function FileManagerIndex() {
                             className="px-4 py-3 cursor-pointer hover:bg-gray-700"
                             onClick={() => { setSortBy('filename'); setSortAsc((s) => !s); }}
                           >
-                            Name {sortBy === 'filename' && (sortAsc ? '↑' : '↓')}
+                            {t('system.attachment_manager.index.col_name')} {sortBy === 'filename' && (sortAsc ? '↑' : '↓')}
                           </th>
                           <th
                             className="px-4 py-3 cursor-pointer hover:bg-gray-700 w-28"
                             onClick={() => { setSortBy('size'); setSortAsc((s) => !s); }}
                           >
-                            Size {sortBy === 'size' && (sortAsc ? '↑' : '↓')}
+                            {t('system.attachment_manager.index.col_size')} {sortBy === 'size' && (sortAsc ? '↑' : '↓')}
                           </th>
                           <th
                             className="px-4 py-3 cursor-pointer hover:bg-gray-700 w-40 select-none"
                             onClick={() => { setSortBy('last_modified'); setSortAsc((s) => !s); }}
                             title={t('system.attachment_manager.index.click_to_sort_by_last_modified')}
                           >
-                            Last modified {sortBy === 'last_modified' && (sortAsc ? ' ↑' : ' ↓')}
+                            {t('system.attachment_manager.index.col_last_modified')}
+                            {sortBy === 'last_modified' && (sortAsc ? ' ↑' : ' ↓')}
                           </th>
                           <th className="px-4 py-3 w-24 text-right">{t('system.attachment_manager.index.actions')}</th>
                         </tr>
@@ -559,7 +579,7 @@ export default function FileManagerIndex() {
                             </td>
                             <td className="px-4 py-2 text-gray-400">{formatFileSize(f.size)}</td>
                             <td className="px-4 py-2 text-gray-400">
-                              {formatRelativeTime(f.last_modified_ts ?? f.last_modified ?? f.voucher_date)}
+                              {formatRelativeTime(f.last_modified_ts ?? f.last_modified ?? f.voucher_date, t)}
                             </td>
                             <td className="px-4 py-2 text-right">
                               <a
@@ -624,12 +644,12 @@ export default function FileManagerIndex() {
                       {uploading ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Uploading…
+                          {t('system.attachment_manager.index.uploading')}
                         </>
                       ) : (
                         <>
                           <Upload className="w-4 h-4" />
-                          Upload files
+                          {t('system.attachment_manager.index.upload_files')}
                         </>
                       )}
                     </button>
@@ -665,7 +685,7 @@ export default function FileManagerIndex() {
                 onClick={() => setUploadModalOpen(false)}
                 className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600"
               >
-                Cancel
+                {t('common.actions.cancel')}
               </button>
             </div>
           </div>
@@ -678,7 +698,7 @@ export default function FileManagerIndex() {
           <div className="bg-gray-800 rounded-xl border border-gray-700 w-full max-w-md p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
               <FolderPlus className="w-5 h-5" />
-              New folder
+              {t('system.attachment_manager.index.title_new_folder')}
             </h3>
             <input
               type="text"
@@ -694,14 +714,14 @@ export default function FileManagerIndex() {
                 onClick={() => { setNewFolderModalOpen(false); setNewFolderName(''); }}
                 className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200"
               >
-                Cancel
+                {t('common.actions.cancel')}
               </button>
               <button
                 onClick={handleCreateFolder}
                 disabled={creatingFolder || !newFolderName.trim()}
                 className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {creatingFolder ? 'Creating…' : 'Create'}
+                {creatingFolder ? t('system.attachment_manager.index.btn_creating') : t('common.actions.create')}
               </button>
             </div>
           </div>

@@ -108,7 +108,7 @@ const CashBookSearch = () => {
   }));
 
   const cashAccountOptions = [
-    { value: '', label: 'All Cash/Bank Accounts (Consolidated)' },
+    { value: '', label: t('reports.cash_book.search.all_cash_bank_consolidated') },
     ...availableCashAccounts.map(account => ({
       value: account.id,
       label: `${account.account_code} - ${account.account_name}`
@@ -204,12 +204,12 @@ const CashBookSearch = () => {
             <div className="title-section">
               <h1 className="page-title">
                 <CreditCard className="title-icon" />
-                Cash Book - Report Filters
+                {t('reports.cash_book.search.page_title')}
               </h1>
               <div className="stats-summary">
                 <div className="stat-item">
                   <DollarSign size={16} />
-                  <span>{availableCashAccounts?.length || 0} Accounts Available</span>
+                  <span>{t('reports.cash_book.search.accounts_available', { count: availableCashAccounts?.length || 0 })}</span>
                 </div>
                 <div className="stat-item">
                   <TrendingUp size={16} />
@@ -237,10 +237,10 @@ const CashBookSearch = () => {
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                   <Filter className="inline-block mr-2" size={20} />
-                  Select Report Filters
+                  {t('reports.cash_book.search.select_report_filters')}
                 </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Choose the filters below to generate your Cash Book report. All filters are optional.
+                  {t('reports.cash_book.search.filters_intro')}
                 </p>
               </div>
 
@@ -252,7 +252,7 @@ const CashBookSearch = () => {
                     <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                       <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                         <Building size={16} />
-                        Company Selection
+                        {t('reports.cash_book.search.company_selection')}
                       </label>
                       <Select
                         options={companyOptions}
@@ -266,7 +266,7 @@ const CashBookSearch = () => {
                         classNamePrefix="react-select"
                       />
                       <p className="text-xs text-gray-400 mt-2">
-                        Select a company to filter data
+                        {t('reports.cash_book.search.hint_select_company')}
                       </p>
                     </div>
 
@@ -275,7 +275,7 @@ const CashBookSearch = () => {
                       <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                         <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                           <MapPin size={16} />
-                          Location Selection
+                          {t('reports.cash_book.search.location_selection')}
                         </label>
                         <Select
                           options={locationOptions}
@@ -290,7 +290,7 @@ const CashBookSearch = () => {
                           isDisabled={!selectedCompany}
                         />
                         <p className="text-xs text-gray-400 mt-2">
-                          Select a location within the selected company
+                          {t('reports.cash_book.search.hint_select_location')}
                         </p>
                       </div>
                     )}
@@ -302,7 +302,7 @@ const CashBookSearch = () => {
                   <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                     <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                       <CreditCard size={16} />
-                      Account Selection
+                      {t('reports.cash_book.search.account_selection')}
                     </label>
                     <Select
                       options={cashAccountOptions}
@@ -318,7 +318,7 @@ const CashBookSearch = () => {
                       isLoading={loadingAccounts}
                     />
                     <p className="text-xs text-gray-400 mt-2">
-                      Leave blank to generate consolidated report for all accounts
+                      {t('reports.cash_book.search.hint_leave_blank_consolidated')}
                     </p>
                   </div>
                 )}
@@ -407,25 +407,25 @@ const CashBookSearch = () => {
                       onClick={setTodayFilter}
                       className="px-3 py-1.5 bg-slate-600 hover:bg-blue-600 text-gray-300 hover:text-white rounded-lg text-xs font-medium transition-all"
                     >
-                      Today
+                      {t('reports.cash_book.search.quick_today')}
                     </button>
                     <button
                       onClick={setThisWeekFilter}
                       className="px-3 py-1.5 bg-slate-600 hover:bg-blue-600 text-gray-300 hover:text-white rounded-lg text-xs font-medium transition-all"
                     >
-                      This Week
+                      {t('reports.cash_book.search.quick_this_week')}
                     </button>
                     <button
                       onClick={setThisMonthFilter}
                       className="px-3 py-1.5 bg-slate-600 hover:bg-blue-600 text-gray-300 hover:text-white rounded-lg text-xs font-medium transition-all"
                     >
-                      This Month
+                      {t('reports.cash_book.search.quick_this_month')}
                     </button>
                     <button
                       onClick={setThisYearFilter}
                       className="px-3 py-1.5 bg-slate-600 hover:bg-blue-600 text-gray-300 hover:text-white rounded-lg text-xs font-medium transition-all"
                     >
-                      This Year
+                      {t('reports.cash_book.search.quick_this_year')}
                     </button>
                   </div>
                 </div>
@@ -437,14 +437,14 @@ const CashBookSearch = () => {
                     className="px-6 py-3 bg-slate-600 hover:bg-slate-500 text-gray-200 rounded-lg font-medium transition-all flex items-center gap-2"
                   >
                     <RefreshCcw size={18} />
-                    Reset Filters
+                    {t('reports.cash_book.search.reset_filters')}
                   </button>
                   <button
                     onClick={handleGenerateReport}
                     className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all flex items-center gap-2 shadow-lg hover:shadow-blue-500/50"
                   >
                     <Search size={18} />
-                    Generate Report
+                    {t('reports.cash_book.search.generate_report')}
                     <ChevronRight size={18} />
                   </button>
                 </div>

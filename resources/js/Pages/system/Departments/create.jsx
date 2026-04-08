@@ -147,7 +147,7 @@ const DepartmentForm = () => {
 
   useEffect(() => {
     if (pageErrors && Object.keys(pageErrors).length > 0) {
-      setAlert({ type: 'error', message: td('msg_please_correct_the_errors_below_and_try_') });
+      setAlert({ type: 'error', message: t('common.form_errors.please_correct') });
     }
   }, [pageErrors, t]);
 
@@ -159,7 +159,7 @@ const DepartmentForm = () => {
   const breadcrumbItems = useMemo(
     () => [
       { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
-      { label: td('breadcrumb_system'), icon: List, href: '#' },
+      { label: t('common.breadcrumbs.system'), icon: List, href: '#' },
       { label: td('breadcrumb_departments'), icon: Users, href: '/system/departments' },
       {
         label: isEdit ? td('breadcrumb_edit') : td('breadcrumb_add'),
@@ -192,11 +192,11 @@ const DepartmentForm = () => {
           });
         },
         onError: () => {
-          setAlert({ type: 'error', message: td('msg_please_correct_the_errors_below_and_try_') });
+          setAlert({ type: 'error', message: t('common.form_errors.please_correct') });
         },
       });
     } catch {
-      setAlert({ type: 'error', message: td('msg_an_unexpected_error_occurred_please_try_') });
+      setAlert({ type: 'error', message: t('common.form_errors.unexpected') });
     }
   };
 

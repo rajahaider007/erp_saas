@@ -1,94 +1,88 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Home, List, Plus, Hash, Tag, Edit3 } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import App from '../../App.jsx';
 import { router, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
-const Breadcrumbs = ({ items }) => {
-const { t } = useTranslations();
-  return (
-    <div className="breadcrumbs-themed">
-      <nav className="breadcrumbs">
-        {items.map((item, index) => (
-          <div key={index} className="breadcrumb-item">
-            <div className="breadcrumb-item-content">
-              {item.icon && (
-                <item.icon className={`breadcrumb-icon ${item.href ? 'breadcrumb-icon-link' : 'breadcrumb-icon-current'}`} />
-              )}
-
-              {item.href ? (
-                <a href={item.href} className="breadcrumb-link-themed">
-                  {item.label}
-                </a>
-              ) : (
-                <span className="breadcrumb-current-themed">{item.label}</span>
-              )}
-            </div>
-
-            {index < items.length - 1 && (
-              <div className="breadcrumb-separator breadcrumb-separator-themed">
-                <svg viewBox="0 0 20 20" fill="currentColor" className="w-full h-full">
-                  <path
-                    fillRule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
+const Breadcrumbs = ({ items, description }) => (
+  <div className="breadcrumbs-themed">
+    <nav className="breadcrumbs">
+      {items.map((item, index) => (
+        <div key={index} className="breadcrumb-item">
+          <div className="breadcrumb-item-content">
+            {item.icon && (
+              <item.icon className={`breadcrumb-icon ${item.href ? 'breadcrumb-icon-link' : 'breadcrumb-icon-current'}`} />
+            )}
+            {item.href ? (
+              <a href={item.href} className="breadcrumb-link-themed">
+                {item.label}
+              </a>
+            ) : (
+              <span className="breadcrumb-current-themed">{item.label}</span>
             )}
           </div>
-        ))}
-      </nav>
-      <div className="breadcrumbs-description">{t('inventory.item_group_coding.create.configure_inventory_item_groups')}</div>
-    </div>
-  );
-};
+          {index < items.length - 1 && (
+            <div className="breadcrumb-separator breadcrumb-separator-themed">
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-full h-full">
+                <path
+                  fillRule="evenodd"
+                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+          )}
+        </div>
+      ))}
+    </nav>
+    <div className="breadcrumbs-description">{description}</div>
+  </div>
+);
 
 const CreateItemGroupCodingForm = () => {
-const { t } = useTranslations();
-  const {
-    errors: pageErrors,
-    flash,
-    itemGroup = null,
-    error,
-  } = usePage().props;
+  const { t } = useTranslations();
+  const tc = useCallback((suffix, rep = {}) => t(`inventory.item_group_coding.create.${suffix}`, rep), [t]);
+  const { errors: pageErrors, flash, itemGroup = null, error } = usePage().props;
 
   const isEditMode = !!itemGroup;
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
 
-  const groupFields = [
-    {
-      name: 'group_code',
-      label: 'Group Code',
-      type: 'text',
-      placeholder: 'Enter group code (e.g., RAW, FG, SPARE)',
-      icon: Hash,
-      required: true,
-    },
-    {
-      name: 'group_name',
-      label: 'Group Name',
-      type: 'text',
-      placeholder: 'Enter group name',
-      icon: Tag,
-      required: true,
-    },
-    {
-      name: 'description',
-      label: 'Description',
-      type: 'textarea',
-      placeholder: 'Optional notes',
-      required: false,
-    },
-    {
-      name: 'is_active',
-      label: 'Status',
-      type: 'toggle',
-      required: false,
-    },
-  ];
+  const groupFields = useMemo(
+    () => [
+      {
+        name: 'group_code',
+        label: tc('lbl_group_code'),
+        type: 'text',
+        placeholder: tc('ph_group_code'),
+        icon: Hash,
+        required: true,
+      },
+      {
+        name: 'group_name',
+        label: tc('lbl_group_name'),
+        type: 'text',
+        placeholder: tc('ph_group_name'),
+        icon: Tag,
+        required: true,
+      },
+      {
+        name: 'description',
+        label: tc('lbl_description'),
+        type: 'textarea',
+        placeholder: tc('ph_description'),
+        required: false,
+      },
+      {
+        name: 'is_active',
+        label: tc('lbl_status'),
+        type: 'toggle',
+        required: false,
+      },
+    ],
+    [tc]
+  );
 
   useEffect(() => {
     if (error) {
@@ -101,10 +95,10 @@ const { t } = useTranslations();
       setErrors(pageErrors);
       setAlert({
         type: 'error',
-        message: t('inventory.item_group_coding.create.msg_please_correct_the_errors_below_and_try_'),
+        message: tc('msg_please_correct_the_errors_below_and_try_'),
       });
     }
-  }, [pageErrors]);
+  }, [pageErrors, tc]);
 
   useEffect(() => {
     if (flash?.success) {
@@ -121,16 +115,16 @@ const { t } = useTranslations();
     const newErrors = {};
 
     if (!submittedFormData.group_code?.trim()) {
-      newErrors.group_code = 'Group code is required';
+      newErrors.group_code = tc('val_group_code');
     }
 
     if (!submittedFormData.group_name?.trim()) {
-      newErrors.group_name = 'Group name is required';
+      newErrors.group_name = tc('val_group_name');
     }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setAlert({ type: 'error', message: t('inventory.item_group_coding.create.msg_please_correct_the_errors_below_and_try_') });
+      setAlert({ type: 'error', message: tc('msg_please_correct_the_errors_below_and_try_') });
       return;
     }
 
@@ -158,15 +152,22 @@ const { t } = useTranslations();
     }
   };
 
-  const breadcrumbItems = [
-    { label: 'Dashboard', icon: Home, href: '/dashboard' },
-    { label: 'Item Group Coding', icon: List, href: '/inventory/item-group-coding' },
-    { label: isEditMode ? `Edit: ${itemGroup.group_code}` : 'Add Item Group', icon: isEditMode ? Edit3 : Plus, href: null },
-  ];
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
+      { label: tc('breadcrumb_module'), icon: List, href: '/inventory/item-group-coding' },
+      {
+        label: isEditMode ? `${tc('breadcrumb_edit_prefix')}: ${itemGroup.group_code}` : tc('breadcrumb_add'),
+        icon: isEditMode ? Edit3 : Plus,
+        href: null,
+      },
+    ],
+    [t, tc, isEditMode, itemGroup]
+  );
 
   return (
     <div>
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs items={breadcrumbItems} description={tc('configure_inventory_item_groups')} />
 
       {alert && (
         <div className={`mb-4 p-3 rounded-lg ${alert.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
@@ -185,39 +186,41 @@ const { t } = useTranslations();
       )}
 
       <GeneralizedForm
-        title={isEditMode ? "Edit Item Group" : "Add Item Group"}
-        subtitle={isEditMode ? "Update item group information" : "Create item group (link to categories later)"}
+        title={isEditMode ? tc('title_edit') : tc('title_create')}
+        subtitle={isEditMode ? tc('subtitle_edit') : tc('subtitle_create')}
         fields={groupFields}
         onSubmit={handleSubmit}
-        submitText={isEditMode ? "Update Group" : "Create Group"}
-        resetText="Clear Form"
+        submitText={isEditMode ? tc('submit_edit') : tc('submit_create')}
+        resetText={t('common.form_actions.clear_form')}
         showReset={!isEditMode}
-        initialData={isEditMode ? {
-          group_code: itemGroup.group_code || '',
-          group_name: itemGroup.group_name || '',
-          description: itemGroup.description || '',
-          is_active: itemGroup.is_active ?? true,
-        } : {
-          group_code: '',
-          group_name: '',
-          description: '',
-          is_active: true,
-        }}
+        initialData={
+          isEditMode
+            ? {
+                group_code: itemGroup.group_code || '',
+                group_name: itemGroup.group_name || '',
+                description: itemGroup.description || '',
+                is_active: itemGroup.is_active ?? true,
+              }
+            : {
+                group_code: '',
+                group_name: '',
+                description: '',
+                is_active: true,
+              }
+        }
       />
     </div>
   );
 };
 
-const Create = () => {
-  return (
-    <App>
-      <div className="rounded-xl shadow-lg form-container border-slate-200">
-        <div className="p-6">
-          <CreateItemGroupCodingForm />
-        </div>
+const Create = () => (
+  <App>
+    <div className="rounded-xl shadow-lg form-container border-slate-200">
+      <div className="p-6">
+        <CreateItemGroupCodingForm />
       </div>
-    </App>
-  );
-};
+    </div>
+  </App>
+);
 
 export default Create;

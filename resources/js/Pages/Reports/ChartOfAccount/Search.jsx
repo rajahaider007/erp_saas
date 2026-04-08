@@ -127,7 +127,7 @@ const ChartOfAccountSearch = () => {
             <div className="title-section">
               <h1 className="page-title">
                 <FileText className="title-icon" />
-                Chart of Accounts - Report Filters
+                {t('reports.chart_of_account.search.page_title')}
               </h1>
               <div className="stats-summary">
                 <div className="stat-item">
@@ -160,10 +160,10 @@ const ChartOfAccountSearch = () => {
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                   <Filter className="inline-block mr-2" size={20} />
-                  Select Report Filters
+                  {t('reports.chart_of_account.search.select_report_filters')}
                 </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Choose the filters below to generate your Chart of Accounts report.
+                  {t('reports.chart_of_account.search.filters_intro')}
                 </p>
               </div>
 
@@ -175,7 +175,7 @@ const ChartOfAccountSearch = () => {
                     <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                       <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                         <Building size={16} />
-                        Company Selection
+                        {t('reports.chart_of_account.search.company_selection')}
                       </label>
                       <Select
                         options={companyOptions}
@@ -189,7 +189,7 @@ const ChartOfAccountSearch = () => {
                         classNamePrefix="react-select"
                       />
                       <p className="text-xs text-gray-400 mt-2">
-                        Select a company to filter data
+                        {t('reports.chart_of_account.search.hint_select_company')}
                       </p>
                     </div>
 
@@ -198,7 +198,7 @@ const ChartOfAccountSearch = () => {
                       <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                         <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                           <MapPin size={16} />
-                          Location Selection
+                          {t('reports.chart_of_account.search.location_selection')}
                         </label>
                         <Select
                           options={locationOptions}
@@ -213,7 +213,7 @@ const ChartOfAccountSearch = () => {
                           isDisabled={!selectedCompany}
                         />
                         <p className="text-xs text-gray-400 mt-2">
-                          Select a location within the selected company
+                          {t('reports.chart_of_account.search.hint_select_location')}
                         </p>
                       </div>
                     )}
@@ -227,14 +227,14 @@ const ChartOfAccountSearch = () => {
                     className="px-6 py-3 bg-slate-600 hover:bg-slate-500 text-gray-200 rounded-lg font-medium transition-all flex items-center gap-2"
                   >
                     <RefreshCcw size={18} />
-                    Reset Filters
+                    {t('reports.chart_of_account.search.reset_filters')}
                   </button>
                   <button
                     onClick={handleGenerateReport}
                     className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all flex items-center gap-2 shadow-lg hover:shadow-blue-500/50"
                   >
                     <Search size={18} />
-                    Generate Report
+                    {t('reports.chart_of_account.search.generate_report')}
                     <ChevronRight size={18} />
                   </button>
                 </div>
@@ -248,7 +248,7 @@ const ChartOfAccountSearch = () => {
                     <h3 className="font-semibold text-blue-200">{t('reports.chart_of_account.search.hierarchical_structure')}</h3>
                   </div>
                   <p className="text-sm text-blue-300">
-                    View accounts organized by level from main categories to transactional accounts
+                    {t('reports.chart_of_account.search.info_hierarchical_body')}
                   </p>
                 </div>
 
@@ -258,7 +258,7 @@ const ChartOfAccountSearch = () => {
                     <h3 className="font-semibold text-green-200">{t('reports.chart_of_account.search.ifrs_compliant')}</h3>
                   </div>
                   <p className="text-sm text-green-300">
-                    Follows IAS 1, IFRS 8, and other international accounting standards
+                    {t('reports.chart_of_account.search.info_ifrs_body')}
                   </p>
                 </div>
 
@@ -268,7 +268,7 @@ const ChartOfAccountSearch = () => {
                     <h3 className="font-semibold text-purple-200">{t('reports.chart_of_account.search.account_analysis')}</h3>
                   </div>
                   <p className="text-sm text-purple-300">
-                    Analyze balances, transactions, and account classifications
+                    {t('reports.chart_of_account.search.info_analysis_body')}
                   </p>
                 </div>
               </div>

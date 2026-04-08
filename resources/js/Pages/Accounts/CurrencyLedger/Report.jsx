@@ -11,8 +11,7 @@ import {
   FileText,
   Printer,
   ChevronDown,
-  Globe,
-  DollarSign
+  Globe
 } from 'lucide-react';
 import App from '../../App.jsx';
 
@@ -52,6 +51,7 @@ const CurrencyLedgerReport = () => {
 
     const initializeDataTables = () => {
       if (window.$ && window.$.fn.DataTable) {
+        const dtAll = t('accounts.currency_ledger.report.dt_all');
         // Initialize DataTable for each account
         accounts.forEach((accountData) => {
           const tableId = `currency-data-table-${accountData.id}`;
@@ -61,7 +61,7 @@ const CurrencyLedgerReport = () => {
             window.$(`#${tableId}`).DataTable({
               responsive: true,
               pageLength: 10,
-              lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+              lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, dtAll]],
               order: [[0, 'asc']], // Sort by date ascending
               columnDefs: [
                 { targets: [0], type: 'date' },
@@ -81,21 +81,21 @@ const CurrencyLedgerReport = () => {
                 }
               ],
               language: {
-                search: '<i class="fas fa-search"></i> Search:',
-                lengthMenu: '<i class="fas fa-list-ol"></i> Show _MENU_ entries',
-                info: '<i class="fas fa-info-circle"></i> Showing _START_ to _END_ of _TOTAL_ entries',
-                infoEmpty: '<i class="fas fa-exclamation-circle"></i> No entries available',
-                infoFiltered: '<i class="fas fa-filter"></i> (filtered from _MAX_ total entries)',
+                search: t('accounts.currency_ledger.report.dt_search'),
+                lengthMenu: t('accounts.currency_ledger.report.dt_length_menu'),
+                info: t('accounts.currency_ledger.report.dt_info'),
+                infoEmpty: t('accounts.currency_ledger.report.dt_info_empty'),
+                infoFiltered: t('accounts.currency_ledger.report.dt_info_filtered'),
                 paginate: {
                   first: '<i class="fas fa-angle-double-left"></i>',
                   last: '<i class="fas fa-angle-double-right"></i>', 
                   next: '<i class="fas fa-angle-right"></i>',
                   previous: '<i class="fas fa-angle-left"></i>'
                 },
-                emptyTable: '<i class="fas fa-database"></i> No transaction data available',
-                zeroRecords: '<i class="fas fa-search"></i> No matching records found',
-                processing: '<i class="fas fa-spinner fa-spin"></i> Processing...',
-                loadingRecords: '<i class="fas fa-spinner fa-spin"></i> Loading...'
+                emptyTable: t('accounts.currency_ledger.report.dt_empty_table'),
+                zeroRecords: t('accounts.currency_ledger.report.dt_zero_records'),
+                processing: t('accounts.currency_ledger.report.dt_processing'),
+                loadingRecords: t('accounts.currency_ledger.report.dt_loading_records')
               },
               dom: `<"top"lf>${t('accounts.currency_ledger.report.rt')}<"bottom"ip><"clear">`,
               initComplete: function() {
@@ -142,7 +142,7 @@ const CurrencyLedgerReport = () => {
         });
       }
     };
-  }, [accounts]);
+  }, [accounts, t]);
 
   const handleBackToFilters = () => {
     // Preserve all current filters in the URL
@@ -195,8 +195,20 @@ const CurrencyLedgerReport = () => {
           const tableData = table.data().toArray();
           
           // Add account header
-          allData.push([`Account: ${accountData.account_code} - ${accountData.account_name}`]);
-          allData.push(['Date', 'Voucher No', 'Type', 'Currency', 'Rate', 'Debit', 'Credit', 'Base Debit', 'Base Credit', 'Balance']);
+          allData.push([t('accounts.currency_ledger.report.csv_account_line', { code: accountData.account_code, name: accountData.account_name })]);
+          allData.push([
+            t('accounts.currency_ledger.report.date'),
+            t('accounts.currency_ledger.report.voucher_no'),
+            t('accounts.currency_ledger.report.csv_header_type'),
+            t('accounts.currency_ledger.print.description'),
+            t('accounts.currency_ledger.report.csv_header_currency'),
+            t('accounts.currency_ledger.report.csv_header_rate'),
+            t('accounts.currency_ledger.report.debit'),
+            t('accounts.currency_ledger.report.credit'),
+            t('accounts.currency_ledger.report.base_debit'),
+            t('accounts.currency_ledger.report.base_credit'),
+            t('accounts.currency_ledger.report.balance')
+          ]);
           
           // Add table data
           tableData.forEach(row => {
@@ -205,8 +217,8 @@ const CurrencyLedgerReport = () => {
           
           // Add totals
           const totals = accountTotals[accountData.id] || {};
-          allData.push(['', '', '', '', '', '', '', 'Account Total', totals.total_debit || 0, totals.total_credit || 0, '']);
-          allData.push(['', '', '', '', '', '', '', 'Closing Balance', '', '', totals.closing_balance || 0]);
+          allData.push(['', '', '', '', '', '', '', t('accounts.currency_ledger.report.csv_label_account_total'), totals.total_debit || 0, totals.total_credit || 0, '']);
+          allData.push(['', '', '', '', '', '', '', t('accounts.currency_ledger.report.csv_label_closing_balance'), '', '', totals.closing_balance || 0]);
           allData.push([]); // Empty row for spacing
         }
       });
@@ -220,7 +232,7 @@ const CurrencyLedgerReport = () => {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', `Currency_Ledger_All_Accounts_${new Date().toISOString().slice(0,10)}.csv`);
+      link.setAttribute('download', `${t('accounts.currency_ledger.report.download_csv_basename')}_${new Date().toISOString().slice(0,10)}.csv`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -256,16 +268,16 @@ const CurrencyLedgerReport = () => {
             <div className="report-title-section">
               <h1 className="report-title">
                 <Globe className="report-title-icon" />
-                Currency Ledger Report
+                {t('accounts.currency_ledger.report.report_title')}
               </h1>
               <div className="report-stats-summary">
                 <div className="report-stat-item">
                   <FileText size={16} />
-                  <span>{accounts?.length || 0} Accounts</span>
+                  <span>{t('accounts.currency_ledger.report.accounts_count', { count: accounts?.length || 0 })}</span>
                 </div>
                 <div className="report-stat-item">
                   <Database size={16} />
-                  <span>{Object.values(groupedData).flat().length || 0} Transactions</span>
+                  <span>{t('accounts.currency_ledger.report.transactions_count', { count: Object.values(groupedData).flat().length || 0 })}</span>
                 </div>
               </div>
             </div>
@@ -277,7 +289,7 @@ const CurrencyLedgerReport = () => {
                 title={t('accounts.currency_ledger.report.back_to_filters')}
               >
                 <Filter size={20} />
-                Change Filters
+                {t('accounts.currency_ledger.report.label_change_filters')}
               </button>
 
               <button
@@ -286,28 +298,28 @@ const CurrencyLedgerReport = () => {
                 title={t('accounts.currency_ledger.report.print_report')}
               >
                 <Printer size={20} />
-                Print
+                {t('accounts.currency_ledger.report.label_print')}
               </button>
 
               {/* Export Dropdown */}
               <div className="dropdown">
                 <button className="report-btn dropdown-toggle">
                   <Download size={20} />
-                  Export
+                  {t('accounts.currency_ledger.report.label_export')}
                   <ChevronDown size={16} />
                 </button>
                 <div className="dropdown-menu bg-slate-700 border-slate-600">
                   <button className="text-white hover:bg-slate-600" onClick={handleExportAllDataTables}>
                     <Database size={16} />
-                    Export All Tables (CSV)
+                    {t('accounts.currency_ledger.report.export_all_tables_csv')}
                   </button>
                   <button className="text-white hover:bg-slate-600" onClick={handleExportExcel}>
                     <FileText size={16} />
-                    Export as Excel
+                    {t('accounts.currency_ledger.report.export_as_excel')}
                   </button>
                   <button className="text-white hover:bg-slate-600" onClick={handleExportPDF}>
                     <FileText size={16} />
-                    Export as PDF
+                    {t('accounts.currency_ledger.report.export_as_pdf')}
                   </button>
                 </div>
               </div>
@@ -464,7 +476,7 @@ const CurrencyLedgerReport = () => {
                                 <tr key={`${accountData.id}-${index}`} className="hover:bg-slate-700 text-white">
                                   <td>{formatDate(entry.voucher_date)}</td>
                                   <td>{entry.voucher_number}</td>
-                                  <td>{entry.voucher_type || 'JV'}</td>
+                                  <td>{entry.voucher_type || t('accounts.currency_ledger.report.voucher_type_fallback')}</td>
                                   <td>{entry.currency_code || '-'}</td>
                                   <td className="text-right">{entry.exchange_rate || '-'}</td>
                                   <td className="text-right">

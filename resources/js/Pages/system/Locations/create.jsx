@@ -136,7 +136,7 @@ const LocationForm = () => {
       },
       {
         name: 'status',
-        label: t('system.locations.list.status'),
+        label: tl('lbl_status'),
         type: 'toggle',
         required: false,
       },
@@ -165,7 +165,7 @@ const LocationForm = () => {
         message: t('common.form_errors.please_correct'),
       });
     }
-  }, [pageErrors]);
+  }, [pageErrors, t]);
 
   // Handle flash messages
   useEffect(() => {

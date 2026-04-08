@@ -47,7 +47,12 @@ const CurrencyLedgerPrint = () => {
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Currency Ledger Report - {account?.account_name || 'All Accounts'}</title>
+        <title>
+          {t('accounts.currency_ledger.print.doc_title', {
+            report: t('accounts.currency_ledger.print.currency_ledger_report'),
+            suffix: account?.account_name || t('accounts.currency_ledger.print.all_accounts')
+          })}
+        </title>
         <style>{`
           @page {
             size: A4 portrait;
@@ -300,11 +305,16 @@ const CurrencyLedgerPrint = () => {
         <div className="report-container">
           {/* Company Header - Repeats on each page */}
           <div className="company-header">
-            <div className="company-name">{company?.company_name || 'Company Name'}</div>
+            <div className="company-name">{company?.company_name || t('accounts.currency_ledger.print.company_name_fallback')}</div>
             <div className="company-details">
               {company?.address && <div>{company.address}</div>}
               {company?.city && company?.country && <div>{company.city}, {company.country}</div>}
-              {company?.phone && <div>Tel: {company.phone} {company?.email && `| Email: ${company.email}`}</div>}
+              {company?.phone && (
+                <div>
+                  {t('accounts.currency_ledger.print.tel_prefix')} {company.phone}
+                  {company?.email && ` | ${t('accounts.currency_ledger.print.email_prefix')} ${company.email}`}
+                </div>
+              )}
             </div>
             <div className="report-title">{t('accounts.currency_ledger.print.currency_ledger_report')}</div>
           </div>
@@ -322,7 +332,10 @@ const CurrencyLedgerPrint = () => {
             <div className="account-info-row">
               <div className="account-info-cell info-label">{t('accounts.currency_ledger.print.period')}</div>
               <div className="account-info-cell info-value">
-                {filters?.from_date ? formatDate(filters.from_date) : 'Beginning'} to {filters?.to_date ? formatDate(filters.to_date) : 'End'}
+                {t('accounts.currency_ledger.print.period_line', {
+                  from: filters?.from_date ? formatDate(filters.from_date) : t('accounts.currency_ledger.print.period_beginning'),
+                  to: filters?.to_date ? formatDate(filters.to_date) : t('accounts.currency_ledger.print.period_end')
+                })}
               </div>
               <div className="account-info-cell info-label">{t('accounts.currency_ledger.print.report_date')}</div>
               <div className="account-info-cell info-value">{new Date().toLocaleDateString('en-US', { dateStyle: 'long' })}</div>
@@ -333,7 +346,7 @@ const CurrencyLedgerPrint = () => {
           <table className="ledger-table">
             <thead>
               <tr>
-                <th style={{width: '2%'}} className="text-center">#</th>
+                <th style={{width: '2%'}} className="text-center">{t('accounts.currency_ledger.print.col_hash')}</th>
                 <th style={{width: '8%'}}>{t('accounts.currency_ledger.print.date')}</th>
                 <th style={{width: '10%'}}>{t('accounts.currency_ledger.print.voucher_no')}</th>
                 <th style={{width: '6%'}}>{t('accounts.currency_ledger.print.type')}</th>
@@ -391,7 +404,7 @@ const CurrencyLedgerPrint = () => {
                           <td className="text-center">{index + 1}</td>
                           <td>{formatDate(entry.voucher_date)}</td>
                           <td>{entry.voucher_number}</td>
-                          <td>{entry.voucher_type || 'JV'}</td>
+                          <td>{entry.voucher_type || t('accounts.currency_ledger.report.voucher_type_fallback')}</td>
                           <td>{entry.description || entry.narration || '-'}</td>
                           <td>{entry.currency_code || '-'}</td>
                           <td className="text-right amount-cell">
@@ -463,9 +476,8 @@ const CurrencyLedgerPrint = () => {
           {/* Footer - Shows on each page */}
           <div className="report-footer">
             <div>{t('accounts.currency_ledger.print.currency_ledger_report__generated_by_erp')}</div>
-            <div>Printed on: {new Date().toLocaleString('en-US', { 
-              dateStyle: 'medium', 
-              timeStyle: 'short' 
+            <div>{t('accounts.currency_ledger.print.printed_on', {
+              datetime: new Date().toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
             })}</div>
             <div className="page-number"></div>
           </div>

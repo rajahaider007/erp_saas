@@ -236,6 +236,7 @@ const UserRegistrationForm = () => {
         required: false,
         options: [
           { value: 'en', label: tu('lang_en') },
+          { value: 'ur', label: tu('lang_ur') },
           { value: 'es', label: tu('lang_es') },
           { value: 'fr', label: tu('lang_fr') },
           { value: 'de', label: tu('lang_de') },
@@ -278,7 +279,7 @@ const UserRegistrationForm = () => {
     if (pageErrors && Object.keys(pageErrors).length > 0) {
       setAlert({
         type: 'error',
-        message: t('system.users.create.msg_please_correct_the_errors_below_and_try_')
+        message: t('common.form_errors.please_correct')
       });
     }
   }, [pageErrors, t]);
@@ -329,14 +330,14 @@ const UserRegistrationForm = () => {
         onError: (_errs) => {
           setAlert({
             type: 'error',
-            message: t('system.users.create.msg_please_correct_the_errors_below_and_try_')
+            message: t('common.form_errors.please_correct')
           });
         }
       });
     } catch (error) {
       setAlert({
         type: 'error',
-        message: t('system.users.create.msg_an_unexpected_error_occurred_please_try_')
+        message: t('common.form_errors.unexpected')
       });
     }
   };

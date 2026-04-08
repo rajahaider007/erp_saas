@@ -1,37 +1,55 @@
 {
+  "shared": {
+    "breadcrumb_home": "Home",
+    "breadcrumb_inventory": "Inventory",
+    "filter_all_status": "All Status",
+    "filter_all_types": "All Types"
+  },
   "item_category_coding": {
     "create": {
       "create_item_categories_and_assign_an_ite": "Create item categories and assign an item class",
       "msg_please_correct_the_errors_below": "Please correct the errors below.",
       "msg_please_correct_the_errors_above": "Please correct the errors above.",
       "msg_failed_to_update_category_please_check_t": "Failed to update category. Please check the errors.",
-      "msg_failed_to_create_category_please_check_t": "Failed to create category. Please check the errors."
+      "msg_failed_to_create_category_please_check_t": "Failed to create category. Please check the errors.",
+      "lbl_item_class": "Item Class",
+      "ph_item_class": "Select item class",
+      "lbl_category_code": "Category Code",
+      "ph_category_code": "Enter category code (e.g., RAW-MAT, FIN-GOODS)",
+      "lbl_category_name": "Category Name",
+      "ph_category_name": "Enter category name",
+      "lbl_description": "Description",
+      "ph_description": "Optional description",
+      "lbl_active_status": "Active Status",
+      "val_category_code": "Category code is required",
+      "val_category_name": "Category name is required",
+      "val_item_class": "Item class is required",
+      "title_create": "Create Item Category",
+      "title_edit": "Edit Item Category",
+      "subtitle_create": "Define a new inventory category and assign item class",
+      "subtitle_edit": "Update category details and item class",
+      "submit_create": "Create Category",
+      "submit_edit": "Update Category",
+      "breadcrumb_module": "Item Category Coding",
+      "breadcrumb_create": "Create Category",
+      "breadcrumb_edit": "Edit Category"
     },
     "list": {
+      "page_title_fallback": "Item Category Coding",
       "refresh": "Refresh",
       "add_item_category": "Add Item Category",
       "search_item_categories": "Search item categories...",
       "status": "Status",
       "reset_all_filters": "Reset all filters",
       "showhide_columns": "Show/Hide Columns",
-      "stouppercase": "s.toUpperCase())}",
-      "setshowcolumnselectorfalseclose": "setShowColumnSelector(false)}>Close",
-      "setselected": "setSelected([])}>",
       "clear": "Clear",
       "delete": "Delete",
-      "handleselectalletargetchecked_": "handleSelectAll(e.target.checked)} />",
-      "handlesortid": "handleSort('id')}>",
       "id": "ID",
-      "handlesortcategory_code": "handleSort('category_code')}>",
       "category_code": "Category Code",
-      "handlesortcategory_name": "handleSort('category_name')}>",
       "category_name": "Category Name",
       "item_class": "Item Class",
-      "handlesortis_active": "handleSort('is_active')}>",
-      "handlesortupdated_at": "handleSort('updated_at')}>",
       "updated": "Updated",
       "actions": "Actions",
-      "handleselectrowcategoryid_etargetchecked": "handleSelectRow(category.id, e.target.checked)} />",
       "edit_item_category": "Edit Item Category",
       "delete_item_category": "Delete Item Category",
       "show": "Show:",
@@ -40,38 +58,56 @@
       "previous_page": "Previous Page",
       "next_page": "Next Page",
       "last_page": "Last Page",
-      "go_to": "Go to:"
+      "go_to": "Go to:",
+      "page_of_total": "of {total}",
+      "bulk_delete_title": "Delete selected categories?",
+      "bulk_delete_text": "You are about to delete {count} category(ies).",
+      "col_id": "ID",
+      "col_category_code": "Category Code",
+      "col_category_name": "Category Name",
+      "col_item_class": "Item Class",
+      "col_status": "Status",
+      "col_updated_at": "Updated"
     }
   },
   "item_class_coding": {
     "create": {
       "configure_inventory_item_classes": "Configure inventory item classes",
-      "msg_please_correct_the_errors_below_and_try_": "Please correct the errors below and try again."
+      "msg_please_correct_the_errors_below_and_try_": "Please correct the errors below and try again.",
+      "lbl_class_code": "Class Code",
+      "ph_class_code": "Enter class code (e.g., ELEC, FOOD, CHEM)",
+      "lbl_class_name": "Class Name",
+      "ph_class_name": "Enter class name",
+      "lbl_description": "Description",
+      "ph_description": "Optional notes",
+      "lbl_status": "Status",
+      "val_class_code": "Class code is required",
+      "val_class_name": "Class name is required",
+      "title_create": "Add Item Class",
+      "title_edit": "Edit Item Class",
+      "subtitle_create": "Create item class (link to categories later)",
+      "subtitle_edit": "Update item class information",
+      "submit_create": "Create Class",
+      "submit_edit": "Update Class",
+      "breadcrumb_module": "Item Class Coding",
+      "breadcrumb_add": "Add Item Class",
+      "breadcrumb_edit_prefix": "Edit"
     },
     "list": {
+      "page_title_fallback": "Item Class Coding",
       "refresh": "Refresh",
       "add_item_class": "Add Item Class",
       "search_item_classes": "Search item classes...",
       "status": "Status",
       "reset_all_filters": "Reset all filters",
       "showhide_columns": "Show/Hide Columns",
-      "stouppercase": "s.toUpperCase())}",
-      "setshowcolumnselectorfalseclose": "setShowColumnSelector(false)}>Close",
-      "setselected": "setSelected([])}>",
       "clear": "Clear",
       "delete": "Delete",
-      "handleselectalletargetchecked_": "handleSelectAll(e.target.checked)} />",
-      "handlesortid": "handleSort('id')}>",
       "id": "ID",
-      "handlesortclass_code": "handleSort('class_code')}>",
       "class_code": "Class Code",
-      "handlesortclass_name": "handleSort('class_name')}>",
       "class_name": "Class Name",
-      "handlesortis_active": "handleSort('is_active')}>",
-      "handlesortupdated_at": "handleSort('updated_at')}>",
       "updated": "Updated",
       "actions": "Actions",
-      "handleselectrowitemid_etargetchecked_": "handleSelectRow(item.id, e.target.checked)} />",
       "edit_item_class": "Edit Item Class",
       "delete_item_class": "Delete Item Class",
       "show": "Show:",
@@ -80,38 +116,55 @@
       "previous_page": "Previous Page",
       "next_page": "Next Page",
       "last_page": "Last Page",
-      "go_to": "Go to:"
+      "go_to": "Go to:",
+      "page_of_total": "of {total}",
+      "bulk_delete_title": "Delete selected item classes?",
+      "bulk_delete_text": "You are about to delete {count} item class(es).",
+      "col_id": "ID",
+      "col_class_code": "Class Code",
+      "col_class_name": "Class Name",
+      "col_status": "Status",
+      "col_updated_at": "Updated"
     }
   },
   "item_group_coding": {
     "create": {
       "configure_inventory_item_groups": "Configure inventory item groups",
-      "msg_please_correct_the_errors_below_and_try_": "Please correct the errors below and try again."
+      "msg_please_correct_the_errors_below_and_try_": "Please correct the errors below and try again.",
+      "lbl_group_code": "Group Code",
+      "ph_group_code": "Enter group code (e.g., RAW, FG, SPARE)",
+      "lbl_group_name": "Group Name",
+      "ph_group_name": "Enter group name",
+      "lbl_description": "Description",
+      "ph_description": "Optional notes",
+      "lbl_status": "Status",
+      "val_group_code": "Group code is required",
+      "val_group_name": "Group name is required",
+      "title_create": "Add Item Group",
+      "title_edit": "Edit Item Group",
+      "subtitle_create": "Create item group (link to categories later)",
+      "subtitle_edit": "Update item group information",
+      "submit_create": "Create Group",
+      "submit_edit": "Update Group",
+      "breadcrumb_module": "Item Group Coding",
+      "breadcrumb_add": "Add Item Group",
+      "breadcrumb_edit_prefix": "Edit"
     },
     "list": {
+      "page_title_fallback": "Item Group Coding",
       "refresh": "Refresh",
       "add_item_group": "Add Item Group",
       "search_item_groups": "Search item groups...",
       "status": "Status",
       "reset_all_filters": "Reset all filters",
       "showhide_columns": "Show/Hide Columns",
-      "stouppercase": "s.toUpperCase())}",
-      "setshowcolumnselectorfalseclose": "setShowColumnSelector(false)}>Close",
-      "setselected": "setSelected([])}>",
       "clear": "Clear",
       "delete": "Delete",
-      "handleselectalletargetchecked_": "handleSelectAll(e.target.checked)} />",
-      "handlesortid": "handleSort('id')}>",
       "id": "ID",
-      "handlesortgroup_code": "handleSort('group_code')}>",
       "group_code": "Group Code",
-      "handlesortgroup_name": "handleSort('group_name')}>",
       "group_name": "Group Name",
-      "handlesortis_active": "handleSort('is_active')}>",
-      "handlesortupdated_at": "handleSort('updated_at')}>",
       "updated": "Updated",
       "actions": "Actions",
-      "handleselectrowitemid_etargetchecked_": "handleSelectRow(item.id, e.target.checked)} />",
       "edit_item_group": "Edit Item Group",
       "delete_item_group": "Delete Item Group",
       "show": "Show:",
@@ -120,17 +173,398 @@
       "previous_page": "Previous Page",
       "next_page": "Next Page",
       "last_page": "Last Page",
-      "go_to": "Go to:"
+      "go_to": "Go to:",
+      "page_of_total": "of {total}",
+      "bulk_delete_title": "Delete selected item groups?",
+      "bulk_delete_text": "You are about to delete {count} item group(s).",
+      "col_id": "ID",
+      "col_group_code": "Group Code",
+      "col_group_name": "Group Name",
+      "col_status": "Status",
+      "col_updated_at": "Updated"
     }
   },
   "item_master": {
     "create": {
+      "breadcrumb_desc": "Create and maintain product masters with complete costing, tracking, and compliance data",
+      "breadcrumbs": {
+        "dashboard": "Dashboard",
+        "item_master": "Item Master",
+        "create_item": "Create Item",
+        "edit_item": "Edit Item"
+      },
+      "form": {
+        "title_create": "Create New Item",
+        "title_edit": "Complete Item Master Record",
+        "subtitle_create": "Define complete product master with all required specifications",
+        "subtitle_edit": "Update all item details and parameters",
+        "submit_create": "Create Item",
+        "submit_edit": "Update Item",
+        "reset": "Clear Form"
+      },
+      "sections": {
+        "header": {
+          "title": "Section A: Header Information",
+          "description": "Basic product identification and classification"
+        },
+        "tracking": {
+          "title": "Section B: Tracking & UOM Configuration",
+          "description": "Define tracking mode and unit of measure conversions"
+        },
+        "costing": {
+          "title": "Section C: Costing & Procurement",
+          "description": "Valuation method, reorder points, and vendor information"
+        },
+        "expiry": {
+          "title": "Section D: Expiry & Storage",
+          "description": "Shelf life management and storage requirements"
+        },
+        "physical": {
+          "title": "Section E: Physical Attributes",
+          "description": "Weight, volume, and dimension specifications"
+        },
+        "tax": {
+          "title": "Section F: Tax & Trade Compliance",
+          "description": "Tax codes and international trade information"
+        },
+        "identifiers": {
+          "title": "Section G: Identifiers & Alternate Codes",
+          "description": "Alternate identifiers, inspection and consignment flags"
+        },
+        "gl": {
+          "title": "Section H: GL Account Mapping",
+          "description": "Accounting mappings for inventory and expenses"
+        },
+        "analytics": {
+          "title": "Section I: Classification & Analytics",
+          "description": "ABC classification and slow-moving tracking"
+        }
+      },
+      "options": {
+        "item_status": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "discontinued": "Discontinued",
+          "blocked": "Blocked"
+        },
+        "item_type": {
+          "raw_material": "Raw Material",
+          "finished_good": "Finished Good",
+          "trading": "Trading",
+          "consumable": "Consumable",
+          "service": "Service (Non-Stock)"
+        },
+        "tracking_mode": {
+          "none": "None",
+          "lot": "Lot / Batch",
+          "serial": "Serial Number"
+        },
+        "costing_method": {
+          "fifo": "FIFO (First In First Out)",
+          "weighted_avg": "Moving Weighted Average",
+          "standard_cost": "Standard Cost"
+        },
+        "expiry_basis": {
+          "manufacturing_date": "Manufacturing Date",
+          "receipt_date": "Receipt Date"
+        },
+        "storage_temperature_class": {
+          "ambient": "Ambient (15-25°C)",
+          "chilled": "Chilled (0-8°C)",
+          "frozen": "Frozen (<-15°C)",
+          "controlled": "Controlled (Other)"
+        },
+        "abc_classification": {
+          "a": "A (High Value)",
+          "b": "B (Medium Value)",
+          "c": "C (Low Value)"
+        }
+      },
+      "validation": {
+        "item_code": "Item code is required",
+        "item_name_short": "Item name (short) is required",
+        "item_type": "Item type is required",
+        "item_class_id": "Item class is required",
+        "item_category_id": "Item category is required",
+        "stock_uom_id": "Stock UOM is required",
+        "purchase_uom_id": "Purchase UOM is required",
+        "sales_uom_id": "Sales UOM is required",
+        "tracking_mode": "Tracking mode is required",
+        "costing_method": "Costing method is required",
+        "standard_cost": "Standard cost is required for Standard Cost method",
+        "tax_category_id": "Tax category is required",
+        "inventory_gl_account_id": "Inventory GL account is required",
+        "cogs_gl_account_id": "COGS GL account is required",
+        "writeoff_gl_account_id": "Write-off GL account is required",
+        "shelf_life_days": "Shelf life days is required when expiry tracking is enabled",
+        "expiry_basis": "Expiry basis is required when expiry tracking is enabled",
+        "near_expiry_alert_days": "Near-expiry alert days is required when expiry tracking is enabled",
+        "conversions_min": "Add at least one conversion row with To UOM and factor."
+      },
       "msg_please_correct_the_errors_below": "Please correct the errors below.",
       "msg_please_correct_the_errors_above": "Please correct the errors above.",
       "msg_failed_to_update_item_please_check_the_e": "Failed to update item. Please check the errors.",
-      "msg_failed_to_create_item_please_check_the_e": "Failed to create item. Please check the errors."
+      "msg_failed_to_create_item_please_check_the_e": "Failed to create item. Please check the errors.",
+      "fields": {
+        "item_code": {
+          "label": "Item Code",
+          "placeholder": "Auto-generated or enter manually",
+          "help": "Unique identifier - no spaces, alphanumeric + dashes allowed"
+        },
+        "item_name_short": {
+          "label": "Item Name (Short)",
+          "placeholder": "Max 50 characters",
+          "help": "Display name in pick lists"
+        },
+        "item_name_long": {
+          "label": "Item Name (Long/Description)",
+          "placeholder": "Full product description",
+          "help": "Complete product description"
+        },
+        "item_status": {
+          "label": "Item Status",
+          "placeholder": "Select status",
+          "help": "Inactive items cannot be used in new transactions"
+        },
+        "item_type": {
+          "label": "Item Type",
+          "placeholder": "Select item type",
+          "help": "Determines GL account category"
+        },
+        "item_class_id": {
+          "label": "Item Class",
+          "placeholder": "Select item class",
+          "help": "E.g., Electronics, Chemicals, Textiles"
+        },
+        "item_category_id": {
+          "label": "Item Category",
+          "placeholder": "Select item category",
+          "help": "Child of Item Class"
+        },
+        "item_group_id": {
+          "label": "Item Group",
+          "placeholder": "Select item group",
+          "help": "Further sub-classification"
+        },
+        "brand": {
+          "label": "Brand",
+          "placeholder": "Brand name or select from master",
+          "help": "For reporting and sales analytics"
+        },
+        "item_image": {
+          "label": "Item Image",
+          "placeholder": "Upload JPG/PNG (max 5 MB)",
+          "help": "For mobile app display"
+        },
+        "tracking_mode": {
+          "label": "Tracking Mode",
+          "placeholder": "Select tracking mode",
+          "help": "Determines GRN line-item requirements"
+        },
+        "stock_uom_id": {
+          "label": "Stock UOM",
+          "placeholder": "Select stock UOM",
+          "help": "Base unit for quantity ledger (e.g., Unit, Box, kg, Liter)"
+        },
+        "purchase_uom_id": {
+          "label": "Purchase UOM",
+          "placeholder": "Select purchase UOM",
+          "help": "Vendor billing unit - may differ from Stock UOM"
+        },
+        "sales_uom_id": {
+          "label": "Sales UOM",
+          "placeholder": "Select sales UOM",
+          "help": "Customer invoicing unit - may differ from Stock UOM"
+        },
+        "uom_conversion_table": {
+          "label": "UOM Conversion Table",
+          "placeholder": "Example: 12 pcs = 1 box; 1 box = 1 stock unit",
+          "help": "Purchase → Stock → Sales conversion with decimal factors (Sub-table implementation pending)"
+        },
+        "packaging_hierarchy": {
+          "label": "Packaging Hierarchy",
+          "placeholder": "Unit / Box / Case / Pallet with qty per level",
+          "help": "For WMS and shipping optimization (Sub-table implementation pending)"
+        },
+        "costing_method": {
+          "label": "Costing Method",
+          "placeholder": "Select costing method",
+          "help": "Per IAS 2 policy. LIFO feature-flagged by country"
+        },
+        "standard_cost": {
+          "label": "Standard Cost",
+          "placeholder": "Enter standard cost",
+          "help": "Required if Standard Cost method selected. Fixed reference cost for variance tracking"
+        },
+        "last_purchase_price": {
+          "label": "Last Purchase Price",
+          "placeholder": "Auto-updated from GRN",
+          "help": "Auto-updated, read-only for reference"
+        },
+        "minimum_order_qty": {
+          "label": "Minimum Order Qty (MOQ)",
+          "placeholder": "Enter MOQ",
+          "help": "Vendor minimum requirement"
+        },
+        "reorder_point": {
+          "label": "Reorder Point",
+          "placeholder": "Enter reorder point",
+          "help": "When stock falls below this, alert is triggered"
+        },
+        "safety_stock": {
+          "label": "Safety Stock",
+          "placeholder": "Enter safety stock",
+          "help": "Buffer stock level"
+        },
+        "maximum_stock_level": {
+          "label": "Maximum Stock Level",
+          "placeholder": "Enter maximum level",
+          "help": "Upper limit before overstock alert"
+        },
+        "lead_time_days": {
+          "label": "Lead Time (days)",
+          "placeholder": "Days from PO to GRN",
+          "help": "For reorder planning"
+        },
+        "default_vendor_id": {
+          "label": "Default Vendor",
+          "placeholder": "Auto-populate in PO if selected",
+          "help": "Select from vendor master"
+        },
+        "substitute_items": {
+          "label": "Substitute Items",
+          "placeholder": "Enter substitute item codes (comma-separated)",
+          "help": "Other items that can substitute if stockout (Multi-select implementation pending)"
+        },
+        "expiry_tracking": {
+          "label": "Expiry Tracking",
+          "placeholder": "",
+          "help": "If enabled, fields below become mandatory"
+        },
+        "shelf_life_days": {
+          "label": "Shelf Life (days)",
+          "placeholder": "Days from manufacturing to expiry",
+          "help": "Required only if Expiry Tracking is enabled"
+        },
+        "expiry_basis": {
+          "label": "Expiry Basis",
+          "placeholder": "Select expiry calculation basis",
+          "help": "Start point for shelf life calculation"
+        },
+        "near_expiry_alert_days": {
+          "label": "Near-Expiry Alert (days)",
+          "placeholder": "E.g., 30 for alert 30 days before expiry",
+          "help": "Triggers stock report warning"
+        },
+        "storage_temperature_class": {
+          "label": "Storage Temperature Class",
+          "placeholder": "Select storage class",
+          "help": "Affects warehouse bin assignment"
+        },
+        "hazardous_material": {
+          "label": "Hazardous Material Flag",
+          "placeholder": "",
+          "help": "Triggers compliance checks and special storage"
+        },
+        "gross_weight_kg": {
+          "label": "Gross Weight (kg)",
+          "placeholder": "Weight in kilograms",
+          "help": "For freight cost calculations"
+        },
+        "net_weight_kg": {
+          "label": "Net Weight (kg)",
+          "placeholder": "Actual product weight",
+          "help": "Must be <= Gross Weight"
+        },
+        "volume_cbm": {
+          "label": "Volume (CBM)",
+          "placeholder": "Cubic meters",
+          "help": "For container & logistics planning"
+        },
+        "dimensions": {
+          "label": "Dimensions (L×W×H cm)",
+          "placeholder": "Format: 10x20x5",
+          "help": "For picking/packing efficiency"
+        },
+        "tax_category_id": {
+          "label": "Tax Category",
+          "placeholder": "Select tax category",
+          "help": "Determines output tax on sales"
+        },
+        "hsn_code": {
+          "label": "HSN Code / SAC Code",
+          "placeholder": "GST/VAT format",
+          "help": "India GST classification"
+        },
+        "hs_tariff_code": {
+          "label": "HS Tariff Code",
+          "placeholder": "6-8 digit international code",
+          "help": "Customs classification for imports"
+        },
+        "country_of_origin_id": {
+          "label": "Country of Origin",
+          "placeholder": "Select country",
+          "help": "For import/export documentation"
+        },
+        "barcode_gtin": {
+          "label": "Barcode / GTIN",
+          "placeholder": "GS1 format (13-digit EAN or 12-digit UPC)",
+          "help": "Unique for supply chain"
+        },
+        "alternate_barcodes": {
+          "label": "Alternate Barcodes",
+          "placeholder": "Code, Type (EAN/UPC/QR), Vendor, Supplier Code",
+          "help": "Multiple symbologies support (Sub-table implementation pending)"
+        },
+        "alternate_item_codes": {
+          "label": "Alternate Item Codes",
+          "placeholder": "Code / Type (Supplier/Customer/Internal) / Vendor Link",
+          "help": "Map vendor SKU, customer part number (Sub-table implementation pending)"
+        },
+        "inspection_required": {
+          "label": "Inspection Required",
+          "placeholder": "",
+          "help": "Triggers QC workflow on GRN receipt"
+        },
+        "consignment_item_flag": {
+          "label": "Consignment Item Flag",
+          "placeholder": "",
+          "help": "For vendor-owned inventory tracking"
+        },
+        "inventory_gl_account_id": {
+          "label": "Inventory GL Account",
+          "placeholder": "Select GL account",
+          "help": "Balance sheet asset account"
+        },
+        "cogs_gl_account_id": {
+          "label": "COGS GL Account",
+          "placeholder": "Select GL account",
+          "help": "P&L expense account"
+        },
+        "writeoff_gl_account_id": {
+          "label": "Write-Off GL Account",
+          "placeholder": "Select GL account",
+          "help": "For adjustments/write-downs"
+        },
+        "price_variance_gl_account_id": {
+          "label": "Price Variance GL Account",
+          "placeholder": "Select GL account",
+          "help": "Standard cost variance tracking - required if using Standard Cost method"
+        },
+        "abc_classification": {
+          "label": "ABC Classification",
+          "placeholder": "Select classification",
+          "help": "For inventory management focus"
+        },
+        "slow_moving_threshold_days": {
+          "label": "Slow-Moving Threshold (days)",
+          "placeholder": "Default 180 days",
+          "help": "Days without movement = flag item"
+        }
+      }
     },
     "list": {
+      "page_title_fallback": "Item Master",
       "refresh": "Refresh",
       "create_item": "Create Item",
       "search_items_by_code_or_name": "Search items by code or name...",
@@ -143,7 +577,16 @@
       "edit": "Edit",
       "delete": "Delete",
       "no_items_found": "No Items Found",
-      "no_inventory_items_yet_create_your_first": "No inventory items yet. Create your first item to get started."
+      "no_inventory_items_yet_create_your_first": "No inventory items yet. Create your first item to get started.",
+      "reset_filters": "Reset Filters",
+      "bulk_delete_title": "Delete selected items?",
+      "bulk_delete_text": "You are about to delete {count} item(s).",
+      "bulk_selected_label": "{count} item(s) selected",
+      "btn_delete_selected": "Delete Selected",
+      "stat_total_items": "{count} Total Items",
+      "col_item_code": "Item Code",
+      "col_item_name": "Item Name",
+      "empty_create_item": "Create Item"
     }
   },
   "master_data": {
@@ -162,15 +605,26 @@
       "inactive": "Inactive",
       "id": "ID",
       "status": "Status",
-      "actions": "Actions"
+      "actions": "Actions",
+      "title_fallback": "Master Data",
+      "total_records": "Total records: {count}",
+      "add_new": "Add New",
+      "apply_filters": "Apply Filters",
+      "confirm_delete": "Are you sure you want to delete this record?",
+      "no_records": "No records found.",
+      "prev": "Prev",
+      "next": "Next",
+      "page_of": "Page {current} of {last}"
     }
   },
   "uom_conversion": {
     "create": {
       "configure_unit_of_measure_conversions_on": "Configure unit of measure conversions (one From UOM, multiple To UOM + factor)",
       "from_unit_master": "From Unit (Master)",
+      "lbl_from_uom_required": "From UOM",
       "select_from_uom": "Select From UOM...",
       "conversion_rows_detail": "Conversion Rows (Detail)",
+      "add_row": "Add row",
       "to_uom_": "To UOM *",
       "operation": "Operation",
       "conversion_factor_": "Conversion factor *",
@@ -180,7 +634,19 @@
       "eg_12": "e.g. 12",
       "remove_row": "Remove row",
       "msg_please_correct_the_errors_below_and_try_": "Please correct the errors below and try again.",
-      "msg_at_least_one_conversion_row_is_required": "At least one conversion row is required."
+      "msg_at_least_one_conversion_row_is_required": "At least one conversion row is required.",
+      "title_create": "Create New Unit Conversions",
+      "title_edit": "Edit Unit Conversions",
+      "desc_create": "Select a From UOM and add one or more To UOM with conversion factor (1 From = factor × To)",
+      "desc_edit": "Update conversions for the selected From UOM",
+      "submit_save": "Save conversions",
+      "submit_update": "Update conversions",
+      "breadcrumb_uom_conversion": "UOM Conversion",
+      "breadcrumb_create": "Create Conversions",
+      "breadcrumb_edit": "Edit Conversions",
+      "val_from_uom": "From UOM is required",
+      "val_to_uom": "To UOM is required",
+      "val_factor": "Enter a valid factor (0.0001 – 999999.9999)"
     },
     "list": {
       "uom_conversion": "UOM Conversion",
@@ -190,38 +656,64 @@
       "status": "Status",
       "reset_all_filters": "Reset all filters",
       "showhide_columns": "Show/Hide Columns",
-      "stouppercase": "s.toUpperCase())}",
-      "setshowcolumnselectorfalseclose": "setShowColumnSelector(false)}>Close",
-      "setselected": "setSelected([])}>",
       "clear": "Clear",
       "delete": "Delete",
-      "handleselectalletargetchecked_": "handleSelectAll(e.target.checked)} />",
-      "handlesortid": "handleSort('id')}>",
       "id": "ID",
-      "handlesortfrom_uom_id": "handleSort('from_uom_id')}>",
       "from_uom": "From UOM",
-      "handlesortto_uom_id": "handleSort('to_uom_id')}>",
       "to_uom": "To UOM",
-      "handlesortconversion_factor": "handleSort('conversion_factor')}>",
       "factor": "Factor",
-      "handlesortconversion_direction": "handleSort('conversion_direction')}>",
       "direction": "Direction",
-      "handlesortis_active": "handleSort('is_active')}>",
-      "handlesortupdated_at": "handleSort('updated_at')}>",
       "updated": "Updated",
       "actions": "Actions",
-      "handleselectrowitemid_etargetchecked_": "handleSelectRow(item.id, e.target.checked)} />",
       "edit_conversion": "Edit Conversion",
       "delete_conversion": "Delete Conversion",
       "show": "Show:",
       "first": "First",
-      "last": "Last"
+      "last": "Last",
+      "bulk_delete_title": "Delete selected conversions?",
+      "bulk_delete_text": "You are about to delete {count} UOM conversion(s).",
+      "confirm_delete_conversion": "Delete conversion: {from} → {to}? This cannot be undone.",
+      "multiply_label": "Multiply",
+      "col_id": "ID",
+      "col_from_uom": "From UOM",
+      "col_to_uom": "To UOM",
+      "col_factor": "Factor",
+      "col_direction": "Direction",
+      "col_status": "Status",
+      "col_updated": "Updated",
+      "page_title": "Page {current} of {last}"
     }
   },
   "uom_master": {
     "create": {
       "configure_unit_of_measure_master_data": "Configure unit of measure master data",
-      "msg_please_correct_the_errors_below_and_try_": "Please correct the errors below and try again."
+      "msg_please_correct_the_errors_below_and_try_": "Please correct the errors below and try again.",
+      "title_create": "Create New Unit of Measure",
+      "title_edit": "Edit Unit of Measure",
+      "desc_create": "Add a new unit of measure to your inventory system",
+      "desc_edit": "Update the unit of measure details below",
+      "submit_create": "Create UOM",
+      "submit_update": "Update UOM",
+      "lbl_uom_code": "UOM Code",
+      "ph_uom_code": "Enter UOM code (e.g., KG, M, L, PCS, HR)",
+      "lbl_uom_name": "UOM Name",
+      "ph_uom_name": "Enter full UOM name",
+      "lbl_uom_type": "UOM Type",
+      "lbl_symbol": "Symbol",
+      "ph_symbol": "Enter symbol (e.g., kg, m, L, pcs)",
+      "lbl_description": "Description",
+      "ph_description": "Enter description (max 200 chars)",
+      "lbl_decimal_precision": "Decimal Precision",
+      "ph_decimal_precision": "0-10",
+      "lbl_status": "Status",
+      "val_uom_code": "UOM code is required",
+      "val_uom_name": "UOM name is required",
+      "val_uom_type": "UOM type is required",
+      "val_symbol": "Symbol is required",
+      "val_decimal_precision": "Decimal precision is required",
+      "breadcrumb_uom_master": "UOM Master",
+      "breadcrumb_create": "Create UOM",
+      "breadcrumb_edit": "Edit UOM"
     },
     "list": {
       "unit_of_measure_master": "Unit of Measure Master",
@@ -232,33 +724,40 @@
       "status": "Status",
       "reset_all_filters": "Reset all filters",
       "showhide_columns": "Show/Hide Columns",
-      "stouppercase": "s.toUpperCase())}",
-      "setshowcolumnselectorfalseclose": "setShowColumnSelector(false)}>Close",
-      "setselected": "setSelected([])}>",
       "clear": "Clear",
       "delete": "Delete",
-      "handleselectalletargetchecked_": "handleSelectAll(e.target.checked)} />",
-      "handlesortid": "handleSort('id')}>",
       "id": "ID",
-      "handlesortuom_code": "handleSort('uom_code')}>",
       "uom_code": "UOM Code",
-      "handlesortuom_name": "handleSort('uom_name')}>",
       "uom_name": "UOM Name",
-      "handlesortuom_type": "handleSort('uom_type')}>",
-      "handlesortsymbol": "handleSort('symbol')}>",
       "symbol": "Symbol",
-      "handlesortdecimal_precision": "handleSort('decimal_precision')}>",
       "precision": "Precision",
-      "handlesortis_active": "handleSort('is_active')}>",
-      "handlesortupdated_at": "handleSort('updated_at')}>",
       "updated": "Updated",
       "actions": "Actions",
-      "handleselectrowitemid_etargetchecked_": "handleSelectRow(item.id, e.target.checked)} />",
       "edit_uom": "Edit UOM",
       "delete_uom": "Delete UOM",
       "show": "Show:",
       "first": "First",
-      "last": "Last"
+      "last": "Last",
+      "bulk_delete_title": "Delete selected UOMs?",
+      "bulk_delete_text": "You are about to delete {count} unit(s) of measure.",
+      "col_id": "ID",
+      "col_uom_code": "UOM Code",
+      "col_uom_name": "UOM Name",
+      "col_uom_type": "Type",
+      "col_symbol": "Symbol",
+      "col_precision": "Precision",
+      "col_status": "Status",
+      "col_updated": "Updated",
+      "page_title": "Page {current} of {last}"
+    },
+    "uom_types": {
+      "Length": "Length",
+      "Weight": "Weight",
+      "Volume": "Volume",
+      "Quantity": "Quantity",
+      "Time": "Time",
+      "Area": "Area",
+      "Other": "Other"
     }
   }
 }

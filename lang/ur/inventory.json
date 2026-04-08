@@ -1,264 +1,763 @@
 {
-    "item_category_coding": {
-        "create": {
-            "create_item_categories_and_assign_an_ite": "آئٹم کیٹیگریز بنائیں اور آئٹم کلاس تفویض کریں۔",
-            "msg_please_correct_the_errors_below": "براہ کرم ذیل کی غلطیوں کو درست کریں۔",
-            "msg_please_correct_the_errors_above": "براہ کرم اوپر کی غلطیاں درست کریں۔",
-            "msg_failed_to_update_category_please_check_t": "زمرہ اپ ڈیٹ کرنے میں ناکام۔ براہ کرم غلطیاں چیک کریں۔",
-            "msg_failed_to_create_category_please_check_t": "زمرہ بنانے میں ناکام۔ براہ کرم غلطیاں چیک کریں۔"
-        },
-        "list": {
-            "refresh": "ریفریش کریں۔",
-            "add_item_category": "آئٹم کیٹیگری شامل کریں۔",
-            "search_item_categories": "آئٹم کے زمرے تلاش کریں...",
-            "status": "حیثیت",
-            "reset_all_filters": "تمام فلٹرز کو دوبارہ ترتیب دیں۔",
-            "showhide_columns": "کالم دکھائیں\/چھپائیں۔",
-            "stouppercase": "s.toUpperCase())}",
-            "setshowcolumnselectorfalseclose": "setShowColumnSelector(false)}>بند کرنا",
-            "setselected": "سیٹ سلیکٹڈ([])}>",
-            "clear": "صاف",
-            "delete": "حذف کریں۔",
-            "handleselectalletargetchecked_": "handleSelectAll(e.target.checked)} \/>",
-            "handlesortid": "handleSort('id')}>",
-            "id": "ID",
-            "handlesortcategory_code": "handleSort('category_code')}>",
-            "category_code": "زمرہ کا کوڈ",
-            "handlesortcategory_name": "handleSort('category_name')}>",
-            "category_name": "زمرہ کا نام",
-            "item_class": "آئٹم کلاس",
-            "handlesortis_active": "handleSort('is_active')}>",
-            "handlesortupdated_at": "handleSort('updated_at')}>",
-            "updated": "تازہ کاری",
-            "actions": "اعمال",
-            "handleselectrowcategoryid_etargetchecked": "handleSelectRow(category.id, e.target.checked)} \/>",
-            "edit_item_category": "آئٹم کے زمرے میں ترمیم کریں۔",
-            "delete_item_category": "آئٹم کے زمرے کو حذف کریں۔",
-            "show": "دکھائیں:",
-            "per_page": "فی صفحہ",
-            "first_page": "پہلا صفحہ",
-            "previous_page": "پچھلا صفحہ",
-            "next_page": "اگلا صفحہ",
-            "last_page": "آخری صفحہ",
-            "go_to": "پر جائیں:"
-        }
+  "shared": {
+    "breadcrumb_home": "ہوم",
+    "breadcrumb_inventory": "انوینٹری",
+    "filter_all_status": "تمام حیثیت",
+    "filter_all_types": "تمام اقسام"
+  },
+  "item_category_coding": {
+    "create": {
+      "create_item_categories_and_assign_an_ite": "آئٹم زمرے بنائیں اور آئٹم کلاس تفویض کریں",
+      "msg_please_correct_the_errors_below": "براہ کرم ذیل کی غلطیاں درست کریں۔",
+      "msg_please_correct_the_errors_above": "براہ کرم اوپر کی غلطیاں درست کریں۔",
+      "msg_failed_to_update_category_please_check_t": "زمرہ اپ ڈیٹ ناکام۔ غلطیاں چیک کریں۔",
+      "msg_failed_to_create_category_please_check_t": "زمرہ بنانا ناکام۔ غلطیاں چیک کریں۔",
+      "lbl_item_class": "آئٹم کلاس",
+      "ph_item_class": "کلاس منتخب کریں",
+      "lbl_category_code": "زمرہ کوڈ",
+      "ph_category_code": "زمرہ کوڈ درج کریں",
+      "lbl_category_name": "زمرہ نام",
+      "ph_category_name": "زمرہ نام درج کریں",
+      "lbl_description": "تفصیل",
+      "ph_description": "اختیاری تفصیل",
+      "lbl_active_status": "فعال حیثیت",
+      "val_category_code": "زمرہ کوڈ لازمی ہے",
+      "val_category_name": "زمرہ نام لازمی ہے",
+      "val_item_class": "آئٹم کلاس لازمی ہے",
+      "title_create": "آئٹم زمرہ بنائیں",
+      "title_edit": "آئٹم زمرہ میں ترمیم",
+      "subtitle_create": "نیا انوینٹری زمرہ اور کلاس تفویض کریں",
+      "subtitle_edit": "زمرہ اور کلاس اپ ڈیٹ کریں",
+      "submit_create": "زمرہ بنائیں",
+      "submit_edit": "زمرہ اپ ڈیٹ",
+      "breadcrumb_module": "آئٹم زمرہ کوڈنگ",
+      "breadcrumb_create": "زمرہ بنائیں",
+      "breadcrumb_edit": "زمرہ میں ترمیم"
     },
-    "item_class_coding": {
-        "create": {
-            "configure_inventory_item_classes": "انوینٹری آئٹم کلاسز کو ترتیب دیں۔",
-            "msg_please_correct_the_errors_below_and_try_": "براہ کرم ذیل کی خرابیوں کو درست کریں اور دوبارہ کوشش کریں۔"
-        },
-        "list": {
-            "refresh": "ریفریش کریں۔",
-            "add_item_class": "آئٹم کلاس شامل کریں۔",
-            "search_item_classes": "آئٹم کی کلاسیں تلاش کریں...",
-            "status": "حیثیت",
-            "reset_all_filters": "تمام فلٹرز کو دوبارہ ترتیب دیں۔",
-            "showhide_columns": "کالم دکھائیں\/چھپائیں۔",
-            "stouppercase": "s.toUpperCase())}",
-            "setshowcolumnselectorfalseclose": "setShowColumnSelector(false)}>بند کرنا",
-            "setselected": "سیٹ سلیکٹڈ([])}>",
-            "clear": "صاف",
-            "delete": "حذف کریں۔",
-            "handleselectalletargetchecked_": "handleSelectAll(e.target.checked)} \/>",
-            "handlesortid": "handleSort('id')}>",
-            "id": "ID",
-            "handlesortclass_code": "handleSort('class_code')}>",
-            "class_code": "کلاس کوڈ",
-            "handlesortclass_name": "handleSort('class_name')}>",
-            "class_name": "کلاس کا نام",
-            "handlesortis_active": "handleSort('is_active')}>",
-            "handlesortupdated_at": "handleSort('updated_at')}>",
-            "updated": "تازہ کاری",
-            "actions": "اعمال",
-            "handleselectrowitemid_etargetchecked_": "handleSelectRow(item.id, e.target.checked)} \/>",
-            "edit_item_class": "آئٹم کلاس میں ترمیم کریں۔",
-            "delete_item_class": "آئٹم کلاس کو حذف کریں۔",
-            "show": "دکھائیں:",
-            "per_page": "فی صفحہ",
-            "first_page": "پہلا صفحہ",
-            "previous_page": "پچھلا صفحہ",
-            "next_page": "اگلا صفحہ",
-            "last_page": "آخری صفحہ",
-            "go_to": "پر جائیں:"
-        }
+    "list": {
+      "page_title_fallback": "آئٹم زمرہ کوڈنگ",
+      "refresh": "ریفریش",
+      "add_item_category": "زمرہ شامل کریں",
+      "search_item_categories": "زمرے تلاش کریں...",
+      "status": "حیثیت",
+      "reset_all_filters": "فلٹرز ری سیٹ",
+      "showhide_columns": "کالم دکھائیں/چھپائیں",
+      "clear": "صاف",
+      "delete": "حذف",
+      "id": "ID",
+      "category_code": "زمرہ کوڈ",
+      "category_name": "زمرہ نام",
+      "item_class": "آئٹم کلاس",
+      "updated": "تازہ",
+      "actions": "اعمال",
+      "edit_item_category": "زمرہ میں ترمیم",
+      "delete_item_category": "زمرہ حذف",
+      "show": "دکھائیں:",
+      "per_page": "فی صفحہ",
+      "first_page": "پہلا",
+      "previous_page": "پچھلا",
+      "next_page": "اگلا",
+      "last_page": "آخری",
+      "go_to": "جائیں:",
+      "page_of_total": "از {total}",
+      "bulk_delete_title": "منتخب زمرے حذف؟",
+      "bulk_delete_text": "آپ {count} زمرہ(ے) حذف کرنے جا رہے ہیں۔",
+      "col_id": "ID",
+      "col_category_code": "زمرہ کوڈ",
+      "col_category_name": "زمرہ نام",
+      "col_item_class": "آئٹم کلاس",
+      "col_status": "حیثیت",
+      "col_updated_at": "تازہ"
+    }
+  },
+  "item_class_coding": {
+    "create": {
+      "configure_inventory_item_classes": "انوینٹری آئٹم کلاسز ترتیب دیں",
+      "msg_please_correct_the_errors_below_and_try_": "براہ کرم غلطیاں درست کریں اور دوبارہ کوشش کریں۔",
+      "lbl_class_code": "کلاس کوڈ",
+      "ph_class_code": "کلاس کوڈ درج کریں",
+      "lbl_class_name": "کلاس نام",
+      "ph_class_name": "کلاس نام درج کریں",
+      "lbl_description": "تفصیل",
+      "ph_description": "اختیاری نوٹس",
+      "lbl_status": "حیثیت",
+      "val_class_code": "کلاس کوڈ لازمی",
+      "val_class_name": "کلاس نام لازمی",
+      "title_create": "کلاس شامل کریں",
+      "title_edit": "کلاس میں ترمیم",
+      "subtitle_create": "کلاس بنائیں (بعد میں زمرہ منسلک)",
+      "subtitle_edit": "کلاس کی معلومات اپ ڈیٹ",
+      "submit_create": "کلاس بنائیں",
+      "submit_edit": "کلاس اپ ڈیٹ",
+      "breadcrumb_module": "آئٹم کلاس کوڈنگ",
+      "breadcrumb_add": "کلاس شامل",
+      "breadcrumb_edit_prefix": "ترمیم"
     },
-    "item_group_coding": {
-        "create": {
-            "configure_inventory_item_groups": "انوینٹری آئٹم گروپس کو ترتیب دیں۔",
-            "msg_please_correct_the_errors_below_and_try_": "براہ کرم ذیل کی خرابیوں کو درست کریں اور دوبارہ کوشش کریں۔"
-        },
-        "list": {
-            "refresh": "ریفریش کریں۔",
-            "add_item_group": "آئٹم گروپ شامل کریں۔",
-            "search_item_groups": "آئٹم گروپس تلاش کریں...",
-            "status": "حیثیت",
-            "reset_all_filters": "تمام فلٹرز کو دوبارہ ترتیب دیں۔",
-            "showhide_columns": "کالم دکھائیں\/چھپائیں۔",
-            "stouppercase": "s.toUpperCase())}",
-            "setshowcolumnselectorfalseclose": "setShowColumnSelector(false)}>بند کرنا",
-            "setselected": "سیٹ سلیکٹڈ([])}>",
-            "clear": "صاف",
-            "delete": "حذف کریں۔",
-            "handleselectalletargetchecked_": "handleSelectAll(e.target.checked)} \/>",
-            "handlesortid": "handleSort('id')}>",
-            "id": "ID",
-            "handlesortgroup_code": "handleSort('group_code')}>",
-            "group_code": "گروپ کوڈ",
-            "handlesortgroup_name": "handleSort('group_name')}>",
-            "group_name": "گروپ کا نام",
-            "handlesortis_active": "handleSort('is_active')}>",
-            "handlesortupdated_at": "handleSort('updated_at')}>",
-            "updated": "تازہ کاری",
-            "actions": "اعمال",
-            "handleselectrowitemid_etargetchecked_": "handleSelectRow(item.id, e.target.checked)} \/>",
-            "edit_item_group": "آئٹم گروپ میں ترمیم کریں۔",
-            "delete_item_group": "آئٹم گروپ کو حذف کریں۔",
-            "show": "دکھائیں:",
-            "per_page": "فی صفحہ",
-            "first_page": "پہلا صفحہ",
-            "previous_page": "پچھلا صفحہ",
-            "next_page": "اگلا صفحہ",
-            "last_page": "آخری صفحہ",
-            "go_to": "پر جائیں:"
-        }
+    "list": {
+      "page_title_fallback": "آئٹم کلاس کوڈنگ",
+      "refresh": "ریفریش",
+      "add_item_class": "کلاس شامل",
+      "search_item_classes": "کلاسیں تلاش کریں...",
+      "status": "حیثیت",
+      "reset_all_filters": "فلٹرز ری سیٹ",
+      "showhide_columns": "کالم",
+      "clear": "صاف",
+      "delete": "حذف",
+      "id": "ID",
+      "class_code": "کلاس کوڈ",
+      "class_name": "کلاس نام",
+      "updated": "تازہ",
+      "actions": "اعمال",
+      "edit_item_class": "ترمیم",
+      "delete_item_class": "حذف",
+      "show": "دکھائیں:",
+      "per_page": "فی صفحہ",
+      "first_page": "پہلا",
+      "previous_page": "پچھلا",
+      "next_page": "اگلا",
+      "last_page": "آخری",
+    "go_to": "جائیں:",
+    "page_of_total": "از {total}",
+    "bulk_delete_title": "کلاسیں حذف؟",
+      "bulk_delete_text": "آپ {count} کلاس(یں) حذف کرنے جا رہے ہیں۔",
+      "col_id": "ID",
+      "col_class_code": "کلاس کوڈ",
+      "col_class_name": "کلاس نام",
+      "col_status": "حیثیت",
+      "col_updated_at": "تازہ"
+    }
+  },
+  "item_group_coding": {
+    "create": {
+      "configure_inventory_item_groups": "آئٹم گروپس ترتیب دیں",
+      "msg_please_correct_the_errors_below_and_try_": "براہ کرم غلطیاں درست کریں اور دوبارہ کوشش کریں۔",
+      "lbl_group_code": "گروپ کوڈ",
+      "ph_group_code": "گروپ کوڈ درج کریں",
+      "lbl_group_name": "گروپ نام",
+      "ph_group_name": "گروپ نام درج کریں",
+      "lbl_description": "تفصیل",
+      "ph_description": "اختیاری نوٹس",
+      "lbl_status": "حیثیت",
+      "val_group_code": "گروپ کوڈ لازمی",
+      "val_group_name": "گروپ نام لازمی",
+      "title_create": "گروپ شامل",
+      "title_edit": "گروپ میں ترمیم",
+      "subtitle_create": "گروپ بنائیں",
+      "subtitle_edit": "گروپ اپ ڈیٹ",
+      "submit_create": "گروپ بنائیں",
+      "submit_edit": "گروپ اپ ڈیٹ",
+      "breadcrumb_module": "آئٹم گروپ کوڈنگ",
+      "breadcrumb_add": "گروپ شامل",
+      "breadcrumb_edit_prefix": "ترمیم"
     },
-    "item_master": {
-        "create": {
-            "msg_please_correct_the_errors_below": "براہ کرم ذیل کی غلطیوں کو درست کریں۔",
-            "msg_please_correct_the_errors_above": "براہ کرم اوپر کی غلطیاں درست کریں۔",
-            "msg_failed_to_update_item_please_check_the_e": "آئٹم کو اپ ڈیٹ کرنے میں ناکام۔ براہ کرم غلطیاں چیک کریں۔",
-            "msg_failed_to_create_item_please_check_the_e": "آئٹم بنانے میں ناکام۔ براہ کرم غلطیاں چیک کریں۔"
+    "list": {
+      "page_title_fallback": "آئٹم گروپ کوڈنگ",
+      "refresh": "ریفریش",
+      "add_item_group": "گروپ شامل",
+      "search_item_groups": "گروپ تلاش...",
+      "status": "حیثیت",
+      "reset_all_filters": "فلٹرز ری سیٹ",
+      "showhide_columns": "کالم",
+      "clear": "صاف",
+      "delete": "حذف",
+      "id": "ID",
+      "group_code": "گروپ کوڈ",
+      "group_name": "گروپ نام",
+      "updated": "تازہ",
+      "actions": "اعمال",
+      "edit_item_group": "ترمیم",
+      "delete_item_group": "حذف",
+      "show": "دکھائیں:",
+      "per_page": "فی صفحہ",
+      "first_page": "پہلا",
+      "previous_page": "پچھلا",
+      "next_page": "اگلا",
+      "last_page": "آخری",
+    "go_to": "جائیں:",
+    "page_of_total": "از {total}",
+    "bulk_delete_title": "گروپ حذف؟",
+      "bulk_delete_text": "آپ {count} گروپ حذف کرنے جا رہے ہیں۔",
+      "col_id": "ID",
+      "col_group_code": "گروپ کوڈ",
+      "col_group_name": "گروپ نام",
+      "col_status": "حیثیت",
+      "col_updated_at": "تازہ"
+    }
+  },
+  "item_master": {
+    "create": {
+      "breadcrumb_desc": "مکمل لاگت، ٹریکنگ اور تعمیل کے ساتھ پروڈکٹ ماسٹر بنائیں اور رکھیں",
+      "breadcrumbs": {
+        "dashboard": "ڈیش بورڈ",
+        "item_master": "آئٹم ماسٹر",
+        "create_item": "آئٹم بنائیں",
+        "edit_item": "آئٹم میں ترمیم"
+      },
+      "form": {
+        "title_create": "نیا آئٹم",
+        "title_edit": "مکمل آئٹم ریکارڈ",
+        "subtitle_create": "تمام تفصیلات کے ساتھ آئٹم",
+        "subtitle_edit": "تفصیلات اپ ڈیٹ",
+        "submit_create": "آئٹم بنائیں",
+        "submit_edit": "اپ ڈیٹ",
+        "reset": "فارم صاف"
+      },
+      "sections": {
+        "header": {
+          "title": "A: شناخت",
+          "description": "بنیادی درجہ بندی"
         },
-        "list": {
-            "refresh": "ریفریش کریں۔",
-            "create_item": "آئٹم بنائیں",
-            "search_items_by_code_or_name": "کوڈ یا نام سے آئٹمز تلاش کریں...",
-            "status": "حیثیت",
-            "per_page": "فی صفحہ",
-            "item_type": "آئٹم کی قسم",
-            "category": "زمرہ",
-            "costing_method": "لاگت کا طریقہ",
-            "actions": "اعمال",
-            "edit": "ترمیم کریں۔",
-            "delete": "حذف کریں۔",
-            "no_items_found": "کوئی آئٹمز نہیں ملے",
-            "no_inventory_items_yet_create_your_first": "ابھی تک کوئی انوینٹری آئٹمز نہیں ہیں۔ شروع کرنے کے لیے اپنا پہلا آئٹم بنائیں۔"
+        "tracking": {
+          "title": "B: ٹریکنگ اور UOM",
+          "description": "اکائیاں اور ٹریکنگ"
+        },
+        "costing": {
+          "title": "C: لاگت اور خرید",
+          "description": "قدر اور وینڈر"
+        },
+        "expiry": {
+          "title": "D: میعاد اور ذخیرہ",
+          "description": "شیلف لائف"
+        },
+        "physical": {
+          "title": "E: جسمانی خصوصیات",
+          "description": "وزن اور حجم"
+        },
+        "tax": {
+          "title": "F: ٹیکس و تجارت",
+          "description": "کوڈز"
+        },
+        "identifiers": {
+          "title": "G: شناخت کنندگان",
+          "description": "متبادل کوڈ"
+        },
+        "gl": {
+          "title": "H: GL میپنگ",
+          "description": "اکاؤنٹس"
+        },
+        "analytics": {
+          "title": "I: تجزیہ",
+          "description": "ABC"
         }
+      },
+      "options": {
+        "item_status": {
+          "active": "فعال",
+          "inactive": "غیر فعال",
+          "discontinued": "موقوف",
+          "blocked": "بلاک"
+        },
+        "item_type": {
+          "raw_material": "خام مال",
+          "finished_good": "تیار شدہ",
+          "trading": "تجارت",
+          "consumable": "ضروریات",
+          "service": "سروس (غیر اسٹاک)"
+        },
+        "tracking_mode": {
+          "none": "کوئی نہیں",
+          "lot": "لاٹ / بیچ",
+          "serial": "سیریل"
+        },
+        "costing_method": {
+          "fifo": "FIFO",
+          "weighted_avg": "وزنی اوسط",
+          "standard_cost": "معیاری لاگت"
+        },
+        "expiry_basis": {
+          "manufacturing_date": "تیاری",
+          "receipt_date": "رسید"
+        },
+        "storage_temperature_class": {
+          "ambient": "محیط (15-25°C)",
+          "chilled": "ٹھنڈا (0-8°C)",
+          "frozen": "منجمد",
+          "controlled": "قابو میں"
+        },
+        "abc_classification": {
+          "a": "A (اعلیٰ قدر)",
+          "b": "B (درمیانی)",
+          "c": "C (کم)"
+        }
+      },
+      "validation": {
+        "item_code": "آئٹم کوڈ لازمی",
+        "item_name_short": "مختصر نام لازمی",
+        "item_type": "قسم لازمی",
+        "item_class_id": "کلاس لازمی",
+        "item_category_id": "زمرہ لازمی",
+        "stock_uom_id": "اسٹاک UOM لازمی",
+        "purchase_uom_id": "خرید UOM لازمی",
+        "sales_uom_id": "فروخت UOM لازمی",
+        "tracking_mode": "ٹریکنگ لازمی",
+        "costing_method": "لاگت طریقہ لازمی",
+        "standard_cost": "معیاری لاگت اس طریقے میں لازمی",
+        "tax_category_id": "ٹیکس زمرہ لازمی",
+        "inventory_gl_account_id": "انوینٹری GL لازمی",
+        "cogs_gl_account_id": "COGS GL لازمی",
+        "writeoff_gl_account_id": "رائیٹ آف GL لازمی",
+        "shelf_life_days": "شیلف لائف لازمی جب میعاد فعال",
+        "expiry_basis": "میعاد بنیاد لازمی",
+        "near_expiry_alert_days": "الرٹ دن لازمی",
+        "conversions_min": "کم از کم ایک قطار درکار۔"
+      },
+      "msg_please_correct_the_errors_below": "براہ کرم غلطیاں درست کریں۔",
+      "msg_please_correct_the_errors_above": "براہ کرم اوپر درست کریں۔",
+      "msg_failed_to_update_item_please_check_the_e": "اپ ڈیٹ ناکام۔ غلطیاں چیک کریں۔",
+      "msg_failed_to_create_item_please_check_the_e": "بنانا ناکام۔ غلطیاں چیک کریں۔",
+      "fields": {
+        "item_code": {
+          "label": "آئٹم کوڈ",
+          "placeholder": "خودکار یا دستی درج کریں",
+          "help": "منفرد شناخت — خالی جگہ نہیں، حروف عدد اور ڈیش"
+        },
+        "item_name_short": {
+          "label": "آئٹم کا مختصر نام",
+          "placeholder": "زیادہ سے زیادہ 50 حروف",
+          "help": "فہرستوں میں ظاہر ہونے والا نام"
+        },
+        "item_name_long": {
+          "label": "آئٹم کا طویل نام / تفصیل",
+          "placeholder": "مکمل مصنوعات کی تفصیل",
+          "help": "مکمل پروڈکٹ کی تفصیل"
+        },
+        "item_status": {
+          "label": "آئٹم کی حیثیت",
+          "placeholder": "حیثیت منتخب کریں",
+          "help": "غیر فعال آئٹم نئے لین دین میں استعمال نہیں ہو سکتے"
+        },
+        "item_type": {
+          "label": "آئٹم کی قسم",
+          "placeholder": "قسم منتخب کریں",
+          "help": "جی ایل اکاؤنٹ کی زمینہ کی تعین"
+        },
+        "item_class_id": {
+          "label": "آئٹم کلاس",
+          "placeholder": "کلاس منتخب کریں",
+          "help": "مثلاً الیکٹرانکس، کیمیکل، ٹیکسٹائل"
+        },
+        "item_category_id": {
+          "label": "آئٹم زمرہ",
+          "placeholder": "زمرہ منتخب کریں",
+          "help": "آئٹم کلاس کی ذیلی سطح"
+        },
+        "item_group_id": {
+          "label": "آئٹم گروپ",
+          "placeholder": "گروپ منتخب کریں",
+          "help": "مزید ذیلی درجہ بندی"
+        },
+        "brand": {
+          "label": "برانڈ",
+          "placeholder": "برانڈ یا ماسٹر سے",
+          "help": "رپورٹنگ اور فروخت"
+        },
+        "item_image": {
+          "label": "آئٹم کی تصویر",
+          "placeholder": "JPG/PNG (زیادہ سے زیادہ 5 MB)",
+          "help": "موبائل ایپ ڈسپلے"
+        },
+        "tracking_mode": {
+          "label": "ٹریکنگ موڈ",
+          "placeholder": "موڈ منتخب کریں",
+          "help": "GRN لائن کی ضروریات"
+        },
+        "stock_uom_id": {
+          "label": "اسٹاک UOM",
+          "placeholder": "اسٹاک UOM منتخب کریں",
+          "help": "مقدار لیجر کی بنیادی اکائی"
+        },
+        "purchase_uom_id": {
+          "label": "خرید UOM",
+          "placeholder": "خرید UOM منتخب کریں",
+          "help": "وینڈر بلنگ اکائی"
+        },
+        "sales_uom_id": {
+          "label": "فروخت UOM",
+          "placeholder": "فروخت UOM منتخب کریں",
+          "help": "کسٹمر انوائسنگ اکائی"
+        },
+        "uom_conversion_table": {
+          "label": "UOM تبادلوں کی جدول",
+          "placeholder": "مثال: 12 عدد = 1 باکس",
+          "help": "خرید → اسٹاک → فروخت تبادلے"
+        },
+        "packaging_hierarchy": {
+          "label": "پیکیجنگ کی درجہ بندی",
+          "placeholder": "یونٹ / باکس / کیس / پلیٹ",
+          "help": "WMS اور شپنگ"
+        },
+        "costing_method": {
+          "label": "لاگت کا طریقہ",
+          "placeholder": "طریقہ منتخب کریں",
+          "help": "IAS 2 پالیسی"
+        },
+        "standard_cost": {
+          "label": "معیاری لاگت",
+          "placeholder": "معیاری لاگت درج کریں",
+          "help": "معیاری لاگت کے ساتھ لازمی"
+        },
+        "last_purchase_price": {
+          "label": "آخری خرید قیمت",
+          "placeholder": "GRN سے خودکار",
+          "help": "صرف حوالہ — صارفین میں تبدیل نہیں"
+        },
+        "minimum_order_qty": {
+          "label": "کم از کم آرڈر مقدار (MOQ)",
+          "placeholder": "MOQ درج کریں",
+          "help": "وینڈر کی کم از کم"
+        },
+        "reorder_point": {
+          "label": "دوبارہ آرڈر پوائنٹ",
+          "placeholder": "پوائنٹ درج کریں",
+          "help": "اس سے نیچے مقد الرتی"
+        },
+        "safety_stock": {
+          "label": "محفوظ اسٹاک",
+          "placeholder": "مقدار درج کریں",
+          "help": "بفر اسٹاک"
+        },
+        "maximum_stock_level": {
+          "label": "زیادہ سے زیادہ اسٹاک",
+          "placeholder": "زیادہ سے زیادہ درج کریں",
+          "help": "حد سے زیادہ الرٹ"
+        },
+        "lead_time_days": {
+          "label": "لیڈ ٹائم (دن)",
+          "placeholder": "PO سے GRN تک دن",
+          "help": "دوبارہ آرڈر منصوبہ بندی"
+        },
+        "default_vendor_id": {
+          "label": "طے شدہ وینڈر",
+          "placeholder": "PO میں خودکار",
+          "help": "وینڈر ماسٹر سے"
+        },
+        "substitute_items": {
+          "label": "متبادل آئٹمز",
+          "placeholder": "کوڈز کاما سے علیحدہ",
+          "help": "اسٹاک آؤٹ پر متبادل"
+        },
+        "expiry_tracking": {
+          "label": "میعاد کی ٹریکنگ",
+          "placeholder": "",
+          "help": "فعال ہونے پر ذیل کے خانے لازمی"
+        },
+        "shelf_life_days": {
+          "label": "شیلف لائف (دن)",
+          "placeholder": "تیاری سے میعاد تک",
+          "help": "میعاد ٹریکنگ فعال پر لازمی"
+        },
+        "expiry_basis": {
+          "label": "میعاد کی بنیاد",
+          "placeholder": "بنیاد منتخب کریں",
+          "help": "شیلف لائف کا آغاز"
+        },
+        "near_expiry_alert_days": {
+          "label": "میعاد قریب الرٹ (دن)",
+          "placeholder": "مثلاً 30",
+          "help": "اسٹاک رپورٹ الرٹ"
+        },
+        "storage_temperature_class": {
+          "label": "ذخیرہ درجہ حرارت",
+          "placeholder": "کلاس منتخب کریں",
+          "help": "گودام بن تفویض"
+        },
+        "hazardous_material": {
+          "label": "خطرناک مادہ",
+          "placeholder": "",
+          "help": "تعمیل اور خاص ذخیرہ"
+        },
+        "gross_weight_kg": {
+          "label": "مجموعی وزن (kg)",
+          "placeholder": "کلوگرام میں",
+          "help": "فریٹ لاگت"
+        },
+        "net_weight_kg": {
+          "label": "خالص وزن (kg)",
+          "placeholder": "پیداوار کا وزن",
+          "help": "مجموعی وزن سے ≤ ہونا چاہیے"
+        },
+        "volume_cbm": {
+          "label": "حجم (CBM)",
+          "placeholder": "مکعب میٹر",
+          "help": "کنٹینر منصوبہ بندی"
+        },
+        "dimensions": {
+          "label": "ابعاد (لمبائی×چڑھائی×اونچائی سم)",
+          "placeholder": "فارمیٹ: 10x20x5",
+          "help": "پیکنگ کارکردگی"
+        },
+        "tax_category_id": {
+          "label": "ٹیکس زمرہ",
+          "placeholder": "زمرہ منتخب کریں",
+          "help": "فروخت پر آؤٹ پٹ ٹیکس"
+        },
+        "hsn_code": {
+          "label": "HSN / SAC کوڈ",
+          "placeholder": "GST/VAT فارمیٹ",
+          "help": "بھارتی GST درجہ بندی"
+        },
+        "hs_tariff_code": {
+          "label": "HS ٹیرف کوڈ",
+          "placeholder": "بین الاقوامی کوڈ",
+          "help": "امپورٹ کسٹمز"
+        },
+        "country_of_origin_id": {
+          "label": "اصل ملک",
+          "placeholder": "ملک منتخب کریں",
+          "help": "دستاویزات"
+        },
+        "barcode_gtin": {
+          "label": "بارکوڈ / GTIN",
+          "placeholder": "GS1 فارمیٹ",
+          "help": "سپلائی چین میں منفرد"
+        },
+        "alternate_barcodes": {
+          "label": "متبادل بارکوڈ",
+          "placeholder": "کوڈ، قسم، وینڈر",
+          "help": "متعدد علامتیں"
+        },
+        "alternate_item_codes": {
+          "label": "متبادل آئٹم کوڈ",
+          "placeholder": "کوڈ / قسم / لنک",
+          "help": "سپلائر SKU میپنگ"
+        },
+        "inspection_required": {
+          "label": "معائنہ لازم",
+          "placeholder": "",
+          "help": "GRN پر QC ورک فلو"
+        },
+        "consignment_item_flag": {
+          "label": "کنزائنمنٹ آئٹم",
+          "placeholder": "",
+          "help": "وینڈر کے ذریعے اسٹاک"
+        },
+        "inventory_gl_account_id": {
+          "label": "انوینٹری GL اکاؤنٹ",
+          "placeholder": "اکاؤنٹ منتخب کریں",
+          "help": "بیلنس شیٹ اثاثہ"
+        },
+        "cogs_gl_account_id": {
+          "label": "COGS GL اکاؤنٹ",
+          "placeholder": "اکاؤنٹ منتخب کریں",
+          "help": "P&L خرچ"
+        },
+        "writeoff_gl_account_id": {
+          "label": "رائیٹ آف GL اکاؤنٹ",
+          "placeholder": "اکاؤنٹ منتخب کریں",
+          "help": "تنسیخ / ایڈجسٹمنٹ"
+        },
+        "price_variance_gl_account_id": {
+          "label": "قیمت فرق GL اکاؤنٹ",
+          "placeholder": "اکاؤنٹ منتخب کریں",
+          "help": "معیاری لاگت فرق"
+        },
+        "abc_classification": {
+          "label": "ABC درجہ بندی",
+          "placeholder": "درجہ منتخب کریں",
+          "help": "انوینٹری فوکس"
+        },
+        "slow_moving_threshold_days": {
+          "label": "سست حرکت آستانہ (دن)",
+          "placeholder": "طے شدہ 180",
+          "help": "بغیر حرکت دن"
+        }
+      }
     },
+    "list": {
+      "page_title_fallback": "آئٹم ماسٹر",
+      "refresh": "ریفریش",
+      "create_item": "آئٹم بنائیں",
+      "search_items_by_code_or_name": "کوڈ یا نام سے تلاش...",
+      "status": "حیثیت",
+      "per_page": "فی صفحہ",
+      "item_type": "قسم",
+      "category": "زمرہ",
+      "costing_method": "لاگت",
+      "actions": "اعمال",
+      "edit": "ترمیم",
+      "delete": "حذف",
+      "no_items_found": "کوئی آئٹم نہیں",
+      "no_inventory_items_yet_create_your_first": "ابھی کوئی آئٹم نہیں۔ پہلا بنائیں۔",
+      "reset_filters": "فلٹر ری سیٹ",
+      "bulk_delete_title": "آئٹمز حذف؟",
+      "bulk_delete_text": "آپ {count} آئٹم حذف کر رہے ہیں۔",
+      "bulk_selected_label": "{count} آئٹم منتخب",
+      "btn_delete_selected": "منتخب حذف",
+      "stat_total_items": "{count} کل آئٹمز",
+      "col_item_code": "آئٹم کوڈ",
+      "col_item_name": "آئٹم نام",
+      "empty_create_item": "آئٹم بنائیں"
+    }
+  },
   "master_data": {
     "create": {
       "back_to_list": "← فہرست پر واپس",
       "title_create": "{name} بنائیں",
       "title_edit": "{name} میں ترمیم",
-      "subtitle_create": "نیا ماسٹر ڈیٹا ریکارڈ شامل کریں",
-      "subtitle_edit": "ماسٹر ڈیٹا ریکارڈ اپ ڈیٹ کریں",
+      "subtitle_create": "نیا ماسٹر ریکارڈ",
+      "subtitle_edit": "ریکارڈ اپ ڈیٹ",
       "fallback_title": "ماسٹر ڈیٹا"
     },
     "list": {
-            "search": "تلاش کریں...",
-            "all_status": "تمام حیثیت",
-            "active": "فعال",
-            "inactive": "غیر فعال",
-            "id": "ID",
-            "status": "حیثیت",
-            "actions": "اعمال"
-        }
-    },
-    "uom_conversion": {
-        "create": {
-            "configure_unit_of_measure_conversions_on": "پیمائش کے تبادلوں کی اکائی ترتیب دیں (ایک سے UOM، متعدد سے UOM + فیکٹر)",
-            "from_unit_master": "یونٹ سے (ماسٹر)",
-            "select_from_uom": "UOM سے منتخب کریں...",
-            "conversion_rows_detail": "تبادلوں کی قطاریں (تفصیل)",
-            "to_uom_": "UOM کو *",
-            "operation": "آپریشن",
-            "conversion_factor_": "تبادلوں کا عنصر *",
-            "select_to_uom": "UOM کو منتخب کریں...",
-            "multiply_": "ضرب (×)",
-            "divide_": "تقسیم (÷)",
-            "eg_12": "جیسے 12",
-            "remove_row": "قطار کو ہٹا دیں۔",
-            "msg_please_correct_the_errors_below_and_try_": "براہ کرم ذیل کی خرابیوں کو درست کریں اور دوبارہ کوشش کریں۔",
-            "msg_at_least_one_conversion_row_is_required": "کم از کم ایک تبادلوں کی قطار درکار ہے۔"
-        },
-        "list": {
-            "uom_conversion": "UOM کی تبدیلی",
-            "refresh": "ریفریش کریں۔",
-            "add_conversion": "تبدیلی شامل کریں۔",
-            "search_by_fromto_uom_code": "UOM کوڈ سے\/ تک تلاش کریں...",
-            "status": "حیثیت",
-            "reset_all_filters": "تمام فلٹرز کو دوبارہ ترتیب دیں۔",
-            "showhide_columns": "کالم دکھائیں\/چھپائیں۔",
-            "stouppercase": "s.toUpperCase())}",
-            "setshowcolumnselectorfalseclose": "setShowColumnSelector(false)}>بند کرنا",
-            "setselected": "سیٹ سلیکٹڈ([])}>",
-            "clear": "صاف",
-            "delete": "حذف کریں۔",
-            "handleselectalletargetchecked_": "handleSelectAll(e.target.checked)} \/>",
-            "handlesortid": "handleSort('id')}>",
-            "id": "ID",
-            "handlesortfrom_uom_id": "handleSort('from_uom_id')}>",
-            "from_uom": "UOM ۔",
-            "handlesortto_uom_id": "handleSort('to_uom_id')}>",
-            "to_uom": "UOM کو",
-            "handlesortconversion_factor": "handleSort('conversion_factor')}>",
-            "factor": "عامل",
-            "handlesortconversion_direction": "handleSort('conversion_direction')}>",
-            "direction": "سمت",
-            "handlesortis_active": "handleSort('is_active')}>",
-            "handlesortupdated_at": "handleSort('updated_at')}>",
-            "updated": "تازہ کاری",
-            "actions": "اعمال",
-            "handleselectrowitemid_etargetchecked_": "handleSelectRow(item.id, e.target.checked)} \/>",
-            "edit_conversion": "تبدیلی میں ترمیم کریں۔",
-            "delete_conversion": "تبادلوں کو حذف کریں۔",
-            "show": "دکھائیں:",
-            "first": "سب سے پہلے",
-            "last": "آخری"
-        }
-    },
-    "uom_master": {
-        "create": {
-            "configure_unit_of_measure_master_data": "پیمائش ماسٹر ڈیٹا کی اکائی ترتیب دیں۔",
-            "msg_please_correct_the_errors_below_and_try_": "براہ کرم ذیل کی خرابیوں کو درست کریں اور دوبارہ کوشش کریں۔"
-        },
-        "list": {
-            "unit_of_measure_master": "پیمائش ماسٹر کی اکائی",
-            "refresh": "ریفریش کریں۔",
-            "add_uom": "UOM شامل کریں۔",
-            "search_uoms_by_code_name_or_symbol": "کوڈ، نام یا علامت کے ذریعے UOMs تلاش کریں...",
-            "type": "قسم",
-            "status": "حیثیت",
-            "reset_all_filters": "تمام فلٹرز کو دوبارہ ترتیب دیں۔",
-            "showhide_columns": "کالم دکھائیں\/چھپائیں۔",
-            "stouppercase": "s.toUpperCase())}",
-            "setshowcolumnselectorfalseclose": "setShowColumnSelector(false)}>بند کرنا",
-            "setselected": "سیٹ سلیکٹڈ([])}>",
-            "clear": "صاف",
-            "delete": "حذف کریں۔",
-            "handleselectalletargetchecked_": "handleSelectAll(e.target.checked)} \/>",
-            "handlesortid": "handleSort('id')}>",
-            "id": "ID",
-            "handlesortuom_code": "handleSort('uom_code')}>",
-            "uom_code": "UOM کوڈ",
-            "handlesortuom_name": "handleSort('uom_name')}>",
-            "uom_name": "UOM نام",
-            "handlesortuom_type": "handleSort('uom_type')}>",
-            "handlesortsymbol": "handleSort('symbol')}>",
-            "symbol": "علامت",
-            "handlesortdecimal_precision": "handleSort('decimal_precision')}>",
-            "precision": "صحت سے متعلق",
-            "handlesortis_active": "handleSort('is_active')}>",
-            "handlesortupdated_at": "handleSort('updated_at')}>",
-            "updated": "تازہ کاری",
-            "actions": "اعمال",
-            "handleselectrowitemid_etargetchecked_": "handleSelectRow(item.id, e.target.checked)} \/>",
-            "edit_uom": "UOM میں ترمیم کریں۔",
-            "delete_uom": "UOM کو حذف کریں۔",
-            "show": "دکھائیں:",
-            "first": "سب سے پہلے",
-            "last": "آخری"
-        }
+      "search": "تلاش...",
+      "all_status": "تمام حیثیت",
+      "active": "فعال",
+      "inactive": "غیر فعال",
+      "id": "ID",
+      "status": "حیثیت",
+      "actions": "اعمال",
+      "title_fallback": "ماسٹر ڈیٹا",
+      "total_records": "کل ریکارڈز: {count}",
+      "add_new": "نیا شامل",
+      "apply_filters": "فلٹر لاگو",
+      "confirm_delete": "کیا آپ یقیناً حذف کرنا چاہتے ہیں؟",
+      "no_records": "کوئی ریکارڈ نہیں۔",
+      "prev": "پچھلا",
+      "next": "اگلا",
+      "page_of": "صفحہ {current} از {last}"
     }
+  },
+  "uom_conversion": {
+    "create": {
+      "configure_unit_of_measure_conversions_on": "پیمائش کی اکائی تبدیلیاں (ایک سے، متعدد تک + عنصر)",
+      "lbl_from_uom_required": "سے UOM",
+      "from_unit_master": "سے یونٹ (ماسٹر)",
+      "select_from_uom": "سے UOM منتخب...",
+      "conversion_rows_detail": "تبدیلی کی قطاریں",
+      "add_row": "قطار",
+      "to_uom_": "تا UOM *",
+      "operation": "عمل",
+      "conversion_factor_": "تبدیلی عنصر *",
+      "select_to_uom": "تا UOM منتخب...",
+      "multiply_": "ضرب (×)",
+      "divide_": "تقسیم (÷)",
+      "eg_12": "مثلاً 12",
+      "remove_row": "قطار ہٹائیں",
+      "msg_please_correct_the_errors_below_and_try_": "براہ کرم غلطیاں درست کریں۔",
+      "msg_at_least_one_conversion_row_is_required": "کم از کم ایک قطار لازمی۔",
+      "title_create": "نئی تبدیلیاں",
+      "title_edit": "تبدیلیاں میں ترمیم",
+      "desc_create": "سے UOM منتخب کریں اور تا UOM + عنصر شامل کریں",
+      "desc_edit": "منتخب سے UOM کی تبدیلیاں اپ ڈیٹ",
+      "submit_save": "محفوظ",
+      "submit_update": "اپ ڈیٹ",
+      "breadcrumb_uom_conversion": "UOM تبدیلی",
+      "breadcrumb_create": "بنائیں",
+      "breadcrumb_edit": "ترمیم",
+      "val_from_uom": "سے UOM لازمی",
+      "val_to_uom": "تا UOM لازمی",
+      "val_factor": "درست عنصر درج کریں (0.0001 – 999999.9999)"
+    },
+    "list": {
+      "uom_conversion": "UOM تبدیلی",
+      "refresh": "ریفریش",
+      "add_conversion": "تبدیلی شامل",
+      "search_by_fromto_uom_code": "UOM کوڈ سے تلاش...",
+      "status": "حیثیت",
+      "reset_all_filters": "فلٹر ری سیٹ",
+      "showhide_columns": "کالم",
+      "clear": "صاف",
+      "delete": "حذف",
+      "id": "ID",
+      "from_uom": "سے UOM",
+      "to_uom": "تا UOM",
+      "factor": "عنصر",
+      "direction": "سمت",
+      "updated": "تازہ",
+      "actions": "اعمال",
+      "edit_conversion": "ترمیم",
+      "delete_conversion": "حذف",
+      "show": "دکھائیں:",
+      "first": "پہلا",
+      "last": "آخری",
+      "bulk_delete_title": "تبدیلیاں حذف؟",
+      "bulk_delete_text": "آپ {count} تبدیلی(یاں) حذف کر رہے ہیں۔",
+      "confirm_delete_conversion": "حذف: {from} → {to}؟ واپس نہیں۔",
+      "multiply_label": "ضرب",
+      "col_id": "ID",
+      "col_from_uom": "سے UOM",
+      "col_to_uom": "تا UOM",
+      "col_factor": "عنصر",
+      "col_direction": "سمت",
+      "col_status": "حیثیت",
+      "col_updated": "تازہ",
+      "page_title": "صفحہ {current} از {last}"
+    }
+  },
+  "uom_master": {
+    "create": {
+      "configure_unit_of_measure_master_data": "پیمائش کی اکائی ماسٹر",
+      "msg_please_correct_the_errors_below_and_try_": "براہ کرم غلطیاں درست کریں۔",
+      "title_create": "نئی اکائی",
+      "title_edit": "اکائی میں ترمیم",
+      "desc_create": "نیا یونٹ شامل کریں",
+      "desc_edit": "تفصیلات اپ ڈیٹ",
+      "submit_create": "UOM بنائیں",
+      "submit_update": "UOM اپ ڈیٹ",
+      "lbl_uom_code": "UOM کوڈ",
+      "ph_uom_code": "UOM کوڈ درج کریں",
+      "lbl_uom_name": "UOM نام",
+      "ph_uom_name": "مکمل نام",
+      "lbl_uom_type": "قسم",
+      "lbl_symbol": "علامت",
+      "ph_symbol": "علامت",
+      "lbl_description": "تفصیل",
+      "ph_description": "تفصیل (200)",
+      "lbl_decimal_precision": "اعشاری درستگی",
+      "ph_decimal_precision": "0-10",
+      "lbl_status": "حیثیت",
+      "val_uom_code": "کوڈ لازمی",
+      "val_uom_name": "نام لازمی",
+      "val_uom_type": "قسم لازمی",
+      "val_symbol": "علامت لازمی",
+      "val_decimal_precision": "درستگی لازمی",
+      "breadcrumb_uom_master": "UOM ماسٹر",
+      "breadcrumb_create": "UOM بنائیں",
+      "breadcrumb_edit": "ترمیم"
+    },
+    "list": {
+      "unit_of_measure_master": "پیمائش کی اکائی ماسٹر",
+      "refresh": "ریفریش",
+      "add_uom": "UOM شامل",
+      "search_uoms_by_code_name_or_symbol": "UOM تلاش...",
+      "type": "قسم",
+      "status": "حیثیت",
+      "reset_all_filters": "فلٹر ری سیٹ",
+      "showhide_columns": "کالم",
+      "clear": "صاف",
+      "delete": "حذف",
+      "id": "ID",
+      "uom_code": "UOM کوڈ",
+      "uom_name": "UOM نام",
+      "symbol": "علامت",
+      "precision": "درستگی",
+      "updated": "تازہ",
+      "actions": "اعمال",
+      "edit_uom": "ترمیم",
+      "delete_uom": "حذف",
+      "show": "دکھائیں:",
+      "first": "پہلا",
+      "last": "آخری",
+      "bulk_delete_title": "UOM حذف؟",
+      "bulk_delete_text": "آپ {count} یونٹ حذف کر رہے ہیں۔",
+      "col_id": "ID",
+      "col_uom_code": "UOM کوڈ",
+      "col_uom_name": "UOM نام",
+      "col_uom_type": "قسم",
+      "col_symbol": "علامت",
+      "col_precision": "درستگی",
+      "col_status": "حیثیت",
+      "col_updated": "تازہ",
+      "page_title": "صفحہ {current} از {last}"
+    },
+    "uom_types": {
+      "Length": "لمبائی",
+      "Weight": "وزن",
+      "Volume": "حجم",
+      "Quantity": "مقدار",
+      "Time": "وقت",
+      "Area": "رقبہ",
+      "Other": "دیگر"
+    }
+  }
 }

@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
-import { 
-  DollarSign, Plus, Edit, Trash2, Search, Filter, 
-  ChevronDown, Globe, Star, TrendingUp, Home, List, Clock 
+import {
+  DollarSign, Plus, Edit, Trash2, Search, Filter,
+  ChevronDown, Globe, Star, TrendingUp, Home, List, Clock
 } from 'lucide-react';
 import App from "../../App.jsx";
 
-// Professional Breadcrumbs Component
-const Breadcrumbs = ({ items }) => {
+const Breadcrumbs = ({ items, description }) => {
   return (
     <div className="breadcrumbs-themed">
       <nav className="breadcrumbs">
@@ -56,7 +55,7 @@ const Breadcrumbs = ({ items }) => {
       </nav>
 
       <div className="breadcrumbs-description">
-        Manage system currencies and exchange rates
+        {description}
       </div>
     </div>
   );
@@ -65,11 +64,11 @@ const Breadcrumbs = ({ items }) => {
 const CurrenciesIndex = () => {
   const { currencies, flash } = usePage().props;
   const { t } = useTranslations();
+  const ti = (key, rep = {}) => t(`system.currencies.index.${key}`, rep);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState('all');
   const [alert, setAlert] = useState(null);
 
-  // Handle flash messages
   React.useEffect(() => {
     if (flash?.success) {
       setAlert({ type: 'success', message: flash.success });
@@ -87,7 +86,7 @@ const CurrenciesIndex = () => {
   };
 
   const handleSetAsBase = (currencyId) => {
-    if (confirm('Are you sure you want to set this as the base currency? This will reset its exchange rate to 1.0000')) {
+    if (window.confirm(ti('confirm_set_base_currency'))) {
       router.post(`/system/currencies/${currencyId}/set-as-base`, {}, {
         preserveScroll: true,
       });
@@ -95,7 +94,7 @@ const CurrenciesIndex = () => {
   };
 
   const handleDelete = (currencyId) => {
-    if (confirm('Are you sure you want to delete this currency?')) {
+    if (window.confirm(ti('confirm_delete_currency'))) {
       router.delete(`/system/currencies/${currencyId}`, {
         preserveScroll: true,
       });
@@ -103,8 +102,8 @@ const CurrenciesIndex = () => {
   };
 
   const handleUpdateFromApi = () => {
-    if (confirm('This will update exchange rates from external API. Continue?')) {
-      setAlert({ type: 'info', message: t('system.currencies.index.msg_updating_exchange_rates_please_wait') });
+    if (window.confirm(ti('confirm_update_rates_from_api'))) {
+      setAlert({ type: 'info', message: ti('msg_updating_exchange_rates_please_wait') });
       router.post('/system/currencies/update-from-api', {
         provider: 'frankfurter'
       }, {
@@ -118,12 +117,12 @@ const CurrenciesIndex = () => {
   };
 
   const filteredCurrencies = currencies.data.filter(currency => {
-    const matchesSearch = 
+    const matchesSearch =
       currency.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       currency.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       currency.country.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesFilter = 
+    const matchesFilter =
       filterActive === 'all' ? true :
       filterActive === 'active' ? currency.is_active :
       !currency.is_active;
@@ -132,18 +131,19 @@ const CurrenciesIndex = () => {
   });
 
   const breadcrumbItems = [
-    { icon: Home, label: 'Home', href: '/dashboard' },
-    { icon: List, label: 'System', href: '/system' },
-    { icon: DollarSign, label: 'Currencies' }
+    { icon: Home, label: t('common.breadcrumbs.dashboard'), href: '/dashboard' },
+    { icon: List, label: t('common.breadcrumbs.system'), href: '/system' },
+    { icon: DollarSign, label: t('system.currencies.create.breadcrumb_currencies') },
   ];
 
   return (
     <App>
       <div className="container-modern">
-        {/* Breadcrumbs */}
-        <Breadcrumbs items={breadcrumbItems} />
+        <Breadcrumbs
+          items={breadcrumbItems}
+          description={ti('breadcrumb_description')}
+        />
 
-        {/* Alert Messages */}
         {alert && (
           <div className={`alert alert-${alert.type} mb-4`}>
             <div className="flex items-center">
@@ -165,11 +165,10 @@ const CurrenciesIndex = () => {
           </div>
         )}
 
-        {/* Header */}
         <div className="page-header">
           <div>
-            <h1 className="page-title">{t('system.currencies.index.currencies_management')}</h1>
-            <p className="page-subtitle">{t('system.currencies.index.manage_currencies_and_exchange_rates')}</p>
+            <h1 className="page-title">{ti('currencies_management')}</h1>
+            <p className="page-subtitle">{ti('manage_currencies_and_exchange_rates')}</p>
           </div>
           <div className="page-actions">
             <button
@@ -177,32 +176,31 @@ const CurrenciesIndex = () => {
               className="btn btn-secondary mr-2"
             >
               <TrendingUp className="w-4 h-4 mr-2" />
-              Currency Converter
+              {ti('btn_currency_converter')}
             </button>
             <button
               onClick={() => handleUpdateFromApi()}
               className="btn btn-info mr-2"
             >
               <TrendingUp className="w-4 h-4 mr-2" />
-              Update Rates from API
+              {ti('btn_update_rates_api')}
             </button>
             <button
               onClick={() => router.visit('/system/currencies/create')}
               className="btn btn-primary"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Add Currency
+              {ti('btn_add_currency')}
             </button>
           </div>
         </div>
 
-        {/* Filters */}
         <div className="filter-bar">
           <div className="search-box">
             <Search className="search-icon" />
             <input
               type="text"
-              placeholder={t('system.currencies.index.search_currencies')}
+              placeholder={ti('search_currencies')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
@@ -214,37 +212,36 @@ const CurrenciesIndex = () => {
               onClick={() => setFilterActive('all')}
               className={`filter-button ${filterActive === 'all' ? 'active' : ''}`}
             >
-              All ({currencies.data.length})
+              {ti('filter_all_count', { count: currencies.data.length })}
             </button>
             <button
               onClick={() => setFilterActive('active')}
               className={`filter-button ${filterActive === 'active' ? 'active' : ''}`}
             >
-              Active ({currencies.data.filter(c => c.is_active).length})
+              {ti('filter_active_count', { count: currencies.data.filter(c => c.is_active).length })}
             </button>
             <button
               onClick={() => setFilterActive('inactive')}
               className={`filter-button ${filterActive === 'inactive' ? 'active' : ''}`}
             >
-              Inactive ({currencies.data.filter(c => !c.is_active).length})
+              {ti('filter_inactive_count', { count: currencies.data.filter(c => !c.is_active).length })}
             </button>
           </div>
         </div>
 
-        {/* Currencies Table */}
         <div className="card">
           <div className="overflow-x-auto">
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>{t('system.currencies.index.code')}</th>
-                  <th>{t('system.currencies.index.currency')}</th>
-                  <th>{t('system.currencies.index.symbol')}</th>
-                  <th>{t('system.currencies.index.country')}</th>
-                  <th>{t('system.currencies.index.exchange_rate')}</th>
-                  <th>{t('system.currencies.index.status')}</th>
-                  <th>{t('system.currencies.index.base')}</th>
-                  <th>{t('system.currencies.index.actions')}</th>
+                  <th>{ti('code')}</th>
+                  <th>{ti('currency')}</th>
+                  <th>{ti('symbol')}</th>
+                  <th>{ti('country')}</th>
+                  <th>{ti('exchange_rate')}</th>
+                  <th>{ti('status')}</th>
+                  <th>{ti('base')}</th>
+                  <th>{ti('actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -272,21 +269,21 @@ const CurrenciesIndex = () => {
                           className={`badge ${currency.is_active ? 'badge-success' : 'badge-error'}`}
                           disabled={currency.is_base_currency}
                         >
-                          {currency.is_active ? 'Active' : 'Inactive'}
+                          {currency.is_active ? t('common.status.active') : t('common.status.inactive')}
                         </button>
                       </td>
                       <td>
                         {currency.is_base_currency ? (
                           <span className="badge badge-warning flex items-center">
                             <Star className="w-3 h-3 mr-1" />
-                            Base Currency
+                            {ti('badge_base_currency')}
                           </span>
                         ) : (
                           <button
                             onClick={() => handleSetAsBase(currency.id)}
                             className="text-sm text-blue-600 hover:text-blue-800"
                           >
-                            Set as Base
+                            {ti('btn_set_as_base')}
                           </button>
                         )}
                       </td>
@@ -295,21 +292,21 @@ const CurrenciesIndex = () => {
                           <button
                             onClick={() => handleViewHistory(currency.id)}
                             className="btn-icon btn-icon-info"
-                            title={t('system.currencies.index.view_history')}
+                            title={ti('view_history')}
                           >
                             <Clock className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => router.visit(`/system/currencies/${currency.id}/edit`)}
                             className="btn-icon btn-icon-primary"
-                            title={t('system.currencies.index.edit')}
+                            title={ti('edit')}
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(currency.id)}
                             className="btn-icon btn-icon-danger"
-                            title={t('system.currencies.index.delete')}
+                            title={ti('delete')}
                             disabled={currency.is_base_currency}
                           >
                             <Trash2 className="w-4 h-4" />
@@ -321,7 +318,7 @@ const CurrenciesIndex = () => {
                 ) : (
                   <tr>
                     <td colSpan="8" className="text-center py-8 text-gray-500">
-                      No currencies found
+                      {ti('empty_no_currencies')}
                     </td>
                   </tr>
                 )}
@@ -329,7 +326,6 @@ const CurrenciesIndex = () => {
             </table>
           </div>
 
-          {/* Pagination */}
           {currencies.links && currencies.links.length > 3 && (
             <div className="pagination">
               {currencies.links.map((link, index) => (
@@ -350,4 +346,3 @@ const CurrenciesIndex = () => {
 };
 
 export default CurrenciesIndex;
-

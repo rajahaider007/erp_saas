@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { DollarSign, Globe, TrendingUp, Hash, Star, Home, List, Plus, Edit } from 'lucide-react';
 import GeneralizedForm from '../../../Components/GeneralizedForm';
 import PermissionAwareForm, { PermissionButton } from '../../../Components/PermissionAwareForm';
@@ -7,8 +7,7 @@ import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 
-// Professional Breadcrumbs Component
-const Breadcrumbs = ({ items }) => {
+const Breadcrumbs = ({ items, description }) => {
   return (
     <div className="breadcrumbs-themed">
       <nav className="breadcrumbs">
@@ -55,102 +54,100 @@ const Breadcrumbs = ({ items }) => {
         ))}
       </nav>
 
-      <div className="breadcrumbs-description">
-        {usePage().props.currency ? 'Update currency information' : 'Add a new currency to the system'}
-      </div>
+      <div className="breadcrumbs-description">{description}</div>
     </div>
   );
 };
 
-// Currency Form Component (Unified for Create and Edit)
 const CreateCurrencyForm = () => {
-const { t } = useTranslations();
+  const { t } = useTranslations();
   const { errors: pageErrors, flash, currency } = usePage().props;
   const isEdit = !!currency;
-  
-  const currencyFields = [
-    {
-      name: 'code',
-      label: 'Currency Code',
-      type: 'text',
-      placeholder: 'e.g., USD, EUR, GBP',
-      icon: Hash,
-      required: true,
-      maxLength: 3
-    },
-    {
-      name: 'name',
-      label: 'Currency Name',
-      type: 'text',
-      placeholder: 'e.g., United States Dollar',
-      icon: DollarSign,
-      required: true
-    },
-    {
-      name: 'symbol',
-      label: 'Currency Symbol',
-      type: 'text',
-      placeholder: 'e.g., $, €, £',
-      icon: DollarSign,
-      required: true
-    },
-    {
-      name: 'country',
-      label: 'Country',
-      type: 'text',
-      placeholder: 'e.g., United States',
-      icon: Globe,
-      required: true
-    },
-    {
-      name: 'exchange_rate',
-      label: 'Exchange Rate',
-      type: 'number',
-      placeholder: 'Exchange rate to base currency',
-      icon: TrendingUp,
-      required: true,
-      min: 0,
-      step: 0.0001
-    },
-    {
-      name: 'is_active',
-      label: 'Active Status',
-      type: 'toggle',
-      required: false
-    },
-    {
-      name: 'is_base_currency',
-      label: 'Set as Base Currency',
-      type: 'toggle',
-      required: false
-    },
-    {
-      name: 'sort_order',
-      label: 'Sort Order',
-      type: 'number',
-      placeholder: 'Display order (lower number = higher priority)',
-      icon: Hash,
-      required: false,
-      min: 0
-    }
-  ];
+  const tc = (suffix, rep = {}) => t(`system.currencies.create.${suffix}`, rep);
 
-  // State for debugging and tracking
+  const currencyFields = useMemo(
+    () => [
+      {
+        name: 'code',
+        label: tc('lbl_code'),
+        type: 'text',
+        placeholder: tc('ph_code'),
+        icon: Hash,
+        required: true,
+        maxLength: 3
+      },
+      {
+        name: 'name',
+        label: tc('lbl_name'),
+        type: 'text',
+        placeholder: tc('ph_name'),
+        icon: DollarSign,
+        required: true
+      },
+      {
+        name: 'symbol',
+        label: tc('lbl_symbol'),
+        type: 'text',
+        placeholder: tc('ph_symbol'),
+        icon: DollarSign,
+        required: true
+      },
+      {
+        name: 'country',
+        label: tc('lbl_country'),
+        type: 'text',
+        placeholder: tc('ph_country'),
+        icon: Globe,
+        required: true
+      },
+      {
+        name: 'exchange_rate',
+        label: tc('lbl_exchange_rate'),
+        type: 'number',
+        placeholder: tc('ph_exchange_rate'),
+        icon: TrendingUp,
+        required: true,
+        min: 0,
+        step: 0.0001
+      },
+      {
+        name: 'is_active',
+        label: tc('lbl_active_status'),
+        type: 'toggle',
+        required: false
+      },
+      {
+        name: 'is_base_currency',
+        label: tc('lbl_base_currency'),
+        type: 'toggle',
+        required: false
+      },
+      {
+        name: 'sort_order',
+        label: tc('lbl_sort_order'),
+        type: 'number',
+        placeholder: tc('ph_sort_order'),
+        icon: Hash,
+        required: false,
+        min: 0
+      }
+    ],
+    [t]
+  );
+
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
 
-  // Handle page errors from Laravel
   useEffect(() => {
     if (pageErrors && Object.keys(pageErrors).length > 0) {
       setErrors(pageErrors);
       setAlert({
         type: 'error',
-        message: t('system.currencies.create.msg_please_correct_the_errors_below_and_try_')
+        message: tc('msg_please_correct_the_errors_below_and_try_')
       });
     }
-  }, [pageErrors]);
+  }, [pageErrors, t]);
 
-  // Handle flash messages
   useEffect(() => {
     if (flash?.success) {
       setAlert({
@@ -170,15 +167,13 @@ const { t } = useTranslations();
 
     try {
       const formData = new FormData();
-      
-      // Add all form fields to FormData
+
       Object.keys(submittedFormData).forEach(key => {
         if (submittedFormData[key] !== null && submittedFormData[key] !== undefined) {
           formData.append(key, submittedFormData[key]);
         }
       });
 
-      // Add _method for edit operations
       if (isEdit) {
         formData.append('_method', 'put');
       }
@@ -187,52 +182,45 @@ const { t } = useTranslations();
 
       router.post(url, formData, {
         forceFormData: true,
-        onSuccess: (page) => {
+        onSuccess: () => {
           setAlert({
             type: 'success',
-            message: isEdit ? 'Currency updated successfully!' : 'Currency created successfully!'
+            message: isEdit ? tc('success_updated') : tc('success_created')
           });
         },
-        onError: (errors) => {
-          setErrors(errors);
+        onError: () => {
           setAlert({
             type: 'error',
-            message: t('system.currencies.create.msg_please_correct_the_errors_below_and_try_')
+            message: tc('msg_please_correct_the_errors_below_and_try_')
           });
         }
       });
-    } catch (error) {
+    } catch {
       setAlert({
         type: 'error',
-        message: t('system.currencies.create.msg_an_unexpected_error_occurred_please_try_')
+        message: tc('msg_an_unexpected_error_occurred_please_try_')
       });
     }
   };
 
-  const handleReset = () => {
-    setErrors({});
-    setAlert(null);
-  };
-
-  // Breadcrumb items configuration
   const breadcrumbItems = [
     {
-      label: 'Dashboard',
+      label: t('common.breadcrumbs.dashboard'),
       icon: Home,
       href: '/dashboard'
     },
     {
-      label: 'System',
+      label: t('common.breadcrumbs.system'),
       icon: List,
       href: '#'
     },
     {
-      label: 'Currencies',
+      label: tc('breadcrumb_currencies'),
       icon: DollarSign,
       href: '/system/currencies'
     },
     {
-      label: isEdit ? 'Edit Currency' : 'Add Currency',
+      label: isEdit ? tc('breadcrumb_edit') : tc('breadcrumb_add'),
       icon: isEdit ? Edit : Plus,
       href: null
     }
@@ -240,10 +228,11 @@ const { t } = useTranslations();
 
   return (
     <div>
-      {/* Professional Breadcrumbs */}
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs
+        items={breadcrumbItems}
+        description={isEdit ? tc('breadcrumb_desc_edit') : tc('breadcrumb_desc_create')}
+      />
 
-      {/* Alert Messages */}
       {alert && (
         <div className={`mb-4 p-4 rounded-lg animate-slideIn ${alert.type === 'success'
             ? 'bg-green-50 border border-green-200 text-green-800'
@@ -268,15 +257,14 @@ const { t } = useTranslations();
         </div>
       )}
 
-      {/* Currency Form */}
       <GeneralizedForm
-        title={isEdit ? "Edit Currency" : "Add New Currency"}
-        subtitle={isEdit ? "Update currency information and exchange rate" : "Add a new currency to the system"}
+        title={isEdit ? tc('title_edit') : tc('title_add')}
+        subtitle={isEdit ? tc('subtitle_edit') : tc('subtitle_create')}
         fields={currencyFields}
         onSubmit={handleCurrencySubmit}
-        submitText={isEdit ? "Update Currency" : "Add Currency"}
-        resetText="Clear Form"
-        initialData={{ 
+        submitText={isEdit ? tc('submit_edit') : tc('submit_add')}
+        resetText={t('common.form_actions.clear_form')}
+        initialData={{
           code: currency?.code || '',
           name: currency?.name || '',
           symbol: currency?.symbol || '',
@@ -292,19 +280,17 @@ const { t } = useTranslations();
   );
 };
 
-// Main Create Component
 const Create = () => {
-  const { canAdd } = usePermissions();
-  
+  const { t } = useTranslations();
+
   return (
     <App>
-      {/* Main Content Card */}
       <div className="rounded-xl shadow-lg form-container border-slate-200">
         <div className="p-6">
           <PermissionAwareForm
             requiredPermission="can_add"
             route="/system/currencies"
-            fallbackMessage="You don't have permission to create currencies. Please contact your administrator."
+            fallbackMessage={t('system.currencies.create.permission_fallback')}
           >
             <CreateCurrencyForm />
           </PermissionAwareForm>
@@ -315,4 +301,3 @@ const Create = () => {
 };
 
 export default Create;
-

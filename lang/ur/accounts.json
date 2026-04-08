@@ -97,7 +97,29 @@
             "total_liabilities": "کل ذمہ داریاں",
             "total_equity": "کل ایکوئٹی",
             "total_liabilities__equity": "کل ذمہ داریاں اور ایکوئٹی",
-            "balance_sheet": "بیلنس شیٹ"
+            "balance_sheet": "بیلنس شیٹ",
+            "page_title_long": "بیلنس شیٹ (مالی حیثیت کا بیان)",
+            "page_subtitle_ias1": "بین الاقوامی اکاؤنٹنگ معیارات - IAS 1 فارمیٹ",
+            "as_at_date_label": "تاریخ تک",
+            "btn_generate": "بنائیں",
+            "btn_print": "پرنٹ",
+            "report_heading_capital_liabilities": "سرمایہ اور ذمہ داریاں",
+            "report_heading_assets": "اثاثے",
+            "balance_sheet_as_at": "بیلنس شیٹ {date} تک",
+            "currency_line": "کرنسی: {code}",
+            "net_profit_retained": "خالص منافع (برقرار آمدنی)",
+            "net_loss_label": "خالص نقصان",
+            "not_balanced": "بیلنس شیٹ متوازن نہیں۔ فرق: {amount}",
+            "footer_ias1_note": "یہ رپورٹ بین الاقوامی اکاؤنٹنگ معیارات (IAS 1) کے مطابق تیار کی گئی ہے۔",
+            "generated_on": "تیار شدہ: {datetime}",
+            "failed_load_level4_details": "اکاؤنٹ کی تفصیلات لوڈ کرنے میں ناکامی",
+            "print_balance_sheet_as_at": "بیلنس شیٹ {date} تک",
+            "print_footer_ias1": "یہ رپورٹ بین الاقوامی اکاؤنٹنگ معیارات (IAS 1) کے مطابق تیار کی گئی ہے۔",
+            "print_generated_on": "تیار شدہ: {datetime}",
+            "total_level2_line": "کل {name}",
+            "company_name_placeholder": "کمپنی کا نام",
+            "tel_label": "فون:",
+            "email_label": "ای میل:"
         },
         "search": {
             "select_date_and_company_to_view_balance_": "بیلنس شیٹ دیکھنے کے لیے تاریخ اور کمپنی کا انتخاب کریں۔",
@@ -772,7 +794,16 @@
             "final_balance": "فائنل بیلنس",
             "grand_total": "گرانڈ کل:",
             "all_accounts": "تمام اکاؤنٹس",
-            "currency_ledger_report__generated_by_erp": "کرنسی لیجر رپورٹ | ERP سسٹم کے ذریعہ تیار کردہ"
+            "currency_ledger_report__generated_by_erp": "کرنسی لیجر رپورٹ | ERP سسٹم کے ذریعہ تیار کردہ",
+            "doc_title": "{report} - {suffix}",
+            "company_name_fallback": "کمپنی کا نام",
+            "period_beginning": "آغاز",
+            "period_end": "اختتام",
+            "period_line": "{from} سے {to} تک",
+            "col_hash": "#",
+            "printed_on": "پرنٹ: {datetime}",
+            "tel_prefix": "فون:",
+            "email_prefix": "ای میل:"
         },
         "report": {
             "rt": "rt",
@@ -807,7 +838,34 @@
             "grand_totals__all_accounts": "گرینڈ ٹوٹل - تمام اکاؤنٹس",
             "total_debit": "کل ڈیبٹ",
             "total_credit": "کل کریڈٹ",
-            "net_balance": "نیٹ بیلنس"
+            "net_balance": "نیٹ بیلنس",
+            "report_title": "کرنسی لیجر رپورٹ",
+            "accounts_count": "{count} اکاؤنٹس",
+            "transactions_count": "{count} لین دین",
+            "label_change_filters": "فلٹرز تبدیل کریں",
+            "label_print": "پرنٹ",
+            "label_export": "برآمد",
+            "export_all_tables_csv": "تمام ٹیبلز برآمد (CSV)",
+            "export_as_excel": "ایکسل میں برآمد",
+            "export_as_pdf": "PDF میں برآمد",
+            "voucher_type_fallback": "JV",
+            "dt_search": "<i class=\"fas fa-search\"></i> تلاش:",
+            "dt_length_menu": "<i class=\"fas fa-list-ol\"></i> _MENU_ اندراجات دکھائیں",
+            "dt_info": "<i class=\"fas fa-info-circle\"></i> _TOTAL_ میں سے _START_ سے _END_ تک",
+            "dt_info_empty": "<i class=\"fas fa-exclamation-circle\"></i> کوئی اندراج دستیاب نہیں",
+            "dt_info_filtered": "<i class=\"fas fa-filter\"></i> (_MAX_ کل اندراجات سے فلٹر شدہ)",
+            "dt_empty_table": "<i class=\"fas fa-database\"></i> کوئی لین دین دستیاب نہیں",
+            "dt_zero_records": "<i class=\"fas fa-search\"></i> کوئی مماثل ریکارڈ نہیں ملا",
+            "dt_processing": "<i class=\"fas fa-spinner fa-spin\"></i> کارروائی جاری...",
+            "dt_loading_records": "<i class=\"fas fa-spinner fa-spin\"></i> لوڈ ہو رہا ہے...",
+            "dt_all": "تمام",
+            "csv_account_line": "اکاؤنٹ: {code} - {name}",
+            "csv_label_account_total": "اکاؤنٹ کل",
+            "csv_label_closing_balance": "اختتامی بیلنس",
+            "csv_header_type": "قسم",
+            "csv_header_currency": "کرنسی",
+            "csv_header_rate": "شرح",
+            "download_csv_basename": "Currency_Ledger_All_Accounts"
         },
         "search": {
             "multicurrency_transaction_report": "کثیر کرنسی کے لین دین کی رپورٹ",
@@ -864,6 +922,12 @@
         }
     },
     "dashboard_financial_report": {
+        "default_title": "مالی رپورٹ",
+        "default_company": "کمپنی",
+        "generated_now": "ابھی تیار کی گئی",
+        "apply_date_filter": "تاریخ کا فلٹر لگائیں",
+        "col_number": "#",
+        "no_accounts": "اس رپورٹ کے لیے کوئی اکاؤنٹ ڈیٹا نہیں ملا۔",
         "from_date": "تاریخ سے",
         "to_date": "آج تک",
         "report_type": "رپورٹ کی قسم:",
@@ -872,7 +936,33 @@
         "account_code": "اکاؤنٹ کوڈ",
         "account_name": "اکاؤنٹ کا نام",
         "account_type": "اکاؤنٹ کی قسم",
-        "balance": "توازن"
+        "balance": "بیلنس",
+        "errors": {
+            "company_location_required": "کمپنی اور مقام کی معلومات درکار ہیں۔",
+            "invalid_report_type": "درخواست کردہ رپورٹ کی قسم درست نہیں۔"
+        },
+        "types": {
+            "main_payable": {
+                "title": "کل واجبات کی رپورٹ",
+                "description": "اکاؤنٹ کوڈ اور نام کے ساتھ قابل ادائیگی اکاؤنٹس کے بیلنس۔"
+            },
+            "main_receivable": {
+                "title": "کل وصولیوں کی رپورٹ",
+                "description": "اکاؤنٹ کوڈ اور نام کے ساتھ قابل وصول اکاؤنٹس کے بیلنس۔"
+            },
+            "current_cash": {
+                "title": "موجودہ نقد رقم کی رپورٹ",
+                "description": "اکاؤنٹ کوڈ اور نام کے ساتھ نقد اکاؤنٹس کے موجودہ بیلنس۔"
+            },
+            "all_cash_codes": {
+                "title": "تمام نقد کوڈز کی رپورٹ",
+                "description": "تمام ترتیب شدہ نقد کوڈز کے بیلنس، اکاؤنٹ کوڈ اور نام کے ساتھ۔"
+            },
+            "bank_balances": {
+                "title": "بینک بیلنس رپورٹ",
+                "description": "بینک کے نام اور بیلنس، اکاؤنٹ کوڈ اور نام کے ساتھ۔"
+            }
+        }
     },
     "fiscal_year_configuration": {
         "index": {
@@ -932,7 +1022,16 @@
             "final_balance": "فائنل بیلنس",
             "grand_total": "گرانڈ کل:",
             "all_accounts": "تمام اکاؤنٹس",
-            "general_ledger_report__generated_by_erp_": "جنرل لیجر رپورٹ | ERP سسٹم کے ذریعہ تیار کردہ"
+            "general_ledger_report__generated_by_erp_": "جنرل لیجر رپورٹ | ERP سسٹم کے ذریعہ تیار کردہ",
+            "doc_title": "{report} - {suffix}",
+            "company_name_fallback": "کمپنی کا نام",
+            "period_beginning": "آغاز",
+            "period_end": "اختتام",
+            "period_line": "{from} سے {to} تک",
+            "col_hash": "#",
+            "printed_on": "پرنٹ: {datetime}",
+            "tel_prefix": "فون:",
+            "email_prefix": "ای میل:"
         },
         "report": {
             "rt": "rt",
@@ -968,7 +1067,33 @@
             "grand_totals__all_accounts": "گرینڈ ٹوٹل - تمام اکاؤنٹس",
             "total_debit": "کل ڈیبٹ",
             "total_credit": "کل کریڈٹ",
-            "net_balance": "نیٹ بیلنس"
+            "net_balance": "نیٹ بیلنس",
+            "report_title": "جنرل لیجر رپورٹ",
+            "accounts_count": "{count} اکاؤنٹس",
+            "transactions_count": "{count} لین دین",
+            "label_change_filters": "فلٹرز تبدیل کریں",
+            "label_print": "پرنٹ",
+            "label_export": "برآمد",
+            "export_all_tables_csv": "تمام ٹیبلز برآمد (CSV)",
+            "export_as_excel": "ایکسل میں برآمد",
+            "export_as_pdf": "PDF میں برآمد",
+            "voucher_type_fallback": "JV",
+            "dt_search": "<i class=\"fas fa-search\"></i> تلاش:",
+            "dt_length_menu": "<i class=\"fas fa-list-ol\"></i> _MENU_ اندراجات دکھائیں",
+            "dt_info": "<i class=\"fas fa-info-circle\"></i> _TOTAL_ میں سے _START_ سے _END_ تک",
+            "dt_info_empty": "<i class=\"fas fa-exclamation-circle\"></i> کوئی اندراج دستیاب نہیں",
+            "dt_info_filtered": "<i class=\"fas fa-filter\"></i> (_MAX_ کل اندراجات سے فلٹر شدہ)",
+            "dt_empty_table": "<i class=\"fas fa-database\"></i> کوئی لین دین دستیاب نہیں",
+            "dt_zero_records": "<i class=\"fas fa-search\"></i> کوئی مماثل ریکارڈ نہیں ملا",
+            "dt_processing": "<i class=\"fas fa-spinner fa-spin\"></i> کارروائی جاری...",
+            "dt_loading_records": "<i class=\"fas fa-spinner fa-spin\"></i> لوڈ ہو رہا ہے...",
+            "dt_all": "تمام",
+            "csv_account_line": "اکاؤنٹ: {code} - {name}",
+            "csv_label_account_total": "اکاؤنٹ کل",
+            "csv_label_closing_balance": "اختتامی بیلنس",
+            "csv_summary": "خلاصہ",
+            "download_csv_basename": "General_Ledger_All_Accounts",
+            "csv_col_type": "قسم"
         },
         "search": {
             "select_filters_to_generate_report": "رپورٹ بنانے کے لیے فلٹرز منتخب کریں۔",
@@ -1037,7 +1162,16 @@
             "total_tax_expense": "کل ٹیکس کا خرچ",
             "net_profit__loss_for_the_period": "مدت کے لیے خالص منافع \/ (نقصان)",
             "this_report_has_been_generated_from_the_": "یہ رپورٹ اکاؤنٹنگ سسٹم سے تیار کی گئی ہے۔",
-            "income_statement": "آمدنی کا بیان"
+            "income_statement": "آمدنی کا بیان",
+            "page_heading": "آمدنی کا بیان (جامع آمدنی کا بیان)",
+            "page_subtitle_ias1": "بین الاقوامی اکاؤنٹنگ معیارات (IAS 1) کے مطابق",
+            "from_date_label": "تاریخ سے",
+            "to_date_label": "تاریخ تک",
+            "btn_generate": "بنائیں",
+            "btn_print": "پرنٹ",
+            "period_line": "مدت {from} سے {to} تک کے لیے آمدنی کا بیان",
+            "currency_line": "کرنسی: {code}",
+            "generated_on": "تیار شدہ: {datetime}"
         },
         "search": {
             "select_date_range_and_company_to_view_in": "آمدنی کا بیان دیکھنے کے لیے تاریخ کی حد اور کمپنی کا انتخاب کریں۔",
@@ -1578,7 +1712,19 @@
             "level_2_only": "صرف لیول 2",
             "level_3_only": "صرف سطح 3",
             "level_4_only": "صرف سطح 4",
-            "hide_zero_balances": "زیرو بیلنس چھپائیں۔"
+            "hide_zero_balances": "زیرو بیلنس چھپائیں۔",
+            "page_title": "ٹرائل بیلنس - رپورٹ فلٹرز",
+            "filter_description": "ٹرائل بیلنس رپورٹ بنانے کے لیے فلٹرز ترتیب دیں",
+            "company_selection": "کمپنی کا انتخاب",
+            "company_hint": "وہ کمپنی منتخب کریں جس کے لیے ٹرائل بیلنس دیکھنا ہے",
+            "location_selection": "لوکیشن کا انتخاب",
+            "location_hint": "منتخب کمپنی کے اندر لوکیشن منتخب کریں",
+            "date_range": "تاریخ کی حد",
+            "account_level_filter": "اکاؤنٹ لیول فلٹر",
+            "level_filter_hint": "درجہ بندی کی سطح کے لحاظ سے اکاؤنٹس فلٹر کریں",
+            "hide_zero_hint": "زیرو ڈیبٹ، کریڈٹ اور بیلنس والے اکاؤنٹس خارج کریں",
+            "reset_filters": "فلٹرز ری سیٹ",
+            "generate_report": "رپورٹ بنائیں"
         }
     },
     "voucher_number_configuration": {

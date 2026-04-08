@@ -172,7 +172,7 @@ const TrialBalanceSearch = () => {
             <div className="title-section">
               <h1 className="page-title">
                 <BarChart3 className="title-icon" />
-                Trial Balance - Report Filters
+                {t('accounts.trial_balance.search.page_title')}
               </h1>
               <div className="stats-summary">
                 <div className="stat-item">
@@ -215,7 +215,7 @@ const TrialBalanceSearch = () => {
                 <h2 className="text-lg font-semibold text-gray-100">{t('accounts.trial_balance.search.report_filters')}</h2>
               </div>
               <p className="text-sm text-gray-400 mt-1">
-                Configure filters to generate your trial balance report
+                {t('accounts.trial_balance.search.filter_description')}
               </p>
             </div>
 
@@ -227,7 +227,7 @@ const TrialBalanceSearch = () => {
                     <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                       <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                         <Database size={16} />
-                        Company Selection
+                        {t('accounts.trial_balance.search.company_selection')}
                       </label>
                       <Select
                         options={companyOptions}
@@ -241,7 +241,7 @@ const TrialBalanceSearch = () => {
                         classNamePrefix="react-select"
                       />
                       <p className="text-xs text-gray-400 mt-2">
-                        Select the company for which you want to view the trial balance
+                        {t('accounts.trial_balance.search.company_hint')}
                       </p>
                     </div>
 
@@ -249,7 +249,7 @@ const TrialBalanceSearch = () => {
                       <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                         <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                           <Database size={16} />
-                          Location Selection
+                          {t('accounts.trial_balance.search.location_selection')}
                         </label>
                         <Select
                           options={locationOptions}
@@ -263,7 +263,7 @@ const TrialBalanceSearch = () => {
                           classNamePrefix="react-select"
                         />
                         <p className="text-xs text-gray-400 mt-2">
-                          Select the location within the selected company
+                          {t('accounts.trial_balance.search.location_hint')}
                         </p>
                       </div>
                     )}
@@ -274,7 +274,7 @@ const TrialBalanceSearch = () => {
                 <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                   <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                     <Calendar size={16} />
-                    Date Range
+                    {t('accounts.trial_balance.search.date_range')}
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -304,7 +304,7 @@ const TrialBalanceSearch = () => {
                 <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600">
                   <label className="flex items-center gap-2 text-sm font-semibold text-blue-400 mb-3 uppercase tracking-wide">
                     <Filter size={16} />
-                    Account Level Filter
+                    {t('accounts.trial_balance.search.account_level_filter')}
                   </label>
                   <select
                     value={selectedLevel}
@@ -318,7 +318,7 @@ const TrialBalanceSearch = () => {
                     <option value="4">{t('accounts.trial_balance.search.level_4_only')}</option>
                   </select>
                   <p className="text-xs text-gray-400 mt-2">
-                    Filter accounts by their hierarchy level
+                    {t('accounts.trial_balance.search.level_filter_hint')}
                   </p>
                 </div>
 
@@ -334,7 +334,7 @@ const TrialBalanceSearch = () => {
                     <div>
                       <span className="text-sm font-semibold text-gray-100">{t('accounts.trial_balance.search.hide_zero_balances')}</span>
                       <p className="text-xs text-gray-400 mt-1">
-                        Exclude accounts with zero debit, credit, and balance amounts
+                        {t('accounts.trial_balance.search.hide_zero_hint')}
                       </p>
                     </div>
                   </label>
@@ -347,14 +347,14 @@ const TrialBalanceSearch = () => {
                     className="px-6 py-3 bg-slate-600 hover:bg-slate-500 text-gray-200 rounded-lg font-medium transition-all flex items-center gap-2"
                   >
                     <RefreshCcw size={18} />
-                    Reset Filters
+                    {t('accounts.trial_balance.search.reset_filters')}
                   </button>
                   <button
                     onClick={handleGenerateReport}
                     className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all flex items-center gap-2 shadow-lg hover:shadow-blue-500/50"
                   >
                     <SearchIcon size={18} />
-                    Generate Report
+                    {t('accounts.trial_balance.search.generate_report')}
                     <ChevronRight size={18} />
                   </button>
                 </div>

@@ -57,16 +57,13 @@ const List = () => {
         confirmButtonText: tf('ok'),
       });
     }
-  }, [flash, t]);
+  }, [flash, tf]);
 
   const userStatusLabel = (status) => {
-    const map = {
-      active: tl('active'),
-      inactive: tl('inactive'),
-      suspended: tl('suspended'),
-      pending: tl('pending'),
-    };
-    return map[status] ?? status;
+    if (!status) return '';
+    const sk = `common.status.${status}`;
+    const tr = t(sk);
+    return tr !== sk ? tr : status;
   };
 
   const formatLoginAt = (iso) => {
@@ -217,10 +214,10 @@ const List = () => {
                     onChange={(e) => setStatusFilter(e.target.value)}
                   >
                     <option value="">{t('system.users.list.all_status')}</option>
-                    <option value="active">{t('system.users.list.active')}</option>
-                    <option value="inactive">{t('system.users.list.inactive')}</option>
-                    <option value="suspended">{t('system.users.list.suspended')}</option>
-                    <option value="pending">{t('system.users.list.pending')}</option>
+                    <option value="active">{t('common.status.active')}</option>
+                    <option value="inactive">{t('common.status.inactive')}</option>
+                    <option value="suspended">{t('common.status.suspended')}</option>
+                    <option value="pending">{t('common.status.pending')}</option>
                   </select>
                 </div>
 
@@ -261,10 +258,10 @@ const List = () => {
                   <ChevronDown size={12} />
                 </button>
                 <div className="dropdown-menu">
-                  <button type="button" onClick={() => handleBulkStatusChange('active')}>{tl('active')}</button>
-                  <button type="button" onClick={() => handleBulkStatusChange('inactive')}>{tl('inactive')}</button>
-                  <button type="button" onClick={() => handleBulkStatusChange('suspended')}>{tl('suspended')}</button>
-                  <button type="button" onClick={() => handleBulkStatusChange('pending')}>{tl('pending')}</button>
+                  <button type="button" onClick={() => handleBulkStatusChange('active')}>{t('common.status.active')}</button>
+                  <button type="button" onClick={() => handleBulkStatusChange('inactive')}>{t('common.status.inactive')}</button>
+                  <button type="button" onClick={() => handleBulkStatusChange('suspended')}>{t('common.status.suspended')}</button>
+                  <button type="button" onClick={() => handleBulkStatusChange('pending')}>{t('common.status.pending')}</button>
                 </div>
               </div>
               {canDelete(USERS_ROUTE) && (

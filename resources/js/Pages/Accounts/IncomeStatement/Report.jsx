@@ -88,10 +88,10 @@ function ReportContent() {
               primaryColor === 'teal' ? 'text-teal-600 dark:text-teal-400' :
               'text-pink-600 dark:text-pink-400'
             }`} />
-            Income Statement (Statement of Comprehensive Income)
+            {t('accounts.income_statement.report.page_heading')}
           </h1>
           <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
-            As per International Accounting Standards (IAS 1)
+            {t('accounts.income_statement.report.page_subtitle_ias1')}
           </p>
         </div>
 
@@ -106,7 +106,7 @@ function ReportContent() {
               <label className={`block text-sm font-medium mb-2 ${
                 theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
               }`}>
-                From Date
+                {t('accounts.income_statement.report.from_date_label')}
               </label>
               <input
                 type="date"
@@ -133,7 +133,7 @@ function ReportContent() {
               <label className={`block text-sm font-medium mb-2 ${
                 theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
               }`}>
-                To Date
+                {t('accounts.income_statement.report.to_date_label')}
               </label>
               <input
                 type="date"
@@ -172,7 +172,7 @@ function ReportContent() {
                 }`}
               >
                 <RefreshCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                Generate
+                {t('accounts.income_statement.report.btn_generate')}
               </button>
             </div>
 
@@ -187,7 +187,7 @@ function ReportContent() {
                 }`}
               >
                 <Printer className="w-4 h-4" />
-                Print
+                {t('accounts.income_statement.report.btn_print')}
               </button>
             </div>
           </form>
@@ -209,11 +209,14 @@ function ReportContent() {
               }`}>{company?.company_name}</h2>
               <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>{company?.legal_name}</p>
               <p className={`text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-                Income Statement for the period {new Date(fromDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })} 
-                {' '} to {' '}
-                {new Date(toDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                {t('accounts.income_statement.report.period_line', {
+                  from: new Date(fromDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }),
+                  to: new Date(toDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+                })}
               </p>
-              <p className={`text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Currency: {currencyCode}</p>
+              <p className={`text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                {t('accounts.income_statement.report.currency_line', { code: currencyCode })}
+              </p>
             </div>
 
             {/* === REVENUE SECTION === */}
@@ -594,7 +597,7 @@ function ReportContent() {
               theme === 'dark' ? 'border-gray-700 text-gray-500' : 'border-gray-900 text-gray-500'
             }`}>
               <p>{t('accounts.income_statement.report.this_report_has_been_generated_from_the_')}</p>
-              <p>Generated on: {new Date().toLocaleString()}</p>
+              <p>{t('accounts.income_statement.report.generated_on', { datetime: new Date().toLocaleString() })}</p>
             </div>
           </div>
         )}
@@ -603,6 +606,7 @@ function ReportContent() {
 }
 
 export default function IncomeStatementReport() {
+  const { t } = useTranslations();
   return (
     <App title={t('accounts.income_statement.report.income_statement')}>
       <ReportContent />
