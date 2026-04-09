@@ -8,6 +8,7 @@ import InlineSearchSelect from '@/Components/InlineSearchSelect';
 import CustomDatePicker from '@/Components/DatePicker/DatePicker';
 import App from '../../App.jsx';
 import { useTranslations } from '@/hooks/useTranslations';
+import { consumeRahjAiDraftPayload } from '@/utils/rahjAiDraft';
 
 const emptyLine = () => ({
   purchase_requisition_line_id: '',
@@ -85,6 +86,10 @@ export default function PurchaseOrderCreate() {
   );
   const [loadingPr, setLoadingPr] = useState(false);
   const [headerPrefillBoost, setHeaderPrefillBoost] = useState({});
+  const aiDraftPayload = useMemo(
+    () => (order?.id ? null : consumeRahjAiDraftPayload('purchase_order')),
+    [order?.id]
+  );
 
   useEffect(() => {
     if (order?.id) {
@@ -369,7 +374,7 @@ export default function PurchaseOrderCreate() {
         notes: order.notes ?? '',
       };
     }
-    return {
+    const base = {
       po_number_display: preview_po_number ?? '',
       vendor_id: '',
       po_type: 'standard',
@@ -390,7 +395,8 @@ export default function PurchaseOrderCreate() {
       initial_status: 'draft',
       notes: '',
     };
-  }, [defaults, order, preview_po_number]);
+    return aiDraftPayload ? { ...base, ...aiDraftPayload } : base;
+  }, [aiDraftPayload, defaults, order, preview_po_number]);
 
   const lineSubtotal = useMemo(() => {
     let sum = 0;

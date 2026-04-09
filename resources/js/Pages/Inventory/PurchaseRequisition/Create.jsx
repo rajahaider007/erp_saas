@@ -7,6 +7,7 @@ import InlineSearchSelect from '@/Components/InlineSearchSelect';
 import CustomDatePicker from '@/Components/DatePicker/DatePicker';
 import App from '../../App.jsx';
 import { useTranslations } from '@/hooks/useTranslations';
+import { consumeRahjAiDraftPayload } from '@/utils/rahjAiDraft';
 
 const emptyLine = () => ({
   inventory_item_id: '',
@@ -65,6 +66,10 @@ const PurchaseRequisitionCreate = () => {
   const [lines, setLines] = useState([emptyLine()]);
   const [alert, setAlert] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const aiDraftPayload = useMemo(
+    () => (requisition?.id ? null : consumeRahjAiDraftPayload('purchase_requisition')),
+    [requisition?.id]
+  );
 
   useEffect(() => {
     if (requisition?.id) {
@@ -247,7 +252,7 @@ const PurchaseRequisitionCreate = () => {
         notes: requisition.notes ?? '',
       };
     }
-    return {
+    const base = {
       pr_number_display: preview_pr_number ?? '',
       pr_date: defaults.pr_date || '',
       required_by_date: '',
@@ -262,7 +267,8 @@ const PurchaseRequisitionCreate = () => {
       justification: '',
       notes: '',
     };
-  }, [defaults, requisition, preview_pr_number]);
+    return aiDraftPayload ? { ...base, ...aiDraftPayload } : base;
+  }, [aiDraftPayload, defaults, requisition, preview_pr_number]);
 
   const estimatedSubtotal = useMemo(() => {
     let sum = 0;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 import { 
@@ -21,6 +21,7 @@ import FloatingCurrencyWidget from '../../../Components/FloatingCurrencyWidget';
 import InlineSearchSelect from '../../../Components/InlineSearchSelect';
 import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
 import StorageWarning from '../../../Components/StorageWarning';
+import { consumeRahjAiDraftPayload } from '../../../utils/rahjAiDraft';
 
 // Breadcrumbs Component
 const Breadcrumbs = ({ items }) => {
@@ -65,47 +66,55 @@ const JournalVoucherCreate = () => {
   };
   const isEdit = !!voucher;
   const autoVoucherNumbering = true; // Always auto-generate voucher numbers
+  const aiDraftPayload = useMemo(
+    () => (!isEdit ? consumeRahjAiDraftPayload('journal_voucher') : null),
+    [isEdit]
+  );
   
-  const [formData, setFormData] = useState({
-    voucher_date: voucher?.voucher_date || new Date().toISOString().split('T')[0],
-    voucher_number: voucher?.voucher_number || preview_voucher_number || '',
-    description: voucher?.description || '',
-    reference_number: voucher?.reference_number || '',
-    base_currency_code: company?.default_currency_code || 'PKR',
-    entries: entries.length > 0 ? entries.map(entry => ({
-      account_id: entry.account_id,
-      description: entry.description || '',
-      debit_amount: entry.debit_amount && entry.debit_amount !== '' ? parseFloat(entry.debit_amount) : null,
-      credit_amount: entry.credit_amount && entry.credit_amount !== '' ? parseFloat(entry.credit_amount) : null,
-      currency_code: entry.currency_code || company?.default_currency_code || 'PKR',
-      exchange_rate: entry.exchange_rate || 1.0,
-      base_debit_amount: entry.base_debit_amount && entry.base_debit_amount !== '' ? parseFloat(entry.base_debit_amount) : null,
-      base_credit_amount: entry.base_credit_amount && entry.base_credit_amount !== '' ? parseFloat(entry.base_credit_amount) : null,
-      attachment: entry.attachment || null
-    })) : [
-      { 
-        account_id: null, 
-        description: '', 
-        debit_amount: null, 
-        credit_amount: null, 
-        currency_code: company?.default_currency_code || 'PKR',
-        exchange_rate: 1.0,
-        base_debit_amount: null, 
-        base_credit_amount: null,
-        attachment: null
-      },
-      { 
-        account_id: null, 
-        description: '', 
-        debit_amount: null, 
-        credit_amount: null, 
-        currency_code: company?.default_currency_code || 'PKR',
-        exchange_rate: 1.0,
-        base_debit_amount: null, 
-        base_credit_amount: null,
-        attachment: null
-      }
-    ]
+  const [formData, setFormData] = useState(() => {
+    const base = {
+      voucher_date: voucher?.voucher_date || new Date().toISOString().split('T')[0],
+      voucher_number: voucher?.voucher_number || preview_voucher_number || '',
+      description: voucher?.description || '',
+      reference_number: voucher?.reference_number || '',
+      base_currency_code: company?.default_currency_code || 'PKR',
+      entries: entries.length > 0 ? entries.map(entry => ({
+        account_id: entry.account_id,
+        description: entry.description || '',
+        debit_amount: entry.debit_amount && entry.debit_amount !== '' ? parseFloat(entry.debit_amount) : null,
+        credit_amount: entry.credit_amount && entry.credit_amount !== '' ? parseFloat(entry.credit_amount) : null,
+        currency_code: entry.currency_code || company?.default_currency_code || 'PKR',
+        exchange_rate: entry.exchange_rate || 1.0,
+        base_debit_amount: entry.base_debit_amount && entry.base_debit_amount !== '' ? parseFloat(entry.base_debit_amount) : null,
+        base_credit_amount: entry.base_credit_amount && entry.base_credit_amount !== '' ? parseFloat(entry.base_credit_amount) : null,
+        attachment: entry.attachment || null
+      })) : [
+        {
+          account_id: null,
+          description: '',
+          debit_amount: null,
+          credit_amount: null,
+          currency_code: company?.default_currency_code || 'PKR',
+          exchange_rate: 1.0,
+          base_debit_amount: null,
+          base_credit_amount: null,
+          attachment: null
+        },
+        {
+          account_id: null,
+          description: '',
+          debit_amount: null,
+          credit_amount: null,
+          currency_code: company?.default_currency_code || 'PKR',
+          exchange_rate: 1.0,
+          base_debit_amount: null,
+          base_credit_amount: null,
+          attachment: null
+        }
+      ]
+    };
+
+    return aiDraftPayload ? { ...base, ...aiDraftPayload } : base;
   });
   
   const [errors, setErrors] = useState({});

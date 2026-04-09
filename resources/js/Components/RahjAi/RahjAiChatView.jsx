@@ -1,7 +1,278 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Sparkles, Send } from 'lucide-react';
+import { router } from '@inertiajs/react';
 import { useRahjAiAssistant } from '../../Contexts/RahjAiAssistantContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { stashRahjAiDraftAction } from '../../utils/rahjAiDraft';
+
+const markdownLinkPattern = /\[([^\]]+)\]\(((?:https?:\/\/|\/)[^\s)]+)\)/g;
+const plainLinkPattern = /(https?:\/\/[^\s<>()]+|\/[a-zA-Z0-9\-._~\/?#=&%]+)/g;
+
+function isInternalLink(href) {
+  return typeof href === 'string' && href.startsWith('/');
+}
+
+function normalizeLinkMatch(raw) {
+  if (!raw) {
+    return { href: '', trailing: '' };
+  }
+
+  let href = raw;
+  let trailing = '';
+  while (/[),.;!?]$/.test(href)) {
+    trailing = href.slice(-1) + trailing;
+    href = href.slice(0, -1);
+  }
+
+  return { href, trailing };
+}
+
+function LinkText({ href, children }) {
+  const internal = isInternalLink(href);
+
+  return (
+    <a
+      href={href}
+      target={internal ? '_self' : '_blank'}
+      rel={internal ? undefined : 'noreferrer noopener'}
+      className="break-all font-medium underline decoration-blue-400/70 underline-offset-2 transition-colors hover:text-blue-600 dark:hover:text-blue-300"
+    >
+      {children}
+    </a>
+  );
+}
+
+function renderPlainLinks(text, keyPrefix) {
+  const source = String(text || '');
+  const result = [];
+  let cursor = 0;
+  let linkIndex = 0;
+
+  plainLinkPattern.lastIndex = 0;
+  let match;
+  while ((match = plainLinkPattern.exec(source)) !== null) {
+    const start = match.index;
+    const rawMatch = match[0];
+    const before = source.slice(cursor, start);
+    if (before) {
+      result.push(<React.Fragment key={`${keyPrefix}-txt-${cursor}`}>{before}</React.Fragment>);
+    }
+
+    const normalized = normalizeLinkMatch(rawMatch);
+    if (normalized.href) {
+      result.push(
+        <LinkText href={normalized.href} key={`${keyPrefix}-lnk-${linkIndex}`}>
+          {normalized.href}
+        </LinkText>,
+      );
+      linkIndex += 1;
+    }
+
+    if (normalized.trailing) {
+      result.push(<React.Fragment key={`${keyPrefix}-trail-${linkIndex}`}>{normalized.trailing}</React.Fragment>);
+    }
+
+    cursor = start + rawMatch.length;
+  }
+
+  const remaining = source.slice(cursor);
+  if (remaining) {
+    result.push(<React.Fragment key={`${keyPrefix}-rest`}>{remaining}</React.Fragment>);
+  }
+
+  return result.length ? result : [source];
+}
+
+function renderMarkdownAndPlainLinks(text, lineIndex) {
+  const source = String(text || '');
+  const result = [];
+  let cursor = 0;
+  let matchIndex = 0;
+
+  markdownLinkPattern.lastIndex = 0;
+  let match;
+  while ((match = markdownLinkPattern.exec(source)) !== null) {
+    const start = match.index;
+    const [full, label, hrefRaw] = match;
+    const before = source.slice(cursor, start);
+
+    if (before) {
+      result.push(...renderPlainLinks(before, `line-${lineIndex}-before-${matchIndex}`));
+    }
+
+    const normalized = normalizeLinkMatch(hrefRaw);
+    const href = normalized.href || hrefRaw;
+    result.push(
+      <LinkText href={href} key={`line-${lineIndex}-md-${matchIndex}`}>
+        {label}
+      </LinkText>,
+    );
+    if (normalized.trailing) {
+      result.push(<React.Fragment key={`line-${lineIndex}-mdtrail-${matchIndex}`}>{normalized.trailing}</React.Fragment>);
+    }
+
+    cursor = start + full.length;
+    matchIndex += 1;
+  }
+
+  const remaining = source.slice(cursor);
+  if (remaining) {
+    result.push(...renderPlainLinks(remaining, `line-${lineIndex}-rest`));
+  }
+
+  return result.length ? result : [source];
+}
+
+function RichMessageText({ content }) {
+  const lines = String(content || '').split('\n');
+
+  return (
+    <>
+      {lines.map((line, i) => (
+        <React.Fragment key={`line-${i}`}>
+          {renderMarkdownAndPlainLinks(line, i)}
+          {i < lines.length - 1 ? <br /> : null}
+        </React.Fragment>
+      ))}
+    </>
+  );
+}
+
+function ActionCard({ action }) {
+  const isDraftAction = Boolean(action && action.type === 'draft_prefill' && action.route);
+
+  const targetLabelMap = {
+    purchase_requisition: 'Purchase Requisition',
+    purchase_order: 'Purchase Order',
+    goods_receipt_note: 'Goods Receipt Note',
+    journal_voucher: 'Journal Voucher',
+    bank_voucher: 'Bank Voucher',
+    cash_voucher: 'Cash Voucher',
+    opening_voucher: 'Opening Voucher',
+  };
+
+  const targetLabel = targetLabelMap[action.target] || action.target || 'Draft Form';
+
+  const payloadEntries = useMemo(() => {
+    const payload = action && action.payload && typeof action.payload === 'object' ? action.payload : {};
+    return Object.entries(payload);
+  }, [action]);
+
+  const [selectedFields, setSelectedFields] = useState(() => payloadEntries.map(([key]) => key));
+
+  const allSelected = payloadEntries.length > 0 && selectedFields.length === payloadEntries.length;
+
+  const toggleField = (fieldKey) => {
+    setSelectedFields((prev) => {
+      if (prev.includes(fieldKey)) {
+        return prev.filter((item) => item !== fieldKey);
+      }
+      return [...prev, fieldKey];
+    });
+  };
+
+  const toggleAllFields = () => {
+    setSelectedFields((prev) => {
+      if (payloadEntries.length > 0 && prev.length === payloadEntries.length) {
+        return [];
+      }
+      return payloadEntries.map(([key]) => key);
+    });
+  };
+
+  const selectedPayload = useMemo(() => {
+    const payload = action && action.payload && typeof action.payload === 'object' ? action.payload : {};
+    const next = {};
+    for (const key of selectedFields) {
+      if (Object.prototype.hasOwnProperty.call(payload, key)) {
+        next[key] = payload[key];
+      }
+    }
+    return next;
+  }, [action, selectedFields]);
+
+  const applyDraft = () => {
+    if (!isDraftAction) {
+      return;
+    }
+
+    stashRahjAiDraftAction({
+      ...action,
+      payload: selectedPayload,
+    });
+    router.visit(action.route);
+  };
+
+  if (!isDraftAction) {
+    return null;
+  }
+
+  const formatValue = (value) => {
+    if (value === null || value === undefined || value === '') {
+      return 'empty';
+    }
+    if (typeof value === 'object') {
+      try {
+        return JSON.stringify(value);
+      } catch {
+        return '[object]';
+      }
+    }
+    return String(value);
+  };
+
+  return (
+    <div className="mt-3 rounded-xl border border-emerald-300/70 bg-emerald-50/90 p-3 text-xs text-emerald-900 dark:border-emerald-800/60 dark:bg-emerald-950/30 dark:text-emerald-200">
+      <div className="mb-1 text-sm font-semibold">Draft Action Ready</div>
+      <div className="mb-2">Target: {targetLabel}</div>
+      {payloadEntries.length > 0 && (
+        <div className="mb-3 rounded-lg border border-emerald-300/60 bg-white/60 p-2 dark:border-emerald-800/50 dark:bg-emerald-950/20">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <div className="text-[11px] font-semibold uppercase tracking-wide opacity-90">Draft Fields</div>
+            <button
+              type="button"
+              onClick={toggleAllFields}
+              className="rounded border border-emerald-500/50 px-2 py-0.5 text-[11px] font-semibold transition-colors hover:bg-emerald-100/70 dark:hover:bg-emerald-900/40"
+            >
+              {allSelected ? 'Unselect All' : 'Select All'}
+            </button>
+          </div>
+          <div className="max-h-40 space-y-1 overflow-y-auto pr-1">
+            {payloadEntries.map(([field, value]) => {
+              const checked = selectedFields.includes(field);
+              return (
+                <label
+                  key={field}
+                  className="flex cursor-pointer items-start gap-2 rounded border border-emerald-200/60 px-2 py-1 transition-colors hover:bg-emerald-100/40 dark:border-emerald-800/40 dark:hover:bg-emerald-900/20"
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleField(field)}
+                    className="mt-0.5"
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold">{field}</span>
+                    <span className="block truncate opacity-80">{formatValue(value)}</span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={applyDraft}
+        disabled={payloadEntries.length > 0 && selectedFields.length === 0}
+        className="rounded-lg border border-emerald-500/60 bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-700"
+      >
+        Apply Selected Fields And Open Form
+      </button>
+      <div className="mt-2 text-[11px] opacity-80">Review required before saving.</div>
+    </div>
+  );
+}
 
 /**
  * Shared chat thread + composer (form-themes input). Used on portal (embedded) and in slide drawer.
@@ -84,7 +355,9 @@ export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-
                 className={`max-w-[90%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${
                   msg.role === 'user'
                     ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
-                    : 'border border-gray-200/80 bg-white/90 text-gray-800 dark:border-gray-600/60 dark:bg-gray-800/90 dark:text-gray-100'
+                    : msg.error
+                      ? 'border border-rose-200/90 bg-rose-50/90 text-rose-900 dark:border-rose-800/70 dark:bg-rose-950/40 dark:text-rose-200'
+                      : 'border border-gray-200/80 bg-white/90 text-gray-800 dark:border-gray-600/60 dark:bg-gray-800/90 dark:text-gray-100'
                 }`}
               >
                 {msg.role === 'assistant' && msg.pending ? (
@@ -92,7 +365,20 @@ export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-
                     {t('rahj_ai.portal.reply_pending')}
                   </span>
                 ) : (
-                  <span className="whitespace-pre-wrap break-words">{msg.content}</span>
+                  <div>
+                    <span className="whitespace-pre-wrap break-words"><RichMessageText content={msg.content} /></span>
+                    {msg.role === 'assistant' && msg.action && <ActionCard action={msg.action} />}
+                    {msg.role === 'assistant' && Array.isArray(msg.sources) && msg.sources.length > 0 && (
+                      <div className="mt-3 border-t border-gray-200/70 pt-2 text-xs text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                        <div className="mb-1 font-semibold">Sources</div>
+                        {msg.sources.slice(0, 4).map((src, i) => (
+                          <div key={`${src.source_path || 'source'}-${i}`} className="mb-1 truncate">
+                            {(src.document_title || 'Untitled')} - {(src.section_title || src.table_name || src.source_path || 'Unknown source')}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

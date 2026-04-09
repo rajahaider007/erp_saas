@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 import { 
@@ -21,6 +21,7 @@ import FloatingCurrencyWidget from '../../../Components/FloatingCurrencyWidget.j
 import InlineSearchSelect from '../../../Components/InlineSearchSelect';
 import CustomDatePicker from '../../../Components/DatePicker/DatePicker.jsx';
 import StorageWarning from '../../../Components/StorageWarning.jsx';
+import { consumeRahjAiDraftPayload } from '../../../utils/rahjAiDraft';
 
 // Breadcrumbs Component
 const Breadcrumbs = ({ items }) => {
@@ -65,6 +66,10 @@ const BankVoucherCreate = () => {
   };
   const isEdit = !!voucher;
   const autoVoucherNumbering = true; // Always auto-generate voucher numbers
+  const aiDraftPayload = useMemo(
+    () => (!isEdit ? consumeRahjAiDraftPayload('bank_voucher') : null),
+    [isEdit]
+  );
   const getAutoVoucherNumberByType = (type) => {
     if (type === 'Bank Payment') {
       return preview_voucher_numbers?.['Bank Payment'] || 'BPV0001';
@@ -80,43 +85,47 @@ const BankVoucherCreate = () => {
   const defaultVoucherType = voucher?.voucher_sub_type || 'Bank Payment';
   const defaultPreviewVoucherNumber = getAutoVoucherNumberByType(defaultVoucherType);
   
-  const [formData, setFormData] = useState({
-    voucher_date: voucher?.voucher_date || new Date().toISOString().split('T')[0],
-    voucher_number: voucher?.voucher_number || defaultPreviewVoucherNumber,
-    voucher_sub_type: defaultVoucherType,
-    bank_account_id: voucher?.bank_account_id || '',
-    description: voucher?.description || '',
-    reference_number: voucher?.reference_number || '',
-    base_currency_code: company?.default_currency_code || 'PKR',
-    entries: entries.length > 0 ? entries.map(entry => ({
-      account_id: entry.account_id,
-      description: entry.description || '',
-      amount: (entry.debit_amount && parseFloat(entry.debit_amount) > 0)
-        ? parseFloat(entry.debit_amount)
-        : (entry.credit_amount && parseFloat(entry.credit_amount) > 0 ? parseFloat(entry.credit_amount) : null),
-      currency_code: entry.currency_code || company?.default_currency_code || 'PKR',
-      exchange_rate: entry.exchange_rate || 1.0,
-      base_amount: (entry.base_debit_amount && parseFloat(entry.base_debit_amount) > 0)
-        ? parseFloat(entry.base_debit_amount)
-        : (entry.base_credit_amount && parseFloat(entry.base_credit_amount) > 0 ? parseFloat(entry.base_credit_amount) : null),
-      cheque_number: entry.cheque_number || '',
-      cheque_date: entry.cheque_date || '',
-      slip_number: entry.slip_number || '',
-      attachment: entry.attachment || null
-    })) : [
-      { 
-        account_id: null, 
-        description: '', 
-        amount: null,
-        currency_code: company?.default_currency_code || 'PKR',
-        exchange_rate: 1.0,
-        base_amount: null,
-        cheque_number: '',
-        cheque_date: '',
-        slip_number: '',
-        attachment: null
-      }
-    ]
+  const [formData, setFormData] = useState(() => {
+    const base = {
+      voucher_date: voucher?.voucher_date || new Date().toISOString().split('T')[0],
+      voucher_number: voucher?.voucher_number || defaultPreviewVoucherNumber,
+      voucher_sub_type: defaultVoucherType,
+      bank_account_id: voucher?.bank_account_id || '',
+      description: voucher?.description || '',
+      reference_number: voucher?.reference_number || '',
+      base_currency_code: company?.default_currency_code || 'PKR',
+      entries: entries.length > 0 ? entries.map(entry => ({
+        account_id: entry.account_id,
+        description: entry.description || '',
+        amount: (entry.debit_amount && parseFloat(entry.debit_amount) > 0)
+          ? parseFloat(entry.debit_amount)
+          : (entry.credit_amount && parseFloat(entry.credit_amount) > 0 ? parseFloat(entry.credit_amount) : null),
+        currency_code: entry.currency_code || company?.default_currency_code || 'PKR',
+        exchange_rate: entry.exchange_rate || 1.0,
+        base_amount: (entry.base_debit_amount && parseFloat(entry.base_debit_amount) > 0)
+          ? parseFloat(entry.base_debit_amount)
+          : (entry.base_credit_amount && parseFloat(entry.base_credit_amount) > 0 ? parseFloat(entry.base_credit_amount) : null),
+        cheque_number: entry.cheque_number || '',
+        cheque_date: entry.cheque_date || '',
+        slip_number: entry.slip_number || '',
+        attachment: entry.attachment || null
+      })) : [
+        {
+          account_id: null,
+          description: '',
+          amount: null,
+          currency_code: company?.default_currency_code || 'PKR',
+          exchange_rate: 1.0,
+          base_amount: null,
+          cheque_number: '',
+          cheque_date: '',
+          slip_number: '',
+          attachment: null
+        }
+      ]
+    };
+
+    return aiDraftPayload ? { ...base, ...aiDraftPayload } : base;
   });
   
   const [errors, setErrors] = useState({});

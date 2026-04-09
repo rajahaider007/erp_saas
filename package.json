@@ -5,6 +5,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
+        "rag:build": "node scripts/build-rag-corpus.js",
         "i18n:extract": "node scripts/i18n-extract.js",
         "i18n:extract:update": "node scripts/i18n-extract.js --update-json",
         "i18n:sync-ur": "node scripts/i18n-sync-ur-keys.js",

@@ -108,6 +108,26 @@ Route::get('/rahj-ai', function () {
     return Inertia::render('RahjAi/Portal');
 })->middleware('web.auth')->name('rahj-ai.portal');
 
+Route::post('/rahj-ai/chat', [App\Http\Controllers\RahjAiController::class, 'chat'])
+    ->middleware('web.auth')
+    ->name('rahj-ai.chat');
+
+Route::get('/rahj-ai/history', [App\Http\Controllers\RahjAiController::class, 'history'])
+    ->middleware('web.auth')
+    ->name('rahj-ai.history');
+
+Route::get('/rahj-ai/conversations', [App\Http\Controllers\RahjAiController::class, 'conversations'])
+    ->middleware('web.auth')
+    ->name('rahj-ai.conversations');
+
+Route::delete('/rahj-ai/conversations', [App\Http\Controllers\RahjAiController::class, 'clearAllConversations'])
+    ->middleware('web.auth')
+    ->name('rahj-ai.conversations.clear-all');
+
+Route::delete('/rahj-ai/conversations/{conversationId}', [App\Http\Controllers\RahjAiController::class, 'clearConversation'])
+    ->middleware('web.auth')
+    ->name('rahj-ai.conversations.clear');
+
 // Accounts Module Routes
 Route::get('/accounts', function () {
     return redirect('/accounts/dashboard');

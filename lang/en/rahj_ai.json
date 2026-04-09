@@ -6,7 +6,7 @@
     "open_drawer": "Side panel",
     "chat_heading": "Chat",
     "chat_subheading": "Same thread continues in the side panel if you open it from here or elsewhere.",
-    "reply_pending": "The assistant backend is not connected yet — your message is saved in this session only.",
+    "reply_pending": "RAHJ AI is preparing a response...",
     "composer_hint": "Enter to send · Shift+Enter for new line",
     "suggestion_reports": "How do I open inventory reports?",
     "suggestion_navigation": "Where do I add a supplier or customer?",

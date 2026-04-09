@@ -8,6 +8,7 @@ import InlineSearchSelect from '@/Components/InlineSearchSelect';
 import CustomDatePicker from '@/Components/DatePicker/DatePicker';
 import App from '../../App.jsx';
 import { useTranslations } from '@/hooks/useTranslations';
+import { consumeRahjAiDraftPayload } from '@/utils/rahjAiDraft';
 
 const emptyLine = () => ({
   purchase_order_line_id: '',
@@ -92,6 +93,10 @@ export default function GoodsReceiptNoteCreate() {
   const [vendorId, setVendorId] = useState(isEdit ? String(grn.vendor_id) : '');
   const [loadingPo, setLoadingPo] = useState(false);
   const [headerPrefillBoost, setHeaderPrefillBoost] = useState({});
+  const aiDraftPayload = useMemo(
+    () => (isEdit ? null : consumeRahjAiDraftPayload('goods_receipt_note')),
+    [isEdit]
+  );
 
   useEffect(() => {
     if (pageError) {
@@ -353,7 +358,8 @@ export default function GoodsReceiptNoteCreate() {
   );
 
   const initialHeader = useMemo(
-    () => ({
+    () => {
+      const base = {
       grn_number_display: preview_grn_number ?? '',
       vendor_display: '',
       grn_type: 'standard',
@@ -376,8 +382,11 @@ export default function GoodsReceiptNoteCreate() {
       three_way_match_display: tc('match_status_pending'),
       initial_status: 'draft',
       notes: '',
-    }),
-    [defaults, preview_grn_number, tc]
+      };
+
+      return aiDraftPayload ? { ...base, ...aiDraftPayload } : base;
+    },
+    [aiDraftPayload, defaults, preview_grn_number, tc]
   );
 
   const threeWayMatchLabels = useMemo(

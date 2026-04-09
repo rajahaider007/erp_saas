@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
-import { Sparkles, ArrowLeft, Shield, BookOpen, MessageSquare } from 'lucide-react';
+import { Sparkles, ArrowLeft, Shield, BookOpen, MessageSquare, PlusCircle, Trash2, History } from 'lucide-react';
 import AppLayout from '../../Layouts/AppLayout';
 import RahjAiChatView from '../../Components/RahjAi/RahjAiChatView';
 import { useRahjAiAssistant } from '../../Contexts/RahjAiAssistantContext';
@@ -9,7 +9,17 @@ import { useTranslations } from '../../hooks/useTranslations';
 /** Must render inside AppLayout so RahjAiAssistantProvider is an ancestor (hooks run in parent first). */
 function RahjAiPortalBody() {
   const { t } = useTranslations();
-  const { openAssistant } = useRahjAiAssistant();
+  const {
+    openAssistant,
+    startNewChat,
+    clearConversation,
+    clearAllConversations,
+    loadConversation,
+    conversationId,
+    conversations,
+    conversationsLoading,
+    threadLoading,
+  } = useRahjAiAssistant();
 
   return (
     <div className="advanced-module-manager pb-8">
@@ -79,10 +89,76 @@ function RahjAiPortalBody() {
                   </h2>
                   <p className="stat-item m-0 text-sm normal-case">{t('rahj_ai.portal.chat_subheading')}</p>
                 </div>
+                <div className="header-actions flex-wrap">
+                  <button type="button" className="btn btn-secondary" onClick={startNewChat}>
+                    <PlusCircle className="h-4 w-4" />
+                    <span>New Chat</span>
+                  </button>
+                  <button type="button" className="btn btn-secondary" onClick={clearConversation}>
+                    <Trash2 className="h-4 w-4" />
+                    <span>Clear Chat</span>
+                  </button>
+                  <button type="button" className="btn btn-secondary" onClick={clearAllConversations}>
+                    <Trash2 className="h-4 w-4" />
+                    <span>Clear All Chats</span>
+                  </button>
+                </div>
               </div>
             </div>
-            <RahjAiChatView variant="embedded" textareaId="rahj-ai-input-portal" />
+            {threadLoading ? (
+              <div className="manager-header flex min-h-[320px] items-center justify-center py-8 text-sm text-gray-600 dark:text-gray-400">
+                Loading chat...
+              </div>
+            ) : (
+              <RahjAiChatView variant="embedded" textareaId="rahj-ai-input-portal" />
+            )}
           </section>
+
+          <aside className="flex min-h-0 flex-col lg:col-span-12 xl:col-span-4">
+            <div className="manager-header mb-0 flex min-h-[320px] flex-col py-4">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h2 className="page-title mb-0 text-lg">
+                  <History className="title-icon h-5 w-5" aria-hidden />
+                  Chat History
+                </h2>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={startNewChat}
+                >
+                  New
+                </button>
+              </div>
+
+              <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+                {conversationsLoading ? (
+                  <div className="rounded-xl border border-white/20 bg-white/40 px-3 py-2 text-xs text-gray-600 dark:border-gray-700/50 dark:bg-gray-900/40 dark:text-gray-300">
+                    Loading history...
+                  </div>
+                ) : conversations.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-white/25 bg-white/30 px-3 py-2 text-xs text-gray-600 dark:border-gray-700/60 dark:bg-gray-900/30 dark:text-gray-300">
+                    No previous chats yet.
+                  </div>
+                ) : (
+                  conversations.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => loadConversation(item.id)}
+                      className={`w-full rounded-xl border px-3 py-2 text-left transition-colors ${
+                        Number(conversationId) === Number(item.id)
+                          ? 'border-blue-500/50 bg-blue-500/10'
+                          : 'border-white/20 bg-white/35 hover:bg-white/50 dark:border-gray-700/60 dark:bg-gray-900/35 dark:hover:bg-gray-800/50'
+                      }`}
+                    >
+                      <div className="truncate text-xs font-semibold text-gray-800 dark:text-gray-100">{item.title || `Chat #${item.id}`}</div>
+                      <div className="mt-1 truncate text-[11px] text-gray-600 dark:text-gray-400">{item.preview || 'No preview'}</div>
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
     </div>
