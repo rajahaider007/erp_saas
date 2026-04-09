@@ -18,6 +18,7 @@ import {
   Calendar,
   CheckCircle2,
   XCircle,
+  ScrollText,
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import Breadcrumbs from '@/Components/Breadcrumbs';
@@ -733,6 +734,36 @@ export default function PurchaseRequisitionList() {
                                   </button>
                                 </>
                               )}
+                              <button
+                                type="button"
+                                className="action-btn print-summary"
+                                title={tl('invoice_summary')}
+                                onClick={() =>
+                                  window.open(
+                                    `/inventory/purchase-requisition/${row.id}/invoice/summary`,
+                                    '_blank',
+                                    'noopener,noreferrer'
+                                  )
+                                }
+                                disabled={loading}
+                              >
+                                <FileText size={16} />
+                              </button>
+                              <button
+                                type="button"
+                                className="action-btn print-detailed"
+                                title={tl('invoice_detailed')}
+                                onClick={() =>
+                                  window.open(
+                                    `/inventory/purchase-requisition/${row.id}/invoice/detailed`,
+                                    '_blank',
+                                    'noopener,noreferrer'
+                                  )
+                                }
+                                disabled={loading}
+                              >
+                                <ScrollText size={16} />
+                              </button>
                             </div>
                           </td>
                         </tr>

@@ -69,6 +69,7 @@ const CreateDocumentNumberConfigurationForm = () => {
           options: [
             { value: 'Purchase Requisition', label: tc('opt_purchase_requisition') },
             { value: 'Purchase Order', label: tc('opt_purchase_order') },
+            { value: 'Goods Receipt Note', label: tc('opt_goods_receipt_note') },
           ],
         },
         {

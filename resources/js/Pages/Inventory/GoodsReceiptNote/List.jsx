@@ -7,29 +7,19 @@ import {
   Plus,
   RefreshCcw,
   Search,
-  CheckCircle,
-  Trash2,
-  X,
-  Edit3,
+  Truck,
   Database,
-  TrendingUp,
-  Users,
+  Edit3,
+  Trash2,
+  CheckCircle,
   FileText,
   ScrollText,
-  Calendar,
-  CheckCircle2,
-  XCircle,
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import Breadcrumbs from '@/Components/Breadcrumbs';
 import CustomDatePicker from '@/Components/DatePicker/DatePicker';
 import { useTranslations } from '@/hooks/useTranslations';
-
-function formatDisplayDate(value) {
-  if (value == null || value === '') return '—';
-  const s = typeof value === 'string' ? value.split('T')[0] : String(value);
-  return s;
-}
+import { usePermissions } from '@/hooks/usePermissions';
 
 const swalThemed = {
   background: 'rgba(30, 41, 59, 0.95)',
@@ -46,13 +36,34 @@ const swalThemed = {
   },
 };
 
-export default function PurchaseOrderList() {
-  const { orders, filters = {}, vendorOptions = [], error, flash } = usePage().props;
+function formatDisplayDate(value) {
+  if (value == null || value === '') return '—';
+  const s = typeof value === 'string' ? value.split('T')[0] : String(value);
+  return s;
+}
+
+export default function GoodsReceiptNoteList() {
+  const {
+    grns,
+    filters = {},
+    vendorOptions = [],
+    error,
+    flash,
+  } = usePage().props;
   const { t } = useTranslations();
-  const tl = useCallback((k, r = {}) => t(`inventory.purchase_order.list.${k}`, r), [t]);
+  const tl = useCallback((k, r = {}) => t(`inventory.goods_receipt_note.list.${k}`, r), [t]);
+  const { auth, hasRoutePermission } = usePermissions();
+
+  const grnPermission = useCallback(
+    (perm) => {
+      if (auth?.user?.role === 'super_admin') return true;
+      return hasRoutePermission('/inventory/goods-receipt-note', perm);
+    },
+    [auth?.user?.role, hasRoutePermission]
+  );
 
   const paginated =
-    orders && typeof orders === 'object' && Array.isArray(orders.data) ? orders : null;
+    grns && typeof grns === 'object' && Array.isArray(grns.data) ? grns : null;
 
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
   const [statusFilter, setStatusFilter] = useState(filters?.status ?? 'all');
@@ -60,7 +71,6 @@ export default function PurchaseOrderList() {
   const [fromDate, setFromDate] = useState(filters?.from_date || '');
   const [toDate, setToDate] = useState(filters?.to_date || '');
   const [loading, setLoading] = useState(false);
-  const [selectedIds, setSelectedIds] = useState([]);
   const filterStateRef = useRef({
     statusFilter,
     vendorFilter,
@@ -169,7 +179,8 @@ export default function PurchaseOrderList() {
     () => [
       { value: 'all', label: tl('status_all') },
       { value: 'draft', label: tl('status_draft') },
-      { value: 'approved', label: tl('status_approved') },
+      { value: 'qc_pending', label: tl('status_qc_pending') },
+      { value: 'posted', label: tl('status_posted') },
     ],
     [tl]
   );
@@ -178,60 +189,51 @@ export default function PurchaseOrderList() {
     () => [
       { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
       { label: tl('breadcrumb_inventory'), icon: ClipboardList, href: '/erp-modules' },
-      { label: tl('title'), icon: ClipboardList, href: null },
+      { label: tl('title'), icon: Truck, href: null },
     ],
     [t, tl]
   );
 
   const rows = paginated?.data ?? [];
-  const total = paginated?.total ?? 0;
-  const draftCountOnPage = useMemo(() => rows.filter((r) => r.status === 'draft').length, [rows]);
 
-  const draftRowIds = useMemo(() => rows.filter((r) => r.status === 'draft').map((r) => r.id), [rows]);
-
-  const draftSelectedCount = useMemo(
-    () => selectedIds.filter((id) => draftRowIds.includes(id)).length,
-    [selectedIds, draftRowIds]
-  );
-
-  const handleSelectAllDrafts = (checked) => {
-    if (checked) {
-      setSelectedIds([...new Set([...selectedIds.filter((id) => !draftRowIds.includes(id)), ...draftRowIds])]);
-    } else {
-      setSelectedIds(selectedIds.filter((id) => !draftRowIds.includes(id)));
-    }
+  const statusLabel = (status) => {
+    if (status === 'draft') return tl('status_draft');
+    if (status === 'qc_pending') return tl('status_qc_pending');
+    if (status === 'posted') return tl('status_posted');
+    return status ?? '—';
   };
 
-  const toggleRow = (row, checked) => {
-    if (row.status !== 'draft') return;
-    if (checked) {
-      setSelectedIds((prev) => [...new Set([...prev, row.id])]);
-    } else {
-      setSelectedIds((prev) => prev.filter((id) => id !== row.id));
+  const statusClass = (status) => {
+    if (status === 'draft') {
+      return 'px-2 py-0.5 rounded text-xs font-medium bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30';
     }
+    if (status === 'qc_pending') {
+      return 'px-2 py-0.5 rounded text-xs font-medium bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/30';
+    }
+    if (status === 'posted') {
+      return 'px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30';
+    }
+    return 'px-2 py-0.5 rounded text-xs font-medium bg-slate-500/15 text-slate-600 dark:text-slate-300 border border-slate-500/25';
   };
 
-  const approveOne = async (row) => {
+  const submitQcOne = async (row) => {
     const res = await Swal.fire({
       ...swalThemed,
-      title: tl('approve'),
-      text: row.po_number,
+      title: tl('submit_qc'),
+      text: row.grn_number,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: tl('approve'),
+      confirmButtonText: tl('submit_qc'),
       cancelButtonText: t('common.actions.cancel'),
     });
     if (!res.isConfirmed) return;
     setLoading(true);
     router.post(
-      `/inventory/purchase-order/${row.id}/approve`,
+      `/inventory/goods-receipt-note/${row.id}/approve`,
       {},
       {
         preserveScroll: true,
-        onFinish: () => {
-          setLoading(false);
-          setSelectedIds([]);
-        },
+        onFinish: () => setLoading(false),
       }
     );
   };
@@ -240,139 +242,29 @@ export default function PurchaseOrderList() {
     const res = await Swal.fire({
       ...swalThemed,
       title: tl('swal_delete_title'),
-      html: tl('swal_delete_body', { number: row.po_number }),
+      text: tl('swal_delete_body', { number: row.grn_number }),
       icon: 'warning',
       showCancelButton: true,
-      showDenyButton: true,
-      confirmButtonText: tl('swal_recycle'),
-      denyButtonText: tl('swal_permanent'),
-      cancelButtonText: tl('swal_cancel'),
-    });
-    if (res.isDismissed) return;
-    setLoading(true);
-    const permanent = res.isDenied;
-    const url = permanent ? `/inventory/purchase-order/${row.id}?permanent=1` : `/inventory/purchase-order/${row.id}`;
-    router.delete(url, {
-      preserveScroll: true,
-      onFinish: () => {
-        setLoading(false);
-        setSelectedIds((prev) => prev.filter((id) => id !== row.id));
-      },
-    });
-  };
-
-  const bulkApprove = async () => {
-    const draftOnly = selectedIds.filter((id) => draftRowIds.includes(id));
-    if (draftOnly.length === 0) {
-      await Swal.fire({
-        ...swalThemed,
-        title: tl('swal_bulk_approve_title'),
-        text: tl('no_drafts_selected'),
-        icon: 'info',
-      });
-      return;
-    }
-    const res = await Swal.fire({
-      ...swalThemed,
-      title: tl('swal_bulk_approve_title'),
-      text: tl('swal_bulk_approve_text', { count: draftOnly.length }),
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: tl('bulk_approve'),
+      confirmButtonText: tl('swal_confirm_delete'),
       cancelButtonText: t('common.actions.cancel'),
     });
     if (!res.isConfirmed) return;
     setLoading(true);
-    router.post(
-      '/inventory/purchase-order/bulk-approve',
-      { ids: draftOnly },
-      {
-        preserveScroll: true,
-        onFinish: () => {
-          setLoading(false);
-          setSelectedIds([]);
-        },
-      }
-    );
+    router.delete(`/inventory/goods-receipt-note/${row.id}`, {
+      preserveScroll: true,
+      onFinish: () => setLoading(false),
+    });
   };
-
-  const allDraftsOnPageSelected = draftRowIds.length > 0 && draftRowIds.every((id) => selectedIds.includes(id));
 
   return (
     <App>
-      <div className="advanced-module-manager form-theme-system">
-        <div className="px-4 pt-4 max-w-[100vw]">
+      <div className="page-container form-theme-system">
+        <div className="breadcrumb-header px-4 pt-4">
           <Breadcrumbs items={breadcrumbItems} description={tl('description')} />
         </div>
 
-        <div className="manager-header">
-          <div className="header-main">
-            <div className="title-section">
-              <h1 className="page-title">
-                <Database className="title-icon" />
-                {tl('title')}
-              </h1>
-              <div className="stats-summary">
-                <div className="stat-item">
-                  <TrendingUp size={16} />
-                  <span>{tl('subtitle', { count: total })}</span>
-                </div>
-                <div className="stat-item">
-                  <Users size={16} />
-                  <span>
-                    {draftCountOnPage} {tl('status_draft')}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="header-actions">
-              <button
-                type="button"
-                className="btn btn-icon"
-                onClick={() => {
-                  setLoading(true);
-                  router.reload({ onFinish: () => setLoading(false) });
-                }}
-                disabled={loading}
-                title={tl('refresh')}
-              >
-                <RefreshCcw size={20} className={loading ? 'animate-spin' : ''} />
-              </button>
-              <a href="/inventory/purchase-order/create" className="btn btn-primary">
-                <Plus size={20} />
-                {tl('new_po')}
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {flashMessage && !flashBannerDismissed && (
-          <div
-            className={`mb-4 mx-4 p-4 rounded-lg border animate-slideIn relative pr-12 ${
-              flashMessage.type === 'success'
-                ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300'
-                : 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300'
-            }`}
-            role={flashMessage.type === 'success' ? 'status' : 'alert'}
-          >
-            <div className="flex items-start gap-3">
-              {flashMessage.type === 'success' ? (
-                <CheckCircle className="h-5 w-5 shrink-0 mt-0.5" aria-hidden />
-              ) : (
-                <XCircle className="h-5 w-5 shrink-0 mt-0.5" aria-hidden />
-              )}
-              <p className="text-sm font-medium m-0">{flashMessage.text}</p>
-            </div>
-            <button
-              type="button"
-              className="absolute top-3 right-3 rounded-md p-1 text-current opacity-70 hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              onClick={() => setFlashBannerDismissed(true)}
-              aria-label={t('common.actions.close')}
-            >
-              <X size={18} />
-            </button>
-          </div>
+        {!flashBannerDismissed && flashMessage && (
+          <div className="mx-4 mb-3 p-3 rounded-lg border border-current/20">{flashMessage.text}</div>
         )}
 
         <div className="modern-filters-container mx-4">
@@ -435,11 +327,11 @@ export default function PurchaseOrderList() {
               </div>
 
               <div className={`filter-group ${statusFilter !== 'all' ? 'has-value' : ''}`}>
-                <label className="filter-label" htmlFor="po-filter-status">
+                <label className="filter-label" htmlFor="grn-filter-status">
                   {tl('status_label')}
                 </label>
                 <select
-                  id="po-filter-status"
+                  id="grn-filter-status"
                   className="filter-select"
                   value={statusFilter}
                   onChange={(e) => {
@@ -463,11 +355,11 @@ export default function PurchaseOrderList() {
               </div>
 
               <div className={`filter-group ${vendorFilter ? 'has-value' : ''}`}>
-                <label className="filter-label" htmlFor="po-filter-vendor">
+                <label className="filter-label" htmlFor="grn-filter-vendor">
                   {tl('vendor_label')}
                 </label>
                 <select
-                  id="po-filter-vendor"
+                  id="grn-filter-vendor"
                   className="filter-select"
                   value={vendorFilter}
                   onChange={(e) => {
@@ -498,36 +390,17 @@ export default function PurchaseOrderList() {
           </div>
         </div>
 
-        {draftSelectedCount > 0 && (
-          <div className="bulk-actions-bar mx-4 rounded-xl overflow-hidden">
-            <div className="selection-info">
-              <CheckCircle2 size={20} />
-              <span>{tl('selected_count', { count: draftSelectedCount })}</span>
-            </div>
-            <div className="bulk-actions">
-              <button
-                type="button"
-                className="btn btn-sm"
-                style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.35)' }}
-                onClick={bulkApprove}
-                disabled={loading}
-                title={tl('bulk_approve')}
-              >
-                <CheckCircle size={16} />
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm"
-                style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.35)' }}
-                onClick={() => setSelectedIds([])}
-                disabled={loading}
-                title={tl('clear_selection')}
-              >
-                <X size={16} />
-              </button>
-            </div>
-          </div>
-        )}
+        <div className="flex justify-end mx-4 mb-3">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => router.visit('/inventory/goods-receipt-note/create')}
+            disabled={!grnPermission('can_add')}
+          >
+            <Plus size={18} />
+            {tl('new_grn')}
+          </button>
+        </div>
 
         <div className="main-content mx-4 mb-6">
           <div className="data-table-container">
@@ -536,12 +409,17 @@ export default function PurchaseOrderList() {
                 <Database className="empty-icon" />
                 <h3 className="m-0">{tl('empty')}</h3>
                 <p className="text-center m-0 mt-2 max-w-md" style={{ color: 'var(--text-secondary, #64748b)' }}>
-                  {tl('description')}
+                  {tl('empty_hint')}
                 </p>
-                <a href="/inventory/purchase-order/create" className="btn btn-primary mt-4">
+                <button
+                  type="button"
+                  className="btn btn-primary mt-4"
+                  onClick={() => router.visit('/inventory/goods-receipt-note/create')}
+                  disabled={!grnPermission('can_add')}
+                >
                   <Plus size={20} />
-                  {tl('new_po')}
-                </a>
+                  {tl('new_grn')}
+                </button>
               </div>
             ) : (
               <>
@@ -549,105 +427,50 @@ export default function PurchaseOrderList() {
                   <table className="data-table">
                     <thead>
                       <tr>
-                        <th className="checkbox-cell">
-                          {draftRowIds.length > 0 ? (
-                            <input
-                              type="checkbox"
-                              className="checkbox"
-                              checked={allDraftsOnPageSelected}
-                              onChange={(e) => handleSelectAllDrafts(e.target.checked)}
-                              title={tl('status_draft')}
-                              aria-label={tl('status_draft')}
-                            />
-                          ) : null}
-                        </th>
-                        <th>{tl('col_po_number')}</th>
-                        <th>{tl('col_po_date')}</th>
+                        <th>{tl('col_grn_number')}</th>
+                        <th>{tl('col_receipt_date')}</th>
+                        <th>{tl('col_po')}</th>
                         <th>{tl('col_vendor')}</th>
-                        <th>{tl('col_pr')}</th>
                         <th>{tl('col_lines')}</th>
+                        <th>{tl('col_receive_at')}</th>
                         <th>{tl('col_status')}</th>
-                        <th>{tl('col_ship_to')}</th>
-                        <th className="actions-header">{tl('col_actions')}</th>
+                        <th className="actions-header whitespace-nowrap">{tl('col_actions')}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {rows.map((row) => (
                         <tr key={row.id} className="table-row">
                           <td>
-                            {row.status === 'draft' ? (
-                              <input
-                                type="checkbox"
-                                className="checkbox"
-                                checked={selectedIds.includes(row.id)}
-                                onChange={(e) => toggleRow(row, e.target.checked)}
-                                aria-label={`${tl('col_po_number')} ${row.po_number}`}
-                              />
-                            ) : (
-                              <span className="inline-block w-4" />
-                            )}
-                          </td>
-                          <td>
                             <div className="module-info">
                               <div className="module-avatar">
-                                <FileText className="w-6 h-6 text-blue-600" />
+                                <Truck className="w-6 h-6 text-emerald-600" />
                               </div>
                               <div className="module-details">
-                                <div className="module-name">{row.po_number}</div>
-                                {row.vendor_reference ? (
-                                  <div className="module-folder">{row.vendor_reference}</div>
+                                <div className="module-name font-mono">{row.grn_number}</div>
+                                {row.grn_type ? (
+                                  <div className="module-folder text-xs opacity-80">{row.grn_type}</div>
                                 ) : null}
                               </div>
                             </div>
                           </td>
+                          <td>{formatDisplayDate(row.receipt_date)}</td>
                           <td>
-                            <div className="date-cell">
-                              <Calendar size={14} />
-                              <span>{formatDisplayDate(row.po_date)}</span>
-                            </div>
+                            <span className="font-mono text-sm">
+                              {row.purchase_order?.po_number ?? '—'}
+                            </span>
                           </td>
                           <td>
-                            {row.vendor
-                              ? `${row.vendor.account_code} — ${row.vendor.account_name}`
-                              : '—'}
+                            <span className="text-sm">
+                              {row.vendor
+                                ? `${row.vendor.account_code} · ${row.vendor.account_name}`
+                                : '—'}
+                            </span>
                           </td>
-                          <td>{row.purchase_requisition?.pr_number ?? '—'}</td>
-                          <td className="tabular-nums">{row.lines_count ?? '—'}</td>
+                          <td>{row.lines_count ?? 0}</td>
+                          <td className="text-sm">{row.receive_location?.location_name ?? '—'}</td>
                           <td>
-                            <div className="status-container">
-                              <span
-                                className={`status-badge status-${(row.status || '').toLowerCase()}`}
-                                style={{
-                                  backgroundColor:
-                                    row.status === 'approved'
-                                      ? '#10B98115'
-                                      : row.status === 'draft'
-                                        ? '#F59E0B15'
-                                        : '#64748B15',
-                                  color:
-                                    row.status === 'approved'
-                                      ? '#10B981'
-                                      : row.status === 'draft'
-                                        ? '#F59E0B'
-                                        : '#64748B',
-                                }}
-                              >
-                                <span
-                                  className="status-dot"
-                                  style={{
-                                    backgroundColor:
-                                      row.status === 'approved'
-                                        ? '#10B981'
-                                        : row.status === 'draft'
-                                          ? '#F59E0B'
-                                          : '#64748B',
-                                  }}
-                                />
-                                {row.status}
-                              </span>
-                            </div>
+                            <span className={statusClass(row.status)}>{statusLabel(row.status)}</span>
                           </td>
-                          <td>{row.ship_to_location?.location_name ?? '—'}</td>
                           <td>
                             <div className="actions-cell flex flex-wrap gap-1 justify-end">
                               {row.status === 'draft' && (
@@ -656,19 +479,17 @@ export default function PurchaseOrderList() {
                                     type="button"
                                     className="action-btn edit"
                                     title={tl('edit')}
-                                    onClick={() => {
-                                      router.visit(`/inventory/purchase-order/${row.id}/edit`);
-                                    }}
-                                    disabled={loading}
+                                    onClick={() => router.visit(`/inventory/goods-receipt-note/${row.id}/edit`)}
+                                    disabled={loading || !grnPermission('can_edit')}
                                   >
                                     <Edit3 size={16} />
                                   </button>
                                   <button
                                     type="button"
                                     className="action-btn copy"
-                                    title={tl('approve')}
-                                    onClick={() => approveOne(row)}
-                                    disabled={loading}
+                                    title={tl('submit_qc')}
+                                    onClick={() => void submitQcOne(row)}
+                                    disabled={loading || !grnPermission('can_edit')}
                                   >
                                     <CheckCircle size={16} />
                                   </button>
@@ -676,8 +497,8 @@ export default function PurchaseOrderList() {
                                     type="button"
                                     className="action-btn delete"
                                     title={tl('delete')}
-                                    onClick={() => deleteOne(row)}
-                                    disabled={loading}
+                                    onClick={() => void deleteOne(row)}
+                                    disabled={loading || !grnPermission('can_delete')}
                                   >
                                     <Trash2 size={16} />
                                   </button>
@@ -689,12 +510,12 @@ export default function PurchaseOrderList() {
                                 title={tl('invoice_summary')}
                                 onClick={() =>
                                   window.open(
-                                    `/inventory/purchase-order/${row.id}/invoice/summary`,
+                                    `/inventory/goods-receipt-note/${row.id}/invoice/summary`,
                                     '_blank',
                                     'noopener,noreferrer'
                                   )
                                 }
-                                disabled={loading}
+                                disabled={loading || !grnPermission('can_view')}
                               >
                                 <FileText size={16} />
                               </button>
@@ -704,12 +525,12 @@ export default function PurchaseOrderList() {
                                 title={tl('invoice_detailed')}
                                 onClick={() =>
                                   window.open(
-                                    `/inventory/purchase-order/${row.id}/invoice/detailed`,
+                                    `/inventory/goods-receipt-note/${row.id}/invoice/detailed`,
                                     '_blank',
                                     'noopener,noreferrer'
                                   )
                                 }
-                                disabled={loading}
+                                disabled={loading || !grnPermission('can_view')}
                               >
                                 <ScrollText size={16} />
                               </button>
@@ -750,7 +571,11 @@ export default function PurchaseOrderList() {
                             className={`pagination-btn ${link.active ? 'active' : ''}`}
                             onClick={() => {
                               setLoading(true);
-                              router.visit(link.url, { preserveState: true, preserveScroll: true, onFinish: () => setLoading(false) });
+                              router.visit(link.url, {
+                                preserveState: true,
+                                preserveScroll: true,
+                                onFinish: () => setLoading(false),
+                              });
                             }}
                             disabled={loading}
                             dangerouslySetInnerHTML={{ __html: link.label }}

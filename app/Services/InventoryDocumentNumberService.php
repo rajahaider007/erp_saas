@@ -11,11 +11,20 @@ class InventoryDocumentNumberService
 
     public const DOCUMENT_PURCHASE_ORDER = 'Purchase Order';
 
+    public const DOCUMENT_GOODS_RECEIPT_NOTE = 'Goods Receipt Note';
+
+    public const DOCUMENT_GRN_SUPPLIER_INVOICE = 'GRN Supplier Invoice';
+
     protected const TABLE = 'inventory_document_number_configurations';
 
     public static function documentTypes(): array
     {
-        return [self::DOCUMENT_PURCHASE_REQUISITION, self::DOCUMENT_PURCHASE_ORDER];
+        return [
+            self::DOCUMENT_PURCHASE_REQUISITION,
+            self::DOCUMENT_PURCHASE_ORDER,
+            self::DOCUMENT_GOODS_RECEIPT_NOTE,
+            self::DOCUMENT_GRN_SUPPLIER_INVOICE,
+        ];
     }
 
     public static function previewNext(int $compId, int $locationId, string $documentType): string
@@ -156,6 +165,8 @@ class InventoryDocumentNumberService
         return match ($documentType) {
             self::DOCUMENT_PURCHASE_REQUISITION => 'PR-',
             self::DOCUMENT_PURCHASE_ORDER => 'PO-',
+            self::DOCUMENT_GOODS_RECEIPT_NOTE => 'GRN-',
+            self::DOCUMENT_GRN_SUPPLIER_INVOICE => 'SIV-',
             default => 'INV-',
         };
     }

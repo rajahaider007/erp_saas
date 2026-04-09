@@ -2,9 +2,9 @@
 
 **Purpose:** This document is for end users, testers, and **LLM / AI agents**. It explains which inventory forms exist in the ERP, where they live in the app, what they do, and where the code is.
 
-**Scope:** Only **currently implemented** screens (Laravel + Inertia/React). Transactional forms listed in `more_required_fields.md` (PO, GRN, etc.) that are **not started** are **out of scope** here.
+**Scope:** **Currently implemented** inventory screens (Laravel + Inertia/React), including **PR, PO, GRN**, and **GRN-linked Purchase Invoice** (see procurement guide linked below). Other transactional forms in `more_required_fields.md` that are not yet built remain out of scope here.
 
-**Last aligned to codebase:** 2026-04-08 (`routes/web.php`, prefix `inventory/*`).
+**Last aligned to codebase:** 2026-04-09 (`routes/web.php`, prefix `inventory/*`).
 
 ---
 
@@ -32,8 +32,13 @@
 | 5 | UOM Conversion | `/inventory/uom-conversion` | `/inventory/uom-conversion/create` | `/inventory/uom-conversion/{id}/edit` *(set-based)* |
 | 6 | Item Master | `/inventory/item-master` | `/inventory/item-master/create` | `/inventory/item-master/{id}/edit` |
 | 7+ | Master Data (generic) — see §8 | `/inventory/master-data/{slug}` | `/inventory/master-data/{slug}/create` | `/inventory/master-data/{slug}/{id}/edit` |
+| 8 | Purchase Requisition (PR) | `/inventory/purchase-requisition` | `/inventory/purchase-requisition/create` | `/inventory/purchase-requisition/{id}/edit` |
+| 9 | Purchase Order (PO) | `/inventory/purchase-order` | `/inventory/purchase-order/create` | `/inventory/purchase-order/{id}/edit` |
+| 10 | Goods Receipt Note (GRN) | `/inventory/goods-receipt-note` | `/inventory/goods-receipt-note/create` | `/inventory/goods-receipt-note/{id}/edit` |
 
 **Delete:** Usually from list screens; master-data: `DELETE /inventory/master-data/{slug}/{id}`.
+
+**Procurement suite (PR → PO → GRN → Purchase Invoice):** See [PROCUREMENT_FORMS_USER_GUIDE_EN.md](./PROCUREMENT_FORMS_USER_GUIDE_EN.md) for field-by-field English user documentation. Purchase Invoice UI: `GET /inventory/goods-receipt-note/{id}/purchase-invoice`.
 
 ---
 
@@ -194,11 +199,13 @@
 
 ## 10) What is NOT implemented yet (reference for AI)
 
-These are **not** available as inventory transactional screens yet (blueprint: `more_required_fields.md`, FORM 3–12):
+**Implemented as transactional screens:** Purchase Requisition, Purchase Order, Goods Receipt Note, GRN Purchase Invoice posting — see [PROCUREMENT_FORMS_USER_GUIDE_EN.md](./PROCUREMENT_FORMS_USER_GUIDE_EN.md).
 
-- Purchase Order, GRN, Landed Cost, Stock Transfer, Delivery, Stock Adjustment, RTV, RMA, Physical Count, Cost revaluation / write-down.
+Still **not** available (or only partial) per broader blueprint (`more_required_fields.md`, FORM 3–12 and beyond), examples:
 
-Use `user_guides/inventory_system/more_required_fields.md` and `INVENTORY_SYSTEM_FINAL_BLUEPRINT.md` for those.
+- Landed cost allocation UI (beyond GRN header flags), full three-way match automation, Stock Transfer, Delivery, Stock Adjustment, RTV, RMA, Physical Count, Cost revaluation / write-down.
+
+Use `user_guides/inventory_system/more_required_fields.md` and `INVENTORY_SYSTEM_FINAL_BLUEPRINT.md` for planned scope.
 
 ---
 
@@ -210,6 +217,7 @@ Use `user_guides/inventory_system/more_required_fields.md` and `INVENTORY_SYSTEM
 | UOM | `UomMasterController`, `UomConversionController` | `Pages/Inventory/UomMaster/*`, `UomConversion/*` |
 | Item | `ItemMasterController` | `Pages/Inventory/ItemMaster/*` |
 | Generic masters | `MasterDataController` | `Pages/Inventory/MasterData/List.jsx`, `Create.jsx` |
+| Procurement | `PurchaseRequisitionController`, `PurchaseOrderController`, `GoodsReceiptNoteController` | `Pages/Inventory/PurchaseRequisition/*`, `PurchaseOrder/*`, `GoodsReceiptNote/*` |
 
 ---
 

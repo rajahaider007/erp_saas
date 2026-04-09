@@ -1189,7 +1189,9 @@
       "swal_cancel": "Cancel",
       "swal_bulk_approve_title": "Approve selected requisitions?",
       "swal_bulk_approve_text": "{count} draft requisition(s) will be marked approved.",
-      "no_drafts_selected": "Select at least one draft requisition to approve."
+      "no_drafts_selected": "Select at least one draft requisition to approve.",
+      "invoice_summary": "Summary invoice (print / PDF)",
+      "invoice_detailed": "Detailed invoice (print / PDF)"
     },
     "create": {
       "breadcrumb_home": "Home",
@@ -1372,6 +1374,8 @@
       "col_status": "Status",
       "col_ship_to": "Ship to",
       "col_actions": "Actions",
+      "invoice_summary": "Summary document (print / PDF)",
+      "invoice_detailed": "Line detail (print / PDF)",
       "empty": "No purchase orders yet — create one to get started.",
       "page_summary": "Showing {from}–{to} of {total}"
     },
@@ -1421,6 +1425,7 @@
       "msg_pick_pr_first": "Select an approved purchase requisition first.",
       "msg_loaded_from_pr": "Header hints and lines were loaded from the selected PR. Review prices before saving.",
       "msg_pr_load_failed": "Could not load the purchase requisition.",
+      "msg_pr_fully_consumed": "All quantities on this purchase requisition are already on purchase orders. It will stay hidden for new POs until nothing is left to allocate.",
       "msg_pr_required": "Choose an approved PR or switch to Without PR.",
       "fields": {
         "po_number": {
@@ -1573,6 +1578,458 @@
       }
     }
   },
+  "grn_supplier_invoice": {
+    "list": {
+      "title": "Supplier invoices (GRN)",
+      "description": "Draft and posted supplier invoices linked to one or more QC-pending goods receipts.",
+      "breadcrumb_inventory": "Inventory",
+      "search_label": "Search",
+      "search_placeholder": "Invoice #, reference, notes…",
+      "status_label": "Status",
+      "status_all": "All",
+      "status_draft": "Draft",
+      "status_posted": "Posted",
+      "reset_filters": "Reset filters",
+      "new_invoice": "New supplier invoice",
+      "empty": "No supplier invoices yet",
+      "empty_hint": "Create a supplier invoice, pick a vendor, and select goods receipts that are not yet posted to accounts.",
+      "col_invoice_number": "Invoice #",
+      "col_vendor": "Vendor",
+      "col_grn_count": "GRNs",
+      "col_status": "Status",
+      "col_voucher_date": "Voucher date",
+      "col_actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete",
+      "swal_delete_title": "Delete this draft invoice?",
+      "swal_delete_body": "Draft {number} will be removed. Linked GRNs stay QC pending.",
+      "swal_confirm_delete": "Delete",
+      "page_summary": "Showing {from}–{to} of {total}"
+    },
+    "create": {
+      "title_new": "New supplier invoice (GRN)",
+      "title_edit": "Edit supplier invoice",
+      "description": "Choose vendor, select one or more goods receipts that are ready for invoicing, then set tax and post.",
+      "breadcrumb_inventory": "Inventory",
+      "breadcrumb_list": "Supplier invoices (GRN)",
+      "breadcrumb_current": "Invoice",
+      "preview_number": "Document no. (on save)",
+      "vendor_label": "Vendor",
+      "vendor_placeholder": "Select vendor",
+      "eligible_heading": "Goods receipts (QC pending, not invoiced)",
+      "load_lines_hint": "Select receipts to load lines. All lines must be included when you save.",
+      "btn_back": "Back to list",
+      "btn_save_draft": "Save draft",
+      "btn_save_post": "Save and post",
+      "section_document": "Supplier invoice header",
+      "notes_label": "Notes",
+      "grn_col_select": "Include",
+      "grn_col_number": "GRN #",
+      "grn_col_date": "Receipt date",
+      "grn_col_po": "PO",
+      "no_eligible": "No receipts available for this vendor. They must be QC pending and not on another draft invoice.",
+      "err_select_vendor_grns": "Select a vendor and at least one goods receipt.",
+      "err_load_lines": "Load lines before saving.",
+      "col_grn": "GRN"
+    }
+  },
+  "goods_receipt_note": {
+    "list": {
+      "title": "Goods receipt notes",
+      "description": "Inbound receipts posted against purchase orders. Filter by receipt date, vendor, or status.",
+      "breadcrumb_inventory": "Inventory",
+      "search_label": "Search",
+      "search_placeholder": "GRN #, PO #, notes, vendor DN…",
+      "from_date": "Receipt from",
+      "to_date": "Receipt to",
+      "status_label": "Status",
+      "status_all": "All",
+      "status_draft": "Draft",
+      "status_qc_pending": "QC pending",
+      "vendor_label": "Vendor",
+      "vendor_all": "All vendors",
+      "reset_filters": "Reset filters",
+      "new_grn": "New GRN",
+      "empty": "No goods receipt notes yet",
+      "empty_hint": "Create a GRN from an approved purchase order with open quantity.",
+      "col_grn_number": "GRN #",
+      "col_receipt_date": "Receipt date",
+      "col_po": "PO",
+      "col_vendor": "Vendor",
+      "col_lines": "Lines",
+      "col_receive_at": "Receive at",
+      "col_status": "Status",
+      "col_actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete",
+      "submit_qc": "Submit for QC",
+      "invoice_summary": "Summary invoice (print / PDF)",
+      "invoice_detailed": "Detailed invoice (print / PDF)",
+      "swal_delete_title": "Delete this goods receipt?",
+      "swal_delete_body": "Draft GRN {number} will be removed. This cannot be undone.",
+      "swal_confirm_delete": "Delete",
+      "page_summary": "Showing {from}–{to} of {total}",
+      "status_posted": "Posted"
+    },
+    "create": {
+      "breadcrumb_inventory": "Inventory",
+      "breadcrumb_po": "Purchase order",
+      "breadcrumb_grn": "Goods receipt",
+      "breadcrumb_grn_list": "Goods receipt notes",
+      "breadcrumb_new": "New receipt",
+      "breadcrumb_edit": "Edit receipt",
+      "submit_update": "Update GRN",
+      "po_locked_readonly": "Purchase order (locked for this receipt)",
+      "three_way_match_labels": {
+        "pending": "Pending (system)",
+        "matched": "Matched",
+        "variance": "Variance",
+        "failed": "Failed"
+      },
+      "invoice_summary": "Summary invoice",
+      "invoice_detailed": "Detailed invoice",
+      "section_summary": "Summary bill",
+      "summary_receipt_qty": "Total receipt qty",
+      "summary_receipt_value": "Receipt value (gross)",
+      "summary_accepted_value": "Accepted value",
+      "summary_rejected_value": "Rejected value (est.)",
+      "summary_grand_total": "Grand total",
+      "summary_footnote": "Amounts use receipt qty × unit cost. Accepted/rejected values follow accepted qty vs receipt.",
+      "breadcrumb_desc": "Receive goods against an approved purchase order. Draft saves hold data only; submit for QC updates PO received quantities when within pending limits.",
+      "title": "Goods Receipt Note (GRN)",
+      "subtitle": "Vendor receipt, logistics, QC, and line quantities consistent with international GRN practice.",
+      "section_header": "Receipt header",
+      "section_po_link": "Purchase order",
+      "po_link_hint": "Select an approved PO that still has open quantity. Load from PO copies vendor, currency, ship-to hints, and open lines (ordered, previously received, pending).",
+      "approved_po_label": "Approved PO",
+      "approved_po_placeholder": "Search PO",
+      "btn_load_from_po": "Load from PO",
+      "loading_po": "Loading…",
+      "section_lines": "Receipt lines",
+      "lines_hint": "Enter this receipt quantity (≤ pending). Unit cost defaults from PO net price. Accepted qty defaults to receipt; if less, set rejection reason. Lot, dates, and put-away support tracking and warehouse standards.",
+      "lines_summary": "{count} line row(s) · Receipt value (qty × unit cost): {amount}",
+      "line_number": "#",
+      "submit_save": "Save GRN",
+      "reset_form": "Clear form",
+      "match_status_pending": "Pending (system)",
+      "msg_please_correct_errors": "Please correct the errors below.",
+      "msg_fix_lines": "Each line with receipt needs a PO line, valid quantities, unit cost, accepted ≤ receipt, and rejection reason when accepted < receipt. Receipt cannot exceed pending.",
+      "msg_pick_po_first": "Select an approved purchase order first.",
+      "msg_loaded_from_po": "Header hints and open lines were loaded from the PO. Review receipt quantities before saving.",
+      "msg_po_load_failed": "Could not load the purchase order.",
+      "msg_po_fully_received": "There is no remaining quantity to receive on this PO for open lines.",
+      "msg_po_required": "Select an approved PO.",
+      "msg_load_po_first": "Load lines from the PO (vendor is taken from the PO).",
+      "initial_status_options": {
+        "draft": "Save as draft (no PO receipt update)",
+        "qc_pending": "Submit for QC (updates PO received qty)"
+      },
+      "grn_type_options": {
+        "standard": "Standard",
+        "import": "Import",
+        "return_from_vendor": "Return / reversal context",
+        "sample": "Sample",
+        "consolidated": "Consolidated"
+      },
+      "overall_qc_options": {
+        "pending": "Pending",
+        "passed": "Passed",
+        "failed": "Failed",
+        "partial": "Partial"
+      },
+      "line_qc_options": {
+        "passed": "Passed",
+        "failed": "Failed",
+        "partial": "Partial",
+        "waived": "Waived"
+      },
+      "rejection_reason_placeholder": "—",
+      "rejection_reasons": {
+        "quality": "Quality",
+        "damage": "Damage",
+        "expiry": "Expiry",
+        "quantity": "Quantity mismatch",
+        "other": "Other"
+      },
+      "fields": {
+        "grn_number": {
+          "label": "GRN number",
+          "placeholder": "Assigned on save",
+          "help": "Configure under Inventory → Document Number Configuration (Goods Receipt Note)."
+        },
+        "vendor_display": {
+          "label": "Vendor",
+          "placeholder": "From PO",
+          "help": "Filled automatically from the linked purchase order."
+        },
+        "grn_type": {
+          "label": "GRN type",
+          "placeholder": "Select type",
+          "help": "Standard, import, sample, consolidated receipt, etc."
+        },
+        "receipt_date": {
+          "label": "Receipt / arrival date",
+          "placeholder": "Date",
+          "help": "Physical receipt date."
+        },
+        "posting_date": {
+          "label": "Posting date",
+          "placeholder": "Optional",
+          "help": "Fiscal / GL posting date when different from receipt."
+        },
+        "receive_location_id": {
+          "label": "Receiving site",
+          "placeholder": "Warehouse / branch",
+          "help": "Company location where goods are received."
+        },
+        "vehicle_number": {
+          "label": "Vehicle no.",
+          "placeholder": "Optional",
+          "help": "Delivery vehicle registration or fleet id."
+        },
+        "transporter_name": {
+          "label": "Transporter",
+          "placeholder": "Carrier name",
+          "help": "Freight forwarder or carrier."
+        },
+        "driver_contact": {
+          "label": "Driver / contact",
+          "placeholder": "Name or phone",
+          "help": "Delivery contact for tracking."
+        },
+        "seal_number": {
+          "label": "Seal number",
+          "placeholder": "Optional",
+          "help": "Container or trailer seal (imports)."
+        },
+        "container_number": {
+          "label": "Container / trailer",
+          "placeholder": "Optional",
+          "help": "Container or trailer reference."
+        },
+        "bol_awb": {
+          "label": "B/L or AWB",
+          "placeholder": "Optional",
+          "help": "Bill of lading or air waybill."
+        },
+        "packing_list_ref": {
+          "label": "Packing list ref.",
+          "placeholder": "Optional",
+          "help": "Supports three-way match with invoice."
+        },
+        "vendor_delivery_note_no": {
+          "label": "Vendor delivery note",
+          "placeholder": "Supplier DN no.",
+          "help": "Supplier delivery note reference."
+        },
+        "currency_id": {
+          "label": "Currency",
+          "placeholder": "Optional",
+          "help": "Usually from PO; editable if policy allows."
+        },
+        "fx_rate": {
+          "label": "FX rate to base",
+          "placeholder": "e.g. 1.000000",
+          "help": "Exchange rate for valuation."
+        },
+        "overall_qc_status": {
+          "label": "Overall QC status",
+          "placeholder": "",
+          "help": "Header QC outcome for the receipt."
+        },
+        "landed_cost_applies": {
+          "label": "Landed cost applies",
+          "placeholder": "",
+          "help": "Toggle when import landed cost will be allocated to this receipt."
+        },
+        "landed_cost_reference": {
+          "label": "Landed cost reference",
+          "placeholder": "LC document / batch",
+          "help": "Reference to landed cost allocation when applicable."
+        },
+        "three_way_match_display": {
+          "label": "3-way match (PO–GRN–invoice)",
+          "placeholder": "",
+          "help": "System status; pending until AP invoice matched."
+        },
+        "initial_status": {
+          "label": "When saved",
+          "placeholder": "",
+          "help": "Draft keeps PO received quantities unchanged; submit for QC posts receipt against PO lines."
+        },
+        "notes": {
+          "label": "Notes",
+          "placeholder": "Receipt notes, QC remarks",
+          "help": "Internal or document notes."
+        }
+      },
+      "line_fields": {
+        "item": {
+          "label": "Item",
+          "placeholder": "—",
+          "help": "From PO line."
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Line description",
+          "help": "Editable snapshot for printout."
+        },
+        "uom": {
+          "label": "UOM",
+          "placeholder": "—",
+          "help": "Purchase UOM from PO."
+        },
+        "po_ordered_qty": {
+          "label": "PO qty",
+          "placeholder": "",
+          "help": "Ordered on PO line."
+        },
+        "prev_received": {
+          "label": "Prev. received",
+          "placeholder": "",
+          "help": "Cumulative from prior GRNs."
+        },
+        "receipt_qty": {
+          "label": "This receipt",
+          "placeholder": "0",
+          "help": "Quantity on this GRN; must not exceed pending."
+        },
+        "unit_cost": {
+          "label": "Unit cost",
+          "placeholder": "0",
+          "help": "Default net unit price from PO; override per policy."
+        },
+        "line_total": {
+          "label": "Line total",
+          "placeholder": "",
+          "help": "Receipt qty × unit cost."
+        },
+        "accepted_amount": {
+          "label": "Accepted",
+          "placeholder": "",
+          "help": "Accepted qty × unit cost."
+        },
+        "rejected_amount": {
+          "label": "Rejected",
+          "placeholder": "",
+          "help": "Difference between line total and accepted value."
+        },
+        "accepted_qty": {
+          "label": "Accepted qty",
+          "placeholder": "Default = receipt",
+          "help": "After QC; blank means equal to receipt qty."
+        },
+        "rejection_reason": {
+          "label": "Rejection reason",
+          "placeholder": "",
+          "help": "Required when accepted quantity is less than receipt."
+        },
+        "qc_line_status": {
+          "label": "QC (line)",
+          "placeholder": "",
+          "help": "Line inspection outcome."
+        },
+        "lot_batch": {
+          "label": "Lot / batch",
+          "placeholder": "Optional",
+          "help": "Mandatory on tracked items when policy requires."
+        },
+        "mfg_date": {
+          "label": "Mfg date",
+          "placeholder": "Date",
+          "help": "Manufacturing date when tracked."
+        },
+        "expiry_date": {
+          "label": "Expiry",
+          "placeholder": "Date",
+          "help": "Expiry or best-before."
+        },
+        "temp_receipt": {
+          "label": "Temp. °C",
+          "placeholder": "Optional",
+          "help": "Cold chain recording."
+        },
+        "put_away": {
+          "label": "Put-away bin",
+          "placeholder": "Location",
+          "help": "Target storage location."
+        },
+        "line_notes": {
+          "label": "Line notes",
+          "placeholder": "QC / variance",
+          "help": "Line-level remarks."
+        }
+      }
+    },
+    "purchase_invoice": {
+      "breadcrumb_inventory": "Inventory",
+      "breadcrumb_grn_list": "Goods receipt notes",
+      "breadcrumb_current": "Purchase invoice",
+      "description": "Record the supplier’s purchase invoice against this GRN: line net (accepted × unit cost), recoverable tax (VAT/GST), optional extra GL lines, then post Dr inventory & input tax / Cr accounts payable.",
+      "title": "GRN purchase invoice",
+      "subtitle": "Aligns with common AP practice: document currency amounts, tax in line extensions, and a balanced voucher (open fiscal period required).",
+      "section_header": "Receipt summary",
+      "section_gl": "Posting preview",
+      "section_form": "Invoice / voucher",
+      "section_document": "Invoice & dates",
+      "section_document_hint": "Supplier invoice number, tax point / due dates, and GL voucher date. Header text is stored on the posted transaction.",
+      "section_lines": "Line amounts & tax",
+      "section_lines_hint": "Net comes from the GRN. Tax defaults from the PO line or item tax category; adjust if the supplier invoice differs. Gross = net + tax.",
+      "section_additional": "Additional GL lines",
+      "section_additional_hint": "Use for freight, customs, withholding, or other amounts that belong on the same supplier invoice (one-sided rows: debit or credit, not both).",
+      "section_preview": "Double-entry preview",
+      "missing_gl_warn": "One or more lines are missing an inventory GL account on the item master. Posting will fail until each stocked item has inventory_gl_account_id set.",
+      "missing_tax_gl_warn": "One or more lines have default tax but the tax category has no input tax GL. Set input_tax_gl_account_id on the tax category or set tax to zero on those lines.",
+      "col_line": "Line",
+      "col_item": "Item",
+      "col_accepted_qty": "Accepted qty",
+      "col_unit_cost": "Unit cost (net)",
+      "col_line_value": "Line value",
+      "col_net": "Net",
+      "col_tax": "Tax category",
+      "col_tax_amount": "Tax",
+      "col_line_gross": "Gross",
+      "col_stock_gl": "Stock GL",
+      "col_account": "Account",
+      "col_debit": "Debit",
+      "col_credit": "Credit",
+      "col_memo": "Memo",
+      "ph_select_account": "Search account",
+      "ph_memo": "e.g. Freight-in",
+      "tax_gl_missing_short": "No input tax GL",
+      "label_grn": "GRN",
+      "label_po": "PO",
+      "label_vendor": "Vendor",
+      "label_receipt_date": "Receipt date",
+      "label_currency": "Document currency",
+      "label_fx": "FX rate",
+      "label_total": "Total (accepted value)",
+      "label_total_net": "Subtotal (net)",
+      "label_total_tax": "Total tax",
+      "label_grand_document": "Document total",
+      "label_debit_pattern": "Debits: inventory (per stock GL), input tax (per tax GL), and any extra debits. Credits: optional credit lines, then vendor AP for the balance.",
+      "field_voucher_date": "Voucher date (GL)",
+      "field_reference": "Vendor invoice / reference",
+      "field_reference_ph": "Supplier invoice no.",
+      "field_supplier_invoice_date": "Supplier invoice date",
+      "field_due_date": "Due date",
+      "field_description": "Description (optional)",
+      "field_description_ph": "Shown on the voucher header",
+      "btn_back": "Back to list",
+      "btn_submit": "Post purchase invoice",
+      "btn_add_line": "Add GL line",
+      "btn_remove_line": "Remove",
+      "posting": "Posting…",
+      "preview_debits": "Debit side",
+      "preview_credits": "Credit side",
+      "preview_tag_tax": "input tax",
+      "preview_extra_dr": "Additional debit",
+      "preview_extra_cr": "Additional credit",
+      "preview_vendor_ap": "Vendor AP",
+      "preview_tax_unassigned": "Input tax (unassigned GL — fix category)",
+      "err_vendor_total": "Total payable to the vendor must be greater than zero. Check amounts, tax, and additional lines."
+    }
+  },
   "document_number_configuration": {
     "create": {
       "breadcrumb_description": "Set running document numbers for inventory (e.g. purchase requisitions).",
@@ -1589,6 +2046,7 @@
       "ph_document_type": "Select document type",
       "opt_purchase_requisition": "Purchase requisition",
       "opt_purchase_order": "Purchase order",
+      "opt_goods_receipt_note": "Goods receipt note (GRN)",
       "lbl_prefix": "Prefix",
       "ph_prefix": "e.g. PR-, REQ-",
       "lbl_number_length": "Number length",

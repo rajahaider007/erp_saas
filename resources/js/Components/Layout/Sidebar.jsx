@@ -4,6 +4,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { useLayout } from '../../Contexts/LayoutContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTranslations } from '../../hooks/useTranslations';
+import { isSidebarChildActive } from '../../utils/sidebarMenuActive';
 import {
   X,
   Home,
@@ -21,7 +22,8 @@ import {
   Phone,
   Building,
   Bell,
-  HardDrive
+  HardDrive,
+  Receipt
 } from 'lucide-react';
 
 const menuLabel = (child, t) => {
@@ -31,7 +33,7 @@ const menuLabel = (child, t) => {
   return (v && v !== k) ? v : child.name;
 };
 
-const TooltipPortal = ({ item, anchorEl, onRequestClose, keepOpenClear, t }) => {
+const TooltipPortal = ({ item, anchorEl, onRequestClose, keepOpenClear, t, pageUrl }) => {
   const portalRef = React.useRef(null);
   const [pos, setPos] = React.useState({ left: 0, top: 0 });
 
@@ -105,7 +107,7 @@ const TooltipPortal = ({ item, anchorEl, onRequestClose, keepOpenClear, t }) => 
         <div className="space-y-1">
           {item.children.map(child => {
             const ChildIcon = child.icon;
-            const isChildActive = window.location.pathname === child.href || window.location.pathname.startsWith(child.href + '/');
+            const isChildActive = isSidebarChildActive(pageUrl || `${window.location.pathname}${window.location.search}`, child.href);
             const label = menuLabel(child, t);
 
             return (
@@ -409,6 +411,7 @@ const Sidebar = () => {
       case 'bell': return Bell;
       case 'harddrive':
       case 'storage': return HardDrive;
+      case 'receipt': return Receipt;
       default: return Settings;
     }
   };
@@ -555,7 +558,7 @@ const Sidebar = () => {
           <div className="mt-1 space-y-1 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2 ml-2">
             {item.children.map(child => {
               const ChildIcon = child.icon;
-              const isChildActive = url === child.href || url.startsWith(child.href + '/');
+              const isChildActive = isSidebarChildActive(url, child.href);
               const label = menuLabel(child, t);
 
               return (
@@ -715,6 +718,7 @@ const Sidebar = () => {
           onRequestClose={requestCloseFromPortal}
           keepOpenClear={clearPortalCloseTimeout}
           t={t}
+          pageUrl={url}
         />
       )}
     </>

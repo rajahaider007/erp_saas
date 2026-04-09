@@ -18,6 +18,7 @@
     "system_menus": "Menus",
     "system_companies": "Companies",
     "system_roles": "Roles",
-    "inventory_purchase_requisition_create": "Purchase Requisition"
+    "inventory_purchase_requisition_create": "Purchase Requisition",
+    "inventory_grn_supplier_invoice": "Supplier invoice (GRN)"
   }
 }

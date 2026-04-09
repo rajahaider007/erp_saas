@@ -25,11 +25,11 @@
   /* Report container */
   .p-4,
   .p-8,
-  .md\\:p-8 {
+  .md\:p-8 {
     padding: 0 !important;
   }
 
-  .max-w-\\[1600px\\] {
+  .max-w-\[1600px\] {
     max-width: 100% !important;
   }
 
@@ -68,7 +68,7 @@
   }
 
   /* Grid layout for two columns */
-  .grid.grid-cols-1.lg\\:grid-cols-2 {
+  .grid.grid-cols-1.lg\:grid-cols-2 {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 15mm !important;
@@ -134,8 +134,8 @@
 
   /* Hide drill-down sections in print */
   .cursor-pointer:hover,
-  .hover\\:bg-gray-600,
-  .hover\\:bg-gray-200 {
+  .hover\:bg-gray-600,
+  .hover\:bg-gray-200 {
     cursor: default !important;
     background: transparent !important;
   }
@@ -162,7 +162,7 @@
   }
 
   /* Orange totals (Liabilities & Capital) */
-  .bg-orange-900\\/30,
+  .bg-orange-900\/30,
   .bg-orange-100 {
     background: #fed7aa !important;
     border-color: #ea580c !important;
@@ -174,7 +174,7 @@
   }
 
   /* Blue totals (Assets) */
-  .bg-blue-900\\/30,
+  .bg-blue-900\/30,
   .bg-blue-100 {
     background: #dbeafe !important;
     border-color: #2563eb !important;
@@ -219,7 +219,7 @@
 
   /* Ensure proper line heights */
   .py-1,
-  .py-1\\.5,
+  .py-1\.5,
   .py-2 {
     line-height: 1.4 !important;
   }
@@ -236,8 +236,8 @@
   }
 
   /* Hide dark mode specific elements */
-  .dark\\:bg-gray-800,
-  .dark\\:text-white {
+  .dark\:bg-gray-800,
+  .dark\:text-white {
     background: white !important;
     color: black !important;
   }

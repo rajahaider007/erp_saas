@@ -18,6 +18,7 @@
     "system_menus": "مینو",
     "system_companies": "کمپنیاں",
     "system_roles": "رولز",
-    "inventory_purchase_requisition_create": "خریداری درخواست"
+    "inventory_purchase_requisition_create": "خریداری درخواست",
+    "inventory_grn_supplier_invoice": "سپلائر انوائس (GRN)"
   }
 }

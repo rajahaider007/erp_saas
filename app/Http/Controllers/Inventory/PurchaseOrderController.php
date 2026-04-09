@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
 use App\Models\ChartOfAccount;
+use App\Models\Company;
 use App\Models\Currency;
 use App\Models\InventoryItem;
 use App\Models\Location;
@@ -18,11 +19,13 @@ use App\Services\InventoryDocumentNumberService;
 use App\Services\RecoveryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class PurchaseOrderController extends Controller
@@ -134,7 +137,7 @@ class PurchaseOrderController extends Controller
             ]);
         }
 
-        return Inertia::render('Inventory/PurchaseOrder/Create', $this->purchaseOrderFormPageData($compId, $locationId));
+        return Inertia::render('Inventory/PurchaseOrder/Create', $this->purchaseOrderFormPageData($compId, $locationId, null, null));
     }
 
     public function edit(Request $request, int $id)
@@ -178,7 +181,7 @@ class PurchaseOrderController extends Controller
                 ->with('error', __('inventory_messages.purchase_order.errors.only_draft_can_edit'));
         }
 
-        $page = $this->purchaseOrderFormPageData($compId, $locationId);
+        $page = $this->purchaseOrderFormPageData($compId, $locationId, $doc->id, $doc->purchase_requisition_id);
         $page['order'] = $this->serializeOrderForForm($doc);
 
         return Inertia::render('Inventory/PurchaseOrder/Create', $page);
@@ -206,27 +209,57 @@ class PurchaseOrderController extends Controller
             return response()->json(['message' => __('inventory_messages.purchase_order.errors.pr_not_available')], 404);
         }
 
+        $excludePoId = null;
+        if ($request->filled('exclude_po')) {
+            $excludePoId = (int) $request->input('exclude_po');
+            $owns = PurchaseOrder::query()
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->whereKey($excludePoId)
+                ->exists();
+            if (! $owns) {
+                $excludePoId = null;
+            }
+        }
+
+        $openLines = $pr->lines
+            ->map(function (PurchaseRequisitionLine $l) use ($excludePoId) {
+                $remaining = $l->remainingQtyAvailableForPurchaseOrder($excludePoId);
+                if ($remaining <= 0) {
+                    return null;
+                }
+
+                return [
+                    'purchase_requisition_line_id' => $l->id,
+                    'inventory_item_id' => $l->inventory_item_id,
+                    'item_description' => $l->item_description,
+                    'uom_id' => $l->uom_id,
+                    'ordered_qty' => $remaining,
+                    'unit_price' => $l->estimated_unit_price,
+                    'need_by_date' => $l->need_by_date?->format('Y-m-d'),
+                    'pr_remaining_qty' => $remaining,
+                ];
+            })
+            ->filter()
+            ->values();
+
         return response()->json([
             'ship_to_location_id' => $pr->deliver_to_location_id,
             'delivery_address' => $pr->delivery_address,
             'currency_id' => $pr->currency_id,
             'fx_rate' => $pr->fx_rate,
-            'lines' => $pr->lines->map(fn (PurchaseRequisitionLine $l) => [
-                'purchase_requisition_line_id' => $l->id,
-                'inventory_item_id' => $l->inventory_item_id,
-                'item_description' => $l->item_description,
-                'uom_id' => $l->uom_id,
-                'ordered_qty' => $l->quantity,
-                'unit_price' => $l->estimated_unit_price,
-                'need_by_date' => $l->need_by_date?->format('Y-m-d'),
-            ])->values(),
+            'lines' => $openLines,
         ]);
     }
 
     /**
      * @return array<string, mixed>
      */
-    private function purchaseOrderFormPageData(int $compId, int $locationId): array
+    /**
+     * @param  int|null  $editingPurchaseOrderId  Exclude this PO's lines when computing PR remaining qty (edit draft).
+     * @param  int|null  $linkedPurchaseRequisitionId  Always show this PR in the dropdown (e.g. current link while editing).
+     */
+    private function purchaseOrderFormPageData(int $compId, int $locationId, ?int $editingPurchaseOrderId = null, ?int $linkedPurchaseRequisitionId = null): array
     {
         $uomOptions = UomMaster::query()
             ->byCompany($compId)
@@ -300,19 +333,12 @@ class PurchaseOrderController extends Controller
             ])
             ->values();
 
-        $approvedPrOptions = PurchaseRequisition::query()
-            ->where('comp_id', $compId)
-            ->where('location_id', $locationId)
-            ->where('status', 'approved')
-            ->orderByDesc('pr_date')
-            ->orderByDesc('id')
-            ->limit(500)
-            ->get(['id', 'pr_number', 'pr_date'])
-            ->map(fn ($p) => [
-                'value' => (string) $p->id,
-                'label' => $p->pr_number.' · '.$p->pr_date->format('Y-m-d'),
-            ])
-            ->values();
+        $approvedPrOptions = $this->approvedPurchaseRequisitionOptions(
+            $compId,
+            $locationId,
+            $editingPurchaseOrderId,
+            $linkedPurchaseRequisitionId
+        );
 
         $defaultShipTo = $locationOptions->firstWhere('value', (string) $locationId);
 
@@ -374,7 +400,9 @@ class PurchaseOrderController extends Controller
             'notes' => $doc->notes,
             'lines' => $doc->lines
                 ->map(fn (PurchaseOrderLine $l) => [
-                    'purchase_requisition_line_id' => $l->purchase_requisition_line_id,
+                    'purchase_requisition_line_id' => $l->purchase_requisition_line_id
+                        ? (string) $l->purchase_requisition_line_id
+                        : '',
                     'inventory_item_id' => $l->inventory_item_id,
                     'item_description' => $l->item_description,
                     'uom_id' => $l->uom_id,
@@ -400,7 +428,7 @@ class PurchaseOrderController extends Controller
             return back()->withErrors(['error' => __('inventory_messages.purchase_order.errors.company_location_required')]);
         }
 
-        $validated = $this->validatedOrderPayload($request, $compId, $locationId);
+        $validated = $this->validatedOrderPayload($request, $compId, $locationId, null);
         $lines = $this->normalizedLines($validated['lines'], $validated['purchase_requisition_id']);
 
         $userId = $this->resolvedUserId($request);
@@ -516,7 +544,7 @@ class PurchaseOrderController extends Controller
             return back()->with('error', __('inventory_messages.purchase_order.errors.only_draft_can_edit'));
         }
 
-        $validated = $this->validatedOrderPayload($request, $compId, $locationId);
+        $validated = $this->validatedOrderPayload($request, $compId, $locationId, $id);
         $lines = $this->normalizedLines($validated['lines'], $validated['purchase_requisition_id']);
 
         $userId = $this->resolvedUserId($request);
@@ -624,6 +652,11 @@ class PurchaseOrderController extends Controller
             return back()->with('error', __('inventory_messages.purchase_order.errors.only_draft_can_approve', ['status' => $doc->status]));
         }
 
+        $doc->load('lines');
+        if (! $this->purchaseOrderPrLinesWithinRequisitionCapacity($doc)) {
+            return back()->with('error', __('inventory_messages.purchase_order.errors.pr_capacity_exceeded_on_approve'));
+        }
+
         $oldData = $doc->fresh()->toArray();
         $doc->status = 'approved';
         $doc->approved_at = now();
@@ -673,6 +706,13 @@ class PurchaseOrderController extends Controller
         }
 
         $now = now();
+        foreach ($docs as $doc) {
+            $doc->load('lines');
+            if (! $this->purchaseOrderPrLinesWithinRequisitionCapacity($doc)) {
+                return back()->with('error', __('inventory_messages.purchase_order.errors.pr_capacity_exceeded_bulk', ['po' => $doc->po_number]));
+            }
+        }
+
         foreach ($docs as $doc) {
             $oldData = $doc->fresh()->toArray();
             $doc->status = 'approved';
@@ -783,10 +823,68 @@ class PurchaseOrderController extends Controller
             ->with('success', $msg);
     }
 
+    public function invoice(Request $request, int $id, string $variant): Response
+    {
+        $compId = $this->resolvedCompId($request);
+        $locationId = $this->resolvedLocationId($request);
+
+        if (! $compId || ! $locationId) {
+            abort(403);
+        }
+
+        if (! in_array($variant, ['summary', 'detailed'], true)) {
+            abort(404);
+        }
+
+        $company = Company::query()
+            ->whereKey($compId)
+            ->first([
+                'company_name',
+                'legal_name',
+                'trading_name',
+                'address_line_1',
+                'address_line_2',
+                'city',
+                'state_province',
+                'postal_code',
+                'country',
+                'phone',
+                'email',
+                'tax_id',
+                'vat_number',
+                'registration_number',
+            ]);
+
+        $po = PurchaseOrder::query()
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->whereKey($id)
+            ->with([
+                'lines.inventoryItem:id,item_code,item_name_short',
+                'lines.uom:id,uom_code,uom_name',
+                'lines.taxCategory:id,tax_code,tax_name',
+                'vendor:id,account_code,account_name',
+                'purchaseRequisition:id,pr_number',
+                'shipToLocation:id,location_name',
+                'currency:id,code,name',
+                'orderingLocation:id,location_name',
+            ])
+            ->firstOrFail();
+
+        $view = $variant === 'summary'
+            ? 'inventory.purchase_order.invoice_summary'
+            : 'inventory.purchase_order.invoice_detailed';
+
+        return response()->view($view, [
+            'po' => $po,
+            'company' => $company,
+        ]);
+    }
+
     /**
      * @return array<string, mixed>
      */
-    private function validatedOrderPayload(Request $request, int $compId, int $locationId): array
+    private function validatedOrderPayload(Request $request, int $compId, int $locationId, ?int $editingPurchaseOrderId): array
     {
         $validated = $request->validate([
             'link_pr' => ['required', Rule::in(['yes', 'no'])],
@@ -867,7 +965,117 @@ class PurchaseOrderController extends Controller
             : null;
         $validated['vendor_id'] = (int) $validated['vendor_id'];
 
+        $linesForCheck = $this->normalizedLines($validated['lines'], $validated['purchase_requisition_id']);
+        $this->assertPrLineOrderedTotalsFit($linesForCheck, $validated['purchase_requisition_id'], $validated['link_pr'] === 'yes', $editingPurchaseOrderId);
+
         return $validated;
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $lines  Normalized lines (PR link ids verified).
+     */
+    private function assertPrLineOrderedTotalsFit(array $lines, ?int $purchaseRequisitionId, bool $linkPr, ?int $editingPurchaseOrderId): void
+    {
+        if (! $linkPr || ! $purchaseRequisitionId) {
+            return;
+        }
+
+        /** @var array<int, float> $sums */
+        $sums = [];
+        foreach ($lines as $row) {
+            $prLineId = $row['purchase_requisition_line_id'] ?? null;
+            if ($prLineId === null) {
+                continue;
+            }
+            $prLineId = (int) $prLineId;
+            $sums[$prLineId] = ($sums[$prLineId] ?? 0) + (float) $row['ordered_qty'];
+        }
+
+        foreach ($sums as $prLineId => $wantQty) {
+            $line = PurchaseRequisitionLine::query()
+                ->whereKey($prLineId)
+                ->where('purchase_requisition_id', $purchaseRequisitionId)
+                ->first();
+
+            if (! $line) {
+                throw ValidationException::withMessages([
+                    'lines' => __('inventory_messages.purchase_order.errors.pr_line_invalid'),
+                ]);
+            }
+
+            $remaining = $line->remainingQtyAvailableForPurchaseOrder($editingPurchaseOrderId);
+            if ($wantQty > $remaining + 0.000001) {
+                throw ValidationException::withMessages([
+                    'lines' => __('inventory_messages.purchase_order.errors.pr_line_qty_exceeded', [
+                        'line' => $line->line_no,
+                        'max' => $this->formatQtyForMessage($remaining),
+                    ]),
+                ]);
+            }
+        }
+    }
+
+    private function formatQtyForMessage(float $qty): string
+    {
+        $s = number_format($qty, 6, '.', '');
+        $s = rtrim(rtrim($s, '0'), '.');
+
+        return $s === '' ? '0' : $s;
+    }
+
+    private function purchaseOrderPrLinesWithinRequisitionCapacity(PurchaseOrder $order): bool
+    {
+        $ids = $order->lines->pluck('purchase_requisition_line_id')->filter()->unique()->values();
+        foreach ($ids as $prLineId) {
+            $line = PurchaseRequisitionLine::query()->find((int) $prLineId);
+            if (! $line) {
+                continue;
+            }
+            $total = $line->totalOrderedAcrossAllPurchaseOrders();
+            if ($total > (float) $line->quantity + 0.000001) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * PRs that still have at least one line with remaining qty, plus optional forced include for the linked PR on edit.
+     *
+     * @return \Illuminate\Support\Collection<int, array{value: string, label: string}>
+     */
+    private function approvedPurchaseRequisitionOptions(
+        int $compId,
+        int $locationId,
+        ?int $editingPurchaseOrderId,
+        ?int $linkedPurchaseRequisitionId
+    ) {
+        $prs = PurchaseRequisition::query()
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('status', 'approved')
+            ->with(['lines'])
+            ->orderByDesc('pr_date')
+            ->orderByDesc('id')
+            ->limit(500)
+            ->get();
+
+        return $prs
+            ->filter(function (PurchaseRequisition $pr) use ($editingPurchaseOrderId, $linkedPurchaseRequisitionId) {
+                if ($linkedPurchaseRequisitionId !== null && (int) $pr->id === (int) $linkedPurchaseRequisitionId) {
+                    return true;
+                }
+
+                return $pr->lines->contains(
+                    fn (PurchaseRequisitionLine $line) => $line->remainingQtyAvailableForPurchaseOrder($editingPurchaseOrderId) > 0
+                );
+            })
+            ->map(fn (PurchaseRequisition $p) => [
+                'value' => (string) $p->id,
+                'label' => $p->pr_number.' · '.$p->pr_date->format('Y-m-d'),
+            ])
+            ->values();
     }
 
     /**

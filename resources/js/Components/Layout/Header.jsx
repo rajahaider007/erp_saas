@@ -3,6 +3,7 @@ import { Link, router, usePage } from '@inertiajs/react';
 import { useLayout } from '../../Contexts/LayoutContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTranslations } from '../../hooks/useTranslations';
+import { isSidebarChildActive } from '../../utils/sidebarMenuActive';
 import {
   Menu,
   Search,
@@ -23,7 +24,8 @@ import {
   Calendar,
   Mail,
   Building,
-  Grid3X3
+  Grid3X3,
+  Receipt
 } from 'lucide-react';
 
 const Header = () => {
@@ -390,6 +392,7 @@ const Header = () => {
       case 'mail': return Mail;
       case 'building': return Building;
       case 'bell': return Bell;
+      case 'receipt': return Receipt;
       default: return Settings;
     }
   };
@@ -541,7 +544,7 @@ const Header = () => {
               <div className="p-2">
                 {item.children.map((child) => {
                   const ChildIcon = child.icon;
-                  const isChildActive = url === child.href || (url || '').startsWith(child.href + '/');
+                  const isChildActive = isSidebarChildActive(url, child.href);
 
                   return (
                     <Link

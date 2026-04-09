@@ -10,18 +10,19 @@ export const usePermissions = () => {
   
   
   
-  // Create a map of menu permissions for quick lookup
+  // Create a map of menu permissions for quick lookup (keys: numeric menu id)
   const menuPermissions = useMemo(() => {
     const permissions = {};
-    
+
     if (userRights && typeof userRights === 'object') {
-      // userRights is an object, not an array
-      Object.values(userRights).forEach(right => {
-        permissions[right.menu_id] = {
-          can_view: right.can_view || false,
-          can_add: right.can_add || false,
-          can_edit: right.can_edit || false,
-          can_delete: right.can_delete || false,
+      Object.values(userRights).forEach((right) => {
+        const id = Number(right.menu_id);
+        if (!Number.isFinite(id)) return;
+        permissions[id] = {
+          can_view: Boolean(right.can_view),
+          can_add: Boolean(right.can_add),
+          can_edit: Boolean(right.can_edit),
+          can_delete: Boolean(right.can_delete),
         };
       });
     }
@@ -31,16 +32,34 @@ export const usePermissions = () => {
   // Create a map of route permissions for quick lookup
   const routePermissions = useMemo(() => {
     const permissions = {};
-    
+
     if (availableMenus && Array.isArray(availableMenus)) {
-      availableMenus.forEach(menu => {
-        if (menu.route && menuPermissions[menu.id]) {
-          permissions[menu.route] = menuPermissions[menu.id];
+      availableMenus.forEach((menu) => {
+        const mid = Number(menu.id);
+        const perms = Number.isFinite(mid) ? menuPermissions[mid] : null;
+        if (menu.route && perms) {
+          permissions[menu.route] = perms;
         }
       });
     }
-    
-    
+
+    // GRN menu row may still use legacy URL `/create` while screens use list path — share rights
+    const grnPerms =
+      permissions['/inventory/goods-receipt-note'] ||
+      permissions['/inventory/goods-receipt-note/create'];
+    if (grnPerms) {
+      permissions['/inventory/goods-receipt-note'] = grnPerms;
+      permissions['/inventory/goods-receipt-note/create'] = grnPerms;
+    }
+
+    const grnSiPerms =
+      permissions['/inventory/grn-supplier-invoice'] ||
+      permissions['/inventory/grn-supplier-invoice/create'];
+    if (grnSiPerms) {
+      permissions['/inventory/grn-supplier-invoice'] = grnSiPerms;
+      permissions['/inventory/grn-supplier-invoice/create'] = grnSiPerms;
+    }
+
     return permissions;
   }, [availableMenus, menuPermissions]);
 
@@ -56,17 +75,41 @@ export const usePermissions = () => {
       return true;
     }
 
-    // If it's a route name, find the menu ID
+    // If it's a path, resolve menu row (handle GRN / supplier invoice list vs /create URL drift)
     if (typeof menuId === 'string' && menuId.startsWith('/')) {
-      const menu = availableMenus?.find(m => m.route === menuId);
+      let menu = availableMenus?.find((m) => m.route === menuId);
+      if (
+        !menu &&
+        (menuId === '/inventory/goods-receipt-note' || menuId.startsWith('/inventory/goods-receipt-note/'))
+      ) {
+        menu = availableMenus?.find(
+          (m) =>
+            m.route === '/inventory/goods-receipt-note' || m.route === '/inventory/goods-receipt-note/create'
+        );
+      }
+      if (
+        !menu &&
+        (menuId === '/inventory/grn-supplier-invoice' || menuId.startsWith('/inventory/grn-supplier-invoice/'))
+      ) {
+        menu = availableMenus?.find(
+          (m) =>
+            m.route === '/inventory/grn-supplier-invoice' ||
+            m.route === '/inventory/grn-supplier-invoice/create'
+        );
+      }
       if (menu) {
-        menuId = menu.id;
+        menuId = Number(menu.id);
       } else {
         return false;
       }
     }
-    
-    return menuPermissions[menuId]?.[permission] || false;
+
+    const mid = Number(menuId);
+    return (
+      (Number.isFinite(mid) ? menuPermissions[mid]?.[permission] : null) ||
+      menuPermissions[menuId]?.[permission] ||
+      false
+    );
   }, [auth?.user?.role, availableMenus, menuPermissions]);
 
   /**
@@ -75,9 +118,30 @@ export const usePermissions = () => {
    * @param {string} permission - Permission type
    * @returns {boolean}
    */
-  const hasRoutePermission = useCallback((route, permission = 'can_view') => {
-    return routePermissions[route]?.[permission] || false;
-  }, [routePermissions]);
+  const hasRoutePermission = useCallback(
+    (route, permission = 'can_view') => {
+      const direct = routePermissions[route]?.[permission];
+      if (direct) return true;
+      if (routePermissions[route] && routePermissions[route][permission] === false) return false;
+      // Subpages (e.g. …/5/edit) inherit base menu rights
+      if (route?.startsWith('/inventory/goods-receipt-note/')) {
+        return (
+          routePermissions['/inventory/goods-receipt-note']?.[permission] ||
+          routePermissions['/inventory/goods-receipt-note/create']?.[permission] ||
+          false
+        );
+      }
+      if (route?.startsWith('/inventory/grn-supplier-invoice/')) {
+        return (
+          routePermissions['/inventory/grn-supplier-invoice']?.[permission] ||
+          routePermissions['/inventory/grn-supplier-invoice/create']?.[permission] ||
+          false
+        );
+      }
+      return false;
+    },
+    [routePermissions]
+  );
 
   /**
    * Check if user can view a specific menu/route
@@ -112,23 +176,54 @@ export const usePermissions = () => {
    * @param {number|string} menuId - Menu ID or route name
    * @returns {Object} Permission object
    */
-  const getMenuPermissions = useCallback((menuId) => {
-    if (typeof menuId === 'string' && menuId.startsWith('/')) {
-      return routePermissions[menuId] || {
-        can_view: false,
-        can_add: false,
-        can_edit: false,
-        can_delete: false,
-      };
-    }
-    
-    return menuPermissions[menuId] || {
-      can_view: false,
-      can_add: false,
-      can_edit: false,
-      can_delete: false,
-    };
-  }, [routePermissions, menuPermissions]);
+  const getMenuPermissions = useCallback(
+    (menuId) => {
+      if (typeof menuId === 'string' && menuId.startsWith('/')) {
+        const fromMap = routePermissions[menuId];
+        if (fromMap) return fromMap;
+        if (menuId.startsWith('/inventory/goods-receipt-note/')) {
+          return (
+            routePermissions['/inventory/goods-receipt-note'] ||
+            routePermissions['/inventory/goods-receipt-note/create'] || {
+              can_view: false,
+              can_add: false,
+              can_edit: false,
+              can_delete: false,
+            }
+          );
+        }
+        if (menuId.startsWith('/inventory/grn-supplier-invoice/')) {
+          return (
+            routePermissions['/inventory/grn-supplier-invoice'] ||
+            routePermissions['/inventory/grn-supplier-invoice/create'] || {
+              can_view: false,
+              can_add: false,
+              can_edit: false,
+              can_delete: false,
+            }
+          );
+        }
+        return {
+          can_view: false,
+          can_add: false,
+          can_edit: false,
+          can_delete: false,
+        };
+      }
+
+      const mid = Number(menuId);
+      return (
+        (Number.isFinite(mid) ? menuPermissions[mid] : null) ||
+        menuPermissions[menuId] || {
+          can_view: false,
+          can_add: false,
+          can_edit: false,
+          can_delete: false,
+        }
+      );
+    },
+    [routePermissions, menuPermissions]
+  );
 
   /**
    * Check if user has any of the specified roles
@@ -188,9 +283,11 @@ export const usePermissions = () => {
     if (auth?.user?.role === 'super_admin') return true;
     if (!availableMenus || !Array.isArray(availableMenus)) return false;
     const normalized = String(folderName).toLowerCase();
-    return availableMenus.some(
-      m => String(m.folder_name || '').toLowerCase() === normalized && (menuPermissions[m.id]?.can_view === true)
-    );
+    return availableMenus.some((m) => {
+      const mid = Number(m.id);
+      const perms = Number.isFinite(mid) ? menuPermissions[mid] : null;
+      return String(m.folder_name || '').toLowerCase() === normalized && perms?.can_view === true;
+    });
   }, [auth?.user?.role, availableMenus, menuPermissions]);
 
   /**

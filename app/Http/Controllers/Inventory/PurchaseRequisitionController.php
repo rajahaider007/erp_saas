@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
 use App\Models\Currency;
 use App\Models\Department;
 use App\Models\InventoryItem;
@@ -14,6 +15,7 @@ use App\Services\AuditLogService;
 use App\Services\InventoryDocumentNumberService;
 use App\Services\RecoveryService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -743,6 +745,62 @@ class PurchaseRequisitionController extends Controller
         return redirect()
             ->route('inventory.purchase-requisition.index')
             ->with('success', $msg);
+    }
+
+    public function invoice(Request $request, int $id, string $variant): Response
+    {
+        $compId = $this->resolvedCompId($request);
+        $locationId = $this->resolvedLocationId($request);
+
+        if (! $compId || ! $locationId) {
+            abort(403);
+        }
+
+        if (! in_array($variant, ['summary', 'detailed'], true)) {
+            abort(404);
+        }
+
+        $company = Company::query()
+            ->whereKey($compId)
+            ->first([
+                'company_name',
+                'legal_name',
+                'trading_name',
+                'address_line_1',
+                'address_line_2',
+                'city',
+                'state_province',
+                'postal_code',
+                'country',
+                'phone',
+                'email',
+                'tax_id',
+                'vat_number',
+                'registration_number',
+            ]);
+
+        $pr = PurchaseRequisition::query()
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->whereKey($id)
+            ->with([
+                'lines.inventoryItem:id,item_code,item_name_short',
+                'lines.uom:id,uom_code,uom_name',
+                'department:id,department_name',
+                'deliverToLocation:id,location_name',
+                'requestingLocation:id,location_name',
+                'currency:id,code,name',
+            ])
+            ->firstOrFail();
+
+        $view = $variant === 'summary'
+            ? 'inventory.purchase_requisition.invoice_summary'
+            : 'inventory.purchase_requisition.invoice_detailed';
+
+        return response()->view($view, [
+            'pr' => $pr,
+            'company' => $company,
+        ]);
     }
 
     private function departmentOptions(int $compId, int $locationId): array

@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Inventory\GoodsReceiptNoteController;
+use App\Http\Controllers\Inventory\GrnSupplierInvoiceController;
+use App\Http\Controllers\Inventory\InventoryDocumentNumberConfigurationController;
 use App\Http\Controllers\Inventory\ItemCategoryCodingController;
 use App\Http\Controllers\Inventory\ItemClassCodingController;
 use App\Http\Controllers\Inventory\ItemGroupCodingController;
 use App\Http\Controllers\Inventory\ItemMasterController;
 use App\Http\Controllers\Inventory\MasterDataController;
-use App\Http\Controllers\Inventory\InventoryDocumentNumberConfigurationController;
 use App\Http\Controllers\Inventory\PurchaseOrderController;
 use App\Http\Controllers\Inventory\PurchaseRequisitionController;
 use App\Http\Controllers\Inventory\UomConversionController;
@@ -167,6 +169,7 @@ Route::prefix('inventory/purchase-requisition')->name('inventory.purchase-requis
     Route::get('/create', [PurchaseRequisitionController::class, 'create'])->name('create');
     Route::post('/', [PurchaseRequisitionController::class, 'store'])->name('store');
     Route::get('/{id}/edit', [PurchaseRequisitionController::class, 'edit'])->name('edit')->whereNumber('id');
+    Route::get('/{id}/invoice/{variant}', [PurchaseRequisitionController::class, 'invoice'])->name('invoice')->whereNumber('id')->where('variant', 'summary|detailed');
     Route::put('/{id}', [PurchaseRequisitionController::class, 'update'])->name('update')->whereNumber('id');
     Route::post('/bulk-approve', [PurchaseRequisitionController::class, 'bulkApprove'])->name('bulk-approve');
     Route::post('/{id}/approve', [PurchaseRequisitionController::class, 'approve'])->name('approve');
@@ -179,11 +182,38 @@ Route::prefix('inventory/purchase-order')->name('inventory.purchase-order.')->mi
     Route::get('/create', [PurchaseOrderController::class, 'create'])->name('create');
     Route::get('/prefill-pr/{id}', [PurchaseOrderController::class, 'prefillFromPr'])->name('prefill-pr')->whereNumber('id');
     Route::post('/', [PurchaseOrderController::class, 'store'])->name('store');
+    Route::get('/{id}/invoice/{variant}', [PurchaseOrderController::class, 'invoice'])->name('invoice')->whereNumber('id')->where('variant', 'summary|detailed');
     Route::get('/{id}/edit', [PurchaseOrderController::class, 'edit'])->name('edit')->whereNumber('id');
     Route::put('/{id}', [PurchaseOrderController::class, 'update'])->name('update')->whereNumber('id');
     Route::post('/bulk-approve', [PurchaseOrderController::class, 'bulkApprove'])->name('bulk-approve');
     Route::post('/{id}/approve', [PurchaseOrderController::class, 'approve'])->name('approve')->whereNumber('id');
     Route::delete('/{id}', [PurchaseOrderController::class, 'destroy'])->name('destroy')->whereNumber('id');
+});
+
+// Inventory — Supplier invoice (GRN): separate documents; multiple GRNs per vendor per invoice
+Route::prefix('inventory/grn-supplier-invoice')->name('inventory.grn-supplier-invoice.')->middleware('web.auth')->group(function () {
+    Route::get('/', [GrnSupplierInvoiceController::class, 'index'])->name('index');
+    Route::get('/create', [GrnSupplierInvoiceController::class, 'create'])->name('create');
+    Route::post('/', [GrnSupplierInvoiceController::class, 'store'])->name('store');
+    Route::get('/eligible-grns', [GrnSupplierInvoiceController::class, 'eligibleGrns'])->name('eligible-grns');
+    Route::get('/preview-lines', [GrnSupplierInvoiceController::class, 'previewLines'])->name('preview-lines');
+    Route::get('/{id}/edit', [GrnSupplierInvoiceController::class, 'edit'])->name('edit')->whereNumber('id');
+    Route::put('/{id}', [GrnSupplierInvoiceController::class, 'update'])->name('update')->whereNumber('id');
+    Route::delete('/{id}', [GrnSupplierInvoiceController::class, 'destroy'])->name('destroy')->whereNumber('id');
+    Route::post('/{id}/post', [GrnSupplierInvoiceController::class, 'post'])->name('post')->whereNumber('id');
+});
+
+// Inventory Module — Goods Receipt Note (GRN)
+Route::prefix('inventory/goods-receipt-note')->name('inventory.goods-receipt-note.')->middleware('web.auth')->group(function () {
+    Route::get('/', [GoodsReceiptNoteController::class, 'index'])->name('index');
+    Route::get('/create', [GoodsReceiptNoteController::class, 'create'])->name('create');
+    Route::get('/prefill-po/{id}', [GoodsReceiptNoteController::class, 'prefillFromPo'])->name('prefill-po')->whereNumber('id');
+    Route::post('/', [GoodsReceiptNoteController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [GoodsReceiptNoteController::class, 'edit'])->name('edit')->whereNumber('id');
+    Route::get('/{id}/invoice/{variant}', [GoodsReceiptNoteController::class, 'invoice'])->name('invoice')->whereNumber('id')->where('variant', 'summary|detailed');
+    Route::put('/{id}', [GoodsReceiptNoteController::class, 'update'])->name('update')->whereNumber('id');
+    Route::post('/{id}/approve', [GoodsReceiptNoteController::class, 'approve'])->name('approve')->whereNumber('id');
+    Route::delete('/{id}', [GoodsReceiptNoteController::class, 'destroy'])->name('destroy')->whereNumber('id');
 });
 
 // Inventory — document number configuration (running numbers for PR, etc.)

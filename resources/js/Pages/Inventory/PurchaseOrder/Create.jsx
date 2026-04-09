@@ -450,7 +450,18 @@ export default function PurchaseOrderCreate() {
     }
     setLoadingPr(true);
     try {
-      const { data } = await axios.get(`/inventory/purchase-order/prefill-pr/${prId}`);
+      const excludePo = order?.id != null ? String(order.id) : '';
+      const { data } = await axios.get(`/inventory/purchase-order/prefill-pr/${prId}`, {
+        params: excludePo ? { exclude_po: excludePo } : {},
+      });
+      if (!Array.isArray(data.lines) || data.lines.length === 0) {
+        setAlert({
+          type: 'error',
+          message: tc('msg_pr_fully_consumed'),
+        });
+        setLoadingPr(false);
+        return;
+      }
       const mapped =
         Array.isArray(data.lines) && data.lines.length
           ? data.lines.map((l) => ({
@@ -739,28 +750,28 @@ export default function PurchaseOrderCreate() {
                   </div>
 
                   <div className="overflow-x-auto rounded-lg border border-slate-200/80 dark:border-slate-700">
-                    <table className="min-w-full border-collapse text-sm pr-line-table" role="grid" aria-label={tc('section_lines')}>
+                    <table className="min-w-[1180px] w-full border-collapse text-sm pr-line-table" role="grid" aria-label={tc('section_lines')}>
                       <thead>
                         <tr className="bg-slate-50/90 dark:bg-slate-800/50 text-left">
                           <th scope="col" className="px-2 py-2 font-semibold w-10">
                             {tc('line_number')}
                           </th>
-                          <th scope="col" className="px-2 py-2 font-semibold min-w-[14rem]">
+                          <th scope="col" className="px-2 py-2 font-semibold min-w-[15rem]">
                             {lf('item', 'label')}
                           </th>
-                          <th scope="col" className="px-2 py-2 font-semibold min-w-[12rem]">
+                          <th scope="col" className="px-2 py-2 font-semibold min-w-[14rem]">
                             {lf('description', 'label')}
                           </th>
-                          <th scope="col" className="px-2 py-2 font-semibold min-w-[8rem]">
+                          <th scope="col" className="px-2 py-2 font-semibold min-w-[9rem]">
                             {lf('uom', 'label')}
                           </th>
-                          <th scope="col" className="px-2 py-2 font-semibold min-w-[6rem]">
+                          <th scope="col" className="px-2 py-2 font-semibold min-w-[8.5rem] whitespace-nowrap">
                             {lf('ordered_qty', 'label')}
                           </th>
-                          <th scope="col" className="px-2 py-2 font-semibold min-w-[7rem]">
+                          <th scope="col" className="px-2 py-2 font-semibold min-w-[8.5rem] whitespace-nowrap">
                             {lf('unit_price', 'label')}
                           </th>
-                          <th scope="col" className="px-2 py-2 font-semibold min-w-[6rem]">
+                          <th scope="col" className="px-2 py-2 font-semibold min-w-[7.5rem] whitespace-nowrap">
                             {lf('line_discount', 'label')}
                           </th>
                           <th scope="col" className="px-2 py-2 font-semibold min-w-[9rem]">
@@ -772,7 +783,7 @@ export default function PurchaseOrderCreate() {
                           <th scope="col" className="px-2 py-2 font-semibold min-w-[9rem]">
                             {lf('receive_loc', 'label')}
                           </th>
-                          <th scope="col" className="px-2 py-2 font-semibold min-w-[8rem]">
+                          <th scope="col" className="px-2 py-2 font-semibold min-w-[11rem]">
                             {lf('line_notes', 'label')}
                           </th>
                           <th scope="col" className="px-2 py-2 w-12" aria-label={tc('remove_line')} />
@@ -795,7 +806,7 @@ export default function PurchaseOrderCreate() {
                             <td className="px-2 py-2">
                               <input
                                 type="text"
-                                className="form-input w-full min-w-[10rem]"
+                                className="form-input w-full min-w-[12rem]"
                                 value={row.item_description}
                                 onChange={(e) => updateLine(index, { item_description: e.target.value })}
                                 placeholder={lf('description', 'placeholder')}
@@ -818,7 +829,7 @@ export default function PurchaseOrderCreate() {
                                 type="number"
                                 step="any"
                                 min="0"
-                                className="form-input w-full min-w-[5rem]"
+                                className="form-input w-full min-w-[8.5rem] sm:min-w-[9rem] tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 value={row.ordered_qty}
                                 onChange={(e) => updateLine(index, { ordered_qty: e.target.value })}
                                 placeholder={lf('ordered_qty', 'placeholder')}
@@ -830,7 +841,7 @@ export default function PurchaseOrderCreate() {
                                 type="number"
                                 step="any"
                                 min="0"
-                                className="form-input w-full min-w-[5rem]"
+                                className="form-input w-full min-w-[8.5rem] sm:min-w-[9rem] tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 value={row.unit_price}
                                 onChange={(e) => updateLine(index, { unit_price: e.target.value })}
                                 placeholder={lf('unit_price', 'placeholder')}
@@ -842,7 +853,7 @@ export default function PurchaseOrderCreate() {
                                 type="number"
                                 step="any"
                                 min="0"
-                                className="form-input w-full min-w-[4rem]"
+                                className="form-input w-full min-w-[7.5rem] sm:min-w-[8rem] tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 value={row.line_discount_percent}
                                 onChange={(e) => updateLine(index, { line_discount_percent: e.target.value })}
                                 placeholder={lf('line_discount', 'placeholder')}
@@ -886,7 +897,7 @@ export default function PurchaseOrderCreate() {
                             <td className="px-2 py-2">
                               <input
                                 type="text"
-                                className="form-input w-full min-w-[8rem]"
+                                className="form-input w-full min-w-[10rem]"
                                 value={row.line_notes}
                                 onChange={(e) => updateLine(index, { line_notes: e.target.value })}
                                 placeholder={lf('line_notes', 'placeholder')}

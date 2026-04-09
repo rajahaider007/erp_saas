@@ -70,6 +70,11 @@ trait CheckUserPermissions
         // Find menu by route name - try exact match first, then base route
         $menu = Menu::where('route', $routeName)->first();
 
+        // GRN + supplier-invoice landing share two menu rows (same module); allow if user has rights on either.
+        if (! $menu && $routeName && str_starts_with($routeName, 'inventory.goods-receipt-note.')) {
+            return $this->checkGrnMenusPermission($user, $permission);
+        }
+
         // inventory.master-data.* uses one route name for all masters; menus store list URL /inventory/master-data/{key}
         if (! $menu && $routeName && str_starts_with($routeName, 'inventory.master-data.')) {
             $segments = explode('/', trim($request->path(), '/'));
@@ -319,8 +324,39 @@ trait CheckUserPermissions
             'inventory.uom-conversion.update' => '/inventory/uom-conversion',
             'inventory.uom-conversion.destroy' => '/inventory/uom-conversion',
             'inventory.uom-conversion.bulk-destroy' => '/inventory/uom-conversion',
+
+            'inventory.grn-supplier-invoice.index' => '/inventory/grn-supplier-invoice',
+            'inventory.grn-supplier-invoice.create' => '/inventory/grn-supplier-invoice',
+            'inventory.grn-supplier-invoice.store' => '/inventory/grn-supplier-invoice',
+            'inventory.grn-supplier-invoice.eligible-grns' => '/inventory/grn-supplier-invoice',
+            'inventory.grn-supplier-invoice.preview-lines' => '/inventory/grn-supplier-invoice',
+            'inventory.grn-supplier-invoice.edit' => '/inventory/grn-supplier-invoice',
+            'inventory.grn-supplier-invoice.update' => '/inventory/grn-supplier-invoice',
+            'inventory.grn-supplier-invoice.destroy' => '/inventory/grn-supplier-invoice',
+            'inventory.grn-supplier-invoice.post' => '/inventory/grn-supplier-invoice',
         ];
 
         return $routeMappings[$routeName] ?? null;
+    }
+
+    /**
+     * GRN routes: user must have rights on the goods receipt menu (supplier invoice is a separate menu).
+     */
+    private function checkGrnMenusPermission(User $user, string $permission): bool
+    {
+        if ($user->role === 'super_admin') {
+            return true;
+        }
+
+        $menu = Menu::query()
+            ->whereIn('route', ['/inventory/goods-receipt-note', '/inventory/goods-receipt-note/create'])
+            ->orderByRaw("CASE WHEN route = '/inventory/goods-receipt-note' THEN 0 ELSE 1 END")
+            ->first();
+
+        if (! $menu) {
+            return false;
+        }
+
+        return $user->hasPermission($menu->id, $permission);
     }
 }
