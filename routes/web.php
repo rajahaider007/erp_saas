@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Inventory\GoodsReceiptNoteController;
 use App\Http\Controllers\Inventory\GrnSupplierInvoiceController;
 use App\Http\Controllers\Inventory\InventoryDocumentNumberConfigurationController;
+use App\Http\Controllers\Inventory\InventoryReportingController;
 use App\Http\Controllers\Inventory\ItemCategoryCodingController;
 use App\Http\Controllers\Inventory\ItemClassCodingController;
 use App\Http\Controllers\Inventory\ItemGroupCodingController;
@@ -102,6 +103,11 @@ Route::get('/erp-modules', function (Request $request) {
     return Inertia::render('Modules/index');
 })->middleware('web.auth')->name('erp.modules');
 
+// RAHJ AI — assistant portal (frontend shell; guidance backend later)
+Route::get('/rahj-ai', function () {
+    return Inertia::render('RahjAi/Portal');
+})->middleware('web.auth')->name('rahj-ai.portal');
+
 // Accounts Module Routes
 Route::get('/accounts', function () {
     return redirect('/accounts/dashboard');
@@ -197,6 +203,7 @@ Route::prefix('inventory/grn-supplier-invoice')->name('inventory.grn-supplier-in
     Route::post('/', [GrnSupplierInvoiceController::class, 'store'])->name('store');
     Route::get('/eligible-grns', [GrnSupplierInvoiceController::class, 'eligibleGrns'])->name('eligible-grns');
     Route::get('/preview-lines', [GrnSupplierInvoiceController::class, 'previewLines'])->name('preview-lines');
+    Route::get('/{id}/invoice/{variant}', [GrnSupplierInvoiceController::class, 'invoice'])->name('invoice')->whereNumber('id')->where('variant', 'summary|detailed|voucher');
     Route::get('/{id}/edit', [GrnSupplierInvoiceController::class, 'edit'])->name('edit')->whereNumber('id');
     Route::put('/{id}', [GrnSupplierInvoiceController::class, 'update'])->name('update')->whereNumber('id');
     Route::delete('/{id}', [GrnSupplierInvoiceController::class, 'destroy'])->name('destroy')->whereNumber('id');
@@ -225,6 +232,25 @@ Route::prefix('inventory/document-number-configuration')->name('inventory.docume
     Route::get('/{id}', [InventoryDocumentNumberConfigurationController::class, 'show'])->name('show')->whereNumber('id');
     Route::put('/{id}', [InventoryDocumentNumberConfigurationController::class, 'update'])->name('update')->whereNumber('id');
     Route::delete('/{id}', [InventoryDocumentNumberConfigurationController::class, 'destroy'])->name('destroy')->whereNumber('id');
+});
+
+// Inventory — reporting (standards-aligned registers; see docs/INVENTORY_REPORTING_STANDARDS.md)
+Route::prefix('inventory/reports')->name('inventory.reports.')->middleware('web.auth')->group(function () {
+    Route::get('/', [InventoryReportingController::class, 'index'])->name('index');
+    Route::get('/goods-receipt-register', [InventoryReportingController::class, 'goodsReceiptRegister'])->name('goods-receipt-register');
+    Route::get('/goods-receipt-register/report', [InventoryReportingController::class, 'goodsReceiptRegisterReport'])->name('goods-receipt-register.report');
+    Route::post('/goods-receipt-register/data', [InventoryReportingController::class, 'goodsReceiptRegisterData'])->name('goods-receipt-register.data');
+    Route::get('/goods-receipt-register/export/csv', [InventoryReportingController::class, 'goodsReceiptRegisterExportCsv'])->name('goods-receipt-register.export.csv');
+    Route::get('/goods-receipt-register/export/excel', [InventoryReportingController::class, 'goodsReceiptRegisterExportExcel'])->name('goods-receipt-register.export.excel');
+    Route::get('/goods-receipt-register/export/pdf', [InventoryReportingController::class, 'goodsReceiptRegisterExportPdf'])->name('goods-receipt-register.export.pdf');
+    Route::get('/goods-receipt-register/print', [InventoryReportingController::class, 'goodsReceiptRegisterPrint'])->name('goods-receipt-register.print');
+    Route::get('/purchase-order-lines', [InventoryReportingController::class, 'purchaseOrderLinesRegister'])->name('purchase-order-lines');
+    Route::get('/purchase-order-lines/report', [InventoryReportingController::class, 'purchaseOrderLinesReport'])->name('purchase-order-lines.report');
+    Route::post('/purchase-order-lines/data', [InventoryReportingController::class, 'purchaseOrderLinesData'])->name('purchase-order-lines.data');
+    Route::get('/purchase-order-lines/export/csv', [InventoryReportingController::class, 'purchaseOrderLinesExportCsv'])->name('purchase-order-lines.export.csv');
+    Route::get('/purchase-order-lines/export/excel', [InventoryReportingController::class, 'purchaseOrderLinesExportExcel'])->name('purchase-order-lines.export.excel');
+    Route::get('/purchase-order-lines/export/pdf', [InventoryReportingController::class, 'purchaseOrderLinesExportPdf'])->name('purchase-order-lines.export.pdf');
+    Route::get('/purchase-order-lines/print', [InventoryReportingController::class, 'purchaseOrderLinesPrint'])->name('purchase-order-lines.print');
 });
 
 // Inventory Module - Item Master

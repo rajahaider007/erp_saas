@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import axios from 'axios';
 import App from '../../App.jsx';
 import { router, usePage } from '@inertiajs/react';
-import { ArrowLeft, ClipboardList, Home, Plus, Receipt, Trash2 } from 'lucide-react';
+import { ArrowLeft, ClipboardList, FileText, Home, Plus, Receipt, ScrollText, Trash2 } from 'lucide-react';
 import Breadcrumbs from '@/Components/Breadcrumbs';
 import CustomDatePicker from '@/Components/DatePicker/DatePicker';
 import InlineSearchSelect from '@/Components/InlineSearchSelect';
@@ -249,6 +249,17 @@ export default function GrnSupplierInvoiceCreate() {
     [t, tc]
   );
 
+  const openSiPrint = useCallback(
+    (path) => {
+      if (!siPermission('can_view')) {
+        showPermissionDeniedAlert('view', 'supplier invoices (GRN)');
+        return;
+      }
+      window.open(path, '_blank', 'noopener,noreferrer');
+    },
+    [siPermission, showPermissionDeniedAlert]
+  );
+
   const setLineTax = (lineId, value) => {
     setLineTaxById((prev) => ({ ...prev, [lineId]: value }));
   };
@@ -332,88 +343,115 @@ export default function GrnSupplierInvoiceCreate() {
 
   return (
     <App>
-      <div className="page-container form-theme-system">
-        <div className="breadcrumb-header px-4 pt-4">
+      <div className="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700/60">
+        <div className="p-4 md:p-5">
           <Breadcrumbs items={breadcrumbItems} description={tc('description')} />
-        </div>
 
-        <div className="mx-4 mb-4 flex flex-wrap gap-2 items-center justify-between">
-          <h1 className="text-xl font-semibold m-0 flex items-center gap-2">
-            <Receipt className="text-emerald-600" size={22} />
-            {isEdit ? tc('title_edit') : tc('title_new')}
-          </h1>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => router.visit('/inventory/grn-supplier-invoice')}
-          >
-            <ArrowLeft size={18} />
-            {tc('btn_back')}
-          </button>
-        </div>
+          <div className="form-theme-system">
+            <div className="form-container form-container--pr-compact">
+              <div className="form-header form-header--compact mb-4 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h1 className="form-title form-title--compact m-0 flex items-center gap-2">
+                    <Receipt className="text-emerald-600 shrink-0" size={22} />
+                    {isEdit ? tc('title_edit') : tc('title_new')}
+                  </h1>
+                  <p className="form-subtitle mb-0">{tc('description')}</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  {isEdit && invoice?.id ? (
+                    <>
+                      <button
+                        type="button"
+                        className="btn btn-icon btn-secondary"
+                        title={t('inventory.grn_supplier_invoice.list.print_summary')}
+                        onClick={() =>
+                          openSiPrint(`/inventory/grn-supplier-invoice/${invoice.id}/invoice/summary`)
+                        }
+                      >
+                        <FileText size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-icon btn-secondary"
+                        title={t('inventory.grn_supplier_invoice.list.print_detailed')}
+                        onClick={() =>
+                          openSiPrint(`/inventory/grn-supplier-invoice/${invoice.id}/invoice/detailed`)
+                        }
+                      >
+                        <ScrollText size={18} />
+                      </button>
+                    </>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => router.visit('/inventory/grn-supplier-invoice')}
+                  >
+                    <ArrowLeft size={18} />
+                    {tc('btn_back')}
+                  </button>
+                </div>
+              </div>
 
-        {!isEdit && preview_invoice_number && (
-          <p className="mx-4 text-sm text-slate-600 dark:text-slate-400">
-            {tc('preview_number')}: <span className="font-mono font-medium">{preview_invoice_number}</span>
-          </p>
-        )}
-        {isEdit && invoice?.invoice_number && (
-          <p className="mx-4 text-sm text-slate-600 dark:text-slate-400">
-            <span className="font-mono font-medium">{invoice.invoice_number}</span>
-          </p>
-        )}
+              {!isEdit && preview_invoice_number && (
+                <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
+                  {tc('preview_number')}:{' '}
+                  <span className="font-mono font-medium">{preview_invoice_number}</span>
+                </p>
+              )}
+              {isEdit && invoice?.invoice_number && (
+                <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="font-mono font-medium">{invoice.invoice_number}</span>
+                </p>
+              )}
 
-        {missingInventoryGl && (
-          <div className="mx-4 mb-4 p-3 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-100 text-sm">
-            {tp('missing_gl_warn')}
-          </div>
-        )}
-        {missingTaxGl && (
-          <div className="mx-4 mb-4 p-3 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-100 text-sm">
-            {tp('missing_tax_gl_warn')}
-          </div>
-        )}
+              {missingInventoryGl && (
+                <div className="mb-4 p-3 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-100 text-sm">
+                  {tp('missing_gl_warn')}
+                </div>
+              )}
+              {missingTaxGl && (
+                <div className="mb-4 p-3 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-100 text-sm">
+                  {tp('missing_tax_gl_warn')}
+                </div>
+              )}
 
-        {alert && (
-          <div
-            className={`mx-4 mb-4 p-3 rounded-lg border ${
-              alert.type === 'error'
-                ? 'border-red-500/30 bg-red-500/10 text-red-900 dark:text-red-100'
-                : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-900 dark:text-emerald-100'
-            }`}
-            role="status"
-          >
-            <p className="m-0">{alert.message}</p>
-          </div>
-        )}
+              {alert && (
+                <div
+                  className={`mb-4 ${alert.type === 'error' ? 'alert-error-themed' : 'alert-success-themed'}`}
+                  role={alert.type === 'error' ? 'alert' : 'status'}
+                >
+                  <p className="m-0">{alert.message}</p>
+                </div>
+              )}
 
-        <form className="mx-4 mb-8 space-y-6" onSubmit={(e) => e.preventDefault()}>
-          <section className="p-4 rounded-lg border border-slate-200/80 dark:border-slate-700">
-            <h2 className="m-0 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-              {tc('vendor_label')}
-            </h2>
-            <div className="mt-3 max-w-xl">
-              <select
-                className="form-select w-full"
-                value={vendorId}
-                onChange={(e) => {
-                  setVendorId(e.target.value);
-                  setSelectedIds([]);
-                }}
-                disabled={isEdit}
-                required
-              >
-                <option value="">{tc('vendor_placeholder')}</option>
-                {vendorOptions.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </section>
+              <form className="mb-8 space-y-6" onSubmit={(e) => e.preventDefault()}>
+                <section className="mb-4 p-3 rounded-lg border border-slate-200/80 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30">
+                  <h2
+                    className="m-0 text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
+                    {tc('vendor_label')}
+                  </h2>
+                  <div className="max-w-xl mt-3">
+                    <InlineSearchSelect
+                      id="gsi-vendor"
+                      options={vendorOptions}
+                      value={vendorId}
+                      onChange={(v) => {
+                        setVendorId(v);
+                        setSelectedIds([]);
+                      }}
+                      placeholder={tc('vendor_placeholder')}
+                      disabled={isEdit}
+                      searchable
+                      allowClear={!isEdit}
+                      className="w-full"
+                    />
+                  </div>
+                </section>
 
-          <section className="p-4 rounded-lg border border-slate-200/80 dark:border-slate-700">
+                <section className="mb-4 p-3 rounded-lg border border-slate-200/80 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30">
             <h2 className="m-0 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
               {tc('eligible_heading')}
             </h2>
@@ -820,6 +858,9 @@ export default function GrnSupplierInvoiceCreate() {
             </button>
           </div>
         </form>
+            </div>
+          </div>
+        </div>
       </div>
     </App>
   );

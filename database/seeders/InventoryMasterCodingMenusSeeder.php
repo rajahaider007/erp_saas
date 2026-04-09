@@ -91,6 +91,19 @@ class InventoryMasterCodingMenusSeeder extends Seeder
             $now
         ));
 
+        $allMenuIds = array_merge($allMenuIds, $this->seedMenuGroup(
+            $moduleId,
+            'Reports',
+            'inventory-reports',
+            4,
+            [
+                ['menu_name' => 'Inventory Reports', 'route' => '/inventory/reports', 'icon' => 'file-chart-column-increasing', 'sort_order' => 1],
+                ['menu_name' => 'Goods Receipt Register', 'route' => '/inventory/reports/goods-receipt-register', 'icon' => 'clipboard-list', 'sort_order' => 2],
+                ['menu_name' => 'Purchase Order Lines Report', 'route' => '/inventory/reports/purchase-order-lines', 'icon' => 'file-spreadsheet', 'sort_order' => 3],
+            ],
+            $now
+        ));
+
         if (Schema::hasTable('package_modules') && Schema::hasTable('packages')) {
             $packageIds = DB::table('packages')->pluck('id');
             foreach ($packageIds as $packageId) {

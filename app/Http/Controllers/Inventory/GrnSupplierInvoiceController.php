@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Inventory;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\CheckUserPermissions;
 use App\Models\ChartOfAccount;
+use App\Models\Company;
 use App\Models\GoodsReceiptNote;
 use App\Models\GrnSupplierInvoice;
 use App\Models\GrnSupplierInvoiceLineTax;
@@ -13,6 +14,7 @@ use App\Services\GrnPurchaseInvoicePostingService;
 use App\Services\InventoryDocumentNumberService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -566,6 +568,155 @@ class GrnSupplierInvoiceController extends Controller
         return redirect()
             ->route('inventory.grn-supplier-invoice.index')
             ->with('success', __('inventory_messages.grn_supplier_invoice.messages.deleted', ['number' => $number]));
+    }
+
+    public function invoice(Request $request, int $id, string $variant): Response
+    {
+        $this->requirePermission($request, null, 'can_view');
+
+        if (! in_array($variant, ['summary', 'detailed', 'voucher'], true)) {
+            abort(404);
+        }
+
+        $compId = $this->resolvedCompId($request);
+        $locationId = $this->resolvedLocationId($request);
+
+        if (! $compId || ! $locationId) {
+            abort(403);
+        }
+
+        $company = Company::query()
+            ->whereKey($compId)
+            ->first([
+                'company_name',
+                'legal_name',
+                'trading_name',
+                'address_line_1',
+                'address_line_2',
+                'city',
+                'state_province',
+                'postal_code',
+                'country',
+                'phone',
+                'email',
+                'tax_id',
+                'vat_number',
+                'registration_number',
+            ]);
+
+        $invoice = GrnSupplierInvoice::query()
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->whereKey($id)
+            ->with(['vendor:id,account_code,account_name', 'lineTaxes', 'goodsReceiptNotes:id,grn_number,receipt_date,purchase_order_id'])
+            ->firstOrFail();
+
+        if ($variant === 'voucher') {
+            if ($invoice->status !== 'posted' || ! $invoice->posted_transaction_id) {
+                abort(404);
+            }
+
+            $transaction = DB::table('transactions')
+                ->where('id', $invoice->posted_transaction_id)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->first();
+
+            if (! $transaction) {
+                abort(404);
+            }
+
+            $entries = DB::table('transaction_entries as te')
+                ->join('chart_of_accounts as coa', 'coa.id', '=', 'te.account_id')
+                ->where('te.transaction_id', $invoice->posted_transaction_id)
+                ->where('te.comp_id', $compId)
+                ->where('te.location_id', $locationId)
+                ->orderBy('te.line_number')
+                ->get([
+                    'te.line_number',
+                    'te.description',
+                    'te.debit_amount',
+                    'te.credit_amount',
+                    'te.base_debit_amount',
+                    'te.base_credit_amount',
+                    'te.reference',
+                    'coa.account_code',
+                    'coa.account_name',
+                ]);
+
+            return response()->view('inventory.grn_supplier_invoice.invoice_voucher', [
+                'invoice' => $invoice,
+                'company' => $company,
+                'transaction' => $transaction,
+                'entries' => $entries,
+            ]);
+        }
+
+        $grns = $invoice->goodsReceiptNotes()
+            ->orderByDesc('receipt_date')
+            ->orderByDesc('goods_receipt_notes.id')
+            ->with(['purchaseOrder:id,po_number'])
+            ->get();
+
+        $grns->load([
+            'lines.purchaseOrderLine.taxCategory.inputTaxGlAccount',
+            'lines.inventoryItem.inventoryGlAccount',
+            'lines.inventoryItem.taxCategory.inputTaxGlAccount',
+            'vendor:id,account_code,account_name',
+            'purchaseOrder:id,po_number',
+            'receiveLocation:id,location_name',
+            'currency:id,code,name',
+        ]);
+
+        $flatLines = $this->flatLinesForSupplierInvoicePrint($invoice, $grns);
+
+        $postedVoucher = $invoice->posted_transaction_id
+            ? DB::table('transactions')
+                ->where('id', $invoice->posted_transaction_id)
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->first(['voucher_number', 'voucher_date'])
+            : null;
+
+        $view = $variant === 'summary'
+            ? 'inventory.grn_supplier_invoice.invoice_summary'
+            : 'inventory.grn_supplier_invoice.invoice_detailed';
+
+        return response()->view($view, [
+            'invoice' => $invoice,
+            'company' => $company,
+            'grns' => $grns,
+            'flatLines' => $flatLines,
+            'postedVoucher' => $postedVoucher,
+        ]);
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, GoodsReceiptNote>  $grns
+     * @return array<int, array<string, mixed>>
+     */
+    private function flatLinesForSupplierInvoicePrint(GrnSupplierInvoice $invoice, $grns): array
+    {
+        $taxByLineId = $invoice->lineTaxes->keyBy('goods_receipt_note_line_id');
+        $flatLines = [];
+        foreach ($grns as $grn) {
+            $payload = GrnPurchaseInvoicePayloadService::serializeGrn($grn);
+            foreach ($payload['lines'] as $l) {
+                $tid = (int) $l['id'];
+                $override = $taxByLineId->get($tid);
+                $taxAmt = $override !== null
+                    ? (float) $override->tax_amount
+                    : (float) ($l['default_tax_amount'] ?? 0);
+                $net = (float) ($l['line_value'] ?? 0);
+                $flatLines[] = array_merge($l, [
+                    'grn_number' => $grn->grn_number,
+                    'tax_amount' => round($taxAmt, 2),
+                    'line_gross' => round($net + $taxAmt, 2),
+                ]);
+            }
+        }
+
+        return $flatLines;
     }
 
     /**

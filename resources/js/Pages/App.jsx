@@ -6,6 +6,7 @@ import Header from '@/Components/Layout/Header';
 import Sidebar from '@/Components/Layout/Sidebar';
 import Footer from '@/Components/Layout/Footer';
 import LicenseAlert from '@/Components/LicenseAlert';
+import { RahjAiAssistantProvider } from '@/Contexts/RahjAiAssistantContext';
 
 // ThemeWrapper component to handle dark mode class
 const ThemeWrapper = ({ children }) => {
@@ -46,18 +47,20 @@ export default function App({ children }) {
   return (
     <LayoutProvider>
       <ThemeWrapper>
-        <AppHead />
-        <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-          <Header />
-          <div className="flex min-h-0 flex-1">
-            <Sidebar />
-            <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4">
-              {children}
-            </main>
+        <RahjAiAssistantProvider>
+          <AppHead />
+          <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+            <Header />
+            <div className="flex min-h-0 flex-1">
+              <Sidebar />
+              <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4">
+                {children}
+              </main>
+            </div>
+            <Footer />
+            <LicenseAlert />
           </div>
-          <Footer />
-          <LicenseAlert />
-        </div>
+        </RahjAiAssistantProvider>
       </ThemeWrapper>
     </LayoutProvider>
   );

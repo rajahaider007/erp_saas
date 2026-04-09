@@ -1,5 +1,6 @@
 import React from 'react';
 import { LayoutProvider, useLayout } from '../Contexts/LayoutContext';
+import { RahjAiAssistantProvider } from '../Contexts/RahjAiAssistantContext';
 
 import Header from '../Components/Layout/Header';
 import Sidebar from '../Components/Layout/Sidebar';
@@ -8,9 +9,11 @@ import Footer from '../Components/Layout/Footer';
 const AppLayout = ({ children, title }) => {
   return (
     <LayoutProvider>
-      <AppContent title={title}>
-        {children}
-      </AppContent>
+      <RahjAiAssistantProvider>
+        <AppContent title={title}>
+          {children}
+        </AppContent>
+      </RahjAiAssistantProvider>
     </LayoutProvider>
   );
 };

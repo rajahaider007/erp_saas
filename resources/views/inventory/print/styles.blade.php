@@ -176,6 +176,8 @@
         color: #64748b;
         margin: 0 0 12px;
     }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    table.data td .sub { font-size: 8px; color: #64748b; margin-top: 2px; }
     .footer-audit {
         margin-top: 18px;
         padding-top: 12px;

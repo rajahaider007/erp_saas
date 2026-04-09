@@ -1624,6 +1624,18 @@ html.dark .pagination-btn:hover:not(:disabled) {
     border-color: #b91c1c;
 }
 
+/* Print voucher / GL — indigo */
+.action-btn.print-voucher {
+    color: #4f46e5;
+    border-color: #4f46e5;
+}
+
+.action-btn.print-voucher:hover {
+    background: #eef2ff;
+    color: #4338ca;
+    border-color: #4338ca;
+}
+
 /* Filter Badge Styles */
 .filter-badge {
     display: inline-flex;
@@ -1646,13 +1658,13 @@ html.dark .pagination-btn:hover:not(:disabled) {
 }
 
 /* Action button dark styling: follow app theme (html.dark), not OS prefers-color-scheme */
-html.dark .action-btn:not(.view):not(.edit):not(.copy):not(.delete):not(.rights):not(.print-summary):not(.print-detailed) {
+html.dark .action-btn:not(.view):not(.edit):not(.copy):not(.delete):not(.rights):not(.print-summary):not(.print-detailed):not(.print-voucher) {
     background: #374151;
     color: #9ca3af;
     border-color: #4b5563;
 }
 
-html.dark .action-btn:not(.view):not(.edit):not(.copy):not(.delete):not(.rights):not(.print-summary):not(.print-detailed):hover {
+html.dark .action-btn:not(.view):not(.edit):not(.copy):not(.delete):not(.rights):not(.print-summary):not(.print-detailed):not(.print-voucher):hover {
     background: #4b5563;
     color: #f9fafb;
     border-color: #6b7280;
@@ -1678,6 +1690,17 @@ html.dark .action-btn.print-detailed:hover {
     background: rgba(248, 113, 113, 0.1);
     color: #fca5a5;
     border-color: #fca5a5;
+}
+
+html.dark .action-btn.print-voucher {
+    color: #a5b4fc;
+    border-color: #a5b4fc;
+}
+
+html.dark .action-btn.print-voucher:hover {
+    background: rgba(99, 102, 241, 0.12);
+    color: #c7d2fe;
+    border-color: #c7d2fe;
 }
 
 /* Base Theme Variables */

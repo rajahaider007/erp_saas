@@ -330,10 +330,27 @@ trait CheckUserPermissions
             'inventory.grn-supplier-invoice.store' => '/inventory/grn-supplier-invoice',
             'inventory.grn-supplier-invoice.eligible-grns' => '/inventory/grn-supplier-invoice',
             'inventory.grn-supplier-invoice.preview-lines' => '/inventory/grn-supplier-invoice',
+            'inventory.grn-supplier-invoice.invoice' => '/inventory/grn-supplier-invoice',
             'inventory.grn-supplier-invoice.edit' => '/inventory/grn-supplier-invoice',
             'inventory.grn-supplier-invoice.update' => '/inventory/grn-supplier-invoice',
             'inventory.grn-supplier-invoice.destroy' => '/inventory/grn-supplier-invoice',
             'inventory.grn-supplier-invoice.post' => '/inventory/grn-supplier-invoice',
+
+            'inventory.reports.index' => '/inventory/reports',
+            'inventory.reports.goods-receipt-register' => '/inventory/reports/goods-receipt-register',
+            'inventory.reports.goods-receipt-register.report' => '/inventory/reports/goods-receipt-register',
+            'inventory.reports.goods-receipt-register.data' => '/inventory/reports/goods-receipt-register',
+            'inventory.reports.goods-receipt-register.export.csv' => '/inventory/reports/goods-receipt-register',
+            'inventory.reports.goods-receipt-register.export.excel' => '/inventory/reports/goods-receipt-register',
+            'inventory.reports.goods-receipt-register.export.pdf' => '/inventory/reports/goods-receipt-register',
+            'inventory.reports.goods-receipt-register.print' => '/inventory/reports/goods-receipt-register',
+            'inventory.reports.purchase-order-lines' => '/inventory/reports/purchase-order-lines',
+            'inventory.reports.purchase-order-lines.report' => '/inventory/reports/purchase-order-lines',
+            'inventory.reports.purchase-order-lines.data' => '/inventory/reports/purchase-order-lines',
+            'inventory.reports.purchase-order-lines.export.csv' => '/inventory/reports/purchase-order-lines',
+            'inventory.reports.purchase-order-lines.export.excel' => '/inventory/reports/purchase-order-lines',
+            'inventory.reports.purchase-order-lines.export.pdf' => '/inventory/reports/purchase-order-lines',
+            'inventory.reports.purchase-order-lines.print' => '/inventory/reports/purchase-order-lines',
         ];
 
         return $routeMappings[$routeName] ?? null;

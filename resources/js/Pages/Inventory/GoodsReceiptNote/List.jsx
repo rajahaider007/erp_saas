@@ -62,6 +62,46 @@ export default function GoodsReceiptNoteList() {
     [auth?.user?.role, hasRoutePermission]
   );
 
+  const showNoFormRights = useCallback(() => {
+    void Swal.fire({
+      ...swalThemed,
+      icon: 'warning',
+      title: t('common.flash.warning_title'),
+      text: tl('no_form_rights'),
+      confirmButtonText: t('common.flash.ok'),
+    });
+  }, [t, tl]);
+
+  const goCreateGrn = useCallback(() => {
+    if (!grnPermission('can_add')) {
+      showNoFormRights();
+      return;
+    }
+    router.visit('/inventory/goods-receipt-note/create');
+  }, [grnPermission, showNoFormRights]);
+
+  const goEditGrn = useCallback(
+    (id) => {
+      if (!grnPermission('can_edit')) {
+        showNoFormRights();
+        return;
+      }
+      router.visit(`/inventory/goods-receipt-note/${id}/edit`);
+    },
+    [grnPermission, showNoFormRights]
+  );
+
+  const openGrnInvoice = useCallback(
+    (path) => {
+      if (!grnPermission('can_view')) {
+        showNoFormRights();
+        return;
+      }
+      window.open(path, '_blank', 'noopener,noreferrer');
+    },
+    [grnPermission, showNoFormRights]
+  );
+
   const paginated =
     grns && typeof grns === 'object' && Array.isArray(grns.data) ? grns : null;
 
@@ -217,6 +257,10 @@ export default function GoodsReceiptNoteList() {
   };
 
   const submitQcOne = async (row) => {
+    if (!grnPermission('can_edit')) {
+      showNoFormRights();
+      return;
+    }
     const res = await Swal.fire({
       ...swalThemed,
       title: tl('submit_qc'),
@@ -239,6 +283,10 @@ export default function GoodsReceiptNoteList() {
   };
 
   const deleteOne = async (row) => {
+    if (!grnPermission('can_delete')) {
+      showNoFormRights();
+      return;
+    }
     const res = await Swal.fire({
       ...swalThemed,
       title: tl('swal_delete_title'),
@@ -394,8 +442,8 @@ export default function GoodsReceiptNoteList() {
           <button
             type="button"
             className="btn btn-primary"
-            onClick={() => router.visit('/inventory/goods-receipt-note/create')}
-            disabled={!grnPermission('can_add')}
+            onClick={goCreateGrn}
+            disabled={loading}
           >
             <Plus size={18} />
             {tl('new_grn')}
@@ -414,8 +462,8 @@ export default function GoodsReceiptNoteList() {
                 <button
                   type="button"
                   className="btn btn-primary mt-4"
-                  onClick={() => router.visit('/inventory/goods-receipt-note/create')}
-                  disabled={!grnPermission('can_add')}
+                  onClick={goCreateGrn}
+                  disabled={loading}
                 >
                   <Plus size={20} />
                   {tl('new_grn')}
@@ -479,8 +527,8 @@ export default function GoodsReceiptNoteList() {
                                     type="button"
                                     className="action-btn edit"
                                     title={tl('edit')}
-                                    onClick={() => router.visit(`/inventory/goods-receipt-note/${row.id}/edit`)}
-                                    disabled={loading || !grnPermission('can_edit')}
+                                    onClick={() => goEditGrn(row.id)}
+                                    disabled={loading}
                                   >
                                     <Edit3 size={16} />
                                   </button>
@@ -489,7 +537,7 @@ export default function GoodsReceiptNoteList() {
                                     className="action-btn copy"
                                     title={tl('submit_qc')}
                                     onClick={() => void submitQcOne(row)}
-                                    disabled={loading || !grnPermission('can_edit')}
+                                    disabled={loading}
                                   >
                                     <CheckCircle size={16} />
                                   </button>
@@ -498,7 +546,7 @@ export default function GoodsReceiptNoteList() {
                                     className="action-btn delete"
                                     title={tl('delete')}
                                     onClick={() => void deleteOne(row)}
-                                    disabled={loading || !grnPermission('can_delete')}
+                                    disabled={loading}
                                   >
                                     <Trash2 size={16} />
                                   </button>
@@ -509,13 +557,9 @@ export default function GoodsReceiptNoteList() {
                                 className="action-btn print-summary"
                                 title={tl('invoice_summary')}
                                 onClick={() =>
-                                  window.open(
-                                    `/inventory/goods-receipt-note/${row.id}/invoice/summary`,
-                                    '_blank',
-                                    'noopener,noreferrer'
-                                  )
+                                  openGrnInvoice(`/inventory/goods-receipt-note/${row.id}/invoice/summary`)
                                 }
-                                disabled={loading || !grnPermission('can_view')}
+                                disabled={loading}
                               >
                                 <FileText size={16} />
                               </button>
@@ -524,13 +568,9 @@ export default function GoodsReceiptNoteList() {
                                 className="action-btn print-detailed"
                                 title={tl('invoice_detailed')}
                                 onClick={() =>
-                                  window.open(
-                                    `/inventory/goods-receipt-note/${row.id}/invoice/detailed`,
-                                    '_blank',
-                                    'noopener,noreferrer'
-                                  )
+                                  openGrnInvoice(`/inventory/goods-receipt-note/${row.id}/invoice/detailed`)
                                 }
-                                disabled={loading || !grnPermission('can_view')}
+                                disabled={loading}
                               >
                                 <ScrollText size={16} />
                               </button>

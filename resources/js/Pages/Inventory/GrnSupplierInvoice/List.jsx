@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import App from '../../App.jsx';
 import { router, usePage } from '@inertiajs/react';
-import { ClipboardList, Home, Plus, Search, Edit3, Trash2, Receipt } from 'lucide-react';
+import { ClipboardList, Home, Plus, Search, Edit3, Trash2, Receipt, FileText, ScrollText, BookOpen } from 'lucide-react';
 import Swal from 'sweetalert2';
 import Breadcrumbs from '@/Components/Breadcrumbs';
 import { useTranslations } from '@/hooks/useTranslations';
@@ -40,6 +40,60 @@ export default function GrnSupplierInvoiceList() {
       return hasRoutePermission('/inventory/grn-supplier-invoice', perm);
     },
     [auth?.user?.role, hasRoutePermission]
+  );
+
+  const showNoFormRights = useCallback(() => {
+    void Swal.fire({
+      ...swalThemed,
+      icon: 'warning',
+      title: t('common.flash.warning_title'),
+      text: tl('no_form_rights'),
+      confirmButtonText: t('common.flash.ok'),
+    });
+  }, [t, tl]);
+
+  const showPostedNotEditable = useCallback(() => {
+    void Swal.fire({
+      ...swalThemed,
+      icon: 'info',
+      title: t('common.flash.warning_title'),
+      text: tl('posted_not_editable'),
+      confirmButtonText: t('common.flash.ok'),
+    });
+  }, [t, tl]);
+
+  const goNewInvoice = useCallback(() => {
+    if (!siPermission('can_add')) {
+      showNoFormRights();
+      return;
+    }
+    router.visit('/inventory/grn-supplier-invoice/create');
+  }, [siPermission, showNoFormRights]);
+
+  const openSiPrint = useCallback(
+    (path) => {
+      if (!siPermission('can_view')) {
+        showNoFormRights();
+        return;
+      }
+      window.open(path, '_blank', 'noopener,noreferrer');
+    },
+    [siPermission, showNoFormRights]
+  );
+
+  const goEditInvoice = useCallback(
+    (row) => {
+      if (row.status !== 'draft') {
+        showPostedNotEditable();
+        return;
+      }
+      if (!siPermission('can_edit')) {
+        showNoFormRights();
+        return;
+      }
+      router.visit(`/inventory/grn-supplier-invoice/${row.id}/edit`);
+    },
+    [siPermission, showNoFormRights, showPostedNotEditable]
   );
 
   const paginated =
@@ -166,6 +220,10 @@ export default function GrnSupplierInvoiceList() {
   };
 
   const deleteOne = async (row) => {
+    if (!siPermission('can_delete')) {
+      showNoFormRights();
+      return;
+    }
     const res = await Swal.fire({
       ...swalThemed,
       title: tl('swal_delete_title'),
@@ -234,8 +292,8 @@ export default function GrnSupplierInvoiceList() {
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => router.visit('/inventory/grn-supplier-invoice/create')}
-                disabled={!siPermission('can_add')}
+                onClick={goNewInvoice}
+                disabled={loading}
               >
                 <Plus size={18} />
                 {tl('new_invoice')}
@@ -280,27 +338,60 @@ export default function GrnSupplierInvoiceList() {
                         </td>
                         <td className="text-end">
                           <div className="actions-cell flex flex-wrap gap-1 justify-end">
+                            <button
+                              type="button"
+                              className="action-btn print-summary"
+                              title={tl('print_summary')}
+                              onClick={() =>
+                                openSiPrint(`/inventory/grn-supplier-invoice/${row.id}/invoice/summary`)
+                              }
+                              disabled={loading}
+                            >
+                              <FileText size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              className="action-btn print-detailed"
+                              title={tl('print_detailed')}
+                              onClick={() =>
+                                openSiPrint(`/inventory/grn-supplier-invoice/${row.id}/invoice/detailed`)
+                              }
+                              disabled={loading}
+                            >
+                              <ScrollText size={16} />
+                            </button>
+                            {row.status === 'posted' && row.posted_transaction_id ? (
+                              <button
+                                type="button"
+                                className="action-btn print-voucher"
+                                title={tl('print_voucher')}
+                                onClick={() =>
+                                  openSiPrint(`/inventory/grn-supplier-invoice/${row.id}/invoice/voucher`)
+                                }
+                                disabled={loading}
+                              >
+                                <BookOpen size={16} />
+                              </button>
+                            ) : null}
+                            <button
+                              type="button"
+                              className="action-btn edit"
+                              title={tl('edit')}
+                              onClick={() => goEditInvoice(row)}
+                              disabled={loading}
+                            >
+                              <Edit3 size={16} />
+                            </button>
                             {row.status === 'draft' && (
-                              <>
-                                <button
-                                  type="button"
-                                  className="action-btn edit"
-                                  title={tl('edit')}
-                                  onClick={() => router.visit(`/inventory/grn-supplier-invoice/${row.id}/edit`)}
-                                  disabled={loading || !siPermission('can_edit')}
-                                >
-                                  <Edit3 size={16} />
-                                </button>
-                                <button
-                                  type="button"
-                                  className="action-btn delete"
-                                  title={tl('delete')}
-                                  onClick={() => void deleteOne(row)}
-                                  disabled={loading || !siPermission('can_delete')}
-                                >
-                                  <Trash2 size={16} />
-                                </button>
-                              </>
+                              <button
+                                type="button"
+                                className="action-btn delete"
+                                title={tl('delete')}
+                                onClick={() => void deleteOne(row)}
+                                disabled={loading}
+                              >
+                                <Trash2 size={16} />
+                              </button>
                             )}
                           </div>
                         </td>

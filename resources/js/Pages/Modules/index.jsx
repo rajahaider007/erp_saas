@@ -26,7 +26,8 @@ import {
   Layout,
   Monitor,
   LogOut,
-  User
+  User,
+  Sparkles
 } from 'lucide-react';
 
 const ModulesPage = () => {
@@ -266,13 +267,20 @@ const ModulesPage = () => {
                 </div>
               </div>
             </div>
-            <div className="flex items-center justify-center sm:justify-end gap-3">
+            <div className="flex items-center justify-center sm:justify-end gap-3 flex-wrap">
               {user && (
                 <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200 text-sm">
                   <User className="h-4 w-4" />
                   <span className="font-medium">{user.name || user.email || user.loginid || t('common.labels.user')}</span>
                 </div>
               )}
+              <Link
+                href="/rahj-ai"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium shadow-md hover:shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-all"
+              >
+                <Sparkles className="h-4 w-4" />
+                {t('rahj_ai.portal.title')}
+              </Link>
               <button
                 type="button"
                 onClick={() => router.post('/logout')}

@@ -1,0 +1,28 @@
+{
+  "portal": {
+    "title": "RAHJ AI",
+    "subtitle": "Your ERP assistant portal — guidance and answers tailored to this system.",
+    "open_assistant": "Open assistant",
+    "open_drawer": "Side panel",
+    "chat_heading": "Chat",
+    "chat_subheading": "Same thread continues in the side panel if you open it from here or elsewhere.",
+    "reply_pending": "The assistant backend is not connected yet — your message is saved in this session only.",
+    "composer_hint": "Enter to send · Shift+Enter for new line",
+    "suggestion_reports": "How do I open inventory reports?",
+    "suggestion_navigation": "Where do I add a supplier or customer?",
+    "suggestion_capabilities": "What can RAHJ AI help with?",
+    "card_what_title": "What is RAHJ AI?",
+    "card_what_body": "A dedicated space for help with forms, reports, and workflows. Step-by-step guidance will connect here in a later phase.",
+    "card_privacy_title": "Your data",
+    "card_privacy_body": "When live features are enabled, answers will respect your company, location, and permissions — same as the rest of the ERP.",
+    "bubble_aria": "Open RAHJ AI assistant",
+    "panel_title": "RAHJ AI",
+    "panel_subtitle": "Assistant",
+    "close_panel": "Close",
+    "empty_title": "Start a conversation",
+    "empty_hint": "Guidance and smart replies will appear here once the assistant is connected.",
+    "input_placeholder": "Type a message…",
+    "send": "Send",
+    "coming_soon": "Coming soon"
+  }
+}
