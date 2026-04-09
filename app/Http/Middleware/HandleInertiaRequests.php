@@ -63,6 +63,10 @@ class HandleInertiaRequests extends Middleware
                 'translations' => $loader->loadForLocale($locale),
                 'supportedLocales' => TranslationLoaderService::getSupportedLocales(),
                 'attachmentPublicUrlMode' => config('filesystems.attachment_public_url_mode', 'route'),
+                'flash' => [
+                    'success' => $request->session()->get('success'),
+                    'error' => $request->session()->get('error'),
+                ],
             ];
         }
         
@@ -249,6 +253,10 @@ class HandleInertiaRequests extends Middleware
             'translations' => $loader->loadForLocale($locale),
             'supportedLocales' => TranslationLoaderService::getSupportedLocales(),
             'attachmentPublicUrlMode' => config('filesystems.attachment_public_url_mode', 'route'),
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+            ],
         ];
 
         // Add fiscal year if user has a company

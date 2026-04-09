@@ -5,6 +5,7 @@ import {
   Type, Folder, Image, ToggleLeft, ToggleRight
 } from 'lucide-react';
 import InlineSearchSelect from './InlineSearchSelect';
+import CustomDatePicker from './DatePicker/DatePicker';
 import { useTranslations } from '@/hooks/useTranslations';
 
 // Generalized Form Component
@@ -59,7 +60,9 @@ const GeneralizedForm = forwardRef(function GeneralizedForm({
       const cur = String(prev[field] ?? '').trim();
       if (cur === '' || cur === lastAutoPartyCodeRef.current) {
         lastAutoPartyCodeRef.current = v;
-        return { ...prev, [field]: v };
+        const next = { ...prev, [field]: v };
+        formDataRef.current = next;
+        return next;
       }
       return prev;
     });
@@ -86,6 +89,7 @@ const GeneralizedForm = forwardRef(function GeneralizedForm({
         }
       }
 
+      formDataRef.current = next;
       return next;
     });
 
@@ -95,7 +99,11 @@ const GeneralizedForm = forwardRef(function GeneralizedForm({
   };
   const handleImageSelect = (fieldName, file) => {
     if (file && file.type.startsWith('image/')) {
-      setFormData(prev => ({ ...prev, [fieldName]: file }));
+      setFormData((prev) => {
+        const next = { ...prev, [fieldName]: file };
+        formDataRef.current = next;
+        return next;
+      });
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -131,7 +139,11 @@ const GeneralizedForm = forwardRef(function GeneralizedForm({
   };
 
   const removeImage = (fieldName) => {
-    setFormData(prev => ({ ...prev, [fieldName]: null }));
+    setFormData((prev) => {
+      const next = { ...prev, [fieldName]: null };
+      formDataRef.current = next;
+      return next;
+    });
     setImagePreviews(prev => ({ ...prev, [fieldName]: null }));
     if (fileInputRefs.current[fieldName]) {
       fileInputRefs.current[fieldName].value = '';
@@ -214,6 +226,29 @@ const GeneralizedForm = forwardRef(function GeneralizedForm({
         : !!field.disabled;
 
     switch (field.type) {
+      case 'datepicker': {
+        const inputDisabled =
+          typeof field.resolveDisabled === 'function'
+            ? !!field.resolveDisabled(formData)
+            : !!field.disabled;
+        return (
+          <div className="input-group input-group--datepicker" key={field.name}>
+            <label className="input-label">{field.label}</label>
+            <div className="w-full min-w-0 overflow-visible">
+              <CustomDatePicker
+                selected={fieldValue ? new Date(fieldValue) : null}
+                onChange={(date) => handleInputChange(field.name, date ? date.toISOString().split('T')[0] : '', field)}
+                type="date"
+                placeholder={field.placeholder || t('common.form.select_date')}
+                className={`form-input w-full text-sm min-h-0 py-2.5 px-3.5 rounded-[12px] ${field.className || ''}`.trim()}
+                disabled={inputDisabled}
+                required={field.required}
+                isClearable={field.required ? false : field.isClearable !== false}
+              />
+            </div>
+          </div>
+        );
+      }
       case 'text':
       case 'email':
       case 'tel':

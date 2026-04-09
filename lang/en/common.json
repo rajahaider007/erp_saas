@@ -61,6 +61,7 @@
     "image_formats_hint": "PNG, JPG, JPEG up to 10MB",
     "preview_alt": "Preview",
     "select_an_option": "Select an option...",
+    "select_date": "Select date",
     "search_placeholder": "Search...",
     "clear_selection": "Clear",
     "no_options_found": "No options found"

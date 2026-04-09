@@ -17,6 +17,7 @@
     "system_users": "Users",
     "system_menus": "Menus",
     "system_companies": "Companies",
-    "system_roles": "Roles"
+    "system_roles": "Roles",
+    "inventory_purchase_requisition_create": "Purchase Requisition"
   }
 }

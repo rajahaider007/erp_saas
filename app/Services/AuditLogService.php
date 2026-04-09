@@ -469,6 +469,50 @@ class AuditLogService
     }
 
     /**
+     * Log purchase requisition (inventory)
+     */
+    public static function logPurchaseRequisition(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        $label = $data['pr_number'] ?? $oldData['pr_number'] ?? '';
+
+        return self::log(
+            $action,
+            'Inventory',
+            'purchase_requisitions',
+            $recordId,
+            $oldData,
+            $data,
+            "Purchase Requisition {$action}: {$label}"
+        );
+    }
+
+    /**
+     * Log purchase order (inventory)
+     */
+    public static function logPurchaseOrder(
+        string $action,
+        int $recordId,
+        array $data,
+        ?array $oldData = null
+    ): bool {
+        $label = $data['po_number'] ?? $oldData['po_number'] ?? '';
+
+        return self::log(
+            $action,
+            'Inventory',
+            'purchase_orders',
+            $recordId,
+            $oldData,
+            $data,
+            "Purchase Order {$action}: {$label}"
+        );
+    }
+
+    /**
      * Log menu operation
      */
     public static function logMenu(

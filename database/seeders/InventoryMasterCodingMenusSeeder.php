@@ -80,11 +80,13 @@ class InventoryMasterCodingMenusSeeder extends Seeder
 
         $allMenuIds = array_merge($allMenuIds, $this->seedMenuGroup(
             $moduleId,
-            'Procurement',
-            'inventory-procurement',
+            'Purchases',
+            'purchases',
             3,
             [
-                ['menu_name' => 'Purchase Requisition', 'route' => '/inventory/purchase-requisition/create', 'icon' => 'shopping-cart', 'sort_order' => 1],
+                ['menu_name' => 'Purchase Requisition', 'route' => '/inventory/purchase-requisition', 'icon' => 'shopping-cart', 'sort_order' => 1],
+                ['menu_name' => 'Purchase Order', 'route' => '/inventory/purchase-order', 'icon' => 'file-text', 'sort_order' => 2],
+                ['menu_name' => 'Document Number Configuration', 'route' => '/inventory/document-number-configuration', 'icon' => 'hash', 'sort_order' => 3],
             ],
             $now
         ));

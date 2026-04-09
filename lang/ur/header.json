@@ -1,6 +1,9 @@
 {
     "dashboard": "ڈیش بورڈ",
     "erp_modules": "ERP ماڈیولز",
+    "module": "ماڈیول",
+    "system_home": "سسٹم",
+    "switch_module": "کاروباری ماڈیول تبدیل کریں",
     "settings": "ترتیبات",
     "storage": "سٹوریج",
     "language": "زبان",

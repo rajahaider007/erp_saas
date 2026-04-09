@@ -20,8 +20,11 @@ const CustomDatePicker = ({
   id,
   name,
   required = false,
+  /** Render calendar in #datepicker-portal (escapes overflow:hidden ancestors). Default true. */
+  withPortal: withPortalProp,
   ...props
 }) => {
+  const withPortal = withPortalProp !== undefined ? withPortalProp : true;
   const [isMobile, setIsMobile] = useState(false);
 
   // Detect mobile device
@@ -127,11 +130,11 @@ const CustomDatePicker = ({
         // Better UX
         todayButton="Today"
         showWeekNumbers={false}
-        // Mobile optimization
-        withPortal={isMobile}
+        withPortal={withPortal}
         portalId="datepicker-portal"
         showPopperArrow={!isMobile}
         popperPlacement={isMobile ? "bottom" : "bottom-start"}
+        popperClassName="react-datepicker-popper--high-z"
         // Keyboard navigation
         strictParsing={false}
         readOnly={false}

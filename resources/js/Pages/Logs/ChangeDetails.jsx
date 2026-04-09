@@ -2,13 +2,11 @@ import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
 import AppLayout from '../../Layouts/AppLayout';
-import { ArrowLeft, Clock, User, FileText, Eye, Calendar, MapPin, Shield, Database, Hash, Building } from 'lucide-react';
+import { ArrowLeft, Clock, User, FileText, Eye, MapPin, Shield, Database, Hash, Building } from 'lucide-react';
 
 export default function ChangeDetails({ log }) {
     const { t } = useTranslations();
-    const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleString();
-    };
+    const formatDate = (dateString) => new Date(dateString).toLocaleString();
 
     const formatJsonData = (data) => {
         if (!data) return 'No data';
@@ -37,29 +35,30 @@ export default function ChangeDetails({ log }) {
 
     const getActionBadgeClass = (actionType) => {
         const classes = {
-            'CREATE': 'bg-green-100 text-green-700 border-green-300',
-            'UPDATE': 'bg-blue-100 text-blue-700 border-blue-300',
-            'DELETE': 'bg-red-100 text-red-700 border-red-300',
-            'POST': 'bg-purple-100 text-purple-700 border-purple-300',
-            'UNPOST': 'bg-orange-100 text-orange-700 border-orange-300',
-            'APPROVE': 'bg-emerald-100 text-emerald-700 border-emerald-300',
-            'REJECT': 'bg-rose-100 text-rose-700 border-rose-300'
+            CREATE: 'bg-green-100 text-green-700 border-green-300',
+            UPDATE: 'bg-blue-100 text-blue-700 border-blue-300',
+            DELETE: 'bg-red-100 text-red-700 border-red-300',
+            POST: 'bg-purple-100 text-purple-700 border-purple-300',
+            UNPOST: 'bg-orange-100 text-orange-700 border-orange-300',
+            APPROVE: 'bg-emerald-100 text-emerald-700 border-emerald-300',
+            REJECT: 'bg-rose-100 text-rose-700 border-rose-300',
         };
         return classes[actionType] || 'bg-gray-100 text-gray-700 border-gray-300';
     };
+
+    const changedFieldsObj = parseJsonData(log.changed_fields) || {};
 
     return (
         <AppLayout>
             <Head title={t('logs.change_details.change_details')} />
 
             <div className="form-theme-system change-details-container min-h-screen p-6">
-                {/* Header */}
                 <div className="manager-header">
                     <div className="header-content">
-                        <div className="header-info">
-                            <Link 
-                                href={route('logs.activity')} 
-                                className="back-btn"
+                        <div className="header-info" style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                            <Link
+                                href={route('logs.activity')}
+                                className="cd-back"
                                 title={t('logs.change_details.back_to_activity_logs')}
                             >
                                 <ArrowLeft size={20} />
@@ -67,153 +66,126 @@ export default function ChangeDetails({ log }) {
                             <div className="header-text">
                                 <h1 className="header-title">
                                     <FileText className="header-icon" size={24} />
-                                    Change Details
+                                    {t('logs.change_details.change_details')}
                                 </h1>
-                                <p className="header-subtitle">
-                                    Detailed view of activity log entry
-                                </p>
+                                <p className="header-subtitle">{t('logs.change_details.detailed_subtitle')}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Professional Details Layout */}
                 <div className="main-content">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Basic Information Card */}
-                        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                            <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
-                                <h3 className="flex items-center gap-3 text-lg font-semibold text-white">
-                                    <Eye size={20} />
-                                    Basic Information
-                                </h3>
+                        <div className="cd-panel">
+                            <div className="cd-panel__head cd-panel__head--blue">
+                                <Eye size={20} />
+                                {t('logs.change_details.basic_information')}
                             </div>
-                            <div className="p-6 space-y-5">
-                                <div className="flex items-start gap-4 pb-4 border-b border-gray-100">
-                                    <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
-                                        <Clock size={16} className="text-blue-600" />
-                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.timestamp')}</span>
+                            <div className="cd-panel__body cd-panel__body--stack">
+                                <div className="cd-row">
+                                    <div className="cd-label">
+                                        <Clock size={16} />
+                                        <span>{t('logs.change_details.timestamp')}</span>
                                     </div>
-                                    <div className="text-sm text-gray-700 font-medium">
-                                        {formatDate(log.created_at)}
-                                    </div>
+                                    <div className="cd-value cd-value--strong">{formatDate(log.created_at)}</div>
                                 </div>
-                                
-                                <div className="flex items-start gap-4 pb-4 border-b border-gray-100">
-                                    <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
-                                        <User size={16} className="text-blue-600" />
-                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.user')}</span>
+
+                                <div className="cd-row">
+                                    <div className="cd-label">
+                                        <User size={16} />
+                                        <span>{t('logs.change_details.user')}</span>
                                     </div>
-                                    <div className="text-sm text-gray-700">
-                                        <div className="font-semibold text-gray-800">{log.user_name || 'System Administrator'}</div>
-                                        <div className="text-xs text-gray-600">{log.user_email || 'admin@erpsystem.com'}</div>
+                                    <div>
+                                        <div className="cd-value cd-value--strong">{log.user_name || 'System'}</div>
+                                        <div className="cd-value cd-value--small">{log.user_email || '—'}</div>
                                     </div>
                                 </div>
 
-                                <div className="flex items-start gap-4 pb-4 border-b border-gray-100">
-                                    <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
-                                        <FileText size={16} className="text-blue-600" />
-                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.action')}</span>
+                                <div className="cd-row">
+                                    <div className="cd-label">
+                                        <FileText size={16} />
+                                        <span>{t('logs.change_details.action')}</span>
                                     </div>
                                     <div>
-                                        <span className={`px-3 py-1 rounded-lg text-sm font-semibold border ${getActionBadgeClass(log.action_type)}`}>
+                                        <span className={`px-3 py-1 rounded-lg text-sm font-semibold border inline-block ${getActionBadgeClass(log.action_type)}`}>
                                             {log.action_type}
                                         </span>
                                     </div>
                                 </div>
 
-                                <div className="flex items-start gap-4 pb-4 border-b border-gray-100">
-                                    <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
-                                        <Building size={16} className="text-blue-600" />
-                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.module')}</span>
+                                <div className="cd-row">
+                                    <div className="cd-label">
+                                        <Building size={16} />
+                                        <span>{t('logs.change_details.module')}</span>
                                     </div>
                                     <div>
-                                        <span className="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 text-sm font-semibold border border-blue-200">
+                                        <span className="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-200 text-sm font-semibold border border-blue-200 dark:border-blue-800 inline-block">
                                             {log.module_name || 'N/A'}
                                         </span>
                                     </div>
                                 </div>
 
-                                <div className="flex items-start gap-4">
-                                    <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
-                                        <MapPin size={16} className="text-blue-600" />
-                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.ip_address')}</span>
+                                <div className="cd-row">
+                                    <div className="cd-label">
+                                        <MapPin size={16} />
+                                        <span>{t('logs.change_details.ip_address')}</span>
                                     </div>
                                     <div>
-                                        <code className="bg-gray-100 px-3 py-1 rounded text-sm text-gray-800 font-mono border">
-                                            {log.ip_address || 'N/A'}
-                                        </code>
+                                        <code className="cd-code">{log.ip_address || 'N/A'}</code>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Description Card */}
-                        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                            <div className="bg-gradient-to-r from-green-600 to-blue-600 px-6 py-4">
-                                <h3 className="flex items-center gap-3 text-lg font-semibold text-white">
-                                    <FileText size={20} />
-                                    Description & Details
-                                </h3>
+                        <div className="cd-panel">
+                            <div className="cd-panel__head cd-panel__head--green">
+                                <FileText size={20} />
+                                {t('logs.change_details.description_details')}
                             </div>
-                            <div className="p-6">
-                                <div className="space-y-4">
-                                    <p className="text-gray-800 leading-relaxed font-medium">
-                                        {log.description || 'No description available'}
-                                    </p>
-                                    <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-                                        <div className="flex items-center gap-2">
-                                            <Database size={16} className="text-gray-600" />
-                                            <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.table')}</span>
-                                            <span className="text-sm text-gray-700 font-mono">{log.table_name || 'N/A'}</span>
+                            <div className="cd-panel__body">
+                                <div className="cd-stack-sm">
+                                    <p className="cd-lead">{log.description || t('logs.change_details.no_description')}</p>
+                                    <div className="cd-inset">
+                                        <div className="cd-inset-row">
+                                            <Database size={16} />
+                                            <span className="cd-value cd-value--strong">{t('logs.change_details.table')}</span>
+                                            <span className="cd-value font-mono">{log.table_name || 'N/A'}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <Hash size={16} className="text-gray-600" />
-                                            <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.record_id')}</span>
-                                            <span className="text-sm text-gray-700 font-mono">{log.record_id || 'N/A'}</span>
+                                        <div className="cd-inset-row">
+                                            <Hash size={16} />
+                                            <span className="cd-value cd-value--strong">{t('logs.change_details.record_id')}</span>
+                                            <span className="cd-value font-mono">{log.record_id ?? 'N/A'}</span>
                                         </div>
-                                        {log.company_id && (
-                                            <div className="flex items-center gap-2">
-                                                <Building size={16} className="text-gray-600" />
-                                                <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.company_id')}</span>
-                                                <span className="text-sm text-gray-700 font-mono">{log.company_id}</span>
+                                        {log.company_id ? (
+                                            <div className="cd-inset-row">
+                                                <Building size={16} />
+                                                <span className="cd-value cd-value--strong">{t('logs.change_details.company_id')}</span>
+                                                <span className="cd-value font-mono">{log.company_id}</span>
                                             </div>
-                                        )}
+                                        ) : null}
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Changes Data Card */}
                         {(log.old_values || log.new_values) && (
-                            <div className="lg:col-span-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                                <div className="bg-gradient-to-r from-orange-600 to-red-600 px-6 py-4">
-                                    <h3 className="flex items-center gap-3 text-lg font-semibold text-white">
-                                        <Shield size={20} />
-                                        Data Changes
-                                    </h3>
+                            <div className="cd-panel lg:col-span-2">
+                                <div className="cd-panel__head cd-panel__head--diff">
+                                    <Shield size={20} />
+                                    {t('logs.change_details.data_changes')}
                                 </div>
-                                <div className="p-6">
+                                <div className="cd-panel__body">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {log.old_values && (
-                                            <div className="rounded-lg overflow-hidden border border-red-200">
-                                                <h4 className="bg-red-50 text-red-800 px-4 py-3 font-semibold text-sm border-b border-red-200">
-                                                    📋 Previous Data
-                                                </h4>
-                                                <pre className="bg-red-50 p-4 text-xs leading-relaxed overflow-x-auto max-h-80 overflow-y-auto text-red-800 font-mono">
-                                                    {formatJsonData(log.old_values)}
-                                                </pre>
+                                            <div className="cd-diff">
+                                                <h4 className="cd-diff__title cd-diff__title--old">{t('logs.change_details.previous_data')}</h4>
+                                                <pre className="cd-diff__pre cd-diff__pre--old">{formatJsonData(log.old_values)}</pre>
                                             </div>
                                         )}
-
                                         {log.new_values && (
-                                            <div className="rounded-lg overflow-hidden border border-green-200">
-                                                <h4 className="bg-green-50 text-green-800 px-4 py-3 font-semibold text-sm border-b border-green-200">
-                                                    ✅ New Data
-                                                </h4>
-                                                <pre className="bg-green-50 p-4 text-xs leading-relaxed overflow-x-auto max-h-80 overflow-y-auto text-green-800 font-mono">
-                                                    {formatJsonData(log.new_values)}
-                                                </pre>
+                                            <div className="cd-diff">
+                                                <h4 className="cd-diff__title cd-diff__title--new">{t('logs.change_details.new_data')}</h4>
+                                                <pre className="cd-diff__pre cd-diff__pre--new">{formatJsonData(log.new_values)}</pre>
                                             </div>
                                         )}
                                     </div>
@@ -221,35 +193,28 @@ export default function ChangeDetails({ log }) {
                             </div>
                         )}
 
-                        {/* Changed Fields Card */}
                         {log.changed_fields && (
-                            <div className="lg:col-span-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                                <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4">
-                                    <h3 className="flex items-center gap-3 text-lg font-semibold text-white">
-                                        <Shield size={20} />
-                                        Changed Fields Summary
-                                    </h3>
+                            <div className="cd-panel lg:col-span-2">
+                                <div className="cd-panel__head cd-panel__head--fields">
+                                    <Shield size={20} />
+                                    {t('logs.change_details.changed_fields_summary')}
                                 </div>
-                                <div className="p-6">
-                                    <div className="space-y-3">
-                                        {Object.entries(parseJsonData(log.changed_fields) || {}).map(([field, changes]) => (
-                                            <div key={field} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <Hash size={14} className="text-purple-600" />
-                                                    <span className="font-semibold text-gray-800">{field}</span>
+                                <div className="cd-panel__body">
+                                    <div className="cd-stack-sm">
+                                        {Object.entries(changedFieldsObj).map(([field, changes]) => (
+                                            <div key={field} className="cd-field-card">
+                                                <div className="cd-field-card__name">
+                                                    <Hash size={14} />
+                                                    <span>{field}</span>
                                                 </div>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="cd-field-grid">
                                                     <div>
-                                                        <span className="text-xs font-semibold text-red-600">{t('logs.change_details.old')}</span>
-                                                        <p className="text-sm text-gray-700 font-mono bg-red-50 p-2 rounded mt-1">
-                                                            {changes.old || 'N/A'}
-                                                        </p>
+                                                        <span className="cd-field-old-label">{t('logs.change_details.old')}</span>
+                                                        <p className="cd-field-value cd-field-value--old">{changes?.old ?? 'N/A'}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-xs font-semibold text-green-600">{t('logs.change_details.new')}</span>
-                                                        <p className="text-sm text-gray-700 font-mono bg-green-50 p-2 rounded mt-1">
-                                                            {changes.new || 'N/A'}
-                                                        </p>
+                                                        <span className="cd-field-new-label">{t('logs.change_details.new')}</span>
+                                                        <p className="cd-field-value cd-field-value--new">{changes?.new ?? 'N/A'}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -259,33 +224,24 @@ export default function ChangeDetails({ log }) {
                             </div>
                         )}
 
-                        {/* Technical Information Card */}
-                        <div className="lg:col-span-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                            <div className="bg-gradient-to-r from-gray-600 to-gray-800 px-6 py-4">
-                                <h3 className="flex items-center gap-3 text-lg font-semibold text-white">
-                                    <Database size={20} />
-                                    Technical Information
-                                </h3>
+                        <div className="cd-panel lg:col-span-2">
+                            <div className="cd-panel__head cd-panel__head--technical">
+                                <Database size={20} />
+                                {t('logs.change_details.technical_information')}
                             </div>
-                            <div className="p-6">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div className="space-y-2">
-                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.session_id')}</span>
-                                        <code className="block bg-gray-100 p-2 rounded text-xs text-gray-700 font-mono break-all">
-                                            {log.session_id || 'N/A'}
-                                        </code>
+                            <div className="cd-panel__body">
+                                <div className="cd-tech-grid">
+                                    <div>
+                                        <span className="cd-tech-label">{t('logs.change_details.session_id')}</span>
+                                        <code className="cd-code cd-code--block">{log.session_id || 'N/A'}</code>
                                     </div>
-                                    <div className="space-y-2">
-                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.user_agent')}</span>
-                                        <code className="block bg-gray-100 p-2 rounded text-xs text-gray-700 font-mono break-all">
-                                            {log.user_agent || 'N/A'}
-                                        </code>
+                                    <div>
+                                        <span className="cd-tech-label">{t('logs.change_details.user_agent')}</span>
+                                        <code className="cd-code cd-code--block">{log.user_agent || 'N/A'}</code>
                                     </div>
-                                    <div className="space-y-2">
-                                        <span className="text-sm font-semibold text-gray-800">{t('logs.change_details.location_id')}</span>
-                                        <code className="block bg-gray-100 p-2 rounded text-xs text-gray-700 font-mono">
-                                            {log.location_id || 'N/A'}
-                                        </code>
+                                    <div>
+                                        <span className="cd-tech-label">{t('logs.change_details.location_id')}</span>
+                                        <code className="cd-code cd-code--block">{log.location_id ?? 'N/A'}</code>
                                     </div>
                                 </div>
                             </div>
@@ -293,7 +249,6 @@ export default function ChangeDetails({ log }) {
                     </div>
                 </div>
             </div>
-
         </AppLayout>
     );
 }

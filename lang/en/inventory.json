@@ -1145,14 +1145,63 @@
     }
   },
   "purchase_requisition": {
+    "list": {
+      "title": "Purchase requisitions",
+      "description": "Draft and track internal purchase requests for your company and location.",
+      "breadcrumb_inventory": "Inventory",
+      "subtitle": "{count} requisition(s) in this view.",
+      "new_pr": "New requisition",
+      "refresh": "Refresh",
+      "search_label": "Search",
+      "search_placeholder": "PR number, requester, notes…",
+      "status_label": "Status",
+      "status_all": "All",
+      "status_draft": "Draft",
+      "status_approved": "Approved",
+      "apply_filters": "Search",
+      "col_pr_number": "PR #",
+      "col_pr_date": "PR date",
+      "col_required_by": "Required by",
+      "col_lines": "Lines",
+      "col_priority": "Priority",
+      "col_status": "Status",
+      "col_deliver_to": "Deliver to",
+      "col_actions": "Actions",
+      "empty": "No purchase requisitions yet — create one to get started.",
+      "page_summary": "Showing {from}–{to} of {total}",
+      "from_date": "PR date from",
+      "to_date": "PR date to",
+      "priority_label": "Priority",
+      "priority_all": "All priorities",
+      "department_label": "Department",
+      "department_all": "All departments",
+      "reset_filters": "Reset filters",
+      "selected_count": "{count} selected",
+      "clear_selection": "Clear selection",
+      "bulk_approve": "Approve selected",
+      "approve": "Approve",
+      "edit": "Edit",
+      "delete": "Delete",
+      "swal_delete_title": "Delete this requisition?",
+      "swal_delete_body": "PR {number} is a draft. Choose whether to keep a recoverable copy in the recycle bin or remove it permanently.",
+      "swal_recycle": "Move to recycle bin",
+      "swal_permanent": "Delete permanently",
+      "swal_cancel": "Cancel",
+      "swal_bulk_approve_title": "Approve selected requisitions?",
+      "swal_bulk_approve_text": "{count} draft requisition(s) will be marked approved.",
+      "no_drafts_selected": "Select at least one draft requisition to approve."
+    },
     "create": {
       "breadcrumb_home": "Home",
       "breadcrumb_inventory": "Inventory",
       "breadcrumb_pr": "Purchase requisition",
       "breadcrumb_create": "Create",
+      "breadcrumb_edit": "Edit",
       "breadcrumb_desc": "Raise an internal purchase request before a purchase order. Lines can be converted to a PO later; POs may also be created without a PR.",
       "title": "Purchase requisition",
-      "subtitle": "Header details and line items (procure-to-stock, draft)",
+      "title_edit": "Edit purchase requisition",
+      "subtitle": "Header, line items, and whether to save as draft or approved.",
+      "subtitle_edit": "Only drafts can be edited. Saving can keep this PR as draft or mark it approved.",
       "section_header": "Request header",
       "section_lines": "Line items",
       "lines_hint": "Add one or more items. Use Tab to move across cells; item and UOM lists are keyboard searchable.",
@@ -1161,12 +1210,22 @@
       "add_line": "Add line",
       "remove_line": "Remove",
       "line_number": "#",
-      "submit_save": "Save draft",
+      "submit_save": "Save requisition",
+      "submit_update": "Update requisition",
       "reset_form": "Clear form",
+      "initial_status_options": {
+        "draft": "Save as draft (pending approval)",
+        "approved": "Save as approved"
+      },
       "msg_fix_header": "Please fix the highlighted header fields.",
       "msg_fix_lines": "Please correct line items (item, UOM, and quantity are required; quantity must be greater than zero).",
       "msg_please_correct_errors": "Please correct the errors below.",
       "fields": {
+        "pr_number": {
+          "label": "PR number",
+          "placeholder": "Assigned on save",
+          "help": "Configured under Inventory → Document Number Configuration. New documents show the next number that will be used when you save."
+        },
         "pr_date": {
           "label": "Requisition date",
           "placeholder": "Select date",
@@ -1221,6 +1280,11 @@
           "label": "Internal notes",
           "placeholder": "Optional notes for procurement",
           "help": "Not printed on external documents."
+        },
+        "initial_status": {
+          "label": "When saved",
+          "placeholder": "",
+          "help": "Draft stays pending until approved from the list. Approved is final for this workflow."
         }
       },
       "line_fields": {
@@ -1265,6 +1329,319 @@
         "high": "High",
         "urgent": "Urgent"
       }
+    }
+  },
+  "purchase_order": {
+    "list": {
+      "title": "Purchase orders",
+      "description": "Create vendor purchase orders with or without a purchase requisition. Approved PRs can load lines and ship-to defaults.",
+      "breadcrumb_inventory": "Inventory",
+      "subtitle": "{count} order(s) in this view.",
+      "new_po": "New purchase order",
+      "refresh": "Refresh",
+      "search_label": "Search",
+      "search_placeholder": "PO number, vendor ref, notes…",
+      "status_label": "Status",
+      "status_all": "All",
+      "status_draft": "Draft",
+      "status_approved": "Approved",
+      "from_date": "PO date from",
+      "to_date": "PO date to",
+      "vendor_label": "Vendor",
+      "vendor_all": "All vendors",
+      "reset_filters": "Reset filters",
+      "selected_count": "{count} selected",
+      "clear_selection": "Clear selection",
+      "bulk_approve": "Approve selected",
+      "approve": "Approve",
+      "edit": "Edit",
+      "delete": "Delete",
+      "swal_delete_title": "Delete this purchase order?",
+      "swal_delete_body": "PO {number} is a draft. Choose whether to keep a recoverable copy in the recycle bin or remove it permanently.",
+      "swal_recycle": "Move to recycle bin",
+      "swal_permanent": "Delete permanently",
+      "swal_cancel": "Cancel",
+      "swal_bulk_approve_title": "Approve selected orders?",
+      "swal_bulk_approve_text": "{count} draft purchase order(s) will be marked approved.",
+      "no_drafts_selected": "Select at least one draft order to approve.",
+      "col_po_number": "PO #",
+      "col_po_date": "PO date",
+      "col_vendor": "Vendor",
+      "col_pr": "PR",
+      "col_lines": "Lines",
+      "col_status": "Status",
+      "col_ship_to": "Ship to",
+      "col_actions": "Actions",
+      "empty": "No purchase orders yet — create one to get started.",
+      "page_summary": "Showing {from}–{to} of {total}"
+    },
+    "create": {
+      "breadcrumb_inventory": "Inventory",
+      "breadcrumb_po": "Purchase order",
+      "breadcrumb_create": "Create",
+      "breadcrumb_edit": "Edit",
+      "breadcrumb_desc": "Commercial purchase to vendor. Link an approved PR to copy lines, or leave unlinked for a direct PO.",
+      "title": "Purchase order",
+      "title_edit": "Edit purchase order",
+      "subtitle": "Vendor, commercial header, and line items (qty & unit price required).",
+      "subtitle_edit": "Only drafts can be edited. You can save as draft or approved.",
+      "section_header": "Order header",
+      "section_pr_link": "Purchase requisition link",
+      "pr_link_hint": "Choose whether this PO is based on an approved internal requisition. When linked, pick a PR and use Load from PR to copy lines and ship-to hints.",
+      "link_pr_label": "PR linkage",
+      "link_pr_options": {
+        "without": "Without PR (direct PO)",
+        "with": "With PR (from approved requisition)"
+      },
+      "approved_pr_label": "Approved PR",
+      "approved_pr_placeholder": "Search approved PR",
+      "btn_load_from_pr": "Load from PR",
+      "loading_pr": "Loading…",
+      "section_lines": "Line items",
+      "lines_hint": "Enter ordered quantity and unit price for each line. Optional line discount adjusts the display subtotal.",
+      "lines_summary": "{count} line(s) · Net line subtotal: {amount}",
+      "line_number": "#",
+      "add_line": "Add line",
+      "remove_line": "Remove line",
+      "submit_save": "Save order",
+      "submit_update": "Update order",
+      "reset_form": "Clear form",
+      "initial_status_options": {
+        "draft": "Save as draft (pending approval)",
+        "approved": "Save as approved"
+      },
+      "po_type_options": {
+        "standard": "Standard",
+        "blanket": "Blanket",
+        "import": "Import"
+      },
+      "payment_terms_advance": "Advance payment",
+      "msg_please_correct_errors": "Please correct the errors below.",
+      "msg_fix_lines": "Each line needs item, UOM, ordered quantity, and unit price (both valid numbers greater than zero).",
+      "msg_pick_pr_first": "Select an approved purchase requisition first.",
+      "msg_loaded_from_pr": "Header hints and lines were loaded from the selected PR. Review prices before saving.",
+      "msg_pr_load_failed": "Could not load the purchase requisition.",
+      "msg_pr_required": "Choose an approved PR or switch to Without PR.",
+      "fields": {
+        "po_number": {
+          "label": "PO number",
+          "placeholder": "Assigned on save",
+          "help": "Configured under Inventory → Document Number Configuration."
+        },
+        "vendor_id": {
+          "label": "Vendor",
+          "placeholder": "Select vendor",
+          "help": "Active vendor from master (Chart of Accounts party)."
+        },
+        "po_type": {
+          "label": "PO type",
+          "placeholder": "Select type",
+          "help": "Standard, blanket agreement, or import purchase."
+        },
+        "is_blanket": {
+          "label": "Blanket PO",
+          "placeholder": "",
+          "help": "Enable when this order is a master blanket agreement."
+        },
+        "vendor_reference": {
+          "label": "Vendor reference",
+          "placeholder": "Quote or offer number",
+          "help": "Supplier's reference on their documents."
+        },
+        "po_date": {
+          "label": "PO date",
+          "placeholder": "Select date",
+          "help": "Document date."
+        },
+        "expected_delivery_date": {
+          "label": "Expected delivery",
+          "placeholder": "Optional",
+          "help": "Header default receipt date for lines."
+        },
+        "ship_to_location_id": {
+          "label": "Ship-to location",
+          "placeholder": "Branch / warehouse",
+          "help": "Receiving location."
+        },
+        "delivery_address": {
+          "label": "Delivery address",
+          "placeholder": "Ship-to address",
+          "help": "Full address if different from location master."
+        },
+        "currency_id": {
+          "label": "Currency",
+          "placeholder": "Optional",
+          "help": "Commercial currency for the PO."
+        },
+        "fx_rate": {
+          "label": "FX rate to base",
+          "placeholder": "e.g. 1.000000",
+          "help": "Spot or policy rate."
+        },
+        "incoterms": {
+          "label": "Incoterms 2020",
+          "placeholder": "Optional",
+          "help": "Standard delivery term code."
+        },
+        "incoterms_location": {
+          "label": "Incoterms location",
+          "placeholder": "Port or city",
+          "help": "Named place for the Incoterm."
+        },
+        "payment_terms": {
+          "label": "Payment terms",
+          "placeholder": "Optional",
+          "help": "Can default from vendor master."
+        },
+        "advance_payment_percent": {
+          "label": "Advance %",
+          "placeholder": "Optional",
+          "help": "If an advance applies."
+        },
+        "tax_inclusive": {
+          "label": "Tax-inclusive prices",
+          "placeholder": "",
+          "help": "Toggle when line prices include tax."
+        },
+        "header_discount_percent": {
+          "label": "Header discount %",
+          "placeholder": "Optional",
+          "help": "For display; line-level discount is on each row."
+        },
+        "initial_status": {
+          "label": "When saved",
+          "placeholder": "",
+          "help": "Draft stays pending until approved from the list."
+        },
+        "notes": {
+          "label": "Notes / terms",
+          "placeholder": "Commercial or internal notes",
+          "help": "Special conditions visible on documents where configured."
+        }
+      },
+      "line_fields": {
+        "item": {
+          "label": "Item",
+          "placeholder": "Search item",
+          "help": "Active items for this company and location."
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Description",
+          "help": "Defaults from item; editable for PO print."
+        },
+        "uom": {
+          "label": "UOM",
+          "placeholder": "Unit",
+          "help": "Purchase unit of measure."
+        },
+        "ordered_qty": {
+          "label": "Ordered qty",
+          "placeholder": "0",
+          "help": "Quantity to receive against this line."
+        },
+        "unit_price": {
+          "label": "Unit price",
+          "placeholder": "0",
+          "help": "Price per UOM in PO currency."
+        },
+        "line_discount": {
+          "label": "Disc. %",
+          "placeholder": "Optional",
+          "help": "Line discount before tax (display)."
+        },
+        "tax_category": {
+          "label": "Tax",
+          "placeholder": "Optional",
+          "help": "Tax category from master."
+        },
+        "line_delivery": {
+          "label": "Line deliv.",
+          "placeholder": "Date",
+          "help": "Expected delivery for this line."
+        },
+        "receive_loc": {
+          "label": "Receive at",
+          "placeholder": "Location",
+          "help": "Override receiving site."
+        },
+        "line_notes": {
+          "label": "Line notes",
+          "placeholder": "Specs / QC",
+          "help": "Notes for supplier or warehouse."
+        }
+      }
+    }
+  },
+  "document_number_configuration": {
+    "create": {
+      "breadcrumb_description": "Set running document numbers for inventory (e.g. purchase requisitions).",
+      "breadcrumb_inventory_configuration": "Document number configuration",
+      "breadcrumb_edit": "Edit configuration",
+      "breadcrumb_add": "Add configuration",
+      "title_add": "Add document number configuration",
+      "title_edit": "Edit document number configuration",
+      "subtitle_add": "Prefix, numeric length, next running number, and reset rules for this company and location.",
+      "subtitle_edit": "Update numbering for this document type.",
+      "submit_add": "Create configuration",
+      "submit_edit": "Update configuration",
+      "lbl_document_type": "Document type",
+      "ph_document_type": "Select document type",
+      "opt_purchase_requisition": "Purchase requisition",
+      "opt_purchase_order": "Purchase order",
+      "lbl_prefix": "Prefix",
+      "ph_prefix": "e.g. PR-, REQ-",
+      "lbl_number_length": "Number length",
+      "ph_number_length": "Digits (1–10)",
+      "lbl_running_number": "Next / starting number",
+      "ph_running_number": "Next value to use (padded to length)",
+      "lbl_reset_frequency": "Reset frequency",
+      "ph_reset_frequency": "Select",
+      "lbl_status": "Active",
+      "opt_monthly": "Monthly",
+      "opt_yearly": "Yearly",
+      "opt_never": "Never",
+      "msg_please_correct_errors": "Please correct the errors below.",
+      "val_document_type_required": "Document type is required",
+      "val_prefix_required": "Prefix is required",
+      "val_number_length_required": "Number length must be at least 1",
+      "val_running_number_required": "Starting number must be at least 1"
+    },
+    "list": {
+      "page_title": "Document number configuration",
+      "stat_total": "{count} configuration(s)",
+      "stat_active": "{count} active",
+      "refresh": "Refresh",
+      "add_configuration": "Add configuration",
+      "add_first": "Add your first configuration",
+      "empty_title": "No configurations yet",
+      "empty_hint": "Create a configuration so purchase requisitions use your prefix and running sequence.",
+      "col_id": "ID",
+      "col_document": "Document",
+      "col_prefix": "Prefix",
+      "col_length": "Length",
+      "col_next": "Next #",
+      "col_reset": "Reset",
+      "col_status": "Status",
+      "col_actions": "Actions",
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirm_delete_title": "Delete this configuration?",
+      "confirm_delete_text": "Remove settings for “{name}”. New documents may fall back to default numbering until you add a configuration again.",
+      "confirm_delete_ok": "Delete"
+    },
+    "show": {
+      "title": "Document number configuration",
+      "document_type": "Document type",
+      "prefix": "Prefix",
+      "number_length": "Number length",
+      "suffix_digits": "{count} digits",
+      "reset_frequency": "Reset frequency",
+      "next_running_number": "Next running number",
+      "status": "Status",
+      "back_to_list": "Back to list",
+      "not_found": "Configuration not found."
     }
   }
 }

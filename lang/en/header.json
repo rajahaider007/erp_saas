@@ -1,6 +1,9 @@
 {
   "dashboard": "Dashboard",
   "erp_modules": "ERP Modules",
+  "module": "Module",
+  "system_home": "System",
+  "switch_module": "Switch business module",
   "settings": "Settings",
   "storage": "Storage",
   "language": "Language",

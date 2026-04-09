@@ -1817,7 +1817,7 @@ html.dark .action-btn.print-detailed:hover {
 }
 
 /* App light mode + "dark form" preset: use light surfaces & dark text so lists/cards stay readable */
-html.form-theme-2:not(.dark) {
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9):not(.dark) {
     --primary-color: #8B5CF6;
     --primary-hover: #7C3AED;
     --primary-light: #EDE9FE;
@@ -1859,10 +1859,148 @@ html.form-theme-2:not(.dark) {
     --glass-border: rgba(6, 182, 212, 0.2);
 }
 
+/* Light — Liquid Glass: translucent surfaces, iridescent backdrop */
+.form-theme-4 {
+    --primary-color: #6366F1;
+    --primary-hover: #4F46E5;
+    --primary-light: rgba(99, 102, 241, 0.18);
+    --secondary-color: #64748B;
+    --background: linear-gradient(150deg, #e8eaf6 0%, #f3e8ff 38%, #e0f2fe 72%, #ecfeff 100%);
+    --surface: rgba(255, 255, 255, 0.48);
+    --surface-hover: rgba(255, 255, 255, 0.68);
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --border: rgba(255, 255, 255, 0.72);
+    --border-focus: #6366F1;
+    --success: #059669;
+    --warning: #D97706;
+    --error: #DC2626;
+    --shadow: 0 8px 32px rgba(15, 23, 42, 0.07);
+    --shadow-hover: 0 24px 56px rgba(15, 23, 42, 0.11);
+    --glass-bg: rgba(255, 255, 255, 0.28);
+    --glass-border: rgba(255, 255, 255, 0.5);
+}
+
+/* Dark — Liquid Glass */
+.form-theme-5 {
+    --primary-color: #38BDF8;
+    --primary-hover: #0EA5E9;
+    --primary-light: rgba(56, 189, 248, 0.14);
+    --secondary-color: #94A3B8;
+    --background: linear-gradient(155deg, #0a0f1a 0%, #1e1b4b 42%, #0f172a 100%);
+    --surface: rgba(15, 23, 42, 0.52);
+    --surface-hover: rgba(30, 41, 59, 0.62);
+    --text-primary: #F8FAFC;
+    --text-secondary: #CBD5E1;
+    --border: rgba(148, 163, 184, 0.28);
+    --border-focus: #38BDF8;
+    --success: #34D399;
+    --warning: #FBBF24;
+    --error: #F87171;
+    --shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    --shadow-hover: 0 24px 56px rgba(0, 0, 0, 0.45);
+    --glass-bg: rgba(56, 189, 248, 0.09);
+    --glass-border: rgba(56, 189, 248, 0.25);
+}
+
+/* Light — Classic: flat, neutral, paper-like */
+.form-theme-6 {
+    --primary-color: #1D4ED8;
+    --primary-hover: #1E40AF;
+    --primary-light: #DBEAFE;
+    --secondary-color: #52525B;
+    --background: #F4F4F5;
+    --surface: #FFFFFF;
+    --surface-hover: #FAFAFA;
+    --text-primary: #18181B;
+    --text-secondary: #71717A;
+    --border: #E4E4E7;
+    --border-focus: #2563EB;
+    --success: #16A34A;
+    --warning: #CA8A04;
+    --error: #DC2626;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.08);
+    --glass-bg: rgba(255, 255, 255, 0.94);
+    --glass-border: #D4D4D8;
+}
+
+/* Dark — Classic: zinc studio */
+.form-theme-7 {
+    --primary-color: #60A5FA;
+    --primary-hover: #3B82F6;
+    --primary-light: rgba(96, 165, 250, 0.12);
+    --secondary-color: #A1A1AA;
+    --background: #09090B;
+    --surface: #18181B;
+    --surface-hover: #27272A;
+    --text-primary: #FAFAFA;
+    --text-secondary: #A1A1AA;
+    --border: #3F3F46;
+    --border-focus: #60A5FA;
+    --success: #4ADE80;
+    --warning: #FACC15;
+    --error: #F87171;
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-hover: 0 16px 40px rgba(0, 0, 0, 0.5);
+    --glass-bg: rgba(24, 24, 27, 0.85);
+    --glass-border: #52525B;
+}
+
+/* Light — Emerald Slate */
+.form-theme-8 {
+    --primary-color: #059669;
+    --primary-hover: #047857;
+    --primary-light: #D1FAE5;
+    --secondary-color: #64748B;
+    --background: linear-gradient(135deg, #ECFDF5 0%, #F1F5F9 48%, #E2E8F0 100%);
+    --surface: rgba(255, 255, 255, 0.94);
+    --surface-hover: #FFFFFF;
+    --text-primary: #0F172A;
+    --text-secondary: #64748B;
+    --border: rgba(148, 163, 184, 0.35);
+    --border-focus: #059669;
+    --success: #047857;
+    --warning: #D97706;
+    --error: #DC2626;
+    --shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+    --shadow-hover: 0 20px 44px rgba(15, 23, 42, 0.1);
+    --glass-bg: rgba(255, 255, 255, 0.35);
+    --glass-border: rgba(16, 185, 129, 0.22);
+}
+
+/* Dark — Carbon Blue */
+.form-theme-9 {
+    --primary-color: #60A5FA;
+    --primary-hover: #3B82F6;
+    --primary-light: rgba(59, 130, 246, 0.14);
+    --secondary-color: #94A3B8;
+    --background: linear-gradient(180deg, #020617 0%, #0F172A 45%, #1E3A8A 100%);
+    --surface: rgba(15, 23, 42, 0.94);
+    --surface-hover: rgba(30, 58, 138, 0.35);
+    --text-primary: #F1F5F9;
+    --text-secondary: #94A3B8;
+    --border: rgba(71, 85, 105, 0.45);
+    --border-focus: #60A5FA;
+    --success: #34D399;
+    --warning: #FBBF24;
+    --error: #F87171;
+    --shadow: 0 12px 36px rgba(0, 0, 0, 0.38);
+    --shadow-hover: 0 24px 52px rgba(0, 0, 0, 0.48);
+    --glass-bg: rgba(30, 58, 138, 0.12);
+    --glass-border: rgba(96, 165, 250, 0.22);
+}
+
 /* Global Styles */
 .form-theme-1,
 .form-theme-2,
 .form-theme-3,
+.form-theme-4,
+.form-theme-5,
+.form-theme-6,
+.form-theme-7,
+.form-theme-8,
+.form-theme-9,
 .form-theme-system {
     background: var(--background);
     color: var(--text-primary);
@@ -1874,6 +2012,12 @@ html.form-theme-2:not(.dark) {
 .form-theme-1::before,
 .form-theme-2::before,
 .form-theme-3::before,
+.form-theme-4::before,
+.form-theme-5::before,
+.form-theme-6::before,
+.form-theme-7::before,
+.form-theme-8::before,
+.form-theme-9::before,
 .form-theme-system::before {
     content: '';
     position: fixed;
@@ -1885,6 +2029,43 @@ html.form-theme-2:not(.dark) {
         radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
         radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
     pointer-events: none;
+}
+
+.form-theme-4::before {
+    background:
+        radial-gradient(ellipse 90% 70% at 12% 20%, rgba(99, 102, 241, 0.22) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 60% at 88% 78%, rgba(14, 165, 233, 0.2) 0%, transparent 52%),
+        radial-gradient(circle at 48% 52%, rgba(244, 114, 182, 0.12) 0%, transparent 58%);
+}
+
+.form-theme-5::before {
+    background:
+        radial-gradient(circle at 18% 28%, rgba(56, 189, 248, 0.16) 0%, transparent 48%),
+        radial-gradient(circle at 82% 72%, rgba(129, 140, 248, 0.14) 0%, transparent 50%),
+        radial-gradient(circle at 50% 100%, rgba(15, 23, 42, 0.5) 0%, transparent 45%);
+}
+
+.form-theme-6::before,
+.form-theme-7::before {
+    background: radial-gradient(circle at 50% 0%, rgba(0, 0, 0, 0.04) 0%, transparent 38%);
+    opacity: 0.65;
+}
+
+html.dark.form-theme-7::before {
+    background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 40%);
+    opacity: 0.5;
+}
+
+.form-theme-8::before {
+    background:
+        radial-gradient(circle at 15% 25%, rgba(16, 185, 129, 0.14) 0%, transparent 48%),
+        radial-gradient(circle at 85% 80%, rgba(100, 116, 139, 0.12) 0%, transparent 50%);
+}
+
+.form-theme-9::before {
+    background:
+        radial-gradient(circle at 25% 35%, rgba(37, 99, 235, 0.18) 0%, transparent 50%),
+        radial-gradient(circle at 75% 65%, rgba(15, 23, 42, 0.4) 0%, transparent 55%);
 }
 
 /* System Theme Variables (for dynamic theming) */
@@ -1929,6 +2110,337 @@ html.form-theme-2:not(.dark) {
     --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.4);
     --glass-bg: rgba(139, 92, 246, 0.1);
     --glass-border: rgba(139, 92, 246, 0.2);
+}
+
+/* Activity log change details — uses form-theme-system CSS variables (light ↔ dark) */
+.change-details-container .cd-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.change-details-container .cd-back:hover {
+    background: var(--surface-hover);
+    border-color: var(--primary-color);
+    transform: translateX(-2px);
+}
+
+.change-details-container .cd-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.change-details-container .cd-panel__head {
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.change-details-container .cd-panel__head--blue {
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+}
+
+.change-details-container .cd-panel__head--green {
+    background: linear-gradient(90deg, #059669, #2563eb);
+}
+
+.change-details-container .cd-panel__head--diff {
+    background: linear-gradient(90deg, #ea580c, #dc2626);
+}
+
+.change-details-container .cd-panel__head--fields {
+    background: linear-gradient(90deg, #7c3aed, #db2777);
+}
+
+.change-details-container .cd-panel__head--technical {
+    background: linear-gradient(90deg, #475569, #1e293b);
+}
+
+.change-details-container .cd-panel__body {
+    padding: 1.5rem;
+    color: var(--text-primary);
+}
+
+.change-details-container .cd-panel__body--stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.change-details-container .cd-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.change-details-container .cd-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.change-details-container .cd-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    flex-shrink: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.change-details-container .cd-label svg {
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.change-details-container .cd-value {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.change-details-container .cd-value--strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.change-details-container .cd-value--small {
+    font-size: 0.75rem;
+    margin-top: 0.125rem;
+}
+
+.change-details-container .cd-inset {
+    background: var(--glass-bg);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.change-details-container .cd-inset-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.change-details-container .cd-inset-row svg {
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.change-details-container .cd-code {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.change-details-container .cd-code--block {
+    display: block;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    word-break: break-all;
+}
+
+.change-details-container .cd-lead {
+    line-height: 1.625;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.change-details-container .cd-diff {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.change-details-container .cd-diff__title {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+}
+
+.change-details-container .cd-diff__title--old {
+    background: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+}
+
+.dark .change-details-container .cd-diff__title--old {
+    color: #fecaca;
+    background: rgba(239, 68, 68, 0.22);
+}
+
+.change-details-container .cd-diff__title--new {
+    background: rgba(34, 197, 94, 0.12);
+    color: #15803d;
+}
+
+.dark .change-details-container .cd-diff__title--new {
+    color: #bbf7d0;
+    background: rgba(34, 197, 94, 0.22);
+}
+
+.change-details-container .cd-diff__pre {
+    margin: 0;
+    padding: 1rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    overflow: auto;
+    max-height: 20rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.change-details-container .cd-diff__pre--old {
+    background: rgba(239, 68, 68, 0.08);
+    color: #991b1b;
+}
+
+.dark .change-details-container .cd-diff__pre--old {
+    color: #fecaca;
+    background: rgba(239, 68, 68, 0.14);
+}
+
+.change-details-container .cd-diff__pre--new {
+    background: rgba(34, 197, 94, 0.08);
+    color: #166534;
+}
+
+.dark .change-details-container .cd-diff__pre--new {
+    color: #bbf7d0;
+    background: rgba(34, 197, 94, 0.14);
+}
+
+.change-details-container .cd-field-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.change-details-container .cd-field-card__name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.change-details-container .cd-field-card__name svg {
+    color: #9333ea;
+}
+
+.dark .change-details-container .cd-field-card__name svg {
+    color: #c084fc;
+}
+
+.change-details-container .cd-field-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .change-details-container .cd-field-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.change-details-container .cd-field-old-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #dc2626;
+}
+
+.dark .change-details-container .cd-field-old-label {
+    color: #f87171;
+}
+
+.change-details-container .cd-field-new-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #16a34a;
+}
+
+.dark .change-details-container .cd-field-new-label {
+    color: #4ade80;
+}
+
+.change-details-container .cd-field-value {
+    font-size: 0.875rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    margin-top: 0.25rem;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    word-break: break-word;
+}
+
+.change-details-container .cd-field-value--old {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--text-primary);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.change-details-container .cd-field-value--new {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--text-primary);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.change-details-container .cd-tech-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .change-details-container .cd-tech-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.change-details-container .cd-tech-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.change-details-container .cd-stack-sm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .theme-selector {
@@ -1994,6 +2506,34 @@ html.form-theme-2:not(.dark) {
     border: 1px solid var(--glass-border);
     position: relative;
     z-index: 5;
+}
+
+html.form-theme-4 .form-container,
+html.form-theme-5 .form-container {
+    backdrop-filter: blur(42px) saturate(170%);
+    -webkit-backdrop-filter: blur(42px) saturate(170%);
+    border-radius: 28px;
+    box-shadow:
+        var(--shadow-hover),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+html.form-theme-6 .form-container,
+html.form-theme-7 .form-container {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-radius: 14px;
+    box-shadow: var(--shadow-hover);
+}
+
+html.form-theme-8 .form-container {
+    backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+}
+
+html.form-theme-9 .form-container {
+    backdrop-filter: blur(26px) saturate(155%);
+    -webkit-backdrop-filter: blur(26px) saturate(155%);
 }
 
 .form-header {
@@ -2066,6 +2606,53 @@ html.form-theme-2:not(.dark) {
         padding: 1rem 0.75rem;
         margin: 0;
     }
+}
+
+/* Purchase Requisition & similar long forms: less padding, tighter grid, less scroll */
+.form-container.form-container--pr-compact {
+    padding: 1.25rem 1.35rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+}
+
+@media (min-width: 1024px) {
+    .form-container.form-container--pr-compact {
+        padding: 1.35rem 1.5rem;
+    }
+}
+
+.form-container.form-container--pr-compact .input-group {
+    animation: none;
+    gap: 0.4rem;
+}
+
+.form-header--compact {
+    margin-bottom: 0.75rem;
+}
+
+.form-title--compact {
+    font-size: 1.35rem;
+    margin: 0 0 0.35rem 0;
+}
+
+.form-grid.form-grid--pr-compact {
+    gap: 0.9rem 1.1rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+@media (min-width: 900px) {
+    .form-grid.form-grid--pr-compact {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.button-group.button-group--pr {
+    margin-top: 1rem;
+    gap: 0.75rem;
+}
+
+.input-group.input-group--datepicker .input-label {
+    margin-bottom: 0.15rem;
 }
 
 .input-group {
@@ -2172,8 +2759,8 @@ html .input-with-icon select {
 }
 
 /* Theme-2: icon select matches surface tokens */
-html.form-theme-2 .input-with-icon.form-select,
-html.form-theme-2 .input-with-icon select {
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .input-with-icon.form-select,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .input-with-icon select {
     color: var(--text-primary);
     background: var(--surface);
     background-image: none;
@@ -2871,13 +3458,13 @@ html select[class*="input-with-icon"] {
     }
 }
 
-/* Theme-2 on <html>: form controls follow tokens (html.form-theme-2:not(.dark) uses light tokens; .dark uses dark tokens) */
-html.form-theme-2 .form-input,
-html.form-theme-2 .form-select,
-html.form-theme-2 .form-textarea,
-html.form-theme-2 input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="hidden"]):not([type="image"]),
-html.form-theme-2 select,
-html.form-theme-2 textarea {
+/* Dark-style form themes on <html>: controls follow tokens (:not(.dark) uses light fallback) */
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .form-input,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .form-select,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .form-textarea,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="hidden"]):not([type="image"]),
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) textarea {
     background: var(--surface);
     color: var(--text-primary);
     border-color: var(--border);
@@ -2886,64 +3473,64 @@ html.form-theme-2 textarea {
     font-weight: 500;
 }
 
-html.form-theme-2 .form-input::placeholder,
-html.form-theme-2 .form-textarea::placeholder,
-html.form-theme-2 input::placeholder,
-html.form-theme-2 textarea::placeholder {
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .form-input::placeholder,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .form-textarea::placeholder,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) input::placeholder,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) textarea::placeholder {
     color: var(--text-secondary);
     opacity: 0.85;
 }
 
-html.form-theme-2 .form-input:focus,
-html.form-theme-2 .form-select:focus,
-html.form-theme-2 .form-textarea:focus,
-html.form-theme-2 input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="hidden"]):focus,
-html.form-theme-2 select:focus,
-html.form-theme-2 textarea:focus {
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .form-input:focus,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .form-select:focus,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .form-textarea:focus,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="hidden"]):focus,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:focus,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) textarea:focus {
     background: var(--surface-hover);
     color: var(--text-primary);
     border-color: var(--border-focus);
     outline: none;
 }
 
-html.form-theme-2 .form-select option,
-html.form-theme-2 .filter-select option,
-html.form-theme-2 select option {
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .form-select option,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .filter-select option,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select option {
     background: var(--surface);
     color: var(--text-primary);
     padding: 0.75rem;
 }
 
-html.form-theme-2 select,
-html.form-theme-2 .filter-select,
-html.form-theme-2 .form-select {
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .filter-select,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .form-select {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
 }
 
-html.form-theme-2 .search-input,
-html.form-theme-2 .filter-select,
-html.form-theme-2 .date-input,
-html.form-theme-2 .text-input,
-html.form-theme-2 .number-input,
-html.form-theme-2 .select-input {
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .search-input,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .filter-select,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .date-input,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .text-input,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .number-input,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .select-input {
     background: var(--surface);
     color: var(--text-primary);
 }
 
-html.form-theme-2 .search-input:focus,
-html.form-theme-2 .filter-select:focus,
-html.form-theme-2 .date-input:focus,
-html.form-theme-2 .text-input:focus,
-html.form-theme-2 .number-input:focus,
-html.form-theme-2 .select-input:focus {
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .search-input:focus,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .filter-select:focus,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .date-input:focus,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .text-input:focus,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .number-input:focus,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .select-input:focus {
     background: var(--surface-hover);
     color: var(--text-primary);
 }
 
-html.form-theme-2 .select-wrapper,
-html.form-theme-2 .dropdown-container {
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .select-wrapper,
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .dropdown-container {
     color: var(--text-primary);
 }
 
@@ -3019,7 +3606,7 @@ textarea::placeholder {
     }
 }
 
-html.form-theme-2 .btn-secondary {
+html:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .btn-secondary {
     background: var(--surface);
     color: var(--text-primary);
     border-color: var(--border);
@@ -4328,7 +4915,13 @@ html:not(.dark) .advanced-module-manager .table-row:hover {
 .dark .form-theme-system .module-id,
 .dark .form-theme-1 .module-id,
 .dark .form-theme-2 .module-id,
-.dark .form-theme-3 .module-id {
+.dark .form-theme-3 .module-id,
+.dark .form-theme-4 .module-id,
+.dark .form-theme-5 .module-id,
+.dark .form-theme-6 .module-id,
+.dark .form-theme-7 .module-id,
+.dark .form-theme-8 .module-id,
+.dark .form-theme-9 .module-id {
     color: #94a3b8;
 }
 

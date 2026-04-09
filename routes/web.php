@@ -6,6 +6,8 @@ use App\Http\Controllers\Inventory\ItemClassCodingController;
 use App\Http\Controllers\Inventory\ItemGroupCodingController;
 use App\Http\Controllers\Inventory\ItemMasterController;
 use App\Http\Controllers\Inventory\MasterDataController;
+use App\Http\Controllers\Inventory\InventoryDocumentNumberConfigurationController;
+use App\Http\Controllers\Inventory\PurchaseOrderController;
 use App\Http\Controllers\Inventory\PurchaseRequisitionController;
 use App\Http\Controllers\Inventory\UomConversionController;
 use App\Http\Controllers\Inventory\UomMasterController;
@@ -161,8 +163,38 @@ Route::prefix('inventory/uom-conversion')->name('inventory.uom-conversion.')->mi
 
 // Inventory Module — Purchase Requisition (PR)
 Route::prefix('inventory/purchase-requisition')->name('inventory.purchase-requisition.')->middleware('web.auth')->group(function () {
+    Route::get('/', [PurchaseRequisitionController::class, 'index'])->name('index');
     Route::get('/create', [PurchaseRequisitionController::class, 'create'])->name('create');
     Route::post('/', [PurchaseRequisitionController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [PurchaseRequisitionController::class, 'edit'])->name('edit')->whereNumber('id');
+    Route::put('/{id}', [PurchaseRequisitionController::class, 'update'])->name('update')->whereNumber('id');
+    Route::post('/bulk-approve', [PurchaseRequisitionController::class, 'bulkApprove'])->name('bulk-approve');
+    Route::post('/{id}/approve', [PurchaseRequisitionController::class, 'approve'])->name('approve');
+    Route::delete('/{id}', [PurchaseRequisitionController::class, 'destroy'])->name('destroy');
+});
+
+// Inventory Module — Purchase Order (PO)
+Route::prefix('inventory/purchase-order')->name('inventory.purchase-order.')->middleware('web.auth')->group(function () {
+    Route::get('/', [PurchaseOrderController::class, 'index'])->name('index');
+    Route::get('/create', [PurchaseOrderController::class, 'create'])->name('create');
+    Route::get('/prefill-pr/{id}', [PurchaseOrderController::class, 'prefillFromPr'])->name('prefill-pr')->whereNumber('id');
+    Route::post('/', [PurchaseOrderController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [PurchaseOrderController::class, 'edit'])->name('edit')->whereNumber('id');
+    Route::put('/{id}', [PurchaseOrderController::class, 'update'])->name('update')->whereNumber('id');
+    Route::post('/bulk-approve', [PurchaseOrderController::class, 'bulkApprove'])->name('bulk-approve');
+    Route::post('/{id}/approve', [PurchaseOrderController::class, 'approve'])->name('approve')->whereNumber('id');
+    Route::delete('/{id}', [PurchaseOrderController::class, 'destroy'])->name('destroy')->whereNumber('id');
+});
+
+// Inventory — document number configuration (running numbers for PR, etc.)
+Route::prefix('inventory/document-number-configuration')->name('inventory.document-number-configuration.')->middleware('web.auth')->group(function () {
+    Route::get('/', [InventoryDocumentNumberConfigurationController::class, 'index'])->name('index');
+    Route::get('/create', [InventoryDocumentNumberConfigurationController::class, 'create'])->name('create');
+    Route::post('/create', [InventoryDocumentNumberConfigurationController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [InventoryDocumentNumberConfigurationController::class, 'edit'])->name('edit')->whereNumber('id');
+    Route::get('/{id}', [InventoryDocumentNumberConfigurationController::class, 'show'])->name('show')->whereNumber('id');
+    Route::put('/{id}', [InventoryDocumentNumberConfigurationController::class, 'update'])->name('update')->whereNumber('id');
+    Route::delete('/{id}', [InventoryDocumentNumberConfigurationController::class, 'destroy'])->name('destroy')->whereNumber('id');
 });
 
 // Inventory Module - Item Master
@@ -745,6 +777,7 @@ Route::prefix('system/logs')->name('logs.')->middleware('web.auth')->group(funct
     // Deleted Items & Recovery
     Route::get('/deleted-items', [LogController::class, 'deletedItems'])->name('deleted-items');
     Route::post('/deleted-items/{id}/restore', [LogController::class, 'restore'])->name('restore');
+    Route::post('/deleted-items/{id}/purge', [LogController::class, 'purgeRecovery'])->name('purge-recovery');
 
     // Security Logs
     Route::get('/security', [LogController::class, 'securityLogs'])->name('security');

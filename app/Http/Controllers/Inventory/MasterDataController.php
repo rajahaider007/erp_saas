@@ -36,6 +36,11 @@ class MasterDataController extends Controller
         'transporter-master',
     ];
 
+    /** Masters backed by shared tables without a company_id / comp_id column */
+    private const GLOBAL_MASTER_DATA_KEYS = [
+        'country-master',
+    ];
+
     public function list(Request $request, string $master)
     {
         $config = $this->config($master);
@@ -144,7 +149,9 @@ class MasterDataController extends Controller
         }
 
         $validated = $request->validate($this->rules($config, $companyId, null, $master));
-        $validated['company_id'] = $companyId;
+        if (! in_array($master, self::GLOBAL_MASTER_DATA_KEYS, true)) {
+            $validated['company_id'] = $companyId;
+        }
 
         if ($master === 'tax-category') {
             $this->applyTaxCategoryRules($validated, null);
@@ -1412,6 +1419,10 @@ class MasterDataController extends Controller
                 });
         }
 
+        if (in_array($master, self::GLOBAL_MASTER_DATA_KEYS, true)) {
+            return $query;
+        }
+
         return $query->where('company_id', $companyId);
     }
 
@@ -1435,6 +1446,10 @@ class MasterDataController extends Controller
                         });
                     }
                 });
+        }
+
+        if (in_array($master, self::GLOBAL_MASTER_DATA_KEYS, true)) {
+            return $config['model']::query();
         }
 
         return $config['model']::query()->where('company_id', $companyId);

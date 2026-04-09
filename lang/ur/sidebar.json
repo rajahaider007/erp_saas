@@ -17,6 +17,7 @@
     "system_users": "صارفین",
     "system_menus": "مینو",
     "system_companies": "کمپنیاں",
-    "system_roles": "رولز"
+    "system_roles": "رولز",
+    "inventory_purchase_requisition_create": "خریداری درخواست"
   }
 }

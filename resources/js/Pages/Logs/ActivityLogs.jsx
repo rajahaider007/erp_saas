@@ -36,18 +36,6 @@ export default function ActivityLogs({ logs, users, companies = [], locations = 
     };
 
     const handleFilter = () => {
-        console.log('Applying filters:', {
-            comp_id: selectedCompany?.value,
-            location_id: selectedLocation?.value,
-            search,
-            module,
-            action,
-            user_id: userId,
-            from_date: fromDate ? fromDate.toISOString().split('T')[0] : '',
-            to_date: toDate ? toDate.toISOString().split('T')[0] : '',
-            per_page: perPage
-        });
-        
         router.get(route('logs.activity'), {
             comp_id: selectedCompany?.value,
             location_id: selectedLocation?.value,
@@ -65,7 +53,6 @@ export default function ActivityLogs({ logs, users, companies = [], locations = 
     };
 
     const handleReset = () => {
-        console.log('Resetting filters');
         setSelectedCompany(null);
         setSelectedLocation(null);
         setAvailableLocations([]);
@@ -101,83 +88,108 @@ export default function ActivityLogs({ logs, users, companies = [], locations = 
             <Head title={t('logs.activity_logs.activity_logs')} />
 
             <div className="form-theme-system min-h-screen p-6">
-                {/* Header */}
+                {/* Header — align with Security / Reports logs pages */}
                 <div className="manager-header">
-                    <div className="header-main">
-                        <div className="title-section">
-                            <h1 className="page-title">
-                                <Activity className="title-icon" size={32} />
-                                Activity Logs
-                            </h1>
-                            <p className="text-secondary mt-2">{t('logs.activity_logs.view_all_system_activities_and_changes')}</p>
-                            <div className="stats-summary">
-                                <div className="stat-item">
-                                    <FileText size={16} />
-                                    <span>Total: {logs.total} records</span>
+                    <div className="header-content">
+                        <div className="header-info">
+                            <div className="header-text">
+                                <h1 className="header-title">
+                                    <Activity className="header-icon" size={24} />
+                                    {t('logs.activity_logs.activity_logs')}
+                                </h1>
+                                <p className="header-subtitle">
+                                    {t('logs.activity_logs.view_all_system_activities_and_changes')}
+                                </p>
+                                <div className="stats-summary" style={{ marginTop: '0.75rem' }}>
+                                    <div className="stat-item">
+                                        <FileText size={16} />
+                                        <span>{t('logs.activity_logs.total_records', { count: logs.total })}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div className="header-actions">
-                            <Link href={route('logs.deleted-items')} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
+                            <Link href={route('logs.deleted-items')} className="btn btn-secondary btn-sm" style={{ color: 'var(--text-primary)', fontWeight: '600' }}>
                                 <RotateCcw size={16} />
-                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>{t('logs.activity_logs.deleted_items')}</span>
+                                <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>{t('logs.activity_logs.deleted_items')}</span>
                             </Link>
-                            <Link href={route('logs.security')} className="btn btn-secondary btn-sm" style={{color: 'var(--text-primary)', fontWeight: '600'}}>
+                            <Link href={route('logs.security')} className="btn btn-secondary btn-sm" style={{ color: 'var(--text-primary)', fontWeight: '600' }}>
                                 <Shield size={16} />
-                                <span style={{color: 'var(--text-primary)', fontWeight: '600'}}>{t('logs.activity_logs.security_logs')}</span>
+                                <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>{t('logs.activity_logs.security_logs')}</span>
                             </Link>
-                            <Link href={route('logs.reports')} className="btn btn-primary btn-sm" style={{color: 'white', fontWeight: '600'}}>
+                            <Link href={route('logs.reports')} className="btn btn-primary btn-sm" style={{ color: 'white', fontWeight: '600' }}>
                                 <Download size={16} />
-                                <span style={{color: 'white', fontWeight: '600'}}>{t('logs.activity_logs.reports')}</span>
+                                <span style={{ color: 'white', fontWeight: '600' }}>{t('logs.activity_logs.reports')}</span>
                             </Link>
                         </div>
                     </div>
                 </div>
 
-                {/* Filters */}
-                <div className="filters-bar">
+                {/* Filters — same shell as SecurityLogs / DeletedItems for theme CSS */}
+                <div className="professional-filters-container">
                     <div className="filters-row">
-                        {/* Company Filter - Only for Parent Companies */}
                         {isParentCompany && (
-                            <div className="filter-group">
-                                <label className="filter-label">{t('logs.activity_logs.company')}</label>
-                                <select
-                                    className="filter-select"
-                                    value={selectedCompany?.value || ''}
-                                    onChange={(e) => {
-                                        const company = companies.find(c => c.id.toString() === e.target.value);
-                                        handleCompanyChange(company ? { value: company.id, label: company.company_name } : null);
-                                    }}
-                                >
-                                    <option value="">{t('logs.activity_logs.all_companies')}</option>
-                                    {companies.map(company => (
-                                        <option key={company.id} value={company.id}>{company.company_name}</option>
-                                    ))}
-                                </select>
-                            </div>
+                            <select
+                                className="filter-select custom-select"
+                                value={selectedCompany?.value || ''}
+                                onChange={(e) => {
+                                    const company = companies.find((c) => c.id.toString() === e.target.value);
+                                    handleCompanyChange(company ? { value: company.id, label: company.company_name } : null);
+                                }}
+                                style={{
+                                    color: '#F1F5F9',
+                                    backgroundColor: 'rgba(30, 41, 59, 0.8)',
+                                    border: '2px solid rgba(148, 163, 184, 0.3)',
+                                    borderRadius: '12px',
+                                    padding: '0.875rem 1rem',
+                                    fontSize: '0.875rem',
+                                    fontWeight: '500',
+                                    cursor: 'pointer',
+                                    width: '100%',
+                                    display: 'block',
+                                    boxSizing: 'border-box',
+                                }}
+                            >
+                                <option value="">{t('logs.activity_logs.all_companies')}</option>
+                                {companies.map((company) => (
+                                    <option key={company.id} value={company.id}>
+                                        {company.company_name}
+                                    </option>
+                                ))}
+                            </select>
                         )}
 
-                        {/* Location Filter - Only shown after company selection */}
                         {isParentCompany && selectedCompany && (
-                            <div className="filter-group">
-                                <label className="filter-label">{t('logs.activity_logs.location')}</label>
-                                <select
-                                    className="filter-select"
-                                    value={selectedLocation?.value || ''}
-                                    onChange={(e) => {
-                                        const location = availableLocations.find(l => l.id.toString() === e.target.value);
-                                        setSelectedLocation(location ? { value: location.id, label: location.location_name } : null);
-                                    }}
-                                >
-                                    <option value="">{t('logs.activity_logs.all_locations')}</option>
-                                    {availableLocations.map(location => (
-                                        <option key={location.id} value={location.id}>{location.location_name}</option>
-                                    ))}
-                                </select>
-                            </div>
+                            <select
+                                className="filter-select custom-select"
+                                value={selectedLocation?.value || ''}
+                                onChange={(e) => {
+                                    const location = availableLocations.find((l) => l.id.toString() === e.target.value);
+                                    setSelectedLocation(location ? { value: location.id, label: location.location_name } : null);
+                                }}
+                                style={{
+                                    color: '#F1F5F9',
+                                    backgroundColor: 'rgba(30, 41, 59, 0.8)',
+                                    border: '2px solid rgba(148, 163, 184, 0.3)',
+                                    borderRadius: '12px',
+                                    padding: '0.875rem 1rem',
+                                    fontSize: '0.875rem',
+                                    fontWeight: '500',
+                                    cursor: 'pointer',
+                                    width: '100%',
+                                    display: 'block',
+                                    boxSizing: 'border-box',
+                                }}
+                            >
+                                <option value="">{t('logs.activity_logs.all_locations')}</option>
+                                {availableLocations.map((location) => (
+                                    <option key={location.id} value={location.id}>
+                                        {location.location_name}
+                                    </option>
+                                ))}
+                            </select>
                         )}
 
-                        {/* Search */}
                         <div className="search-container">
                             <Search className="search-icon" size={20} />
                             <input
@@ -186,18 +198,13 @@ export default function ActivityLogs({ logs, users, companies = [], locations = 
                                 placeholder={t('logs.activity_logs.search_logs')}
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleFilter()}
+                                onKeyDown={(e) => e.key === 'Enter' && handleFilter()}
                             />
                         </div>
 
-                        {/* Module Filter */}
                         <div className="filter-group">
                             <label className="filter-label">{t('logs.activity_logs.module')}</label>
-                            <select
-                                className="filter-select"
-                                value={module}
-                                onChange={(e) => setModule(e.target.value)}
-                            >
+                            <select className="professional-select" value={module} onChange={(e) => setModule(e.target.value)}>
                                 <option value="">{t('logs.activity_logs.all_modules')}</option>
                                 <option value="Accounts">{t('logs.activity_logs.accounts')}</option>
                                 <option value="System">{t('logs.activity_logs.system')}</option>
@@ -205,14 +212,9 @@ export default function ActivityLogs({ logs, users, companies = [], locations = 
                             </select>
                         </div>
 
-                        {/* Action Filter */}
                         <div className="filter-group">
                             <label className="filter-label">{t('logs.activity_logs.action')}</label>
-                            <select
-                                className="filter-select"
-                                value={action}
-                                onChange={(e) => setAction(e.target.value)}
-                            >
+                            <select className="professional-select" value={action} onChange={(e) => setAction(e.target.value)}>
                                 <option value="">{t('logs.activity_logs.all_actions')}</option>
                                 <option value="CREATE">{t('logs.activity_logs.create')}</option>
                                 <option value="UPDATE">{t('logs.activity_logs.update')}</option>
@@ -224,51 +226,45 @@ export default function ActivityLogs({ logs, users, companies = [], locations = 
                             </select>
                         </div>
 
-                        {/* User Filter */}
                         <div className="filter-group">
                             <label className="filter-label">{t('logs.activity_logs.user')}</label>
-                            <select
-                                className="filter-select"
-                                value={userId}
-                                onChange={(e) => setUserId(e.target.value)}
-                            >
+                            <select className="professional-select" value={userId} onChange={(e) => setUserId(e.target.value)}>
                                 <option value="">{t('logs.activity_logs.all_users')}</option>
-                                {users.map(user => (
-                                    <option key={user.id} value={user.id}>{user.name}</option>
+                                {users.map((user) => (
+                                    <option key={user.id} value={user.id}>
+                                        {user.name}
+                                    </option>
                                 ))}
                             </select>
                         </div>
 
-                        {/* From Date Filter */}
-                        <div className="date-filter-container">
-                            <label className="date-filter-label">{t('logs.activity_logs.from_date')}</label>
-                            <input
-                                type="date"
-                                className="date-filter-input"
-                                value={fromDate ? fromDate.toISOString().split('T')[0] : ''}
-                                onChange={(e) => setFromDate(e.target.value ? new Date(e.target.value) : null)}
-                            />
+                        <div className="filter-group">
+                            <label className="filter-label">{t('logs.activity_logs.date_range')}</label>
+                            <div className="date-range-wrapper">
+                                <CustomDatePicker
+                                    selected={fromDate}
+                                    onChange={setFromDate}
+                                    placeholderText={t('logs.activity_logs.from_date')}
+                                    className="professional-date-input"
+                                />
+                                <span className="date-separator">{t('logs.activity_logs.to')}</span>
+                                <CustomDatePicker
+                                    selected={toDate}
+                                    onChange={setToDate}
+                                    placeholderText={t('logs.activity_logs.to_date')}
+                                    className="professional-date-input"
+                                />
+                            </div>
                         </div>
 
-                        {/* To Date Filter */}
-                        <div className="date-filter-container">
-                            <label className="date-filter-label">{t('logs.activity_logs.to_date')}</label>
-                            <input
-                                type="date"
-                                className="date-filter-input"
-                                value={toDate ? toDate.toISOString().split('T')[0] : ''}
-                                onChange={(e) => setToDate(e.target.value ? new Date(e.target.value) : null)}
-                            />
-                        </div>
-
-                        <div className="view-controls">
-                            <button onClick={handleFilter} className="btn btn-primary">
-                                <Filter size={16} />
-                                <span>{t('logs.activity_logs.apply')}</span>
+                        <div className="filter-actions">
+                            <button type="button" onClick={handleFilter} className="btn-primary-professional" style={{ color: 'white', fontWeight: '600' }}>
+                                <Filter size={18} />
+                                <span style={{ color: 'white', fontWeight: '600' }}>{t('logs.activity_logs.apply')}</span>
                             </button>
-                            <button onClick={handleReset} className="btn btn-secondary">
-                                <RotateCcw size={16} />
-                                <span>{t('logs.activity_logs.reset')}</span>
+                            <button type="button" onClick={handleReset} className="btn-secondary-professional" style={{ color: 'var(--text-primary)', fontWeight: '600' }}>
+                                <Calendar size={18} />
+                                <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>{t('logs.activity_logs.reset')}</span>
                             </button>
                         </div>
                     </div>
@@ -319,17 +315,13 @@ export default function ActivityLogs({ logs, users, companies = [], locations = 
                                             </div>
                                         </td>
                                         <td>
-                                            <span 
-                                                className="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 text-sm font-semibold border border-blue-200"
-                                                style={{color: '#1d4ed8', fontWeight: '600'}}
-                                            >
+                                            <span className="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 text-sm font-semibold border border-blue-200">
                                                 {log.module_name}
                                             </span>
                                         </td>
                                         <td>
-                                            <span 
+                                            <span
                                                 className={`px-3 py-1 rounded-lg text-sm font-semibold border ${getActionBadgeClass(log.action_type)}`}
-                                                style={{color: 'inherit', fontWeight: '600'}}
                                             >
                                                 {log.action_type}
                                             </span>

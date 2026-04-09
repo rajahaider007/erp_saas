@@ -251,82 +251,14 @@ html.dark .search-input:focus {
   transform: translateY(-1px);
 }
 
-/* Change Details Page - Fix Text Visibility */
-.change-details-container .bg-white {
-    background-color: #ffffff !important;
-}
-
-.change-details-container .text-gray-800 {
-    color: #1f2937 !important;
-}
-
-.change-details-container .text-gray-700 {
-    color: #374151 !important;
-}
-
-.change-details-container .text-gray-600 {
-    color: #4b5563 !important;
-}
-
-.change-details-container .text-red-800 {
-    color: #991b1b !important;
-}
-
-.change-details-container .text-green-800 {
-    color: #166534 !important;
-}
-
-.change-details-container .text-blue-700 {
-    color: #1d4ed8 !important;
-}
-
-.change-details-container .text-purple-600 {
-    color: #9333ea !important;
-}
-
-.change-details-container .text-blue-600 {
-    color: #2563eb !important;
-}
-
-.change-details-container .bg-gray-100 {
-    background-color: #f3f4f6 !important;
-}
-
-.change-details-container .bg-red-50 {
-    background-color: #fef2f2 !important;
-}
-
-.change-details-container .bg-green-50 {
-    background-color: #f0fdf4 !important;
-}
-
-.change-details-container .bg-blue-50 {
-    background-color: #eff6ff !important;
-}
-
-.change-details-container .border-gray-200 {
-    border-color: #e5e7eb !important;
-}
-
-.change-details-container .border-red-200 {
-    border-color: #fecaca !important;
-}
-
-.change-details-container .border-green-200 {
-    border-color: #bbf7d0 !important;
-}
-
-.change-details-container .border-blue-200 {
-    border-color: #bfdbfe !important;
-}
-
-/* Dark app + form-theme-2: reset Tailwind on selects (light mode keeps normal styling) */
-html.dark.form-theme-2 select,
-html.dark.form-theme-2 select * {
+/* Dark app + dark-style form themes: reset Tailwind on selects (light mode keeps normal styling).
+   Exclude SweetAlert2 template .swal2-select — global display/block rules override its inline display:none. */
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select),
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select) * {
   all: unset !important;
 }
 
-html.dark.form-theme-2 select {
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select) {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.8) !important;
   border: 2px solid rgba(148, 163, 184, 0.3) !important;
@@ -368,11 +300,14 @@ html.dark .custom-select {
 }
 
 html.dark .filter-select {
-  height: 16px !important;
+  min-height: 2.75rem !important;
   width: auto !important;
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.8) !important;
-
+  border: 2px solid rgba(148, 163, 184, 0.3) !important;
+  border-radius: 12px !important;
+  padding: 0.875rem 1rem !important;
+  font-size: 0.875rem !important;
   font-weight: 500 !important;
   cursor: pointer !important;
   -webkit-appearance: none !important;
@@ -2000,6 +1935,173 @@ html.dark .filter-select option {
   transform: none !important;
 }
 
+.recovery-trust-card {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 1rem !important;
+  padding: 1.25rem 1.5rem !important;
+  margin-bottom: 1.75rem !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(34, 197, 94, 0.35) !important;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(34, 197, 94, 0.04) 100%) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06) !important;
+}
+
+.recovery-trust-icon {
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  background: rgba(34, 197, 94, 0.2) !important;
+  color: #22c55e !important;
+}
+
+.recovery-trust-text {
+  margin: 0 !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-size: 0.9375rem !important;
+  line-height: 1.55 !important;
+  font-weight: 500 !important;
+}
+
+.recovery-feedback {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  padding: 1rem 1.25rem !important;
+  border-radius: 12px !important;
+  margin-bottom: 1.25rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+}
+
+.recovery-feedback--success {
+  background: rgba(34, 197, 94, 0.15) !important;
+  border: 1px solid rgba(34, 197, 94, 0.35) !important;
+  color: #86efac !important;
+}
+
+.recovery-feedback--error {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  color: #fecaca !important;
+}
+
+.recovery-feedback-dismiss {
+  all: unset !important;
+  margin-left: auto !important;
+  cursor: pointer !important;
+  opacity: 0.85 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.recovery-feedback-dismiss:hover {
+  opacity: 1 !important;
+}
+
+.detail-item--full {
+  grid-column: 1 / -1 !important;
+}
+
+.item-actions--split {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 1rem !important;
+}
+
+.item-actions-buttons {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.75rem !important;
+  justify-content: flex-end !important;
+}
+
+.btn-purge-permanent {
+  all: unset !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 0.75rem 1.25rem !important;
+  background: transparent !important;
+  color: #fecaca !important;
+  border-radius: 12px !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  border: 2px solid rgba(239, 68, 68, 0.45) !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-purge-permanent:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.65) !important;
+}
+
+.btn-purge-permanent:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+}
+
+.recovery-modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 10050 !important;
+  background: rgba(0, 0, 0, 0.55) !important;
+  backdrop-filter: blur(6px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1.25rem !important;
+}
+
+.recovery-modal {
+  width: 100% !important;
+  max-width: 440px !important;
+  border-radius: 20px !important;
+  padding: 1.75rem !important;
+  background: linear-gradient(145deg, rgba(30, 30, 40, 0.98) 0%, rgba(20, 20, 30, 0.98) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45) !important;
+}
+
+.recovery-modal-title {
+  margin: 0 0 0.75rem 0 !important;
+  color: #fff !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  line-height: 1.35 !important;
+}
+
+.recovery-modal-body {
+  margin: 0 !important;
+  color: rgba(255, 255, 255, 0.78) !important;
+  font-size: 0.9rem !important;
+  line-height: 1.55 !important;
+}
+
+.recovery-modal-meta {
+  margin: 1rem 0 0 0 !important;
+  font-size: 0.8125rem !important;
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.recovery-modal-meta-sep {
+  margin: 0 0.35rem !important;
+}
+
+.recovery-modal-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.75rem !important;
+  justify-content: flex-end !important;
+  margin-top: 1.5rem !important;
+}
+
 /* Empty State Container */
 .empty-state-container {
   grid-column: 1 / -1 !important;
@@ -2580,6 +2682,12 @@ html.dark .filter-select option {
 .form-theme-1,
 .form-theme-2,
 .form-theme-3,
+.form-theme-4,
+.form-theme-5,
+.form-theme-6,
+.form-theme-7,
+.form-theme-8,
+.form-theme-9,
 .form-theme-system {
   background: var(--background);
   color: var(--text-primary);
@@ -2634,27 +2742,27 @@ html.dark .filter-select option {
 }
 
 /* Dark app theme only: force select contrast (light mode uses normal / theme variables) */
-html.dark.form-theme-2 select,
-html.dark.form-theme-2 .filter-select,
-html.dark.form-theme-2 .form-select {
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select),
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .filter-select,
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .form-select {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.8) !important;
 }
 
-html.dark.form-theme-2 select:focus,
-html.dark.form-theme-2 .filter-select:focus,
-html.dark.form-theme-2 .form-select:focus {
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select):focus,
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .filter-select:focus,
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) .form-select:focus {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.95) !important;
 }
 
-html.dark.form-theme-2 select option:checked,
-html.dark.form-theme-2 select option[selected] {
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select) option:checked,
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select) option[selected] {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 1) !important;
 }
 
-html.dark.form-theme-2 select {
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select) {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.8) !important;
   -webkit-text-fill-color: #F1F5F9 !important;
@@ -2662,22 +2770,22 @@ html.dark.form-theme-2 select {
   text-fill-color: #F1F5F9 !important;
 }
 
-html.dark.form-theme-2 select,
-html.dark.form-theme-2 select:focus,
-html.dark.form-theme-2 select:hover,
-html.dark.form-theme-2 select:active,
-html.dark.form-theme-2 select:visited,
-html.dark.form-theme-2 select:not(:focus):not(:hover):not(:active) {
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select),
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select):focus,
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select):hover,
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select):active,
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select):visited,
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select):not(:focus):not(:hover):not(:active) {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.8) !important;
   -webkit-text-fill-color: #F1F5F9 !important;
 }
 
-html.dark.form-theme-2 * select {
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) * select:not(.swal2-select) {
   color: #F1F5F9 !important;
 }
 
-html.dark.form-theme-2 select {
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select) {
   all: unset !important;
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.8) !important;
@@ -2695,11 +2803,11 @@ html.dark.form-theme-2 select {
   text-fill-color: #F1F5F9 !important;
 }
 
-html.dark.form-theme-2 select,
-html.dark.form-theme-2 select:focus,
-html.dark.form-theme-2 select:hover,
-html.dark.form-theme-2 select:active,
-html.dark.form-theme-2 select:visited {
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select),
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select):focus,
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select):hover,
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select):active,
+html.dark:is(.form-theme-2, .form-theme-5, .form-theme-7, .form-theme-9) select:not(.swal2-select):visited {
   color: #F1F5F9 !important;
   background: rgba(30, 41, 59, 0.8) !important;
   -webkit-text-fill-color: #F1F5F9 !important;

@@ -24,6 +24,8 @@ class PurchaseRequisition extends Model
         'justification',
         'notes',
         'status',
+        'approved_at',
+        'approved_by',
         'created_by',
         'updated_by',
     ];
@@ -32,6 +34,7 @@ class PurchaseRequisition extends Model
         'pr_date' => 'date',
         'required_by_date' => 'date',
         'fx_rate' => 'decimal:6',
+        'approved_at' => 'datetime',
     ];
 
     public function lines(): HasMany
@@ -57,5 +60,10 @@ class PurchaseRequisition extends Model
     public function requestingLocation(): BelongsTo
     {
         return $this->belongsTo(Location::class, 'location_id');
+    }
+
+    public function purchaseOrders(): HasMany
+    {
+        return $this->hasMany(PurchaseOrder::class);
     }
 }

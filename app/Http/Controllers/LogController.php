@@ -153,27 +153,36 @@ class LogController extends Controller
         $table = $request->input('table');
         $search = $request->input('search');
         $perPage = $request->input('per_page', 25);
+        $compId = (int) session('user_comp_id');
 
-        $query = DB::table('tbl_deleted_data_recovery as r')
-            ->leftJoin('tbl_users as u', 'r.deleted_by', '=', 'u.id')
+        $base = RecoveryService::queryRecoverableForCompany($compId);
+
+        $tableOptions = (clone $base)
+            ->select('r.original_table')
+            ->distinct()
+            ->orderBy('r.original_table')
+            ->pluck('original_table')
+            ->filter()
+            ->values()
+            ->all();
+
+        $query = (clone $base)
             ->select(
                 'r.*',
-                DB::raw("CONCAT(u.fname, ' ', COALESCE(u.mname, ''), ' ', u.lname) as deleted_by_name"),
+                DB::raw("CONCAT(COALESCE(u.fname, ''), ' ', COALESCE(u.mname, ''), ' ', COALESCE(u.lname, '')) as deleted_by_name"),
                 'u.email as deleted_by_email',
-                DB::raw('DATEDIFF(r.recovery_expires_at, NOW()) as days_remaining')
-            )
-            ->where('r.status', 'DELETED')
-            ->where('r.recovery_expires_at', '>', now())
-            ->where('u.comp_id', session('user_comp_id')); // Company filtering via user
+                DB::raw('GREATEST(0, DATEDIFF(r.recovery_expires_at, NOW())) as days_remaining')
+            );
 
         if ($table) {
             $query->where('r.original_table', $table);
         }
 
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('r.record_identifier', 'like', "%{$search}%")
-                  ->orWhere('r.delete_reason', 'like', "%{$search}%");
+                    ->orWhere('r.original_table', 'like', "%{$search}%")
+                    ->orWhere('r.delete_reason', 'like', "%{$search}%");
             });
         }
 
@@ -183,11 +192,12 @@ class LogController extends Controller
 
         return Inertia::render('Logs/DeletedItems', [
             'deletedItems' => $deletedItems,
+            'tableOptions' => $tableOptions,
             'filters' => [
                 'table' => $table,
                 'search' => $search,
-                'per_page' => $perPage
-            ]
+                'per_page' => $perPage,
+            ],
         ]);
     }
 
@@ -198,17 +208,37 @@ class LogController extends Controller
     {
         try {
             $notes = $request->input('notes');
-            $result = RecoveryService::restore($id, $notes);
+            $result = RecoveryService::restore((int) $id, $notes);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data restored successfully',
-                'data' => $result
+                'message' => __('logs_messages.deleted_items.restore_success'),
+                'data' => $result,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
+     * Permanently remove a recovery entry (discard backup; cannot be undone).
+     */
+    public function purgeRecovery(Request $request, $id)
+    {
+        try {
+            RecoveryService::purgeFromRecycleBin((int) $id);
+
+            return response()->json([
+                'success' => true,
+                'message' => __('logs_messages.deleted_items.purge_success'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
             ], 400);
         }
     }

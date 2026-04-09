@@ -1,9 +1,10 @@
 import React, { useRef, useState, useMemo, useCallback, useEffect } from 'react';
-import { Home, ClipboardList, Plus, Trash2, Package } from 'lucide-react';
+import { Home, ClipboardList, Plus, Trash2, SquarePen } from 'lucide-react';
 import { router, usePage } from '@inertiajs/react';
 import GeneralizedForm from '@/Components/GeneralizedForm';
 import Breadcrumbs from '@/Components/Breadcrumbs';
 import InlineSearchSelect from '@/Components/InlineSearchSelect';
+import CustomDatePicker from '@/Components/DatePicker/DatePicker';
 import App from '../../App.jsx';
 import { useTranslations } from '@/hooks/useTranslations';
 
@@ -16,6 +17,26 @@ const emptyLine = () => ({
   need_by_date: '',
   line_notes: '',
 });
+
+function mapLineFromApi(line) {
+  return {
+    inventory_item_id: line.inventory_item_id != null ? String(line.inventory_item_id) : '',
+    item_description: line.item_description ?? '',
+    uom_id: line.uom_id != null ? String(line.uom_id) : '',
+    quantity: line.quantity != null ? String(line.quantity) : '',
+    estimated_unit_price:
+      line.estimated_unit_price != null && line.estimated_unit_price !== ''
+        ? String(line.estimated_unit_price)
+        : '',
+    need_by_date: line.need_by_date ? String(line.need_by_date).split('T')[0] : '',
+    line_notes: line.line_notes ?? '',
+  };
+}
+
+function formatHeaderDate(v) {
+  if (v == null || v === '') return '';
+  return String(v).split('T')[0];
+}
 
 const PurchaseRequisitionCreate = () => {
   const { t } = useTranslations();
@@ -35,11 +56,27 @@ const PurchaseRequisitionCreate = () => {
     currencyOptions = [],
     itemMetaById = {},
     defaults = {},
+    requisition = null,
+    preview_pr_number = null,
   } = usePage().props;
 
+  const isEdit = Boolean(requisition?.id);
+  const [headerFormKey, setHeaderFormKey] = useState(0);
   const [lines, setLines] = useState([emptyLine()]);
   const [alert, setAlert] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (requisition?.id) {
+      setLines(
+        Array.isArray(requisition.lines) && requisition.lines.length
+          ? requisition.lines.map(mapLineFromApi)
+          : [emptyLine()]
+      );
+    } else {
+      setLines([emptyLine()]);
+    }
+  }, [requisition?.id]);
 
   useEffect(() => {
     if (pageError) {
@@ -48,14 +85,10 @@ const PurchaseRequisitionCreate = () => {
   }, [pageError]);
 
   useEffect(() => {
-    if (flash?.success) {
-      setAlert({ type: 'success', message: flash.success });
-      setLines([emptyLine()]);
-      headerFormRef.current?.resetForm?.();
-    } else if (flash?.error) {
+    if (flash?.error) {
       setAlert({ type: 'error', message: flash.error });
     }
-  }, [flash]);
+  }, [flash?.error]);
 
   useEffect(() => {
     if (pageErrors && Object.keys(pageErrors).length > 0) {
@@ -79,18 +112,26 @@ const PurchaseRequisitionCreate = () => {
   const headerFields = useMemo(
     () => [
       {
+        name: 'pr_number_display',
+        label: fld('pr_number', 'label'),
+        type: 'text',
+        placeholder: fld('pr_number', 'placeholder'),
+        required: false,
+        disabled: true,
+        section: tc('section_header'),
+      },
+      {
         name: 'pr_date',
         label: fld('pr_date', 'label'),
-        type: 'date',
+        type: 'datepicker',
         placeholder: fld('pr_date', 'placeholder'),
-        icon: Package,
         required: true,
         section: tc('section_header'),
       },
       {
         name: 'required_by_date',
         label: fld('required_by_date', 'label'),
-        type: 'date',
+        type: 'datepicker',
         placeholder: fld('required_by_date', 'placeholder'),
         required: false,
       },
@@ -109,7 +150,7 @@ const PurchaseRequisitionCreate = () => {
         type: 'textarea',
         placeholder: fld('delivery_address', 'placeholder'),
         required: false,
-        rows: 3,
+        rows: 2,
       },
       {
         name: 'currency_id',
@@ -138,6 +179,18 @@ const PurchaseRequisitionCreate = () => {
         required: true,
       },
       {
+        name: 'initial_status',
+        label: fld('initial_status', 'label'),
+        type: 'select',
+        placeholder: fld('initial_status', 'placeholder'),
+        options: [
+          { value: 'draft', label: tc('initial_status_options.draft') },
+          { value: 'approved', label: tc('initial_status_options.approved') },
+        ],
+        required: true,
+        section: tc('section_header'),
+      },
+      {
         name: 'department_id',
         label: fld('department_id', 'label'),
         type: 'select',
@@ -160,7 +213,7 @@ const PurchaseRequisitionCreate = () => {
         type: 'textarea',
         placeholder: fld('justification', 'placeholder'),
         required: false,
-        rows: 3,
+        rows: 2,
       },
       {
         name: 'notes',
@@ -174,8 +227,28 @@ const PurchaseRequisitionCreate = () => {
     [fld, tc, locationOptions, currencyOptions, departmentOptions, priorityOptions]
   );
 
-  const initialHeader = useMemo(
-    () => ({
+  const initialHeader = useMemo(() => {
+    if (requisition?.id) {
+      return {
+        pr_number_display: requisition.pr_number ?? '',
+        pr_date: formatHeaderDate(requisition.pr_date),
+        required_by_date: formatHeaderDate(requisition.required_by_date),
+        deliver_to_location_id:
+          requisition.deliver_to_location_id != null ? String(requisition.deliver_to_location_id) : '',
+        delivery_address: requisition.delivery_address ?? '',
+        currency_id: requisition.currency_id != null ? String(requisition.currency_id) : '',
+        fx_rate:
+          requisition.fx_rate != null && requisition.fx_rate !== '' ? String(requisition.fx_rate) : '',
+        priority: requisition.priority || 'normal',
+        initial_status: requisition.status === 'approved' ? 'approved' : 'draft',
+        department_id: requisition.department_id != null ? String(requisition.department_id) : '',
+        requested_by: requisition.requested_by ?? '',
+        justification: requisition.justification ?? '',
+        notes: requisition.notes ?? '',
+      };
+    }
+    return {
+      pr_number_display: preview_pr_number ?? '',
       pr_date: defaults.pr_date || '',
       required_by_date: '',
       deliver_to_location_id: defaults.deliver_to_location_id || '',
@@ -183,13 +256,13 @@ const PurchaseRequisitionCreate = () => {
       currency_id: defaults.currency_id || '',
       fx_rate: defaults.fx_rate || '',
       priority: 'normal',
+      initial_status: 'draft',
       department_id: '',
       requested_by: '',
       justification: '',
       notes: '',
-    }),
-    [defaults]
-  );
+    };
+  }, [defaults, requisition, preview_pr_number]);
 
   const estimatedSubtotal = useMemo(() => {
     let sum = 0;
@@ -250,6 +323,7 @@ const PurchaseRequisitionCreate = () => {
 
     const header = headerFormRef.current.getValues();
     const payload = {
+      initial_status: header.initial_status || 'draft',
       pr_date: header.pr_date,
       required_by_date: header.required_by_date || null,
       deliver_to_location_id: header.deliver_to_location_id || null,
@@ -276,26 +350,43 @@ const PurchaseRequisitionCreate = () => {
     };
 
     setSubmitting(true);
-    router.post('/inventory/purchase-requisition', payload, {
+    const opts = {
       preserveScroll: true,
       onFinish: () => setSubmitting(false),
-    });
+      onError: () => setSubmitting(false),
+    };
+    if (requisition?.id) {
+      router.put(`/inventory/purchase-requisition/${requisition.id}`, payload, opts);
+    } else {
+      router.post('/inventory/purchase-requisition', payload, opts);
+    }
   };
 
   const handleResetAll = () => {
-    headerFormRef.current?.resetForm?.();
-    setLines([emptyLine()]);
     setAlert(null);
+    if (requisition?.id) {
+      setLines(
+        Array.isArray(requisition.lines) && requisition.lines.length
+          ? requisition.lines.map(mapLineFromApi)
+          : [emptyLine()]
+      );
+      setHeaderFormKey((k) => k + 1);
+    } else {
+      headerFormRef.current?.resetForm?.();
+      setLines([emptyLine()]);
+    }
   };
 
   const breadcrumbItems = useMemo(
     () => [
       { label: t('common.breadcrumbs.dashboard'), icon: Home, href: '/dashboard' },
       { label: tc('breadcrumb_inventory'), icon: ClipboardList, href: '/erp-modules' },
-      { label: tc('breadcrumb_pr'), icon: ClipboardList, href: null },
-      { label: tc('breadcrumb_create'), icon: Plus, href: null },
+      { label: tc('breadcrumb_pr'), icon: ClipboardList, href: '/inventory/purchase-requisition' },
+      isEdit
+        ? { label: tc('breadcrumb_edit'), icon: SquarePen, href: null }
+        : { label: tc('breadcrumb_create'), icon: Plus, href: null },
     ],
-    [t, tc]
+    [t, tc, isEdit]
   );
 
   const subtotalLabel = estimatedSubtotal.toLocaleString(undefined, {
@@ -306,19 +397,24 @@ const PurchaseRequisitionCreate = () => {
   return (
     <App>
       <div className="rounded-xl shadow-lg border-slate-200">
-        <div className="p-6">
+        <div className="p-4 md:p-5">
           <Breadcrumbs items={breadcrumbItems} description={tc('breadcrumb_desc')} />
 
           <div className="form-theme-system">
-            <div className="form-container">
-              <div className="form-header mb-6">
-                <h1 className="form-title">{tc('title')}</h1>
-                <p className="form-subtitle">{tc('subtitle')}</p>
+            <div className="form-container form-container--pr-compact">
+              <div className="form-header form-header--compact mb-4">
+                <h1 className="form-title form-title--compact">
+                  {isEdit ? tc('title_edit') : tc('title')}
+                  {isEdit && requisition?.pr_number ? (
+                    <span className="ml-2 text-base font-mono font-normal opacity-90">{requisition.pr_number}</span>
+                  ) : null}
+                </h1>
+                <p className="form-subtitle mb-0">{isEdit ? tc('subtitle_edit') : tc('subtitle')}</p>
               </div>
 
               {alert && (
                 <div
-                  className={`mb-6 ${alert.type === 'error' ? 'alert-error-themed' : 'alert-success-themed'}`}
+                  className={`mb-4 ${alert.type === 'error' ? 'alert-error-themed' : 'alert-success-themed'}`}
                   role={alert.type === 'error' ? 'alert' : 'status'}
                 >
                   <p className="m-0">{alert.message}</p>
@@ -334,6 +430,7 @@ const PurchaseRequisitionCreate = () => {
 
               <form onSubmit={handleFormSubmit} noValidate>
                 <GeneralizedForm
+                  key={`pr-h-${headerFormKey}-${requisition?.id ?? 'new'}`}
                   ref={headerFormRef}
                   embedded
                   showEmbeddedHeader={false}
@@ -341,13 +438,14 @@ const PurchaseRequisitionCreate = () => {
                   subtitle=""
                   fields={headerFields}
                   initialData={initialHeader}
+                  formGridClassName="form-grid--pr-compact"
                   onSubmit={() => {}}
                   showReset={false}
                   showSubmitActions={false}
                 />
 
-                <section className="mt-10" aria-labelledby="pr-lines-heading">
-                  <div className="textarea-group mb-2">
+                <section className="mt-5" aria-labelledby="pr-lines-heading">
+                  <div className="textarea-group mb-1.5">
                     <h2 id="pr-lines-heading" className="m-0 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                       {tc('section_lines')}
                     </h2>
@@ -447,12 +545,17 @@ const PurchaseRequisitionCreate = () => {
                               />
                             </td>
                             <td className="px-2 py-2">
-                              <input
+                              <CustomDatePicker
+                                selected={row.need_by_date ? new Date(row.need_by_date) : null}
+                                onChange={(date) =>
+                                  updateLine(index, {
+                                    need_by_date: date ? date.toISOString().split('T')[0] : '',
+                                  })
+                                }
                                 type="date"
+                                placeholder={lf('need_by_date', 'placeholder')}
                                 className="form-input w-full min-w-[8rem]"
-                                value={row.need_by_date}
-                                onChange={(e) => updateLine(index, { need_by_date: e.target.value })}
-                                aria-label={lf('need_by_date', 'label')}
+                                isClearable
                               />
                             </td>
               <td className="px-2 py-2">
@@ -501,9 +604,9 @@ const PurchaseRequisitionCreate = () => {
                   </div>
                 </section>
 
-                <div className="button-group mt-8">
+                <div className="button-group button-group--pr mt-4">
                   <button type="submit" className="btn btn-primary" disabled={submitting}>
-                    {submitting ? t('common.form.processing') : tc('submit_save')}
+                    {submitting ? t('common.form.processing') : isEdit ? tc('submit_update') : tc('submit_save')}
                   </button>
                   <button type="button" className="btn btn-secondary" disabled={submitting} onClick={handleResetAll}>
                     {tc('reset_form')}

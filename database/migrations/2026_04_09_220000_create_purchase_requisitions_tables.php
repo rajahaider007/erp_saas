@@ -29,8 +29,8 @@ return new class extends Migration
             $table->text('justification')->nullable();
             $table->text('notes')->nullable();
             $table->string('status', 32)->default('draft');
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('tbl_users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('tbl_users')->nullOnDelete();
             $table->timestamps();
 
             $table->unique(['comp_id', 'location_id', 'pr_number'], 'purchase_requisitions_number_unique');

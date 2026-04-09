@@ -321,17 +321,15 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
                                             </div>
                                         </td>
                                         <td>
-                                            <span 
+                                            <span
                                                 className={`px-3 py-1 rounded-lg text-sm font-semibold border ${getEventBadgeClass(log.event_type)}`}
-                                                style={{color: 'inherit', fontWeight: '600'}}
                                             >
                                                 {log.event_type}
                                             </span>
                                         </td>
                                         <td>
-                                            <span 
+                                            <span
                                                 className={`px-3 py-1 rounded-lg text-sm font-semibold border ${getRiskBadgeClass(log.risk_level)}`}
-                                                style={{color: 'inherit', fontWeight: '600'}}
                                             >
                                                 {log.risk_level}
                                             </span>

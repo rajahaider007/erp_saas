@@ -15,8 +15,28 @@ import {
   Type,
   Minimize,
   Eye,
-  EyeOff
+  EyeOff,
+  Sparkles
 } from 'lucide-react';
+
+/** Matches <html> form-theme-* classes applied in useEffect */
+const FORM_THEME_CLASSES = [
+  'form-theme-1',
+  'form-theme-2',
+  'form-theme-3',
+  'form-theme-4',
+  'form-theme-5',
+  'form-theme-6',
+  'form-theme-7',
+  'form-theme-8',
+  'form-theme-9',
+  'form-theme-system',
+];
+
+const ALLOWED_FORM_THEME_IDS = new Set(
+  FORM_THEME_CLASSES.filter((c) => c !== 'form-theme-system').map((c) => c.replace(/^form-/, ''))
+);
+ALLOWED_FORM_THEME_IDS.add('theme-system');
 
 const LayoutContext = createContext(undefined);
 
@@ -33,11 +53,16 @@ export function LayoutProvider({ children }) {
     { name: 'Pink', value: 'pink', color: 'bg-pink-500', primary: '#EC4899' },
   ];
 
-  // Form themes: theme-1 & theme-3 = light styles, theme-2 = dark form style (used with app dark mode)
   const formThemeOptions = [
-    { id: 'light-1', theme: 'light', formTheme: 'theme-1', label: 'Light — Style 1', sub: 'Blue/purple forms', preview: 'bg-gradient-to-br from-blue-500 to-purple-600' },
-    { id: 'light-2', theme: 'light', formTheme: 'theme-3', label: 'Light — Style 2', sub: 'Cyan/blue forms', preview: 'bg-gradient-to-br from-cyan-400 to-blue-500' },
-    { id: 'dark', theme: 'dark', formTheme: 'theme-2', label: 'Dark', sub: 'Dark forms', preview: 'bg-gradient-to-br from-gray-800 to-purple-900' },
+    { id: 'light-1', theme: 'light', formTheme: 'theme-1', label: 'Light — Style 1', sub: 'Blue/purple forms', preview: 'bg-gradient-to-br from-blue-500 to-purple-600', icon: 'sun' },
+    { id: 'light-2', theme: 'light', formTheme: 'theme-3', label: 'Light — Style 2', sub: 'Cyan/blue forms', preview: 'bg-gradient-to-br from-cyan-400 to-blue-500', icon: 'sun' },
+    { id: 'light-glass', theme: 'light', formTheme: 'theme-4', label: 'Light — Liquid Glass', sub: 'Frosted glass & soft gradients', preview: 'bg-gradient-to-br from-indigo-400 via-sky-300 to-fuchsia-400', icon: 'sparkles' },
+    { id: 'light-classic', theme: 'light', formTheme: 'theme-6', label: 'Light — Classic', sub: 'Neutral, high clarity', preview: 'bg-gradient-to-b from-zinc-200 to-zinc-100', icon: 'sun' },
+    { id: 'light-emerald', theme: 'light', formTheme: 'theme-8', label: 'Light — Emerald Slate', sub: 'Modern green & stone', preview: 'bg-gradient-to-br from-emerald-200 via-slate-200 to-teal-100', icon: 'sun' },
+    { id: 'dark', theme: 'dark', formTheme: 'theme-2', label: 'Dark', sub: 'Purple depth (classic dark)', preview: 'bg-gradient-to-br from-gray-800 to-purple-900', icon: 'moon' },
+    { id: 'dark-glass', theme: 'dark', formTheme: 'theme-5', label: 'Dark — Liquid Glass', sub: 'Deep glass & cyan accents', preview: 'bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900', icon: 'sparkles' },
+    { id: 'dark-classic', theme: 'dark', formTheme: 'theme-7', label: 'Dark — Classic', sub: 'Zinc contrast, minimal', preview: 'bg-gradient-to-b from-zinc-950 to-black', icon: 'moon' },
+    { id: 'dark-carbon', theme: 'dark', formTheme: 'theme-9', label: 'Dark — Carbon Blue', sub: 'Slate & blue professional', preview: 'bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900', icon: 'moon' },
   ];
 
   // Initialize state with defaults
@@ -66,6 +91,9 @@ export function LayoutProvider({ children }) {
         // Legacy 'system' / mismatched pairs: default to dark + dark forms
         if (merged.theme === 'system') {
           merged.theme = 'dark';
+          merged.formTheme = 'theme-2';
+        }
+        if (!ALLOWED_FORM_THEME_IDS.has(merged.formTheme)) {
           merged.formTheme = 'theme-2';
         }
         return merged;
@@ -163,7 +191,7 @@ export function LayoutProvider({ children }) {
     }
 
     // Form style: theme-1 / theme-2 / theme-3 (light-1, dark, light-2)
-    root.classList.remove('form-theme-1', 'form-theme-2', 'form-theme-3', 'form-theme-system');
+    FORM_THEME_CLASSES.forEach((c) => root.classList.remove(c));
     root.classList.add(`form-${formTheme}`);
 
     // Apply other settings as classes
@@ -282,7 +310,11 @@ export function LayoutProvider({ children }) {
       if (filteredSettings.compactMode !== undefined) setCompactMode(filteredSettings.compactMode);
       if (filteredSettings.borderRadius) setBorderRadius(filteredSettings.borderRadius);
       if (filteredSettings.fontSize) setFontSize(filteredSettings.fontSize);
-      if (filteredSettings.formTheme) setFormTheme(filteredSettings.formTheme);
+      if (filteredSettings.formTheme) {
+        setFormTheme(
+          ALLOWED_FORM_THEME_IDS.has(filteredSettings.formTheme) ? filteredSettings.formTheme : 'theme-2'
+        );
+      }
       
       return { success: true, message: 'Settings imported successfully!' };
     } catch (error) {
@@ -304,7 +336,10 @@ export function LayoutProvider({ children }) {
     return classes.join(' ');
   };
 
-  const currentThemeOption = () => formThemeOptions.find(o => o.theme === theme && o.formTheme === formTheme) || formThemeOptions[0];
+  const currentThemeOption = () =>
+    formThemeOptions.find((o) => o.theme === theme && o.formTheme === formTheme) ||
+    formThemeOptions.find((o) => o.id === 'dark') ||
+    formThemeOptions[0];
 
   const setCombinedTheme = (option) => {
     setTempSettings(prev => ({ ...prev, theme: option.theme, formTheme: option.formTheme }));
@@ -340,7 +375,7 @@ export function LayoutProvider({ children }) {
       }
       
       // Form theme from temp settings
-      root.classList.remove('form-theme-1', 'form-theme-2', 'form-theme-3', 'form-theme-system');
+      FORM_THEME_CLASSES.forEach((c) => root.classList.remove(c));
       root.classList.add(`form-${tempSettings.formTheme}`);
       
       // Apply other settings
@@ -463,7 +498,13 @@ export function LayoutProvider({ children }) {
                         title={opt.sub}
                       >
                         <div className={`h-10 w-10 rounded-lg ${opt.preview} flex-shrink-0 flex items-center justify-center`}>
-                          {opt.theme === 'dark' ? <Moon className="h-5 w-5 text-white" /> : <Sun className="h-5 w-5 text-white" />}
+                          {opt.icon === 'sparkles' ? (
+                            <Sparkles className="h-5 w-5 text-white drop-shadow-sm" />
+                          ) : opt.theme === 'dark' ? (
+                            <Moon className="h-5 w-5 text-white drop-shadow-sm" />
+                          ) : (
+                            <Sun className="h-5 w-5 text-white drop-shadow-sm" />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 dark:text-white">{opt.label}</p>

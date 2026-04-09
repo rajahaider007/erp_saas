@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { useLayout } from '../../Contexts/LayoutContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTranslations } from '../../hooks/useTranslations';
@@ -32,7 +32,7 @@ const Header = () => {
   const { auth, company, userRights, availableMenus } = props;
   const user = auth?.user;
   
-  const { canView } = usePermissions();
+  const { canView, hasAccessToModule } = usePermissions();
   const {
     sidebarOpen,
     setSidebarOpen,
@@ -46,6 +46,10 @@ const Header = () => {
   const [profileOpen, setProfileOpen] = React.useState(false);
   const [notificationsOpen, setNotificationsOpen] = React.useState(false);
   const [languageMenuOpen, setLanguageMenuOpen] = React.useState(false);
+  const [moduleSwitching, setModuleSwitching] = React.useState(false);
+  const [moduleDropdownOpen, setModuleDropdownOpen] = React.useState(false);
+  const moduleDropdownLeaveTimerRef = React.useRef(null);
+  const moduleSwitchRootRef = React.useRef(null);
   const [hoveredNavItem, setHoveredNavItem] = React.useState(null);
   const [currentLanguage, setCurrentLanguage] = React.useState('default');
   const [googleTranslateLoaded, setGoogleTranslateLoaded] = React.useState(false);
@@ -75,6 +79,14 @@ const Header = () => {
   // Get modules from props at component level
   const { availableModules } = props;
   const modules = availableModules;
+
+  const moduleSwitcherOptions = React.useMemo(() => {
+    if (!modules || !Array.isArray(modules)) return [];
+    return modules
+      .filter((m) => m && m.folder_name && hasAccessToModule(m.folder_name))
+      .slice()
+      .sort((a, b) => String(a.module_name || '').localeCompare(String(b.module_name || '')));
+  }, [modules, hasAccessToModule]);
 
   // State for current module data
   const [currentModuleData, setCurrentModuleData] = React.useState(null);
@@ -139,6 +151,95 @@ const Header = () => {
     const path = url.replace(/^\/+/, '').split('/');
     return path[0];
   };
+
+  const moduleSelectValue = React.useMemo(() => {
+    const folder = getCurrentModuleName(url);
+    if (!folder) return '';
+    if (folder === 'system' || folder === 'erp-modules') return '';
+    const match = moduleSwitcherOptions.some((m) => m.folder_name === folder);
+    return match ? folder : '';
+  }, [url, moduleSwitcherOptions]);
+
+  const clearModuleDropdownLeaveTimer = React.useCallback(() => {
+    if (moduleDropdownLeaveTimerRef.current) {
+      clearTimeout(moduleDropdownLeaveTimerRef.current);
+      moduleDropdownLeaveTimerRef.current = null;
+    }
+  }, []);
+
+  const openModuleDropdown = React.useCallback(() => {
+    clearModuleDropdownLeaveTimer();
+    setModuleDropdownOpen(true);
+  }, [clearModuleDropdownLeaveTimer]);
+
+  const scheduleCloseModuleDropdown = React.useCallback(() => {
+    clearModuleDropdownLeaveTimer();
+    moduleDropdownLeaveTimerRef.current = setTimeout(() => {
+      setModuleDropdownOpen(false);
+      moduleDropdownLeaveTimerRef.current = null;
+    }, 140);
+  }, [clearModuleDropdownLeaveTimer]);
+
+  React.useEffect(() => () => clearModuleDropdownLeaveTimer(), [clearModuleDropdownLeaveTimer]);
+
+  React.useEffect(() => {
+    if (!moduleDropdownOpen) return undefined;
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        clearModuleDropdownLeaveTimer();
+        setModuleDropdownOpen(false);
+      }
+    };
+
+    const onPointerDown = (e) => {
+      const root = moduleSwitchRootRef.current;
+      if (root && !root.contains(e.target)) {
+        clearModuleDropdownLeaveTimer();
+        setModuleDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('mousedown', onPointerDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('mousedown', onPointerDown);
+    };
+  }, [moduleDropdownOpen, clearModuleDropdownLeaveTimer]);
+
+  const applyModuleFolder = React.useCallback(
+    (folder) => {
+      setModuleDropdownOpen(false);
+      if (folder === moduleSelectValue) return;
+      if (!folder) {
+        router.visit('/system/dashboard', {
+          preserveScroll: true,
+          onStart: () => setModuleSwitching(true),
+          onFinish: () => setModuleSwitching(false),
+        });
+        return;
+      }
+      const mod = moduleSwitcherOptions.find((m) => m.folder_name === folder);
+      if (!mod) return;
+      router.post(
+        '/set-current-module',
+        { module_id: mod.id },
+        {
+          preserveScroll: true,
+          onStart: () => setModuleSwitching(true),
+          onFinish: () => setModuleSwitching(false),
+        }
+      );
+    },
+    [moduleSelectValue, moduleSwitcherOptions]
+  );
+
+  const moduleTriggerLabel = React.useMemo(() => {
+    if (!moduleSelectValue) return t('header.system_home');
+    const mod = moduleSwitcherOptions.find((m) => m.folder_name === moduleSelectValue);
+    return mod?.module_name || t('header.system_home');
+  }, [moduleSelectValue, moduleSwitcherOptions, t]);
 
   // Load current module data from session
   React.useEffect(() => {
@@ -589,6 +690,97 @@ const Header = () => {
 
           {/* Right Section */}
           <div className="flex items-center space-x-2">
+            {/* Module switcher: custom menu, height-matched to locale pill; open on hover */}
+            {moduleSwitcherOptions.length > 0 && (
+              <div
+                ref={moduleSwitchRootRef}
+                className={`hidden sm:inline-block align-middle relative max-w-[12.5rem] flex-shrink-0 notranslate transition-opacity duration-300 ease-out ${
+                  moduleSwitching ? 'opacity-60 pointer-events-none' : 'opacity-100'
+                }`}
+                onMouseEnter={openModuleDropdown}
+                onMouseLeave={scheduleCloseModuleDropdown}
+              >
+                <button
+                  type="button"
+                  id="header-module-switch-trigger"
+                  aria-label={t('header.switch_module')}
+                  aria-expanded={moduleDropdownOpen}
+                  aria-haspopup="listbox"
+                  disabled={moduleSwitching}
+                  onFocus={openModuleDropdown}
+                  onClick={() =>
+                    setModuleDropdownOpen((open) => !open)
+                  }
+                  className="flex w-full max-w-[12.5rem] items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-800/50 p-0.5 text-left outline-none transition-[box-shadow,background-color, border-color] duration-200 focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900"
+                >
+                  <span className="inline-flex flex-1 min-w-0 items-center gap-1.5 rounded-md bg-white dark:bg-gray-700 px-2.5 py-1 text-xs font-medium text-gray-900 dark:text-white shadow-sm">
+                    <Layers className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" aria-hidden />
+                    <span className="truncate">{moduleTriggerLabel}</span>
+                  </span>
+                  <span className="flex h-full shrink-0 items-center pr-1 text-gray-500 dark:text-gray-400">
+                    <ChevronDown
+                      className={`h-3.5 w-3.5 transition-transform duration-200 ${moduleDropdownOpen ? 'rotate-180' : ''}`}
+                      aria-hidden
+                    />
+                  </span>
+                </button>
+
+                {/* Invisible gap filler so hover reaches the panel without mouseleave firing */}
+                {moduleDropdownOpen && (
+                  <div
+                    className="absolute left-0 top-full z-[99] h-1.5 min-w-[12rem]"
+                    aria-hidden
+                  />
+                )}
+                <div
+                  role="listbox"
+                  aria-labelledby="header-module-switch-trigger"
+                  className={`absolute left-0 top-[calc(100%+0.375rem)] z-[100] w-max min-w-[12rem] max-w-[17rem] origin-top overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 py-1 shadow-xl shadow-gray-900/10 ring-1 ring-black/5 backdrop-blur-md transition-all duration-200 dark:border-gray-600/80 dark:bg-gray-900/95 dark:shadow-black/40 dark:ring-white/10 ${
+                    moduleDropdownOpen
+                      ? 'pointer-events-auto visible scale-100 opacity-100 translate-y-0'
+                      : 'pointer-events-none invisible scale-95 opacity-0 -translate-y-0.5'
+                  }`}
+                  onMouseEnter={openModuleDropdown}
+                  onMouseLeave={scheduleCloseModuleDropdown}
+                >
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={!moduleSelectValue}
+                    onClick={() => applyModuleFolder('')}
+                    className={`flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium transition-colors duration-150 ${
+                      !moduleSelectValue
+                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-200'
+                        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    <Home className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
+                    <span className="truncate">{t('header.system_home')}</span>
+                  </button>
+                  <div className="mx-2 my-1 border-t border-gray-200/80 dark:border-gray-700/80" />
+                  {moduleSwitcherOptions.map((m) => {
+                    const active = moduleSelectValue === m.folder_name;
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        role="option"
+                        aria-selected={active}
+                        onClick={() => applyModuleFolder(m.folder_name)}
+                        className={`flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium transition-colors duration-150 ${
+                          active
+                            ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-200'
+                            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800'
+                        }`}
+                      >
+                        <Layers className="h-3.5 w-3.5 shrink-0 text-blue-600 opacity-80 dark:text-blue-400" aria-hidden />
+                        <span className="truncate">{m.module_name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* App locale (EN / اردو) — in-app translations */}
             {supportedLocales && supportedLocales.length > 1 && (
