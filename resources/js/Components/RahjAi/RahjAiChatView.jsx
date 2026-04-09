@@ -308,25 +308,27 @@ export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-
     <div
       className={`${
         embedded
-          ? 'flex min-h-[min(62vh,600px)] flex-col overflow-hidden rounded-2xl border border-white/15 bg-white/40 shadow-inner dark:border-gray-600/40 dark:bg-gray-800/40'
+          ? 'relative flex min-h-[min(66vh,680px)] flex-col overflow-hidden rounded-3xl border border-white/25 bg-gradient-to-b from-white/75 via-white/55 to-slate-100/40 shadow-2xl shadow-slate-900/10 backdrop-blur-xl dark:border-gray-700/60 dark:from-slate-900/75 dark:via-slate-900/60 dark:to-slate-950/55'
           : 'flex min-h-0 flex-1 flex-col'
       } ${className}`.trim()}
     >
+      {embedded && <div className="pointer-events-none absolute -right-14 -top-12 h-36 w-36 rounded-full bg-cyan-300/20 blur-3xl dark:bg-cyan-500/10" aria-hidden />}
       <div
         ref={listRef}
-        className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4"
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-transparent via-transparent to-white/15 px-4 py-4 dark:to-slate-950/15"
         role="log"
         aria-live="polite"
       >
         {messages.length === 0 ? (
           <div className="flex min-h-[200px] flex-col items-center justify-center gap-3 px-2 py-6 text-center">
-            <div className="rounded-2xl bg-gradient-to-br from-blue-500/15 to-indigo-500/10 p-4 dark:from-blue-400/10 dark:to-indigo-500/10">
-              <Sparkles className="mx-auto h-10 w-10 text-blue-500 dark:text-blue-400" aria-hidden />
+            <div className="relative rounded-2xl border border-cyan-300/40 bg-gradient-to-br from-cyan-400/15 to-blue-500/10 p-4 shadow-lg shadow-cyan-900/10 dark:border-cyan-700/40 dark:from-cyan-400/10 dark:to-blue-600/10">
+              <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-cyan-500/70 animate-ping" aria-hidden />
+              <Sparkles className="mx-auto h-10 w-10 text-cyan-600 dark:text-cyan-300" aria-hidden />
             </div>
-            <h3 className="text-base font-semibold text-gray-800 dark:text-gray-100">
+            <h3 className="text-base font-semibold tracking-tight text-slate-800 dark:text-slate-100">
               {t('rahj_ai.portal.empty_title')}
             </h3>
-            <p className="max-w-md text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+            <p className="max-w-md text-sm leading-relaxed text-slate-600 dark:text-slate-300">
               {t('rahj_ai.portal.empty_hint')}
             </p>
             <div className="mt-2 flex max-w-lg flex-wrap justify-center gap-2">
@@ -334,30 +336,28 @@ export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-
                 <button
                   key={label}
                   type="button"
-                  className="rounded-full border border-blue-400/40 bg-blue-500/10 px-3 py-1.5 text-xs font-medium text-blue-800 transition-colors hover:bg-blue-500/20 dark:border-blue-500/30 dark:text-blue-200 dark:hover:bg-blue-500/15"
+                  className="rounded-full border border-cyan-400/40 bg-cyan-400/10 px-3 py-1.5 text-xs font-medium text-cyan-800 transition-all duration-200 hover:-translate-y-0.5 hover:bg-cyan-500/20 dark:border-cyan-500/40 dark:text-cyan-200 dark:hover:bg-cyan-500/20"
                   onClick={() => sendMessage(label)}
                 >
                   {label}
                 </button>
               ))}
             </div>
-            <span className="mt-1 inline-flex items-center rounded-full border border-dashed border-blue-300/80 bg-blue-50/80 px-3 py-1 text-xs font-medium text-blue-700 dark:border-blue-500/40 dark:bg-blue-950/40 dark:text-blue-300">
-              {t('rahj_ai.portal.coming_soon')}
-            </span>
           </div>
         ) : (
-          messages.map((msg) => (
+          messages.map((msg, index) => (
             <div
               key={msg.id}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`rahj-ai-chat-entry flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              style={{ '--stagger-index': index + 1 }}
             >
               <div
-                className={`max-w-[90%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${
+                className={`max-w-[90%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm transition-all duration-200 ${
                   msg.role === 'user'
-                    ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
+                    ? 'border border-cyan-400/30 bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-900/25'
                     : msg.error
-                      ? 'border border-rose-200/90 bg-rose-50/90 text-rose-900 dark:border-rose-800/70 dark:bg-rose-950/40 dark:text-rose-200'
-                      : 'border border-gray-200/80 bg-white/90 text-gray-800 dark:border-gray-600/60 dark:bg-gray-800/90 dark:text-gray-100'
+                      ? 'border border-rose-200/90 bg-rose-50/95 text-rose-900 shadow-md shadow-rose-900/5 dark:border-rose-800/70 dark:bg-rose-950/40 dark:text-rose-200'
+                      : 'border border-white/70 bg-white/90 text-gray-800 shadow-md shadow-slate-900/5 dark:border-gray-600/60 dark:bg-gray-800/90 dark:text-gray-100'
                 }`}
               >
                 {msg.role === 'assistant' && msg.pending ? (
@@ -387,7 +387,7 @@ export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-
       </div>
 
       <div
-        className={`shrink-0 border-t border-gray-200/80 bg-white/90 p-3 dark:border-gray-700/60 dark:bg-gray-900/90 ${
+        className={`shrink-0 border-t border-white/50 bg-white/85 p-3 backdrop-blur dark:border-gray-700/60 dark:bg-slate-900/90 ${
           embedded ? 'rounded-b-2xl' : ''
         }`}
       >
@@ -395,14 +395,14 @@ export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-
           {t('rahj_ai.portal.input_placeholder')}
         </label>
         <div className="flex gap-2">
-          <div className="search-input-wrapper min-w-0 flex-1 rounded-xl border border-gray-200/90 bg-white dark:border-gray-600 dark:bg-gray-800/80">
+          <div className="search-input-wrapper min-w-0 flex-1 rounded-2xl border border-slate-200/90 bg-white/95 shadow-inner dark:border-slate-600 dark:bg-slate-800/80">
             <textarea
               id={textareaId}
               rows={embedded ? 3 : 2}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={onKeyDown}
-              className="search-input min-h-[2.75rem] resize-none border-0 bg-transparent py-2.5 focus:ring-0"
+              className="search-input min-h-[2.75rem] resize-none border-0 bg-transparent py-2.5 text-slate-800 focus:ring-0 dark:text-slate-100"
               placeholder={t('rahj_ai.portal.input_placeholder')}
             />
           </div>
@@ -410,7 +410,7 @@ export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-
             type="button"
             onClick={handleSend}
             disabled={!draft.trim()}
-            className="btn btn-primary btn-icon h-[2.75rem] w-[2.75rem] shrink-0 self-end disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn btn-primary btn-icon h-[2.75rem] w-[2.75rem] shrink-0 self-end border border-cyan-300/40 bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-900/25 transition-all hover:-translate-y-0.5 hover:from-cyan-400 hover:to-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label={t('rahj_ai.portal.send')}
           >
             <Send className="h-5 w-5" />

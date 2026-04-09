@@ -25,7 +25,8 @@ import {
   Mail,
   Building,
   Grid3X3,
-  Receipt
+  Receipt,
+  Sparkles
 } from 'lucide-react';
 
 const Header = () => {
@@ -162,6 +163,8 @@ const Header = () => {
     return match ? folder : '';
   }, [url, moduleSwitcherOptions]);
 
+  const onRahjAiRoute = React.useMemo(() => (url || '').startsWith('/rahj-ai'), [url]);
+
   const clearModuleDropdownLeaveTimer = React.useCallback(() => {
     if (moduleDropdownLeaveTimerRef.current) {
       clearTimeout(moduleDropdownLeaveTimerRef.current);
@@ -213,6 +216,14 @@ const Header = () => {
   const applyModuleFolder = React.useCallback(
     (folder) => {
       setModuleDropdownOpen(false);
+      if (folder === '__rahj_ai__') {
+        router.visit('/rahj-ai', {
+          preserveScroll: true,
+          onStart: () => setModuleSwitching(true),
+          onFinish: () => setModuleSwitching(false),
+        });
+        return;
+      }
       if (folder === moduleSelectValue) return;
       if (!folder) {
         router.visit('/system/dashboard', {
@@ -238,10 +249,11 @@ const Header = () => {
   );
 
   const moduleTriggerLabel = React.useMemo(() => {
+    if (onRahjAiRoute) return 'RAHJ AI';
     if (!moduleSelectValue) return t('header.system_home');
     const mod = moduleSwitcherOptions.find((m) => m.folder_name === moduleSelectValue);
     return mod?.module_name || t('header.system_home');
-  }, [moduleSelectValue, moduleSwitcherOptions, t]);
+  }, [onRahjAiRoute, moduleSelectValue, moduleSwitcherOptions, t]);
 
   // Load current module data from session
   React.useEffect(() => {
@@ -749,16 +761,16 @@ const Header = () => {
                   <button
                     type="button"
                     role="option"
-                    aria-selected={!moduleSelectValue}
-                    onClick={() => applyModuleFolder('')}
+                    aria-selected={onRahjAiRoute}
+                    onClick={() => applyModuleFolder('__rahj_ai__')}
                     className={`flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium transition-colors duration-150 ${
-                      !moduleSelectValue
+                      onRahjAiRoute
                         ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-200'
                         : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800'
                     }`}
                   >
-                    <Home className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
-                    <span className="truncate">{t('header.system_home')}</span>
+                    <Sparkles className="h-3.5 w-3.5 shrink-0 opacity-80 text-blue-600 dark:text-blue-400" aria-hidden />
+                    <span className="truncate">RAHJ AI</span>
                   </button>
                   <div className="mx-2 my-1 border-t border-gray-200/80 dark:border-gray-700/80" />
                   {moduleSwitcherOptions.map((m) => {
