@@ -351,7 +351,7 @@
         "item_category_id": {
           "label": "آئٹم زمرہ",
           "placeholder": "زمرہ منتخب کریں",
-          "help": "آئٹم کلاس کی ذیلی سطح۔ زمرے پر لاگت کے چار سر (انوینٹری، خرید، COGS، فروخت) GL فیلڈز خود بھر دیتے ہیں۔"
+          "help": "پہلے آئٹم کلاس منتخب کریں؛ صرف اس کلاس کے زمرے (یا پرانے غیر تفویض شدہ) نظر آتے ہیں۔ ترتیب پر GL خود بھر سکتا ہے۔"
         },
         "item_group_id": {
           "label": "آئٹم گروپ",
@@ -397,6 +397,11 @@
           "label": "پیکیجنگ کی درجہ بندی",
           "placeholder": "یونٹ / باکس / کیس / پلیٹ",
           "help": "WMS اور شپنگ"
+        },
+        "package_type_id": {
+          "label": "پیکج ٹائپ",
+          "placeholder": "پیکج ٹائپ منتخب کریں",
+          "help": "Package Type Configuration سے منسلک۔"
         },
         "costing_method": {
           "label": "لاگت کا طریقہ",
@@ -473,6 +478,11 @@
           "placeholder": "کلاس منتخب کریں",
           "help": "گودام بن تفویض"
         },
+        "inventory_temperature_class_id": {
+          "label": "ذخیرہ درجہ حرارت",
+          "placeholder": "ٹمپریچر کلاس منتخب کریں",
+          "help": "Temperature Class Configuration سے منسلک۔"
+        },
         "hazardous_material": {
           "label": "خطرناک مادہ",
           "placeholder": "",
@@ -516,12 +526,32 @@
         "country_of_origin_id": {
           "label": "اصل ملک",
           "placeholder": "ملک منتخب کریں",
-          "help": "دستاویزات"
+          "help": "کرنسیوں سے نام (اور کنٹری ماسٹر)۔ درست ID کے لیے کرنسی کو کنٹری ماسٹر سے جور کریں۔"
+        },
+        "origin_currency_id": {
+          "label": "اصل ملک",
+          "placeholder": "کرنسیوں کی فہرست سے ملک",
+          "help": "آپشن کرنسی ماسٹر کے \"ملک\" خانے سے۔ میچ پر کنٹری ماسٹر ID سنک ہوتی ہے۔"
+        },
+        "hsn_sac_compliance_code_id": {
+          "label": "HSN / SAC کوڈ",
+          "placeholder": "کوڈ منتخب کریں",
+          "help": "HSN / SAC & HS Tariff Codes ماسٹر (قسم: HSN / SAC)۔"
+        },
+        "hs_tariff_compliance_code_id": {
+          "label": "HS ٹیرف کوڈ",
+          "placeholder": "ٹیرف کوڈ منتخب کریں",
+          "help": "HSN / SAC & HS Tariff Codes ماسٹر (قسم: HS Tariff)۔"
+        },
+        "barcode_type_id": {
+          "label": "بارکوڈ کی قسم",
+          "placeholder": "قسم منتخب کریں (بارکوڈ کنفیگریشن)",
+          "help": "ماسٹر ڈیٹا میں Barcode Type Configuration سے تعریف شدہ قسم۔"
         },
         "barcode_gtin": {
           "label": "بارکوڈ / GTIN",
           "placeholder": "GS1 فارمیٹ",
-          "help": "سپلائی چین میں منفرد"
+          "help": "بارکوڈ کی قسم منتخب ہو تو یہ خانہ صرف پڑھنے کے لیے ہے؛ قسم ہٹا کر دستی GTIN، یا انٹیگریشن سے۔"
         },
         "alternate_barcodes": {
           "label": "متبادل بارکوڈ",
@@ -1112,6 +1142,57 @@
       "Time": "وقت",
       "Area": "رقبہ",
       "Other": "دیگر"
+    }
+  },
+  "purchase_requisition": {
+    "create": {
+      "breadcrumb_home": "ہوم",
+      "breadcrumb_inventory": "انوینٹری",
+      "breadcrumb_pr": "خریداری درخواست",
+      "breadcrumb_create": "نیا",
+      "breadcrumb_desc": "خرید آرڈر سے پہلے اندرونی درخواست۔ بعد میں PO بن سکتا ہے؛ PO بغیر PR کے بھی ممکن ہے۔",
+      "title": "خریداری درخواست (PR)",
+      "subtitle": "ہیڈر اور لائن آئٹمز — مسودہ",
+      "section_header": "درخواست کا ہیڈر",
+      "section_lines": "لائن آئٹمز",
+      "lines_hint": "ایک یا زیادہ آئٹمز شامل کریں۔ Tab سے خلیوں میں جائیں؛ آئٹم/UOM تلاش کی بورڈ سے۔",
+      "lines_summary": "{count} لائن(یں) · تخمینی کل: {amount}",
+      "lines_empty": "ابھی کوئی لائن نہیں — کم از کم ایک لائن درکار ہے۔",
+      "add_line": "لائن شامل کریں",
+      "remove_line": "حذف",
+      "line_number": "#",
+      "submit_save": "مسودہ محفوظ",
+      "reset_form": "فارم صاف",
+      "msg_fix_header": "ہیڈر کے فیلڈز درست کریں۔",
+      "msg_fix_lines": "لائن آئٹمز درست کریں (آئٹم، UOM، مقدار لازمی؛ مقدار صفر سے زیادہ)۔",
+      "msg_please_correct_errors": "نیچے دی گئی غلطیاں درست کریں۔",
+      "fields": {
+        "pr_date": { "label": "درخواست کی تاریخ", "placeholder": "تاریخ", "help": "عام طور پر آج۔" },
+        "required_by_date": { "label": "کب تک چاہیے", "placeholder": "اختیاری", "help": "مواد کب تک درکار ہیں۔" },
+        "deliver_to_location_id": { "label": " کہاں ترسیل", "placeholder": "مقام", "help": "شپ-ٹو یا برانچ۔" },
+        "delivery_address": { "label": "پتہ", "placeholder": "مکمل پتہ (اختیاری)", "help": "ماسٹر سے مختلف ہو تو۔" },
+        "currency_id": { "label": "کرنسی", "placeholder": "اختیاری", "help": "تخمینی بجٹ کے لیے۔" },
+        "fx_rate": { "label": "شرح تبادلہ", "placeholder": "1.000000", "help": "بیس کرنسی کے مقابلے میں۔" },
+        "priority": { "label": "ترجیح", "placeholder": "منتخب", "help": "ترتیب دینے میں مدد۔" },
+        "department_id": { "label": "شعبہ", "placeholder": "اختیاری", "help": "درخواست گزار شعبہ۔" },
+        "requested_by": { "label": "درخواست دہندہ", "placeholder": "نام", "help": "رابطہ۔" },
+        "justification": { "label": "جواز", "placeholder": "کیوں درکار ہے", "help": "منظوری و آڈٹ۔" },
+        "notes": { "label": "نوٹس", "placeholder": "اختیاری", "help": "اندرونی۔" }
+      },
+      "line_fields": {
+        "item": { "label": "آئٹم", "placeholder": "تلاش", "help": "فعال آئٹمز۔" },
+        "description": { "label": "تفصیل", "placeholder": "اختیاری", "help": "آئٹم سے بھرتا ہے۔" },
+        "uom": { "label": "اکائی", "placeholder": "UOM", "help": "عاماً خرید UOM۔" },
+        "quantity": { "label": "مقدار", "placeholder": "0", "help": "zero سے زیادہ۔" },
+        "estimated_price": { "label": "تخمینہ قیمت", "placeholder": "اختیاری", "help": "اشارتی۔" },
+        "need_by_date": { "label": "تاریخ ضرورت", "placeholder": "تاریخ", "help": "لائن سطح۔" },
+        "line_notes": { "label": "نوٹس", "placeholder": "نوٹس", "help": "خریدار/رسید۔" }
+      },
+      "priority_options": {
+        "normal": "عام",
+        "high": "اعلیٰ",
+        "urgent": "فوری"
+      }
     }
   }
 }

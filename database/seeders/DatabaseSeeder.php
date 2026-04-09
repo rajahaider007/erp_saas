@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             UomMasterSeeder::class,         // Depends on Company
             TaxCategorySeeder::class,       // Depends on Company
             InventoryMasterCodingMenusSeeder::class,
+            InventoryAllMastersDemoSeeder::class, // Idempotent demo rows (10 per inventory master form)
         ]);
     }
 }

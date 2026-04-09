@@ -351,7 +351,7 @@
         "item_category_id": {
           "label": "Item Category",
           "placeholder": "Select item category",
-          "help": "Child of Item Class. Category costing accounts (inventory, purchase, COGS, sales) auto-fill GL fields when configured on the category."
+          "help": "Select Item Class first. Only categories for that class (or legacy uncategorized) are listed. Category costing accounts auto-fill GL when configured."
         },
         "item_group_id": {
           "label": "Item Group",
@@ -397,6 +397,11 @@
           "label": "Packaging Hierarchy",
           "placeholder": "Unit / Box / Case / Pallet with qty per level",
           "help": "For WMS and shipping optimization (Sub-table implementation pending)"
+        },
+        "package_type_id": {
+          "label": "Package type",
+          "placeholder": "Select package type (from Package Type Configuration)",
+          "help": "Linked to Inventory → Master Data → Package Type Configuration."
         },
         "costing_method": {
           "label": "Costing Method",
@@ -473,6 +478,11 @@
           "placeholder": "Select storage class",
           "help": "Affects warehouse bin assignment"
         },
+        "inventory_temperature_class_id": {
+          "label": "Storage Temperature Class",
+          "placeholder": "Select temperature class",
+          "help": "Linked to Inventory → Master Data → Temperature Class Configuration."
+        },
         "hazardous_material": {
           "label": "Hazardous Material Flag",
           "placeholder": "",
@@ -516,12 +526,32 @@
         "country_of_origin_id": {
           "label": "Country of Origin",
           "placeholder": "Select country",
-          "help": "For import/export documentation"
+          "help": "Pulled from currencies (and country master). Link each currency’s country to a row in Country Master for correct IDs."
+        },
+        "origin_currency_id": {
+          "label": "Country of Origin",
+          "placeholder": "Select country (from currencies)",
+          "help": "Options come from the Currencies master (country name per currency). Country of record is synced to Country Master when matched."
+        },
+        "hsn_sac_compliance_code_id": {
+          "label": "HSN Code / SAC Code",
+          "placeholder": "Select code",
+          "help": "Maintain codes under Inventory → Master Data → HSN / SAC & HS Tariff Codes (type: HSN / SAC)."
+        },
+        "hs_tariff_compliance_code_id": {
+          "label": "HS Tariff Code",
+          "placeholder": "Select tariff code",
+          "help": "Maintain codes under Inventory → Master Data → HSN / SAC & HS Tariff Codes (type: HS Tariff)."
+        },
+        "barcode_type_id": {
+          "label": "Barcode Type",
+          "placeholder": "Select type (from Barcode Type Configuration)",
+          "help": "Must match a type defined under Master Data → Barcode Type Configuration."
         },
         "barcode_gtin": {
           "label": "Barcode / GTIN",
           "placeholder": "GS1 format (13-digit EAN or 12-digit UPC)",
-          "help": "Unique for supply chain"
+          "help": "When a Barcode Type is selected, this field is read-only so values stay aligned with the type master; clear the type to enter a GTIN manually, or load values from your integration."
         },
         "alternate_barcodes": {
           "label": "Alternate Barcodes",
@@ -1112,6 +1142,129 @@
       "Time": "Time",
       "Area": "Area",
       "Other": "Other"
+    }
+  },
+  "purchase_requisition": {
+    "create": {
+      "breadcrumb_home": "Home",
+      "breadcrumb_inventory": "Inventory",
+      "breadcrumb_pr": "Purchase requisition",
+      "breadcrumb_create": "Create",
+      "breadcrumb_desc": "Raise an internal purchase request before a purchase order. Lines can be converted to a PO later; POs may also be created without a PR.",
+      "title": "Purchase requisition",
+      "subtitle": "Header details and line items (procure-to-stock, draft)",
+      "section_header": "Request header",
+      "section_lines": "Line items",
+      "lines_hint": "Add one or more items. Use Tab to move across cells; item and UOM lists are keyboard searchable.",
+      "lines_summary": "{count} line(s) · Estimated subtotal: {amount}",
+      "lines_empty": "No lines yet — add at least one line to save.",
+      "add_line": "Add line",
+      "remove_line": "Remove",
+      "line_number": "#",
+      "submit_save": "Save draft",
+      "reset_form": "Clear form",
+      "msg_fix_header": "Please fix the highlighted header fields.",
+      "msg_fix_lines": "Please correct line items (item, UOM, and quantity are required; quantity must be greater than zero).",
+      "msg_please_correct_errors": "Please correct the errors below.",
+      "fields": {
+        "pr_date": {
+          "label": "Requisition date",
+          "placeholder": "Select date",
+          "help": "Date the request is raised (typically today)."
+        },
+        "required_by_date": {
+          "label": "Required by",
+          "placeholder": "Optional",
+          "help": "When materials are needed at the latest."
+        },
+        "deliver_to_location_id": {
+          "label": "Deliver to (branch / location)",
+          "placeholder": "Select location",
+          "help": "Ship-to or receiving branch for this request."
+        },
+        "delivery_address": {
+          "label": "Delivery address",
+          "placeholder": "Full ship-to address (optional)",
+          "help": "Override or complete the address if different from the location master."
+        },
+        "currency_id": {
+          "label": "Currency",
+          "placeholder": "Optional — for estimating budget",
+          "help": "Used for estimated line values only; PO may use final commercial terms."
+        },
+        "fx_rate": {
+          "label": "FX rate to base",
+          "placeholder": "e.g. 1.000000",
+          "help": "Spot or policy rate when currency is not base currency."
+        },
+        "priority": {
+          "label": "Priority",
+          "placeholder": "Select priority",
+          "help": "Helps procurement triage the request."
+        },
+        "department_id": {
+          "label": "Department",
+          "placeholder": "Optional",
+          "help": "Cost centre / requesting department."
+        },
+        "requested_by": {
+          "label": "Requested by",
+          "placeholder": "Name or contact",
+          "help": "Defaults can be set from your user profile later."
+        },
+        "justification": {
+          "label": "Justification / business case",
+          "placeholder": "Why this purchase is needed",
+          "help": "Supports approval and audit (SoD: requester ≠ approver)."
+        },
+        "notes": {
+          "label": "Internal notes",
+          "placeholder": "Optional notes for procurement",
+          "help": "Not printed on external documents."
+        }
+      },
+      "line_fields": {
+        "item": {
+          "label": "Item",
+          "placeholder": "Search item",
+          "help": "Active items for this company and location."
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Override description",
+          "help": "Optional; defaults from item master when item is selected."
+        },
+        "uom": {
+          "label": "UOM",
+          "placeholder": "Unit",
+          "help": "Usually purchase UOM from item master."
+        },
+        "quantity": {
+          "label": "Qty",
+          "placeholder": "0",
+          "help": "Must be greater than zero."
+        },
+        "estimated_price": {
+          "label": "Est. unit price",
+          "placeholder": "Optional",
+          "help": "Indicative budget; not binding until final PO."
+        },
+        "need_by_date": {
+          "label": "Need by",
+          "placeholder": "Date",
+          "help": "Line-level need date overrides header when filled."
+        },
+        "line_notes": {
+          "label": "Line notes",
+          "placeholder": "Specs / remarks",
+          "help": "Visible to buyers and receivers."
+        }
+      },
+      "priority_options": {
+        "normal": "Normal",
+        "high": "High",
+        "urgent": "Urgent"
+      }
     }
   }
 }

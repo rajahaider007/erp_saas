@@ -9,6 +9,7 @@ use App\Models\Country;
 use App\Models\Currency;
 use App\Models\InventoryBarcodeType;
 use App\Models\InventoryBrand;
+use App\Models\InventoryComplianceCode;
 use App\Models\InventoryPackageType;
 use App\Models\InventoryReasonCode;
 use App\Models\InventoryTemperatureClass;
@@ -509,6 +510,10 @@ class MasterDataController extends Controller
                 ['value' => 'QR', 'label' => 'QR'],
                 ['value' => 'Code128', 'label' => 'Code128'],
             ],
+            'inventoryComplianceCodeKindOptions' => [
+                ['value' => InventoryComplianceCode::KIND_HSN_SAC, 'label' => 'HSN / SAC'],
+                ['value' => InventoryComplianceCode::KIND_HS_TARIFF, 'label' => 'HS Tariff'],
+            ],
         ];
     }
 
@@ -867,6 +872,30 @@ class MasterDataController extends Controller
                     ['name' => 'is_active', 'label' => 'Status', 'type' => 'toggle'],
                 ],
                 'list_columns' => ['class_code' => 'Class Code', 'class_name' => 'Class Name', 'temperature_range' => 'Temperature Range'],
+            ],
+            'compliance-code-master' => [
+                'key' => 'compliance-code-master',
+                'title' => 'HSN / SAC & HS Tariff Codes',
+                'model' => InventoryComplianceCode::class,
+                'table' => 'inventory_compliance_codes',
+                'key_field' => 'code',
+                'name_field' => 'description',
+                'search' => ['code', 'description', 'code_kind'],
+                'default_sort' => 'code',
+                'unique' => ['code_kind', 'code'],
+                'rules' => [
+                    'code_kind' => ['required', Rule::in([InventoryComplianceCode::KIND_HSN_SAC, InventoryComplianceCode::KIND_HS_TARIFF])],
+                    'code' => ['required', 'string', 'max:20'],
+                    'description' => ['nullable', 'string', 'max:255'],
+                    'is_active' => ['nullable', 'boolean'],
+                ],
+                'fields' => [
+                    ['name' => 'code_kind', 'label' => 'Code Type', 'type' => 'select', 'required' => true, 'optionsKey' => 'inventoryComplianceCodeKindOptions'],
+                    ['name' => 'code', 'label' => 'Code', 'type' => 'text', 'required' => true],
+                    ['name' => 'description', 'label' => 'Description', 'type' => 'text'],
+                    ['name' => 'is_active', 'label' => 'Status', 'type' => 'toggle'],
+                ],
+                'list_columns' => ['code_kind' => 'Type', 'code' => 'Code', 'description' => 'Description'],
             ],
             'transporter-master' => [
                 'key' => 'transporter-master',

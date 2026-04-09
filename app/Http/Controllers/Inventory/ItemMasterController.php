@@ -6,17 +6,23 @@ use App\Http\Controllers\Controller;
 use App\Models\AccountConfiguration;
 use App\Models\ChartOfAccount;
 use App\Models\Country;
+use App\Models\Currency;
+use App\Models\InventoryBarcodeType;
+use App\Models\InventoryComplianceCode;
 use App\Models\InventoryItem;
 use App\Models\InventoryItemCategory;
 use App\Models\InventoryItemClass;
 use App\Models\InventoryItemGroup;
+use App\Models\InventoryPackageType;
+use App\Models\InventoryTemperatureClass;
 use App\Models\TaxCategory;
+use App\Models\UomConversion;
 use App\Models\UomMaster;
 use App\Services\Inventory\ItemCategoryCostingAccountService;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class ItemMasterController extends Controller
@@ -95,6 +101,11 @@ class ItemMasterController extends Controller
                 'itemTypeOptions' => [],
                 'uomOptions' => [],
                 'taxCategoryOptions' => [],
+                'packageTypeOptions' => [],
+                'temperatureClassOptions' => [],
+                'hsnSacOptions' => [],
+                'hsTariffOptions' => [],
+                'currencyOriginOptions' => [],
                 'glAccountOptions' => [],
                 'glAccountOptionsInventory' => [],
                 'glAccountOptionsPurchase' => [],
@@ -130,6 +141,7 @@ class ItemMasterController extends Controller
             ->map(fn ($category) => [
                 'value' => (string) $category->id,
                 'label' => $category->category_code.' - '.$category->category_name,
+                'item_class_id' => $category->item_class_id !== null ? (string) $category->item_class_id : null,
             ])
             ->values();
 
@@ -176,11 +188,69 @@ class ItemMasterController extends Controller
 
         $taxCategoryOptions = TaxCategory::byCompany($compId)
             ->active()
+            ->orderBy('tax_code')
             ->get(['id', 'tax_code', 'tax_name', 'tax_rate'])
             ->map(fn ($tax) => [
                 'value' => (string) $tax->id,
                 'label' => $tax->tax_code.' - '.$tax->tax_name.' ('.number_format($tax->tax_rate, 2).'%)',
             ])
+            ->values();
+
+        $packageTypeOptions = InventoryPackageType::byCompany($compId)
+            ->active()
+            ->orderBy('package_code')
+            ->get(['id', 'package_code', 'package_name'])
+            ->map(fn ($row) => [
+                'value' => (string) $row->id,
+                'label' => $row->package_code.' - '.$row->package_name,
+            ])
+            ->values();
+
+        $temperatureClassOptions = InventoryTemperatureClass::byCompany($compId)
+            ->active()
+            ->orderBy('class_code')
+            ->get(['id', 'class_code', 'class_name', 'temperature_range'])
+            ->map(fn ($row) => [
+                'value' => (string) $row->id,
+                'label' => $row->class_code.' - '.$row->class_name.($row->temperature_range ? ' ('.$row->temperature_range.')' : ''),
+            ])
+            ->values();
+
+        $hsnSacOptions = InventoryComplianceCode::byCompany($compId)
+            ->active()
+            ->ofKind(InventoryComplianceCode::KIND_HSN_SAC)
+            ->orderBy('code')
+            ->get(['id', 'code', 'description'])
+            ->map(fn ($row) => [
+                'value' => (string) $row->id,
+                'label' => $row->description ? $row->code.' — '.$row->description : $row->code,
+            ])
+            ->values();
+
+        $hsTariffOptions = InventoryComplianceCode::byCompany($compId)
+            ->active()
+            ->ofKind(InventoryComplianceCode::KIND_HS_TARIFF)
+            ->orderBy('code')
+            ->get(['id', 'code', 'description'])
+            ->map(fn ($row) => [
+                'value' => (string) $row->id,
+                'label' => $row->description ? $row->code.' — '.$row->description : $row->code,
+            ])
+            ->values();
+
+        $currencyOriginOptions = Currency::active()
+            ->ordered()
+            ->get(['id', 'code', 'country', 'name'])
+            ->map(function ($c) {
+                $country = trim((string) ($c->country ?? ''));
+                $name = trim((string) ($c->name ?? ''));
+                $label = $country !== '' ? $country : ($name !== '' ? $name : $c->code);
+
+                return [
+                    'value' => (string) $c->id,
+                    'label' => $label.' ('.$c->code.')',
+                ];
+            })
             ->values();
 
         $categoryInventoryIds = $itemCategories->pluck('inventory_gl_account_id')->filter()->unique();
@@ -243,13 +313,30 @@ class ItemMasterController extends Controller
             ->values()
             ->all();
 
-        $countryOptions = Country::active()
-            ->get(['id', 'country_code', 'country_name'])
-            ->map(fn ($country) => [
-                'value' => (string) $country->id,
-                'label' => $country->country_code.' - '.$country->country_name,
+        $barcodeTypes = InventoryBarcodeType::query()
+            ->byCompany($compId)
+            ->active()
+            ->orderBy('barcode_type')
+            ->get(['id', 'barcode_type', 'format_pattern', 'length']);
+
+        $barcodeTypeOptions = $barcodeTypes
+            ->map(fn ($b) => [
+                'value' => (string) $b->id,
+                'label' => $b->barcode_type,
             ])
-            ->values();
+            ->values()
+            ->all();
+
+        $barcodeTypeMetaById = $barcodeTypes
+            ->mapWithKeys(fn ($b) => [
+                (string) $b->id => [
+                    'length' => $b->length,
+                    'format_pattern' => $b->format_pattern,
+                ],
+            ])
+            ->all();
+
+        [$uomPurchaseFromStock, $uomSalesFromStock] = $this->uomConversionMaps((int) $compId);
 
         $vendorOptions = ChartOfAccount::query()
             ->where('comp_id', $compId)
@@ -294,13 +381,15 @@ class ItemMasterController extends Controller
             ],
             'uomOptions' => $uomOptions,
             'taxCategoryOptions' => $taxCategoryOptions,
-            'temperatureClassOptions' => [
-                ['value' => 'ambient', 'label' => 'Ambient (15-25°C)'],
-                ['value' => 'chilled', 'label' => 'Chilled (0-8°C)'],
-                ['value' => 'frozen', 'label' => 'Frozen (<-15°C)'],
-                ['value' => 'controlled', 'label' => 'Controlled (Other)'],
-            ],
-            'countryOptions' => $countryOptions,
+            'packageTypeOptions' => $packageTypeOptions,
+            'temperatureClassOptions' => $temperatureClassOptions,
+            'hsnSacOptions' => $hsnSacOptions,
+            'hsTariffOptions' => $hsTariffOptions,
+            'currencyOriginOptions' => $currencyOriginOptions,
+            'barcodeTypeOptions' => $barcodeTypeOptions,
+            'barcodeTypeMetaById' => $barcodeTypeMetaById,
+            'uomPurchaseFromStock' => $uomPurchaseFromStock,
+            'uomSalesFromStock' => $uomSalesFromStock,
             'vendorOptions' => $vendorOptions,
             'glAccountOptions' => $glAccountOptions,
             'glAccountOptionsInventory' => $glAccountOptionsInventory,
@@ -341,7 +430,17 @@ class ItemMasterController extends Controller
             'item_status' => 'required|in:active,inactive,discontinued,blocked',
             'item_type' => 'required|in:raw_material,finished_good,trading,consumable,service',
             'item_class_id' => 'required|exists:inventory_item_classes,id',
-            'item_category_id' => 'required|exists:inventory_item_categories,id',
+            'item_category_id' => [
+                'required',
+                Rule::exists('inventory_item_categories', 'id')->where(function ($query) use ($request, $compId, $locationId) {
+                    $query->where('comp_id', $compId)
+                        ->where('location_id', $locationId)
+                        ->where(function ($q) use ($request) {
+                            $q->whereNull('item_class_id')
+                                ->orWhere('item_class_id', $request->input('item_class_id'));
+                        });
+                }),
+            ],
             'item_group_id' => 'nullable|exists:inventory_item_groups,id',
             'brand' => 'nullable|string|max:100',
             'tracking_mode' => 'required|in:none,lot,serial',
@@ -364,16 +463,33 @@ class ItemMasterController extends Controller
             'shelf_life_days' => 'nullable|integer|min:0',
             'expiry_basis' => 'nullable|in:manufacturing_date,receipt_date',
             'near_expiry_alert_days' => 'nullable|integer|min:0',
-            'storage_temperature_class' => 'nullable|in:ambient,chilled,frozen,controlled',
+            'inventory_temperature_class_id' => [
+                'nullable',
+                Rule::exists('inventory_temperature_classes', 'id')->where(fn ($q) => $q->where('company_id', $compId)),
+            ],
+            'package_type_id' => [
+                'nullable',
+                Rule::exists('inventory_package_types', 'id')->where(fn ($q) => $q->where('company_id', $compId)),
+            ],
             'hazardous_material' => 'boolean',
             'gross_weight_kg' => 'nullable|numeric|min:0',
             'net_weight_kg' => 'nullable|numeric|min:0',
             'volume_cbm' => 'nullable|numeric|min:0',
             'dimensions' => 'nullable|string|max:50',
             'tax_category_id' => 'required|exists:tax_categories,id',
-            'hsn_code' => 'nullable|string|max:20',
-            'hs_tariff_code' => 'nullable|string|max:10',
-            'country_of_origin_id' => 'nullable|exists:countries,id',
+            'hsn_sac_compliance_code_id' => [
+                'nullable',
+                Rule::exists('inventory_compliance_codes', 'id')->where(fn ($q) => $q->where('company_id', $compId)->where('code_kind', InventoryComplianceCode::KIND_HSN_SAC)),
+            ],
+            'hs_tariff_compliance_code_id' => [
+                'nullable',
+                Rule::exists('inventory_compliance_codes', 'id')->where(fn ($q) => $q->where('company_id', $compId)->where('code_kind', InventoryComplianceCode::KIND_HS_TARIFF)),
+            ],
+            'origin_currency_id' => 'nullable|exists:currencies,id',
+            'barcode_type_id' => [
+                'nullable',
+                Rule::exists('inventory_barcode_types', 'id')->where(fn ($q) => $q->where('company_id', $compId)),
+            ],
             'barcode_gtin' => 'nullable|string|max:20|unique:inventory_items,barcode_gtin',
             'inventory_gl_account_id' => 'nullable|exists:chart_of_accounts,id',
             'purchase_gl_account_id' => 'nullable|exists:chart_of_accounts,id',
@@ -384,6 +500,9 @@ class ItemMasterController extends Controller
             'abc_classification' => 'nullable|in:a,b,c',
             'slow_moving_threshold_days' => 'nullable|integer|min:0',
         ]);
+
+        $this->applySingleConversionUomDefaults($validated, (int) $compId);
+        $this->syncItemComplianceOriginAndBarcodeGtin($validated, (int) $compId);
 
         $this->categoryCostingAccounts->applyCategoryGlToItemPayload(
             $validated,
@@ -469,7 +588,17 @@ class ItemMasterController extends Controller
             'item_status' => 'required|in:active,inactive,discontinued,blocked',
             'item_type' => 'required|in:raw_material,finished_good,trading,consumable,service',
             'item_class_id' => 'required|exists:inventory_item_classes,id',
-            'item_category_id' => 'required|exists:inventory_item_categories,id',
+            'item_category_id' => [
+                'required',
+                Rule::exists('inventory_item_categories', 'id')->where(function ($query) use ($request, $compId, $locationId) {
+                    $query->where('comp_id', $compId)
+                        ->where('location_id', $locationId)
+                        ->where(function ($q) use ($request) {
+                            $q->whereNull('item_class_id')
+                                ->orWhere('item_class_id', $request->input('item_class_id'));
+                        });
+                }),
+            ],
             'item_group_id' => 'nullable|exists:inventory_item_groups,id',
             'brand' => 'nullable|string|max:100',
             'tracking_mode' => 'required|in:none,lot,serial',
@@ -492,16 +621,33 @@ class ItemMasterController extends Controller
             'shelf_life_days' => 'nullable|integer|min:0',
             'expiry_basis' => 'nullable|in:manufacturing_date,receipt_date',
             'near_expiry_alert_days' => 'nullable|integer|min:0',
-            'storage_temperature_class' => 'nullable|in:ambient,chilled,frozen,controlled',
+            'inventory_temperature_class_id' => [
+                'nullable',
+                Rule::exists('inventory_temperature_classes', 'id')->where(fn ($q) => $q->where('company_id', $compId)),
+            ],
+            'package_type_id' => [
+                'nullable',
+                Rule::exists('inventory_package_types', 'id')->where(fn ($q) => $q->where('company_id', $compId)),
+            ],
             'hazardous_material' => 'boolean',
             'gross_weight_kg' => 'nullable|numeric|min:0',
             'net_weight_kg' => 'nullable|numeric|min:0',
             'volume_cbm' => 'nullable|numeric|min:0',
             'dimensions' => 'nullable|string|max:50',
             'tax_category_id' => 'required|exists:tax_categories,id',
-            'hsn_code' => 'nullable|string|max:20',
-            'hs_tariff_code' => 'nullable|string|max:10',
-            'country_of_origin_id' => 'nullable|exists:countries,id',
+            'hsn_sac_compliance_code_id' => [
+                'nullable',
+                Rule::exists('inventory_compliance_codes', 'id')->where(fn ($q) => $q->where('company_id', $compId)->where('code_kind', InventoryComplianceCode::KIND_HSN_SAC)),
+            ],
+            'hs_tariff_compliance_code_id' => [
+                'nullable',
+                Rule::exists('inventory_compliance_codes', 'id')->where(fn ($q) => $q->where('company_id', $compId)->where('code_kind', InventoryComplianceCode::KIND_HS_TARIFF)),
+            ],
+            'origin_currency_id' => 'nullable|exists:currencies,id',
+            'barcode_type_id' => [
+                'nullable',
+                Rule::exists('inventory_barcode_types', 'id')->where(fn ($q) => $q->where('company_id', $compId)),
+            ],
             'barcode_gtin' => 'nullable|string|max:20|unique:inventory_items,barcode_gtin,'.$id,
             'inventory_gl_account_id' => 'nullable|exists:chart_of_accounts,id',
             'purchase_gl_account_id' => 'nullable|exists:chart_of_accounts,id',
@@ -512,6 +658,9 @@ class ItemMasterController extends Controller
             'abc_classification' => 'nullable|in:a,b,c',
             'slow_moving_threshold_days' => 'nullable|integer|min:0',
         ]);
+
+        $this->applySingleConversionUomDefaults($validated, (int) $compId);
+        $this->syncItemComplianceOriginAndBarcodeGtin($validated, (int) $compId);
 
         $this->categoryCostingAccounts->applyCategoryGlToItemPayload(
             $validated,
@@ -775,6 +924,119 @@ class ItemMasterController extends Controller
                 'value' => (string) $a->id,
                 'label' => $a->account_code.' - '.$a->account_name,
             ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     */
+    private function syncItemComplianceOriginAndBarcodeGtin(array &$validated, int $compId): void
+    {
+        if (! empty($validated['hsn_sac_compliance_code_id'])) {
+            $validated['hsn_code'] = InventoryComplianceCode::query()
+                ->where('company_id', $compId)
+                ->where('id', $validated['hsn_sac_compliance_code_id'])
+                ->value('code');
+        } else {
+            $validated['hsn_code'] = null;
+        }
+
+        if (! empty($validated['hs_tariff_compliance_code_id'])) {
+            $validated['hs_tariff_code'] = InventoryComplianceCode::query()
+                ->where('company_id', $compId)
+                ->where('id', $validated['hs_tariff_compliance_code_id'])
+                ->value('code');
+        } else {
+            $validated['hs_tariff_code'] = null;
+        }
+
+        if (! empty($validated['origin_currency_id'])) {
+            $cur = Currency::query()->find((int) $validated['origin_currency_id']);
+            $validated['country_of_origin_id'] = null;
+            if ($cur) {
+                $validated['country_of_origin_id'] = Country::active()
+                    ->where('currency_id', $cur->id)
+                    ->value('id');
+                if (! $validated['country_of_origin_id'] && $cur->country) {
+                    $validated['country_of_origin_id'] = Country::active()
+                        ->whereRaw('LOWER(TRIM(country_name)) = ?', [mb_strtolower(trim((string) $cur->country))])
+                        ->value('id');
+                }
+            }
+        } else {
+            $validated['country_of_origin_id'] = null;
+        }
+
+        if (! empty($validated['barcode_type_id'])) {
+            unset($validated['barcode_gtin']);
+        }
+    }
+
+    /**
+     * Neighbour UOM ids per stock UOM from conversions (both directions treated as linked).
+     *
+     * @return array{0: array<string, list<string>>, 1: array<string, list<string>>}
+     */
+    private function uomConversionMaps(int $compId): array
+    {
+        $neighbors = [];
+
+        foreach (UomConversion::query()->byCompany($compId)->active()->get(['from_uom_id', 'to_uom_id']) as $row) {
+            $from = (string) $row->from_uom_id;
+            $to = (string) $row->to_uom_id;
+
+            foreach ([[$from, $to], [$to, $from]] as [$a, $b]) {
+                if ($a === $b) {
+                    continue;
+                }
+                if (! isset($neighbors[$a])) {
+                    $neighbors[$a] = [];
+                }
+                if (! in_array($b, $neighbors[$a], true)) {
+                    $neighbors[$a][] = $b;
+                }
+            }
+        }
+
+        foreach ($neighbors as $k => $ids) {
+            usort($neighbors[$k], fn ($a, $b) => (int) $a <=> (int) $b);
+        }
+
+        return [$neighbors, $neighbors];
+    }
+
+    /**
+     * When stock links to exactly one other UOM via conversions, default purchase and sales to that UOM.
+     *
+     * @param  array<string, mixed>  $validated
+     */
+    private function applySingleConversionUomDefaults(array &$validated, int $compId): void
+    {
+        $stockId = (int) $validated['stock_uom_id'];
+
+        $others = collect();
+        foreach (UomConversion::query()
+            ->byCompany($compId)
+            ->active()
+            ->where(function ($q) use ($stockId) {
+                $q->where('to_uom_id', $stockId)
+                    ->orWhere('from_uom_id', $stockId);
+            })
+            ->get(['from_uom_id', 'to_uom_id']) as $row) {
+            if ((int) $row->to_uom_id === $stockId) {
+                $others->push((int) $row->from_uom_id);
+            }
+            if ((int) $row->from_uom_id === $stockId) {
+                $others->push((int) $row->to_uom_id);
+            }
+        }
+
+        $others = $others->unique()->filter(fn ($id) => $id !== $stockId)->values();
+
+        if ($others->count() === 1) {
+            $only = (string) $others->first();
+            $validated['purchase_uom_id'] = $only;
+            $validated['sales_uom_id'] = $only;
+        }
     }
 
     /**

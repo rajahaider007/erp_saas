@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import {
   Upload, X, CheckCircle, AlertCircle, Loader2, Eye, EyeOff,
   Search, Calendar, Clock, ChevronDown, Mail, Lock, Shield,
@@ -8,11 +8,11 @@ import InlineSearchSelect from './InlineSearchSelect';
 import { useTranslations } from '@/hooks/useTranslations';
 
 // Generalized Form Component
-const GeneralizedForm = ({
+const GeneralizedForm = forwardRef(function GeneralizedForm({
   title,
   subtitle,
   fields = [],
-  onSubmit,
+  onSubmit = async () => {},
   submitText,
   resetText,
   showReset = true,
@@ -20,14 +20,22 @@ const GeneralizedForm = ({
   formContainerClassName = '',
   formGridClassName = '',
   suggestedPartyCode = null,
-}) => {
+  /** When true, renders only the field grid (no outer theme shell, no <form>, no buttons). Use inside a parent <form> with ref API for submit. */
+  embedded = false,
+  /** When embedded, hide built-in H1/subtitle (parent supplies page header). */
+  showEmbeddedHeader = false,
+  /** When embedded, omit submit/reset row (parent provides actions). Default follows embedded. */
+  showSubmitActions = null,
+}, ref) {
   const { t } = useTranslations();
+  const showActions = showSubmitActions ?? !embedded;
   const displayTitle = title ?? t('common.form.default_title');
   const displaySubtitle = subtitle ?? t('common.form.default_subtitle');
   const displaySubmit = submitText ?? t('common.actions.submit');
   const displayReset = resetText ?? t('common.actions.reset');
 
   const [formData, setFormData] = useState(initialData || {});
+  const formDataRef = useRef(formData);
   const lastAutoPartyCodeRef = useRef('');
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState(null);
@@ -35,6 +43,10 @@ const GeneralizedForm = ({
   const [dragActive, setDragActive] = useState({});
   const [imagePreviews, setImagePreviews] = useState({});
   const fileInputRefs = useRef({});
+
+  useEffect(() => {
+    formDataRef.current = formData;
+  }, [formData]);
 
   useEffect(() => {
     const field = suggestedPartyCode?.field;
@@ -131,9 +143,11 @@ const GeneralizedForm = ({
   };
 
   const validateForm = () => {
+    const data = formDataRef.current;
     const requiredFields = fields.filter(field => field.required);
     for (const field of requiredFields) {
-      if (!formData[field.name] || formData[field.name] === '') {
+      const v = data[field.name];
+      if (v === null || v === undefined || v === '') {
         setAlert({
           type: 'error',
           message: t('common.form.field_required', { label: field.label }),
@@ -170,6 +184,7 @@ const GeneralizedForm = ({
 
   const handleReset = () => {
     setFormData(initialData || {});
+    formDataRef.current = initialData || {};
     setImagePreviews({});
     setAlert(null);
     Object.keys(fileInputRefs.current).forEach(key => {
@@ -179,9 +194,24 @@ const GeneralizedForm = ({
     });
   };
 
+  useImperativeHandle(ref, () => ({
+    getValues: () => ({ ...formDataRef.current }),
+    validate: validateForm,
+    resetForm: handleReset,
+  }), [fields, t, initialData]);
+
   const renderField = (field) => {
     const fieldValue = formData[field.name] ?? '';
     const Icon = field.icon;
+    const resolvedSelectOptions =
+      typeof field.resolveOptions === 'function'
+        ? field.resolveOptions(formData) || []
+        : field.options || [];
+
+    const selectDisabled =
+      typeof field.resolveDisabled === 'function'
+        ? !!field.resolveDisabled(formData)
+        : !!field.disabled;
 
     switch (field.type) {
       case 'text':
@@ -189,14 +219,36 @@ const GeneralizedForm = ({
       case 'tel':
       case 'url':
       case 'number':
-      case 'date':
+      case 'integer':
+      case 'decimal':
+      case 'date': {
+        const inputDisabled =
+          typeof field.resolveDisabled === 'function'
+            ? !!field.resolveDisabled(formData)
+            : !!field.disabled;
+        const inputReadOnly =
+          typeof field.resolveReadOnly === 'function'
+            ? !!field.resolveReadOnly(formData)
+            : !!field.readOnly;
+        const inputType =
+          field.type === 'date'
+            ? 'date'
+            : field.type === 'integer' || field.type === 'decimal' || field.type === 'number'
+              ? 'number'
+              : field.type;
+        const stepProp =
+          field.type === 'integer'
+            ? 1
+            : field.type === 'decimal'
+              ? field.step ?? 'any'
+              : field.step;
         return (
           <div className="input-group" key={field.name}>
             <label className="input-label">{field.label}</label>
             <div className="input-wrapper">
               {Icon && <Icon className="input-icon" size={20} />}
               <input
-                type={field.type}
+                type={inputType}
                 className={`form-input ${Icon ? 'input-with-icon' : ''}`}
                 placeholder={field.placeholder}
                 title={field.inputTitle || undefined}
@@ -204,12 +256,16 @@ const GeneralizedForm = ({
                 onChange={(e) => handleInputChange(field.name, e.target.value, field)}
                 min={field.min}
                 max={field.max}
+                step={stepProp}
+                inputMode={field.type === 'decimal' ? 'decimal' : field.type === 'integer' ? 'numeric' : undefined}
                 required={field.required}
-                disabled={field.disabled || false}
+                disabled={inputDisabled}
+                readOnly={inputReadOnly}
               />
             </div>
           </div>
         );
+      }
 
       case 'password':
         return (
@@ -238,7 +294,11 @@ const GeneralizedForm = ({
           </div>
         );
 
-      case 'textarea':
+      case 'textarea': {
+        const textareaDisabled =
+          typeof field.resolveDisabled === 'function'
+            ? !!field.resolveDisabled(formData)
+            : !!field.disabled;
         return (
           <div className="input-group textarea-group" key={field.name}>
             <label className="input-label">{field.label}</label>
@@ -251,11 +311,12 @@ const GeneralizedForm = ({
                 value={fieldValue}
                 onChange={(e) => handleInputChange(field.name, e.target.value, field)}
                 required={field.required}
-                disabled={field.disabled || false}
+                disabled={textareaDisabled}
               />
             </div>
           </div>
         );
+      }
 
       case 'select':
       // Use InlineSearchSelect for searchable fields, regular select for others
@@ -265,11 +326,11 @@ const GeneralizedForm = ({
             <label className="input-label">{field.label}</label>
             <div className="input-wrapper" style={{ overflow: 'visible', position: 'relative' }}>
               <InlineSearchSelect
-                options={field.options || []}
+                options={resolvedSelectOptions}
                 value={fieldValue}
                 onChange={(value) => handleInputChange(field.name, value, field)}
                 placeholder={field.placeholder || t('common.form.select_option', { label: field.label })}
-                disabled={field.disabled || false}
+                disabled={selectDisabled}
                 searchable={true}
                 usePortal
               />
@@ -287,11 +348,12 @@ const GeneralizedForm = ({
                 className={`form-select ${Icon ? 'input-with-icon' : ''}`}
                 value={fieldValue}
                 onChange={(e) => handleInputChange(field.name, e.target.value, field)}
-                disabled={field.disabled || false}
+                disabled={selectDisabled}
                 required={field.required}
               >
                 <option value="">{field.placeholder || t('common.form.select_option', { label: field.label })}</option>
-                {field.options && field.options.map((option, index) => {
+                {resolvedSelectOptions &&
+                  resolvedSelectOptions.map((option, index) => {
                   const value = typeof option === 'object' ? option.value : option;
                   const label = typeof option === 'object' ? option.label : option;
                   return (
@@ -440,6 +502,86 @@ const GeneralizedForm = ({
     );
   };
 
+  const fieldGrid = (
+    <div className={`form-grid ${formGridClassName}`.trim()}>
+      {fields.map((field, index) => {
+        const showSection =
+          field.section &&
+          (index === 0 || fields[index - 1].section !== field.section);
+        return (
+          <React.Fragment key={field.name}>
+            {showSection && (
+              <div className="textarea-group">
+                <h3
+                  className="m-0 text-xs font-semibold uppercase tracking-wider"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
+                  {field.section}
+                </h3>
+              </div>
+            )}
+            {renderField(field)}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+
+  if (embedded) {
+    return (
+      <>
+        {showEmbeddedHeader && (title || subtitle) && (
+          <div className="form-header mb-8">
+            {title && <h1 className="form-title">{displayTitle}</h1>}
+            {subtitle && <p className="form-subtitle">{displaySubtitle}</p>}
+          </div>
+        )}
+        {alert && (
+          <div className="mb-6 transform animate-slideIn">
+            <AlertComponent type={alert.type} message={alert.message} />
+          </div>
+        )}
+        {fieldGrid}
+        {showActions && (
+          <div className="button-group mt-6">
+            <button
+              type="button"
+              disabled={isLoading}
+              className="btn btn-primary"
+              onClick={(e) => {
+                e.preventDefault();
+                handleSubmit(e);
+              }}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="btn-icon animate-spin" size={20} />
+                  {t('common.form.processing')}
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="btn-icon" size={20} />
+                  {displaySubmit}
+                </>
+              )}
+            </button>
+            {showReset && (
+              <button
+                type="button"
+                onClick={handleReset}
+                className="btn btn-secondary"
+                disabled={isLoading}
+              >
+                <X className="btn-icon" size={20} />
+                {displayReset}
+              </button>
+            )}
+          </div>
+        )}
+      </>
+    );
+  }
+
   return (
     <div className="form-theme-system min-h-screen transition-all duration-500">
 
@@ -457,66 +599,48 @@ const GeneralizedForm = ({
         )}
 
         <form onSubmit={handleSubmit}>
-          <div className={`form-grid ${formGridClassName}`.trim()}>
-            {fields.map((field, index) => {
-              const showSection =
-                field.section &&
-                (index === 0 || fields[index - 1].section !== field.section);
-              return (
-                <React.Fragment key={field.name}>
-                  {showSection && (
-                    <div className="textarea-group">
-                      <h3
-                        className="m-0 text-xs font-semibold uppercase tracking-wider"
-                        style={{ color: 'var(--text-secondary)' }}
-                      >
-                        {field.section}
-                      </h3>
-                    </div>
-                  )}
-                  {renderField(field)}
-                </React.Fragment>
-              );
-            })}
-          </div>
+          {fieldGrid}
 
           {/* Submit Buttons */}
-          <div className="button-group">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn btn-primary"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="btn-icon animate-spin" size={20} />
-                  {t('common.form.processing')}
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="btn-icon" size={20} />
-                  {displaySubmit}
-                </>
-              )}
-            </button>
-
-            {showReset && (
+          {showActions && (
+            <div className="button-group">
               <button
-                type="button"
-                onClick={handleReset}
-                className="btn btn-secondary"
+                type="submit"
                 disabled={isLoading}
+                className="btn btn-primary"
               >
-                <X className="btn-icon" size={20} />
-                {displayReset}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="btn-icon animate-spin" size={20} />
+                    {t('common.form.processing')}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="btn-icon" size={20} />
+                    {displaySubmit}
+                  </>
+                )}
               </button>
-            )}
-          </div>
+
+              {showReset && (
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="btn btn-secondary"
+                  disabled={isLoading}
+                >
+                  <X className="btn-icon" size={20} />
+                  {displayReset}
+                </button>
+              )}
+            </div>
+          )}
         </form>
       </div>
 
 
     </div>
   );
-};
+});
+
 export default GeneralizedForm;

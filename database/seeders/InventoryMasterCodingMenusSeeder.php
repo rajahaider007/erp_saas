@@ -60,7 +60,8 @@ class InventoryMasterCodingMenusSeeder extends Seeder
                 ['menu_name' => 'Transporter Master', 'route' => '/inventory/master-data/transporter-master', 'icon' => 'file-text', 'sort_order' => 9],
                 ['menu_name' => 'Customer Master', 'route' => '/inventory/master-data/customer-master', 'icon' => 'file-text', 'sort_order' => 10],
                 ['menu_name' => 'Package Type Configuration', 'route' => '/inventory/master-data/package-type-master', 'icon' => 'file-text', 'sort_order' => 11],
-                ['menu_name' => 'Barcode Type Configuration', 'route' => '/inventory/master-data/barcode-type-master', 'icon' => 'file-text', 'sort_order' => 12],
+                ['menu_name' => 'HSN / SAC & Tariff Codes', 'route' => '/inventory/master-data/compliance-code-master', 'icon' => 'file-text', 'sort_order' => 12],
+                ['menu_name' => 'Barcode Type Configuration', 'route' => '/inventory/master-data/barcode-type-master', 'icon' => 'file-text', 'sort_order' => 13],
             ],
             $now
         ));
@@ -73,6 +74,17 @@ class InventoryMasterCodingMenusSeeder extends Seeder
             [
                 ['menu_name' => 'UOM Master', 'route' => '/inventory/uom-master', 'icon' => 'list', 'sort_order' => 1],
                 ['menu_name' => 'UOM Conversion', 'route' => '/inventory/uom-conversion', 'icon' => 'list', 'sort_order' => 2],
+            ],
+            $now
+        ));
+
+        $allMenuIds = array_merge($allMenuIds, $this->seedMenuGroup(
+            $moduleId,
+            'Procurement',
+            'inventory-procurement',
+            3,
+            [
+                ['menu_name' => 'Purchase Requisition', 'route' => '/inventory/purchase-requisition/create', 'icon' => 'shopping-cart', 'sort_order' => 1],
             ],
             $now
         ));

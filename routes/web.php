@@ -6,6 +6,7 @@ use App\Http\Controllers\Inventory\ItemClassCodingController;
 use App\Http\Controllers\Inventory\ItemGroupCodingController;
 use App\Http\Controllers\Inventory\ItemMasterController;
 use App\Http\Controllers\Inventory\MasterDataController;
+use App\Http\Controllers\Inventory\PurchaseRequisitionController;
 use App\Http\Controllers\Inventory\UomConversionController;
 use App\Http\Controllers\Inventory\UomMasterController;
 use App\Http\Controllers\system\CompanyController;
@@ -156,6 +157,12 @@ Route::prefix('inventory/uom-conversion')->name('inventory.uom-conversion.')->mi
     Route::put('/{id}', [UomConversionController::class, 'update'])->name('update');
     Route::delete('/{id}', [UomConversionController::class, 'destroy'])->name('destroy');
     Route::post('/bulk-destroy', [UomConversionController::class, 'bulkDestroy'])->name('bulk-destroy');
+});
+
+// Inventory Module — Purchase Requisition (PR)
+Route::prefix('inventory/purchase-requisition')->name('inventory.purchase-requisition.')->middleware('web.auth')->group(function () {
+    Route::get('/create', [PurchaseRequisitionController::class, 'create'])->name('create');
+    Route::post('/', [PurchaseRequisitionController::class, 'store'])->name('store');
 });
 
 // Inventory Module - Item Master

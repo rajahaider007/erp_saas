@@ -167,6 +167,7 @@ Count Plan → Freeze → Blind Count Entry → Recount (if variance)
 |------|-----------|----------------|
 | **FORM 1** | Item Master | **Partial** — list/create/edit: `resources/js/Pages/Inventory/ItemMaster/`, routes `inventory/item-master/*`. Blueprint ke saath har field abhi cover nahi; agla kaam: missing fields + sub-tables align karna. |
 | **FORM 2** | Warehouse / Bin | **Done (masters phase)** — `warehouse-master`, `zone-bin-master` → `Inventory/MasterData/`. Agar blueprint mein extra fields (staging bins, Return/Scrap type) bache hon to alag polish ticket. |
+| **FORM 2.5** | Purchase Requisition (PR) | **Started** — create (draft) + lines: `resources/js/Pages/Inventory/PurchaseRequisition/Create.jsx`, `PurchaseRequisitionController`, routes `inventory/purchase-requisition/*`. PO baad mein PR se link ho sakta hai; PR ke baghair PO bhi blueprint ke mutabiq mumkin. |
 | **FORM 3** | Purchase Order | **Not started** — is route group ka koi transactional UI/controller nahi. |
 | **FORM 4** | GRN | **Not started** |
 | **FORM 5** | Landed Cost | **Not started** |
@@ -335,9 +336,48 @@ Count Plan → Freeze → Blind Count Entry → Recount (if variance)
 
 ---
 
+### FORM 2.5: Purchase Requisition (PR)
+
+> **Dev status:** 🟡 **Partial** — create + multi-line draft save live; approval workflow / list / convert-to-PO abhi scope mein nahi.
+
+Procurement flow: **PR pehle** (internal request), phir **PO** vendor + commercial terms ke saath; PO **PR se linked** ho sakta hai ya **direct** (PR optional). Ye form PO jaisa header + line structure follow karta hai lekin **vendor, Incoterms, firm unit price** PR draft par optional / indicative rehte hain.
+
+**Header (aligned with P2S controls):**
+
+| # | Field | Type | Rule |
+|---|---|---|---|
+| 1 | PR Number | Auto | Unique per company/location |
+| 2 | PR Date | Date | Required |
+| 3 | Required by | Date | Optional header default |
+| 4 | Deliver to (location) | Lookup | Branch / ship-to |
+| 5 | Delivery address | Text | Optional |
+| 6 | Currency | Lookup | Optional — estimated budget |
+| 7 | FX rate | Decimal | Optional |
+| 8 | Priority | Dropdown | Normal / High / Urgent |
+| 9 | Department | Lookup | Optional |
+| 10 | Requested by | Text | Optional |
+| 11 | Justification | Text | Supports SoD / audit |
+| 12 | Internal notes | Text | Optional |
+| 13 | Status | System | Draft (extend: Submitted / Approved) |
+
+**Lines (PO-compatible subset):**
+
+| # | Field | Type | Rule |
+|---|---|---|---|
+| 1 | Line No. | Auto | — |
+| 2 | Item | Lookup | Active items |
+| 3 | Description | Text | Optional override |
+| 4 | UOM | Dropdown | Purchase UOM |
+| 5 | Quantity | Decimal | \> 0 |
+| 6 | Est. unit price | Currency | Optional |
+| 7 | Need by date | Date | Optional |
+| 8 | Line notes | Text | Optional |
+
+---
+
 ### FORM 3: Purchase Order (PO)
 
-> **Dev status:** 🔴 **Not started** — yahi se transactional inventory shuru karne ki recommendation (P2S).
+> **Dev status:** 🔴 **Not started** — transactional PO **PR ke baad** ya **baghair PR** dono supported hon ge; PR link field PO header mein add hogi.
 
 **Header:**
 

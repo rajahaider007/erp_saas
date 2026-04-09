@@ -28,6 +28,7 @@ class InventoryItem extends Model
         'stock_uom_id',
         'purchase_uom_id',
         'sales_uom_id',
+        'package_type_id',
         'costing_method',
         'standard_cost',
         'last_purchase_price',
@@ -41,16 +42,20 @@ class InventoryItem extends Model
         'shelf_life_days',
         'expiry_basis',
         'near_expiry_alert_days',
-        'storage_temperature_class',
+        'inventory_temperature_class_id',
         'hazardous_material',
         'gross_weight_kg',
         'net_weight_kg',
         'volume_cbm',
         'dimensions',
         'tax_category_id',
+        'hsn_sac_compliance_code_id',
+        'hs_tariff_compliance_code_id',
         'hsn_code',
         'hs_tariff_code',
         'country_of_origin_id',
+        'origin_currency_id',
+        'barcode_type_id',
         'barcode_gtin',
         'inventory_gl_account_id',
         'purchase_gl_account_id',
@@ -135,6 +140,16 @@ class InventoryItem extends Model
         return $this->belongsTo(UomMaster::class, 'sales_uom_id');
     }
 
+    public function packageType()
+    {
+        return $this->belongsTo(InventoryPackageType::class, 'package_type_id');
+    }
+
+    public function inventoryTemperatureClass()
+    {
+        return $this->belongsTo(InventoryTemperatureClass::class, 'inventory_temperature_class_id');
+    }
+
     public function taxCategory()
     {
         return $this->belongsTo(TaxCategory::class, 'tax_category_id');
@@ -143,6 +158,26 @@ class InventoryItem extends Model
     public function countryOfOrigin()
     {
         return $this->belongsTo(Country::class, 'country_of_origin_id');
+    }
+
+    public function originCurrency()
+    {
+        return $this->belongsTo(Currency::class, 'origin_currency_id');
+    }
+
+    public function hsnSacComplianceCode()
+    {
+        return $this->belongsTo(InventoryComplianceCode::class, 'hsn_sac_compliance_code_id');
+    }
+
+    public function hsTariffComplianceCode()
+    {
+        return $this->belongsTo(InventoryComplianceCode::class, 'hs_tariff_compliance_code_id');
+    }
+
+    public function barcodeType()
+    {
+        return $this->belongsTo(InventoryBarcodeType::class, 'barcode_type_id');
     }
 
     public function defaultVendor()

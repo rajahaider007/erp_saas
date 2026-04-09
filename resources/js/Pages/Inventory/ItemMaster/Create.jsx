@@ -60,8 +60,16 @@ const CreateItemMasterForm = () => {
     trackingModeOptions = [],
     uomOptions = [],
     taxCategoryOptions = [],
+    packageTypeOptions = [],
     temperatureClassOptions = [],
-    countryOptions = [],
+    hsnSacOptions = [],
+    hsTariffOptions = [],
+    currencyOriginOptions = [],
+    barcodeTypeOptions = [],
+    barcodeTypeMetaById = {},
+    uomPurchaseFromStock = {},
+    uomSalesFromStock = {},
+    vendorOptions = [],
     glAccountOptions = [],
     glAccountOptionsInventory = [],
     glAccountOptionsPurchase = [],
@@ -164,7 +172,24 @@ const CreateItemMasterForm = () => {
       placeholder: fld('item_class_id', 'placeholder'),
       required: true,
       options: itemClassOptions,
-      help: fld('item_class_id', 'help')
+      help: fld('item_class_id', 'help'),
+      onFormDataPatch: (value, next, prev) => {
+        if (!value) {
+          return { item_category_id: '' };
+        }
+        const prevCat = prev.item_category_id;
+        if (!prevCat) {
+          return {};
+        }
+        const stillValid = itemCategoryOptions.some(
+          (c) =>
+            String(c.value) === String(prevCat) &&
+            (c.item_class_id == null ||
+              c.item_class_id === '' ||
+              String(c.item_class_id) === String(value))
+        );
+        return stillValid ? {} : { item_category_id: '' };
+      },
     },
     {
       name: 'item_category_id',
@@ -173,8 +198,28 @@ const CreateItemMasterForm = () => {
       placeholder: fld('item_category_id', 'placeholder'),
       required: true,
       options: itemCategoryOptions,
+      resolveDisabled: (formData) => !formData.item_class_id,
+      resolveOptions: (formData) => {
+        if (!formData.item_class_id) {
+          return [];
+        }
+        return itemCategoryOptions.filter(
+          (c) =>
+            c.item_class_id == null ||
+            c.item_class_id === '' ||
+            String(c.item_class_id) === String(formData.item_class_id)
+        );
+      },
       help: fld('item_category_id', 'help'),
       onFormDataPatch: (value) => {
+        if (!value) {
+          return {
+            inventory_gl_account_id: '',
+            purchase_gl_account_id: '',
+            sales_gl_account_id: '',
+            cogs_gl_account_id: '',
+          };
+        }
         const row = itemCategoryCoaById?.[value];
         if (!row) {
           return {};
@@ -229,71 +274,120 @@ const CreateItemMasterForm = () => {
   // ============================================
   // SECTION B: Tracking & UOM Configuration
   // ============================================
-  const trackingFields = [
-    {
-      name: 'tracking_mode',
-      label: fld('tracking_mode', 'label'),
-      type: 'select',
-      placeholder: fld('tracking_mode', 'placeholder'),
-      required: true,
-      options: trackingModeOptions || [
-        { value: 'none', label: opt('tracking_mode', 'none') },
-        { value: 'lot', label: opt('tracking_mode', 'lot') },
-        { value: 'serial', label: opt('tracking_mode', 'serial') },
-      ],
-      help: fld('tracking_mode', 'help')
-    },
-    {
-      name: 'stock_uom_id',
-      label: fld('stock_uom_id', 'label'),
-      type: 'select',
-      placeholder: fld('stock_uom_id', 'placeholder'),
-      required: true,
-      options: uomOptions,
-      help: fld('stock_uom_id', 'help')
-    },
-    {
-      name: 'purchase_uom_id',
-      label: fld('purchase_uom_id', 'label'),
-      type: 'select',
-      placeholder: fld('purchase_uom_id', 'placeholder'),
-      required: true,
-      options: uomOptions,
-      help: fld('purchase_uom_id', 'help')
-    },
-    {
-      name: 'sales_uom_id',
-      label: fld('sales_uom_id', 'label'),
-      type: 'select',
-      placeholder: fld('sales_uom_id', 'placeholder'),
-      required: true,
-      options: uomOptions,
-      help: fld('sales_uom_id', 'help')
-    },
-    {
-      name: 'uom_conversion_table',
-      label: fld('uom_conversion_table', 'label'),
-      type: 'textarea',
-      placeholder: fld('uom_conversion_table', 'placeholder'),
-      required: false,
-      maxLength: 500,
-      help: fld('uom_conversion_table', 'help')
-    },
-    {
-      name: 'packaging_hierarchy',
-      label: fld('packaging_hierarchy', 'label'),
-      type: 'textarea',
-      placeholder: fld('packaging_hierarchy', 'placeholder'),
-      required: false,
-      maxLength: 500,
-      help: fld('packaging_hierarchy', 'help')
-    },
-  ];
+  const trackingFields = useMemo(
+    () => [
+      {
+        name: 'tracking_mode',
+        label: fld('tracking_mode', 'label'),
+        type: 'select',
+        placeholder: fld('tracking_mode', 'placeholder'),
+        required: true,
+        options: trackingModeOptions || [
+          { value: 'none', label: opt('tracking_mode', 'none') },
+          { value: 'lot', label: opt('tracking_mode', 'lot') },
+          { value: 'serial', label: opt('tracking_mode', 'serial') },
+        ],
+        help: fld('tracking_mode', 'help'),
+      },
+      {
+        name: 'stock_uom_id',
+        label: fld('stock_uom_id', 'label'),
+        type: 'select',
+        placeholder: fld('stock_uom_id', 'placeholder'),
+        required: true,
+        options: uomOptions,
+        help: fld('stock_uom_id', 'help'),
+        onFormDataPatch: (value, next) => {
+          if (!value) {
+            return {
+              purchase_uom_id: '',
+              sales_uom_id: '',
+            };
+          }
+          const patch = {};
+          const stockId = value;
+          const pCand = uomPurchaseFromStock[stockId] || [];
+          const sCand = uomSalesFromStock[stockId] || [];
+          if (pCand.length === 1) {
+            patch.purchase_uom_id = pCand[0];
+          } else if (pCand.length === 0) {
+            patch.purchase_uom_id = stockId;
+          } else if (
+            pCand.length > 1 &&
+            !pCand.some((id) => String(id) === String(next.purchase_uom_id || ''))
+          ) {
+            patch.purchase_uom_id = '';
+          }
+          if (sCand.length === 1) {
+            patch.sales_uom_id = sCand[0];
+          } else if (sCand.length === 0) {
+            patch.sales_uom_id = stockId;
+          } else if (
+            sCand.length > 1 &&
+            !sCand.some((id) => String(id) === String(next.sales_uom_id || ''))
+          ) {
+            patch.sales_uom_id = '';
+          }
+          return patch;
+        },
+      },
+      {
+        name: 'purchase_uom_id',
+        label: fld('purchase_uom_id', 'label'),
+        type: 'select',
+        placeholder: fld('purchase_uom_id', 'placeholder'),
+        required: true,
+        options: uomOptions,
+        resolveDisabled: (formData) => !formData.stock_uom_id,
+        resolveOptions: (formData) => {
+          const stockId = formData.stock_uom_id;
+          if (!stockId) {
+            return [];
+          }
+          const extra = uomPurchaseFromStock[stockId] || [];
+          const allowed = new Set([String(stockId), ...extra.map(String)]);
+          return uomOptions.filter((o) => allowed.has(String(o.value)));
+        },
+        help: fld('purchase_uom_id', 'help'),
+      },
+      {
+        name: 'sales_uom_id',
+        label: fld('sales_uom_id', 'label'),
+        type: 'select',
+        placeholder: fld('sales_uom_id', 'placeholder'),
+        required: true,
+        options: uomOptions,
+        resolveDisabled: (formData) => !formData.stock_uom_id,
+        resolveOptions: (formData) => {
+          const stockId = formData.stock_uom_id;
+          if (!stockId) {
+            return [];
+          }
+          const extra = uomSalesFromStock[stockId] || [];
+          const allowed = new Set([String(stockId), ...extra.map(String)]);
+          return uomOptions.filter((o) => allowed.has(String(o.value)));
+        },
+        help: fld('sales_uom_id', 'help'),
+      },
+      {
+        name: 'package_type_id',
+        label: fld('package_type_id', 'label'),
+        type: 'select',
+        placeholder: fld('package_type_id', 'placeholder'),
+        required: false,
+        options: packageTypeOptions,
+        searchable: true,
+        help: fld('package_type_id', 'help'),
+      },
+    ],
+    [fld, opt, trackingModeOptions, uomOptions, uomPurchaseFromStock, uomSalesFromStock, packageTypeOptions]
+  );
 
   // ============================================
   // SECTION C: Costing & Procurement
   // ============================================
-  const costingFields = [
+  const costingFields = useMemo(
+    () => [
     {
       name: 'costing_method',
       label: fld('costing_method', 'label'),
@@ -376,7 +470,7 @@ const CreateItemMasterForm = () => {
       type: 'select',
       placeholder: fld('default_vendor_id', 'placeholder'),
       required: false,
-      options: [],
+      options: vendorOptions,
       help: fld('default_vendor_id', 'help')
     },
     {
@@ -388,7 +482,9 @@ const CreateItemMasterForm = () => {
       maxLength: 500,
       help: fld('substitute_items', 'help')
     },
-  ];
+  ],
+    [fld, opt, vendorOptions]
+  );
 
   // ============================================
   // SECTION D: Expiry & Storage
@@ -433,18 +529,14 @@ const CreateItemMasterForm = () => {
       help: fld('near_expiry_alert_days', 'help')
     },
     {
-      name: 'storage_temperature_class',
-      label: fld('storage_temperature_class', 'label'),
+      name: 'inventory_temperature_class_id',
+      label: fld('inventory_temperature_class_id', 'label'),
       type: 'select',
-      placeholder: fld('storage_temperature_class', 'placeholder'),
+      placeholder: fld('inventory_temperature_class_id', 'placeholder'),
       required: false,
-      options: temperatureClassOptions || [
-        { value: 'ambient', label: opt('storage_temperature_class', 'ambient') },
-        { value: 'chilled', label: opt('storage_temperature_class', 'chilled') },
-        { value: 'frozen', label: opt('storage_temperature_class', 'frozen') },
-        { value: 'controlled', label: opt('storage_temperature_class', 'controlled') },
-      ],
-      help: fld('storage_temperature_class', 'help')
+      options: temperatureClassOptions,
+      searchable: true,
+      help: fld('inventory_temperature_class_id', 'help'),
     },
     {
       name: 'hazardous_material',
@@ -504,7 +596,8 @@ const CreateItemMasterForm = () => {
   // ============================================
   // SECTION F: Tax & Trade Compliance
   // ============================================
-  const taxFields = [
+  const taxFields = useMemo(
+    () => [
     {
       name: 'tax_category_id',
       label: fld('tax_category_id', 'label'),
@@ -515,31 +608,44 @@ const CreateItemMasterForm = () => {
       help: fld('tax_category_id', 'help')
     },
     {
-      name: 'hsn_code',
-      label: fld('hsn_code', 'label'),
-      type: 'text',
-      placeholder: fld('hsn_code', 'placeholder'),
-      required: false,
-      maxLength: 20,
-      help: fld('hsn_code', 'help')
-    },
-    {
-      name: 'hs_tariff_code',
-      label: fld('hs_tariff_code', 'label'),
-      type: 'text',
-      placeholder: fld('hs_tariff_code', 'placeholder'),
-      required: false,
-      maxLength: 10,
-      help: fld('hs_tariff_code', 'help')
-    },
-    {
-      name: 'country_of_origin_id',
-      label: fld('country_of_origin_id', 'label'),
+      name: 'hsn_sac_compliance_code_id',
+      label: fld('hsn_sac_compliance_code_id', 'label'),
       type: 'select',
-      placeholder: fld('country_of_origin_id', 'placeholder'),
+      placeholder: fld('hsn_sac_compliance_code_id', 'placeholder'),
       required: false,
-      options: countryOptions,
-      help: fld('country_of_origin_id', 'help')
+      options: hsnSacOptions,
+      searchable: true,
+      help: fld('hsn_sac_compliance_code_id', 'help'),
+    },
+    {
+      name: 'hs_tariff_compliance_code_id',
+      label: fld('hs_tariff_compliance_code_id', 'label'),
+      type: 'select',
+      placeholder: fld('hs_tariff_compliance_code_id', 'placeholder'),
+      required: false,
+      options: hsTariffOptions,
+      searchable: true,
+      help: fld('hs_tariff_compliance_code_id', 'help'),
+    },
+    {
+      name: 'origin_currency_id',
+      label: fld('origin_currency_id', 'label'),
+      type: 'select',
+      placeholder: fld('origin_currency_id', 'placeholder'),
+      required: false,
+      options: currencyOriginOptions,
+      searchable: true,
+      help: fld('origin_currency_id', 'help'),
+    },
+    {
+      name: 'barcode_type_id',
+      label: fld('barcode_type_id', 'label'),
+      type: 'select',
+      placeholder: fld('barcode_type_id', 'placeholder'),
+      required: false,
+      options: barcodeTypeOptions,
+      help: fld('barcode_type_id', 'help'),
+      onFormDataPatch: (value) => (!value ? { barcode_gtin: '' } : {}),
     },
     {
       name: 'barcode_gtin',
@@ -548,32 +654,17 @@ const CreateItemMasterForm = () => {
       placeholder: fld('barcode_gtin', 'placeholder'),
       required: false,
       maxLength: 20,
-      help: fld('barcode_gtin', 'help')
+      help: fld('barcode_gtin', 'help'),
+      resolveReadOnly: (formData) => !!formData.barcode_type_id,
     },
-    {
-      name: 'alternate_barcodes',
-      label: fld('alternate_barcodes', 'label'),
-      type: 'textarea',
-      placeholder: fld('alternate_barcodes', 'placeholder'),
-      required: false,
-      maxLength: 500,
-      help: fld('alternate_barcodes', 'help')
-    },
-  ];
+  ],
+    [fld, opt, taxCategoryOptions, hsnSacOptions, hsTariffOptions, currencyOriginOptions, barcodeTypeOptions]
+  );
 
   // ============================================
   // SECTION G: Identifiers & Alternate Codes
   // ============================================
   const identifiersFields = [
-    {
-      name: 'alternate_item_codes',
-      label: fld('alternate_item_codes', 'label'),
-      type: 'textarea',
-      placeholder: fld('alternate_item_codes', 'placeholder'),
-      required: false,
-      maxLength: 500,
-      help: fld('alternate_item_codes', 'help')
-    },
     {
       name: 'inspection_required',
       label: fld('inspection_required', 'label'),
@@ -823,14 +914,32 @@ const CreateItemMasterForm = () => {
 
     const formDataToSend = new FormData();
 
-    // Append all form data
-    Object.keys(formData).forEach(key => {
-      if (formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
-        if (typeof formData[key] === 'boolean') {
-          formDataToSend.append(key, formData[key] ? '1' : '0');
-        } else {
-          formDataToSend.append(key, formData[key]);
-        }
+    const nullableFormKeys = new Set([
+      'barcode_type_id',
+      'origin_currency_id',
+      'inventory_temperature_class_id',
+      'package_type_id',
+      'hsn_sac_compliance_code_id',
+      'hs_tariff_compliance_code_id',
+      'item_group_id',
+      'default_vendor_id',
+      'purchase_gl_account_id',
+      'sales_gl_account_id',
+      'price_variance_gl_account_id',
+    ]);
+
+    Object.keys(formData).forEach((key) => {
+      const val = formData[key];
+      if (val === null || val === undefined) {
+        return;
+      }
+      if (val === '' && !nullableFormKeys.has(key)) {
+        return;
+      }
+      if (typeof val === 'boolean') {
+        formDataToSend.append(key, val ? '1' : '0');
+      } else {
+        formDataToSend.append(key, val);
       }
     });
 
@@ -888,16 +997,18 @@ const CreateItemMasterForm = () => {
     shelf_life_days: item?.shelf_life_days || '',
     expiry_basis: item?.expiry_basis || 'manufacturing_date',
     near_expiry_alert_days: item?.near_expiry_alert_days || '',
-    storage_temperature_class: item?.storage_temperature_class || 'ambient',
+    inventory_temperature_class_id: item?.inventory_temperature_class_id ? String(item.inventory_temperature_class_id) : '',
     hazardous_material: item?.hazardous_material || false,
     gross_weight_kg: item?.gross_weight_kg || '',
     net_weight_kg: item?.net_weight_kg || '',
     volume_cbm: item?.volume_cbm || '',
     dimensions: item?.dimensions || '',
     tax_category_id: item?.tax_category_id ? String(item.tax_category_id) : '',
-    hsn_code: item?.hsn_code || '',
-    hs_tariff_code: item?.hs_tariff_code || '',
-    country_of_origin_id: item?.country_of_origin_id ? String(item.country_of_origin_id) : '',
+    hsn_sac_compliance_code_id: item?.hsn_sac_compliance_code_id ? String(item.hsn_sac_compliance_code_id) : '',
+    hs_tariff_compliance_code_id: item?.hs_tariff_compliance_code_id ? String(item.hs_tariff_compliance_code_id) : '',
+    origin_currency_id: item?.origin_currency_id ? String(item.origin_currency_id) : '',
+    package_type_id: item?.package_type_id ? String(item.package_type_id) : '',
+    barcode_type_id: item?.barcode_type_id ? String(item.barcode_type_id) : '',
     barcode_gtin: item?.barcode_gtin || '',
     inventory_gl_account_id: item?.inventory_gl_account_id ? String(item.inventory_gl_account_id) : '',
     purchase_gl_account_id: item?.purchase_gl_account_id ? String(item.purchase_gl_account_id) : '',
