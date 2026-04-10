@@ -477,7 +477,6 @@ A: Best practices for user management:
    - Match role to job function
    - Limit unnecessary permissions
    - Regular permission reviews
-
 2. Set strong passwords:
    - Use complex passwords
    - Regular password changes
@@ -497,6 +496,19 @@ A: Best practices for user management:
    - Regular security updates
    - Monitor access attempts
    - Implement security policies
+```
+
+---
+
+## 🧭 **Inventory Master Data Queries**
+
+### **Q: "How do I open Vendor Master?"**
+```
+A: Open Vendor Master from:
+1. Inventory → Master Data → Vendor Master
+2. Direct route: /inventory/master-data/vendor-master
+
+Use this route for vendor records and related master-data maintenance.
 ```
 
 ---

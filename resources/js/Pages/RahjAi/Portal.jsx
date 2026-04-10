@@ -53,59 +53,150 @@ function RahjAiPortalBody() {
     threadLoading,
   } = useRahjAiAssistant();
 
-  return (
-    <div className="advanced-module-manager rahj-ai-premium relative overflow-hidden pb-8">
-      <div className="pointer-events-none absolute -left-24 -top-20 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl" aria-hidden />
-      <div className="pointer-events-none absolute -right-16 top-20 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl" aria-hidden />
+  const currentConversation = conversations.find((item) => Number(item.id) === Number(conversationId));
+  const portalStats = [
+    {
+      label: 'Threads',
+      value: conversations.length,
+      detail: conversationsLoading ? 'Refreshing saved chats' : 'Saved conversations',
+      icon: History,
+    },
+    {
+      label: 'Active state',
+      value: threadLoading ? 'Loading' : 'Ready',
+      detail: currentConversation ? currentConversation.title || `Chat #${currentConversation.id}` : 'Start a fresh thread',
+      icon: MessageSquare,
+    },
+    {
+      label: 'Assistant mode',
+      value: 'Embedded',
+      detail: 'Chat, history, and actions in one workspace',
+      icon: Sparkles,
+    },
+  ];
 
-      <div className="manager-header rahj-ai-stagger relative overflow-hidden border border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-blue-900/70 shadow-2xl shadow-blue-900/20 backdrop-blur-xl dark:border-blue-800/40" style={{ '--stagger-index': 0 }}>
-        <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-cyan-400/20 blur-2xl" aria-hidden />
-        <div className="header-main relative">
-          <div className="title-section">
-            <span className="mb-3 inline-flex items-center rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-cyan-100">
-              AI Assistant Portal
-            </span>
-            <h1 className="page-title text-white">
-              <Sparkles className="title-icon h-8 w-8 text-cyan-300" aria-hidden />
-              {t('rahj_ai.portal.title')}
-            </h1>
-            <p className="stat-item mt-2 max-w-2xl text-base leading-relaxed normal-case text-slate-200/90">
-              {t('rahj_ai.portal.subtitle')}
-            </p>
+  const guidanceItems = [
+    {
+      title: 'Ask for ERP work',
+      body: 'Use it for reports, filters, summaries, and workflow guidance across the app.',
+      icon: BookOpen,
+    },
+    {
+      title: 'Keep it private',
+      body: 'The assistant is presented as a session workspace, not a public chat feed.',
+      icon: Shield,
+    },
+    {
+      title: 'Start clean when needed',
+      body: 'Use New Chat or Clear Chat when you want a different context.',
+      icon: PlusCircle,
+    },
+  ];
+
+  return (
+    <div className="relative isolate overflow-hidden pb-10">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.18),_transparent_36%),radial-gradient(circle_at_top_right,_rgba(59,130,246,0.16),_transparent_28%),linear-gradient(180deg,rgba(248,250,252,0.92),rgba(241,245,249,0.82))] dark:bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.16),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(59,130,246,0.14),_transparent_28%),linear-gradient(180deg,rgba(2,6,23,0.96),rgba(15,23,42,0.92))]" />
+      <div className="pointer-events-none absolute left-1/2 top-[-8rem] -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl" aria-hidden />
+      <div className="pointer-events-none absolute right-[-4rem] top-32 -z-10 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl" aria-hidden />
+
+      <div className="rahj-ai-stagger relative overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/90 px-6 py-7 shadow-[0_30px_80px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-slate-700/60 dark:bg-slate-950/90 sm:px-8" style={{ '--stagger-index': 0 }}>
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(148,163,184,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.12)_1px,transparent_1px)] bg-[size:48px_48px] opacity-15 dark:opacity-25" aria-hidden />
+        <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute bottom-[-5rem] left-[-3rem] h-40 w-40 rounded-full bg-blue-500/10 blur-3xl" aria-hidden />
+
+        <div className="relative flex flex-col gap-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl space-y-4">
+              <span className="inline-flex items-center gap-2 rounded-full border border-cyan-300/50 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:border-cyan-300/30 dark:bg-cyan-400/10 dark:text-cyan-100">
+                <Sparkles className="h-3.5 w-3.5" aria-hidden />
+                Rahj AI Portal
+              </span>
+              <div className="space-y-3">
+                <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-4xl lg:text-5xl">
+                  {t('rahj_ai.portal.title')}
+                </h1>
+                <p className="max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-200/90 sm:text-base">
+                  {t('rahj_ai.portal.subtitle')}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs font-medium text-slate-600 dark:text-slate-200/90">
+                <span className="rounded-full border border-slate-300/70 bg-white/70 px-3 py-1.5 backdrop-blur dark:border-white/10 dark:bg-white/10">
+                  Session aware
+                </span>
+                <span className="rounded-full border border-slate-300/70 bg-white/70 px-3 py-1.5 backdrop-blur dark:border-white/10 dark:bg-white/10">
+                  Draft-friendly
+                </span>
+                <span className="rounded-full border border-slate-300/70 bg-white/70 px-3 py-1.5 backdrop-blur dark:border-white/10 dark:bg-white/10">
+                  ERP-focused
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Link href="/erp-modules" className="btn btn-secondary border border-slate-300/70 bg-white/80 text-slate-700 shadow-sm backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:shadow-lg dark:shadow-black/10 dark:hover:bg-white/15">
+                <ArrowLeft className="h-4 w-4" />
+                <span>{t('common.actions.back')}</span>
+              </Link>
+              <button
+                type="button"
+                className="btn border border-cyan-400/60 bg-cyan-500/15 text-cyan-700 shadow-sm shadow-cyan-900/10 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-cyan-500/25 dark:border-cyan-300/40 dark:bg-cyan-400/20 dark:text-cyan-50 dark:shadow-lg dark:shadow-cyan-900/30 dark:hover:bg-cyan-400/30"
+                onClick={() => openAssistant()}
+              >
+                <MessageSquare className="h-4 w-4" />
+                {t('rahj_ai.portal.open_drawer')}
+              </button>
+            </div>
           </div>
-          <div className="header-actions flex-wrap gap-2">
-            <Link href="/erp-modules" className="btn btn-secondary border border-white/20 bg-white/10 text-white backdrop-blur hover:bg-white/20">
-              <ArrowLeft className="h-4 w-4" />
-              <span>{t('common.actions.back')}</span>
-            </Link>
-            <button
-              type="button"
-              className="btn border border-cyan-300/40 bg-cyan-400/20 text-cyan-50 shadow-lg shadow-cyan-900/30 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-cyan-400/30"
-              onClick={() => openAssistant()}
-            >
-              <MessageSquare className="h-4 w-4" />
-              {t('rahj_ai.portal.open_drawer')}
-            </button>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            {portalStats.map((item, index) => {
+              const Icon = item.icon;
+
+              return (
+                <div
+                  key={item.label}
+                  className="rahj-ai-stagger rounded-2xl border border-slate-200/80 bg-white/75 p-4 text-slate-900 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/10 dark:text-white dark:shadow-lg dark:shadow-black/10"
+                  style={{ '--stagger-index': index + 1 }}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-700 dark:bg-cyan-400/15 dark:text-cyan-200">
+                      <Icon className="h-5 w-5" aria-hidden />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300/80">{item.label}</div>
+                      <div className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">{item.value}</div>
+                      <div className="mt-1 text-sm text-slate-600 dark:text-slate-300/85">{item.detail}</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      <div className="main-content mt-4">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6">
-          <section className="order-1 flex min-h-0 flex-col lg:order-2 lg:col-span-8" aria-labelledby="rahj-ai-chat-heading">
-            <div className="manager-header rahj-ai-stagger mb-3 shrink-0 border border-white/15 bg-white/55 py-4 shadow-lg shadow-slate-900/10 backdrop-blur-xl dark:border-gray-700/60 dark:bg-slate-900/45" style={{ '--stagger-index': 2 }}>
-              <div className="header-main mb-0">
-                <div className="title-section">
-                  <h2 id="rahj-ai-chat-heading" className="page-title mb-1 text-xl text-slate-900 dark:text-slate-100">
-                    <MessageSquare className="title-icon h-6 w-6 shrink-0 text-cyan-600 dark:text-cyan-300" aria-hidden />
+      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-12">
+        <section className="order-1 flex min-h-0 flex-col xl:col-span-8" aria-labelledby="rahj-ai-chat-heading">
+          <div className="rahj-ai-stagger overflow-hidden rounded-[1.75rem] border border-white/60 bg-white/85 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-700/60 dark:bg-slate-950/70" style={{ '--stagger-index': 4 }}>
+            <div className="border-b border-slate-200/80 bg-gradient-to-r from-slate-50 to-cyan-50/80 px-5 py-4 dark:border-slate-700/60 dark:from-slate-900/80 dark:to-slate-900/60 sm:px-6">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/40 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-700 dark:text-cyan-200">
+                    <MessageSquare className="h-3.5 w-3.5" aria-hidden />
+                    Live Conversation
+                  </div>
+                  <h2 id="rahj-ai-chat-heading" className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
                     {t('rahj_ai.portal.chat_heading')}
                   </h2>
-                  <p className="stat-item m-0 text-sm normal-case text-slate-600 dark:text-slate-300">{t('rahj_ai.portal.chat_subheading')}</p>
+                  <p className="max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                    {t('rahj_ai.portal.chat_subheading')}
+                  </p>
                 </div>
-                <div className="header-actions flex-wrap gap-2">
+
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    className="btn btn-secondary border border-slate-300/70 bg-white/85 shadow-sm transition-all hover:-translate-y-0.5 dark:border-slate-600 dark:bg-slate-800/80"
+                    className="btn btn-secondary border border-slate-300/70 bg-white/90 shadow-sm transition-all hover:-translate-y-0.5 dark:border-slate-600 dark:bg-slate-800/80"
                     onClick={startNewChat}
                   >
                     <PlusCircle className="h-4 w-4" />
@@ -125,103 +216,134 @@ function RahjAiPortalBody() {
                     onClick={clearAllConversations}
                   >
                     <Trash2 className="h-4 w-4" />
-                    <span>Clear All Chats</span>
+                    <span>Clear All</span>
                   </button>
                 </div>
               </div>
             </div>
+
             {threadLoading ? (
-              <div className="manager-header flex min-h-[320px] items-center justify-center border border-white/20 bg-white/60 py-8 text-sm text-gray-600 shadow-lg shadow-slate-900/10 backdrop-blur-xl dark:border-gray-700/50 dark:bg-slate-900/45 dark:text-gray-400">
-                Loading chat...
+              <div className="flex min-h-[540px] items-center justify-center px-6 py-10 text-center">
+                <div className="max-w-sm rounded-[1.5rem] border border-dashed border-cyan-300/60 bg-cyan-50/70 px-6 py-8 text-sm text-slate-600 shadow-sm dark:border-cyan-700/50 dark:bg-cyan-950/25 dark:text-slate-300">
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-300">
+                    <Sparkles className="h-6 w-6" aria-hidden />
+                  </div>
+                  <div className="text-base font-semibold text-slate-900 dark:text-white">Loading chat...</div>
+                  <p className="mt-2 leading-6">
+                    Preparing the current conversation and restoring the latest context.
+                  </p>
+                </div>
               </div>
             ) : (
-              <RahjAiChatView variant="embedded" textareaId="rahj-ai-input-portal" />
+              <RahjAiChatView variant="embedded" textareaId="rahj-ai-input-portal" className="rounded-none border-0 shadow-none" />
             )}
-          </section>
+          </div>
+        </section>
 
-          <aside className="order-2 flex min-h-0 flex-col lg:order-1 lg:col-span-4">
-            <div className="manager-header rahj-ai-stagger mb-0 flex min-h-[320px] flex-col border border-white/20 bg-gradient-to-b from-white/80 to-slate-100/50 py-4 shadow-xl shadow-slate-900/10 backdrop-blur-xl dark:border-gray-700/60 dark:from-slate-900/70 dark:to-slate-900/40" style={{ '--stagger-index': 1 }}>
-              <div className="mb-3 flex items-center justify-between gap-2 border-b border-slate-200/70 pb-3 dark:border-slate-700/70">
-                <h2 className="page-title mb-0 text-lg text-slate-900 dark:text-slate-100">
-                  <History className="title-icon h-5 w-5 text-cyan-600 dark:text-cyan-300" aria-hidden />
+        <aside className="order-2 space-y-5 xl:col-span-4">
+          <div className="rahj-ai-stagger overflow-hidden rounded-[1.75rem] border border-white/60 bg-white/85 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-700/60 dark:bg-slate-950/70" style={{ '--stagger-index': 5 }}>
+            <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 px-5 py-4 dark:border-slate-700/60 sm:px-6">
+              <div>
+                <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
+                  <History className="h-5 w-5 text-cyan-600 dark:text-cyan-300" aria-hidden />
                   Chat History
-                </h2>
-                <span className="rounded-full border border-cyan-300/40 bg-cyan-100/80 px-2.5 py-1 text-[11px] font-semibold text-cyan-700 dark:border-cyan-600/50 dark:bg-cyan-900/40 dark:text-cyan-200">
-                  {conversations.length} Threads
-                </span>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm border border-slate-300/70 bg-white/90 shadow-sm transition-all hover:-translate-y-0.5 dark:border-slate-600 dark:bg-slate-800/70"
-                  onClick={startNewChat}
-                >
-                  New
-                </button>
+                </h3>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Pick up where you left off or start a new branch.</p>
               </div>
+              <span className="rounded-full border border-cyan-300/40 bg-cyan-100/80 px-3 py-1 text-[11px] font-semibold text-cyan-700 dark:border-cyan-600/50 dark:bg-cyan-900/40 dark:text-cyan-200">
+                {conversations.length} Threads
+              </span>
+            </div>
 
-              <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+            <div className="space-y-3 px-4 py-4 sm:px-5">
+              <button
+                type="button"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-300/70 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-700 transition-all hover:-translate-y-0.5 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800/70 dark:text-slate-100 dark:hover:bg-slate-800"
+                onClick={startNewChat}
+              >
+                <PlusCircle className="h-4 w-4" />
+                New Chat
+              </button>
+
+              <div className="min-h-0 space-y-2 overflow-y-auto pr-1">
                 {conversationsLoading ? (
-                  <div className="rounded-xl border border-white/20 bg-white/70 px-3 py-2 text-xs text-gray-600 dark:border-gray-700/50 dark:bg-gray-900/50 dark:text-gray-300">
+                  <div className="rounded-2xl border border-white/20 bg-white/70 px-3 py-3 text-sm text-gray-600 dark:border-gray-700/50 dark:bg-gray-900/50 dark:text-gray-300">
                     Loading history...
                   </div>
                 ) : conversations.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-cyan-300/40 bg-cyan-50/70 px-3 py-2 text-xs text-cyan-800 dark:border-cyan-700/50 dark:bg-cyan-950/30 dark:text-cyan-200">
+                  <div className="rounded-2xl border border-dashed border-cyan-300/40 bg-cyan-50/70 px-3 py-3 text-sm text-cyan-800 dark:border-cyan-700/50 dark:bg-cyan-950/30 dark:text-cyan-200">
                     No previous chats yet.
                   </div>
                 ) : (
-                  conversations.map((item, index) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => loadConversation(item.id)}
-                      className={`rahj-ai-history-item w-full rounded-xl border px-3 py-2 text-left transition-all duration-200 ${
-                        Number(conversationId) === Number(item.id)
-                          ? 'border-cyan-500/60 bg-cyan-500/10 shadow-md shadow-cyan-900/10'
-                          : 'border-white/30 bg-white/60 hover:-translate-y-0.5 hover:bg-white/90 hover:shadow-md dark:border-gray-700/60 dark:bg-gray-900/40 dark:hover:bg-gray-800/60'
-                      }`}
-                      style={{ '--stagger-index': index + 3 }}
-                    >
-                      <div className="truncate text-xs font-semibold text-gray-800 dark:text-gray-100">{item.title || `Chat #${item.id}`}</div>
-                      <div className="mt-1 truncate text-[11px] text-gray-600 dark:text-gray-400">{item.preview || 'No preview'}</div>
-                      <div className="mt-1 text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                        {formatRelativeTime(item.updated_at) || 'just now'}
-                      </div>
-                    </button>
-                  ))
+                  conversations.map((item, index) => {
+                    const isActive = Number(conversationId) === Number(item.id);
+
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => loadConversation(item.id)}
+                        className={`rahj-ai-history-item w-full rounded-2xl border px-3 py-3 text-left transition-all duration-200 ${
+                          isActive
+                            ? 'border-cyan-500/60 bg-cyan-500/10 shadow-md shadow-cyan-900/10'
+                            : 'border-slate-200/80 bg-white/70 hover:-translate-y-0.5 hover:bg-white hover:shadow-md dark:border-slate-700/60 dark:bg-slate-900/45 dark:hover:bg-slate-900/70'
+                        }`}
+                        style={{ '--stagger-index': index + 6 }}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{item.title || `Chat #${item.id}`}</div>
+                            <div className="mt-1 truncate text-xs text-slate-600 dark:text-slate-400">{item.preview || 'No preview'}</div>
+                          </div>
+                          <span className={`mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full ${isActive ? 'bg-cyan-500' : 'bg-slate-300 dark:bg-slate-600'}`} aria-hidden />
+                        </div>
+                        <div className="mt-2 text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                          {formatRelativeTime(item.updated_at) || 'just now'}
+                        </div>
+                      </button>
+                    );
+                  })
                 )}
               </div>
             </div>
-          </aside>
+          </div>
 
-          <section className="grid grid-cols-1 gap-4 lg:col-span-12 md:grid-cols-2">
-            <div className="manager-header rahj-ai-stagger mb-0 border border-white/20 bg-gradient-to-br from-white/85 to-blue-50/50 py-5 shadow-lg shadow-slate-900/5 backdrop-blur-xl dark:border-gray-700/60 dark:from-slate-900/70 dark:to-blue-950/20" style={{ '--stagger-index': 3 }}>
-              <div className="flex gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-500/15 dark:bg-blue-400/10">
-                  <BookOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" aria-hidden />
-                </div>
-                <div>
-                  <h2 className="page-title mb-2 text-xl">{t('rahj_ai.portal.card_what_title')}</h2>
-                  <p className="m-0 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                    {t('rahj_ai.portal.card_what_body')}
-                  </p>
-                </div>
-              </div>
+          <div className="rahj-ai-stagger overflow-hidden rounded-[1.75rem] border border-white/60 bg-gradient-to-br from-white/90 to-cyan-50/60 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-slate-700/60 dark:from-slate-950/80 dark:to-cyan-950/20" style={{ '--stagger-index': 6 }}>
+            <div className="border-b border-slate-200/80 px-5 py-4 dark:border-slate-700/60 sm:px-6">
+              <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
+                <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden />
+                What this assistant does
+              </h3>
             </div>
 
-            <div className="manager-header rahj-ai-stagger mb-0 border border-white/20 bg-gradient-to-br from-white/85 to-emerald-50/50 py-5 shadow-lg shadow-slate-900/5 backdrop-blur-xl dark:border-gray-700/60 dark:from-slate-900/70 dark:to-emerald-950/20" style={{ '--stagger-index': 4 }}>
-              <div className="flex gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 dark:bg-emerald-400/10">
-                  <Shield className="h-6 w-6 text-emerald-600 dark:text-emerald-400" aria-hidden />
-                </div>
-                <div>
-                  <h2 className="page-title mb-2 text-xl">{t('rahj_ai.portal.card_privacy_title')}</h2>
-                  <p className="m-0 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                    {t('rahj_ai.portal.card_privacy_body')}
-                  </p>
-                </div>
+            <div className="space-y-3 px-5 py-4 sm:px-6">
+              {guidanceItems.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <div key={item.title} className="flex gap-3 rounded-2xl border border-white/60 bg-white/75 p-3 shadow-sm dark:border-slate-700/50 dark:bg-slate-900/60">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-700 dark:text-cyan-300">
+                      <Icon className="h-5 w-5" aria-hidden />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">{item.title}</div>
+                      <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.body}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="border-t border-slate-200/80 px-5 py-4 dark:border-slate-700/60 sm:px-6">
+              <div className="rounded-2xl border border-emerald-300/40 bg-emerald-50/80 p-4 text-sm text-emerald-900 dark:border-emerald-800/50 dark:bg-emerald-950/25 dark:text-emerald-200">
+                <div className="font-semibold">Privacy first</div>
+                <p className="mt-1 leading-6">
+                  Your assistant tools stay in the ERP workspace and are designed for internal use.
+                </p>
               </div>
             </div>
-          </section>
-        </div>
+          </div>
+        </aside>
       </div>
     </div>
   );

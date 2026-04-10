@@ -1,7 +1,8 @@
 {
-  "generated_at": "2026-04-09T18:43:09.184Z",
-  "source_sql_file": "erp (9).sql",
-  "table_count": 63,
+  "generated_at": "2026-04-09T20:12:25.625Z",
+  "source_database": "live",
+  "source_sql_file": null,
+  "table_count": 65,
   "tables": [
     {
       "table_name": "account_configurations",
@@ -11,8 +12,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "comp_id",
@@ -111,7 +112,13 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `uq_acct_config` (`comp_id`,`location_id`,`account_id`,`config_type`)",
+        "KEY `account_configurations_comp_id_location_id_config_type_index` (`comp_id`,`location_id`,`config_type`)",
+        "KEY `account_configurations_account_id_config_type_index` (`account_id`,`config_type`)",
+        "KEY `account_configurations_is_active_index` (`is_active`)"
+      ]
     },
     {
       "table_name": "cache",
@@ -141,7 +148,9 @@
           "constraints": "NOT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`key`)"
+      ]
     },
     {
       "table_name": "cache_locks",
@@ -171,7 +180,9 @@
           "constraints": "NOT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`key`)"
+      ]
     },
     {
       "table_name": "chart_of_accounts",
@@ -181,8 +192,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "account_code",
@@ -214,7 +225,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "account_level",
@@ -278,7 +289,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "location_id",
@@ -286,7 +297,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "party_type",
@@ -366,7 +377,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "country_label",
@@ -382,7 +393,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "payment_terms",
@@ -473,7 +484,22 @@
           "constraints": "DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `chart_of_accounts_account_code_unique` (`account_code`)",
+        "KEY `chart_of_accounts_account_code_index` (`account_code`)",
+        "KEY `chart_of_accounts_account_type_index` (`account_type`)",
+        "KEY `chart_of_accounts_parent_account_id_index` (`parent_account_id`)",
+        "KEY `chart_of_accounts_account_level_index` (`account_level`)",
+        "KEY `chart_of_accounts_status_index` (`status`)",
+        "KEY `chart_of_accounts_is_transactional_index` (`is_transactional`)",
+        "KEY `chart_of_accounts_country_id_foreign` (`country_id`)",
+        "KEY `chart_of_accounts_currency_id_foreign` (`currency_id`)",
+        "KEY `chart_of_accounts_party_type_index` (`party_type`)",
+        "CONSTRAINT `chart_of_accounts_country_id_foreign` FOREIGN KEY (`country_id`) REFERENCES `countries` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `chart_of_accounts_currency_id_foreign` FOREIGN KEY (`currency_id`) REFERENCES `currencies` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `chart_of_accounts_parent_account_id_foreign` FOREIGN KEY (`parent_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE CASCADE"
+      ]
     },
     {
       "table_name": "code_configurations",
@@ -483,8 +509,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "company_id",
@@ -492,7 +518,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "location_id",
@@ -500,7 +526,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "level2_account_id",
@@ -508,7 +534,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "level3_account_id",
@@ -516,7 +542,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "code_type",
@@ -596,7 +622,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "updated_by",
@@ -604,7 +630,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_at",
@@ -623,7 +649,21 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `unique_code_config` (`company_id`,`location_id`,`code_type`)",
+        "KEY `code_configurations_location_id_foreign` (`location_id`)",
+        "KEY `code_configurations_created_by_foreign` (`created_by`)",
+        "KEY `code_configurations_updated_by_foreign` (`updated_by`)",
+        "KEY `code_configurations_level2_account_id_index` (`level2_account_id`)",
+        "KEY `code_configurations_level3_account_id_index` (`level3_account_id`)",
+        "CONSTRAINT `code_configurations_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE",
+        "CONSTRAINT `code_configurations_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `code_configurations_level2_account_id_foreign` FOREIGN KEY (`level2_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `code_configurations_level3_account_id_foreign` FOREIGN KEY (`level3_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `code_configurations_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE",
+        "CONSTRAINT `code_configurations_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL"
+      ]
     },
     {
       "table_name": "companies",
@@ -633,8 +673,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "parent_comp",
@@ -1010,7 +1050,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "updated_by",
@@ -1018,7 +1058,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_at",
@@ -1050,7 +1090,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "license_start_date",
@@ -1069,7 +1109,23 @@
           "constraints": "DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `companies_company_code_unique` (`company_code`)",
+        "UNIQUE KEY `companies_registration_number_unique` (`registration_number`)",
+        "UNIQUE KEY `companies_email_unique` (`email`)",
+        "UNIQUE KEY `companies_tax_id_unique` (`tax_id`)",
+        "KEY `companies_status_subscription_status_index` (`status`)",
+        "KEY `companies_country_state_province_index` (`country`,`state_province`)",
+        "KEY `companies_industry_status_index` (`industry`,`status`)",
+        "KEY `companies_created_at_index` (`created_at`)",
+        "KEY `companies_created_by_foreign` (`created_by`)",
+        "KEY `companies_updated_by_foreign` (`updated_by`)",
+        "KEY `companies_package_id_foreign` (`package_id`)",
+        "CONSTRAINT `companies_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `tbl_users` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `companies_package_id_foreign` FOREIGN KEY (`package_id`) REFERENCES `packages` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `companies_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `tbl_users` (`id`) ON DELETE SET NULL"
+      ]
     },
     {
       "table_name": "company_files",
@@ -1079,8 +1135,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "comp_id",
@@ -1088,7 +1144,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "storage_filename",
@@ -1112,7 +1168,7 @@
           "nullable": false,
           "default": "0",
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL DEFAULT 0"
+          "constraints": "unsigned NOT NULL DEFAULT 0"
         },
         {
           "name": "mime_type",
@@ -1139,7 +1195,11 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `company_files_comp_id_index` (`comp_id`)",
+        "CONSTRAINT `company_files_comp_id_foreign` FOREIGN KEY (`comp_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE"
+      ]
     },
     {
       "table_name": "countries",
@@ -1149,8 +1209,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "country_code",
@@ -1174,7 +1234,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "iso_2_code",
@@ -1249,7 +1309,17 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `countries_country_code_unique` (`country_code`)",
+        "UNIQUE KEY `countries_country_name_unique` (`country_name`)",
+        "UNIQUE KEY `countries_iso_2_code_unique` (`iso_2_code`)",
+        "UNIQUE KEY `countries_iso_numeric_code_unique` (`iso_numeric_code`)",
+        "KEY `countries_country_code_index` (`country_code`)",
+        "KEY `countries_country_name_index` (`country_name`)",
+        "KEY `countries_currency_id_foreign` (`currency_id`)",
+        "CONSTRAINT `countries_currency_id_foreign` FOREIGN KEY (`currency_id`) REFERENCES `currencies` (`id`) ON DELETE SET NULL"
+      ]
     },
     {
       "table_name": "currencies",
@@ -1259,8 +1329,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "code",
@@ -1343,7 +1413,13 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `currencies_code_unique` (`code`)",
+        "KEY `currencies_is_active_index` (`is_active`)",
+        "KEY `currencies_is_base_currency_index` (`is_base_currency`)",
+        "KEY `currencies_sort_order_index` (`sort_order`)"
+      ]
     },
     {
       "table_name": "currency_exchange_rate_history",
@@ -1353,8 +1429,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "currency_id",
@@ -1362,7 +1438,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "exchange_rate",
@@ -1437,7 +1513,13 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `currency_exchange_rate_history_currency_id_effective_date_index` (`currency_id`,`effective_date`)",
+        "KEY `currency_exchange_rate_history_source_index` (`source`)",
+        "KEY `currency_exchange_rate_history_created_at_index` (`created_at`)",
+        "CONSTRAINT `currency_exchange_rate_history_currency_id_foreign` FOREIGN KEY (`currency_id`) REFERENCES `currencies` (`id`) ON DELETE CASCADE"
+      ]
     },
     {
       "table_name": "departments",
@@ -1447,8 +1529,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "company_id",
@@ -1456,7 +1538,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "location_id",
@@ -1464,7 +1546,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "department_name",
@@ -1539,7 +1621,13 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `departments_location_id_department_name_unique` (`location_id`,`department_name`)",
+        "KEY `departments_company_id_foreign` (`company_id`)",
+        "CONSTRAINT `departments_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE",
+        "CONSTRAINT `departments_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE"
+      ]
     },
     {
       "table_name": "failed_jobs",
@@ -1549,8 +1637,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "uuid",
@@ -1601,7 +1689,10 @@
           "constraints": "NOT NULL DEFAULT current_timestamp()"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`)"
+      ]
     },
     {
       "table_name": "fiscal_periods",
@@ -1611,8 +1702,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "comp_id",
@@ -1620,7 +1711,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "fiscal_year",
@@ -1700,7 +1791,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "closed_at",
@@ -1727,7 +1818,12 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `fiscal_periods_comp_id_fiscal_year_period_number_unique` (`comp_id`,`fiscal_year`,`period_number`)",
+        "KEY `fiscal_periods_comp_id_fiscal_year_index` (`comp_id`,`fiscal_year`)",
+        "KEY `fiscal_periods_comp_id_status_index` (`comp_id`,`status`)"
+      ]
     },
     {
       "table_name": "goods_receipt_notes",
@@ -1737,8 +1833,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "comp_id",
@@ -1746,7 +1842,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "location_id",
@@ -1754,7 +1850,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "grn_number",
@@ -1770,7 +1866,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "vendor_id",
@@ -1778,7 +1874,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "grn_type",
@@ -1810,7 +1906,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "vehicle_number",
@@ -1882,7 +1978,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "fx_rate",
@@ -1946,7 +2042,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_by",
@@ -1954,7 +2050,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "updated_by",
@@ -1962,7 +2058,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_at",
@@ -1981,7 +2077,25 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `goods_receipt_notes_number_unique` (`comp_id`,`location_id`,`grn_number`)",
+        "KEY `goods_receipt_notes_purchase_order_id_foreign` (`purchase_order_id`)",
+        "KEY `goods_receipt_notes_vendor_id_foreign` (`vendor_id`)",
+        "KEY `goods_receipt_notes_receive_location_id_foreign` (`receive_location_id`)",
+        "KEY `goods_receipt_notes_currency_id_foreign` (`currency_id`)",
+        "KEY `goods_receipt_notes_created_by_foreign` (`created_by`)",
+        "KEY `goods_receipt_notes_updated_by_foreign` (`updated_by`)",
+        "KEY `goods_receipt_notes_comp_id_index` (`comp_id`)",
+        "KEY `goods_receipt_notes_location_id_index` (`location_id`)",
+        "KEY `goods_receipt_notes_posted_transaction_id_index` (`posted_transaction_id`)",
+        "CONSTRAINT `goods_receipt_notes_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `tbl_users` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `goods_receipt_notes_currency_id_foreign` FOREIGN KEY (`currency_id`) REFERENCES `currencies` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `goods_receipt_notes_purchase_order_id_foreign` FOREIGN KEY (`purchase_order_id`) REFERENCES `purchase_orders` (`id`)",
+        "CONSTRAINT `goods_receipt_notes_receive_location_id_foreign` FOREIGN KEY (`receive_location_id`) REFERENCES `locations` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `goods_receipt_notes_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `tbl_users` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `goods_receipt_notes_vendor_id_foreign` FOREIGN KEY (`vendor_id`) REFERENCES `chart_of_accounts` (`id`)"
+      ]
     },
     {
       "table_name": "goods_receipt_note_lines",
@@ -1991,8 +2105,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "goods_receipt_note_id",
@@ -2000,7 +2114,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "line_no",
@@ -2008,7 +2122,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "purchase_order_line_id",
@@ -2016,7 +2130,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "inventory_item_id",
@@ -2024,7 +2138,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "item_description",
@@ -2040,7 +2154,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "po_ordered_qty",
@@ -2144,7 +2258,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "line_notes",
@@ -2171,7 +2285,19 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `grn_lines_doc_line_unique` (`goods_receipt_note_id`,`line_no`)",
+        "KEY `goods_receipt_note_lines_purchase_order_line_id_foreign` (`purchase_order_line_id`)",
+        "KEY `goods_receipt_note_lines_inventory_item_id_foreign` (`inventory_item_id`)",
+        "KEY `goods_receipt_note_lines_uom_id_foreign` (`uom_id`)",
+        "KEY `goods_receipt_note_lines_put_away_location_id_foreign` (`put_away_location_id`)",
+        "CONSTRAINT `goods_receipt_note_lines_goods_receipt_note_id_foreign` FOREIGN KEY (`goods_receipt_note_id`) REFERENCES `goods_receipt_notes` (`id`) ON DELETE CASCADE",
+        "CONSTRAINT `goods_receipt_note_lines_inventory_item_id_foreign` FOREIGN KEY (`inventory_item_id`) REFERENCES `inventory_items` (`id`)",
+        "CONSTRAINT `goods_receipt_note_lines_purchase_order_line_id_foreign` FOREIGN KEY (`purchase_order_line_id`) REFERENCES `purchase_order_lines` (`id`)",
+        "CONSTRAINT `goods_receipt_note_lines_put_away_location_id_foreign` FOREIGN KEY (`put_away_location_id`) REFERENCES `locations` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `goods_receipt_note_lines_uom_id_foreign` FOREIGN KEY (`uom_id`) REFERENCES `uom_masters` (`id`)"
+      ]
     },
     {
       "table_name": "grn_supplier_invoices",
@@ -2181,8 +2307,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "comp_id",
@@ -2190,7 +2316,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "location_id",
@@ -2198,7 +2324,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "invoice_number",
@@ -2214,7 +2340,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "voucher_date",
@@ -2278,7 +2404,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_by",
@@ -2286,7 +2412,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "updated_by",
@@ -2294,7 +2420,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_at",
@@ -2313,7 +2439,19 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `grn_supplier_invoices_number_unique` (`comp_id`,`location_id`,`invoice_number`)",
+        "KEY `grn_supplier_invoices_comp_id_index` (`comp_id`)",
+        "KEY `grn_supplier_invoices_location_id_index` (`location_id`)",
+        "KEY `grn_supplier_invoices_posted_transaction_id_index` (`posted_transaction_id`)",
+        "KEY `gsi_vendor_fk` (`vendor_id`)",
+        "KEY `gsi_created_fk` (`created_by`)",
+        "KEY `gsi_updated_fk` (`updated_by`)",
+        "CONSTRAINT `gsi_created_fk` FOREIGN KEY (`created_by`) REFERENCES `tbl_users` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `gsi_updated_fk` FOREIGN KEY (`updated_by`) REFERENCES `tbl_users` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `gsi_vendor_fk` FOREIGN KEY (`vendor_id`) REFERENCES `chart_of_accounts` (`id`)"
+      ]
     },
     {
       "table_name": "grn_supplier_invoice_grns",
@@ -2323,8 +2461,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "grn_supplier_invoice_id",
@@ -2332,7 +2470,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "goods_receipt_note_id",
@@ -2340,7 +2478,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "created_at",
@@ -2359,7 +2497,13 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `grn_si_grn_unique` (`grn_supplier_invoice_id`,`goods_receipt_note_id`)",
+        "KEY `gsi_grns_grn_fk` (`goods_receipt_note_id`)",
+        "CONSTRAINT `gsi_grns_grn_fk` FOREIGN KEY (`goods_receipt_note_id`) REFERENCES `goods_receipt_notes` (`id`)",
+        "CONSTRAINT `gsi_grns_inv_fk` FOREIGN KEY (`grn_supplier_invoice_id`) REFERENCES `grn_supplier_invoices` (`id`) ON DELETE CASCADE"
+      ]
     },
     {
       "table_name": "grn_supplier_invoice_line_taxes",
@@ -2369,8 +2513,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "grn_supplier_invoice_id",
@@ -2378,7 +2522,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "goods_receipt_note_line_id",
@@ -2386,7 +2530,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "tax_amount",
@@ -2413,7 +2557,13 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `grn_si_line_tax_unique` (`grn_supplier_invoice_id`,`goods_receipt_note_line_id`)",
+        "KEY `gsi_lt_line_fk` (`goods_receipt_note_line_id`)",
+        "CONSTRAINT `gsi_lt_inv_fk` FOREIGN KEY (`grn_supplier_invoice_id`) REFERENCES `grn_supplier_invoices` (`id`) ON DELETE CASCADE",
+        "CONSTRAINT `gsi_lt_line_fk` FOREIGN KEY (`goods_receipt_note_line_id`) REFERENCES `goods_receipt_note_lines` (`id`)"
+      ]
     },
     {
       "table_name": "inventory_barcode_types",
@@ -2423,8 +2573,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "company_id",
@@ -2432,7 +2582,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "barcode_type",
@@ -2456,7 +2606,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "validation_rule",
@@ -2499,7 +2649,11 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `barcode_types_unique_active` (`company_id`,`barcode_type`,`deleted_at`)",
+        "CONSTRAINT `inventory_barcode_types_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE"
+      ]
     },
     {
       "table_name": "inventory_brands",
@@ -2509,8 +2663,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "company_id",
@@ -2518,7 +2672,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "brand_code",
@@ -2550,7 +2704,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "is_active",
@@ -2585,7 +2739,13 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `brands_unique_active` (`company_id`,`brand_code`,`deleted_at`)",
+        "KEY `inventory_brands_country_id_foreign` (`country_id`)",
+        "CONSTRAINT `inventory_brands_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE",
+        "CONSTRAINT `inventory_brands_country_id_foreign` FOREIGN KEY (`country_id`) REFERENCES `countries` (`id`) ON DELETE SET NULL"
+      ]
     },
     {
       "table_name": "inventory_category_class",
@@ -2595,8 +2755,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "category_id",
@@ -2604,7 +2764,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "class_id",
@@ -2612,7 +2772,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "created_at",
@@ -2631,7 +2791,14 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `uq_inv_cat_cls` (`category_id`,`class_id`)",
+        "KEY `inventory_category_class_category_id_index` (`category_id`)",
+        "KEY `inventory_category_class_class_id_index` (`class_id`)",
+        "CONSTRAINT `fk_inv_cat_cls_category` FOREIGN KEY (`category_id`) REFERENCES `inventory_item_categories` (`id`) ON DELETE CASCADE",
+        "CONSTRAINT `fk_inv_cat_cls_class` FOREIGN KEY (`class_id`) REFERENCES `inventory_item_classes` (`id`) ON DELETE CASCADE"
+      ]
     },
     {
       "table_name": "inventory_compliance_codes",
@@ -2641,8 +2808,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "company_id",
@@ -2650,7 +2817,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "code_kind",
@@ -2709,7 +2876,12 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `inv_compliance_codes_unique_active` (`company_id`,`code_kind`,`code`,`deleted_at`)",
+        "KEY `inventory_compliance_codes_company_id_code_kind_index` (`company_id`,`code_kind`)",
+        "CONSTRAINT `inventory_compliance_codes_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE"
+      ]
     },
     {
       "table_name": "inventory_document_number_configurations",
@@ -2719,8 +2891,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "comp_id",
@@ -2728,7 +2900,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "location_id",
@@ -2736,7 +2908,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "document_type",
@@ -2760,7 +2932,7 @@
           "nullable": false,
           "default": "1",
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL DEFAULT 1"
+          "constraints": "unsigned NOT NULL DEFAULT 1"
         },
         {
           "name": "number_length",
@@ -2768,7 +2940,7 @@
           "nullable": false,
           "default": "6",
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL DEFAULT 6"
+          "constraints": "unsigned NOT NULL DEFAULT 6"
         },
         {
           "name": "reset_frequency",
@@ -2800,7 +2972,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_at",
@@ -2819,7 +2991,12 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `inv_doc_num_config_comp_loc_type_uq` (`comp_id`,`location_id`,`document_type`)",
+        "KEY `inv_doc_num_config_comp_loc_idx` (`comp_id`,`location_id`)",
+        "KEY `inv_doc_num_config_active_idx` (`is_active`)"
+      ]
     },
     {
       "table_name": "inventory_items",
@@ -2829,8 +3006,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "comp_id",
@@ -2838,7 +3015,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "location_id",
@@ -2846,7 +3023,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "item_code",
@@ -2894,7 +3071,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "item_category_id",
@@ -2902,7 +3079,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "item_group_id",
@@ -2910,7 +3087,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "brand",
@@ -2942,7 +3119,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "purchase_uom_id",
@@ -2950,7 +3127,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "sales_uom_id",
@@ -2958,7 +3135,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "costing_method",
@@ -3030,7 +3207,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "expiry_tracking",
@@ -3110,7 +3287,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "hsn_code",
@@ -3134,7 +3311,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "barcode_type_id",
@@ -3142,7 +3319,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "barcode_gtin",
@@ -3158,7 +3335,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "purchase_gl_account_id",
@@ -3166,7 +3343,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "sales_gl_account_id",
@@ -3174,7 +3351,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "cogs_gl_account_id",
@@ -3182,7 +3359,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "writeoff_gl_account_id",
@@ -3190,7 +3367,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "price_variance_gl_account_id",
@@ -3198,7 +3375,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "abc_classification",
@@ -3230,7 +3407,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "updated_by",
@@ -3238,7 +3415,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_at",
@@ -3270,7 +3447,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "inventory_temperature_class_id",
@@ -3278,7 +3455,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "origin_currency_id",
@@ -3286,7 +3463,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "hsn_sac_compliance_code_id",
@@ -3294,7 +3471,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "hs_tariff_compliance_code_id",
@@ -3302,10 +3479,56 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `inventory_items_item_code_unique` (`item_code`)",
+        "UNIQUE KEY `inventory_items_barcode_gtin_unique` (`barcode_gtin`)",
+        "KEY `inventory_items_stock_uom_id_foreign` (`stock_uom_id`)",
+        "KEY `inventory_items_purchase_uom_id_foreign` (`purchase_uom_id`)",
+        "KEY `inventory_items_sales_uom_id_foreign` (`sales_uom_id`)",
+        "KEY `inventory_items_comp_id_location_id_index` (`comp_id`,`location_id`)",
+        "KEY `inventory_items_item_code_index` (`item_code`)",
+        "KEY `inventory_items_item_status_index` (`item_status`)",
+        "KEY `inventory_items_item_type_index` (`item_type`)",
+        "KEY `inventory_items_costing_method_index` (`costing_method`)",
+        "KEY `inventory_items_comp_id_index` (`comp_id`)",
+        "KEY `inventory_items_location_id_index` (`location_id`)",
+        "KEY `inventory_items_item_class_id_index` (`item_class_id`)",
+        "KEY `inventory_items_item_category_id_index` (`item_category_id`)",
+        "KEY `inventory_items_item_group_id_index` (`item_group_id`)",
+        "KEY `inventory_items_default_vendor_id_index` (`default_vendor_id`)",
+        "KEY `inventory_items_tax_category_id_index` (`tax_category_id`)",
+        "KEY `inventory_items_country_of_origin_id_index` (`country_of_origin_id`)",
+        "KEY `inventory_items_inventory_gl_account_id_index` (`inventory_gl_account_id`)",
+        "KEY `inventory_items_cogs_gl_account_id_index` (`cogs_gl_account_id`)",
+        "KEY `inventory_items_writeoff_gl_account_id_index` (`writeoff_gl_account_id`)",
+        "KEY `inventory_items_price_variance_gl_account_id_index` (`price_variance_gl_account_id`)",
+        "KEY `inventory_items_created_by_index` (`created_by`)",
+        "KEY `inventory_items_updated_by_index` (`updated_by`)",
+        "KEY `inventory_items_purchase_gl_account_id_foreign` (`purchase_gl_account_id`)",
+        "KEY `inventory_items_sales_gl_account_id_foreign` (`sales_gl_account_id`)",
+        "KEY `inventory_items_barcode_type_id_foreign` (`barcode_type_id`)",
+        "KEY `inventory_items_package_type_id_foreign` (`package_type_id`)",
+        "KEY `inventory_items_inventory_temperature_class_id_foreign` (`inventory_temperature_class_id`)",
+        "KEY `inventory_items_origin_currency_id_foreign` (`origin_currency_id`)",
+        "KEY `inventory_items_hsn_sac_compliance_code_id_foreign` (`hsn_sac_compliance_code_id`)",
+        "KEY `inventory_items_hs_tariff_compliance_code_id_foreign` (`hs_tariff_compliance_code_id`)",
+        "CONSTRAINT `inventory_items_barcode_type_id_foreign` FOREIGN KEY (`barcode_type_id`) REFERENCES `inventory_barcode_types` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `inventory_items_default_vendor_id_foreign` FOREIGN KEY (`default_vendor_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `inventory_items_hs_tariff_compliance_code_id_foreign` FOREIGN KEY (`hs_tariff_compliance_code_id`) REFERENCES `inventory_compliance_codes` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `inventory_items_hsn_sac_compliance_code_id_foreign` FOREIGN KEY (`hsn_sac_compliance_code_id`) REFERENCES `inventory_compliance_codes` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `inventory_items_inventory_temperature_class_id_foreign` FOREIGN KEY (`inventory_temperature_class_id`) REFERENCES `inventory_temperature_classes` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `inventory_items_origin_currency_id_foreign` FOREIGN KEY (`origin_currency_id`) REFERENCES `currencies` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `inventory_items_package_type_id_foreign` FOREIGN KEY (`package_type_id`) REFERENCES `inventory_package_types` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `inventory_items_purchase_gl_account_id_foreign` FOREIGN KEY (`purchase_gl_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `inventory_items_purchase_uom_id_foreign` FOREIGN KEY (`purchase_uom_id`) REFERENCES `uom_masters` (`id`)",
+        "CONSTRAINT `inventory_items_sales_gl_account_id_foreign` FOREIGN KEY (`sales_gl_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `inventory_items_sales_uom_id_foreign` FOREIGN KEY (`sales_uom_id`) REFERENCES `uom_masters` (`id`)",
+        "CONSTRAINT `inventory_items_stock_uom_id_foreign` FOREIGN KEY (`stock_uom_id`) REFERENCES `uom_masters` (`id`)"
+      ]
     },
     {
       "table_name": "inventory_item_categories",
@@ -3315,8 +3538,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "comp_id",
@@ -3324,7 +3547,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "location_id",
@@ -3332,7 +3555,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "category_code",
@@ -3356,7 +3579,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "description",
@@ -3380,7 +3603,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "purchase_gl_account_id",
@@ -3388,7 +3611,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "sales_gl_account_id",
@@ -3396,7 +3619,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "cogs_gl_account_id",
@@ -3404,7 +3627,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_at",
@@ -3431,7 +3654,23 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `uq_inv_item_cat_code` (`comp_id`,`location_id`,`category_code`)",
+        "KEY `idx_inv_item_cat_comp_loc_status` (`comp_id`,`location_id`,`is_active`)",
+        "KEY `inventory_item_categories_comp_id_index` (`comp_id`)",
+        "KEY `inventory_item_categories_location_id_index` (`location_id`)",
+        "KEY `inventory_item_categories_is_active_index` (`is_active`)",
+        "KEY `inventory_item_categories_item_class_id_index` (`item_class_id`)",
+        "KEY `inventory_item_categories_inventory_gl_account_id_foreign` (`inventory_gl_account_id`)",
+        "KEY `inventory_item_categories_purchase_gl_account_id_foreign` (`purchase_gl_account_id`)",
+        "KEY `inventory_item_categories_sales_gl_account_id_foreign` (`sales_gl_account_id`)",
+        "KEY `inventory_item_categories_cogs_gl_account_id_foreign` (`cogs_gl_account_id`)",
+        "CONSTRAINT `inventory_item_categories_cogs_gl_account_id_foreign` FOREIGN KEY (`cogs_gl_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `inventory_item_categories_inventory_gl_account_id_foreign` FOREIGN KEY (`inventory_gl_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `inventory_item_categories_purchase_gl_account_id_foreign` FOREIGN KEY (`purchase_gl_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `inventory_item_categories_sales_gl_account_id_foreign` FOREIGN KEY (`sales_gl_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL"
+      ]
     },
     {
       "table_name": "inventory_item_classes",
@@ -3441,8 +3680,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "comp_id",
@@ -3450,7 +3689,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "location_id",
@@ -3458,7 +3697,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "class_code",
@@ -3517,7 +3756,14 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `uq_inv_item_cls_code` (`comp_id`,`location_id`,`class_code`)",
+        "KEY `idx_inv_item_cls_comp_loc_status` (`comp_id`,`location_id`,`is_active`)",
+        "KEY `inventory_item_classes_comp_id_index` (`comp_id`)",
+        "KEY `inventory_item_classes_location_id_index` (`location_id`)",
+        "KEY `inventory_item_classes_is_active_index` (`is_active`)"
+      ]
     },
     {
       "table_name": "inventory_item_groups",
@@ -3527,8 +3773,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "comp_id",
@@ -3536,7 +3782,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "location_id",
@@ -3544,7 +3790,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "group_code",
@@ -3603,7 +3849,14 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `uq_inv_item_grp_code` (`comp_id`,`location_id`,`group_code`)",
+        "KEY `idx_inv_item_grp_comp_loc_status` (`comp_id`,`location_id`,`is_active`)",
+        "KEY `inventory_item_groups_comp_id_index` (`comp_id`)",
+        "KEY `inventory_item_groups_location_id_index` (`location_id`)",
+        "KEY `inventory_item_groups_is_active_index` (`is_active`)"
+      ]
     },
     {
       "table_name": "inventory_package_types",
@@ -3613,8 +3866,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "company_id",
@@ -3622,7 +3875,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "package_code",
@@ -3705,7 +3958,11 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `package_types_unique_active` (`company_id`,`package_code`,`deleted_at`)",
+        "CONSTRAINT `inventory_package_types_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE"
+      ]
     },
     {
       "table_name": "inventory_reason_codes",
@@ -3715,8 +3972,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "company_id",
@@ -3724,7 +3981,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "reason_code",
@@ -3756,7 +4013,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "requires_approval",
@@ -3799,7 +4056,13 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `reason_codes_unique_active` (`company_id`,`reason_code`,`deleted_at`)",
+        "KEY `inventory_reason_codes_default_gl_account_id_foreign` (`default_gl_account_id`)",
+        "CONSTRAINT `inventory_reason_codes_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE",
+        "CONSTRAINT `inventory_reason_codes_default_gl_account_id_foreign` FOREIGN KEY (`default_gl_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL"
+      ]
     },
     {
       "table_name": "inventory_temperature_classes",
@@ -3809,8 +4072,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "company_id",
@@ -3818,7 +4081,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "class_code",
@@ -3893,7 +4156,11 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `temperature_classes_unique_active` (`company_id`,`class_code`,`deleted_at`)",
+        "CONSTRAINT `inventory_temperature_classes_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE"
+      ]
     },
     {
       "table_name": "inventory_zone_bins",
@@ -3903,8 +4170,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "company_id",
@@ -3912,7 +4179,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "location_id",
@@ -3920,7 +4187,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "zone_code",
@@ -4003,7 +4270,14 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `zone_bins_unique_active` (`company_id`,`location_id`,`bin_code`,`deleted_at`)",
+        "KEY `inventory_zone_bins_company_id_index` (`company_id`)",
+        "KEY `inventory_zone_bins_location_id_foreign` (`location_id`)",
+        "CONSTRAINT `inventory_zone_bins_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE",
+        "CONSTRAINT `inventory_zone_bins_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`)"
+      ]
     },
     {
       "table_name": "jobs",
@@ -4013,8 +4287,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "queue",
@@ -4038,7 +4312,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "reserved_at",
@@ -4046,7 +4320,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "available_at",
@@ -4054,7 +4328,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "created_at",
@@ -4062,10 +4336,13 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `jobs_queue_index` (`queue`)"
+      ]
     },
     {
       "table_name": "job_batches",
@@ -4151,7 +4428,9 @@
           "constraints": "DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)"
+      ]
     },
     {
       "table_name": "locations",
@@ -4161,8 +4440,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "company_id",
@@ -4170,7 +4449,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "location_name",
@@ -4269,7 +4548,11 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `locations_company_id_location_name_unique` (`company_id`,`location_name`)",
+        "CONSTRAINT `locations_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE"
+      ]
     },
     {
       "table_name": "menus",
@@ -4279,8 +4562,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "module_id",
@@ -4288,7 +4571,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "section_id",
@@ -4296,7 +4579,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "menu_name",
@@ -4363,7 +4646,10 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `menus_module_id_section_id_status_sort_order_index` (`module_id`,`section_id`,`status`,`sort_order`)"
+      ]
     },
     {
       "table_name": "migrations",
@@ -4373,8 +4659,8 @@
           "type": "int(10)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "migration",
@@ -4393,7 +4679,9 @@
           "constraints": "NOT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)"
+      ]
     },
     {
       "table_name": "modules",
@@ -4403,8 +4691,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "module_name",
@@ -4479,7 +4767,14 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `modules_module_name_unique` (`module_name`)",
+        "UNIQUE KEY `modules_folder_name_unique` (`folder_name`)",
+        "UNIQUE KEY `modules_slug_unique` (`slug`)",
+        "KEY `modules_status_sort_order_index` (`status`,`sort_order`)",
+        "KEY `modules_created_at_index` (`created_at`)"
+      ]
     },
     {
       "table_name": "packages",
@@ -4489,8 +4784,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "package_name",
@@ -4549,7 +4844,11 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `packages_slug_unique` (`slug`)",
+        "KEY `packages_status_sort_order_index` (`status`,`sort_order`)"
+      ]
     },
     {
       "table_name": "package_features",
@@ -4559,8 +4858,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "package_id",
@@ -4568,7 +4867,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "menu_id",
@@ -4576,7 +4875,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "is_enabled",
@@ -4603,7 +4902,12 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `package_features_package_id_menu_id_unique` (`package_id`,`menu_id`)",
+        "KEY `package_features_menu_id_foreign` (`menu_id`)",
+        "KEY `package_features_package_id_is_enabled_index` (`package_id`,`is_enabled`)"
+      ]
     },
     {
       "table_name": "password_reset_tokens",
@@ -4633,7 +4937,9 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`email`)"
+      ]
     },
     {
       "table_name": "purchase_orders",
@@ -4643,8 +4949,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "comp_id",
@@ -4652,7 +4958,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "location_id",
@@ -4660,7 +4966,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "po_number",
@@ -4676,7 +4982,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "vendor_id",
@@ -4684,7 +4990,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "po_type",
@@ -4732,7 +5038,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "delivery_address",
@@ -4748,7 +5054,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "fx_rate",
@@ -4836,7 +5142,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_by",
@@ -4844,7 +5150,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "updated_by",
@@ -4852,7 +5158,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_at",
@@ -4871,7 +5177,26 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `purchase_orders_number_unique` (`comp_id`,`location_id`,`po_number`)",
+        "KEY `purchase_orders_purchase_requisition_id_foreign` (`purchase_requisition_id`)",
+        "KEY `purchase_orders_vendor_id_foreign` (`vendor_id`)",
+        "KEY `purchase_orders_ship_to_location_id_foreign` (`ship_to_location_id`)",
+        "KEY `purchase_orders_currency_id_foreign` (`currency_id`)",
+        "KEY `purchase_orders_approved_by_foreign` (`approved_by`)",
+        "KEY `purchase_orders_created_by_foreign` (`created_by`)",
+        "KEY `purchase_orders_updated_by_foreign` (`updated_by`)",
+        "KEY `purchase_orders_comp_id_index` (`comp_id`)",
+        "KEY `purchase_orders_location_id_index` (`location_id`)",
+        "CONSTRAINT `purchase_orders_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `tbl_users` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `purchase_orders_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `tbl_users` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `purchase_orders_currency_id_foreign` FOREIGN KEY (`currency_id`) REFERENCES `currencies` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `purchase_orders_purchase_requisition_id_foreign` FOREIGN KEY (`purchase_requisition_id`) REFERENCES `purchase_requisitions` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `purchase_orders_ship_to_location_id_foreign` FOREIGN KEY (`ship_to_location_id`) REFERENCES `locations` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `purchase_orders_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `tbl_users` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `purchase_orders_vendor_id_foreign` FOREIGN KEY (`vendor_id`) REFERENCES `chart_of_accounts` (`id`)"
+      ]
     },
     {
       "table_name": "purchase_order_lines",
@@ -4881,8 +5206,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "purchase_order_id",
@@ -4890,7 +5215,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "line_no",
@@ -4898,7 +5223,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "purchase_requisition_line_id",
@@ -4906,7 +5231,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "inventory_item_id",
@@ -4914,7 +5239,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "item_description",
@@ -4930,7 +5255,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "ordered_qty",
@@ -4962,7 +5287,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "expected_line_delivery_date",
@@ -4978,7 +5303,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "line_notes",
@@ -5021,7 +5346,21 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `po_lines_doc_line_unique` (`purchase_order_id`,`line_no`)",
+        "KEY `purchase_order_lines_purchase_requisition_line_id_foreign` (`purchase_requisition_line_id`)",
+        "KEY `purchase_order_lines_inventory_item_id_foreign` (`inventory_item_id`)",
+        "KEY `purchase_order_lines_uom_id_foreign` (`uom_id`)",
+        "KEY `purchase_order_lines_tax_category_id_foreign` (`tax_category_id`)",
+        "KEY `purchase_order_lines_receive_location_id_foreign` (`receive_location_id`)",
+        "CONSTRAINT `purchase_order_lines_inventory_item_id_foreign` FOREIGN KEY (`inventory_item_id`) REFERENCES `inventory_items` (`id`)",
+        "CONSTRAINT `purchase_order_lines_purchase_order_id_foreign` FOREIGN KEY (`purchase_order_id`) REFERENCES `purchase_orders` (`id`) ON DELETE CASCADE",
+        "CONSTRAINT `purchase_order_lines_purchase_requisition_line_id_foreign` FOREIGN KEY (`purchase_requisition_line_id`) REFERENCES `purchase_requisition_lines` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `purchase_order_lines_receive_location_id_foreign` FOREIGN KEY (`receive_location_id`) REFERENCES `locations` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `purchase_order_lines_tax_category_id_foreign` FOREIGN KEY (`tax_category_id`) REFERENCES `tax_categories` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `purchase_order_lines_uom_id_foreign` FOREIGN KEY (`uom_id`) REFERENCES `uom_masters` (`id`)"
+      ]
     },
     {
       "table_name": "purchase_requisitions",
@@ -5031,8 +5370,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "comp_id",
@@ -5040,7 +5379,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "location_id",
@@ -5048,7 +5387,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "pr_number",
@@ -5080,7 +5419,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "delivery_address",
@@ -5096,7 +5435,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "fx_rate",
@@ -5120,7 +5459,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "requested_by",
@@ -5168,7 +5507,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_by",
@@ -5176,7 +5515,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "updated_by",
@@ -5184,7 +5523,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_at",
@@ -5203,7 +5542,24 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `purchase_requisitions_number_unique` (`comp_id`,`location_id`,`pr_number`)",
+        "KEY `purchase_requisitions_deliver_to_location_id_foreign` (`deliver_to_location_id`)",
+        "KEY `purchase_requisitions_currency_id_foreign` (`currency_id`)",
+        "KEY `purchase_requisitions_department_id_foreign` (`department_id`)",
+        "KEY `purchase_requisitions_comp_id_index` (`comp_id`)",
+        "KEY `purchase_requisitions_location_id_index` (`location_id`)",
+        "KEY `purchase_requisitions_created_by_foreign` (`created_by`)",
+        "KEY `purchase_requisitions_updated_by_foreign` (`updated_by`)",
+        "KEY `purchase_requisitions_approved_by_foreign` (`approved_by`)",
+        "CONSTRAINT `purchase_requisitions_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `tbl_users` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `purchase_requisitions_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `tbl_users` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `purchase_requisitions_currency_id_foreign` FOREIGN KEY (`currency_id`) REFERENCES `currencies` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `purchase_requisitions_deliver_to_location_id_foreign` FOREIGN KEY (`deliver_to_location_id`) REFERENCES `locations` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `purchase_requisitions_department_id_foreign` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `purchase_requisitions_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `tbl_users` (`id`) ON DELETE SET NULL"
+      ]
     },
     {
       "table_name": "purchase_requisition_lines",
@@ -5213,8 +5569,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "purchase_requisition_id",
@@ -5222,7 +5578,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "line_no",
@@ -5230,7 +5586,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "inventory_item_id",
@@ -5238,7 +5594,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "item_description",
@@ -5254,7 +5610,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "quantity",
@@ -5305,7 +5661,158 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `pr_lines_doc_line_unique` (`purchase_requisition_id`,`line_no`)",
+        "KEY `purchase_requisition_lines_inventory_item_id_foreign` (`inventory_item_id`)",
+        "KEY `purchase_requisition_lines_uom_id_foreign` (`uom_id`)",
+        "CONSTRAINT `purchase_requisition_lines_inventory_item_id_foreign` FOREIGN KEY (`inventory_item_id`) REFERENCES `inventory_items` (`id`)",
+        "CONSTRAINT `purchase_requisition_lines_purchase_requisition_id_foreign` FOREIGN KEY (`purchase_requisition_id`) REFERENCES `purchase_requisitions` (`id`) ON DELETE CASCADE",
+        "CONSTRAINT `purchase_requisition_lines_uom_id_foreign` FOREIGN KEY (`uom_id`) REFERENCES `uom_masters` (`id`)"
+      ]
+    },
+    {
+      "table_name": "rahj_ai_conversations",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint(20)",
+          "nullable": false,
+          "default": null,
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
+        },
+        {
+          "name": "user_id",
+          "type": "bigint(20)",
+          "nullable": true,
+          "default": "NULL",
+          "auto_increment": false,
+          "constraints": "unsigned DEFAULT NULL"
+        },
+        {
+          "name": "session_key",
+          "type": "varchar(120)",
+          "nullable": true,
+          "default": "NULL",
+          "auto_increment": false,
+          "constraints": "DEFAULT NULL"
+        },
+        {
+          "name": "title",
+          "type": "varchar(200)",
+          "nullable": true,
+          "default": "NULL",
+          "auto_increment": false,
+          "constraints": "DEFAULT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": true,
+          "default": "NULL",
+          "auto_increment": false,
+          "constraints": "NULL DEFAULT NULL"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "nullable": true,
+          "default": "NULL",
+          "auto_increment": false,
+          "constraints": "NULL DEFAULT NULL"
+        }
+      ],
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `rahj_ai_conversations_user_created_idx` (`user_id`,`created_at`)",
+        "KEY `rahj_ai_conversations_user_id_index` (`user_id`)",
+        "KEY `rahj_ai_conversations_session_key_index` (`session_key`)",
+        "CONSTRAINT `rahj_ai_conversations_user_fk` FOREIGN KEY (`user_id`) REFERENCES `tbl_users` (`id`) ON DELETE SET NULL"
+      ]
+    },
+    {
+      "table_name": "rahj_ai_messages",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint(20)",
+          "nullable": false,
+          "default": null,
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
+        },
+        {
+          "name": "conversation_id",
+          "type": "bigint(20)",
+          "nullable": false,
+          "default": null,
+          "auto_increment": false,
+          "constraints": "unsigned NOT NULL"
+        },
+        {
+          "name": "role",
+          "type": "varchar(20)",
+          "nullable": false,
+          "default": null,
+          "auto_increment": false,
+          "constraints": "NOT NULL"
+        },
+        {
+          "name": "content",
+          "type": "longtext",
+          "nullable": false,
+          "default": null,
+          "auto_increment": false,
+          "constraints": "NOT NULL"
+        },
+        {
+          "name": "model",
+          "type": "varchar(120)",
+          "nullable": true,
+          "default": "NULL",
+          "auto_increment": false,
+          "constraints": "DEFAULT NULL"
+        },
+        {
+          "name": "sources",
+          "type": "longtext",
+          "nullable": true,
+          "default": "NULL",
+          "auto_increment": false,
+          "constraints": "CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`sources`))"
+        },
+        {
+          "name": "is_error",
+          "type": "tinyint(1)",
+          "nullable": false,
+          "default": "0",
+          "auto_increment": false,
+          "constraints": "NOT NULL DEFAULT 0"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": true,
+          "default": "NULL",
+          "auto_increment": false,
+          "constraints": "NULL DEFAULT NULL"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "nullable": true,
+          "default": "NULL",
+          "auto_increment": false,
+          "constraints": "NULL DEFAULT NULL"
+        }
+      ],
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `rahj_ai_messages_conv_created_idx` (`conversation_id`,`created_at`)",
+        "KEY `rahj_ai_messages_conversation_id_index` (`conversation_id`)",
+        "CONSTRAINT `rahj_ai_messages_conversation_fk` FOREIGN KEY (`conversation_id`) REFERENCES `rahj_ai_conversations` (`id`) ON DELETE CASCADE"
+      ]
     },
     {
       "table_name": "sections",
@@ -5315,8 +5822,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "module_id",
@@ -5324,7 +5831,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "section_name",
@@ -5383,7 +5890,12 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `sections_module_id_section_name_unique` (`module_id`,`section_name`)",
+        "UNIQUE KEY `sections_slug_unique` (`slug`)",
+        "KEY `sections_module_id_status_sort_order_index` (`module_id`,`status`,`sort_order`)"
+      ]
     },
     {
       "table_name": "sessions",
@@ -5402,7 +5914,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "ip_address",
@@ -5437,7 +5949,11 @@
           "constraints": "NOT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `sessions_user_id_index` (`user_id`)",
+        "KEY `sessions_last_activity_index` (`last_activity`)"
+      ]
     },
     {
       "table_name": "tax_categories",
@@ -5447,8 +5963,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "company_id",
@@ -5456,7 +5972,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "tax_code",
@@ -5512,7 +6028,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "tax_category_group",
@@ -5528,7 +6044,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "description",
@@ -5552,7 +6068,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "output_tax_gl_account_id",
@@ -5560,7 +6076,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "tax_payable_gl_account_id",
@@ -5568,7 +6084,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "country_id",
@@ -5576,7 +6092,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "hsn_sac_required",
@@ -5608,7 +6124,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "input_tax_claimable",
@@ -5664,7 +6180,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "updated_by",
@@ -5672,7 +6188,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_at",
@@ -5699,7 +6215,31 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `tax_categories_company_id_tax_code_unique` (`company_id`,`tax_code`)",
+        "KEY `tax_categories_company_id_index` (`company_id`)",
+        "KEY `tax_categories_tax_type_index` (`tax_type`)",
+        "KEY `tax_categories_gl_account_id_foreign` (`gl_account_id`)",
+        "KEY `tax_categories_compound_base_tax_category_id_foreign` (`compound_base_tax_category_id`)",
+        "KEY `tax_categories_input_tax_gl_account_id_foreign` (`input_tax_gl_account_id`)",
+        "KEY `tax_categories_output_tax_gl_account_id_foreign` (`output_tax_gl_account_id`)",
+        "KEY `tax_categories_tax_payable_gl_account_id_foreign` (`tax_payable_gl_account_id`)",
+        "KEY `tax_categories_country_id_foreign` (`country_id`)",
+        "KEY `tax_categories_reverse_charge_gl_account_id_foreign` (`reverse_charge_gl_account_id`)",
+        "KEY `tax_categories_created_by_foreign` (`created_by`)",
+        "KEY `tax_categories_updated_by_foreign` (`updated_by`)",
+        "CONSTRAINT `tax_categories_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE",
+        "CONSTRAINT `tax_categories_compound_base_tax_category_id_foreign` FOREIGN KEY (`compound_base_tax_category_id`) REFERENCES `tax_categories` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `tax_categories_country_id_foreign` FOREIGN KEY (`country_id`) REFERENCES `countries` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `tax_categories_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `tax_categories_gl_account_id_foreign` FOREIGN KEY (`gl_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `tax_categories_input_tax_gl_account_id_foreign` FOREIGN KEY (`input_tax_gl_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `tax_categories_output_tax_gl_account_id_foreign` FOREIGN KEY (`output_tax_gl_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `tax_categories_reverse_charge_gl_account_id_foreign` FOREIGN KEY (`reverse_charge_gl_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `tax_categories_tax_payable_gl_account_id_foreign` FOREIGN KEY (`tax_payable_gl_account_id`) REFERENCES `chart_of_accounts` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `tax_categories_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL"
+      ]
     },
     {
       "table_name": "tbl_audit_logs",
@@ -5709,8 +6249,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "user_id",
@@ -5718,7 +6258,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "company_id",
@@ -5726,7 +6266,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "location_id",
@@ -5734,7 +6274,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "module_name",
@@ -5758,7 +6298,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "action_type",
@@ -5833,7 +6373,15 @@
           "constraints": "NOT NULL DEFAULT current_timestamp()"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `tbl_audit_logs_user_id_index` (`user_id`)",
+        "KEY `tbl_audit_logs_company_id_index` (`company_id`)",
+        "KEY `tbl_audit_logs_table_name_record_id_index` (`table_name`,`record_id`)",
+        "KEY `tbl_audit_logs_created_at_index` (`created_at`)",
+        "KEY `tbl_audit_logs_action_type_index` (`action_type`)",
+        "KEY `tbl_audit_logs_module_name_index` (`module_name`)"
+      ]
     },
     {
       "table_name": "tbl_change_history",
@@ -5843,8 +6391,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "table_name",
@@ -5860,7 +6408,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "record_identifier",
@@ -5900,7 +6448,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "changed_at",
@@ -5956,10 +6504,16 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `tbl_change_history_table_name_record_id_index` (`table_name`,`record_id`)",
+        "KEY `tbl_change_history_field_name_index` (`field_name`)",
+        "KEY `tbl_change_history_changed_at_index` (`changed_at`)",
+        "KEY `tbl_change_history_changed_by_index` (`changed_by`)"
+      ]
     },
     {
       "table_name": "tbl_deleted_data_recovery",
@@ -5969,8 +6523,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "original_table",
@@ -5986,7 +6540,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "record_identifier",
@@ -6018,7 +6572,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "deleted_at",
@@ -6066,7 +6620,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "recovery_notes",
@@ -6085,7 +6639,14 @@
           "constraints": "NOT NULL DEFAULT 'DELETED'"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `tbl_deleted_data_recovery_original_table_original_id_index` (`original_table`,`original_id`)",
+        "KEY `tbl_deleted_data_recovery_record_identifier_index` (`record_identifier`)",
+        "KEY `tbl_deleted_data_recovery_status_index` (`status`)",
+        "KEY `tbl_deleted_data_recovery_recovery_expires_at_index` (`recovery_expires_at`)",
+        "KEY `tbl_deleted_data_recovery_deleted_at_index` (`deleted_at`)"
+      ]
     },
     {
       "table_name": "tbl_report_logs",
@@ -6095,8 +6656,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "user_id",
@@ -6104,7 +6665,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "company_id",
@@ -6112,7 +6673,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "report_name",
@@ -6203,7 +6764,12 @@
           "constraints": "NOT NULL DEFAULT current_timestamp()"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `tbl_report_logs_user_id_index` (`user_id`)",
+        "KEY `tbl_report_logs_report_name_index` (`report_name`)",
+        "KEY `tbl_report_logs_created_at_index` (`created_at`)"
+      ]
     },
     {
       "table_name": "tbl_security_logs",
@@ -6213,8 +6779,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "user_id",
@@ -6222,7 +6788,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "username",
@@ -6297,7 +6863,15 @@
           "constraints": "NOT NULL DEFAULT current_timestamp()"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `tbl_security_logs_user_id_index` (`user_id`)",
+        "KEY `tbl_security_logs_username_index` (`username`)",
+        "KEY `tbl_security_logs_event_type_index` (`event_type`)",
+        "KEY `tbl_security_logs_event_status_index` (`event_status`)",
+        "KEY `tbl_security_logs_risk_level_index` (`risk_level`)",
+        "KEY `tbl_security_logs_created_at_index` (`created_at`)"
+      ]
     },
     {
       "table_name": "tbl_users",
@@ -6307,8 +6881,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "fname",
@@ -6372,7 +6946,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "location_id",
@@ -6380,7 +6954,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "dept_id",
@@ -6388,7 +6962,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "email_verified_at",
@@ -6631,7 +7205,17 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `tbl_users_email_unique` (`email`)",
+        "UNIQUE KEY `tbl_users_loginid_unique` (`loginid`)",
+        "KEY `tbl_users_email_status_index` (`email`,`status`)",
+        "KEY `tbl_users_loginid_status_index` (`loginid`,`status`)",
+        "KEY `tbl_users_comp_id_location_id_dept_id_index` (`comp_id`,`location_id`,`dept_id`)",
+        "KEY `tbl_users_last_login_at_index` (`last_login_at`)",
+        "KEY `tbl_users_created_at_index` (`created_at`)",
+        "KEY `tbl_users_last_activity_index` (`last_activity`)"
+      ]
     },
     {
       "table_name": "tbl_user_activity_logs",
@@ -6641,8 +7225,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "user_id",
@@ -6650,7 +7234,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "company_id",
@@ -6658,7 +7242,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "session_id",
@@ -6765,7 +7349,13 @@
           "constraints": "NOT NULL DEFAULT current_timestamp()"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `tbl_user_activity_logs_user_id_index` (`user_id`)",
+        "KEY `tbl_user_activity_logs_session_id_index` (`session_id`)",
+        "KEY `tbl_user_activity_logs_route_name_index` (`route_name`)",
+        "KEY `tbl_user_activity_logs_created_at_index` (`created_at`)"
+      ]
     },
     {
       "table_name": "temp_level3_mapping",
@@ -6775,8 +7365,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "old_parent_id",
@@ -6784,7 +7374,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "new_parent_id",
@@ -6792,7 +7382,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "level4_account_id",
@@ -6800,7 +7390,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "created_at",
@@ -6819,7 +7409,12 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `temp_level3_mapping_old_parent_id_index` (`old_parent_id`)",
+        "KEY `temp_level3_mapping_new_parent_id_index` (`new_parent_id`)",
+        "KEY `temp_level3_mapping_level4_account_id_index` (`level4_account_id`)"
+      ]
     },
     {
       "table_name": "transactions",
@@ -6829,8 +7424,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "voucher_number",
@@ -6870,7 +7465,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "reference_number",
@@ -6950,7 +7545,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "fiscal_year",
@@ -6966,7 +7561,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "location_id",
@@ -6974,7 +7569,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "created_by",
@@ -6982,7 +7577,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "approved_by",
@@ -6990,7 +7585,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "posted_by",
@@ -6998,7 +7593,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "approved_at",
@@ -7038,7 +7633,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "original_transaction_id",
@@ -7046,7 +7641,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_at",
@@ -7065,7 +7660,18 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `transactions_voucher_number_unique` (`voucher_number`)",
+        "KEY `transactions_comp_id_location_id_index` (`comp_id`,`location_id`)",
+        "KEY `transactions_voucher_type_index` (`voucher_type`)",
+        "KEY `transactions_status_index` (`status`)",
+        "KEY `transactions_voucher_date_index` (`voucher_date`)",
+        "KEY `transactions_created_by_index` (`created_by`)",
+        "KEY `transactions_fiscal_year_index` (`fiscal_year`)",
+        "KEY `transactions_bank_account_id_index` (`bank_account_id`)",
+        "CONSTRAINT `transactions_bank_account_id_foreign` FOREIGN KEY (`bank_account_id`) REFERENCES `chart_of_accounts` (`id`)"
+      ]
     },
     {
       "table_name": "transaction_entries",
@@ -7075,8 +7681,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "transaction_id",
@@ -7084,7 +7690,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "line_number",
@@ -7100,7 +7706,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "description",
@@ -7204,7 +7810,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "location_id",
@@ -7212,7 +7818,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "created_at",
@@ -7231,7 +7837,13 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `transaction_entries_transaction_id_index` (`transaction_id`)",
+        "KEY `transaction_entries_account_id_index` (`account_id`)",
+        "KEY `transaction_entries_comp_id_location_id_index` (`comp_id`,`location_id`)",
+        "CONSTRAINT `transaction_entries_account_id_foreign` FOREIGN KEY (`account_id`) REFERENCES `chart_of_accounts` (`id`)"
+      ]
     },
     {
       "table_name": "uom_conversions",
@@ -7241,8 +7853,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "company_id",
@@ -7250,7 +7862,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "from_uom_id",
@@ -7258,7 +7870,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "to_uom_id",
@@ -7266,7 +7878,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "conversion_factor",
@@ -7317,7 +7929,16 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `uom_conversions_company_from_to_deleted_unique` (`company_id`,`from_uom_id`,`to_uom_id`,`deleted_at`)",
+        "KEY `uom_conversions_company_id_index` (`company_id`)",
+        "KEY `uom_conversions_from_uom_id_index` (`from_uom_id`)",
+        "KEY `uom_conversions_to_uom_id_index` (`to_uom_id`)",
+        "CONSTRAINT `uom_conversions_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE",
+        "CONSTRAINT `uom_conversions_from_uom_id_foreign` FOREIGN KEY (`from_uom_id`) REFERENCES `uom_masters` (`id`) ON DELETE CASCADE",
+        "CONSTRAINT `uom_conversions_to_uom_id_foreign` FOREIGN KEY (`to_uom_id`) REFERENCES `uom_masters` (`id`) ON DELETE CASCADE"
+      ]
     },
     {
       "table_name": "uom_masters",
@@ -7327,8 +7948,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "company_id",
@@ -7336,7 +7957,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "uom_code",
@@ -7392,7 +8013,7 @@
           "nullable": false,
           "default": "2",
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL DEFAULT 2"
+          "constraints": "unsigned NOT NULL DEFAULT 2"
         },
         {
           "name": "conversion_factor",
@@ -7408,7 +8029,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "is_active",
@@ -7432,7 +8053,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "updated_by",
@@ -7440,7 +8061,7 @@
           "nullable": true,
           "default": "NULL",
           "auto_increment": false,
-          "constraints": "UNSIGNED DEFAULT NULL"
+          "constraints": "unsigned DEFAULT NULL"
         },
         {
           "name": "created_at",
@@ -7467,7 +8088,19 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `uom_masters_company_id_uom_code_unique` (`company_id`,`uom_code`)",
+        "KEY `uom_masters_base_uom_id_foreign` (`base_uom_id`)",
+        "KEY `uom_masters_company_id_index` (`company_id`)",
+        "KEY `uom_masters_uom_type_index` (`uom_type`)",
+        "KEY `uom_masters_created_by_foreign` (`created_by`)",
+        "KEY `uom_masters_updated_by_foreign` (`updated_by`)",
+        "CONSTRAINT `uom_masters_base_uom_id_foreign` FOREIGN KEY (`base_uom_id`) REFERENCES `uom_masters` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `uom_masters_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE",
+        "CONSTRAINT `uom_masters_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL",
+        "CONSTRAINT `uom_masters_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL"
+      ]
     },
     {
       "table_name": "users",
@@ -7477,8 +8110,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "name",
@@ -7537,7 +8170,10 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "UNIQUE KEY `users_email_unique` (`email`)"
+      ]
     },
     {
       "table_name": "user_rights",
@@ -7547,8 +8183,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "user_id",
@@ -7556,7 +8192,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "menu_id",
@@ -7564,7 +8200,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "can_view",
@@ -7615,7 +8251,11 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `user_rights_user_id_foreign` (`user_id`)",
+        "CONSTRAINT `user_rights_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `tbl_users` (`id`) ON DELETE CASCADE"
+      ]
     },
     {
       "table_name": "user_sessions",
@@ -7625,8 +8265,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "user_id",
@@ -7634,7 +8274,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "session_id",
@@ -7725,7 +8365,16 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `user_sessions_user_id_is_active_index` (`user_id`,`is_active`)",
+        "KEY `user_sessions_user_id_session_id_index` (`user_id`,`session_id`)",
+        "KEY `user_sessions_expires_at_is_active_index` (`expires_at`,`is_active`)",
+        "KEY `user_sessions_session_id_index` (`session_id`)",
+        "KEY `user_sessions_is_active_index` (`is_active`)",
+        "KEY `user_sessions_last_activity_index` (`last_activity`)",
+        "KEY `user_sessions_expires_at_index` (`expires_at`)"
+      ]
     },
     {
       "table_name": "voucher_number_configurations",
@@ -7735,8 +8384,8 @@
           "type": "bigint(20)",
           "nullable": false,
           "default": null,
-          "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "auto_increment": true,
+          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
         },
         {
           "name": "comp_id",
@@ -7744,7 +8393,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "location_id",
@@ -7752,7 +8401,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "voucher_type",
@@ -7816,7 +8465,7 @@
           "nullable": false,
           "default": null,
           "auto_increment": false,
-          "constraints": "UNSIGNED NOT NULL"
+          "constraints": "unsigned NOT NULL"
         },
         {
           "name": "created_at",
@@ -7835,7 +8484,12 @@
           "constraints": "NULL DEFAULT NULL"
         }
       ],
-      "keys": []
+      "keys": [
+        "PRIMARY KEY (`id`)",
+        "KEY `voucher_config_comp_loc_type_idx` (`comp_id`,`location_id`,`voucher_type`)",
+        "KEY `voucher_config_type_idx` (`voucher_type`)",
+        "KEY `voucher_config_active_idx` (`is_active`)"
+      ]
     }
   ]
 }

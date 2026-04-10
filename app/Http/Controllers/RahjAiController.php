@@ -243,7 +243,7 @@ class RahjAiController extends Controller
                 'action' => $meta['action'] ?? null,
             ]);
         } catch (\Throwable $e) {
-            Log::error('Rahj AI chat failed', [
+            Log::error('RAHJ AI chat failed', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -261,11 +261,11 @@ class RahjAiController extends Controller
                     RahjAiMessage::create([
                         'conversation_id' => $conversation->id,
                         'role' => 'assistant',
-                        'content' => 'Rahj AI is temporarily unavailable. Please try again.',
+                        'content' => 'RAHJ AI is temporarily unavailable. Please try again.',
                         'is_error' => true,
                     ]);
                 } catch (\Throwable $persistError) {
-                    Log::warning('Rahj AI message persistence failed', [
+                    Log::warning('RAHJ AI message persistence failed', [
                         'message' => $persistError->getMessage(),
                     ]);
                 }
@@ -273,7 +273,7 @@ class RahjAiController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Rahj AI is temporarily unavailable. Please try again.',
+                'message' => 'RAHJ AI is temporarily unavailable. Please try again.',
             ], 500);
         }
     }

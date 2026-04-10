@@ -1,15 +1,31 @@
 {
-  "generated_at": "2026-04-09T18:43:09.184Z",
+  "generated_at": "2026-04-09T20:12:25.625Z",
   "project_root": ".",
   "input": {
     "guides_dir": "user_guides",
-    "sql_file": "erp (9).sql"
+    "sql_file": "erp (9).sql",
+    "code_dirs": [
+      "app",
+      "config",
+      "resources",
+      "routes",
+      "lang",
+      "scripts"
+    ],
+    "include_sensitive": false
   },
   "counts": {
-    "total_chunks": 891,
-    "user_guide_chunks": 814,
-    "database_chunks": 77,
-    "parsed_tables": 63
+    "total_chunks": 9434,
+    "user_guide_chunks": 817,
+    "application_source_chunks": 8508,
+    "database_chunks": 109,
+    "application_source_files": 397,
+    "sensitive_excluded_files": 0,
+    "parsed_tables": 65
+  },
+  "source": {
+    "database": "live",
+    "database_label": "live database"
   },
   "files": {
     "chunks_jsonl": "docs/rag/langchain_chunks.jsonl",

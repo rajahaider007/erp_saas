@@ -6,6 +6,18 @@ use Illuminate\Support\Facades\Cache;
 
 class RagCorpusService
 {
+    protected const STOP_WORDS = [
+        'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'do', 'for', 'from', 'how', 'i', 'in', 'is', 'it',
+        'me', 'many', 'module', 'my', 'of', 'on', 'or', 'our', 'please', 'show', 'the', 'this', 'to', 'we',
+        'what', 'when', 'where', 'which', 'with', 'you', 'your', 'kya', 'ka', 'ki', 'ke', 'hain', 'hai',
+    ];
+
+    protected const DOMAIN_KEYWORDS = [
+        'accounts' => ['account', 'accounts', 'coa', 'chart', 'ledger', 'journal', 'voucher', 'trial', 'balance'],
+        'inventory' => ['inventory', 'stock', 'warehouse', 'item', 'items', 'grn', 'po', 'pr', 'purchase'],
+        'reports' => ['report', 'reports', 'summary', 'summaries', 'dashboard'],
+    ];
+
     public function retrieve(string $query, int $topK = 5): array
     {
         $records = $this->loadCorpus();
@@ -82,14 +94,42 @@ class RagCorpusService
 
     protected function score(array $queryTokens, string $content, array $record): float
     {
-        $haystack = mb_strtolower($content);
+        $contentHaystack = mb_strtolower($content);
+        $pathHaystack = mb_strtolower((string) ($record['source_path'] ?? ''));
+        $titleHaystack = mb_strtolower((string) ($record['document_title'] ?? ''));
+        $sectionHaystack = mb_strtolower((string) ($record['section_title'] ?? ''));
+        $tagsHaystack = mb_strtolower(implode(' ', (array) ($record['tags'] ?? [])));
+
+        $domain = $this->detectDomain($queryTokens);
         $matched = 0;
         $densityBoost = 0.0;
+        $importantMatched = 0;
+
+        $importantTokens = array_values(array_filter($queryTokens, static function (string $token): bool {
+            return strlen($token) >= 4;
+        }));
 
         foreach ($queryTokens as $token) {
-            if (str_contains($haystack, $token)) {
+            $inContent = str_contains($contentHaystack, $token);
+            $inMeta = str_contains($pathHaystack, $token)
+                || str_contains($titleHaystack, $token)
+                || str_contains($sectionHaystack, $token)
+                || str_contains($tagsHaystack, $token);
+
+            if ($inContent || $inMeta) {
                 $matched++;
-                $densityBoost += min(3, substr_count($haystack, $token)) * 0.2;
+
+                if ($inContent) {
+                    $densityBoost += min(3, substr_count($contentHaystack, $token)) * 0.16;
+                }
+
+                if ($inMeta) {
+                    $densityBoost += 0.22;
+                }
+
+                if (strlen($token) >= 4) {
+                    $importantMatched++;
+                }
             }
         }
 
@@ -97,10 +137,90 @@ class RagCorpusService
             return 0.0;
         }
 
+        // Avoid generic matches dominating when meaningful tokens are present.
+        if (!empty($importantTokens) && $importantMatched === 0) {
+            return 0.0;
+        }
+
         $coverage = $matched / max(1, count($queryTokens));
-        $sourceBoost = (($record['source_type'] ?? '') === 'database_schema' && $this->looksLikeDbQuery($queryTokens)) ? 0.25 : 0.0;
+
+        $sourceType = (string) ($record['source_type'] ?? '');
+        $sourceBoost = 0.0;
+
+        if ($sourceType === 'database_schema' && $this->looksLikeDbQuery($queryTokens)) {
+            $sourceBoost += 0.25;
+        }
+
+        if ($sourceType === 'user_guide') {
+            $sourceBoost += 0.08;
+        }
+
+        if ($domain !== null) {
+            $sourceBoost += $this->domainBoost($domain, $pathHaystack, $titleHaystack, $sectionHaystack, $tagsHaystack);
+        }
 
         return ($coverage * 1.2) + $densityBoost + $sourceBoost;
+    }
+
+    protected function detectDomain(array $tokens): ?string
+    {
+        $bestDomain = null;
+        $bestCount = 0;
+
+        foreach (self::DOMAIN_KEYWORDS as $domain => $keywords) {
+            $count = 0;
+            foreach ($tokens as $token) {
+                if (in_array($token, $keywords, true)) {
+                    $count++;
+                }
+            }
+
+            if ($count > $bestCount) {
+                $bestCount = $count;
+                $bestDomain = $domain;
+            }
+        }
+
+        return $bestCount > 0 ? $bestDomain : null;
+    }
+
+    protected function domainBoost(
+        string $domain,
+        string $pathHaystack,
+        string $titleHaystack,
+        string $sectionHaystack,
+        string $tagsHaystack
+    ): float {
+        $combined = $pathHaystack . ' ' . $titleHaystack . ' ' . $sectionHaystack . ' ' . $tagsHaystack;
+
+        $domainKeywords = self::DOMAIN_KEYWORDS[$domain] ?? [];
+        $otherKeywords = [];
+        foreach (self::DOMAIN_KEYWORDS as $name => $keywords) {
+            if ($name === $domain) {
+                continue;
+            }
+            $otherKeywords = array_merge($otherKeywords, $keywords);
+        }
+
+        $boost = 0.0;
+        foreach ($domainKeywords as $keyword) {
+            if (str_contains($combined, $keyword)) {
+                $boost += 0.08;
+            }
+        }
+
+        $crossDomainHits = 0;
+        foreach (array_unique($otherKeywords) as $keyword) {
+            if (str_contains($combined, $keyword)) {
+                $crossDomainHits++;
+            }
+        }
+
+        if ($crossDomainHits >= 2) {
+            $boost -= 0.18;
+        }
+
+        return max(-0.25, min(0.45, $boost));
     }
 
     protected function looksLikeDbQuery(array $tokens): bool
@@ -120,6 +240,15 @@ class RagCorpusService
         $parts = preg_split('/[^a-zA-Z0-9_]+/u', mb_strtolower($text));
         $parts = array_values(array_filter($parts, static function ($token) {
             return is_string($token) && strlen($token) >= 2;
+        }));
+
+        $parts = array_values(array_filter($parts, static function (string $token): bool {
+            if (in_array($token, self::STOP_WORDS, true)) {
+                return false;
+            }
+
+            // Drop mostly numeric fragments that add noise in lexical matching.
+            return !preg_match('/^\d+$/', $token);
         }));
 
         return array_values(array_unique($parts));

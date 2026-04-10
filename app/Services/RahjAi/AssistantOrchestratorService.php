@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AssistantOrchestratorService
 {
@@ -22,9 +23,15 @@ class AssistantOrchestratorService
         $context = $this->buildScopeContext($request);
         $user = $request->user();
         $languageHint = $this->detectLanguageHint($question);
+        $smartEntry = new SmartEntryService();
 
         $pending = $this->getPendingClarification($request, $conversationId);
         if ($pending) {
+            $resolution = $this->tryResolveSmartEntryFlow($question, $pending, $context, $user, $smartEntry, $conversationId, $request, $languageHint);
+            if ($resolution !== null) {
+                return $resolution;
+            }
+
             $resolved = $this->tryResolvePendingClarification($question, $pending, $context, $user);
             if ($resolved !== null) {
                 $this->clearPendingClarification($request, $conversationId);
@@ -35,6 +42,13 @@ class AssistantOrchestratorService
                     $resolved['meta'] ?? [],
                     $languageHint
                 );
+            }
+        }
+
+        if ($smartEntry->isCoaCodeCreationIntent($normalized)) {
+            $smartResponse = $this->handleSmartCoaCodeEntry($question, $context, $user, $request, $conversationId, $languageHint, $smartEntry);
+            if ($smartResponse !== null) {
+                return $smartResponse;
             }
         }
 
@@ -582,6 +596,19 @@ class AssistantOrchestratorService
     protected function classifyReadOnlyIntent(string $normalized): string
     {
         if (
+            str_contains($normalized, 'stock') ||
+            str_contains($normalized, 'inventory') ||
+            str_contains($normalized, 'pr status') ||
+            str_contains($normalized, 'po status') ||
+            str_contains($normalized, 'grn status') ||
+            str_contains($normalized, 'purchase requisition') ||
+            str_contains($normalized, 'purchase order') ||
+            str_contains($normalized, 'goods receipt')
+        ) {
+            return 'inventory';
+        }
+
+        if (
             str_contains($normalized, 'receivable') ||
             str_contains($normalized, 'outstanding') ||
             str_contains($normalized, 'invoice aging') ||
@@ -599,21 +626,58 @@ class AssistantOrchestratorService
             return 'report';
         }
 
-        return 'inventory';
+        return 'report';
+    }
+
+    protected function isStructureKnowledgeIntent(string $normalized): bool
+    {
+        return (
+            str_contains($normalized, 'chart of account') ||
+            str_contains($normalized, 'coa') ||
+            str_contains($normalized, 'level') ||
+            str_contains($normalized, 'levels') ||
+            str_contains($normalized, 'form') ||
+            str_contains($normalized, 'field') ||
+            str_contains($normalized, 'fields') ||
+            str_contains($normalized, 'screen') ||
+            str_contains($normalized, 'kitnay level') ||
+            str_contains($normalized, 'kitne level')
+        );
     }
 
     protected function isReadOnlyIntent(string $normalized): bool
     {
-        return (
-            str_contains($normalized, 'stock') ||
-            str_contains($normalized, 'inventory') ||
-            str_contains($normalized, 'count') ||
-            str_contains($normalized, 'receivable') ||
+        if ($this->isStructureKnowledgeIntent($normalized)) {
+            return false;
+        }
+
+        $hasMetricSignal = (
+            str_contains($normalized, 'snapshot') ||
+            str_contains($normalized, 'status') ||
+            str_contains($normalized, 'statuses') ||
+            str_contains($normalized, 'qty') ||
+            str_contains($normalized, 'quantity') ||
             str_contains($normalized, 'outstanding') ||
             str_contains($normalized, 'aging') ||
             str_contains($normalized, 'report') ||
-            str_contains($normalized, 'metric')
+            str_contains($normalized, 'summary') ||
+            str_contains($normalized, 'metric') ||
+            str_contains($normalized, 'metrics')
         );
+
+        $hasOperationalDomain = (
+            str_contains($normalized, 'stock') ||
+            str_contains($normalized, 'inventory') ||
+            str_contains($normalized, 'receivable') ||
+            str_contains($normalized, 'debtor') ||
+            str_contains($normalized, 'invoice') ||
+            str_contains($normalized, 'purchase requisition') ||
+            str_contains($normalized, 'purchase order') ||
+            str_contains($normalized, 'goods receipt') ||
+            str_contains($normalized, 'transaction')
+        );
+
+        return $hasMetricSignal && $hasOperationalDomain;
     }
 
     protected function isAssistedEntryIntent(string $normalized): bool
@@ -867,6 +931,272 @@ class AssistantOrchestratorService
     protected function clearPendingClarification(Request $request, ?int $conversationId): void
     {
         Cache::forget($this->pendingKey($request, $conversationId));
+    }
+
+    protected function handleSmartCoaCodeEntry(
+        string $question,
+        array $context,
+        ?User $user,
+        Request $request,
+        ?int $conversationId,
+        string $languageHint,
+        SmartEntryService $smartEntry
+    ): ?array {
+        if (! $context['comp_id'] || ! $context['location_id']) {
+            $this->savePendingClarification($request, $conversationId, [
+                'intent' => 'smart_entry_scope_missing',
+                'question' => $question,
+            ]);
+
+            return $this->localResponse(
+                'I can help create a COA Level 4 code. First, please confirm your company and location (auto-selected if available).',
+                [],
+                ['mode' => 'clarification', 'needs' => ['company', 'location']],
+                $languageHint
+            );
+        }
+
+        $extracted = $smartEntry->extractCoaCodeParams($question);
+        $level3AccountId = null;
+
+        // If parent code provided, try to resolve it
+        if ($extracted['parent_code']) {
+            $level3Account = DB::table('chart_of_accounts')
+                ->where('account_code', $extracted['parent_code'])
+                ->where('comp_id', $context['comp_id'])
+                ->where('location_id', $context['location_id'])
+                ->where('account_level', 3)
+                ->first();
+
+            if ($level3Account) {
+                $level3AccountId = $level3Account->id;
+            }
+        }
+
+        // Check permissions
+        if (! $this->canAccessMenuRoute($user, '/accounts/chart-of-account-code-configuration', 'can_add')) {
+            return $this->localResponse(
+                'You don\'t have permission to create COA codes. Please contact your administrator.',
+                [],
+                ['mode' => 'smart_entry', 'permission' => 'denied'],
+                $languageHint
+            );
+        }
+
+        $smartResponse = $smartEntry->buildCoaCodeSmartResponse($question, $extracted, $level3AccountId, $languageHint);
+
+        if ($smartResponse['mode'] === 'smart_entry_field_collection') {
+            $this->savePendingClarification($request, $conversationId, [
+                'intent' => 'smart_entry_coa_field_collection',
+                'extracted' => $smartResponse['extracted'],
+                'missing_fields' => $smartResponse['missing_fields'],
+                'level3_account_id' => $level3AccountId,
+            ]);
+
+            return $this->localResponse(
+                $smartResponse['answer'],
+                [],
+                ['mode' => 'smart_entry', 'step' => 'field_collection'],
+                $languageHint
+            );
+        }
+
+        if ($smartResponse['mode'] === 'smart_entry_ready_confirmation') {
+            $this->savePendingClarification($request, $conversationId, [
+                'intent' => 'smart_entry_coa_ready_confirmation',
+                'extracted' => $smartResponse['extracted'],
+                'level3_account_id' => $level3AccountId,
+                'comp_id' => $context['comp_id'],
+                'location_id' => $context['location_id'],
+            ]);
+
+            return $this->localResponse(
+                $smartResponse['answer'],
+                [],
+                ['mode' => 'smart_entry', 'step' => 'confirmation', 'action' => $smartResponse['action'] ?? null],
+                $languageHint
+            );
+        }
+
+        return null;
+    }
+
+    protected function tryResolveSmartEntryFlow(
+        string $question,
+        array $pending,
+        array $context,
+        ?User $user,
+        SmartEntryService $smartEntry,
+        ?int $conversationId,
+        Request $request,
+        string $languageHint
+    ): ?array {
+        $intent = $pending['intent'] ?? null;
+
+        if ($intent === 'smart_entry_coa_field_collection') {
+            $resolved = $smartEntry->tryResolveSmartEntryFieldCollection($question, $pending);
+            if ($resolved && $resolved['complete']) {
+                $extracted = $resolved['extracted'];
+                $level3AccountId = $pending['level3_account_id'] ?? null;
+
+                $smartResponse = $smartEntry->buildCoaCodeSmartResponse(
+                    $question,
+                    $extracted,
+                    $level3AccountId,
+                    $languageHint
+                );
+
+                $this->clearPendingClarification($request, $conversationId);
+                $this->savePendingClarification($request, $conversationId, [
+                    'intent' => 'smart_entry_coa_ready_confirmation',
+                    'extracted' => $smartResponse['extracted'],
+                    'level3_account_id' => $level3AccountId,
+                    'comp_id' => $context['comp_id'],
+                    'location_id' => $context['location_id'],
+                ]);
+
+                return $this->localResponse(
+                    $smartResponse['answer'],
+                    [],
+                    ['mode' => 'smart_entry', 'step' => 'confirmation', 'action' => $smartResponse['action'] ?? null],
+                    $languageHint
+                );
+            }
+        }
+
+        if ($intent === 'smart_entry_coa_ready_confirmation') {
+            if ($smartEntry->isSmartEntryConfirmation($question)) {
+                $extracted = $pending['extracted'] ?? [];
+                $level3AccountId = $pending['level3_account_id'] ?? null;
+                $compId = $pending['comp_id'] ?? $context['comp_id'];
+                $locationId = $pending['location_id'] ?? $context['location_id'];
+
+                $this->clearPendingClarification($request, $conversationId);
+
+                return $this->executeSmartCoaCodeCreation(
+                    $extracted,
+                    $level3AccountId,
+                    $compId,
+                    $locationId,
+                    $user,
+                    $languageHint
+                );
+            }
+        }
+
+        return null;
+    }
+
+    protected function executeSmartCoaCodeCreation(
+        array $extracted,
+        ?int $level3AccountId,
+        int $compId,
+        int $locationId,
+        ?User $user,
+        string $languageHint
+    ): array {
+        // Resolve parent account if needed
+        if (! $level3AccountId && $extracted['parent_code']) {
+            $parentAccount = DB::table('chart_of_accounts')
+                ->where('account_code', $extracted['parent_code'])
+                ->where('comp_id', $compId)
+                ->where('location_id', $locationId)
+                ->where('account_level', 3)
+                ->first();
+
+            if (! $parentAccount) {
+                return $this->localResponse(
+                    "Parent Level 3 account not found: {$extracted['parent_code']}. Please verify the code and try again.",
+                    [],
+                    ['mode' => 'smart_entry', 'step' => 'error', 'error_type' => 'parent_not_found'],
+                    $languageHint
+                );
+            }
+
+            $level3AccountId = $parentAccount->id;
+        }
+
+        if (! $level3AccountId) {
+            return $this->localResponse(
+                'Parent Level 3 account not specified. Please provide the parent account code.',
+                [],
+                ['mode' => 'smart_entry', 'step' => 'error', 'error_type' => 'parent_missing'],
+                $languageHint
+            );
+        }
+
+        $existingCode = DB::table('chart_of_accounts')
+            ->where('account_code', $extracted['account_code'])
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->exists();
+
+        if ($existingCode) {
+            return $this->localResponse(
+                "Account code '{$extracted['account_code']}' already exists for this company/location. Please use a different code.",
+                [],
+                ['mode' => 'smart_entry', 'step' => 'error', 'error_type' => 'duplicate_code'],
+                $languageHint
+            );
+        }
+
+        DB::beginTransaction();
+        try {
+            $newCode = DB::table('chart_of_accounts')->insertGetId([
+                'account_code' => $extracted['account_code'],
+                'account_name' => $extracted['account_name'],
+                'account_type' => $extracted['account_type'] ?? 'Equity',
+                'parent_account_id' => $level3AccountId,
+                'account_level' => 4,
+                'is_transactional' => $extracted['is_transactional'] ?? true,
+                'currency' => 'PKR',
+                'status' => 'Active',
+                'comp_id' => $compId,
+                'location_id' => $locationId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::commit();
+
+            $answer = "✓ **Level 4 account code created successfully!**\n\n";
+            $answer .= "- Code: **{$extracted['account_code']}**\n";
+            $answer .= "- Name: **{$extracted['account_name']}**\n";
+            $answer .= "- Type: **{$extracted['account_type']}**\n";
+            $answer .= "- Transactional: **" . ($extracted['is_transactional'] ? 'Yes' : 'No') . "**\n\n";
+            $answer .= "You can now use this code in journal entries, transactions, and reports.";
+
+            return $this->localResponse(
+                $answer,
+                [[
+                    'source_type' => 'smart_entry_action',
+                    'source_path' => '/accounts/chart-of-account-code-configuration',
+                    'document_title' => 'COA Code Auto-Created',
+                    'section_title' => 'Smart Entry Execution',
+                ]],
+                [
+                    'mode' => 'smart_entry',
+                    'step' => 'completed',
+                    'created_code_id' => $newCode,
+                    'extracted_data' => $extracted,
+                ],
+                $languageHint
+            );
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Smart entry COA code creation failed', [
+                'error' => $e->getMessage(),
+                'extracted' => $extracted,
+            ]);
+
+            return $this->localResponse(
+                'Failed to create account code. Error: ' . $e->getMessage(),
+                [],
+                ['mode' => 'smart_entry', 'step' => 'error', 'error_type' => 'execution_failed'],
+                $languageHint
+            );
+        }
     }
 
     protected function tryResolvePendingClarification(string $question, array $pending, array $scope, ?User $user): ?array

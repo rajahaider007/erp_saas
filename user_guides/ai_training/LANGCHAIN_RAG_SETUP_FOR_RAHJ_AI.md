@@ -6,7 +6,8 @@ Convert ERP user guides and SQL schema into a retrieval-friendly corpus, then us
 
 Data sources covered:
 - user_guides (all markdown and text files)
-- erp (9).sql (database structure)
+- live database schema exported automatically from the app connection
+- erp (9).sql (fallback only when live export is unavailable)
 
 ## Current Output Location
 
@@ -25,6 +26,8 @@ npm run rag:build
 This command runs:
 
 node scripts/build-rag-corpus.js
+
+The build now exports schema from the running database automatically before generating the corpus.
 
 ## Chunk Design (RAG Friendly)
 
@@ -145,4 +148,4 @@ Rebuild corpus whenever:
 - SQL schema changes
 - major accounting/reporting logic changes
 
-Use docs/rag/manifest.json to verify refresh timestamp and chunk counts.
+Use docs/rag/manifest.json to verify refresh timestamp, chunk counts, and whether the database source was live or fallback SQL.

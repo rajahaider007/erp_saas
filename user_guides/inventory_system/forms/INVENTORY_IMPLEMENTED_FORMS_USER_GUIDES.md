@@ -189,6 +189,8 @@
 | `package-type-master` | Package Type Configuration | Packaging |
 | `barcode-type-master` | Barcode Type Configuration | Barcode types |
 
+**Route note:** Vendor Master is served at `/inventory/master-data/vendor-master` in the app, not `/purchase/supplier-master`.
+
 **Field definitions:** `MasterDataController` `fields` / `rules` arrays in PHP — single source of truth.
 
 **i18n:** `lang/*/inventory.json` → `inventory.master_data.masters.{slug}.fields.*`, `list_columns`, `title`, and `inventory.master_data.option_sets.*` (select options).

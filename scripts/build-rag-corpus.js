@@ -1,5 +1,5 @@
 /**
- * Build LangChain-friendly RAG corpus from user guides and SQL schema.
+ * Build LangChain-friendly RAG corpus from user guides and live database schema.
  *
  * Usage:
  *   node scripts/build-rag-corpus.js
@@ -7,6 +7,7 @@
  */
 
 import fs from 'fs';
+import { spawnSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -25,21 +26,61 @@ const OPTS = {
   outDir: readArg('out', 'docs/rag'),
   chunkSize: Number(readArg('chunk-size', '1200')),
   overlap: Number(readArg('overlap', '180')),
+  codeDirs: readArg('code-dirs', 'app,config,resources,routes,lang,scripts')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean),
+  codeOverlapLines: Number(readArg('code-overlap-lines', '8')),
+  includeSensitive: readArg('include-sensitive', 'false') === 'true',
 };
 
 const guidesDirAbs = path.join(projectRoot, OPTS.guidesDir);
 const sqlFileAbs = path.join(projectRoot, OPTS.sqlFile);
+const liveSchemaScriptAbs = path.join(projectRoot, 'scripts', 'export-rag-schema.php');
 const outDirAbs = path.join(projectRoot, OPTS.outDir);
+const phpBinary = process.env.PHP_BINARY || 'php';
 
-function walkFiles(dir, allowedExts, acc = []) {
+const SENSITIVE_FILE_NAME_PATTERNS = [
+  /^\.env(?:\..+)?$/i,
+  /^id_(?:rsa|dsa|ecdsa|ed25519)(?:\.pub)?$/i,
+  /^authorized_keys$/i,
+  /^known_hosts$/i,
+  /\.(?:pem|key|p12|pfx|jks|keystore|der|crt|cer|kdbx)$/i,
+];
+
+const SENSITIVE_PATH_PATTERNS = [
+  /(?:^|\/)secrets?(?:\/|$)/i,
+  /(?:^|\/)(?:certs?|certificates)(?:\/|$)/i,
+  /(?:^|\/)private(?:\/|$)/i,
+];
+
+const SENSITIVE_CONTENT_PATTERNS = [
+  /-----BEGIN(?: [A-Z]+)? PRIVATE KEY-----/,
+  /\bghp_[A-Za-z0-9]{30,}\b/,
+  /\bglpat-[A-Za-z0-9\-_]{20,}\b/,
+  /\bsk-[A-Za-z0-9]{20,}\b/,
+  /\bAKIA[0-9A-Z]{16}\b/,
+  /\bASIA[0-9A-Z]{16}\b/,
+];
+
+function walkFiles(dir, allowedExts, acc = [], options = {}) {
+  const {
+    shouldSkipDir = () => false,
+    shouldSkipFile = () => false,
+  } = options;
+
   if (!fs.existsSync(dir)) return acc;
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      walkFiles(fullPath, allowedExts, acc);
+      if (shouldSkipDir(fullPath, entry.name)) continue;
+      walkFiles(fullPath, allowedExts, acc, options);
       continue;
     }
+
+    if (shouldSkipFile(fullPath, entry.name)) continue;
+
     const ext = path.extname(entry.name).toLowerCase();
     if (allowedExts.has(ext)) acc.push(fullPath);
   }
@@ -180,6 +221,159 @@ function buildGuideRecords() {
   return records;
 }
 
+function inferCodeLanguage(filePath) {
+  const lower = filePath.toLowerCase();
+  if (lower.endsWith('.blade.php')) return 'blade';
+
+  const ext = path.extname(lower);
+  switch (ext) {
+    case '.php':
+      return 'php';
+    case '.js':
+      return 'javascript';
+    case '.jsx':
+      return 'jsx';
+    case '.ts':
+      return 'typescript';
+    case '.tsx':
+      return 'tsx';
+    case '.json':
+      return 'json';
+    case '.md':
+      return 'markdown';
+    case '.txt':
+      return 'text';
+    case '.css':
+      return 'css';
+    case '.scss':
+      return 'scss';
+    case '.yml':
+    case '.yaml':
+      return 'yaml';
+    default:
+      return ext.replace(/^\./, '') || 'text';
+  }
+}
+
+function chunkCodeWithLineNumbers(content, maxSize, overlapLines) {
+  const normalized = content.replace(/\r\n/g, '\n').trim();
+  if (!normalized) return [];
+
+  const lines = normalized.split('\n');
+  const chunks = [];
+  let start = 0;
+
+  while (start < lines.length) {
+    let size = 0;
+    let end = start;
+
+    while (end < lines.length) {
+      const lineLength = lines[end].length + 1;
+      if (size + lineLength > maxSize && end > start) break;
+      size += lineLength;
+      end += 1;
+    }
+
+    const piece = lines.slice(start, end).join('\n').trimEnd();
+    if (piece) {
+      chunks.push({
+        text: piece,
+        startLine: start + 1,
+        endLine: end,
+      });
+    }
+
+    if (end >= lines.length) break;
+    start = Math.max(end - overlapLines, start + 1);
+  }
+
+  return chunks;
+}
+
+function isSensitiveFilePath(relPath) {
+  const normalized = relPath.replace(/\\/g, '/').toLowerCase();
+  const base = path.basename(normalized);
+
+  if (SENSITIVE_FILE_NAME_PATTERNS.some(rx => rx.test(base))) return true;
+  if (SENSITIVE_PATH_PATTERNS.some(rx => rx.test(normalized))) return true;
+
+  return false;
+}
+
+function hasSensitiveContent(content) {
+  return SENSITIVE_CONTENT_PATTERNS.some(rx => rx.test(content));
+}
+
+function buildCodeRecords() {
+  const allowedExts = new Set([
+    '.php',
+    '.js',
+    '.jsx',
+    '.ts',
+    '.tsx',
+    '.json',
+    '.md',
+    '.txt',
+    '.css',
+    '.scss',
+    '.yml',
+    '.yaml',
+  ]);
+
+  const records = [];
+  let chunkCounter = 0;
+  let fileCounter = 0;
+  let sensitiveExcludedCount = 0;
+  const sensitiveExcludedSamples = [];
+
+  for (const dir of OPTS.codeDirs) {
+    const absDir = path.join(projectRoot, dir);
+    const files = walkFiles(absDir, allowedExts);
+
+    for (const absPath of files) {
+      const relPath = toPosixRelative(absPath);
+      const content = fs.readFileSync(absPath, 'utf8');
+
+      if (!OPTS.includeSensitive) {
+        const shouldExclude = isSensitiveFilePath(relPath) || hasSensitiveContent(content);
+        if (shouldExclude) {
+          sensitiveExcludedCount += 1;
+          if (sensitiveExcludedSamples.length < 25) sensitiveExcludedSamples.push(relPath);
+          continue;
+        }
+      }
+
+      fileCounter += 1;
+      const chunks = chunkCodeWithLineNumbers(content, OPTS.chunkSize, OPTS.codeOverlapLines);
+      const language = inferCodeLanguage(absPath);
+
+      chunks.forEach((chunk, idx) => {
+        chunkCounter += 1;
+        records.push({
+          id: `code-${String(chunkCounter).padStart(6, '0')}`,
+          source_type: 'application_source',
+          source_path: relPath,
+          document_title: relPath,
+          section_title: `Code chunk ${idx + 1}`,
+          chunk_index: idx,
+          line_start: chunk.startLine,
+          line_end: chunk.endLine,
+          language,
+          tags: ['codebase', dir, language],
+          content: chunk.text,
+        });
+      });
+    }
+  }
+
+  return {
+    records,
+    filesIndexed: fileCounter,
+    sensitiveExcludedCount,
+    sensitiveExcludedSamples,
+  };
+}
+
 function parseCreateTables(sql) {
   const tables = [];
   const createRegex = /CREATE TABLE\s+`([^`]+)`\s*\(([^]*?)\)\s*ENGINE=/gi;
@@ -264,11 +458,7 @@ function tableToDocument(table) {
   return lines.join('\n');
 }
 
-function buildDbRecords() {
-  if (!fs.existsSync(sqlFileAbs)) return { records: [], tables: [] };
-
-  const sql = fs.readFileSync(sqlFileAbs, 'utf8');
-  const tables = parseCreateTables(sql);
+function buildDbRecordsFromTables(tables, sourcePath) {
   const records = [];
   let chunkCounter = 0;
 
@@ -281,7 +471,7 @@ function buildDbRecords() {
       records.push({
         id: `db-${String(chunkCounter).padStart(6, '0')}`,
         source_type: 'database_schema',
-        source_path: toPosixRelative(sqlFileAbs),
+        source_path: sourcePath,
         document_title: `Database table ${table.table_name}`,
         section_title: `Schema for ${table.table_name}`,
         chunk_index: idx,
@@ -293,6 +483,61 @@ function buildDbRecords() {
   }
 
   return { records, tables };
+}
+
+function buildDbRecordsFromSql(sql, sourcePath) {
+  const tables = parseCreateTables(sql);
+  return buildDbRecordsFromTables(tables, sourcePath);
+}
+
+function loadLiveDatabaseSchema() {
+  if (!fs.existsSync(liveSchemaScriptAbs)) {
+    throw new Error(`Live schema exporter not found: ${toPosixRelative(liveSchemaScriptAbs)}`);
+  }
+
+  const result = spawnSync(phpBinary, [liveSchemaScriptAbs], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+    maxBuffer: 20 * 1024 * 1024,
+    env: process.env,
+  });
+
+  if (result.status !== 0) {
+    const stderr = String(result.stderr || '').trim();
+    const stdout = String(result.stdout || '').trim();
+    const message = stderr || stdout || `PHP exited with code ${result.status ?? 'unknown'}`;
+    throw new Error(message);
+  }
+
+  const sql = String(result.stdout || '').trim();
+  if (!sql) {
+    throw new Error('Live schema exporter returned no schema output.');
+  }
+
+  return sql;
+}
+
+function buildDbRecords() {
+  try {
+    const liveSql = loadLiveDatabaseSchema();
+    return {
+      ...buildDbRecordsFromSql(liveSql, 'database/live-schema.sql'),
+      source: 'live',
+      sourceLabel: 'live database',
+    };
+  } catch (error) {
+    if (fs.existsSync(sqlFileAbs)) {
+      console.warn(`Live schema export failed, falling back to SQL dump: ${error.message}`);
+      const sql = fs.readFileSync(sqlFileAbs, 'utf8');
+      return {
+        ...buildDbRecordsFromSql(sql, toPosixRelative(sqlFileAbs)),
+        source: 'sql',
+        sourceLabel: toPosixRelative(sqlFileAbs),
+      };
+    }
+
+    throw error;
+  }
 }
 
 function ensureDir(dir) {
@@ -312,8 +557,9 @@ function main() {
   ensureDir(outDirAbs);
 
   const guideRecords = buildGuideRecords();
+  const code = buildCodeRecords();
   const db = buildDbRecords();
-  const allRecords = [...guideRecords, ...db.records];
+  const allRecords = [...guideRecords, ...code.records, ...db.records];
 
   const generatedAt = new Date().toISOString();
   const manifest = {
@@ -322,12 +568,21 @@ function main() {
     input: {
       guides_dir: OPTS.guidesDir,
       sql_file: OPTS.sqlFile,
+      code_dirs: OPTS.codeDirs,
+      include_sensitive: OPTS.includeSensitive,
     },
     counts: {
       total_chunks: allRecords.length,
       user_guide_chunks: guideRecords.length,
+      application_source_chunks: code.records.length,
       database_chunks: db.records.length,
+      application_source_files: code.filesIndexed,
+      sensitive_excluded_files: code.sensitiveExcludedCount,
       parsed_tables: db.tables.length,
+    },
+    source: {
+      database: db.source,
+      database_label: db.sourceLabel,
     },
     files: {
       chunks_jsonl: `${OPTS.outDir}/langchain_chunks.jsonl`,
@@ -339,7 +594,8 @@ function main() {
   writeJsonl(path.join(outDirAbs, 'langchain_chunks.jsonl'), allRecords);
   writeJson(path.join(outDirAbs, 'schema_tables.json'), {
     generated_at: generatedAt,
-    source_sql_file: OPTS.sqlFile,
+    source_database: db.source,
+    source_sql_file: db.source === 'sql' ? OPTS.sqlFile : null,
     table_count: db.tables.length,
     tables: db.tables,
   });
@@ -348,9 +604,17 @@ function main() {
   console.log('RAG corpus generated.');
   console.log(`Chunks: ${allRecords.length}`);
   console.log(`Guide chunks: ${guideRecords.length}`);
+  console.log(`Application source chunks: ${code.records.length}`);
+  console.log(`Application source files: ${code.filesIndexed}`);
+  console.log(`Sensitive files excluded: ${code.sensitiveExcludedCount}`);
   console.log(`Database chunks: ${db.records.length}`);
   console.log(`Tables parsed: ${db.tables.length}`);
   console.log(`Output dir: ${toPosixRelative(outDirAbs)}`);
+
+  if (code.sensitiveExcludedSamples.length > 0) {
+    console.log('Sensitive exclusion samples:');
+    code.sensitiveExcludedSamples.forEach(file => console.log(`- ${file}`));
+  }
 }
 
 main();

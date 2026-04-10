@@ -296,7 +296,7 @@ class AssistantChatFlowTest extends TestCase
     private function makeUser(): User
     {
         return User::query()->create([
-            'fname' => 'Rahj',
+            'fname' => 'RAHJ',
             'lname' => 'Tester',
             'email' => 'rahj.tester+'.uniqid().'@example.com',
             'loginid' => 'rahj_tester_'.uniqid(),
