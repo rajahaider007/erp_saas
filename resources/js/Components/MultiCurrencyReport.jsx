@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, Globe, Download, Filter } from 'lucide-react';
 import axios from 'axios';
+import { todayLocalYmd } from '@/utils/dateOnly';
 
 /**
  * Multi-Currency Report Component
@@ -92,7 +93,7 @@ const MultiCurrencyReport = ({
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `multi-currency-report-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `multi-currency-report-${todayLocalYmd()}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

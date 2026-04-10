@@ -6,6 +6,7 @@ import Breadcrumbs from '@/Components/Breadcrumbs';
 import CustomDatePicker from '@/Components/DatePicker/DatePicker';
 import { useTranslations } from '@/hooks/useTranslations';
 import { buildPurchaseOrderLinesQueryString } from './polQueryString';
+import { formatLocalYmd } from '@/utils/dateOnly';
 
 export default function PurchaseOrderLinesSearch() {
   const { vendorOptions = [], initialFilters = {}, error: bootError } = usePage().props;
@@ -123,16 +124,16 @@ export default function PurchaseOrderLinesSearch() {
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <CustomDatePicker
-                      selected={fromDate ? new Date(fromDate) : null}
-                      onChange={(d) => setFromDate(d ? d.toISOString().split('T')[0] : '')}
+                      selected={fromDate || null}
+                      onChange={(d) => setFromDate(d ? formatLocalYmd(d) : '')}
                       type="date"
                       placeholder={tr('from_date')}
                       className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100"
                       isClearable
                     />
                     <CustomDatePicker
-                      selected={toDate ? new Date(toDate) : null}
-                      onChange={(d) => setToDate(d ? d.toISOString().split('T')[0] : '')}
+                      selected={toDate || null}
+                      onChange={(d) => setToDate(d ? formatLocalYmd(d) : '')}
                       type="date"
                       placeholder={tr('to_date')}
                       className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100"

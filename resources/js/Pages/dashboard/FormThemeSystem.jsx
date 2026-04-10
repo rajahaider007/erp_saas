@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslations } from '@/hooks/useTranslations';
 import { Eye, EyeOff, Search, Calendar, Clock, Upload, ChevronDown } from 'lucide-react';
 import CustomDatePicker from '../../Components/DatePicker/DatePicker';
+import { formatLocalYmd } from '@/utils/dateOnly';
 
 const FormThemeSystem = () => {
   const { t } = useTranslations();
@@ -153,8 +154,8 @@ const FormThemeSystem = () => {
             <div className="input-wrapper date-wrapper">
               <Calendar className="input-icon" size={20} />
               <CustomDatePicker
-                selected={formData.date ? new Date(formData.date) : null}
-                onChange={(date) => handleInputChange('date', date ? date.toISOString().split('T')[0] : '')}
+                selected={formData.date || null}
+                onChange={(date) => handleInputChange('date', date ? formatLocalYmd(date) : '')}
                 type="date"
                 placeholder="Select date"
                 className="form-input input-with-icon"

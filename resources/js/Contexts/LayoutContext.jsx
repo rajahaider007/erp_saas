@@ -18,6 +18,7 @@ import {
   EyeOff,
   Sparkles
 } from 'lucide-react';
+import { todayLocalYmd } from '@/utils/dateOnly';
 
 /** Matches <html> form-theme-* classes applied in useEffect */
 const FORM_THEME_CLASSES = [
@@ -282,7 +283,7 @@ export function LayoutProvider({ children }) {
     
     const dataStr = JSON.stringify(settings, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const exportFileDefaultName = `layout-settings-${new Date().toISOString().split('T')[0]}.json`;
+    const exportFileDefaultName = `layout-settings-${todayLocalYmd()}.json`;
     
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);

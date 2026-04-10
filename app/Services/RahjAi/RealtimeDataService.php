@@ -3,240 +3,236 @@
 namespace App\Services\RahjAi;
 
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 /**
- * Real-Time Database Query Service
- * 
- * Enables RAHJAI to query live data from system:
- * - Account balances and transactions
- * - Inventory levels and values
- * - Pending orders and receipts
- * - Amounts, counts, summaries
+ * Read-only snapshots for RAG "live data" chunks. Uses this ERP's real tables (comp_id, chart_of_accounts, transactions).
  */
 class RealtimeDataService
 {
-    /**
-     * Get account balance for a specific date
-     */
     public function getAccountBalance(string $accountCode, string $date, int $companyId): array
     {
         try {
-            $account = DB::table('accounts')
-                ->where('code', $accountCode)
-                ->where('company_id', $companyId)
-                ->first();
-
-            if (!$account) {
-                return ['error' => "Account '{$accountCode}' not found"];
+            if (! Schema::hasTable('chart_of_accounts') || ! Schema::hasTable('transaction_entries') || ! Schema::hasTable('transactions')) {
+                return ['error' => 'Accounting tables are not available in this database.'];
             }
 
-            $debit = DB::table('journal_voucher_lines')
-                ->whereHas('voucher', function ($q) use ($companyId, $date) {
-                    $q->where('company_id', $companyId)
-                      ->whereDate('voucher_date', '<=', $date)
-                      ->where('status', 'posted');
+            $account = DB::table('chart_of_accounts')
+                ->where('account_code', $accountCode)
+                ->where(function ($q) use ($companyId) {
+                    $q->where('comp_id', $companyId)->orWhereNull('comp_id');
                 })
-                ->where('account_id', $account->id)
-                ->where('line_type', 'debit')
-                ->sum('amount');
+                ->first();
 
-            $credit = DB::table('journal_voucher_lines')
-                ->whereHas('voucher', function ($q) use ($companyId, $date) {
-                    $q->where('company_id', $companyId)
-                      ->whereDate('voucher_date', '<=', $date)
-                      ->where('status', 'posted');
-                })
-                ->where('account_id', $account->id)
-                ->where('line_type', 'credit')
-                ->sum('amount');
+            if (! $account) {
+                return ['error' => "Account code '{$accountCode}' was not found for this company."];
+            }
+
+            $debit = (float) DB::table('transaction_entries as te')
+                ->join('transactions as t', 't.id', '=', 'te.transaction_id')
+                ->where('te.account_id', $account->id)
+                ->where('t.comp_id', $companyId)
+                ->where('t.status', 'Posted')
+                ->whereDate('t.voucher_date', '<=', $date)
+                ->sum('te.debit_amount');
+
+            $credit = (float) DB::table('transaction_entries as te')
+                ->join('transactions as t', 't.id', '=', 'te.transaction_id')
+                ->where('te.account_id', $account->id)
+                ->where('t.comp_id', $companyId)
+                ->where('t.status', 'Posted')
+                ->whereDate('t.voucher_date', '<=', $date)
+                ->sum('te.credit_amount');
 
             $balance = $debit - $credit;
 
             return [
                 'account_code' => $accountCode,
-                'account_name' => $account->name,
+                'account_name' => $account->account_name,
                 'as_of_date' => $date,
                 'debit_total' => $debit,
                 'credit_total' => $credit,
                 'balance' => $balance,
                 'balance_formatted' => number_format($balance, 2),
-                'currency' => 'PKR', // From system config
+                'currency' => (string) ($account->currency ?? 'PKR'),
+                'note' => 'Balance from posted vouchers only (transaction_entries + transactions).',
             ];
-        } catch (\Exception $e) {
-            return ['error' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            return ['error' => 'Could not read account balance.', 'detail' => $e->getMessage()];
         }
     }
 
-    /**
-     * Get inventory stock levels for an item
-     */
-    public function getInventoryStock(string $itemCode, int $warehouseId = null, int $companyId = null): array
+    public function getInventoryStock(string $itemCode, ?int $warehouseId = null, ?int $companyId = null): array
     {
         try {
-            $item = DB::table('items')
-                ->where('code', $itemCode)
-                ->first();
-
-            if (!$item) {
-                return ['error' => "Item '{$itemCode}' not found"];
+            if (! Schema::hasTable('inventory_items')) {
+                return ['error' => 'Inventory is not available in this database.'];
             }
 
-            $query = DB::table('inventory_balances')
-                ->where('item_id', $item->id);
-
-            if ($warehouseId) {
-                $query->where('warehouse_id', $warehouseId);
-            }
-
+            $q = DB::table('inventory_items')->where('item_code', $itemCode);
             if ($companyId) {
-                $query->where('company_id', $companyId);
+                $q->where(function ($q2) use ($companyId) {
+                    $q2->where('comp_id', $companyId)->orWhereNull('comp_id');
+                });
             }
 
-            $balances = $query->get();
+            $item = $q->first();
 
-            if ($balances->isEmpty()) {
-                return [
-                    'item_code' => $itemCode,
-                    'item_name' => $item->name,
-                    'total_quantity' => 0,
-                    'total_value' => 0,
-                    'warehouses' => [],
-                ];
+            if (! $item) {
+                return ['error' => "Item code '{$itemCode}' was not found."];
             }
-
-            $totalQty = $balances->sum('quantity');
-            $totalValue = $balances->sum('value');
 
             return [
                 'item_code' => $itemCode,
-                'item_name' => $item->name,
-                'total_quantity' => $totalQty,
-                'total_value' => $totalValue,
-                'total_value_formatted' => number_format($totalValue, 2),
-                'warehouses' => $balances->map(fn($b) => [
-                    'warehouse_id' => $b->warehouse_id,
-                    'warehouse_name' => $this->getWarehouseNameById($b->warehouse_id),
-                    'quantity' => $b->quantity,
-                    'unit_price' => $b->unit_price,
-                    'value' => number_format($b->value, 2),
-                ])->toArray(),
-                'last_updated' => now()->toDateTimeString(),
+                'item_name' => $item->item_name_short ?? $item->item_name_long ?? '',
+                'item_status' => $item->item_status ?? null,
+                'reorder_point' => $item->reorder_point ?? null,
+                'standard_cost' => $item->standard_cost ?? null,
+                'note' => 'On-hand quantity is not computed here; open inventory stock / movement reports for live quantities.',
             ];
-        } catch (\Exception $e) {
-            return ['error' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            return ['error' => 'Could not read inventory item.', 'detail' => $e->getMessage()];
         }
     }
 
-    /**
-     * Get pending purchase orders
-     */
-    public function getPendingPurchaseOrders(int $companyId, int $locationId = null): array
+    public function getPendingPurchaseOrders(int $companyId, ?int $locationId = null): array
     {
         try {
-            $query = DB::table('purchase_orders')
-                ->where('company_id', $companyId)
-                ->whereIn('status', ['draft', 'pending', 'approved']);
-
-            if ($locationId) {
-                $query->where('location_id', $locationId);
+            if (! Schema::hasTable('purchase_orders')) {
+                return ['pending_orders_count' => 0, 'orders' => [], 'note' => 'No purchase_orders table.'];
             }
 
-            $orders = $query->with(['supplier', 'lines'])->get();
+            $query = DB::table('purchase_orders as h')
+                ->where('h.comp_id', $companyId)
+                ->whereIn('h.status', ['draft', 'pending', 'approved']);
 
-            return [
-                'pending_orders_count' => $orders->count(),
-                'pending_amount' => $orders->sum('total_amount'),
-                'pending_amount_formatted' => number_format($orders->sum('total_amount'), 2),
-                'orders' => $orders->map(fn($o) => [
+            if ($locationId) {
+                $query->where('h.location_id', $locationId);
+            }
+
+            if (Schema::hasTable('chart_of_accounts')) {
+                $query->leftJoin('chart_of_accounts as v', 'v.id', '=', 'h.vendor_id')
+                    ->select('h.id', 'h.po_number', 'h.po_date', 'h.expected_delivery_date', 'h.status', 'v.account_name as supplier_name');
+            } else {
+                $query->select('h.id', 'h.po_number', 'h.po_date', 'h.expected_delivery_date', 'h.status', DB::raw('NULL as supplier_name'));
+            }
+
+            $orders = $query->get();
+
+            $list = [];
+            foreach ($orders as $o) {
+                $lineTotal = 0.0;
+                if (Schema::hasTable('purchase_order_lines')) {
+                    $lineTotal = (float) DB::table('purchase_order_lines')
+                        ->where('purchase_order_id', $o->id)
+                        ->selectRaw('COALESCE(SUM(ordered_qty * unit_price), 0) as amt')
+                        ->value('amt');
+                }
+
+                $list[] = [
                     'po_number' => $o->po_number,
-                    'supplier_name' => $o->supplier->name ?? 'Unknown',
+                    'supplier_name' => $o->supplier_name ?? '—',
                     'po_date' => $o->po_date,
                     'expected_delivery' => $o->expected_delivery_date,
-                    'total_amount' => number_format($o->total_amount, 2),
+                    'line_total_estimate' => round($lineTotal, 2),
                     'status' => $o->status,
-                    'items_count' => $o->lines->count(),
-                ])->toArray(),
+                ];
+            }
+
+            return [
+                'pending_orders_count' => count($list),
+                'pending_amount_estimate' => round(array_sum(array_column($list, 'line_total_estimate')), 2),
+                'orders' => $list,
+                'rahj_ui_links' => [
+                    'po_list' => '/inventory/purchase-order',
+                    'po_create' => '/inventory/purchase-order/create',
+                    'markdown_po_list' => '[Purchase orders](/inventory/purchase-order)',
+                ],
             ];
-        } catch (\Exception $e) {
-            return ['error' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            return ['error' => 'Could not read purchase orders.', 'detail' => $e->getMessage()];
         }
     }
 
-    /**
-     * Get pending goods receipts
-     */
     public function getPendingGoodsReceipts(int $companyId): array
     {
         try {
+            if (! Schema::hasTable('goods_receipt_notes')) {
+                return ['pending_receipts_count' => 0, 'receipts' => []];
+            }
+
             $receipts = DB::table('goods_receipt_notes')
-                ->where('company_id', $companyId)
+                ->where('comp_id', $companyId)
                 ->whereIn('status', ['draft', 'pending_qc', 'partial'])
-                ->get();
+                ->get(['grn_number', 'receipt_date', 'status']);
 
             return [
                 'pending_receipts_count' => $receipts->count(),
-                'total_items' => $receipts->sum('total_items'),
-                'receipts' => $receipts->map(fn($r) => [
+                'receipts' => $receipts->map(fn ($r) => [
                     'grn_number' => $r->grn_number,
                     'receipt_date' => $r->receipt_date,
-                    'po_reference' => $r->po_reference,
-                    'total_items' => $r->total_items,
                     'status' => $r->status,
-                ])->toArray(),
+                ])->all(),
+                'rahj_ui_links' => [
+                    'grn_list' => '/inventory/goods-receipt-note',
+                    'markdown_grn_list' => '[Goods receipt (GRN)](/inventory/goods-receipt-note)',
+                ],
             ];
-        } catch (\Exception $e) {
-            return ['error' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            return ['error' => 'Could not read goods receipts.', 'detail' => $e->getMessage()];
         }
     }
 
-    /**
-     * Get account trial balance as of date
-     */
     public function getTrialBalance(string $asOfDate, int $companyId): array
     {
         try {
-            $accounts = DB::table('accounts')
-                ->where('company_id', $companyId)
-                ->where('level', 4) // Only leaf accounts
+            if (! Schema::hasTable('chart_of_accounts') || ! Schema::hasTable('transaction_entries') || ! Schema::hasTable('transactions')) {
+                return ['error' => 'Accounting tables are not available.'];
+            }
+
+            $aggregates = DB::table('transaction_entries as te')
+                ->join('transactions as t', 't.id', '=', 'te.transaction_id')
+                ->where('t.comp_id', $companyId)
+                ->where('t.status', 'Posted')
+                ->whereDate('t.voucher_date', '<=', $asOfDate)
+                ->groupBy('te.account_id')
+                ->selectRaw('te.account_id, SUM(te.debit_amount) as debit, SUM(te.credit_amount) as credit')
+                ->havingRaw('SUM(te.debit_amount) > 0.00001 OR SUM(te.credit_amount) > 0.00001')
                 ->get();
 
+            if ($aggregates->isEmpty()) {
+                return [
+                    'as_of_date' => $asOfDate,
+                    'total_debit' => '0.00',
+                    'total_credit' => '0.00',
+                    'is_balanced' => true,
+                    'accounts' => [],
+                    'note' => 'No posted activity found for this company up to the given date.',
+                ];
+            }
+
+            $ids = $aggregates->pluck('account_id')->filter()->unique()->all();
+            $names = DB::table('chart_of_accounts')->whereIn('id', $ids)->get()->keyBy('id');
+
             $trialBalance = [];
-            $totalDebit = 0;
-            $totalCredit = 0;
+            $totalDebit = 0.0;
+            $totalCredit = 0.0;
 
-            foreach ($accounts as $account) {
-                $debit = DB::table('journal_voucher_lines')
-                    ->whereHas('voucher', function ($q) use ($companyId, $asOfDate) {
-                        $q->where('company_id', $companyId)
-                          ->whereDate('voucher_date', '<=', $asOfDate)
-                          ->where('status', 'posted');
-                    })
-                    ->where('account_id', $account->id)
-                    ->where('line_type', 'debit')
-                    ->sum('amount');
-
-                $credit = DB::table('journal_voucher_lines')
-                    ->whereHas('voucher', function ($q) use ($companyId, $asOfDate) {
-                        $q->where('company_id', $companyId)
-                          ->whereDate('voucher_date', '<=', $asOfDate)
-                          ->where('status', 'posted');
-                    })
-                    ->where('account_id', $account->id)
-                    ->where('line_type', 'credit')
-                    ->sum('amount');
-
-                if ($debit > 0 || $credit > 0) {
-                    $trialBalance[] = [
-                        'account_code' => $account->code,
-                        'account_name' => $account->name,
-                        'debit' => $debit,
-                        'credit' => $credit,
-                    ];
-
-                    $totalDebit += $debit;
-                    $totalCredit += $credit;
+            foreach ($aggregates as $row) {
+                $coa = $names->get($row->account_id);
+                if (! $coa) {
+                    continue;
                 }
+                $d = (float) $row->debit;
+                $c = (float) $row->credit;
+                $trialBalance[] = [
+                    'account_code' => $coa->account_code,
+                    'account_name' => $coa->account_name,
+                    'debit' => $d,
+                    'credit' => $c,
+                ];
+                $totalDebit += $d;
+                $totalCredit += $c;
             }
 
             return [
@@ -245,46 +241,143 @@ class RealtimeDataService
                 'total_credit' => number_format($totalCredit, 2),
                 'is_balanced' => abs($totalDebit - $totalCredit) < 0.01,
                 'accounts' => $trialBalance,
+                'note' => 'Unofficial snapshot for assistant use; use formal Trial Balance report for accounting sign-off.',
             ];
-        } catch (\Exception $e) {
-            return ['error' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            return ['error' => 'Could not compute trial balance.', 'detail' => $e->getMessage()];
         }
+    }
+
+    public function getSalesSummary(string $fromDate, string $toDate, int $companyId): array
+    {
+        return [
+            'from_date' => $fromDate,
+            'to_date' => $toDate,
+            'company_id' => $companyId,
+            'note' => 'Sales order aggregates are not wired in this build. Use AR / sales reports in the app when available.',
+        ];
     }
 
     /**
-     * Get sales summary
+     * Same mapping as AccountsDashboardController::getAccountsByDashboardType configTypeMap.
+     *
+     * @return list<string>
      */
-    public function getSalesSummary(string $fromDate, string $toDate, int $companyId): array
+    public static function dashboardReportConfigTypes(string $reportType): array
     {
+        $map = [
+            'main-payable' => ['accounts_payable'],
+            'main-receivable' => ['accounts_receivable'],
+            'current-cash' => ['cash', 'petty_cash'],
+            'all-cash-codes' => ['cash', 'petty_cash', 'bank'],
+            'bank-balances' => ['bank'],
+        ];
+
+        return $map[$reportType] ?? [];
+    }
+
+    /**
+     * Closing balances for any accounts-dashboard financial card (config-driven report types).
+     */
+    public function getAccountsDashboardFinancialSnapshot(
+        int $companyId,
+        int $locationId,
+        string $reportType,
+        ?array $dateRange = null
+    ): array {
+        $configTypes = self::dashboardReportConfigTypes($reportType);
+        if ($configTypes === []) {
+            return ['error' => 'Unknown financial report type.', 'report_type' => $reportType];
+        }
+
         try {
-            $summary = DB::table('sales_orders')
-                ->where('company_id', $companyId)
-                ->whereDate('order_date', '>=', $fromDate)
-                ->whereDate('order_date', '<=', $toDate)
+            if (
+                ! Schema::hasTable('chart_of_accounts')
+                || ! Schema::hasTable('account_configurations')
+                || ! Schema::hasTable('transaction_entries')
+                || ! Schema::hasTable('transactions')
+            ) {
+                return ['error' => 'Accounting tables are not available in this database.'];
+            }
+
+            $fromDate = $dateRange['from'] ?? null;
+            $toDate = $dateRange['to'] ?? null;
+
+            $openingBalanceExpression = Schema::hasColumn('chart_of_accounts', 'opening_balance')
+                ? 'COALESCE(coa.opening_balance, 0)'
+                : '0';
+
+            $movements = DB::table('transaction_entries as te')
+                ->join('transactions as t', 'te.transaction_id', '=', 't.id')
+                ->where('t.comp_id', $companyId)
+                ->where('t.location_id', $locationId)
+                ->where('t.status', 'Posted');
+
+            if ($fromDate) {
+                $movements->whereDate('t.voucher_date', '>=', $fromDate);
+            }
+            if ($toDate) {
+                $movements->whereDate('t.voucher_date', '<=', $toDate);
+            }
+
+            $movements->groupBy('te.account_id')
                 ->select(
-                    DB::raw('COUNT(*) as order_count'),
-                    DB::raw('SUM(total_amount) as total_amount'),
-                    'status'
+                    'te.account_id',
+                    DB::raw('SUM(COALESCE(te.base_debit_amount, 0) - COALESCE(te.base_credit_amount, 0)) as movement_balance')
+                );
+
+            $rows = DB::table('chart_of_accounts as coa')
+                ->join('account_configurations as ac', function ($join) {
+                    $join->on('coa.id', '=', 'ac.account_id');
+                })
+                ->leftJoinSub($movements, 'mv', function ($join) {
+                    $join->on('coa.id', '=', 'mv.account_id');
+                })
+                ->where('coa.comp_id', $companyId)
+                ->where('coa.location_id', $locationId)
+                ->where('ac.comp_id', $companyId)
+                ->where('ac.location_id', $locationId)
+                ->where('ac.is_active', true)
+                ->whereIn('ac.config_type', $configTypes)
+                ->where('coa.is_transactional', true)
+                ->where('coa.status', 'Active')
+                ->select(
+                    'coa.account_code',
+                    'coa.account_name',
+                    DB::raw($openingBalanceExpression.' as opening_balance'),
+                    DB::raw('COALESCE(mv.movement_balance, 0) as movement_balance'),
+                    DB::raw('('.$openingBalanceExpression.' + COALESCE(mv.movement_balance, 0)) as closing_balance')
                 )
-                ->groupBy('status')
+                ->orderBy('coa.account_code')
                 ->get();
 
+            $accounts = [];
+            foreach ($rows as $r) {
+                $accounts[] = [
+                    'account_code' => (string) $r->account_code,
+                    'account_name' => (string) $r->account_name,
+                    'closing_balance' => round((float) $r->closing_balance, 2),
+                ];
+            }
+
+            $total = round(array_sum(array_column($accounts, 'closing_balance')), 2);
+
             return [
-                'from_date' => $fromDate,
-                'to_date' => $toDate,
-                'period_days' => (new Carbon($toDate))->diffInDays(new Carbon($fromDate)),
-                'total_orders' => $summary->sum('order_count'),
-                'total_amount' => number_format($summary->sum('total_amount'), 2),
-                'by_status' => $summary->toArray(),
+                'accounts' => $accounts,
+                'total_closing' => $total,
+                'report_type' => $reportType,
+                'as_of_note' => ($fromDate || $toDate)
+                    ? 'Movement filtered by voucher date in range; opening + movement = closing (same as dashboard report with dates).'
+                    : 'All posted vouchers included (same logic as accounts dashboard financial card for this report type).',
             ];
-        } catch (\Exception $e) {
-            return ['error' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            return ['error' => 'Could not read financial balances.', 'detail' => $e->getMessage()];
         }
     }
 
-    // Helper methods
-    protected function getWarehouseNameById(int $id): string
+    /** Backwards-compatible alias for bank-balances dashboard snapshot. */
+    public function getBankBalancesSnapshot(int $companyId, int $locationId, ?array $dateRange = null): array
     {
-        return DB::table('warehouses')->where('id', $id)->value('name') ?? "Warehouse {$id}";
+        return $this->getAccountsDashboardFinancialSnapshot($companyId, $locationId, 'bank-balances', $dateRange);
     }
 }

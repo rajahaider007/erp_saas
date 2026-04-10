@@ -271,6 +271,11 @@ Route::prefix('inventory/reports')->name('inventory.reports.')->middleware('web.
     Route::get('/purchase-order-lines/export/excel', [InventoryReportingController::class, 'purchaseOrderLinesExportExcel'])->name('purchase-order-lines.export.excel');
     Route::get('/purchase-order-lines/export/pdf', [InventoryReportingController::class, 'purchaseOrderLinesExportPdf'])->name('purchase-order-lines.export.pdf');
     Route::get('/purchase-order-lines/print', [InventoryReportingController::class, 'purchaseOrderLinesPrint'])->name('purchase-order-lines.print');
+    Route::get('/stock-position', [InventoryReportingController::class, 'stockPositionRegister'])->name('stock-position');
+    Route::get('/stock-position/report', [InventoryReportingController::class, 'stockPositionReport'])->name('stock-position.report');
+    Route::post('/stock-position/data', [InventoryReportingController::class, 'stockPositionData'])->name('stock-position.data');
+    Route::get('/stock-position/export/csv', [InventoryReportingController::class, 'stockPositionExportCsv'])->name('stock-position.export.csv');
+    Route::get('/stock-position/export/excel', [InventoryReportingController::class, 'stockPositionExportExcel'])->name('stock-position.export.excel');
 });
 
 // Inventory Module - Item Master

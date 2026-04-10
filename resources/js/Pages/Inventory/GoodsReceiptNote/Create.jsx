@@ -6,6 +6,7 @@ import GeneralizedForm from '@/Components/GeneralizedForm';
 import Breadcrumbs from '@/Components/Breadcrumbs';
 import InlineSearchSelect from '@/Components/InlineSearchSelect';
 import CustomDatePicker from '@/Components/DatePicker/DatePicker';
+import { formatLocalYmd } from '@/utils/dateOnly';
 import App from '../../App.jsx';
 import { useTranslations } from '@/hooks/useTranslations';
 import { consumeRahjAiDraftPayload } from '@/utils/rahjAiDraft';
@@ -1015,10 +1016,10 @@ export default function GoodsReceiptNoteCreate() {
                             </td>
                             <td className="px-2 py-2">
                               <CustomDatePicker
-                                selected={row.manufacturing_date ? new Date(row.manufacturing_date) : null}
+                                selected={row.manufacturing_date || null}
                                 onChange={(date) =>
                                   updateLine(index, {
-                                    manufacturing_date: date ? date.toISOString().split('T')[0] : '',
+                                    manufacturing_date: date ? formatLocalYmd(date) : '',
                                   })
                                 }
                                 type="date"
@@ -1029,10 +1030,10 @@ export default function GoodsReceiptNoteCreate() {
                             </td>
                             <td className="px-2 py-2">
                               <CustomDatePicker
-                                selected={row.expiry_date ? new Date(row.expiry_date) : null}
+                                selected={row.expiry_date || null}
                                 onChange={(date) =>
                                   updateLine(index, {
-                                    expiry_date: date ? date.toISOString().split('T')[0] : '',
+                                    expiry_date: date ? formatLocalYmd(date) : '',
                                   })
                                 }
                                 type="date"

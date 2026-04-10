@@ -61,34 +61,38 @@ class RagCorpusService
     protected function loadCorpus(): array
     {
         $path = base_path(config('services.groq.rag_chunks_path', 'docs/rag/langchain_chunks.jsonl'));
-        $cacheKey = 'rahj_ai_rag_corpus_' . md5($path);
+        $overlayPath = base_path('docs/rag/artisan_schema_overlay.jsonl');
+        $mtime = (@filemtime($path) ?: 0).':'.(@filemtime($overlayPath) ?: 0);
+        $cacheKey = 'rahj_ai_rag_corpus_'.md5($path.'|'.$overlayPath.'|'.$mtime);
         $ttlSeconds = (int) config('services.groq.rag_cache_seconds', 300);
 
-        return Cache::remember($cacheKey, now()->addSeconds(max($ttlSeconds, 30)), function () use ($path) {
-            if (!is_file($path) || !is_readable($path)) {
-                return [];
-            }
-
-            $rows = [];
-            $fh = fopen($path, 'r');
-            if ($fh === false) {
-                return [];
-            }
-
-            while (($line = fgets($fh)) !== false) {
-                $line = trim($line);
-                if ($line === '') {
-                    continue;
+        // Corpus can be many MB serialized; database `cache.value` is MEDIUMTEXT and will truncate.
+        return Cache::store('file')->remember($cacheKey, now()->addSeconds(max($ttlSeconds, 30)), function () use ($path, $overlayPath) {
+            $readJsonl = static function (string $filePath): array {
+                if (! is_file($filePath) || ! is_readable($filePath)) {
+                    return [];
                 }
-                $decoded = json_decode($line, true);
-                if (is_array($decoded)) {
-                    $rows[] = $decoded;
+                $out = [];
+                $fh = fopen($filePath, 'r');
+                if ($fh === false) {
+                    return [];
                 }
-            }
+                while (($line = fgets($fh)) !== false) {
+                    $line = trim($line);
+                    if ($line === '') {
+                        continue;
+                    }
+                    $decoded = json_decode($line, true);
+                    if (is_array($decoded)) {
+                        $out[] = $decoded;
+                    }
+                }
+                fclose($fh);
 
-            fclose($fh);
+                return $out;
+            };
 
-            return $rows;
+            return array_merge($readJsonl($path), $readJsonl($overlayPath));
         });
     }
 
@@ -138,7 +142,7 @@ class RagCorpusService
         }
 
         // Avoid generic matches dominating when meaningful tokens are present.
-        if (!empty($importantTokens) && $importantMatched === 0) {
+        if (! empty($importantTokens) && $importantMatched === 0) {
             return 0.0;
         }
 
@@ -153,6 +157,14 @@ class RagCorpusService
 
         if ($sourceType === 'user_guide') {
             $sourceBoost += 0.08;
+        }
+
+        if (str_contains($pathHaystack, 'navigation_anchors')) {
+            $sourceBoost += 0.28;
+        }
+
+        if (str_contains($pathHaystack, 'route_catalog')) {
+            $sourceBoost += 0.18;
         }
 
         if ($domain !== null) {
@@ -191,7 +203,7 @@ class RagCorpusService
         string $sectionHaystack,
         string $tagsHaystack
     ): float {
-        $combined = $pathHaystack . ' ' . $titleHaystack . ' ' . $sectionHaystack . ' ' . $tagsHaystack;
+        $combined = $pathHaystack.' '.$titleHaystack.' '.$sectionHaystack.' '.$tagsHaystack;
 
         $domainKeywords = self::DOMAIN_KEYWORDS[$domain] ?? [];
         $otherKeywords = [];
@@ -248,7 +260,7 @@ class RagCorpusService
             }
 
             // Drop mostly numeric fragments that add noise in lexical matching.
-            return !preg_match('/^\d+$/', $token);
+            return ! preg_match('/^\d+$/', $token);
         }));
 
         return array_values(array_unique($parts));

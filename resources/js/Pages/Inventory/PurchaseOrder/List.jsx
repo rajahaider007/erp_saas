@@ -24,6 +24,7 @@ import Swal from 'sweetalert2';
 import Breadcrumbs from '@/Components/Breadcrumbs';
 import CustomDatePicker from '@/Components/DatePicker/DatePicker';
 import { useTranslations } from '@/hooks/useTranslations';
+import { formatLocalYmd } from '@/utils/dateOnly';
 
 function formatDisplayDate(value) {
   if (value == null || value === '') return '—';
@@ -396,9 +397,9 @@ export default function PurchaseOrderList() {
                 </span>
                 <div className="date-inputs">
                   <CustomDatePicker
-                    selected={fromDate ? new Date(fromDate) : null}
+                    selected={fromDate || null}
                     onChange={(date) => {
-                      const v = date ? date.toISOString().split('T')[0] : '';
+                      const v = date ? formatLocalYmd(date) : '';
                       setFromDate(v);
                       pushQuery({
                         search: searchTerm.trim(),
@@ -414,9 +415,9 @@ export default function PurchaseOrderList() {
                     isClearable
                   />
                   <CustomDatePicker
-                    selected={toDate ? new Date(toDate) : null}
+                    selected={toDate || null}
                     onChange={(date) => {
-                      const v = date ? date.toISOString().split('T')[0] : '';
+                      const v = date ? formatLocalYmd(date) : '';
                       setToDate(v);
                       pushQuery({
                         search: searchTerm.trim(),

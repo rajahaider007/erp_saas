@@ -55,7 +55,7 @@ class RahjAiController extends Controller
                     'role' => $message->role,
                     'content' => $message->content,
                     'model' => $message->model,
-                    'sources' => is_array($message->sources) ? $message->sources : [],
+                    'sources' => [],
                     'meta' => $meta,
                     'action' => $action,
                     'error' => (bool) $message->is_error,
@@ -178,8 +178,7 @@ class RahjAiController extends Controller
         RagCorpusService $ragCorpus,
         GroqChatService $groq,
         AssistantOrchestratorService $orchestrator
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $validated = $request->validate([
             'message' => ['required', 'string', 'max:4000'],
             'conversation_id' => ['nullable', 'integer', 'min:1'],
@@ -238,15 +237,19 @@ class RahjAiController extends Controller
                 'conversation_id' => $conversation->id,
                 'answer' => $answer,
                 'model' => $model,
-                'sources' => $sources,
+                'sources' => [],
                 'meta' => $meta,
                 'action' => $meta['action'] ?? null,
             ]);
         } catch (\Throwable $e) {
-            Log::error('RAHJ AI chat failed', [
+            $payload = [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+                'exception' => $e::class,
+            ];
+            if (config('app.debug')) {
+                $payload['trace'] = Str::limit($e->getTraceAsString(), 12000);
+            }
+            Log::error('RAHJ AI chat failed', $payload);
 
             if (! empty($question)) {
                 try {

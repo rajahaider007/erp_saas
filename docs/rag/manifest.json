@@ -1,8 +1,9 @@
 {
-  "generated_at": "2026-04-09T20:12:25.625Z",
+  "generated_at": "2026-04-10T22:23:57.132Z",
   "project_root": ".",
   "input": {
     "guides_dir": "user_guides",
+    "docs_dir": "docs (excluding docs/rag)",
     "sql_file": "erp (9).sql",
     "code_dirs": [
       "app",
@@ -12,16 +13,20 @@
       "lang",
       "scripts"
     ],
-    "include_sensitive": false
+    "include_sensitive": false,
+    "route_catalog_chunk_size": 4500
   },
   "counts": {
-    "total_chunks": 9434,
-    "user_guide_chunks": 817,
-    "application_source_chunks": 8508,
-    "database_chunks": 109,
-    "application_source_files": 397,
+    "total_chunks": 9736,
+    "navigation_anchor_chunks": 1,
+    "route_catalog_chunks": 8,
+    "user_guide_chunks": 951,
+    "docs_markdown_chunks": 13,
+    "application_source_chunks": 8655,
+    "database_chunks": 108,
+    "application_source_files": 407,
     "sensitive_excluded_files": 0,
-    "parsed_tables": 65
+    "parsed_tables": 64
   },
   "source": {
     "database": "live",

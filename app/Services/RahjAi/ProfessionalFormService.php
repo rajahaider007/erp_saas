@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Validator;
 
 /**
  * Professional Form Entry & Validation Service
- * 
+ *
  * Provides:
  * - Smart field validation with helpful error messages
  * - Auto-formatting for different field types
@@ -149,7 +149,7 @@ class ProfessionalFormService
                 'voucher_date' => $data['voucher_date'],
                 'reference_number' => $data['reference_number'] ?? null,
                 'description' => trim($data['description']),
-                'lines' => array_map(fn($line) => [
+                'lines' => array_map(fn ($line) => [
                     'account_id' => $line['account_id'],
                     'line_type' => strtolower($line['line_type']),
                     'amount' => round($line['amount'], 2),
@@ -161,14 +161,14 @@ class ProfessionalFormService
                 'supplier_id' => $data['supplier_id'],
                 'expected_delivery_date' => $data['expected_delivery_date'],
                 'po_type' => $data['po_type'] ?? 'standard',
-                'lines' => array_map(fn($line) => [
+                'lines' => array_map(fn ($line) => [
                     'item_id' => $line['item_id'],
                     'quantity' => (int) $line['quantity'],
                     'unit_price' => round($line['unit_price'], 2),
                     'amount' => round($line['quantity'] * $line['unit_price'], 2),
                 ], $data['lines']),
                 'total_amount' => round(array_sum(array_map(
-                    fn($line) => $line['quantity'] * $line['unit_price'],
+                    fn ($line) => $line['quantity'] * $line['unit_price'],
                     $data['lines']
                 )), 2),
             ],
@@ -188,38 +188,38 @@ class ProfessionalFormService
 📝 Code: {$data['account_code']}
 📋 Name: {$data['account_name']}
 🔖 Type: {$data['account_type']}
-🔗 Transactional: " . ($data['is_transactional'] ? 'Yes' : 'No') . "
+🔗 Transactional: ".($data['is_transactional'] ? 'Yes' : 'No').'
 
-Ready to save? Confirm below.",
+Ready to save? Confirm below.',
 
             'journal_voucher' => "
 ✅ Journal Voucher Summary
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📅 Date: {$data['voucher_date']}
 💬 Description: {$data['description']}
-📍 Reference: {$data['reference_number'] ?: '(None)'}
-📊 Lines: " . count($data['lines']) . " entries
+📍 Reference: ".($data['reference_number'] ?: '(None)').'
+📊 Lines: '.count($data['lines']).' entries
 
-Total Debit: PKR " . number_format(array_sum(array_filter(
-    array_map(fn($l) => $l['line_type'] === 'debit' ? $l['amount'] : 0, $data['lines'])
-)), 2) . "
-Total Credit: PKR " . number_format(array_sum(array_filter(
-    array_map(fn($l) => $l['line_type'] === 'credit' ? $l['amount'] : 0, $data['lines'])
-)), 2) . "
+Total Debit: PKR '.number_format(array_sum(array_filter(
+                array_map(fn ($l) => $l['line_type'] === 'debit' ? $l['amount'] : 0, $data['lines'])
+            )), 2).'
+Total Credit: PKR '.number_format(array_sum(array_filter(
+                array_map(fn ($l) => $l['line_type'] === 'credit' ? $l['amount'] : 0, $data['lines'])
+            )), 2).'
 
-Ready to save? Confirm below.",
+Ready to save? Confirm below.',
 
             'purchase_order' => "
 ✅ Purchase Order Summary
 ━━━━━━━━━━━━━━━━━━━━━━━━━
 📅 PO Date: {$data['po_date']}
-📦 Items: " . count($data['lines']) . " lines
-💰 Total: PKR " . number_format($data['total_amount'], 2) . "
+📦 Items: ".count($data['lines']).' lines
+💰 Total: PKR '.number_format($data['total_amount'], 2)."
 📬 Expected Delivery: {$data['expected_delivery_date']}
 
 Ready to save? Confirm below.",
 
-            default => "Form is ready to submit.",
+            default => 'Form is ready to submit.',
         };
     }
 
@@ -231,7 +231,7 @@ Ready to save? Confirm below.",
         $message = "⚠️ Please fix the following issues:\n\n";
 
         foreach ($errors->messages() as $field => $fieldErrors) {
-            $message .= "• **{$field}**: " . implode("; ", $fieldErrors) . "\n";
+            $message .= "• **{$field}**: ".implode('; ', $fieldErrors)."\n";
         }
 
         return $message;
@@ -247,7 +247,7 @@ Ready to save? Confirm below.",
 
         foreach ($rules as $field => $rule) {
             if (str_starts_with($rule, 'required')) {
-                if (!isset($providedData[$field]) || $providedData[$field] === null || $providedData[$field] === '') {
+                if (! isset($providedData[$field]) || $providedData[$field] === null || $providedData[$field] === '') {
                     $missing[] = $field;
                 }
             }
@@ -261,7 +261,7 @@ Ready to save? Confirm below.",
      */
     public function getFieldPrompt(string $formType, string $fieldName): string
     {
-        return match ($formType . '::' . $fieldName) {
+        return match ($formType.'::'.$fieldName) {
             'chart_of_accounts::account_code' => 'What is the 3-20 character account code? (e.g., RENT, COGS, CASH)',
             'chart_of_accounts::account_name' => 'What is the full account name? (e.g., Rent Expense)',
             'chart_of_accounts::account_type' => 'What type of account? (Asset, Liability, Equity, Revenue, Expense, Contra-Asset)',

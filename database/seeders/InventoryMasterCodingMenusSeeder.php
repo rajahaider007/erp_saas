@@ -100,6 +100,7 @@ class InventoryMasterCodingMenusSeeder extends Seeder
                 ['menu_name' => 'Inventory Reports', 'route' => '/inventory/reports', 'icon' => 'file-chart-column-increasing', 'sort_order' => 1],
                 ['menu_name' => 'Goods Receipt Register', 'route' => '/inventory/reports/goods-receipt-register', 'icon' => 'clipboard-list', 'sort_order' => 2],
                 ['menu_name' => 'Purchase Order Lines Report', 'route' => '/inventory/reports/purchase-order-lines', 'icon' => 'file-spreadsheet', 'sort_order' => 3],
+                ['menu_name' => 'Stock Position (GRN)', 'route' => '/inventory/reports/stock-position', 'icon' => 'boxes', 'sort_order' => 4],
             ],
             $now
         ));

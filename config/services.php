@@ -43,6 +43,13 @@ return [
         'rag_chunks_path' => env('RAHJ_RAG_CHUNKS_PATH', 'docs/rag/langchain_chunks.jsonl'),
         'rag_top_k' => (int) env('RAHJ_RAG_TOP_K', 5),
         'rag_cache_seconds' => (int) env('RAHJ_RAG_CACHE_SECONDS', 300),
+        // Groq returns HTTP 413 if the JSON body is too large; cap grounding text.
+        'max_question_chars' => (int) env('GROQ_MAX_QUESTION_CHARS', 8000),
+        'max_context_chunk_chars' => (int) env('GROQ_MAX_CONTEXT_CHUNK_CHARS', 6000),
+        'max_context_total_chars' => (int) env('GROQ_MAX_CONTEXT_TOTAL_CHARS', 72000),
+        // LLM-based gate before RAG: refuses personal / medical / vulgar / unrelated chit-chat (no keyword lists).
+        'scope_gate_enabled' => filter_var(env('RAHJ_SCOPE_GATE_ENABLED', 'true'), FILTER_VALIDATE_BOOLEAN),
+        'scope_model' => env('GROQ_SCOPE_MODEL'), // optional; defaults to groq.model (can set a smaller/faster model)
     ],
 
 ];

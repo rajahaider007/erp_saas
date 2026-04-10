@@ -16,15 +16,14 @@ import {
   TrendingUp
 } from 'lucide-react';
 import App from '../../App.jsx';
+import { formatLocalYmd, todayLocalYmd } from '@/utils/dateOnly';
 
 const TrialBalanceSearch = () => {
   const { companies = [], locations = [], isParentCompany = false, flash } = usePage().props;
   const { t } = useTranslations();
   
   // Get current date in YYYY-MM-DD format
-  const getCurrentDate = () => {
-    return new Date().toISOString().split('T')[0];
-  };
+  const getCurrentDate = () => todayLocalYmd();
 
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -280,8 +279,8 @@ const TrialBalanceSearch = () => {
                     <div>
                       <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('accounts.trial_balance.search.from_date')}</label>
                       <CustomDatePicker
-                        selected={fromDate ? new Date(fromDate) : null}
-                        onChange={(date) => setFromDate(date ? date.toISOString().split('T')[0] : '')}
+                        selected={fromDate || null}
+                        onChange={(date) => setFromDate(date ? formatLocalYmd(date) : '')}
                         type="date"
                         placeholder={t('accounts.trial_balance.search.select_from_date')}
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -290,8 +289,8 @@ const TrialBalanceSearch = () => {
                     <div>
                       <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('accounts.trial_balance.search.to_date')}</label>
                       <CustomDatePicker
-                        selected={toDate ? new Date(toDate) : null}
-                        onChange={(date) => setToDate(date ? date.toISOString().split('T')[0] : '')}
+                        selected={toDate || null}
+                        onChange={(date) => setToDate(date ? formatLocalYmd(date) : '')}
                         type="date"
                         placeholder={t('accounts.trial_balance.search.select_to_date')}
                         className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"

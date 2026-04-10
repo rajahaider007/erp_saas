@@ -4,6 +4,7 @@ import { useTranslations } from '@/hooks/useTranslations';
 import AppLayout from '../../Layouts/AppLayout';
 import { FileText, Search, Calendar, Filter, Eye, RotateCcw, Download, Activity, User, Clock, ChevronLeft, ChevronRight, Shield } from 'lucide-react';
 import CustomDatePicker from '../../Components/DatePicker/DatePicker';
+import { formatLocalYmd, parseLocalYmd } from '@/utils/dateOnly';
 
 export default function ActivityLogs({ logs, users, companies = [], locations = [], isParentCompany = false, filters }) {
     const { t } = useTranslations();
@@ -14,8 +15,10 @@ export default function ActivityLogs({ logs, users, companies = [], locations = 
     const [module, setModule] = useState(filters.module || '');
     const [action, setAction] = useState(filters.action || '');
     const [userId, setUserId] = useState(filters.user_id || '');
-    const [fromDate, setFromDate] = useState(filters.from_date ? new Date(filters.from_date) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
-    const [toDate, setToDate] = useState(filters.to_date ? new Date(filters.to_date) : new Date());
+    const [fromDate, setFromDate] = useState(
+        filters.from_date ? parseLocalYmd(filters.from_date) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    );
+    const [toDate, setToDate] = useState(filters.to_date ? parseLocalYmd(filters.to_date) : new Date());
     const [perPage, setPerPage] = useState(filters.per_page || 25);
 
     // Handle company selection and fetch locations
@@ -43,8 +46,8 @@ export default function ActivityLogs({ logs, users, companies = [], locations = 
             module,
             action,
             user_id: userId,
-            from_date: fromDate ? fromDate.toISOString().split('T')[0] : '',
-            to_date: toDate ? toDate.toISOString().split('T')[0] : '',
+            from_date: fromDate ? formatLocalYmd(fromDate) : '',
+            to_date: toDate ? formatLocalYmd(toDate) : '',
             per_page: perPage
         }, {
             preserveState: true,

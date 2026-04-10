@@ -36,6 +36,7 @@ import {
 import App from '../../App.jsx';
 import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { formatLocalYmd, todayLocalYmd } from '@/utils/dateOnly';
 
 const JOURNAL_VOUCHER_ROUTE = '/accounts/journal-voucher';
 
@@ -313,7 +314,7 @@ const JournalVoucherList = () => {
   // Quick filter helper functions
   const isTodayFilter = () => {
     if (!fromDate || !toDate) return false;
-    const today = new Date().toISOString().split('T')[0];
+    const today = todayLocalYmd();
     return fromDate === today && toDate === today;
   };
 
@@ -322,8 +323,8 @@ const JournalVoucherList = () => {
     const now = new Date();
     const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
     const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 6));
-    const startStr = startOfWeek.toISOString().split('T')[0];
-    const endStr = endOfWeek.toISOString().split('T')[0];
+    const startStr = formatLocalYmd(startOfWeek);
+    const endStr = formatLocalYmd(endOfWeek);
     return fromDate === startStr && toDate === endStr;
   };
 
@@ -332,13 +333,13 @@ const JournalVoucherList = () => {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    const startStr = startOfMonth.toISOString().split('T')[0];
-    const endStr = endOfMonth.toISOString().split('T')[0];
+    const startStr = formatLocalYmd(startOfMonth);
+    const endStr = formatLocalYmd(endOfMonth);
     return fromDate === startStr && toDate === endStr;
   };
 
   const setTodayFilter = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = todayLocalYmd();
     setFromDate(today);
     setToDate(today);
     const params = new URLSearchParams(window.location.search);
@@ -355,8 +356,8 @@ const JournalVoucherList = () => {
     const now = new Date();
     const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
     const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 6));
-    const startStr = startOfWeek.toISOString().split('T')[0];
-    const endStr = endOfWeek.toISOString().split('T')[0];
+    const startStr = formatLocalYmd(startOfWeek);
+    const endStr = formatLocalYmd(endOfWeek);
     setFromDate(startStr);
     setToDate(endStr);
     const params = new URLSearchParams(window.location.search);
@@ -373,8 +374,8 @@ const JournalVoucherList = () => {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    const startStr = startOfMonth.toISOString().split('T')[0];
-    const endStr = endOfMonth.toISOString().split('T')[0];
+    const startStr = formatLocalYmd(startOfMonth);
+    const endStr = formatLocalYmd(endOfMonth);
     setFromDate(startStr);
     setToDate(endStr);
     const params = new URLSearchParams(window.location.search);
@@ -799,15 +800,15 @@ const JournalVoucherList = () => {
                 <label className="filter-label">{t('accounts.journal_voucher.list.date_range')}</label>
                 <div className="date-inputs">
                   <CustomDatePicker
-                    selected={fromDate ? new Date(fromDate) : null}
-                    onChange={(date) => handleFromDateFilter(date ? date.toISOString().split('T')[0] : '')}
+                    selected={fromDate || null}
+                    onChange={(date) => handleFromDateFilter(date ? formatLocalYmd(date) : '')}
                     type="date"
                     placeholder={t('accounts.journal_voucher.list.from_date')}
                     className="date-input"
                   />
                   <CustomDatePicker
-                    selected={toDate ? new Date(toDate) : null}
-                    onChange={(date) => handleToDateFilter(date ? date.toISOString().split('T')[0] : '')}
+                    selected={toDate || null}
+                    onChange={(date) => handleToDateFilter(date ? formatLocalYmd(date) : '')}
                     type="date"
                     placeholder={t('accounts.journal_voucher.list.to_date')}
                     className="date-input"

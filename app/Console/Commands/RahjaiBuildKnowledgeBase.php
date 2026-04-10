@@ -4,36 +4,48 @@ namespace App\Console\Commands;
 
 use App\Services\RahjAi\KnowledgeBaseBuilder;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Process;
 
 class RahjaiBuildKnowledgeBase extends Command
 {
-    protected $signature = 'rahjai:build-knowledge';
-    protected $description = 'Build complete RAHJAI knowledge base from system schema and documentation';
+    protected $signature = 'rahjai:build-knowledge
+                            {--skip-npm : Do not run npm run rag:build}
+                            {--with-artisan-overlay : Also write docs/rag/artisan_schema_overlay.jsonl (large DB schema dump)}';
 
-    public function handle()
+    protected $description = 'Regenerate RAHJ AI RAG corpus (npm run rag:build). Optional PHP schema overlay.';
+
+    public function handle(): int
     {
-        $this->info('🔨 Building RAHJAI Knowledge Base...');
-        $this->line('This will scan your entire system and create comprehensive documentation.');
-        $this->line('');
+        if (! $this->option('skip-npm')) {
+            $this->info('Running npm run rag:build → docs/rag/langchain_chunks.jsonl …');
+            $cmd = PHP_OS_FAMILY === 'Windows' ? 'npm.cmd run rag:build' : 'npm run rag:build';
+            $result = Process::path(base_path())->timeout(900)->run($cmd);
 
-        if (!$this->confirm('Continue?')) {
-            $this->info('Cancelled.');
-            return;
+            if (! $result->successful()) {
+                $this->error(trim($result->errorOutput() ?: $result->output()) ?: 'npm run rag:build failed.');
+
+                return self::FAILURE;
+            }
+
+            $out = trim($result->output());
+            if ($out !== '') {
+                $this->line($out);
+            }
+            $this->info('RAG JSONL updated. Corpus cache invalidates automatically when the file mtime changes.');
+        } else {
+            $this->warn('Skipped npm (--skip-npm).');
         }
 
-        $this->withProgressBar(range(1, 100), function () {
+        if ($this->option('with-artisan-overlay')) {
+            $this->warn('Writing artisan_schema_overlay.jsonl (can be large)…');
             $builder = app(KnowledgeBaseBuilder::class);
             $builder->buildCompleteKnowledgeBase();
-        });
+            $this->info('Overlay written to docs/rag/artisan_schema_overlay.jsonl (merged at read time).');
+        }
 
         $this->newLine();
-        $this->info('✅ Knowledge base built successfully!');
-        $this->line('');
-        $this->info('📊 Next steps:');
-        $this->line('1. Test a query: php artisan tinker → $svc = app(RtimeDataService::class);');
-        $this->line('2. Get account balance: $svc->getAccountBalance(\'RENT\', \'2026-04-10\', 1);');
-        $this->line('3. Query RAHJAI: Navigate to the AI chat in your app');
-        $this->line('');
-        $this->info('💡 Tip: Run this command weekly to keep documentation up-to-date.');
+        $this->info('Done. Test in the app: /rahj-ai');
+
+        return self::SUCCESS;
     }
 }

@@ -9,6 +9,7 @@ import {
   FileBarChart, Columns, Settings2, BarChart3
 } from 'lucide-react';
 import CustomDatePicker from '../../../Components/DatePicker/DatePicker';
+import { formatLocalYmd, todayLocalYmd } from '@/utils/dateOnly';
 
 const GeneralLedgerReport = () => {
   const { auth, company, currencies } = usePage().props;
@@ -34,8 +35,8 @@ const GeneralLedgerReport = () => {
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState([]);
   const [filters, setFilters] = useState({
-    date_from: new Date().toISOString().split('T')[0],
-    date_to: new Date().toISOString().split('T')[0],
+    date_from: todayLocalYmd(),
+    date_to: todayLocalYmd(),
     account_codes: [],
     account_types: [],
     currency: company?.currency || 'USD',
@@ -121,7 +122,7 @@ const GeneralLedgerReport = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `General_Ledger_Report_${new Date().toISOString().split('T')[0]}.pdf`;
+      a.download = `General_Ledger_Report_${todayLocalYmd()}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -149,7 +150,7 @@ const GeneralLedgerReport = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `General_Ledger_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+      a.download = `General_Ledger_Report_${todayLocalYmd()}.xlsx`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -177,7 +178,7 @@ const GeneralLedgerReport = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `General_Ledger_Report_${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `General_Ledger_Report_${todayLocalYmd()}.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -298,8 +299,8 @@ const GeneralLedgerReport = () => {
               <div>
                 <label className="form-label">{t('reports.general_ledger.index.from_date')}</label>
                 <CustomDatePicker
-                  selected={filters.date_from ? new Date(filters.date_from) : null}
-                  onChange={(date) => setFilters({...filters, date_from: date ? date.toISOString().split('T')[0] : ''})}
+                  selected={filters.date_from || null}
+                  onChange={(date) => setFilters({...filters, date_from: date ? formatLocalYmd(date) : ''})}
                   type="date"
                   placeholder={t('reports.general_ledger.index.select_from_date')}
                   className="form-input"
@@ -309,8 +310,8 @@ const GeneralLedgerReport = () => {
               <div>
                 <label className="form-label">{t('reports.general_ledger.index.to_date')}</label>
                 <CustomDatePicker
-                  selected={filters.date_to ? new Date(filters.date_to) : null}
-                  onChange={(date) => setFilters({...filters, date_to: date ? date.toISOString().split('T')[0] : ''})}
+                  selected={filters.date_to || null}
+                  onChange={(date) => setFilters({...filters, date_to: date ? formatLocalYmd(date) : ''})}
                   type="date"
                   placeholder={t('reports.general_ledger.index.select_to_date')}
                   className="form-input"

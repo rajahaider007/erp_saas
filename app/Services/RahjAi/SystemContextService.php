@@ -4,10 +4,11 @@ namespace App\Services\RahjAi;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * System Context Intelligence Service
- * 
+ *
  * Provides complete user/system context:
  * - Current company, location, user role
  * - Accessible modules and forms
@@ -23,17 +24,20 @@ class SystemContextService
     {
         $user = $request->user();
 
+        $compId = $user ? (int) $user->comp_id : null;
+
         return [
             'user' => [
                 'id' => $user?->id,
                 'name' => $user?->name,
                 'email' => $user?->email,
-                'roles' => $user?->roles()->pluck('name')->toArray() ?? [],
+                'role' => $user?->role,
+                'roles' => $user && filled($user->role) ? [(string) $user->role] : [],
             ],
             'company' => [
-                'id' => $request->header('X-Company-Id') ?? $user?->company_id,
-                'name' => $this->getCompanyName($user?->company_id),
-                'currency' => $this->getCompanyCurrency($user?->company_id),
+                'id' => $request->header('X-Company-Id') ?? $compId,
+                'name' => $this->getCompanyName($compId),
+                'currency' => $this->getCompanyCurrency($compId),
             ],
             'location' => [
                 'id' => $request->header('X-Location-Id') ?? $user?->location_id,
@@ -47,18 +51,61 @@ class SystemContextService
     }
 
     /**
+     * Compact, LLM-safe summary (no email) for Groq system grounding.
+     */
+    public function summarizeForAssistantPrompt(array $context): string
+    {
+        $lines = [];
+        $lines[] = 'Signed-in ERP context (for personalization; factual answers must still follow grounding chunks):';
+
+        $company = $context['company'] ?? [];
+        if (! empty($company['name']) || ! empty($company['id'])) {
+            $lines[] = '- Company: '.($company['name'] ?? 'Unknown').' (id '.($company['id'] ?? 'n/a').', currency '.($company['currency'] ?? 'n/a').')';
+        }
+
+        $location = $context['location'] ?? [];
+        if (! empty($location['name']) || ! empty($location['id'])) {
+            $lines[] = '- Location: '.($location['name'] ?? 'Unknown').' (id '.($location['id'] ?? 'n/a').')';
+        }
+
+        $user = $context['user'] ?? [];
+        $who = trim((string) ($user['name'] ?? ''));
+        $role = (string) ($user['role'] ?? '');
+        if ($who !== '' || $role !== '') {
+            $lines[] = '- User: '.($who !== '' ? $who : 'User').($role !== '' ? " (role: {$role})" : '');
+        }
+
+        $mods = $context['accessible_modules'] ?? [];
+        if (is_array($mods) && $mods !== []) {
+            $names = [];
+            foreach ($mods as $mod) {
+                if (is_array($mod) && ! empty($mod['name'])) {
+                    $names[] = (string) $mod['name'];
+                }
+            }
+            $names = array_values(array_unique($names));
+            if ($names !== []) {
+                $lines[] = '- Menu areas this user can use: '.implode(', ', $names);
+            }
+        }
+
+        $brief = implode("\n", $lines);
+
+        return mb_strlen($brief) > 1800 ? mb_substr($brief, 0, 1800).'…' : $brief;
+    }
+
+    /**
      * Get all accessible modules for user
      */
     protected function getAccessibleModules($user): array
     {
-        if (!$user) {
+        if (! $user) {
             return [];
         }
 
         $modules = [];
 
-        // Check permissions
-        $permissions = $user->getPermissionsViaRoles()->pluck('name')->toArray();
+        $permissions = $this->resolveEffectivePermissions($user);
 
         if ($this->hasPermission($permissions, 'accounts')) {
             $modules['accounts'] = [
@@ -103,7 +150,7 @@ class SystemContextService
      */
     protected function getRecentActivities($user): array
     {
-        if (!$user) {
+        if (! $user) {
             return [];
         }
 
@@ -115,7 +162,7 @@ class SystemContextService
                 ->get(['action', 'subject', 'created_at'])
                 ->toArray();
 
-            return array_map(fn($a) => [
+            return array_map(fn ($a) => [
                 'action' => $a->action,
                 'subject' => $a->subject,
                 'timestamp' => $a->created_at,
@@ -130,7 +177,7 @@ class SystemContextService
      */
     protected function getPendingItems($user): array
     {
-        if (!$user) {
+        if (! $user) {
             return [];
         }
 
@@ -149,7 +196,7 @@ class SystemContextService
 
             // Pending POs
             $pos = DB::table('purchase_orders')
-                ->where('company_id', $user->company_id)
+                ->where('comp_id', $user->comp_id)
                 ->whereIn('status', ['draft', 'pending'])
                 ->count();
 
@@ -159,7 +206,7 @@ class SystemContextService
 
             // Pending GRNs
             $grns = DB::table('goods_receipt_notes')
-                ->where('company_id', $user->company_id)
+                ->where('comp_id', $user->comp_id)
                 ->whereIn('status', ['draft', 'pending_qc'])
                 ->count();
 
@@ -178,7 +225,7 @@ class SystemContextService
      */
     protected function getSuggestedActions($user): array
     {
-        if (!$user) {
+        if (! $user) {
             return [];
         }
 
@@ -221,7 +268,7 @@ class SystemContextService
     public function getContextualHelp(string $formType, array $formData = []): string
     {
         return match ($formType) {
-            'chart_of_accounts' => "
+            'chart_of_accounts' => '
 📚 **Chart of Accounts Help**
 
 **What is a Chart of Accounts?**
@@ -243,9 +290,9 @@ A systematic list of all accounts in your company, organized in a hierarchy:
 - Name: *Office Rent Expense*
 - Type: *Expense*
 - Parent: *Occupancy Costs* (Level 3)
-",
+',
 
-            'journal_voucher' => "
+            'journal_voucher' => '
 📚 **Journal Voucher Help**
 
 **What is a Journal Voucher?**
@@ -266,9 +313,9 @@ If you pay rent of 10,000 PKR:
 3. Add at least 2 lines (one debit, one credit)
 4. Ensure total debits = total credits
 5. Post to ledger
-",
+',
 
-            'purchase_order' => "
+            'purchase_order' => '
 📚 **Purchase Order Help**
 
 **What is a PO?**
@@ -287,9 +334,9 @@ An official document sent to a supplier confirming purchase of goods/services.
 3. System calculates total automatically
 4. Set expected delivery date
 5. Submit for approval
-",
+',
 
-            default => "How can I help you?",
+            default => 'How can I help you?',
         };
     }
 
@@ -298,7 +345,7 @@ An official document sent to a supplier confirming purchase of goods/services.
      */
     public function getFieldDictionary(string $formType, string $fieldName): array
     {
-        return match ($formType . '::' . $fieldName) {
+        return match ($formType.'::'.$fieldName) {
             'chart_of_accounts::account_code' => [
                 'label' => 'Account Code',
                 'description' => 'Unique identifier for the account',
@@ -322,6 +369,53 @@ An official document sent to a supplier confirming purchase of goods/services.
         };
     }
 
+    /**
+     * Map ERP user_rights + module folder_name to the view_/manage_* labels used below.
+     */
+    protected function resolveEffectivePermissions($user): array
+    {
+        if (! $user) {
+            return [];
+        }
+
+        if (($user->role ?? '') === 'super_admin') {
+            return [
+                'view_accounts', 'manage_accounts',
+                'view_inventory', 'manage_inventory',
+                'view_sales', 'manage_sales',
+            ];
+        }
+
+        if (! Schema::hasTable('user_rights') || ! Schema::hasTable('menus') || ! Schema::hasTable('modules')) {
+            return [];
+        }
+
+        $rows = DB::table('user_rights')
+            ->join('menus', 'user_rights.menu_id', '=', 'menus.id')
+            ->join('modules', 'menus.module_id', '=', 'modules.id')
+            ->where('user_rights.user_id', $user->id)
+            ->where('user_rights.can_view', true)
+            ->whereNull('menus.deleted_at')
+            ->whereNull('modules.deleted_at')
+            ->select('modules.folder_name', 'user_rights.can_add', 'user_rights.can_edit')
+            ->distinct()
+            ->get();
+
+        $perms = [];
+        foreach ($rows as $row) {
+            $folder = trim((string) ($row->folder_name ?? ''));
+            if ($folder === '') {
+                continue;
+            }
+            $perms[] = 'view_'.$folder;
+            if ($row->can_add || $row->can_edit) {
+                $perms[] = 'manage_'.$folder;
+            }
+        }
+
+        return array_values(array_unique($perms));
+    }
+
     // Helper methods
     protected function hasPermission(array $permissions, string $module): bool
     {
@@ -329,30 +423,36 @@ An official document sent to a supplier confirming purchase of goods/services.
                in_array("manage_{$module}", $permissions, true);
     }
 
-    protected function getCompanyName(int $companyId = null): string
+    protected function getCompanyName(?int $companyId = null): string
     {
-        if (!$companyId) {
+        if (! $companyId) {
             return 'Unknown Company';
         }
 
         return DB::table('companies')
             ->where('id', $companyId)
-            ->value('name') ?? "Company {$companyId}";
+            ->value('company_name') ?? "Company {$companyId}";
     }
 
-    protected function getLocationName(int $locationId = null): string
+    protected function getLocationName(?int $locationId = null): string
     {
-        if (!$locationId) {
+        if (! $locationId) {
             return 'Unknown Location';
         }
 
         return DB::table('locations')
             ->where('id', $locationId)
-            ->value('name') ?? "Location {$locationId}";
+            ->value('location_name') ?? "Location {$locationId}";
     }
 
-    protected function getCompanyCurrency(int $companyId = null): string
+    protected function getCompanyCurrency(?int $companyId = null): string
     {
-        return 'PKR'; // Default, can be from company settings
+        if (! $companyId || ! Schema::hasTable('companies')) {
+            return 'PKR';
+        }
+
+        $currency = DB::table('companies')->where('id', $companyId)->value('currency');
+
+        return $currency ? (string) $currency : 'PKR';
     }
 }

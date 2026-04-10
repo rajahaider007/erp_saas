@@ -20,6 +20,7 @@ import Breadcrumbs from '@/Components/Breadcrumbs';
 import CustomDatePicker from '@/Components/DatePicker/DatePicker';
 import { useTranslations } from '@/hooks/useTranslations';
 import { usePermissions } from '@/hooks/usePermissions';
+import { formatLocalYmd } from '@/utils/dateOnly';
 
 const swalThemed = {
   background: 'rgba(30, 41, 59, 0.95)',
@@ -336,9 +337,9 @@ export default function GoodsReceiptNoteList() {
                 </span>
                 <div className="date-inputs">
                   <CustomDatePicker
-                    selected={fromDate ? new Date(fromDate) : null}
+                    selected={fromDate || null}
                     onChange={(date) => {
-                      const v = date ? date.toISOString().split('T')[0] : '';
+                      const v = date ? formatLocalYmd(date) : '';
                       setFromDate(v);
                       pushQuery({
                         search: searchTerm.trim(),
@@ -354,9 +355,9 @@ export default function GoodsReceiptNoteList() {
                     isClearable
                   />
                   <CustomDatePicker
-                    selected={toDate ? new Date(toDate) : null}
+                    selected={toDate || null}
                     onChange={(date) => {
-                      const v = date ? date.toISOString().split('T')[0] : '';
+                      const v = date ? formatLocalYmd(date) : '';
                       setToDate(v);
                       pushQuery({
                         search: searchTerm.trim(),

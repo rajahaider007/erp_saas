@@ -5,6 +5,7 @@ import GeneralizedForm from '@/Components/GeneralizedForm';
 import Breadcrumbs from '@/Components/Breadcrumbs';
 import InlineSearchSelect from '@/Components/InlineSearchSelect';
 import CustomDatePicker from '@/Components/DatePicker/DatePicker';
+import { formatLocalYmd } from '@/utils/dateOnly';
 import App from '../../App.jsx';
 import { useTranslations } from '@/hooks/useTranslations';
 import { consumeRahjAiDraftPayload } from '@/utils/rahjAiDraft';
@@ -552,10 +553,10 @@ const PurchaseRequisitionCreate = () => {
                             </td>
                             <td className="px-2 py-2">
                               <CustomDatePicker
-                                selected={row.need_by_date ? new Date(row.need_by_date) : null}
+                                selected={row.need_by_date || null}
                                 onChange={(date) =>
                                   updateLine(index, {
-                                    need_by_date: date ? date.toISOString().split('T')[0] : '',
+                                    need_by_date: date ? formatLocalYmd(date) : '',
                                   })
                                 }
                                 type="date"

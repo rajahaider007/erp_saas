@@ -7,6 +7,7 @@ import {
 import InlineSearchSelect from './InlineSearchSelect';
 import CustomDatePicker from './DatePicker/DatePicker';
 import { useTranslations } from '@/hooks/useTranslations';
+import { formatLocalYmd, parseLocalYmd } from '@/utils/dateOnly';
 
 // Generalized Form Component
 const GeneralizedForm = forwardRef(function GeneralizedForm({
@@ -236,8 +237,8 @@ const GeneralizedForm = forwardRef(function GeneralizedForm({
             <label className="input-label">{field.label}</label>
             <div className="w-full min-w-0 overflow-visible">
               <CustomDatePicker
-                selected={fieldValue ? new Date(fieldValue) : null}
-                onChange={(date) => handleInputChange(field.name, date ? date.toISOString().split('T')[0] : '', field)}
+                selected={fieldValue ? parseLocalYmd(fieldValue) : null}
+                onChange={(date) => handleInputChange(field.name, date ? formatLocalYmd(date) : '', field)}
                 type="date"
                 placeholder={field.placeholder || t('common.form.select_date')}
                 className={`form-input w-full text-sm min-h-0 py-2.5 px-3.5 rounded-[12px] ${field.className || ''}`.trim()}

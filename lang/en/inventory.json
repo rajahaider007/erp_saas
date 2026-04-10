@@ -2132,7 +2132,10 @@
       "card_gr_link": "Open report",
       "card_po_title": "Purchase order lines",
       "card_po_body": "Ordered vs received, balance quantity and open line value by PO line.",
-      "card_po_link": "Open report"
+      "card_po_link": "Open report",
+      "card_stock_title": "Stock position (GRN receipts)",
+      "card_stock_body": "Accepted quantities rolled up by item and branch location from GRN lines (QC pending or posted). Not a full movement ledger until issues/transfers exist.",
+      "card_stock_link": "Open report"
     },
     "goods_receipt_register": {
       "title": "Goods receipt register",
@@ -2244,6 +2247,38 @@
       "col_currency": "Curr",
       "col_line_status": "Line status",
       "col_po_status": "PO status",
+      "back_hub": "All inventory reports"
+    },
+    "stock_position": {
+      "title": "Stock position (GRN receipts)",
+      "search_heading": "Report criteria",
+      "search_lead": "Receipt-based quantities for the current branch location (see methodology note on results).",
+      "run_report": "View report",
+      "reset_filters": "Reset",
+      "report_heading": "Stock position — results",
+      "report_lead": "Aggregated accepted GRN quantities by item. Use filters to change as-of date or posted-only scope.",
+      "change_filters": "Change filters",
+      "export_csv": "CSV",
+      "export_excel": "Excel",
+      "description": "Summarises inventory received through goods receipt notes for the selected branch/location context.",
+      "search_placeholder": "Item code or name…",
+      "as_of_date": "As of (receipt date)",
+      "as_of_hint": "Includes all GRN lines with receipt date on or before this date.",
+      "posted_only": "Posted vouchers only (GRN with posted_transaction_id)",
+      "sort_by": "Sort by",
+      "sort_item_code": "Item code",
+      "sort_qty": "Quantity on hand",
+      "sort_value": "Extended value",
+      "sort_order": "Order",
+      "sort_asc": "Ascending",
+      "sort_desc": "Descending",
+      "col_location": "Location",
+      "col_item": "Item",
+      "col_uom": "UoM",
+      "col_qty": "Qty (accepted)",
+      "col_value": "Value (qty × unit cost)",
+      "col_avg_cost": "Avg unit cost",
+      "methodology_note": "Scope: GRN status is QC pending or posted; quantity uses accepted qty capped by receipt qty (same rule as the goods receipt register). Issues, transfers, and adjustments are not subtracted — this is not full IAS 2 on-hand until a stock ledger is implemented.",
       "back_hub": "All inventory reports"
     }
   }

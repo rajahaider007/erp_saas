@@ -4,6 +4,7 @@ import { useTranslations } from '@/hooks/useTranslations';
 import AppLayout from '../../Layouts/AppLayout';
 import { Shield, Search, Calendar, Filter, Eye, AlertTriangle, User, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import CustomDatePicker from '../../Components/DatePicker/DatePicker';
+import { formatLocalYmd, parseLocalYmd } from '@/utils/dateOnly';
 
 export default function SecurityLogs({ logs = { data: [] }, users = [], companies = [], locations = [], isParentCompany = false, filters = {} }) {
     const { t } = useTranslations();
@@ -14,8 +15,10 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
     const [eventType, setEventType] = useState(filters.event_type || '');
     const [riskLevel, setRiskLevel] = useState(filters.risk_level || '');
     const [userId, setUserId] = useState(filters.user_id || '');
-    const [fromDate, setFromDate] = useState(filters.from_date ? new Date(filters.from_date) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
-    const [toDate, setToDate] = useState(filters.to_date ? new Date(filters.to_date) : new Date());
+    const [fromDate, setFromDate] = useState(
+        filters.from_date ? parseLocalYmd(filters.from_date) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    );
+    const [toDate, setToDate] = useState(filters.to_date ? parseLocalYmd(filters.to_date) : new Date());
     const [perPage, setPerPage] = useState(filters.per_page || 25);
 
     // Handle company selection and fetch locations
@@ -43,8 +46,8 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
             event_type: eventType,
             risk_level: riskLevel,
             user_id: userId,
-            from_date: fromDate ? fromDate.toISOString().split('T')[0] : '',
-            to_date: toDate ? toDate.toISOString().split('T')[0] : '',
+            from_date: fromDate ? formatLocalYmd(fromDate) : '',
+            to_date: toDate ? formatLocalYmd(toDate) : '',
             per_page: perPage
         });
         
@@ -55,8 +58,8 @@ export default function SecurityLogs({ logs = { data: [] }, users = [], companie
             event_type: eventType,
             risk_level: riskLevel,
             user_id: userId,
-            from_date: fromDate ? fromDate.toISOString().split('T')[0] : '',
-            to_date: toDate ? toDate.toISOString().split('T')[0] : '',
+            from_date: fromDate ? formatLocalYmd(fromDate) : '',
+            to_date: toDate ? formatLocalYmd(toDate) : '',
             per_page: perPage
         }, {
             preserveState: true,

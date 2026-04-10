@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-04-09T20:12:25.625Z",
+  "generated_at": "2026-04-10T22:23:57.132Z",
   "source_database": "live",
   "source_sql_file": null,
-  "table_count": 65,
+  "table_count": 64,
   "tables": [
     {
       "table_name": "account_configurations",
@@ -8173,88 +8173,6 @@
       "keys": [
         "PRIMARY KEY (`id`)",
         "UNIQUE KEY `users_email_unique` (`email`)"
-      ]
-    },
-    {
-      "table_name": "user_rights",
-      "columns": [
-        {
-          "name": "id",
-          "type": "bigint(20)",
-          "nullable": false,
-          "default": null,
-          "auto_increment": true,
-          "constraints": "unsigned NOT NULL AUTO_INCREMENT"
-        },
-        {
-          "name": "user_id",
-          "type": "bigint(20)",
-          "nullable": false,
-          "default": null,
-          "auto_increment": false,
-          "constraints": "unsigned NOT NULL"
-        },
-        {
-          "name": "menu_id",
-          "type": "bigint(20)",
-          "nullable": false,
-          "default": null,
-          "auto_increment": false,
-          "constraints": "unsigned NOT NULL"
-        },
-        {
-          "name": "can_view",
-          "type": "tinyint(1)",
-          "nullable": false,
-          "default": "1",
-          "auto_increment": false,
-          "constraints": "NOT NULL DEFAULT 1"
-        },
-        {
-          "name": "can_add",
-          "type": "tinyint(1)",
-          "nullable": false,
-          "default": "0",
-          "auto_increment": false,
-          "constraints": "NOT NULL DEFAULT 0"
-        },
-        {
-          "name": "can_edit",
-          "type": "tinyint(1)",
-          "nullable": false,
-          "default": "0",
-          "auto_increment": false,
-          "constraints": "NOT NULL DEFAULT 0"
-        },
-        {
-          "name": "can_delete",
-          "type": "tinyint(1)",
-          "nullable": false,
-          "default": "0",
-          "auto_increment": false,
-          "constraints": "NOT NULL DEFAULT 0"
-        },
-        {
-          "name": "created_at",
-          "type": "timestamp",
-          "nullable": true,
-          "default": "NULL",
-          "auto_increment": false,
-          "constraints": "NULL DEFAULT NULL"
-        },
-        {
-          "name": "updated_at",
-          "type": "timestamp",
-          "nullable": true,
-          "default": "NULL",
-          "auto_increment": false,
-          "constraints": "NULL DEFAULT NULL"
-        }
-      ],
-      "keys": [
-        "PRIMARY KEY (`id`)",
-        "KEY `user_rights_user_id_foreign` (`user_id`)",
-        "CONSTRAINT `user_rights_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `tbl_users` (`id`) ON DELETE CASCADE"
       ]
     },
     {

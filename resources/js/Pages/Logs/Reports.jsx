@@ -4,6 +4,7 @@ import { useTranslations } from '@/hooks/useTranslations';
 import AppLayout from '../../Layouts/AppLayout';
 import { BarChart3, Download, Calendar, Filter, TrendingUp, Users, Shield, Clock, Activity, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import CustomDatePicker from '../../Components/DatePicker/DatePicker';
+import { formatLocalYmd, parseLocalYmd, todayLocalYmd } from '@/utils/dateOnly';
 
 export default function Reports({ 
     activityStats, 
@@ -13,20 +14,22 @@ export default function Reports({
     filters 
 }) {
     const { t } = useTranslations();
-    const [fromDate, setFromDate] = useState(filters.from_date ? new Date(filters.from_date) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
-    const [toDate, setToDate] = useState(filters.to_date ? new Date(filters.to_date) : new Date());
+    const [fromDate, setFromDate] = useState(
+        filters.from_date ? parseLocalYmd(filters.from_date) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    );
+    const [toDate, setToDate] = useState(filters.to_date ? parseLocalYmd(filters.to_date) : new Date());
     const [reportType, setReportType] = useState(filters.report_type || 'overview');
 
     const handleFilter = () => {
         console.log('Applying report filters:', {
-            from_date: fromDate ? fromDate.toISOString().split('T')[0] : '',
-            to_date: toDate ? toDate.toISOString().split('T')[0] : '',
+            from_date: fromDate ? formatLocalYmd(fromDate) : '',
+            to_date: toDate ? formatLocalYmd(toDate) : '',
             report_type: reportType
         });
         
         router.get(route('logs.reports'), {
-            from_date: fromDate ? fromDate.toISOString().split('T')[0] : '',
-            to_date: toDate ? toDate.toISOString().split('T')[0] : '',
+            from_date: fromDate ? formatLocalYmd(fromDate) : '',
+            to_date: toDate ? formatLocalYmd(toDate) : '',
             report_type: reportType
         }, {
             preserveState: true,
@@ -52,15 +55,15 @@ export default function Reports({
         // Create export URL with current filters
         const exportUrl = route('logs.export', {
             report_type: reportType,
-            from_date: fromDate ? fromDate.toISOString().split('T')[0] : '',
-            to_date: toDate ? toDate.toISOString().split('T')[0] : '',
+            from_date: fromDate ? formatLocalYmd(fromDate) : '',
+            to_date: toDate ? formatLocalYmd(toDate) : '',
             format: format.toLowerCase()
         });
         
         // Create a temporary link and trigger download
         const link = document.createElement('a');
         link.href = exportUrl;
-        link.download = `${reportType}_report_${new Date().toISOString().split('T')[0]}.${format.toLowerCase()}`;
+        link.download = `${reportType}_report_${todayLocalYmd()}.${format.toLowerCase()}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

@@ -16,7 +16,7 @@ trait CheckUserPermissions
     protected function checkPermission(Request $request, ?string $menuRouteName = null, string $permission = 'can_view'): bool
     {
         $routeName = $request->route() ? $request->route()->getName() : null;
-        Log::info('CheckUserPermissions: Starting permission check', [
+        Log::debug('CheckUserPermissions: Starting permission check', [
             'route' => $routeName,
             'menu_route' => $menuRouteName,
             'permission' => $permission,
@@ -48,7 +48,7 @@ trait CheckUserPermissions
             }
         }
 
-        Log::info('CheckUserPermissions: User found', [
+        Log::debug('CheckUserPermissions: User found', [
             'user_id' => $user->id,
             'user_role' => $user->role,
             'user_status' => $user->status,
@@ -110,7 +110,7 @@ trait CheckUserPermissions
 
         $hasPermission = $user->hasPermission($menu->id, $permission);
 
-        Log::info('CheckUserPermissions: Permission check result', [
+        Log::debug('CheckUserPermissions: Permission check result', [
             'user_id' => $user->id,
             'route' => $routeName,
             'menu_id' => $menu->id,
@@ -137,7 +137,7 @@ trait CheckUserPermissions
     protected function requirePermission(Request $request, ?string $menuRouteName = null, string $permission = 'can_view'): void
     {
         $routeName = $request->route() ? $request->route()->getName() : null;
-        Log::info('CheckUserPermissions: requirePermission called', [
+        Log::debug('CheckUserPermissions: requirePermission called', [
             'route' => $routeName,
             'menu_route' => $menuRouteName,
             'permission' => $permission,
@@ -175,7 +175,7 @@ trait CheckUserPermissions
             abort(403, "You don't have permission to {$action} {$resource}. Please contact your administrator.");
         }
 
-        Log::info('CheckUserPermissions: Permission granted', [
+        Log::debug('CheckUserPermissions: Permission granted', [
             'route' => $routeName,
             'permission' => $permission,
         ]);
@@ -351,6 +351,11 @@ trait CheckUserPermissions
             'inventory.reports.purchase-order-lines.export.excel' => '/inventory/reports/purchase-order-lines',
             'inventory.reports.purchase-order-lines.export.pdf' => '/inventory/reports/purchase-order-lines',
             'inventory.reports.purchase-order-lines.print' => '/inventory/reports/purchase-order-lines',
+            'inventory.reports.stock-position' => '/inventory/reports/stock-position',
+            'inventory.reports.stock-position.report' => '/inventory/reports/stock-position',
+            'inventory.reports.stock-position.data' => '/inventory/reports/stock-position',
+            'inventory.reports.stock-position.export.csv' => '/inventory/reports/stock-position',
+            'inventory.reports.stock-position.export.excel' => '/inventory/reports/stock-position',
         ];
 
         return $routeMappings[$routeName] ?? null;

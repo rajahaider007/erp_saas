@@ -1,6 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { parseLocalYmd } from '@/utils/dateOnly';
+
+function coerceSelected(selected) {
+  if (selected == null || selected === '') {
+    return null;
+  }
+  if (selected instanceof Date) {
+    return Number.isNaN(selected.getTime()) ? null : selected;
+  }
+  if (typeof selected === 'string') {
+    return parseLocalYmd(selected);
+  }
+  return null;
+}
 
 const CustomDatePicker = ({
   selected,
@@ -26,6 +40,7 @@ const CustomDatePicker = ({
 }) => {
   const withPortal = withPortalProp !== undefined ? withPortalProp : true;
   const [isMobile, setIsMobile] = useState(false);
+  const selectedDate = useMemo(() => coerceSelected(selected), [selected]);
 
   // Detect mobile device
   useEffect(() => {
@@ -103,7 +118,7 @@ const CustomDatePicker = ({
       <DatePicker
         id={id}
         name={name}
-        selected={selected}
+        selected={selectedDate}
         onChange={(date) => {
           onChange(date);
         }}

@@ -1766,7 +1766,10 @@
       "card_gr_link": "رپورٹ کھولیں",
       "card_po_title": "خریداری آرڈر لائنیں",
       "card_po_body": "آرڈر بمقابل وصول، باقی مقدار اور کھلی لائن کی قیمت۔",
-      "card_po_link": "رپورٹ کھولیں"
+      "card_po_link": "رپورٹ کھولیں",
+      "card_stock_title": "اسٹاک پوزیشن (GRN رسید)",
+      "card_stock_body": "GRN لائنوں سے قبول شدہ مقدار (QC زیر التواء یا پوسٹ) — مکمل موومنٹ لیجر نہیں۔",
+      "card_stock_link": "رپورٹ کھولیں"
     },
     "goods_receipt_register": {
       "title": "مال کی رسید رجسٹر",
@@ -1878,6 +1881,38 @@
       "col_currency": "کرنسی",
       "col_line_status": "لائن حیثیت",
       "col_po_status": "PO حیثیت",
+      "back_hub": "تمام رپورٹس"
+    },
+    "stock_position": {
+      "title": "اسٹاک پوزیشن (GRN رسید)",
+      "search_heading": "رپورٹ کی شرائط",
+      "search_lead": "موجودہ برانچ لوکیشن پر GRN سے قبول شدہ مقدار کا خلاصہ۔",
+      "run_report": "رپورٹ دیکھیں",
+      "reset_filters": "صاف کریں",
+      "report_heading": "اسٹاک پوزیشن — نتائج",
+      "report_lead": "آئٹم وار GRN قبول مقدار۔ تاریخ یا صرف پوسٹ شدہ فلٹر بدل سکتے ہیں۔",
+      "change_filters": "فلٹر تبدیل کریں",
+      "export_csv": "CSV",
+      "export_excel": "Excel",
+      "description": "مال کی رسید (GRN) کے ذریعے وصول شدہ مقدار کا خلاصہ۔",
+      "search_placeholder": "آئٹم کوڈ یا نام…",
+      "as_of_date": "تاریخ تک (رسید)",
+      "as_of_hint": "اس تاریخ یا اس سے پہلے کی تمام GRN لائنیں شامل۔",
+      "posted_only": "صرف پوسٹ شدہ GRN (posted_transaction_id)",
+      "sort_by": "ترتیب",
+      "sort_item_code": "آئٹم کوڈ",
+      "sort_qty": "مقدار",
+      "sort_value": "کل قیمت",
+      "sort_order": "ترتیب",
+      "sort_asc": "صعودی",
+      "sort_desc": "نزولی",
+      "col_location": "لوکیشن",
+      "col_item": "آئٹم",
+      "col_uom": "یونٹ",
+      "col_qty": "مقدار (قبول)",
+      "col_value": "قدر (مقدار × لاگت)",
+      "col_avg_cost": "اوسط یونٹ لاگت",
+      "methodology_note": "شامل: GRN حیثیت QC زیر التواء یا پوسٹ؛ مقدار قبول شدہ (رسید سے زیادہ نہیں)۔ اجراء/منتقلی/ایڈجسٹمنٹ منہا نہیں — مکمل subledger تک یہ مکمل on-hand نہیں۔",
       "back_hub": "تمام رپورٹس"
     }
   }

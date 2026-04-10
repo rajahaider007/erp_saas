@@ -32,9 +32,12 @@ const OPTS = {
     .filter(Boolean),
   codeOverlapLines: Number(readArg('code-overlap-lines', '8')),
   includeSensitive: readArg('include-sensitive', 'false') === 'true',
+  /** Max characters per route-catalog chunk (large = fewer records, more context per chunk). */
+  routeCatalogChunkSize: Number(readArg('route-catalog-chunk-size', '4500')),
 };
 
 const guidesDirAbs = path.join(projectRoot, OPTS.guidesDir);
+const docsDirAbs = path.join(projectRoot, 'docs');
 const sqlFileAbs = path.join(projectRoot, OPTS.sqlFile);
 const liveSchemaScriptAbs = path.join(projectRoot, 'scripts', 'export-rag-schema.php');
 const outDirAbs = path.join(projectRoot, OPTS.outDir);
@@ -184,19 +187,175 @@ function chunkText(text, maxSize, overlap) {
   return chunks;
 }
 
-function buildGuideRecords() {
-  const files = walkFiles(guidesDirAbs, new Set(['.md', '.txt']));
+/**
+ * High-priority chunks with canonical in-app URLs. Prepended so lexical RAG ranks them
+ * above unrelated controller code (e.g. GRN supplier invoice) for "supplier/customer" questions.
+ */
+function buildNavigationAnchorRecords() {
+  const content = [
+    'Authoritative navigation for this ERP (use these paths in markdown links when advising users).',
+    '',
+    '**Supplier / vendor (create or list payables party):**',
+    '- List: [Vendor master](/inventory/master-data/vendor-master)',
+    '- Create new supplier: [Create vendor](/inventory/master-data/vendor-master/create)',
+    '',
+    '**Customer (create or list receivables party):**',
+    '- List: [Customer master](/inventory/master-data/customer-master)',
+    '- Create new customer: [Create customer](/inventory/master-data/customer-master/create)',
+    '',
+    '**Chart of accounts (COA tree, Level 4 codes, not the same as opening party forms):**',
+    '- [Chart of accounts](/accounts/chart-of-accounts)',
+    '',
+    'Party masters (vendor/customer) create a linked Level 4 account under Accounts Payable / Accounts Receivable configuration. They are maintained from **Inventory → Master data**, not from GRN supplier invoice.',
+    '',
+    '**Do not** tell users to use [GRN supplier invoice](/inventory/grn-supplier-invoice) or [Create GRN supplier invoice](/inventory/grn-supplier-invoice/create) to *register* a new supplier — that module posts invoices against vendors that already exist.',
+    '',
+    '**Related procurement (after vendor exists):**',
+    '- [Purchase requisition](/inventory/purchase-requisition)',
+    '- [Purchase order](/inventory/purchase-order)',
+    '- [Goods receipt (GRN)](/inventory/goods-receipt-note)',
+    '- [GRN supplier invoice](/inventory/grn-supplier-invoice) — for invoicing received goods, not for creating vendor master.',
+    '',
+    'Keywords: supplier, vendors, vendor master, customer master, add supplier, add customer, new vendor, new customer, party, AP, AR, master data.',
+  ].join('\n');
+
+  return [
+    {
+      id: 'nav-000001',
+      source_type: 'user_guide',
+      source_path: 'system::navigation_anchors',
+      document_title: 'ERP screen URLs — suppliers, customers, vendors (authoritative)',
+      section_title: 'Where to add a supplier or customer',
+      chunk_index: 0,
+      tags: ['navigation', 'supplier', 'customer', 'vendor', 'master_data', 'how_to', 'routes', 'rahj_ai'],
+      content,
+    },
+  ];
+}
+
+function loadLaravelRoutesJson() {
+  const result = spawnSync(
+    phpBinary,
+    ['artisan', 'route:list', '--json', '--except-vendor', '--no-ansi'],
+    {
+      cwd: projectRoot,
+      encoding: 'utf8',
+      maxBuffer: 50 * 1024 * 1024,
+      env: { ...process.env, NO_COLOR: '1', FORCE_COLOR: '0' },
+    },
+  );
+
+  if (result.error) {
+    console.warn('route:list spawn error:', result.error.message);
+    return [];
+  }
+  if (result.status !== 0) {
+    console.warn('route:list failed:', (result.stderr || result.stdout || '').trim());
+    return [];
+  }
+  try {
+    const data = JSON.parse(String(result.stdout || '[]').trim());
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.warn('route:list JSON parse error:', e.message);
+    return [];
+  }
+}
+
+function normalizeRouteUri(uri) {
+  const u = String(uri || '').trim().split('?')[0];
+  if (!u || u === '/') return '/';
+  return u.startsWith('/') ? u : `/${u}`;
+}
+
+function routeUsesWebMiddleware(route) {
+  const raw = route.middleware;
+  const s = raw == null ? '' : typeof raw === 'string' ? raw : JSON.stringify(raw);
+  return s.toLowerCase().includes('web');
+}
+
+function shouldSkipRouteForCatalog(uri) {
+  if (uri === '/up') return true;
+  if (uri.startsWith('/_')) return true;
+  if (uri.startsWith('/api/')) return true;
+  if (uri.startsWith('/sanctum/')) return true;
+  return false;
+}
+
+function shortenAction(action) {
+  if (action == null) return '';
+  const a = String(action);
+  const m = a.match(/([A-Za-z0-9_]+Controller)@[a-z_]+/i);
+  if (m) return m[1];
+  if (a.length > 90) return `${a.slice(0, 87)}...`;
+  return a;
+}
+
+/**
+ * Full GET route listing from the running Laravel app (accurate URLs for "where is X screen?").
+ */
+function buildRouteCatalogRecords() {
+  const routes = loadLaravelRoutesJson();
+  const rows = [];
+
+  for (const r of routes) {
+    const method = String(r.method || '');
+    if (!/\bGET\b/.test(method)) continue;
+    const uri = normalizeRouteUri(r.uri);
+    if (shouldSkipRouteForCatalog(uri)) continue;
+    if (!routeUsesWebMiddleware(r)) continue;
+    rows.push(r);
+  }
+
+  rows.sort((a, b) => String(a.uri).localeCompare(String(b.uri)));
+
+  const lines = rows.map((r) => {
+    const uri = normalizeRouteUri(r.uri);
+    const name = r.name ? String(r.name) : '';
+    const action = shortenAction(r.action);
+    const label = name || uri;
+    const namePart = name ? ` — route name: \`${name}\`` : '';
+    const actPart = action ? ` — ${action}` : '';
+    return `- [${label}](${uri})${namePart}${actPart}`;
+  });
+
+  const body = [
+    'Official application page index (live `php artisan route:list`, GET + web middleware only).',
+    'Use these paths for markdown links like [Title](/path). Dynamic segments like `{id}` are shown as in Laravel.',
+    '',
+    ...lines,
+  ].join('\n');
+
+  const pieces = chunkText(body, OPTS.routeCatalogChunkSize, 280);
+  const preamble = '**Route catalog (system):** answers like “where is screen X” should prefer these URIs.\n\n';
+
+  return pieces.map((content, idx) => ({
+    id: `routes-${String(idx + 1).padStart(5, '0')}`,
+    source_type: 'user_guide',
+    source_path: 'system::route_catalog',
+    document_title: 'All ERP pages (GET routes)',
+    section_title: `Route catalog ${idx + 1} / ${pieces.length}`,
+    chunk_index: idx,
+    tags: ['routes', 'navigation', 'pages', 'urls', 'laravel', 'rahj_ai', 'system'],
+    content: idx === 0 ? preamble + content : content,
+  }));
+}
+
+function buildMarkdownDirRecords(dirAbs, idPrefix, walkOptions = {}) {
+  if (!fs.existsSync(dirAbs)) return [];
+
+  const files = walkFiles(dirAbs, new Set(['.md', '.txt']), [], walkOptions);
   const records = [];
   let chunkCounter = 0;
 
   for (const absPath of files) {
     const relPath = toPosixRelative(absPath);
     const ext = path.extname(absPath).toLowerCase();
-    const content = fs.readFileSync(absPath, 'utf8');
+    const fileContent = fs.readFileSync(absPath, 'utf8');
     const fallbackTitle = filenameToTitle(absPath);
     const parsed = ext === '.md'
-      ? splitMarkdownSections(content, fallbackTitle)
-      : splitPlainSections(content, fallbackTitle);
+      ? splitMarkdownSections(fileContent, fallbackTitle)
+      : splitPlainSections(fileContent, fallbackTitle);
 
     const tags = relPath.split('/').slice(0, -1).filter(Boolean);
 
@@ -205,7 +364,7 @@ function buildGuideRecords() {
       pieces.forEach((piece, idx) => {
         chunkCounter += 1;
         records.push({
-          id: `guide-${String(chunkCounter).padStart(6, '0')}`,
+          id: `${idPrefix}-${String(chunkCounter).padStart(6, '0')}`,
           source_type: 'user_guide',
           source_path: relPath,
           document_title: parsed.docTitle,
@@ -219,6 +378,20 @@ function buildGuideRecords() {
   }
 
   return records;
+}
+
+function buildGuideRecords() {
+  return buildMarkdownDirRecords(guidesDirAbs, 'guide');
+}
+
+/** Project docs/ markdown (excludes docs/rag build output). */
+function buildDocsMarkdownRecords() {
+  return buildMarkdownDirRecords(docsDirAbs, 'dguide', {
+    shouldSkipDir: (fullPath) => {
+      const rel = toPosixRelative(fullPath);
+      return rel === 'docs/rag' || rel.startsWith('docs/rag/');
+    },
+  });
 }
 
 function inferCodeLanguage(filePath) {
@@ -556,10 +729,20 @@ function writeJsonl(filePath, records) {
 function main() {
   ensureDir(outDirAbs);
 
+  const navigationAnchors = buildNavigationAnchorRecords();
+  const routeCatalog = buildRouteCatalogRecords();
   const guideRecords = buildGuideRecords();
+  const docsGuideRecords = buildDocsMarkdownRecords();
   const code = buildCodeRecords();
   const db = buildDbRecords();
-  const allRecords = [...guideRecords, ...code.records, ...db.records];
+  const allRecords = [
+    ...navigationAnchors,
+    ...routeCatalog,
+    ...guideRecords,
+    ...docsGuideRecords,
+    ...code.records,
+    ...db.records,
+  ];
 
   const generatedAt = new Date().toISOString();
   const manifest = {
@@ -567,13 +750,18 @@ function main() {
     project_root: toPosixRelative(projectRoot),
     input: {
       guides_dir: OPTS.guidesDir,
+      docs_dir: 'docs (excluding docs/rag)',
       sql_file: OPTS.sqlFile,
       code_dirs: OPTS.codeDirs,
       include_sensitive: OPTS.includeSensitive,
+      route_catalog_chunk_size: OPTS.routeCatalogChunkSize,
     },
     counts: {
       total_chunks: allRecords.length,
+      navigation_anchor_chunks: navigationAnchors.length,
+      route_catalog_chunks: routeCatalog.length,
       user_guide_chunks: guideRecords.length,
+      docs_markdown_chunks: docsGuideRecords.length,
       application_source_chunks: code.records.length,
       database_chunks: db.records.length,
       application_source_files: code.filesIndexed,
@@ -603,7 +791,9 @@ function main() {
 
   console.log('RAG corpus generated.');
   console.log(`Chunks: ${allRecords.length}`);
+  console.log(`Route catalog chunks: ${routeCatalog.length}`);
   console.log(`Guide chunks: ${guideRecords.length}`);
+  console.log(`Docs markdown chunks: ${docsGuideRecords.length}`);
   console.log(`Application source chunks: ${code.records.length}`);
   console.log(`Application source files: ${code.filesIndexed}`);
   console.log(`Sensitive files excluded: ${code.sensitiveExcludedCount}`);

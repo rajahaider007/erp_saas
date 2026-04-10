@@ -3,12 +3,12 @@
 namespace App\Services\RahjAi;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Knowledge Base Builder - Generates comprehensive system documentation
- * 
+ *
  * Automatically extracts:
  * - Database schema (tables, columns, relationships)
  * - Business rules and validations
@@ -28,6 +28,8 @@ class KnowledgeBaseBuilder
             'system_config' => $this->extractSystemConfiguration(),
         ];
 
+        // RAG JSONL is produced by `npm run rag:build` (guides + live schema + code). Do not append
+        // huge schema blobs here — they overwrite ranking and confuse navigation answers.
         $this->saveToRagCorpus($knowledge);
     }
 
@@ -254,25 +256,54 @@ class KnowledgeBaseBuilder
         return null;
     }
 
-    protected function analyzeJournalVouchers(): array { return []; }
-    protected function analyzeWarehouses(): array { return []; }
-    protected function analyzeInventoryTransactions(): array { return []; }
-    protected function analyzePurchaseOrders(): array { return []; }
-    protected function analyzeSuppliers(): array { return []; }
-    protected function analyzeSalesOrders(): array { return []; }
-    protected function analyzeCustomers(): array { return []; }
+    protected function analyzeJournalVouchers(): array
+    {
+        return [];
+    }
+
+    protected function analyzeWarehouses(): array
+    {
+        return [];
+    }
+
+    protected function analyzeInventoryTransactions(): array
+    {
+        return [];
+    }
+
+    protected function analyzePurchaseOrders(): array
+    {
+        return [];
+    }
+
+    protected function analyzeSuppliers(): array
+    {
+        return [];
+    }
+
+    protected function analyzeSalesOrders(): array
+    {
+        return [];
+    }
+
+    protected function analyzeCustomers(): array
+    {
+        return [];
+    }
 
     /**
      * Save generated knowledge to RAG corpus (JSONL format)
      */
     protected function saveToRagCorpus(array $knowledge): void
     {
-        $corpusPath = base_path('docs/rag/langchain_chunks.jsonl');
-        
+        $overlayPath = base_path('docs/rag/artisan_schema_overlay.jsonl');
+
+        File::ensureDirectoryExists(dirname($overlayPath));
+
         $chunks = [];
         foreach ($knowledge as $category => $data) {
             $json = json_encode($data, JSON_UNESCAPED_UNICODE);
-            
+
             $chunks[] = [
                 'source_type' => 'database_schema',
                 'source_path' => "system::{$category}",
@@ -283,9 +314,11 @@ class KnowledgeBaseBuilder
             ];
         }
 
-        // Append to corpus
+        $body = '';
         foreach ($chunks as $chunk) {
-            File::append($corpusPath, json_encode($chunk) . "\n");
+            $body .= json_encode($chunk, JSON_UNESCAPED_UNICODE)."\n";
         }
+
+        File::put($overlayPath, $body);
     }
 }

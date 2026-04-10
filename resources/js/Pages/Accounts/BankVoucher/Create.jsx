@@ -20,6 +20,7 @@ import App from '../../App.jsx';
 import FloatingCurrencyWidget from '../../../Components/FloatingCurrencyWidget.jsx';
 import InlineSearchSelect from '../../../Components/InlineSearchSelect';
 import CustomDatePicker from '../../../Components/DatePicker/DatePicker.jsx';
+import { formatLocalYmd, todayLocalYmd } from '@/utils/dateOnly';
 import StorageWarning from '../../../Components/StorageWarning.jsx';
 import { consumeRahjAiDraftPayload } from '../../../utils/rahjAiDraft';
 
@@ -87,7 +88,7 @@ const BankVoucherCreate = () => {
   
   const [formData, setFormData] = useState(() => {
     const base = {
-      voucher_date: voucher?.voucher_date || new Date().toISOString().split('T')[0],
+      voucher_date: voucher?.voucher_date || todayLocalYmd(),
       voucher_number: voucher?.voucher_number || defaultPreviewVoucherNumber,
       voucher_sub_type: defaultVoucherType,
       bank_account_id: voucher?.bank_account_id || '',
@@ -808,8 +809,8 @@ const BankVoucherCreate = () => {
                           {t('accounts.bank_voucher.create.voucher_date_required_label')}
                         </label>
                         <CustomDatePicker
-                          selected={formData.voucher_date ? new Date(formData.voucher_date) : null}
-                          onChange={(date) => setFormData(prev => ({ ...prev, voucher_date: date ? date.toISOString().split('T')[0] : '' }))}
+                          selected={formData.voucher_date || null}
+                          onChange={(date) => setFormData(prev => ({ ...prev, voucher_date: date ? formatLocalYmd(date) : '' }))}
                           type="date"
                           placeholder={t('accounts.bank_voucher.create.select_voucher_date')}
                           className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
@@ -1257,8 +1258,8 @@ const BankVoucherCreate = () => {
                             {t('accounts.bank_voucher.create.cheque_date_label')}
                           </label>
                           <CustomDatePicker
-                            selected={entry.cheque_date ? new Date(entry.cheque_date) : null}
-                            onChange={(date) => updateEntry(index, 'cheque_date', date ? date.toISOString().split('T')[0] : '')}
+                            selected={entry.cheque_date || null}
+                            onChange={(date) => updateEntry(index, 'cheque_date', date ? formatLocalYmd(date) : '')}
                             type="date"
                             placeholder={t('accounts.bank_voucher.create.cheque_date')}
                             className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"

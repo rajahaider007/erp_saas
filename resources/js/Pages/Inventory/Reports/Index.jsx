@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { router, usePage } from '@inertiajs/react';
-import { BarChart3, ClipboardList, FileSpreadsheet, Home } from 'lucide-react';
+import { BarChart3, Boxes, ClipboardList, FileSpreadsheet, Home } from 'lucide-react';
 import App from '../../App.jsx';
 import Breadcrumbs from '@/Components/Breadcrumbs';
 import { useTranslations } from '@/hooks/useTranslations';
@@ -33,7 +33,7 @@ export default function InventoryReportsIndex() {
 
         <div className="mx-4 mb-2 text-xs text-slate-500 dark:text-slate-400">{ts('standards_doc_hint')}</div>
 
-        <div className="mx-4 mb-8 grid gap-4 md:grid-cols-2">
+        <div className="mx-4 mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <button
             type="button"
             onClick={() => router.visit('/inventory/reports/goods-receipt-register')}
@@ -61,6 +61,21 @@ export default function InventoryReportsIndex() {
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{ti('card_po_body')}</p>
             <span className="mt-3 inline-block text-sm font-medium text-indigo-600 dark:text-indigo-400">
               {ti('card_po_link')} →
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.visit('/inventory/reports/stock-position')}
+            className="text-left rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 p-5 shadow-sm hover:border-indigo-400/60 transition-colors"
+          >
+            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-semibold">
+              <Boxes size={20} />
+              {ti('card_stock_title')}
+            </div>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{ti('card_stock_body')}</p>
+            <span className="mt-3 inline-block text-sm font-medium text-indigo-600 dark:text-indigo-400">
+              {ti('card_stock_link')} →
             </span>
           </button>
         </div>

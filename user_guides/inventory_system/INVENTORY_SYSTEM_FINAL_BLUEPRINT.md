@@ -8,6 +8,32 @@
 
 ---
 
+## 📌 Codebase implementation status (`saas_erp` — snapshot 2026-04-11)
+
+یہ جدول اس blueprint کے مقابلے میں **موجودہ ریپو** (`routes/web.php`, `app/Http/Controllers/Inventory`, `resources/js/Pages/Inventory`, migrations) کی حالت دکھاتا ہے۔ **مکمل** = اہم فلو اور فارم موجود؛ **جزوی** = ڈیٹا ماڈل یا UI کچھ حد تک؛ **باقی** = ابھی نہیں یا صرف ڈیزائن۔
+
+| Blueprint § / Form | حالت | تفصیل (codebase) |
+|---|---|---|
+| **3.1 Item Master** | مکمل | `inventory_items` + `ItemMasterController` / `Pages/Inventory/ItemMaster` — بیشتر سیکشن A–I فیلڈز migration میں ہیں؛ `purchase_gl_account_id` / `sales_gl_account_id` بعد میں شامل؛ اقسام کے لیے `ItemClass` / `Category` / `Group` coding۔ |
+| **3.1 UOM + تبدیلی** | مکمل | `UomMasterController`, `UomConversionController`, متعلقہ Inertia صفحات۔ |
+| **3.1 Warehouse / Zone / Bin** | جزوی | الگ `inventory_warehouses` ٹیبل ہٹا دیا گیا؛ **برانچ/لوکیشن** `system/locations` سے، **Zone/Bin** `MasterDataController` (`zone-bin-master`) سے۔ Blueprint والا مکمل warehouse master فارم الگ سے نہیں۔ |
+| **3.1 Party / reference masters** | مکمل | `MasterDataController`: vendor, customer, transporter, reason codes, brands, tax category, وغیرہ۔ |
+| **3.2 PR** | مکمل | `PurchaseRequisitionController` + Inertia۔ |
+| **3.2 PO** | مکمل | `PurchaseOrderController` + Inertia؛ منظوری/فیلڈز کا حصہ پالیسی کے مطابق بڑھایا جا سکتا ہے۔ |
+| **3.2 GRN** | مکمل | `GoodsReceiptNoteController`, `goods_receipt_notes` / `_lines`؛ QC، landed cost flags، 3-way match status وغیرہ migration میں۔ |
+| **3.2 GRN-linked supplier invoice** | مکمل | `GrnSupplierInvoiceController` — AP لنک کی سمت۔ |
+| **3.2 Landed cost allocation (Form 5)** | باقی | GRN پر flags/reference؛ الگ LC allocation فارم/پوسٹنگ نہیں۔ |
+| **3.2 Stock transfer / Delivery / Adjustment / RTV / RMA / Physical count** | باقی | routes/controllers نہیں؛ quantity subledger نہیں۔ |
+| **3.3 Quantity / valuation / audit ledgers** | باقی | مستقل `inventory_transactions` یا valuation layers نہیں؛ رپورٹس GRN/PO سے جمع ہوتی ہیں۔ |
+| **Phase A — Stock on hand** | جزوی | **نئی رپورٹ (2026-04-11):** `Inventory → Reports → Stock position (GRN receipts)` — موجودہ برانچ لوکیشن پر **GRN قبول شدہ مقدار** کا مجموعہ (IAS مکمل on-hand سے پہلے کا عملی P1 قدم)۔ |
+| **Reporting (purchase-to-receipt)** | مکمل | Goods receipt register، purchase order lines (`InventoryReportingController`)؛ معیار: `docs/INVENTORY_REPORTING_STANDARDS.md`۔ |
+| **Document numbering** | مکمل | `InventoryDocumentNumberConfigurationController`۔ |
+| **Controls / SoD / period lock / immutable audit** | جزوی | عام ایپ کنٹرولز؛ blueprint والا مکمل governance ابھی نہیں۔ |
+
+**اگلا منطقی ترقی:** landed cost allocation فارم → stock ledger (receipt/issue/transfer) → adjustment + posting → باقی outbound فارمز۔
+
+---
+
 ## 🎯 Document Overview
 
 **Ye final blueprint document ہے** jo دوں documents کو merge کر کے بنایا گیا ہے:

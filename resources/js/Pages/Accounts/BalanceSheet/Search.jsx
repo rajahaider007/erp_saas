@@ -15,15 +15,14 @@ import {
   TrendingUp
 } from 'lucide-react';
 import App from '../../App.jsx';
+import { formatLocalYmd, todayLocalYmd } from '@/utils/dateOnly';
 
 const BalanceSheetSearch = () => {
   const { companies = [], locations = [], isParentCompany = false, flash } = usePage().props;
   const { t } = useTranslations();
   
   // Get current date in YYYY-MM-DD format
-  const getCurrentDate = () => {
-    return new Date().toISOString().split('T')[0];
-  };
+  const getCurrentDate = () => todayLocalYmd();
 
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -272,8 +271,8 @@ const BalanceSheetSearch = () => {
                     Balance Sheet As At Date
                   </label>
                   <CustomDatePicker
-                    selected={asAtDate ? new Date(asAtDate) : null}
-                    onChange={(date) => setAsAtDate(date ? date.toISOString().split('T')[0] : '')}
+                    selected={asAtDate || null}
+                    onChange={(date) => setAsAtDate(date ? formatLocalYmd(date) : '')}
                     type="date"
                     placeholder={t('accounts.balance_sheet.search.select_as_at_date')}
                     className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -326,8 +325,8 @@ const BalanceSheetSearch = () => {
                       Comparative Date
                     </label>
                     <CustomDatePicker
-                      selected={comparativeDate ? new Date(comparativeDate) : null}
-                      onChange={(date) => setComparativeDate(date ? date.toISOString().split('T')[0] : '')}
+                      selected={comparativeDate || null}
+                      onChange={(date) => setComparativeDate(date ? formatLocalYmd(date) : '')}
                       type="date"
                       placeholder={t('accounts.balance_sheet.search.select_comparative_date')}
                       className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"

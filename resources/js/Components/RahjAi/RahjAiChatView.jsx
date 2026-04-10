@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Sparkles, Send } from 'lucide-react';
 import { router } from '@inertiajs/react';
 import { useRahjAiAssistant } from '../../Contexts/RahjAiAssistantContext';
@@ -281,7 +281,24 @@ export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-
   const { t } = useTranslations();
   const { messages, draft, setDraft, sendMessage } = useRahjAiAssistant();
   const listRef = useRef(null);
+  const textareaRef = useRef(null);
   const embedded = variant === 'embedded';
+
+  const syncComposerHeight = () => {
+    const el = textareaRef.current;
+    if (!el || typeof window === 'undefined') return;
+    el.style.height = '0px';
+    const minPx = 44;
+    const maxPx = Math.min(Math.round(window.innerHeight * 0.5), 480);
+    const next = Math.max(el.scrollHeight, minPx);
+    const clamped = Math.min(next, maxPx);
+    el.style.height = `${clamped}px`;
+    el.style.overflowY = next > maxPx ? 'auto' : 'hidden';
+  };
+
+  useLayoutEffect(() => {
+    syncComposerHeight();
+  }, [draft]);
 
   useEffect(() => {
     const el = listRef.current;
@@ -368,16 +385,6 @@ export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-
                   <div>
                     <span className="whitespace-pre-wrap break-words"><RichMessageText content={msg.content} /></span>
                     {msg.role === 'assistant' && msg.action && <ActionCard action={msg.action} />}
-                    {msg.role === 'assistant' && Array.isArray(msg.sources) && msg.sources.length > 0 && (
-                      <div className="mt-3 border-t border-gray-200/70 pt-2 text-xs text-gray-600 dark:border-gray-700 dark:text-gray-300">
-                        <div className="mb-1 font-semibold">Sources</div>
-                        {msg.sources.slice(0, 4).map((src, i) => (
-                          <div key={`${src.source_path || 'source'}-${i}`} className="mb-1 truncate">
-                            {(src.document_title || 'Untitled')} - {(src.section_title || src.table_name || src.source_path || 'Unknown source')}
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -394,15 +401,16 @@ export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-
         <label className="sr-only" htmlFor={textareaId}>
           {t('rahj_ai.portal.input_placeholder')}
         </label>
-        <div className="flex gap-2">
-          <div className="search-input-wrapper min-w-0 flex-1 rounded-2xl border border-slate-200/90 bg-white/95 shadow-inner dark:border-slate-600 dark:bg-slate-800/80">
+        <div className="flex items-end gap-2">
+          <div className="min-w-0 flex-1 rounded-2xl border border-slate-200/90 bg-white/95 px-1 shadow-inner dark:border-slate-600 dark:bg-slate-800/80">
             <textarea
+              ref={textareaRef}
               id={textareaId}
-              rows={embedded ? 3 : 2}
+              rows={1}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={onKeyDown}
-              className="search-input min-h-[2.75rem] resize-none border-0 bg-transparent py-2.5 text-slate-800 focus:ring-0 dark:text-slate-100"
+              className="rahj-ai-composer-textarea block min-h-[2.75rem] w-full resize-none border-0 bg-transparent px-3 py-2.5 text-sm leading-relaxed text-slate-800 focus:outline-none focus:ring-0 dark:text-slate-100"
               placeholder={t('rahj_ai.portal.input_placeholder')}
             />
           </div>
@@ -410,7 +418,7 @@ export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-
             type="button"
             onClick={handleSend}
             disabled={!draft.trim()}
-            className="btn btn-primary btn-icon h-[2.75rem] w-[2.75rem] shrink-0 self-end border border-cyan-300/40 bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-900/25 transition-all hover:-translate-y-0.5 hover:from-cyan-400 hover:to-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn btn-primary btn-icon h-[2.75rem] w-[2.75rem] shrink-0 border border-cyan-300/40 bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-900/25 transition-all hover:-translate-y-0.5 hover:from-cyan-400 hover:to-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label={t('rahj_ai.portal.send')}
           >
             <Send className="h-5 w-5" />

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Inventory;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\CheckUserPermissions;
 use App\Models\ChartOfAccount;
+use App\Models\Location;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Database\Query\Builder;
@@ -30,6 +31,8 @@ class InventoryReportingController extends Controller
     private const POL_PDF_MAX_ROWS = 3000;
 
     private const POL_PRINT_MAX_ROWS = 10000;
+
+    private const STOCK_POS_EXPORT_MAX_ROWS = 10000;
 
     public function index(Request $request)
     {
@@ -173,6 +176,115 @@ class InventoryReportingController extends Controller
             'initialFilters' => $this->purchaseOrderLinesFiltersFromRequest($request),
             'error' => $this->missingContextMessage($request),
         ]);
+    }
+
+    /**
+     * Receipt-based stock position (sum of GRN accepted quantities) for the current branch location.
+     * See blueprint implementation status — full quantity ledger is not implemented yet.
+     */
+    public function stockPositionRegister(Request $request)
+    {
+        $this->requirePermission($request, null, 'can_view');
+
+        return Inertia::render('Inventory/Reports/StockPositionSearch', [
+            'initialFilters' => $this->stockPositionFiltersFromRequest($request),
+            'error' => $this->missingContextMessage($request),
+        ]);
+    }
+
+    public function stockPositionReport(Request $request)
+    {
+        $this->requirePermission($request, null, 'can_view');
+
+        return Inertia::render('Inventory/Reports/StockPositionReport', [
+            'appliedFilters' => $this->stockPositionFiltersFromRequest($request),
+            'error' => $this->missingContextMessage($request),
+        ]);
+    }
+
+    public function stockPositionData(Request $request): JsonResponse
+    {
+        $this->requirePermission($request, null, 'can_view');
+
+        $compId = $this->resolvedCompId($request);
+        $locationId = $this->resolvedLocationId($request);
+
+        if (! $compId || ! $locationId) {
+            return response()->json([
+                'success' => false,
+                'message' => $this->missingContextMessage($request) ?? __('inventory_messages.reports.company_location_required'),
+                'rows' => [],
+                'meta' => $this->emptyMeta(),
+            ], 422);
+        }
+
+        $filters = $this->validateStockPositionFiltersForApi($request);
+        $grouped = $this->stockPositionGroupedSubquery($compId, $locationId, $filters);
+        $wrapped = DB::query()->fromSub($grouped, 'sp');
+
+        $total = (int) (clone $wrapped)->count();
+        $perPage = (int) ($filters['per_page'] ?? 50);
+        $page = max(1, (int) ($filters['page'] ?? 1));
+        $lastPage = max(1, (int) ceil($total / $perPage));
+
+        $sortBy = $filters['sort_by'] ?? 'item_code';
+        $sortOrder = strtolower((string) ($filters['sort_order'] ?? 'asc')) === 'desc' ? 'desc' : 'asc';
+        $orderCol = match ($sortBy) {
+            'qty_on_hand' => 'qty_on_hand',
+            'value_on_hand' => 'value_on_hand',
+            default => 'item_code',
+        };
+
+        $rawRows = (clone $wrapped)
+            ->orderBy($orderCol, $sortOrder)
+            ->orderBy('item_code')
+            ->offset(($page - 1) * $perPage)
+            ->limit($perPage)
+            ->get();
+
+        $locIds = $rawRows->pluck('at_location_id')->filter()->unique()->all();
+        $locNames = $locIds !== []
+            ? Location::query()->whereIn('id', $locIds)->pluck('location_name', 'id')
+            : collect();
+
+        $rows = $rawRows->map(function ($row) use ($locNames) {
+            $qty = (float) $row->qty_on_hand;
+            $val = (float) $row->value_on_hand;
+            $avg = $qty > 0.0000001 ? round($val / $qty, 6) : null;
+
+            return [
+                'at_location_id' => (int) $row->at_location_id,
+                'location_name' => (string) ($locNames[(int) $row->at_location_id] ?? ''),
+                'inventory_item_id' => (int) $row->inventory_item_id,
+                'item_code' => (string) ($row->item_code ?? ''),
+                'item_name' => (string) ($row->item_name ?? ''),
+                'uom_code' => (string) ($row->uom_code ?? ''),
+                'qty_on_hand' => $qty,
+                'value_on_hand' => round($val, 2),
+                'avg_unit_cost' => $avg,
+            ];
+        })->values()->all();
+
+        return response()->json([
+            'success' => true,
+            'rows' => $rows,
+            'meta' => [
+                'total' => $total,
+                'per_page' => $perPage,
+                'current_page' => $page,
+                'last_page' => $lastPage,
+            ],
+        ]);
+    }
+
+    public function stockPositionExportCsv(Request $request): StreamedResponse|JsonResponse
+    {
+        return $this->stockPositionStreamCsv($request, 'text/csv; charset=UTF-8', 'csv');
+    }
+
+    public function stockPositionExportExcel(Request $request): StreamedResponse|JsonResponse
+    {
+        return $this->stockPositionStreamCsv($request, 'application/vnd.ms-excel', 'xls');
     }
 
     public function purchaseOrderLinesReport(Request $request)
@@ -1052,6 +1164,189 @@ class InventoryReportingController extends Controller
         $query->orderBy('p.po_number')->orderBy('l.line_no');
 
         return $query;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function stockPositionFiltersFromRequest(Request $request): array
+    {
+        $validated = Validator::make($request->query(), $this->stockPositionFilterRules(false))->validate();
+
+        return $this->normalizeStockPositionFilters($validated);
+    }
+
+    /**
+     * @return array<string, string|int|bool|null>
+     */
+    private function stockPositionFilterRules(bool $withPagination): array
+    {
+        $rules = [
+            'as_of_date' => 'nullable|date',
+            'posted_only' => 'nullable|boolean',
+            'search' => 'nullable|string|max:255',
+            'sort_by' => 'nullable|string|in:item_code,qty_on_hand,value_on_hand',
+            'sort_order' => 'nullable|string|in:asc,desc',
+        ];
+        if ($withPagination) {
+            $rules['per_page'] = 'nullable|integer|min:10|max:200';
+            $rules['page'] = 'nullable|integer|min:1';
+        }
+
+        return $rules;
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     * @return array<string, mixed>
+     */
+    private function normalizeStockPositionFilters(array $validated): array
+    {
+        return [
+            'as_of_date' => $validated['as_of_date'] ?? null,
+            'posted_only' => ! empty($validated['posted_only'] ?? false),
+            'search' => isset($validated['search']) ? trim((string) $validated['search']) : '',
+            'sort_by' => $validated['sort_by'] ?? 'item_code',
+            'sort_order' => $validated['sort_order'] ?? 'asc',
+            'per_page' => isset($validated['per_page']) ? (int) $validated['per_page'] : 50,
+            'page' => isset($validated['page']) ? (int) $validated['page'] : 1,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validateStockPositionFiltersForApi(Request $request): array
+    {
+        $validated = $request->validate($this->stockPositionFilterRules(true));
+
+        return $this->normalizeStockPositionFilters($validated);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validateStockPositionFiltersForExport(Request $request): array
+    {
+        $validated = Validator::make($request->query(), $this->stockPositionFilterRules(false))->validate();
+
+        return $this->normalizeStockPositionFilters($validated);
+    }
+
+    /**
+     * Aggregated GRN lines: accepted qty (capped by receipt) × unit cost, by storage location and item.
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    private function stockPositionGroupedSubquery(int $compId, int $locationId, array $filters): Builder
+    {
+        $acceptedSql = '(CASE WHEN l.accepted_qty IS NOT NULL THEN LEAST(CAST(l.accepted_qty AS DECIMAL(18,6)), CAST(l.receipt_qty AS DECIMAL(18,6))) ELSE CAST(l.receipt_qty AS DECIMAL(18,6)) END)';
+
+        $q = DB::table('goods_receipt_note_lines as l')
+            ->join('goods_receipt_notes as g', 'g.id', '=', 'l.goods_receipt_note_id')
+            ->leftJoin('inventory_items as i', 'i.id', '=', 'l.inventory_item_id')
+            ->leftJoin('uom_masters as u', 'u.id', '=', 'l.uom_id')
+            ->where('g.comp_id', $compId)
+            ->whereRaw('COALESCE(g.receive_location_id, g.location_id) = ?', [$locationId])
+            ->whereIn('g.status', ['qc_pending', 'posted']);
+
+        if (! empty($filters['as_of_date'])) {
+            $q->whereDate('g.receipt_date', '<=', $filters['as_of_date']);
+        }
+
+        if (! empty($filters['posted_only'])) {
+            $q->whereNotNull('g.posted_transaction_id');
+        }
+
+        if (! empty($filters['search'])) {
+            $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $filters['search']).'%';
+            $q->where(function ($w) use ($term) {
+                $w->where('i.item_code', 'like', $term)
+                    ->orWhere('i.item_name_short', 'like', $term);
+            });
+        }
+
+        return $q
+            ->groupByRaw('COALESCE(g.receive_location_id, g.location_id)')
+            ->groupBy('l.inventory_item_id', 'l.uom_id')
+            ->selectRaw('COALESCE(g.receive_location_id, g.location_id) as at_location_id')
+            ->selectRaw('l.inventory_item_id as inventory_item_id')
+            ->selectRaw('MAX(i.item_code) as item_code')
+            ->selectRaw('MAX(i.item_name_short) as item_name')
+            ->selectRaw('MAX(u.uom_code) as uom_code')
+            ->selectRaw("SUM({$acceptedSql}) as qty_on_hand")
+            ->selectRaw("SUM(({$acceptedSql}) * CAST(l.unit_cost AS DECIMAL(18,6))) as value_on_hand")
+            ->havingRaw("SUM({$acceptedSql}) > 0.0000001");
+    }
+
+    private function stockPositionStreamCsv(Request $request, string $contentType, string $ext): StreamedResponse|JsonResponse
+    {
+        $this->requirePermission($request, null, 'can_view');
+
+        $compId = $this->resolvedCompId($request);
+        $locationId = $this->resolvedLocationId($request);
+
+        if (! $compId || ! $locationId) {
+            return response()->json([
+                'success' => false,
+                'message' => $this->missingContextMessage($request) ?? __('inventory_messages.reports.company_location_required'),
+            ], 422);
+        }
+
+        $filters = $this->validateStockPositionFiltersForExport($request);
+        $grouped = $this->stockPositionGroupedSubquery($compId, $locationId, $filters);
+        $wrapped = DB::query()->fromSub($grouped, 'sp')
+            ->orderBy('item_code')
+            ->limit(self::STOCK_POS_EXPORT_MAX_ROWS + 1);
+
+        $rawRows = $wrapped->get();
+        $truncated = $rawRows->count() > self::STOCK_POS_EXPORT_MAX_ROWS;
+        $rawRows = $rawRows->take(self::STOCK_POS_EXPORT_MAX_ROWS);
+
+        $locIds = $rawRows->pluck('at_location_id')->filter()->unique()->all();
+        $locNames = $locIds !== []
+            ? Location::query()->whereIn('id', $locIds)->pluck('location_name', 'id')
+            : collect();
+
+        $headers = [
+            __('inventory_messages.reports.spp_col_location_id'),
+            __('inventory_messages.reports.spp_col_location_name'),
+            __('inventory_messages.reports.spp_col_item_code'),
+            __('inventory_messages.reports.spp_col_item_name'),
+            __('inventory_messages.reports.spp_col_uom'),
+            __('inventory_messages.reports.spp_col_qty'),
+            __('inventory_messages.reports.spp_col_value'),
+            __('inventory_messages.reports.spp_col_avg_unit_cost'),
+        ];
+
+        $filename = 'stock_position_grn_'.now()->format('Ymd_His').'.'.$ext;
+
+        return response()->streamDownload(function () use ($rawRows, $locNames, $headers, $truncated) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, $headers);
+            foreach ($rawRows as $row) {
+                $qty = (float) $row->qty_on_hand;
+                $val = (float) $row->value_on_hand;
+                $avg = $qty > 0.0000001 ? round($val / $qty, 6) : '';
+                fputcsv($out, [
+                    (int) $row->at_location_id,
+                    (string) ($locNames[(int) $row->at_location_id] ?? ''),
+                    (string) ($row->item_code ?? ''),
+                    (string) ($row->item_name ?? ''),
+                    (string) ($row->uom_code ?? ''),
+                    $qty,
+                    round($val, 2),
+                    $avg,
+                ]);
+            }
+            if ($truncated) {
+                fputcsv($out, []);
+                fputcsv($out, [__('inventory_messages.reports.spp_export_truncated_note', ['max' => (string) self::STOCK_POS_EXPORT_MAX_ROWS])]);
+            }
+        }, $filename, [
+            'Content-Type' => $contentType,
+        ]);
     }
 
     /**

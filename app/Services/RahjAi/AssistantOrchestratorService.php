@@ -13,20 +13,27 @@ use Illuminate\Support\Facades\Log;
 class AssistantOrchestratorService
 {
     private EnhancedRagService $enhancedRag;
+
     private RealtimeDataService $realtimeData;
+
     private ProfessionalFormService $formService;
+
     private SystemContextService $contextService;
 
+    private FinancialIntentMatcher $financialMatcher;
+
     public function __construct(
-        EnhancedRagService $enhancedRag = null,
-        RealtimeDataService $realtimeData = null,
-        ProfessionalFormService $formService = null,
-        SystemContextService $contextService = null
+        ?EnhancedRagService $enhancedRag = null,
+        ?RealtimeDataService $realtimeData = null,
+        ?ProfessionalFormService $formService = null,
+        ?SystemContextService $contextService = null,
+        ?FinancialIntentMatcher $financialMatcher = null
     ) {
         $this->enhancedRag = $enhancedRag ?? app(EnhancedRagService::class);
         $this->realtimeData = $realtimeData ?? app(RealtimeDataService::class);
         $this->formService = $formService ?? app(ProfessionalFormService::class);
         $this->contextService = $contextService ?? app(SystemContextService::class);
+        $this->financialMatcher = $financialMatcher ?? app(FinancialIntentMatcher::class);
     }
 
     public function respond(
@@ -40,7 +47,7 @@ class AssistantOrchestratorService
         $context = $this->buildScopeContext($request);
         $user = $request->user();
         $languageHint = $this->detectLanguageHint($question);
-        $smartEntry = new SmartEntryService();
+        $smartEntry = new SmartEntryService;
 
         // Build system context for better awareness
         $systemContext = $this->contextService->buildUserContext($request);
@@ -86,6 +93,20 @@ class AssistantOrchestratorService
             }
         }
 
+        $scopeDecision = $groq->evaluateErpMessageScope($question, $languageHint);
+        if (! ($scopeDecision['in_scope'] ?? true)) {
+            return $this->localResponse(
+                $this->outOfScopeRefusalMessage($languageHint),
+                [],
+                [
+                    'mode' => 'out_of_scope',
+                    'scope_category' => $scopeDecision['category'] ?? null,
+                ],
+                $languageHint,
+                false
+            );
+        }
+
         // Use enhanced RAG with real-time data
         $topK = (int) config('services.groq.rag_top_k', 5);
         $chunks = $this->enhancedRag->intelligentRetrieve(
@@ -94,7 +115,12 @@ class AssistantOrchestratorService
             $context['location_id'] ?? 1,
             max(1, min(10, $topK))
         );
-        $reply = $groq->ask($question, $chunks);
+
+        $sessionBrief = $this->contextService->summarizeForAssistantPrompt($systemContext);
+        $reply = $groq->ask($question, $chunks, [
+            'session_brief' => $sessionBrief,
+            'language_hint' => $languageHint,
+        ]);
 
         $sources = array_map(static function (array $chunk): array {
             return [
@@ -145,6 +171,7 @@ class AssistantOrchestratorService
 
         $intent = $this->classifyReadOnlyIntent($normalized);
         $dateRange = $this->extractDateRange($question);
+        $finDef = $this->financialMatcher->definitionForIntent($intent);
 
         if ($intent === 'report' && $dateRange === null) {
             $this->savePendingClarification($request, $conversationId, [
@@ -164,9 +191,10 @@ class AssistantOrchestratorService
             );
         }
 
-        $menuRoute = match ($intent) {
-            'inventory' => '/inventory/reports',
-            'receivables', 'report' => '/accounts/dashboard',
+        $menuRoute = match (true) {
+            $intent === 'inventory' => '/inventory/reports',
+            $finDef !== null => '/accounts/dashboard',
+            in_array($intent, ['receivables', 'report'], true) => '/accounts/dashboard',
             default => '/inventory/reports',
         };
 
@@ -184,7 +212,16 @@ class AssistantOrchestratorService
         }
 
         $cacheKey = $this->metricsCacheKey($scope, $intent, $dateRange);
-        $metrics = Cache::remember($cacheKey, now()->addSeconds(120), function () use ($intent, $scope, $dateRange) {
+        $metrics = Cache::remember($cacheKey, now()->addSeconds(120), function () use ($intent, $finDef, $scope, $dateRange) {
+            if ($finDef !== null) {
+                return $this->realtimeData->getAccountsDashboardFinancialSnapshot(
+                    (int) $scope['comp_id'],
+                    (int) $scope['location_id'],
+                    (string) $finDef['report_type'],
+                    $dateRange
+                );
+            }
+
             return match ($intent) {
                 'inventory' => $this->inventorySnapshot((int) $scope['comp_id'], (int) $scope['location_id'], $dateRange),
                 'receivables' => $this->receivablesSnapshot((int) $scope['comp_id'], (int) $scope['location_id'], $dateRange),
@@ -193,17 +230,25 @@ class AssistantOrchestratorService
             };
         });
 
-        $answer = $this->formatMetricsAnswer($intent, $metrics, $dateRange);
+        $answer = $finDef !== null
+            ? $this->formatFinancialDashboardAnswer($finDef, $metrics, $dateRange)
+            : $this->formatMetricsAnswer($intent, $metrics, $dateRange);
+
+        $sourcePath = $finDef['report_path'] ?? $menuRoute;
 
         return $this->localResponse(
             $answer,
             [
                 [
                     'source_type' => 'application_tool',
-                    'source_path' => $menuRoute,
-                    'document_title' => 'Permission-aware read-only tool',
-                    'section_title' => 'Phase B intelligence',
-                    'table_name' => null,
+                    'source_path' => $sourcePath,
+                    'document_title' => $finDef !== null
+                        ? 'Live '.$finDef['answer_title'].' (DB)'
+                        : 'Permission-aware read-only tool',
+                    'section_title' => $finDef !== null ? 'FinancialIntentMatcher + RealtimeDataService' : 'Phase B intelligence',
+                    'table_name' => $finDef !== null
+                        ? 'chart_of_accounts,account_configurations,transaction_entries'
+                        : null,
                 ],
             ],
             [
@@ -621,6 +666,10 @@ class AssistantOrchestratorService
 
     protected function classifyReadOnlyIntent(string $normalized): string
     {
+        if ($row = $this->financialMatcher->match($normalized)) {
+            return (string) $row['intent'];
+        }
+
         if (
             str_contains($normalized, 'stock') ||
             str_contains($normalized, 'inventory') ||
@@ -657,7 +706,7 @@ class AssistantOrchestratorService
 
     protected function isStructureKnowledgeIntent(string $normalized): bool
     {
-        return (
+        return
             str_contains($normalized, 'chart of account') ||
             str_contains($normalized, 'coa') ||
             str_contains($normalized, 'level') ||
@@ -667,14 +716,17 @@ class AssistantOrchestratorService
             str_contains($normalized, 'fields') ||
             str_contains($normalized, 'screen') ||
             str_contains($normalized, 'kitnay level') ||
-            str_contains($normalized, 'kitne level')
-        );
+            str_contains($normalized, 'kitne level');
     }
 
     protected function isReadOnlyIntent(string $normalized): bool
     {
         if ($this->isStructureKnowledgeIntent($normalized)) {
             return false;
+        }
+
+        if ($this->financialMatcher->match($normalized) !== null) {
+            return true;
         }
 
         $hasMetricSignal = (
@@ -704,6 +756,51 @@ class AssistantOrchestratorService
         );
 
         return $hasMetricSignal && $hasOperationalDomain;
+    }
+
+    /**
+     * @param  array{intent: string, report_type: string, report_path: string, answer_title: string, empty_account_hint?: string}  $def
+     */
+    protected function formatFinancialDashboardAnswer(array $def, array $metrics, ?array $dateRange): string
+    {
+        if (! empty($metrics['error'])) {
+            return ($def['answer_title'] ?? 'Balances').' abhi nikaal nahi sakay: '.(string) $metrics['error'];
+        }
+
+        $accounts = $metrics['accounts'] ?? [];
+        $total = (float) ($metrics['total_closing'] ?? 0);
+        $title = (string) ($def['answer_title'] ?? 'Balances');
+        $reportPath = (string) ($def['report_path'] ?? '/accounts/dashboard');
+        $emptyHint = (string) ($def['empty_account_hint'] ?? 'Is category mein koi mapped account nahi mila.');
+
+        $rangeLabel = $dateRange
+            ? "Voucher date filter: {$dateRange['from']} to {$dateRange['to']}"
+            : 'Scope: all posted vouchers (accounts dashboard jaisa).';
+
+        $lines = [
+            "**{$title}** (live / company + location scope)",
+            $rangeLabel,
+            (string) ($metrics['as_of_note'] ?? ''),
+        ];
+
+        if ($accounts === []) {
+            $lines[] = $emptyHint;
+            $lines[] = 'Full screen: ['.$title.']('.$reportPath.')';
+
+            return implode("\n", array_filter($lines));
+        }
+
+        foreach ($accounts as $row) {
+            $code = $row['account_code'] ?? '';
+            $name = $row['account_name'] ?? '';
+            $bal = number_format((float) ($row['closing_balance'] ?? 0), 2);
+            $lines[] = "- `{$code}` {$name}: **{$bal}**";
+        }
+
+        $lines[] = '**Total (sum of above):** '.number_format($total, 2);
+        $lines[] = 'Detail screen (same logic): ['.$title.']('.$reportPath.')';
+
+        return implode("\n", $lines);
     }
 
     protected function isAssistedEntryIntent(string $normalized): bool
@@ -813,10 +910,31 @@ class AssistantOrchestratorService
         return 'en';
     }
 
-    protected function localResponse(string $answer, array $sources, array $meta, string $languageHint): array
+    protected function outOfScopeRefusalMessage(string $languageHint): string
+    {
+        $lines = [
+            'Main RAHJ AI hoon—main sirf is ERP / business software ke liye train hoon: accounts, inventory, procurement, reports, aur app mein navigation.',
+            'Personal sawal (jaise relationship advice), medical mashware / ilaj, ya na-munasib / vulgar content par main madad nahi kar sakta.',
+            '',
+            'I am only trained to help with this ERP: accounting, inventory, procurement, reports, and using the app. I cannot help with personal, medical, or inappropriate topics.',
+            'Please ask something about your business software or the data/workflows it supports.',
+        ];
+
+        if ($languageHint === 'ur_mix') {
+            return implode("\n", $lines);
+        }
+
+        return implode("\n", [
+            'I am RAHJ AI, and I am only trained to help with this ERP: accounting, inventory, procurement, reports, and using the application.',
+            'I cannot help with personal matters, medical advice, or inappropriate content.',
+            'Please ask something about your business software or the data and workflows it supports.',
+        ]);
+    }
+
+    protected function localResponse(string $answer, array $sources, array $meta, string $languageHint, bool $appendUrduMixOffer = true): array
     {
         $finalAnswer = $answer;
-        if ($languageHint === 'ur_mix' && ! str_contains(mb_strtolower($answer), 'urdu')) {
+        if ($appendUrduMixOffer && $languageHint === 'ur_mix' && ! str_contains(mb_strtolower($answer), 'urdu')) {
             $finalAnswer .= "\n\nAgar chaho to main isi data ka Urdu + English mix summary bhi de sakta hoon.";
         }
 
@@ -1189,8 +1307,8 @@ class AssistantOrchestratorService
             $answer .= "- Code: **{$extracted['account_code']}**\n";
             $answer .= "- Name: **{$extracted['account_name']}**\n";
             $answer .= "- Type: **{$extracted['account_type']}**\n";
-            $answer .= "- Transactional: **" . ($extracted['is_transactional'] ? 'Yes' : 'No') . "**\n\n";
-            $answer .= "You can now use this code in journal entries, transactions, and reports.";
+            $answer .= '- Transactional: **'.($extracted['is_transactional'] ? 'Yes' : 'No')."**\n\n";
+            $answer .= 'You can now use this code in journal entries, transactions, and reports.';
 
             return $this->localResponse(
                 $answer,
@@ -1217,7 +1335,7 @@ class AssistantOrchestratorService
             ]);
 
             return $this->localResponse(
-                'Failed to create account code. Error: ' . $e->getMessage(),
+                'Failed to create account code. Error: '.$e->getMessage(),
                 [],
                 ['mode' => 'smart_entry', 'step' => 'error', 'error_type' => 'execution_failed'],
                 $languageHint

@@ -5,6 +5,7 @@ import { router, usePage } from '@inertiajs/react';
 import { ArrowLeft, ClipboardList, FileText, Home, Plus, Receipt, ScrollText, Trash2 } from 'lucide-react';
 import Breadcrumbs from '@/Components/Breadcrumbs';
 import CustomDatePicker from '@/Components/DatePicker/DatePicker';
+import { formatLocalYmd } from '@/utils/dateOnly';
 import InlineSearchSelect from '@/Components/InlineSearchSelect';
 import { useTranslations } from '@/hooks/useTranslations';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -513,9 +514,9 @@ export default function GrnSupplierInvoiceCreate() {
                 </label>
                 <CustomDatePicker
                   id="si-voucher-date"
-                  selected={voucherDate ? new Date(`${voucherDate}T12:00:00`) : null}
+                  selected={voucherDate || null}
                   onChange={(date) => {
-                    setVoucherDate(date ? date.toISOString().split('T')[0] : '');
+                    setVoucherDate(date ? formatLocalYmd(date) : '');
                   }}
                   type="date"
                   className="form-input w-full max-w-xs"
@@ -542,9 +543,9 @@ export default function GrnSupplierInvoiceCreate() {
                 </label>
                 <CustomDatePicker
                   id="si-supplier-inv-date"
-                  selected={supplierInvoiceDate ? new Date(`${supplierInvoiceDate}T12:00:00`) : null}
+                  selected={supplierInvoiceDate || null}
                   onChange={(date) => {
-                    setSupplierInvoiceDate(date ? date.toISOString().split('T')[0] : '');
+                    setSupplierInvoiceDate(date ? formatLocalYmd(date) : '');
                   }}
                   type="date"
                   className="form-input w-full max-w-xs"
@@ -556,9 +557,9 @@ export default function GrnSupplierInvoiceCreate() {
                 </label>
                 <CustomDatePicker
                   id="si-due-date"
-                  selected={dueDate ? new Date(`${dueDate}T12:00:00`) : null}
+                  selected={dueDate || null}
                   onChange={(date) => {
-                    setDueDate(date ? date.toISOString().split('T')[0] : '');
+                    setDueDate(date ? formatLocalYmd(date) : '');
                   }}
                   type="date"
                   className="form-input w-full max-w-xs"

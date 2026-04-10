@@ -9,6 +9,7 @@ import {
   Database, Calendar, RefreshCcw, TrendingUp, DollarSign, Filter
 } from 'lucide-react';
 import App from '../../App.jsx';
+import { formatLocalYmd, todayLocalYmd } from '@/utils/dateOnly';
 
 /**
  * Cash Book Report Search Component
@@ -20,9 +21,7 @@ const CashBookSearch = () => {
   const { t } = useTranslations();
   
   // Get current date in YYYY-MM-DD format
-  const getCurrentDate = () => {
-    return new Date().toISOString().split('T')[0];
-  };
+  const getCurrentDate = () => todayLocalYmd();
 
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -175,24 +174,24 @@ const CashBookSearch = () => {
     const now = new Date();
     const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
     const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 6));
-    setFromDate(startOfWeek.toISOString().split('T')[0]);
-    setToDate(endOfWeek.toISOString().split('T')[0]);
+    setFromDate(formatLocalYmd(startOfWeek));
+    setToDate(formatLocalYmd(endOfWeek));
   };
 
   const setThisMonthFilter = () => {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    setFromDate(startOfMonth.toISOString().split('T')[0]);
-    setToDate(endOfMonth.toISOString().split('T')[0]);
+    setFromDate(formatLocalYmd(startOfMonth));
+    setToDate(formatLocalYmd(endOfMonth));
   };
 
   const setThisYearFilter = () => {
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 1);
     const endOfYear = new Date(now.getFullYear(), 11, 31);
-    setFromDate(startOfYear.toISOString().split('T')[0]);
-    setToDate(endOfYear.toISOString().split('T')[0]);
+    setFromDate(formatLocalYmd(startOfYear));
+    setToDate(formatLocalYmd(endOfYear));
   };
 
   return (
@@ -333,13 +332,10 @@ const CashBookSearch = () => {
                     <div>
                       <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('reports.cash_book.search.from_date')}</label>
                       <CustomDatePicker
-                        selected={fromDate ? new Date(fromDate) : null}
+                        selected={fromDate || null}
                         onChange={(date) => {
-                          const selectedFromDate = date ? date.toISOString().split('T')[0] : '';
-                          const fromDateObj = date;
-                          const toDateObj = toDate ? new Date(toDate) : null;
-                          
-                          if (selectedFromDate && toDateObj && fromDateObj > toDateObj) {
+                          const selectedFromDate = date ? formatLocalYmd(date) : '';
+                          if (selectedFromDate && toDate && selectedFromDate > toDate) {
                             Swal.fire({
                               title: t('reports.cash_book.search.invalid_date_range_title'),
                               text: t('reports.cash_book.search.invalid_from_after_to'),
@@ -367,13 +363,10 @@ const CashBookSearch = () => {
                     <div>
                       <label className="text-xs font-semibold text-gray-400 mb-2 block">{t('reports.cash_book.search.to_date')}</label>
                       <CustomDatePicker
-                        selected={toDate ? new Date(toDate) : null}
+                        selected={toDate || null}
                         onChange={(date) => {
-                          const selectedToDate = date ? date.toISOString().split('T')[0] : '';
-                          const fromDateObj = fromDate ? new Date(fromDate) : null;
-                          const toDateObj = date;
-                          
-                          if (selectedToDate && fromDateObj && toDateObj < fromDateObj) {
+                          const selectedToDate = date ? formatLocalYmd(date) : '';
+                          if (selectedToDate && fromDate && selectedToDate < fromDate) {
                             Swal.fire({
                               title: t('reports.cash_book.search.invalid_date_range_title'),
                               text: t('reports.cash_book.search.invalid_to_before_from'),

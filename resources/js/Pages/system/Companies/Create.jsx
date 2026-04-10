@@ -6,6 +6,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import App from "../../App.jsx";
 import { router, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
+import { formatLocalYmd } from '@/utils/dateOnly';
 
 // Professional Breadcrumbs Component
 const Breadcrumbs = ({ items, description }) => {
@@ -572,10 +573,9 @@ const formatDateForInput = (date) => {
     return date.split('T')[0];
   }
   
-  // If it's a date object or other format, convert to YYYY-MM-DD
   try {
-    const dateObj = new Date(date);
-    return dateObj.toISOString().split('T')[0];
+    const dateObj = date instanceof Date ? date : new Date(date);
+    return formatLocalYmd(dateObj) || '';
   } catch (error) {
     console.error('Error formatting date:', error);
     return '';

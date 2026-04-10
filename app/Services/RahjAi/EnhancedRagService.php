@@ -2,12 +2,11 @@
 
 namespace App\Services\RahjAi;
 
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Enhanced RAG Service - Combines static knowledge + real-time data
- * 
+ *
  * Improvements:
  * 1. Domain-aware retrieval
  * 2. Real-time data injection
@@ -17,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 class EnhancedRagService
 {
     private RealtimeDataService $realtime;
+
     private RagCorpusService $corpus;
 
     public function __construct(RealtimeDataService $realtime, RagCorpusService $corpus)
@@ -35,7 +35,7 @@ class EnhancedRagService
         int $topK = 5
     ): array {
         $intent = $this->detectQueryIntent($query);
-        
+
         // Get static knowledge from RAG corpus
         $staticChunks = $this->corpus->retrieve($query, $topK);
 
@@ -87,65 +87,76 @@ class EnhancedRagService
         int $companyId,
         int $locationId
     ): array {
-        $today = now()->format('Y-m-d');
-        $realtimeChunks = [];
+        try {
+            $today = now()->format('Y-m-d');
+            $realtimeChunks = [];
 
-        switch ($intent) {
-            case 'account_balance':
-                $accountCode = $this->extractAccountCode($query);
-                if ($accountCode) {
-                    $balance = $this->realtime->getAccountBalance($accountCode, $today, $companyId);
+            switch ($intent) {
+                case 'account_balance':
+                    $accountCode = $this->extractAccountCode($query);
+                    if ($accountCode) {
+                        $balance = $this->realtime->getAccountBalance($accountCode, $today, $companyId);
+                        $realtimeChunks[] = $this->createDataChunk(
+                            'realtime_data',
+                            "Account {$accountCode} Balance",
+                            json_encode($balance)
+                        );
+                    }
+                    break;
+
+                case 'inventory_status':
+                    $itemCode = $this->extractItemCode($query);
+                    if ($itemCode) {
+                        $stock = $this->realtime->getInventoryStock($itemCode, null, $companyId);
+                        $realtimeChunks[] = $this->createDataChunk(
+                            'realtime_data',
+                            "Inventory: {$itemCode}",
+                            json_encode($stock)
+                        );
+                    }
+                    break;
+
+                case 'pending_orders':
+                    $pending = $this->realtime->getPendingPurchaseOrders($companyId, $locationId);
+                    $linkHint = "When replying, use this exact markdown for the PO list screen (pending/open/draft POs live here): [Purchase orders](/inventory/purchase-order). Do not invent paths such as /inventory/purchase-orders.\n\n";
                     $realtimeChunks[] = $this->createDataChunk(
                         'realtime_data',
-                        "Account {$accountCode} Balance",
-                        json_encode($balance)
+                        'Pending purchase orders (live)',
+                        $linkHint.json_encode($pending, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
                     );
-                }
-                break;
+                    break;
 
-            case 'inventory_status':
-                $itemCode = $this->extractItemCode($query);
-                if ($itemCode) {
-                    $stock = $this->realtime->getInventoryStock($itemCode, null, $companyId);
+                case 'goods_receipt':
+                    $receipts = $this->realtime->getPendingGoodsReceipts($companyId);
+                    $linkHint = "Use this exact markdown for the GRN list: [Goods receipt (GRN)](/inventory/goods-receipt-note).\n\n";
                     $realtimeChunks[] = $this->createDataChunk(
                         'realtime_data',
-                        "Inventory: {$itemCode}",
-                        json_encode($stock)
+                        'Pending goods receipts (live)',
+                        $linkHint.json_encode($receipts, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
                     );
-                }
-                break;
+                    break;
 
-            case 'pending_orders':
-                $pending = $this->realtime->getPendingPurchaseOrders($companyId, $locationId);
-                $realtimeChunks[] = $this->createDataChunk(
-                    'realtime_data',
-                    'Pending Purchase Orders',
-                    json_encode($pending)
-                );
-                break;
+                case 'sales_summary':
+                    $fromDate = $this->extractFromDate($query) ?? now()->subDays(30)->format('Y-m-d');
+                    $toDate = $this->extractToDate($query) ?? $today;
+                    $sales = $this->realtime->getSalesSummary($fromDate, $toDate, $companyId);
+                    $realtimeChunks[] = $this->createDataChunk(
+                        'realtime_data',
+                        'Sales Summary',
+                        json_encode($sales)
+                    );
+                    break;
+            }
 
-            case 'goods_receipt':
-                $receipts = $this->realtime->getPendingGoodsReceipts($companyId);
-                $realtimeChunks[] = $this->createDataChunk(
-                    'realtime_data',
-                    'Pending GRNs',
-                    json_encode($receipts)
-                );
-                break;
+            return $realtimeChunks;
+        } catch (\Throwable $e) {
+            Log::warning('RAHJ AI realtime RAG injection skipped', [
+                'message' => $e->getMessage(),
+                'intent' => $intent,
+            ]);
 
-            case 'sales_summary':
-                $fromDate = $this->extractFromDate($query) ?? now()->subDays(30)->format('Y-m-d');
-                $toDate = $this->extractToDate($query) ?? $today;
-                $sales = $this->realtime->getSalesSummary($fromDate, $toDate, $companyId);
-                $realtimeChunks[] = $this->createDataChunk(
-                    'realtime_data',
-                    'Sales Summary',
-                    json_encode($sales)
-                );
-                break;
+            return [];
         }
-
-        return $realtimeChunks;
     }
 
     /**
@@ -161,7 +172,7 @@ class EnhancedRagService
             $scored[] = $chunk;
         }
 
-        usort($scored, fn($a, $b) => ($b['_relevance_score'] ?? 0) <=> ($a['_relevance_score'] ?? 0));
+        usort($scored, fn ($a, $b) => ($b['_relevance_score'] ?? 0) <=> ($a['_relevance_score'] ?? 0));
 
         return $scored;
     }
@@ -261,8 +272,9 @@ class EnhancedRagService
     protected function tokenize(string $text): array
     {
         $text = mb_strtolower($text);
-        $tokens = preg_split('/[^a-z0-9_\u0600-\u06FF]+/u', $text, -1, PREG_SPLIT_NO_EMPTY);
+        // PCRE does not support \uXXXX; use \x{HHHH} for Arabic block (Urdu, etc.)
+        $tokens = preg_split('/[^a-z0-9_\x{0600}-\x{06FF}]+/u', $text, -1, PREG_SPLIT_NO_EMPTY);
 
-        return array_filter($tokens, fn($t) => strlen($t) >= 2);
+        return array_filter($tokens, fn ($t) => strlen($t) >= 2);
     }
 }

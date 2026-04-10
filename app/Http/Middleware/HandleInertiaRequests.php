@@ -2,13 +2,14 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Http\Request;
-use Inertia\Middleware;
-use App\Models\Currency;
 use App\Helpers\FiscalYearHelper;
+use App\Models\Currency;
 use App\Services\TranslationLoaderService;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -37,18 +38,19 @@ class HandleInertiaRequests extends Middleware
         // Get user from custom authentication system
         $user = null;
         $userId = $request->session()->get('user_id');
-        
+
         if ($userId) {
             $user = \App\Models\User::where('id', $userId)->where('status', 'active')->first();
         }
-        
+
         // If no user is authenticated, return minimal shared data (including i18n for login page)
-        if (!$user) {
-            $loader = new TranslationLoaderService();
+        if (! $user) {
+            $loader = new TranslationLoaderService;
             $locale = $request->session()->get('locale', config('app.locale', 'en'));
-            if (!in_array($locale, TranslationLoaderService::LOCALES, true)) {
+            if (! in_array($locale, TranslationLoaderService::LOCALES, true)) {
                 $locale = TranslationLoaderService::DEFAULT_LOCALE;
             }
+
             return [
                 ...parent::share($request),
                 'auth' => [
@@ -69,30 +71,30 @@ class HandleInertiaRequests extends Middleware
                 ],
             ];
         }
-        
+
         $userRights = [];
         $availableMenus = [];
         $availableModules = [];
         $company = null;
-        
-        
 
         if ($user) {
-            // Get user rights
-            $userRights = DB::table('user_rights')
-                ->where('user_id', $user->id)
-                ->get()
-                ->map(function ($right) {
-                    return [
-                        'menu_id' => $right->menu_id,
-                        'can_view' => (bool) $right->can_view,
-                        'can_add' => (bool) $right->can_add,
-                        'can_edit' => (bool) $right->can_edit,
-                        'can_delete' => (bool) $right->can_delete,
-                    ];
-                })
-                ->toArray();
-                
+            // Get user rights (table may be missing on partial / legacy databases)
+            if (Schema::hasTable('user_rights')) {
+                $userRights = DB::table('user_rights')
+                    ->where('user_id', $user->id)
+                    ->get()
+                    ->map(function ($right) {
+                        return [
+                            'menu_id' => $right->menu_id,
+                            'can_view' => (bool) $right->can_view,
+                            'can_add' => (bool) $right->can_add,
+                            'can_edit' => (bool) $right->can_edit,
+                            'can_delete' => (bool) $right->can_delete,
+                        ];
+                    })
+                    ->toArray();
+            }
+
             // Get company data
             if ($user->comp_id) {
                 $company = DB::table('companies')
@@ -166,7 +168,8 @@ class HandleInertiaRequests extends Middleware
                         ->get()
                         ->map(function ($menu) {
                             $route = $menu->route ?? '';
-                            $slug = trim(str_replace(['/', '-'], ['_', '_'], preg_replace('#^/+#', '', $route)), '_') ?: 'menu_' . $menu->id;
+                            $slug = trim(str_replace(['/', '-'], ['_', '_'], preg_replace('#^/+#', '', $route)), '_') ?: 'menu_'.$menu->id;
+
                             return [
                                 'id' => $menu->id,
                                 'menu_name' => $menu->menu_name,
@@ -196,7 +199,8 @@ class HandleInertiaRequests extends Middleware
                         ->get()
                         ->map(function ($menu) {
                             $route = $menu->route ?? '';
-                            $slug = trim(str_replace(['/', '-'], ['_', '_'], preg_replace('#^/+#', '', $route)), '_') ?: 'menu_' . $menu->id;
+                            $slug = trim(str_replace(['/', '-'], ['_', '_'], preg_replace('#^/+#', '', $route)), '_') ?: 'menu_'.$menu->id;
+
                             return [
                                 'id' => $menu->id,
                                 'menu_name' => $menu->menu_name,
@@ -214,7 +218,6 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
-
         // Get active currencies for dropdowns
         $currencies = Cache::remember('active_currencies', 3600, function () {
             return Currency::active()
@@ -226,16 +229,15 @@ class HandleInertiaRequests extends Middleware
                         'label' => "{$currency->name} ({$currency->code})",
                         'symbol' => $currency->symbol,
                         'exchange_rate' => $currency->exchange_rate,
-                        'country' => $currency->country
+                        'country' => $currency->country,
                     ];
                 })
                 ->toArray();
         });
 
-
-        $loader = new TranslationLoaderService();
+        $loader = new TranslationLoaderService;
         $locale = $request->session()->get('locale', config('app.locale', 'en'));
-        if (!in_array($locale, TranslationLoaderService::LOCALES, true)) {
+        if (! in_array($locale, TranslationLoaderService::LOCALES, true)) {
             $locale = TranslationLoaderService::DEFAULT_LOCALE;
         }
 
@@ -263,7 +265,7 @@ class HandleInertiaRequests extends Middleware
         if ($user && $user->comp_id) {
             $sharedData['fiscalYear'] = FiscalYearHelper::getCurrentFiscalYear($user->comp_id);
         }
-        
+
         return $sharedData;
     }
 }

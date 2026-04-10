@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\UserRight;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -18,6 +19,45 @@ class AssistantChatFlowTest extends TestCase
         parent::setUp();
 
         $this->prepareMinimalSchema();
+    }
+
+    public function test_chat_refuses_off_topic_message_via_llm_scope_gate(): void
+    {
+        Cache::flush();
+        config([
+            'services.groq.api_key' => 'test-fake-key',
+            'services.groq.scope_gate_enabled' => true,
+        ]);
+
+        Http::fake([
+            '*api.groq.com*' => Http::response([
+                'choices' => [
+                    [
+                        'message' => [
+                            'content' => '{"in_scope":false,"category":"personal"}',
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $user = $this->makeUser();
+
+        $response = $this
+            ->withoutMiddleware(WebAuthentication::class)
+            ->actingAs($user)
+            ->postJson('/rahj-ai/chat', [
+                'message' => 'gf ko kaisay ptaye',
+            ]);
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('meta.mode', 'out_of_scope')
+            ->assertJsonPath('meta.scope_category', 'personal');
+
+        $this->assertStringContainsString('ERP', (string) $response->json('answer'));
+        Http::assertSentCount(1);
     }
 
     public function test_chat_returns_permission_denial_for_read_only_tool_when_user_lacks_view_right(): void
