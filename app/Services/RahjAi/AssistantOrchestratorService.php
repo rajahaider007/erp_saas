@@ -12,6 +12,23 @@ use Illuminate\Support\Facades\Log;
 
 class AssistantOrchestratorService
 {
+    private EnhancedRagService $enhancedRag;
+    private RealtimeDataService $realtimeData;
+    private ProfessionalFormService $formService;
+    private SystemContextService $contextService;
+
+    public function __construct(
+        EnhancedRagService $enhancedRag = null,
+        RealtimeDataService $realtimeData = null,
+        ProfessionalFormService $formService = null,
+        SystemContextService $contextService = null
+    ) {
+        $this->enhancedRag = $enhancedRag ?? app(EnhancedRagService::class);
+        $this->realtimeData = $realtimeData ?? app(RealtimeDataService::class);
+        $this->formService = $formService ?? app(ProfessionalFormService::class);
+        $this->contextService = $contextService ?? app(SystemContextService::class);
+    }
+
     public function respond(
         Request $request,
         string $question,
@@ -24,6 +41,9 @@ class AssistantOrchestratorService
         $user = $request->user();
         $languageHint = $this->detectLanguageHint($question);
         $smartEntry = new SmartEntryService();
+
+        // Build system context for better awareness
+        $systemContext = $this->contextService->buildUserContext($request);
 
         $pending = $this->getPendingClarification($request, $conversationId);
         if ($pending) {
@@ -66,8 +86,14 @@ class AssistantOrchestratorService
             }
         }
 
+        // Use enhanced RAG with real-time data
         $topK = (int) config('services.groq.rag_top_k', 5);
-        $chunks = $ragCorpus->retrieve($question, max(1, min(10, $topK)));
+        $chunks = $this->enhancedRag->intelligentRetrieve(
+            $question,
+            $context['comp_id'] ?? 1,
+            $context['location_id'] ?? 1,
+            max(1, min(10, $topK))
+        );
         $reply = $groq->ask($question, $chunks);
 
         $sources = array_map(static function (array $chunk): array {
