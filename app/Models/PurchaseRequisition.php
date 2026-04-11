@@ -16,6 +16,7 @@ class PurchaseRequisition extends Model
         'required_by_date',
         'deliver_to_location_id',
         'delivery_address',
+        'vendor_id',
         'currency_id',
         'fx_rate',
         'priority',
@@ -55,6 +56,11 @@ class PurchaseRequisition extends Model
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'vendor_id');
     }
 
     public function requestingLocation(): BelongsTo

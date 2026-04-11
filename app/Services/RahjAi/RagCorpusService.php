@@ -25,6 +25,7 @@ class RagCorpusService
             return [];
         }
 
+        $query = $this->expandQueryForRetrieval($query);
         $queryTokens = $this->tokenize($query);
         if (empty($queryTokens)) {
             return array_slice($records, 0, $topK);
@@ -156,7 +157,7 @@ class RagCorpusService
         }
 
         if ($sourceType === 'user_guide') {
-            $sourceBoost += 0.08;
+            $sourceBoost += 0.18;
         }
 
         if (str_contains($pathHaystack, 'navigation_anchors')) {
@@ -164,7 +165,8 @@ class RagCorpusService
         }
 
         if (str_contains($pathHaystack, 'route_catalog')) {
-            $sourceBoost += 0.18;
+            // Broad route lists: keep a small boost so navigation still surfaces, but below module guides.
+            $sourceBoost += 0.06;
         }
 
         if ($domain !== null) {
@@ -264,5 +266,42 @@ class RagCorpusService
         }));
 
         return array_values(array_unique($parts));
+    }
+
+    /**
+     * Light query expansion for lexical retrieval (Roman Urdu / shorthand → extra English tokens).
+     */
+    protected function expandQueryForRetrieval(string $query): string
+    {
+        $lower = mb_strtolower(trim($query));
+        $extra = [];
+
+        if (preg_match('/\bpo\b|\bp\.o\.|purchase order|purchase orders/i', $query)) {
+            $extra[] = 'purchase order pending status inventory';
+        }
+        if (preg_match('/\bgrn\b|goods receipt|goods received/i', $query)) {
+            $extra[] = 'goods receipt note grn inventory';
+        }
+        if (preg_match('/\bpr\b|purchase requisition|requisition/i', $query) && ! str_contains($lower, 'report')) {
+            $extra[] = 'purchase requisition inventory';
+        }
+        if (preg_match('/journal voucher|\bjv\b/i', $query)) {
+            $extra[] = 'journal voucher accounts';
+        }
+        if (preg_match('/bank voucher|\bbpv\b|\bbrv\b/i', $query)) {
+            $extra[] = 'bank voucher accounts';
+        }
+        if (preg_match('/cash voucher|\bcpv\b|\bcrv\b/i', $query)) {
+            $extra[] = 'cash voucher accounts';
+        }
+        if (preg_match('/voucher|journal|ledger|trial balance|chart of account/i', $query)) {
+            $extra[] = 'accounts module';
+        }
+
+        if ($extra === []) {
+            return $query;
+        }
+
+        return trim($query.' '.implode(' ', array_unique($extra)));
     }
 }

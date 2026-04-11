@@ -17,16 +17,49 @@ class PackageFeatureController extends Controller
     {
         // Check if user has permission to can_view
         $this->requirePermission($request, null, 'can_view');
-        $query = PackageFeature::with(['package', 'menu']);
+        
+        // Get total count of all packages (not features) for pagination
+        $query = Package::query();
 
         if ($request->filled('package_id')) {
-            $query->where('package_id', $request->package_id);
+            $query->where('id', $request->package_id);
         }
 
-        $packageFeatures = $query->orderBy('package_id')->orderBy('menu_id')->paginate(min($request->get('per_page', 25), 100));
+        // Paginate packages (not individual features)
+        $perPage = min($request->get('per_page', 25), 100);
+        $packages = $query->orderBy('package_name')->paginate($perPage);
+
+        // Load features for the paginated packages
+        $packages->load(['features' => function ($q) {
+            $q->with(['menu'])->orderBy('menu_id');
+        }]);
+
+        // Flatten the features for the paginated view
+        $packageFeatures = collect();
+        $totalFeatures = 0;
+        foreach ($packages->items() as $package) {
+            foreach ($package->features as $feature) {
+                $feature->package = $package;
+                $packageFeatures->push($feature);
+                $totalFeatures++;
+            }
+        }
+
+        // Create a proper paginated response
+        $paginatedFeatures = new \Illuminate\Pagination\LengthAwarePaginator(
+            $packageFeatures->values(),
+            PackageFeature::count(), // Total number of all features
+            $packages->perPage(),
+            $packages->currentPage(),
+            [
+                'path' => $packages->path(),
+                'query' => $packages->query(),
+                'fragment' => $packages->fragment(),
+            ]
+        );
 
         return Inertia::render('system/PackageFeatures/List', [
-            'packageFeatures' => $packageFeatures,
+            'packageFeatures' => $paginatedFeatures,
             'packages' => Package::orderBy('package_name')->get(['id', 'package_name']),
             'filters' => $request->only(['package_id', 'per_page']),
             'pageTitle' => 'Package Features',

@@ -3,7 +3,9 @@
 namespace App\Services\RahjAi;
 
 use App\Models\Menu;
+use App\Models\RahjAiMessage;
 use App\Models\User;
+use App\Services\TranslationLoaderService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -93,6 +95,19 @@ class AssistantOrchestratorService
             }
         }
 
+        if (! $this->groqApiConfigured()) {
+            return $this->localResponse(
+                $this->groqMissingKeyMessage($request),
+                [],
+                [
+                    'mode' => 'groq_not_configured',
+                    'hint' => 'GROQ_API_KEY',
+                ],
+                $languageHint,
+                false
+            );
+        }
+
         $scopeDecision = $groq->evaluateErpMessageScope($question, $languageHint);
         if (! ($scopeDecision['in_scope'] ?? true)) {
             return $this->localResponse(
@@ -117,10 +132,23 @@ class AssistantOrchestratorService
         );
 
         $sessionBrief = $this->contextService->summarizeForAssistantPrompt($systemContext);
+        $chatHistory = $this->loadConversationChatHistory($conversationId);
         $reply = $groq->ask($question, $chunks, [
             'session_brief' => $sessionBrief,
             'language_hint' => $languageHint,
+            'chat_history' => $chatHistory,
         ]);
+
+        $verification = $groq->verifyGroundedDraft($question, $chunks, $reply['answer']);
+        $ragMeta = [
+            'mode' => 'rag',
+            'language_hint' => $languageHint,
+            'routing' => $reply['routing'] ?? null,
+            'verifier' => $verification,
+        ];
+        if (($verification['status'] ?? '') === 'warn' && ! empty($verification['detail'])) {
+            $reply['answer'] .= "\n\n*Verifier note:* ".$verification['detail'];
+        }
 
         $sources = array_map(static function (array $chunk): array {
             return [
@@ -136,11 +164,43 @@ class AssistantOrchestratorService
             'answer' => $reply['answer'],
             'model' => $reply['model'],
             'sources' => $sources,
-            'meta' => [
-                'mode' => 'rag',
-                'language_hint' => $languageHint,
-            ],
+            'meta' => $ragMeta,
         ];
+    }
+
+    /**
+     * @return list<array{role: string, content: string}>
+     */
+    protected function loadConversationChatHistory(?int $conversationId): array
+    {
+        if (! $conversationId || $conversationId < 1) {
+            return [];
+        }
+
+        $maxMessages = max(1, min(100, (int) config('services.groq.chat_history_max_messages', 24)));
+
+        $rows = RahjAiMessage::query()
+            ->where('conversation_id', $conversationId)
+            ->orderByDesc('id')
+            ->limit($maxMessages)
+            ->get()
+            ->sortBy('id')
+            ->values();
+
+        $out = [];
+        foreach ($rows as $row) {
+            $role = (string) $row->role;
+            if (! in_array($role, ['user', 'assistant'], true)) {
+                continue;
+            }
+            $content = trim((string) $row->content);
+            if ($content === '') {
+                continue;
+            }
+            $out[] = ['role' => $role, 'content' => $content];
+        }
+
+        return $out;
     }
 
     protected function handleReadOnlyIntent(
@@ -931,6 +991,21 @@ class AssistantOrchestratorService
         ]);
     }
 
+    protected function groqApiConfigured(): bool
+    {
+        return trim((string) config('services.groq.api_key', '')) !== '';
+    }
+
+    protected function groqMissingKeyMessage(Request $request): string
+    {
+        $locale = (string) $request->session()->get('locale', config('app.locale', 'en'));
+        if (! in_array($locale, TranslationLoaderService::LOCALES, true)) {
+            $locale = TranslationLoaderService::DEFAULT_LOCALE;
+        }
+
+        return (string) trans('rahj_ai_backend.groq_not_configured', [], $locale);
+    }
+
     protected function localResponse(string $answer, array $sources, array $meta, string $languageHint, bool $appendUrduMixOffer = true): array
     {
         $finalAnswer = $answer;
@@ -1077,6 +1152,61 @@ class AssistantOrchestratorService
         Cache::forget($this->pendingKey($request, $conversationId));
     }
 
+    /**
+     * @return list<array{code: string, name: string, account_type: string|null}>
+     */
+    protected function suggestLevel3ParentsForCoa(int $compId, int $locationId, string $question): array
+    {
+        $lower = mb_strtolower($question);
+        $bankish = str_contains($lower, 'bank')
+            || str_contains($lower, 'banks')
+            || str_contains($lower, 'cash')
+            || str_contains($lower, 'alfalah')
+            || str_contains($lower, 'hbl')
+            || str_contains($lower, 'ubl')
+            || str_contains($lower, 'mcb');
+
+        $base = DB::table('chart_of_accounts')
+            ->where('comp_id', $compId)
+            ->where('location_id', $locationId)
+            ->where('account_level', 3);
+
+        if ($bankish) {
+            $filtered = (clone $base)
+                ->where(function ($q): void {
+                    $q->where('account_name', 'like', '%bank%')
+                        ->orWhere('account_name', 'like', '%Bank%')
+                        ->orWhere('account_name', 'like', '%cash%')
+                        ->orWhere('account_name', 'like', '%Cash%')
+                        ->orWhere('account_type', 'Asset');
+                })
+                ->orderBy('account_code')
+                ->limit(12)
+                ->get(['account_code', 'account_name', 'account_type']);
+
+            if ($filtered->isNotEmpty()) {
+                return $filtered->map(static function ($row): array {
+                    return [
+                        'code' => (string) $row->account_code,
+                        'name' => (string) $row->account_name,
+                        'account_type' => isset($row->account_type) ? (string) $row->account_type : null,
+                    ];
+                })->all();
+            }
+        }
+
+        return $base->orderBy('account_code')
+            ->limit(12)
+            ->get(['account_code', 'account_name', 'account_type'])
+            ->map(static function ($row): array {
+                return [
+                    'code' => (string) $row->account_code,
+                    'name' => (string) $row->account_name,
+                    'account_type' => isset($row->account_type) ? (string) $row->account_type : null,
+                ];
+            })->all();
+    }
+
     protected function handleSmartCoaCodeEntry(
         string $question,
         array $context,
@@ -1117,6 +1247,12 @@ class AssistantOrchestratorService
             }
         }
 
+        $level3Suggestions = $this->suggestLevel3ParentsForCoa(
+            (int) $context['comp_id'],
+            (int) $context['location_id'],
+            $question
+        );
+
         // Check permissions
         if (! $this->canAccessMenuRoute($user, '/accounts/chart-of-account-code-configuration', 'can_add')) {
             return $this->localResponse(
@@ -1127,7 +1263,13 @@ class AssistantOrchestratorService
             );
         }
 
-        $smartResponse = $smartEntry->buildCoaCodeSmartResponse($question, $extracted, $level3AccountId, $languageHint);
+        $smartResponse = $smartEntry->buildCoaCodeSmartResponse(
+            $question,
+            $extracted,
+            $level3AccountId,
+            $languageHint,
+            $level3Suggestions
+        );
 
         if ($smartResponse['mode'] === 'smart_entry_field_collection') {
             $this->savePendingClarification($request, $conversationId, [
@@ -1140,16 +1282,33 @@ class AssistantOrchestratorService
             return $this->localResponse(
                 $smartResponse['answer'],
                 [],
-                ['mode' => 'smart_entry', 'step' => 'field_collection'],
+                [
+                    'mode' => 'smart_entry',
+                    'step' => 'field_collection',
+                    'action' => $smartResponse['input_form'] ?? null,
+                ],
                 $languageHint
             );
         }
 
         if ($smartResponse['mode'] === 'smart_entry_ready_confirmation') {
+            $level3ForPending = $level3AccountId;
+            if (! $level3ForPending && ! empty($smartResponse['extracted']['parent_code'])) {
+                $resolvedParent = DB::table('chart_of_accounts')
+                    ->where('account_code', $smartResponse['extracted']['parent_code'])
+                    ->where('comp_id', $context['comp_id'])
+                    ->where('location_id', $context['location_id'])
+                    ->where('account_level', 3)
+                    ->first();
+                if ($resolvedParent) {
+                    $level3ForPending = (int) $resolvedParent->id;
+                }
+            }
+
             $this->savePendingClarification($request, $conversationId, [
                 'intent' => 'smart_entry_coa_ready_confirmation',
                 'extracted' => $smartResponse['extracted'],
-                'level3_account_id' => $level3AccountId,
+                'level3_account_id' => $level3ForPending,
                 'comp_id' => $context['comp_id'],
                 'location_id' => $context['location_id'],
             ]);
@@ -1179,33 +1338,94 @@ class AssistantOrchestratorService
 
         if ($intent === 'smart_entry_coa_field_collection') {
             $resolved = $smartEntry->tryResolveSmartEntryFieldCollection($question, $pending);
-            if ($resolved && $resolved['complete']) {
-                $extracted = $resolved['extracted'];
-                $level3AccountId = $pending['level3_account_id'] ?? null;
+            if ($resolved === null) {
+                return null;
+            }
 
+            $extracted = $resolved['extracted'];
+            $level3AccountId = $pending['level3_account_id'] ?? null;
+            if (! $level3AccountId && ! empty($extracted['parent_code'])) {
+                $parentRow = DB::table('chart_of_accounts')
+                    ->where('account_code', $extracted['parent_code'])
+                    ->where('comp_id', $context['comp_id'])
+                    ->where('location_id', $context['location_id'])
+                    ->where('account_level', 3)
+                    ->first();
+                if ($parentRow) {
+                    $level3AccountId = (int) $parentRow->id;
+                }
+            }
+
+            $suggestions = $this->suggestLevel3ParentsForCoa(
+                (int) $context['comp_id'],
+                (int) $context['location_id'],
+                $question
+            );
+
+            if (! ($resolved['complete'] ?? false)) {
                 $smartResponse = $smartEntry->buildCoaCodeSmartResponse(
                     $question,
                     $extracted,
                     $level3AccountId,
-                    $languageHint
+                    $languageHint,
+                    $suggestions
                 );
 
-                $this->clearPendingClarification($request, $conversationId);
                 $this->savePendingClarification($request, $conversationId, [
-                    'intent' => 'smart_entry_coa_ready_confirmation',
+                    'intent' => 'smart_entry_coa_field_collection',
                     'extracted' => $smartResponse['extracted'],
+                    'missing_fields' => $resolved['missing_fields'] ?? [],
                     'level3_account_id' => $level3AccountId,
-                    'comp_id' => $context['comp_id'],
-                    'location_id' => $context['location_id'],
                 ]);
 
                 return $this->localResponse(
                     $smartResponse['answer'],
                     [],
-                    ['mode' => 'smart_entry', 'step' => 'confirmation', 'action' => $smartResponse['action'] ?? null],
+                    [
+                        'mode' => 'smart_entry',
+                        'step' => 'field_collection',
+                        'action' => $smartResponse['input_form'] ?? null,
+                    ],
                     $languageHint
                 );
             }
+
+            $smartResponse = $smartEntry->buildCoaCodeSmartResponse(
+                $question,
+                $extracted,
+                $level3AccountId,
+                $languageHint,
+                $suggestions
+            );
+
+            $level3ForPending = $level3AccountId;
+            if (! $level3ForPending && ! empty($smartResponse['extracted']['parent_code'])) {
+                $resolvedParent = DB::table('chart_of_accounts')
+                    ->where('account_code', $smartResponse['extracted']['parent_code'])
+                    ->where('comp_id', $context['comp_id'])
+                    ->where('location_id', $context['location_id'])
+                    ->where('account_level', 3)
+                    ->first();
+                if ($resolvedParent) {
+                    $level3ForPending = (int) $resolvedParent->id;
+                }
+            }
+
+            $this->clearPendingClarification($request, $conversationId);
+            $this->savePendingClarification($request, $conversationId, [
+                'intent' => 'smart_entry_coa_ready_confirmation',
+                'extracted' => $smartResponse['extracted'],
+                'level3_account_id' => $level3ForPending,
+                'comp_id' => $context['comp_id'],
+                'location_id' => $context['location_id'],
+            ]);
+
+            return $this->localResponse(
+                $smartResponse['answer'],
+                [],
+                ['mode' => 'smart_entry', 'step' => 'confirmation', 'action' => $smartResponse['action'] ?? null],
+                $languageHint
+            );
         }
 
         if ($intent === 'smart_entry_coa_ready_confirmation') {
@@ -1269,6 +1489,19 @@ class AssistantOrchestratorService
             );
         }
 
+        $parentAccountType = (string) (DB::table('chart_of_accounts')
+            ->where('id', $level3AccountId)
+            ->value('account_type') ?? '');
+
+        $accountType = $this->normalizeChartOfAccountsTypeForInsert(
+            isset($extracted['account_type']) ? (string) $extracted['account_type'] : null,
+            $parentAccountType !== '' ? $parentAccountType : null
+        );
+
+        $typeLabelForMessage = trim((string) ($extracted['account_type'] ?? '')) !== ''
+            ? (string) $extracted['account_type']
+            : $accountType;
+
         $existingCode = DB::table('chart_of_accounts')
             ->where('account_code', $extracted['account_code'])
             ->where('comp_id', $compId)
@@ -1289,7 +1522,7 @@ class AssistantOrchestratorService
             $newCode = DB::table('chart_of_accounts')->insertGetId([
                 'account_code' => $extracted['account_code'],
                 'account_name' => $extracted['account_name'],
-                'account_type' => $extracted['account_type'] ?? 'Equity',
+                'account_type' => $accountType,
                 'parent_account_id' => $level3AccountId,
                 'account_level' => 4,
                 'is_transactional' => $extracted['is_transactional'] ?? true,
@@ -1306,7 +1539,9 @@ class AssistantOrchestratorService
             $answer = "✓ **Level 4 account code created successfully!**\n\n";
             $answer .= "- Code: **{$extracted['account_code']}**\n";
             $answer .= "- Name: **{$extracted['account_name']}**\n";
-            $answer .= "- Type: **{$extracted['account_type']}**\n";
+            $answer .= $typeLabelForMessage === $accountType
+                ? "- Type: **{$accountType}**\n"
+                : "- Type: **{$typeLabelForMessage}** (database value **{$accountType}**)\n";
             $answer .= '- Transactional: **'.($extracted['is_transactional'] ? 'Yes' : 'No')."**\n\n";
             $answer .= 'You can now use this code in journal entries, transactions, and reports.';
 
@@ -1341,6 +1576,44 @@ class AssistantOrchestratorService
                 $languageHint
             );
         }
+    }
+
+    /**
+     * chart_of_accounts.account_type is often a MySQL ENUM with plural values (Assets, Liabilities, Expenses).
+     * Smart entry and forms use singular (Asset, …). Normalize before raw DB::insert.
+     */
+    protected function normalizeChartOfAccountsTypeForInsert(?string $fromUser, ?string $fromParentRow): string
+    {
+        $db = $this->mapCoaAccountTypeToDbEnum($fromUser)
+            ?? $this->mapCoaAccountTypeToDbEnum($fromParentRow);
+
+        return $db ?? 'Assets';
+    }
+
+    protected function mapCoaAccountTypeToDbEnum(?string $raw): ?string
+    {
+        if ($raw === null) {
+            return null;
+        }
+        $t = trim($raw);
+        if ($t === '') {
+            return null;
+        }
+
+        static $map = [
+            'Asset' => 'Assets',
+            'Assets' => 'Assets',
+            'Liability' => 'Liabilities',
+            'Liabilities' => 'Liabilities',
+            'Expense' => 'Expenses',
+            'Expenses' => 'Expenses',
+            'Equity' => 'Equity',
+            'Revenue' => 'Revenue',
+            'Contra-Asset' => 'Assets',
+            'Contra-Revenue' => 'Revenue',
+        ];
+
+        return $map[$t] ?? null;
     }
 
     protected function tryResolvePendingClarification(string $question, array $pending, array $scope, ?User $user): ?array

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useMemo, useCallback, useEffect } from 'react';
-import { Home, ClipboardList, Plus, Trash2, SquarePen } from 'lucide-react';
+import { Home, ClipboardList, Plus, Trash2, SquarePen, ChevronDown, ChevronUp } from 'lucide-react';
 import { router, usePage } from '@inertiajs/react';
 import GeneralizedForm from '@/Components/GeneralizedForm';
 import Breadcrumbs from '@/Components/Breadcrumbs';
@@ -67,6 +67,8 @@ const PurchaseRequisitionCreate = () => {
   const [lines, setLines] = useState([emptyLine()]);
   const [alert, setAlert] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [expandedSection, setExpandedSection] = useState('essential');
+  const [collapsedAdvanced, setCollapsedAdvanced] = useState(true);
   const aiDraftPayload = useMemo(
     () => (requisition?.id ? null : consumeRahjAiDraftPayload('purchase_requisition')),
     [requisition?.id]
@@ -135,11 +137,12 @@ const PurchaseRequisitionCreate = () => {
         section: tc('section_header'),
       },
       {
-        name: 'required_by_date',
-        label: fld('required_by_date', 'label'),
-        type: 'datepicker',
-        placeholder: fld('required_by_date', 'placeholder'),
-        required: false,
+        name: 'priority',
+        label: fld('priority', 'label'),
+        type: 'select',
+        placeholder: fld('priority', 'placeholder'),
+        options: priorityOptions,
+        required: true,
       },
       {
         name: 'deliver_to_location_id',
@@ -149,6 +152,19 @@ const PurchaseRequisitionCreate = () => {
         options: locationOptions,
         required: false,
         searchable: true,
+      },
+    ],
+    [fld, tc, locationOptions, priorityOptions]
+  );
+
+  const advancedFields = useMemo(
+    () => [
+      {
+        name: 'required_by_date',
+        label: fld('required_by_date', 'label'),
+        type: 'datepicker',
+        placeholder: fld('required_by_date', 'placeholder'),
+        required: false,
       },
       {
         name: 'delivery_address',
@@ -175,14 +191,6 @@ const PurchaseRequisitionCreate = () => {
         required: false,
         min: 0,
         step: '0.000001',
-      },
-      {
-        name: 'priority',
-        label: fld('priority', 'label'),
-        type: 'select',
-        placeholder: fld('priority', 'placeholder'),
-        options: priorityOptions,
-        required: true,
       },
       {
         name: 'initial_status',
@@ -230,7 +238,7 @@ const PurchaseRequisitionCreate = () => {
         rows: 2,
       },
     ],
-    [fld, tc, locationOptions, currencyOptions, departmentOptions, priorityOptions]
+    [fld, tc, locationOptions, currencyOptions, departmentOptions]
   );
 
   const initialHeader = useMemo(() => {
@@ -329,19 +337,27 @@ const PurchaseRequisitionCreate = () => {
     }
 
     const header = headerFormRef.current.getValues();
+    
+    // Get advanced field values from form inputs
+    const formData = new FormData(e.target);
+    const advancedValues = Object.fromEntries(formData);
+    
+    // Merge header and advanced values
+    const mergedHeader = { ...header, ...advancedValues };
+
     const payload = {
-      initial_status: header.initial_status || 'draft',
-      pr_date: header.pr_date,
-      required_by_date: header.required_by_date || null,
-      deliver_to_location_id: header.deliver_to_location_id || null,
-      delivery_address: header.delivery_address || null,
-      currency_id: header.currency_id || null,
-      fx_rate: header.fx_rate === '' || header.fx_rate == null ? null : header.fx_rate,
-      priority: header.priority,
-      department_id: header.department_id || null,
-      requested_by: header.requested_by || null,
-      justification: header.justification || null,
-      notes: header.notes || null,
+      initial_status: mergedHeader.initial_status || 'draft',
+      pr_date: mergedHeader.pr_date,
+      required_by_date: mergedHeader.required_by_date || null,
+      deliver_to_location_id: mergedHeader.deliver_to_location_id || null,
+      delivery_address: mergedHeader.delivery_address || null,
+      currency_id: mergedHeader.currency_id || null,
+      fx_rate: mergedHeader.fx_rate === '' || mergedHeader.fx_rate == null ? null : mergedHeader.fx_rate,
+      priority: mergedHeader.priority,
+      department_id: mergedHeader.department_id || null,
+      requested_by: mergedHeader.requested_by || null,
+      justification: mergedHeader.justification || null,
+      notes: mergedHeader.notes || null,
       lines: lines.map((row) => ({
         inventory_item_id: parseInt(row.inventory_item_id, 10),
         uom_id: parseInt(row.uom_id, 10),
@@ -403,32 +419,44 @@ const PurchaseRequisitionCreate = () => {
 
   return (
     <App>
-      <div className="rounded-xl shadow-lg border-slate-200">
-        <div className="p-4 md:p-5">
+      <div className="rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="p-4 md:p-6 lg:p-8">
           <Breadcrumbs items={breadcrumbItems} description={tc('breadcrumb_desc')} />
 
           <div className="form-theme-system">
-            <div className="form-container form-container--pr-compact">
-              <div className="form-header form-header--compact mb-4">
-                <h1 className="form-title form-title--compact">
-                  {isEdit ? tc('title_edit') : tc('title')}
-                  {isEdit && requisition?.pr_number ? (
-                    <span className="ml-2 text-base font-mono font-normal opacity-90">{requisition.pr_number}</span>
-                  ) : null}
-                </h1>
-                <p className="form-subtitle mb-0">{isEdit ? tc('subtitle_edit') : tc('subtitle')}</p>
+            <div className="form-container form-container--pr-redesigned">
+              {/* Header Section */}
+              <div className="mb-8">
+                <div className="flex items-baseline justify-between gap-4 flex-wrap">
+                  <div>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 m-0">
+                      {isEdit ? tc('title_edit') : tc('title')}
+                    </h1>
+                    <p className="text-base text-slate-500 dark:text-slate-400 mt-2 mb-0">{isEdit ? tc('subtitle_edit') : tc('subtitle')}</p>
+                  </div>
+                  {isEdit && requisition?.pr_number && (
+                    <div className="bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg">
+                      <p className="text-sm text-slate-600 dark:text-slate-400 m-0">PR Number</p>
+                      <p className="text-lg font-mono font-semibold text-slate-900 dark:text-slate-50 m-0">{requisition.pr_number}</p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {alert && (
                 <div
-                  className={`mb-4 ${alert.type === 'error' ? 'alert-error-themed' : 'alert-success-themed'}`}
+                  className={`mb-6 p-4 rounded-lg border ${
+                    alert.type === 'error'
+                      ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
+                      : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
+                  }`}
                   role={alert.type === 'error' ? 'alert' : 'status'}
                 >
-                  <p className="m-0">{alert.message}</p>
+                  <p className="m-0 font-medium">{alert.message}</p>
                   {pageErrors && Object.keys(pageErrors).length > 0 && (
-                    <ul className="mt-2 mb-0 list-disc pl-5 space-y-1">
+                    <ul className="mt-3 mb-0 list-disc pl-5 space-y-1">
                       {Object.entries(pageErrors).map(([key, val]) => (
-                        <li key={key}>{Array.isArray(val) ? val[0] : val}</li>
+                        <li key={key} className="text-sm">{Array.isArray(val) ? val[0] : val}</li>
                       ))}
                     </ul>
                   )}
@@ -436,67 +464,186 @@ const PurchaseRequisitionCreate = () => {
               )}
 
               <form onSubmit={handleFormSubmit} noValidate>
-                <GeneralizedForm
-                  key={`pr-h-${headerFormKey}-${requisition?.id ?? 'new'}`}
-                  ref={headerFormRef}
-                  embedded
-                  showEmbeddedHeader={false}
-                  title=""
-                  subtitle=""
-                  fields={headerFields}
-                  initialData={initialHeader}
-                  formGridClassName="form-grid--pr-compact"
-                  onSubmit={() => {}}
-                  showReset={false}
-                  showSubmitActions={false}
-                />
-
-                <section className="mt-5" aria-labelledby="pr-lines-heading">
-                  <div className="textarea-group mb-1.5">
-                    <h2 id="pr-lines-heading" className="m-0 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
-                      {tc('section_lines')}
+                {/* Essential Information Section */}
+                <div className="mb-6 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+                  <div
+                    className="px-5 py-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/70 transition-colors flex items-center justify-between"
+                    onClick={() => setExpandedSection(expandedSection === 'essential' ? null : 'essential')}
+                    role="button"
+                    tabIndex="0"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        setExpandedSection(expandedSection === 'essential' ? null : 'essential');
+                      }
+                    }}
+                  >
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50 m-0">
+                      📋 Essential Information
                     </h2>
-                    <p className="mt-1 mb-0 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      {tc('lines_hint')}
-                    </p>
+                    {expandedSection === 'essential' ? (
+                      <ChevronUp size={20} className="text-slate-600 dark:text-slate-400" />
+                    ) : (
+                      <ChevronDown size={20} className="text-slate-600 dark:text-slate-400" />
+                    )}
                   </div>
 
-                  <div className="overflow-x-auto rounded-lg border border-slate-200/80 dark:border-slate-700">
-                    <table className="min-w-full border-collapse text-sm pr-line-table" role="grid" aria-label={tc('section_lines')}>
+                  {expandedSection === 'essential' && (
+                    <div className="p-5">
+                      <GeneralizedForm
+                        key={`pr-h-${headerFormKey}-${requisition?.id ?? 'new'}`}
+                        ref={headerFormRef}
+                        embedded
+                        showEmbeddedHeader={false}
+                        title=""
+                        subtitle=""
+                        fields={headerFields}
+                        initialData={initialHeader}
+                        formGridClassName="grid grid-cols-1 md:grid-cols-2 gap-5"
+                        onSubmit={() => {}}
+                        showReset={false}
+                        showSubmitActions={false}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Advanced Options Section */}
+                <div className="mb-6 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+                  <div
+                    className="px-5 py-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/70 transition-colors flex items-center justify-between"
+                    onClick={() => setCollapsedAdvanced(!collapsedAdvanced)}
+                    role="button"
+                    tabIndex="0"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        setCollapsedAdvanced(!collapsedAdvanced);
+                      }
+                    }}
+                  >
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50 m-0">
+                      ⚙️ Advanced Options
+                    </h2>
+                    {!collapsedAdvanced ? (
+                      <ChevronUp size={20} className="text-slate-600 dark:text-slate-400" />
+                    ) : (
+                      <ChevronDown size={20} className="text-slate-600 dark:text-slate-400" />
+                    )}
+                  </div>
+
+                  {!collapsedAdvanced && (
+                    <div className="p-5">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {advancedFields.map((field) => (
+                          <div key={field.name} className="form-group-wrapper">
+                            {field.type === 'textarea' ? (
+                              <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                  {field.label}
+                                  {field.required && <span className="text-red-500 ml-1">*</span>}
+                                </label>
+                                <textarea
+                                  className="form-input w-full"
+                                  name={field.name}
+                                  placeholder={field.placeholder}
+                                  rows={field.rows || 2}
+                                  defaultValue={initialHeader[field.name] || ''}
+                                  maxLength={field.maxLength}
+                                />
+                              </div>
+                            ) : field.type === 'datepicker' ? (
+                              <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                  {field.label}
+                                  {field.required && <span className="text-red-500 ml-1">*</span>}
+                                </label>
+                                <CustomDatePicker
+                                  selected={initialHeader[field.name] ? new Date(initialHeader[field.name]) : null}
+                                  onChange={(date) => {
+                                    const input = document.querySelector(`input[name="${field.name}"]`);
+                                    if (input) input.value = date ? formatLocalYmd(date) : '';
+                                  }}
+                                  type="date"
+                                  placeholder={field.placeholder}
+                                  className="form-input w-full"
+                                  isClearable
+                                />
+                              </div>
+                            ) : field.type === 'select' ? (
+                              <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                  {field.label}
+                                  {field.required && <span className="text-red-500 ml-1">*</span>}
+                                </label>
+                                <select
+                                  className="form-input w-full"
+                                  name={field.name}
+                                  defaultValue={initialHeader[field.name] || ''}
+                                >
+                                  <option value="">{field.placeholder}</option>
+                                  {field.options?.map((opt) => (
+                                    <option key={opt.value} value={opt.value}>
+                                      {opt.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            ) : (
+                              <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                  {field.label}
+                                  {field.required && <span className="text-red-500 ml-1">*</span>}
+                                </label>
+                                <input
+                                  type={field.type || 'text'}
+                                  className="form-input w-full"
+                                  name={field.name}
+                                  placeholder={field.placeholder}
+                                  defaultValue={initialHeader[field.name] || ''}
+                                  min={field.min}
+                                  step={field.step}
+                                  maxLength={field.maxLength}
+                                  disabled={field.disabled}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Line Items Section */}
+                <div className="mb-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+                  <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50 m-0">
+                      📦 Line Items
+                    </h2>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 mb-0">{tc('lines_hint')}</p>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-sm" role="grid">
                       <thead>
-                        <tr className="bg-slate-50/90 dark:bg-slate-800/50 text-left">
-                          <th scope="col" className="px-2 py-2 font-semibold w-10">
-                            {tc('line_number')}
-                          </th>
-                          <th scope="col" className="px-2 py-2 font-semibold min-w-[14rem]">
-                            {lf('item', 'label')}
-                          </th>
-                          <th scope="col" className="px-2 py-2 font-semibold min-w-[12rem]">
-                            {lf('description', 'label')}
-                          </th>
-                          <th scope="col" className="px-2 py-2 font-semibold min-w-[8rem]">
-                            {lf('uom', 'label')}
-                          </th>
-                          <th scope="col" className="px-2 py-2 font-semibold min-w-[6rem]">
-                            {lf('quantity', 'label')}
-                          </th>
-                          <th scope="col" className="px-2 py-2 font-semibold min-w-[7rem]">
-                            {lf('estimated_price', 'label')}
-                          </th>
-                          <th scope="col" className="px-2 py-2 font-semibold min-w-[8rem]">
-                            {lf('need_by_date', 'label')}
-                          </th>
-                          <th scope="col" className="px-2 py-2 font-semibold min-w-[8rem]">
-                            {lf('line_notes', 'label')}
-                          </th>
-                          <th scope="col" className="px-2 py-2 w-12" aria-label={tc('remove_line')} />
+                        <tr className="bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-800 text-left border-b border-slate-200 dark:border-slate-700">
+                          <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 w-12">#</th>
+                          <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 min-w-[14rem]">{lf('item', 'label')}</th>
+                          <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 min-w-[10rem] hidden sm:table-cell">{lf('description', 'label')}</th>
+                          <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 min-w-[7rem]">{lf('uom', 'label')}</th>
+                          <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 min-w-[8rem]">{lf('quantity', 'label')}</th>
+                          <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 min-w-[8rem] hidden md:table-cell">{lf('estimated_price', 'label')}</th>
+                          <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 min-w-[8rem] hidden lg:table-cell">{lf('need_by_date', 'label')}</th>
+                          <th className="px-4 py-3 w-12"></th>
                         </tr>
                       </thead>
                       <tbody>
                         {lines.map((row, index) => (
-                          <tr key={index} className="border-t border-slate-200/80 dark:border-slate-700 align-top">
-                            <td className="px-2 py-2 text-muted-foreground tabular-nums">{index + 1}</td>
-                            <td className="px-2 py-2">
+                          <tr
+                            key={index}
+                            className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors align-top"
+                          >
+                            <td className="px-4 py-3 text-slate-600 dark:text-slate-400 font-medium tabular-nums">{index + 1}</td>
+                            <td className="px-4 py-3">
                               <InlineSearchSelect
                                 options={itemOptions}
                                 value={row.inventory_item_id}
@@ -506,18 +653,17 @@ const PurchaseRequisitionCreate = () => {
                                 className="pr-cell-control"
                               />
                             </td>
-                            <td className="px-2 py-2">
+                            <td className="px-4 py-3 hidden sm:table-cell">
                               <input
                                 type="text"
-                                className="form-input w-full min-w-[10rem]"
+                                className="form-input w-full text-sm"
                                 value={row.item_description}
-                onChange={(e) => updateLine(index, { item_description: e.target.value })}
+                                onChange={(e) => updateLine(index, { item_description: e.target.value })}
                                 placeholder={lf('description', 'placeholder')}
-                                aria-label={lf('description', 'label')}
-                                maxLength={500}
+                                disabled
                               />
                             </td>
-                            <td className="px-2 py-2">
+                            <td className="px-4 py-3">
                               <InlineSearchSelect
                                 options={uomOptions}
                                 value={row.uom_id}
@@ -527,31 +673,29 @@ const PurchaseRequisitionCreate = () => {
                                 className="pr-cell-control"
                               />
                             </td>
-                            <td className="px-2 py-2">
+                            <td className="px-4 py-3">
                               <input
                                 type="number"
                                 step="any"
                                 min="0"
-                                className="form-input w-full min-w-[5rem]"
+                                className="form-input w-full text-sm"
                                 value={row.quantity}
                                 onChange={(e) => updateLine(index, { quantity: e.target.value })}
                                 placeholder={lf('quantity', 'placeholder')}
-                                aria-label={lf('quantity', 'label')}
                               />
                             </td>
-                            <td className="px-2 py-2">
+                            <td className="px-4 py-3 hidden md:table-cell">
                               <input
                                 type="number"
                                 step="any"
                                 min="0"
-                                className="form-input w-full min-w-[5rem]"
+                                className="form-input w-full text-sm"
                                 value={row.estimated_unit_price}
                                 onChange={(e) => updateLine(index, { estimated_unit_price: e.target.value })}
                                 placeholder={lf('estimated_price', 'placeholder')}
-                                aria-label={lf('estimated_price', 'label')}
                               />
                             </td>
-                            <td className="px-2 py-2">
+                            <td className="px-4 py-3 hidden lg:table-cell">
                               <CustomDatePicker
                                 selected={row.need_by_date || null}
                                 onChange={(date) =>
@@ -561,33 +705,21 @@ const PurchaseRequisitionCreate = () => {
                                 }
                                 type="date"
                                 placeholder={lf('need_by_date', 'placeholder')}
-                                className="form-input w-full min-w-[8rem]"
+                                className="form-input w-full text-sm"
                                 isClearable
                               />
                             </td>
-              <td className="px-2 py-2">
-                <input
-                  type="text"
-                  className="form-input w-full min-w-[8rem]"
-                  value={row.line_notes}
-                  onChange={(e) => updateLine(index, { line_notes: e.target.value })}
-                  placeholder={lf('line_notes', 'placeholder')}
-                  aria-label={lf('line_notes', 'label')}
-                  maxLength={500}
-                />
-              </td>
-                            <td className="px-2 py-2">
+                            <td className="px-4 py-3">
                               <button
                                 type="button"
-                                className="btn btn-secondary p-2"
+                                className="btn btn-sm btn-danger p-2 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                                 onClick={() => {
                                   setLines((prev) => prev.filter((_, i) => i !== index));
                                 }}
                                 disabled={lines.length <= 1}
                                 title={tc('remove_line')}
-                                aria-label={tc('remove_line')}
                               >
-                                <Trash2 size={18} />
+                                <Trash2 size={16} />
                               </button>
                             </td>
                           </tr>
@@ -596,27 +728,39 @@ const PurchaseRequisitionCreate = () => {
                     </table>
                   </div>
 
-                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <div className="px-5 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <button
                       type="button"
-                      className="btn btn-secondary"
+                      className="btn btn-secondary inline-flex items-center justify-center"
                       onClick={() => setLines((prev) => [...prev, emptyLine()])}
                     >
-                      <Plus className="btn-icon" size={18} />
+                      <Plus size={18} className="mr-2" />
                       {tc('add_line')}
                     </button>
-                    <p className="m-0 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      {tc('lines_summary', { count: lines.length, amount: subtotalLabel })}
-                    </p>
+                    {lines.length > 0 && (
+                      <p className="text-sm text-slate-600 dark:text-slate-400 m-0">
+                        <span className="font-semibold text-slate-900 dark:text-slate-50">{lines.length}</span> {tc('lines_summary', { count: lines.length, amount: subtotalLabel }).split('{count}')[1]?.split('{amount}')[0] || 'line'}
+                      </p>
+                    )}
                   </div>
-                </section>
+                </div>
 
-                <div className="button-group button-group--pr mt-4">
-                  <button type="submit" className="btn btn-primary" disabled={submitting}>
-                    {submitting ? t('common.form.processing') : isEdit ? tc('submit_update') : tc('submit_save')}
-                  </button>
-                  <button type="button" className="btn btn-secondary" disabled={submitting} onClick={handleResetAll}>
+                {/* Action Buttons */}
+                <div className="flex gap-4 flex-wrap justify-end">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    disabled={submitting}
+                    onClick={handleResetAll}
+                  >
                     {tc('reset_form')}
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary min-w-[150px]"
+                    disabled={submitting}
+                  >
+                    {submitting ? t('common.form.processing') : isEdit ? tc('submit_update') : tc('submit_save')}
                   </button>
                 </div>
               </form>

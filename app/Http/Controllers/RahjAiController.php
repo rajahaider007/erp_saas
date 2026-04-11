@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use App\Services\TranslationLoaderService;
 
 class RahjAiController extends Controller
 {
@@ -264,7 +265,7 @@ class RahjAiController extends Controller
                     RahjAiMessage::create([
                         'conversation_id' => $conversation->id,
                         'role' => 'assistant',
-                        'content' => 'RAHJ AI is temporarily unavailable. Please try again.',
+                        'content' => $this->rahjChatUnavailableMessage($request),
                         'is_error' => true,
                     ]);
                 } catch (\Throwable $persistError) {
@@ -276,9 +277,19 @@ class RahjAiController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'RAHJ AI is temporarily unavailable. Please try again.',
+                'message' => $this->rahjChatUnavailableMessage($request),
             ], 500);
         }
+    }
+
+    protected function rahjChatUnavailableMessage(Request $request): string
+    {
+        $locale = (string) $request->session()->get('locale', config('app.locale', 'en'));
+        if (! in_array($locale, TranslationLoaderService::LOCALES, true)) {
+            $locale = TranslationLoaderService::DEFAULT_LOCALE;
+        }
+
+        return (string) trans('rahj_ai_backend.chat_unavailable', [], $locale);
     }
 
     protected function resolveConversation(Request $request, array $validated): RahjAiConversation

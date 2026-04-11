@@ -36,8 +36,9 @@ class EnhancedRagService
     ): array {
         $intent = $this->detectQueryIntent($query);
 
-        // Get static knowledge from RAG corpus
-        $staticChunks = $this->corpus->retrieve($query, $topK);
+        // Pull a slightly wider slice from the corpus before merge/rank so guides can outrank noisy chunks.
+        $corpusTop = max($topK, min(12, $topK + (int) config('services.groq.rag_corpus_extra_chunks', 3)));
+        $staticChunks = $this->corpus->retrieve($query, $corpusTop);
 
         // Inject real-time data relevant to intent
         $realtimeData = $this->injectRealtimeData($intent, $query, $companyId, $locationId);

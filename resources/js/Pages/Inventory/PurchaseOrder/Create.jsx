@@ -490,6 +490,7 @@ export default function PurchaseOrderCreate() {
           : [emptyLine()];
       setLines(mapped);
       setHeaderPrefillBoost({
+        vendor_id: data.vendor_id != null ? String(data.vendor_id) : undefined,
         ship_to_location_id: data.ship_to_location_id != null ? String(data.ship_to_location_id) : undefined,
         delivery_address: data.delivery_address ?? undefined,
         currency_id: data.currency_id != null ? String(data.currency_id) : undefined,
@@ -507,6 +508,9 @@ export default function PurchaseOrderCreate() {
 
   const mergedInitialHeader = useMemo(() => {
     const h = { ...initialHeader };
+    if (headerPrefillBoost.vendor_id !== undefined) {
+      h.vendor_id = headerPrefillBoost.vendor_id;
+    }
     if (headerPrefillBoost.ship_to_location_id !== undefined) {
       h.ship_to_location_id = headerPrefillBoost.ship_to_location_id;
     }

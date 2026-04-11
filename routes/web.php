@@ -108,6 +108,14 @@ Route::get('/rahj-ai', function () {
     return Inertia::render('RahjAi/Portal');
 })->middleware('web.auth')->name('rahj-ai.portal');
 
+Route::get('/rahj-ai/guidelines', function () {
+    return Inertia::render('RahjAi/Guidelines');
+})->middleware('web.auth')->name('rahj-ai.guidelines');
+
+Route::get('/rahj-ai/privacy', function () {
+    return Inertia::render('RahjAi/Privacy');
+})->middleware('web.auth')->name('rahj-ai.privacy');
+
 Route::post('/rahj-ai/chat', [App\Http\Controllers\RahjAiController::class, 'chat'])
     ->middleware('web.auth')
     ->name('rahj-ai.chat');

@@ -244,6 +244,7 @@ class PurchaseOrderController extends Controller
             ->values();
 
         return response()->json([
+            'vendor_id' => $pr->vendor_id,
             'ship_to_location_id' => $pr->deliver_to_location_id,
             'delivery_address' => $pr->delivery_address,
             'currency_id' => $pr->currency_id,

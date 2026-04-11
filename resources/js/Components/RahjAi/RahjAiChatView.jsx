@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Sparkles, Send } from 'lucide-react';
-import { router } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { useRahjAiAssistant } from '../../Contexts/RahjAiAssistantContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { stashRahjAiDraftAction } from '../../utils/rahjAiDraft';
@@ -135,6 +135,164 @@ function RichMessageText({ content }) {
         </React.Fragment>
       ))}
     </>
+  );
+}
+
+const RAHJ_COA_FORM_ID = 'smart_entry_coa_level4';
+
+function hasNonEmptyUserMessageAfter(messages, fromIndex) {
+  for (let i = fromIndex + 1; i < messages.length; i += 1) {
+    const row = messages[i];
+    if (row && row.role === 'user' && String(row.content || '').trim() !== '') {
+      return true;
+    }
+  }
+  return false;
+}
+
+function RahjInputFormCard({ action, sendMessage }) {
+  const fields = Array.isArray(action?.fields) ? action.fields : [];
+
+  const buildInitial = () => {
+    const next = {};
+    fields.forEach((f) => {
+      if (f.input === 'checkbox') {
+        next[f.name] = Boolean(f.value);
+      } else {
+        next[f.name] = f.value === undefined || f.value === null ? '' : String(f.value);
+      }
+    });
+    return next;
+  };
+
+  const [values, setValues] = useState(() => buildInitial());
+  const [busy, setBusy] = useState(false);
+
+  useLayoutEffect(() => {
+    setValues(buildInitial());
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset when server sends a new form payload
+  }, [action]);
+
+  const missing = new Set(Array.isArray(action?.missing_field_keys) ? action.missing_field_keys : []);
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    const formId = action?.form_id || RAHJ_COA_FORM_ID;
+    const lines = [`[Form: ${formId}]`];
+    fields.forEach((f) => {
+      if (f.input === 'checkbox') {
+        lines.push(`${f.name}: ${values[f.name] ? 'yes' : 'no'}`);
+        return;
+      }
+      lines.push(`${f.name}: ${String(values[f.name] ?? '').trim()}`);
+    });
+    setBusy(true);
+    try {
+      sendMessage(lines.join('\n'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!fields.length) {
+    return null;
+  }
+
+  return (
+    <form
+      onSubmit={onSubmit}
+      className="mt-3 space-y-3 rounded-xl border border-cyan-200/80 bg-gradient-to-br from-cyan-50/95 to-slate-50/90 p-3 text-xs text-slate-800 shadow-sm dark:border-cyan-900/50 dark:from-slate-900/80 dark:to-slate-950/70 dark:text-slate-100"
+    >
+      <div>
+        <div className="text-sm font-semibold text-slate-900 dark:text-white">{action.title || 'Details needed'}</div>
+        {action.description ? (
+          <p className="mt-1 text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">{action.description}</p>
+        ) : null}
+      </div>
+      <div className="space-y-2.5">
+        {fields.map((f) => {
+          const id = `rahj-form-${f.name}`;
+          const isMissing = missing.has(f.name);
+          return (
+            <div key={f.name} className="rounded-lg border border-slate-200/80 bg-white/80 p-2 dark:border-slate-700/80 dark:bg-slate-900/50">
+              <label htmlFor={id} className="flex items-baseline justify-between gap-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">
+                  {f.label || f.name}
+                  {f.required || isMissing ? <span className="text-rose-500"> *</span> : null}
+                </span>
+              </label>
+              {f.help ? <p className="mt-0.5 text-[10px] leading-snug text-slate-500 dark:text-slate-400">{f.help}</p> : null}
+              {f.input === 'checkbox' ? (
+                <label className="mt-1 flex cursor-pointer items-center gap-2 text-[11px]">
+                  <input
+                    id={id}
+                    type="checkbox"
+                    checked={Boolean(values[f.name])}
+                    onChange={(ev) => setValues((prev) => ({ ...prev, [f.name]: ev.target.checked }))}
+                    className="rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
+                  />
+                  <span>{f.placeholder || 'Enabled'}</span>
+                </label>
+              ) : f.input === 'select' ? (
+                <select
+                  id={id}
+                  value={values[f.name] ?? ''}
+                  onChange={(ev) => setValues((prev) => ({ ...prev, [f.name]: ev.target.value }))}
+                  className="mt-1 block w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-900 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                >
+                  <option value="">{f.placeholder || 'Select…'}</option>
+                  {(f.options || []).map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label || opt.value}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  id={id}
+                  type="text"
+                  value={values[f.name] ?? ''}
+                  onChange={(ev) => setValues((prev) => ({ ...prev, [f.name]: ev.target.value }))}
+                  placeholder={f.placeholder || ''}
+                  className="mt-1 block w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-900 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                  autoComplete="off"
+                />
+              )}
+              {f.name === 'parent_code' && Array.isArray(f.suggestions) && f.suggestions.length > 0 ? (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  <span className="w-full text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    Suggested Level 3 (from your chart)
+                  </span>
+                  {f.suggestions.map((s) => (
+                    <button
+                      key={s.code}
+                      type="button"
+                      onClick={() => setValues((prev) => ({ ...prev, parent_code: s.code }))}
+                      className="max-w-full truncate rounded-full border border-cyan-300/60 bg-cyan-50 px-2 py-0.5 text-[10px] font-medium text-cyan-900 transition-colors hover:bg-cyan-100 dark:border-cyan-800/60 dark:bg-cyan-950/40 dark:text-cyan-100 dark:hover:bg-cyan-900/50"
+                      title={s.name}
+                    >
+                      {s.code}
+                      {s.name ? ` — ${s.name}` : ''}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex items-center justify-between gap-2 pt-1">
+        <span className="text-[10px] text-slate-500 dark:text-slate-400">Required fields marked *</span>
+        <button
+          type="submit"
+          disabled={busy}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/50 bg-gradient-to-r from-cyan-600 to-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <Send className="h-3.5 w-3.5" aria-hidden />
+          {action.submit_label || 'Send to assistant'}
+        </button>
+      </div>
+    </form>
   );
 }
 
@@ -279,9 +437,10 @@ function ActionCard({ action }) {
  */
 export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-ai-input', className = '' }) {
   const { t } = useTranslations();
-  const { messages, draft, setDraft, sendMessage } = useRahjAiAssistant();
+  const { messages, draft, setDraft, sendMessage, threadLoading } = useRahjAiAssistant();
   const listRef = useRef(null);
   const textareaRef = useRef(null);
+  const prevThreadLoading = useRef(threadLoading);
   const embedded = variant === 'embedded';
 
   const syncComposerHeight = () => {
@@ -306,6 +465,18 @@ export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-
     el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
   }, [messages.length]);
 
+  /** After history / thread fetch finishes, land at the latest messages (bottom). */
+  useEffect(() => {
+    const wasLoading = prevThreadLoading.current;
+    prevThreadLoading.current = threadLoading;
+    if (!wasLoading || threadLoading) return;
+    const el = listRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      el.scrollTo({ top: el.scrollHeight, behavior: 'auto' });
+    });
+  }, [threadLoading]);
+
   const handleSend = () => sendMessage();
 
   const onKeyDown = (e) => {
@@ -316,16 +487,19 @@ export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-
   };
 
   const suggestions = [
+    t('rahj_ai.portal.suggestion_po_snapshot'),
+    t('rahj_ai.portal.suggestion_po_list'),
+    t('rahj_ai.portal.suggestion_grn'),
+    t('rahj_ai.portal.suggestion_journal_draft'),
     t('rahj_ai.portal.suggestion_reports'),
     t('rahj_ai.portal.suggestion_navigation'),
-    t('rahj_ai.portal.suggestion_capabilities'),
   ];
 
   return (
     <div
       className={`${
         embedded
-          ? 'relative flex min-h-[min(66vh,680px)] flex-col overflow-hidden rounded-3xl border border-white/25 bg-gradient-to-b from-white/75 via-white/55 to-slate-100/40 shadow-2xl shadow-slate-900/10 backdrop-blur-xl dark:border-gray-700/60 dark:from-slate-900/75 dark:via-slate-900/60 dark:to-slate-950/55'
+          ? 'relative flex min-h-[min(72vh,720px)] flex-col overflow-hidden rounded-3xl border border-white/25 bg-gradient-to-b from-white/75 via-white/55 to-slate-100/40 shadow-2xl shadow-slate-900/10 backdrop-blur-xl dark:border-gray-700/60 dark:from-slate-900/75 dark:via-slate-900/60 dark:to-slate-950/55'
           : 'flex min-h-0 flex-1 flex-col'
       } ${className}`.trim()}
     >
@@ -384,7 +558,12 @@ export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-
                 ) : (
                   <div>
                     <span className="whitespace-pre-wrap break-words"><RichMessageText content={msg.content} /></span>
-                    {msg.role === 'assistant' && msg.action && <ActionCard action={msg.action} />}
+                    {msg.role === 'assistant' && msg.action?.type === 'draft_prefill' ? <ActionCard action={msg.action} /> : null}
+                    {msg.role === 'assistant' &&
+                    msg.action?.type === 'input_form' &&
+                    !hasNonEmptyUserMessageAfter(messages, index) ? (
+                      <RahjInputFormCard action={msg.action} sendMessage={sendMessage} />
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -424,7 +603,27 @@ export default function RahjAiChatView({ variant = 'drawer', textareaId = 'rahj-
             <Send className="h-5 w-5" />
           </button>
         </div>
-        <p className="mt-2 text-center text-xs text-gray-500 dark:text-gray-500">
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-[11px] text-slate-500 dark:text-slate-400">
+          <Link
+            href="/rahj-ai/guidelines"
+            className="font-medium text-cyan-700 underline decoration-cyan-500/40 underline-offset-2 transition-colors hover:text-cyan-600 dark:text-cyan-300 dark:hover:text-cyan-200"
+          >
+            {t('rahj_ai.portal.footer_guidelines')}
+          </Link>
+          <span className="text-slate-300 dark:text-slate-600" aria-hidden>
+            ·
+          </span>
+          <Link
+            href="/rahj-ai/privacy"
+            className="font-medium text-cyan-700 underline decoration-cyan-500/40 underline-offset-2 transition-colors hover:text-cyan-600 dark:text-cyan-300 dark:hover:text-cyan-200"
+          >
+            {t('rahj_ai.portal.footer_privacy')}
+          </Link>
+        </div>
+        <p className="mt-1.5 text-center text-[11px] leading-snug text-slate-500 dark:text-slate-500">
+          {t('rahj_ai.portal.footer_ai_notice')}
+        </p>
+        <p className="mt-1 text-center text-xs text-gray-500 dark:text-gray-500">
           {t('rahj_ai.portal.composer_hint')}
         </p>
       </div>
