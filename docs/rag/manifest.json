@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-10T22:23:57.132Z",
+  "generated_at": "2026-04-12T06:33:28.594Z",
   "project_root": ".",
   "input": {
     "guides_dir": "user_guides",
@@ -17,16 +17,16 @@
     "route_catalog_chunk_size": 4500
   },
   "counts": {
-    "total_chunks": 9736,
+    "total_chunks": 10144,
     "navigation_anchor_chunks": 1,
-    "route_catalog_chunks": 8,
-    "user_guide_chunks": 951,
-    "docs_markdown_chunks": 13,
-    "application_source_chunks": 8655,
-    "database_chunks": 108,
-    "application_source_files": 407,
+    "route_catalog_chunks": 9,
+    "user_guide_chunks": 957,
+    "docs_markdown_chunks": 26,
+    "application_source_chunks": 9042,
+    "database_chunks": 109,
+    "application_source_files": 429,
     "sensitive_excluded_files": 0,
-    "parsed_tables": 64
+    "parsed_tables": 65
   },
   "source": {
     "database": "live",

@@ -24,7 +24,10 @@ export default function StockPositionReport() {
 
   const [filters, setFilters] = useState(() => ({
     as_of_date: appliedFilters.as_of_date || '',
-    posted_only: Boolean(appliedFilters.posted_only),
+    posted_only: !Object.prototype.hasOwnProperty.call(appliedFilters, 'posted_only')
+      ? true
+      : Boolean(appliedFilters.posted_only),
+    qty_basis: appliedFilters.qty_basis === 'subledger' ? 'subledger' : 'grn_lines',
     search: appliedFilters.search || '',
     sort_by: appliedFilters.sort_by || 'item_code',
     sort_order: appliedFilters.sort_order || 'asc',
@@ -57,6 +60,7 @@ export default function StockPositionReport() {
         const body = {
           as_of_date: filters.as_of_date || null,
           posted_only: filters.posted_only,
+          qty_basis: filters.qty_basis,
           search: filters.search.trim() || null,
           sort_by: filters.sort_by,
           sort_order: filters.sort_order,
@@ -112,8 +116,18 @@ export default function StockPositionReport() {
 
   const scopeChips = useMemo(() => {
     const chips = [];
-    if (filters.as_of_date) chips.push(`${tr('as_of_date')}: ${fmtDate(filters.as_of_date)}`);
-    if (filters.posted_only) chips.push(tr('posted_only'));
+    chips.push(filters.qty_basis === 'subledger' ? tr('chip_subledger') : tr('chip_grn_lines'));
+    if (filters.as_of_date) {
+      const asOfLabel = filters.qty_basis === 'subledger' ? tr('as_of_date_subledger') : tr('as_of_date');
+      chips.push(`${asOfLabel}: ${fmtDate(filters.as_of_date)}`);
+    }
+    if (filters.qty_basis === 'grn_lines') {
+      if (filters.posted_only) {
+        chips.push(tr('posted_only'));
+      } else {
+        chips.push(tr('scope_unposted_included'));
+      }
+    }
     if (filters.search.trim()) chips.push(filters.search.trim());
     return chips;
   }, [filters, tr]);
@@ -169,7 +183,9 @@ export default function StockPositionReport() {
           </div>
         </div>
 
-        <p className="mx-4 text-xs text-slate-500 dark:text-slate-400">{tr('methodology_note')}</p>
+        <p className="mx-4 text-xs text-slate-500 dark:text-slate-400">
+          {filters.qty_basis === 'subledger' ? tr('methodology_note_subledger') : tr('methodology_note')}
+        </p>
 
         <div className="manager-content px-4 pb-10">
           <div className="rounded-xl border border-slate-600/60 bg-slate-900/40 overflow-hidden shadow-lg">

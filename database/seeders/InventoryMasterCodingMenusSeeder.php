@@ -101,6 +101,11 @@ class InventoryMasterCodingMenusSeeder extends Seeder
                 ['menu_name' => 'Goods Receipt Register', 'route' => '/inventory/reports/goods-receipt-register', 'icon' => 'clipboard-list', 'sort_order' => 2],
                 ['menu_name' => 'Purchase Order Lines Report', 'route' => '/inventory/reports/purchase-order-lines', 'icon' => 'file-spreadsheet', 'sort_order' => 3],
                 ['menu_name' => 'Stock Position (GRN)', 'route' => '/inventory/reports/stock-position', 'icon' => 'boxes', 'sort_order' => 4],
+                ['menu_name' => 'GRN vs PO variance', 'route' => '/inventory/reports/grn-po-variance', 'icon' => 'git-compare', 'sort_order' => 5],
+                ['menu_name' => 'GRN supplier invoices', 'route' => '/inventory/reports/grn-supplier-invoice-listing', 'icon' => 'file-text', 'sort_order' => 6],
+                ['menu_name' => 'PR lines register', 'route' => '/inventory/reports/purchase-requisition-lines', 'icon' => 'list', 'sort_order' => 7],
+                ['menu_name' => 'PR → PO conversion', 'route' => '/inventory/reports/pr-to-po-conversion', 'icon' => 'arrow-right-left', 'sort_order' => 8],
+                ['menu_name' => 'Posted inventory movements', 'route' => '/inventory/reports/inventory-movements', 'icon' => 'history', 'sort_order' => 9],
             ],
             $now
         ));

@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { router, usePage } from '@inertiajs/react';
-import { BarChart3, Boxes, ClipboardList, FileSpreadsheet, Home } from 'lucide-react';
+import { ArrowRightLeft, BarChart3, Boxes, ClipboardList, FileSpreadsheet, FileText, GitCompare, History, Home, List } from 'lucide-react';
 import App from '../../App.jsx';
 import Breadcrumbs from '@/Components/Breadcrumbs';
 import { useTranslations } from '@/hooks/useTranslations';
@@ -33,7 +33,7 @@ export default function InventoryReportsIndex() {
 
         <div className="mx-4 mb-2 text-xs text-slate-500 dark:text-slate-400">{ts('standards_doc_hint')}</div>
 
-        <div className="mx-4 mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mx-4 mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <button
             type="button"
             onClick={() => router.visit('/inventory/reports/goods-receipt-register')}
@@ -77,6 +77,71 @@ export default function InventoryReportsIndex() {
             <span className="mt-3 inline-block text-sm font-medium text-indigo-600 dark:text-indigo-400">
               {ti('card_stock_link')} →
             </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.visit('/inventory/reports/grn-po-variance')}
+            className="text-left rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 p-5 shadow-sm hover:border-indigo-400/60 transition-colors"
+          >
+            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-semibold">
+              <GitCompare size={20} />
+              {ti('card_gpv_title')}
+            </div>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{ti('card_gpv_body')}</p>
+            <span className="mt-3 inline-block text-sm font-medium text-indigo-600 dark:text-indigo-400">{ti('card_gpv_link')} →</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.visit('/inventory/reports/grn-supplier-invoice-listing')}
+            className="text-left rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 p-5 shadow-sm hover:border-indigo-400/60 transition-colors"
+          >
+            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-semibold">
+              <FileText size={20} />
+              {ti('card_gsi_title')}
+            </div>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{ti('card_gsi_body')}</p>
+            <span className="mt-3 inline-block text-sm font-medium text-indigo-600 dark:text-indigo-400">{ti('card_gsi_link')} →</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.visit('/inventory/reports/purchase-requisition-lines')}
+            className="text-left rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 p-5 shadow-sm hover:border-indigo-400/60 transition-colors"
+          >
+            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-semibold">
+              <List size={20} />
+              {ti('card_prl_title')}
+            </div>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{ti('card_prl_body')}</p>
+            <span className="mt-3 inline-block text-sm font-medium text-indigo-600 dark:text-indigo-400">{ti('card_prl_link')} →</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.visit('/inventory/reports/pr-to-po-conversion')}
+            className="text-left rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 p-5 shadow-sm hover:border-indigo-400/60 transition-colors"
+          >
+            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-semibold">
+              <ArrowRightLeft size={20} />
+              {ti('card_p2p_title')}
+            </div>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{ti('card_p2p_body')}</p>
+            <span className="mt-3 inline-block text-sm font-medium text-indigo-600 dark:text-indigo-400">{ti('card_p2p_link')} →</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.visit('/inventory/reports/inventory-movements')}
+            className="text-left rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 p-5 shadow-sm hover:border-indigo-400/60 transition-colors"
+          >
+            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-semibold">
+              <History size={20} />
+              {ti('card_imv_title')}
+            </div>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{ti('card_imv_body')}</p>
+            <span className="mt-3 inline-block text-sm font-medium text-indigo-600 dark:text-indigo-400">{ti('card_imv_link')} →</span>
           </button>
         </div>
       </div>

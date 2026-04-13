@@ -128,8 +128,8 @@ class EnhancedRagService
                     break;
 
                 case 'goods_receipt':
-                    $receipts = $this->realtime->getPendingGoodsReceipts($companyId);
-                    $linkHint = "Use this exact markdown for the GRN list: [Goods receipt (GRN)](/inventory/goods-receipt-note).\n\n";
+                    $receipts = $this->realtime->getPendingGoodsReceipts($companyId, $locationId);
+                    $linkHint = "Use this exact markdown for the GRN list: [Goods receipt (GRN)](/inventory/goods-receipt-note). Supplier invoice posting (GL): [GRN supplier invoice](/inventory/grn-supplier-invoice). Stock aligned with posted GL: [Stock position (GRN)](/inventory/reports/stock-position).\n\n";
                     $realtimeChunks[] = $this->createDataChunk(
                         'realtime_data',
                         'Pending goods receipts (live)',

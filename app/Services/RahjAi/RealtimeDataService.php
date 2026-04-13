@@ -88,7 +88,7 @@ class RealtimeDataService
                 'item_status' => $item->item_status ?? null,
                 'reorder_point' => $item->reorder_point ?? null,
                 'standard_cost' => $item->standard_cost ?? null,
-                'note' => 'On-hand quantity is not computed here; open inventory stock / movement reports for live quantities.',
+                'note' => 'On-hand quantity is not computed here. For quantities aligned with posted GL (supplier invoice posted), use [Stock position (GRN)](/inventory/reports/stock-position) with “Posted vouchers only” (default). Uncheck that filter for receipts still in QC only.',
             ];
         } catch (\Throwable $e) {
             return ['error' => 'Could not read inventory item.', 'detail' => $e->getMessage()];
@@ -154,28 +154,56 @@ class RealtimeDataService
         }
     }
 
-    public function getPendingGoodsReceipts(int $companyId): array
+    public function getPendingGoodsReceipts(int $companyId, ?int $locationId = null): array
     {
         try {
             if (! Schema::hasTable('goods_receipt_notes')) {
                 return ['pending_receipts_count' => 0, 'receipts' => []];
             }
 
-            $receipts = DB::table('goods_receipt_notes')
+            // Status values match GoodsReceiptNote / GrnSupplierInvoice flows (not legacy pending_qc/partial).
+            $q = DB::table('goods_receipt_notes')
                 ->where('comp_id', $companyId)
-                ->whereIn('status', ['draft', 'pending_qc', 'partial'])
-                ->get(['grn_number', 'receipt_date', 'status']);
+                ->where(function ($w) {
+                    $w->where('status', 'draft')
+                        ->orWhere(function ($w2) {
+                            $w2->where('status', 'qc_pending')
+                                ->whereNull('posted_transaction_id');
+                        });
+                });
+
+            if ($locationId) {
+                $q->where('location_id', $locationId);
+            }
+
+            $countQ = clone $q;
+            $pendingReceiptsCount = (int) $countQ->count();
+            $draftGrnCount = (int) (clone $q)->where('status', 'draft')->count();
+            $qcPendingAwaitingInvoiceCount = (int) (clone $q)->where('status', 'qc_pending')->count();
+
+            $receipts = (clone $q)->orderByDesc('receipt_date')
+                ->orderByDesc('id')
+                ->limit(80)
+                ->get(['grn_number', 'receipt_date', 'status', 'location_id', 'posted_transaction_id']);
 
             return [
-                'pending_receipts_count' => $receipts->count(),
+                'pending_receipts_count' => $pendingReceiptsCount,
+                'draft_grn_count' => $draftGrnCount,
+                'qc_pending_awaiting_supplier_invoice_count' => $qcPendingAwaitingInvoiceCount,
+                'note' => 'Draft = not submitted to QC. QC pending without posted_transaction_id = received operationally but not yet capitalised in GL; post via [GRN supplier invoice](/inventory/grn-supplier-invoice).',
                 'receipts' => $receipts->map(fn ($r) => [
                     'grn_number' => $r->grn_number,
                     'receipt_date' => $r->receipt_date,
                     'status' => $r->status,
+                    'location_id' => $r->location_id,
                 ])->all(),
                 'rahj_ui_links' => [
                     'grn_list' => '/inventory/goods-receipt-note',
                     'markdown_grn_list' => '[Goods receipt (GRN)](/inventory/goods-receipt-note)',
+                    'grn_supplier_invoice' => '/inventory/grn-supplier-invoice',
+                    'markdown_supplier_invoice' => '[GRN supplier invoice](/inventory/grn-supplier-invoice)',
+                    'stock_position_report' => '/inventory/reports/stock-position',
+                    'markdown_stock_position' => '[Stock position (GRN)](/inventory/reports/stock-position)',
                 ],
             ];
         } catch (\Throwable $e) {

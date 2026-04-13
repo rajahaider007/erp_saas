@@ -123,10 +123,11 @@ class SystemContextService
             $modules['inventory'] = [
                 'name' => 'Inventory',
                 'routes' => [
-                    'items' => '/inventory/items',
+                    'item_master' => '/inventory/item-master',
                     'purchase_order' => '/inventory/purchase-order',
                     'goods_receipt' => '/inventory/goods-receipt-note',
-                    'stock_level' => '/inventory/stock-level',
+                    'grn_supplier_invoice' => '/inventory/grn-supplier-invoice',
+                    'stock_position_grn' => '/inventory/reports/stock-position',
                 ],
             ];
         }
@@ -204,10 +205,16 @@ class SystemContextService
                 $pending['pending_pos'] = $pos;
             }
 
-            // Pending GRNs
+            // Pending GRNs (draft or QC pending before supplier invoice / GL post)
             $grns = DB::table('goods_receipt_notes')
                 ->where('comp_id', $user->comp_id)
-                ->whereIn('status', ['draft', 'pending_qc'])
+                ->where(function ($w) {
+                    $w->where('status', 'draft')
+                        ->orWhere(function ($w2) {
+                            $w2->where('status', 'qc_pending')
+                                ->whereNull('posted_transaction_id');
+                        });
+                })
                 ->count();
 
             if ($grns > 0) {

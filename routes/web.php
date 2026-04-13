@@ -284,6 +284,31 @@ Route::prefix('inventory/reports')->name('inventory.reports.')->middleware('web.
     Route::post('/stock-position/data', [InventoryReportingController::class, 'stockPositionData'])->name('stock-position.data');
     Route::get('/stock-position/export/csv', [InventoryReportingController::class, 'stockPositionExportCsv'])->name('stock-position.export.csv');
     Route::get('/stock-position/export/excel', [InventoryReportingController::class, 'stockPositionExportExcel'])->name('stock-position.export.excel');
+    Route::get('/grn-po-variance', [InventoryReportingController::class, 'grnPoVarianceRegister'])->name('grn-po-variance');
+    Route::get('/grn-po-variance/report', [InventoryReportingController::class, 'grnPoVarianceReport'])->name('grn-po-variance.report');
+    Route::post('/grn-po-variance/data', [InventoryReportingController::class, 'grnPoVarianceData'])->name('grn-po-variance.data');
+    Route::get('/grn-po-variance/export/csv', [InventoryReportingController::class, 'grnPoVarianceExportCsv'])->name('grn-po-variance.export.csv');
+    Route::get('/grn-po-variance/export/excel', [InventoryReportingController::class, 'grnPoVarianceExportExcel'])->name('grn-po-variance.export.excel');
+    Route::get('/grn-supplier-invoice-listing', [InventoryReportingController::class, 'grnSupplierInvoiceListingRegister'])->name('grn-supplier-invoice-listing');
+    Route::get('/grn-supplier-invoice-listing/report', [InventoryReportingController::class, 'grnSupplierInvoiceListingReport'])->name('grn-supplier-invoice-listing.report');
+    Route::post('/grn-supplier-invoice-listing/data', [InventoryReportingController::class, 'grnSupplierInvoiceListingData'])->name('grn-supplier-invoice-listing.data');
+    Route::get('/grn-supplier-invoice-listing/export/csv', [InventoryReportingController::class, 'grnSupplierInvoiceListingExportCsv'])->name('grn-supplier-invoice-listing.export.csv');
+    Route::get('/grn-supplier-invoice-listing/export/excel', [InventoryReportingController::class, 'grnSupplierInvoiceListingExportExcel'])->name('grn-supplier-invoice-listing.export.excel');
+    Route::get('/purchase-requisition-lines', [InventoryReportingController::class, 'purchaseRequisitionLinesRegister'])->name('purchase-requisition-lines');
+    Route::get('/purchase-requisition-lines/report', [InventoryReportingController::class, 'purchaseRequisitionLinesReport'])->name('purchase-requisition-lines.report');
+    Route::post('/purchase-requisition-lines/data', [InventoryReportingController::class, 'purchaseRequisitionLinesData'])->name('purchase-requisition-lines.data');
+    Route::get('/purchase-requisition-lines/export/csv', [InventoryReportingController::class, 'purchaseRequisitionLinesExportCsv'])->name('purchase-requisition-lines.export.csv');
+    Route::get('/purchase-requisition-lines/export/excel', [InventoryReportingController::class, 'purchaseRequisitionLinesExportExcel'])->name('purchase-requisition-lines.export.excel');
+    Route::get('/pr-to-po-conversion', [InventoryReportingController::class, 'prToPoConversionRegister'])->name('pr-to-po-conversion');
+    Route::get('/pr-to-po-conversion/report', [InventoryReportingController::class, 'prToPoConversionReport'])->name('pr-to-po-conversion.report');
+    Route::post('/pr-to-po-conversion/data', [InventoryReportingController::class, 'prToPoConversionData'])->name('pr-to-po-conversion.data');
+    Route::get('/pr-to-po-conversion/export/csv', [InventoryReportingController::class, 'prToPoConversionExportCsv'])->name('pr-to-po-conversion.export.csv');
+    Route::get('/pr-to-po-conversion/export/excel', [InventoryReportingController::class, 'prToPoConversionExportExcel'])->name('pr-to-po-conversion.export.excel');
+    Route::get('/inventory-movements', [InventoryReportingController::class, 'inventoryMovementsRegister'])->name('inventory-movements');
+    Route::get('/inventory-movements/report', [InventoryReportingController::class, 'inventoryMovementsReport'])->name('inventory-movements.report');
+    Route::post('/inventory-movements/data', [InventoryReportingController::class, 'inventoryMovementsData'])->name('inventory-movements.data');
+    Route::get('/inventory-movements/export/csv', [InventoryReportingController::class, 'inventoryMovementsExportCsv'])->name('inventory-movements.export.csv');
+    Route::get('/inventory-movements/export/excel', [InventoryReportingController::class, 'inventoryMovementsExportExcel'])->name('inventory-movements.export.excel');
 });
 
 // Inventory Module - Item Master

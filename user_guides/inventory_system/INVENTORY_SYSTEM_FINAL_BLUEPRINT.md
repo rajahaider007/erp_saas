@@ -24,13 +24,15 @@
 | **3.2 GRN-linked supplier invoice** | مکمل | `GrnSupplierInvoiceController` — AP لنک کی سمت۔ |
 | **3.2 Landed cost allocation (Form 5)** | باقی | GRN پر flags/reference؛ الگ LC allocation فارم/پوسٹنگ نہیں۔ |
 | **3.2 Stock transfer / Delivery / Adjustment / RTV / RMA / Physical count** | باقی | routes/controllers نہیں؛ quantity subledger نہیں۔ |
-| **3.3 Quantity / valuation / audit ledgers** | باقی | مستقل `inventory_transactions` یا valuation layers نہیں؛ رپورٹس GRN/PO سے جمع ہوتی ہیں۔ |
-| **Phase A — Stock on hand** | جزوی | **نئی رپورٹ (2026-04-11):** `Inventory → Reports → Stock position (GRN receipts)` — موجودہ برانچ لوکیشن پر **GRN قبول شدہ مقدار** کا مجموعہ (IAS مکمل on-hand سے پہلے کا عملی P1 قدم)۔ |
+| **3.3 Quantity / valuation / audit ledgers** | جزوی | **`inventory_transactions`:** GRN purchase invoice posting پر inbound قطاریں (`InventoryLedgerWriter`)؛ رپورٹ `/inventory/reports/inventory-movements`۔ Issues/transfers/adjustments اور valuation layers ابھی نہیں۔ |
+| **Phase A — Stock on hand** | جزوی | **رپورٹ:** `Inventory → Reports → Stock position` — **GRN لائنیں** (رسید کی تاریخ، posted-only) یا **ذیلی لیجر** (`inventory_transactions` کا مجموعہ، واؤچر تاریخ)؛ `Posted inventory movements` وہی قطاریں دکھاتا ہے۔ |
 | **Reporting (purchase-to-receipt)** | مکمل | Goods receipt register، purchase order lines (`InventoryReportingController`)؛ معیار: `docs/INVENTORY_REPORTING_STANDARDS.md`۔ |
 | **Document numbering** | مکمل | `InventoryDocumentNumberConfigurationController`۔ |
 | **Controls / SoD / period lock / immutable audit** | جزوی | عام ایپ کنٹرولز؛ blueprint والا مکمل governance ابھی نہیں۔ |
 
 **اگلا منطقی ترقی:** landed cost allocation فارم → stock ledger (receipt/issue/transfer) → adjustment + posting → باقی outbound فارمز۔
+
+**Next 3 priorities (detailed, EN):** [`docs/INVENTORY_NEXT_PRIORITIES_ROADMAP.md`](../../docs/INVENTORY_NEXT_PRIORITIES_ROADMAP.md) — quantity subledger first, then landed cost (Form 5), then stock adjustment (Form 8) with rationale vs blueprint ordering.
 
 ---
 

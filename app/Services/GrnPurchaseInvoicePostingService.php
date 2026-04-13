@@ -7,6 +7,7 @@ use App\Models\GoodsReceiptNote;
 use App\Models\GoodsReceiptNoteLine;
 use App\Models\InventoryItem;
 use App\Models\TaxCategory;
+use App\Services\Inventory\InventoryLedgerWriter;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -442,6 +443,15 @@ class GrnPurchaseInvoicePostingService
                     'entries' => __('inventory_messages.goods_receipt_note.errors.purchase_invoice_unbalanced'),
                 ]);
             }
+
+            InventoryLedgerWriter::recordPurchaseInvoicePosting(
+                $grns,
+                $transactionId,
+                $userId,
+                $voucherDate,
+                $documentCurrency,
+                $now
+            );
 
             foreach ($grns as $grn) {
                 $grn->posted_transaction_id = $transactionId;

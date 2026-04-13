@@ -1,7 +1,7 @@
 # Inventory module — full detail for RAHJ AI
 
 **Purpose:** Code-aligned reference for **Inventory** URLs, Inertia pages, procurement documents, master data, numbering, and reports.  
-**Primary sources:** `routes/web.php`, `app/Http/Controllers/Inventory/*`, `docs/INVENTORY_REPORTING_STANDARDS.md`.  
+**Primary sources:** `routes/web.php`, `app/Http/Controllers/Inventory/*`, `docs/INVENTORY_REPORTING_STANDARDS.md` (includes stock-position GRN vs GL scope).  
 **RAG:** `npm run rag:build` ingests `user_guides/`.
 
 **Related:** Vendor/customer navigation hints live in `user_guides/rahj_ai/ERP_NAVIGATION_ROUTES.md`.
@@ -19,6 +19,8 @@
 7. [GRN supplier invoice](#7-grn-supplier-invoice)
 8. [Inventory document number configuration](#8-inventory-document-number-configuration)
 9. [Reports (`/inventory/reports`)](#9-reports-inventoryreports)
+   - [9.6 Phase 2 procurement reports (standards A3–B2)](#96-phase-2-procurement-reports-standards-a3b2)
+   - [9.7 Posted inventory movements (quantity subledger read)](#97-posted-inventory-movements-quantity-subledger-read)
 10. [Purchase cycle data model (tables)](#10-purchase-cycle-data-model-tables)
 11. [Deeper docs in repo](#11-deeper-docs-in-repo)
 12. [Rebuild corpus](#12-rebuild-corpus)
@@ -262,6 +264,7 @@ These are the **only** keys with a non-null config; any other slug → “Invali
 |--------|----------------------------|--------------|----------------|
 | Goods receipt register | **25 000** | **3 000** | **10 000** |
 | Purchase order lines | **25 000** | **3 000** | **10 000** |
+| Phase 2 (§9.6) + §9.7 movements | **25 000** (CSV/Excel only) | — | — |
 
 Exports add a **truncation note** row when the cap is hit.
 
@@ -299,6 +302,25 @@ Exports add a **truncation note** row when the cap is hit.
 
 **Data joins (summary):** `goods_receipt_note_lines` → `goods_receipt_notes` → PO, item, vendor (`chart_of_accounts` party), UOM, currency.
 
+### 9.4b Stock position (GRN) — accounting-aligned default
+
+| Method | Path | Name | Component |
+|--------|------|------|-----------|
+| GET | `/inventory/reports/stock-position` | `inventory.reports.stock-position` | `StockPositionSearch` |
+| GET | `/inventory/reports/stock-position/report` | `inventory.reports.stock-position.report` | `StockPositionReport` |
+| POST | `/inventory/reports/stock-position/data` | `inventory.reports.stock-position.data` | JSON grid |
+| GET | `/inventory/reports/stock-position/export/csv` | `inventory.reports.stock-position.export.csv` | stream |
+| GET | `/inventory/reports/stock-position/export/excel` | `inventory.reports.stock-position.export.excel` | stream |
+
+**Query / API filters:**
+
+| Key | Rules / default |
+|-----|------------------|
+| `as_of_date` | optional date (receipt date ≤) |
+| `posted_only` | boolean — **default true** (only GRNs with `posted_transaction_id`, same economic scope as posted inventory + AP in GL). Set `posted_only=0` to include **QC pending** receipts not yet on a posted supplier invoice. |
+| `search` | item code / name |
+| `sort_by`, `sort_order`, `per_page`, `page` | same pattern as other report APIs |
+
 ### 9.5 Purchase order lines register
 
 | Method | Path | Name | Component |
@@ -323,6 +345,42 @@ Exports add a **truncation note** row when the cap is hit.
 | `sort_by` | `po_date`, `po_number`, `vendor`, `item_code`, `balance_qty` |
 | `sort_order` | `asc` / `desc` |
 | `per_page`, `page` | API: 10–200, default 50 |
+
+### 9.6 Phase 2 procurement reports (standards A3–B2)
+
+**Service:** `app/Services/Inventory/Phase2InventoryReports.php`  
+**Exports:** CSV + Excel (streamed); **no** PDF/print routes for these four. Export cap **25 000** rows (truncation row when exceeded).  
+**Permissions:** `inventory.reports.grn-po-variance`, `…grn-supplier-invoice-listing`, `…purchase-requisition-lines`, `…pr-to-po-conversion` (see `CheckUserPermissions`).  
+**Manual QA:** `docs/SMOKE_TEST_INVENTORY_PHASE2_REPORTS.md` (filters, `POST /data`, CSV/Excel).
+
+| Standard | Report | GET search | GET report | POST data | export CSV | export Excel |
+|----------|--------|------------|------------|-----------|------------|--------------|
+| A3 | GRN vs PO variance | `/inventory/reports/grn-po-variance` | `…/report` | `…/data` | `…/export/csv` | `…/export/excel` |
+| A4 | GRN-linked supplier invoice listing | `/inventory/reports/grn-supplier-invoice-listing` | `…/report` | `…/data` | `…/export/csv` | `…/export/excel` |
+| B1 | Purchase requisition lines register | `/inventory/reports/purchase-requisition-lines` | `…/report` | `…/data` | `…/export/csv` | `…/export/excel` |
+| B2 | PR → PO conversion | `/inventory/reports/pr-to-po-conversion` | `…/report` | `…/data` | `…/export/csv` | `…/export/excel` |
+
+**Inertia / JSX:** `GrnPoVarianceSearch` / `GrnPoVarianceReport`; `GrnSupplierInvoiceListingSearch` / `GrnSupplierInvoiceListingReport`; `PurchaseRequisitionLinesSearch` / `PurchaseRequisitionLinesReport`; `PrToPoConversionSearch` / `PrToPoConversionReport`.
+
+**Implementation notes (code):** GRN aggregates for A3 use **`qc_pending`** + **`posted`** receipt states. PR→PO lead time uses **`DATEDIFF`** (MySQL). Department filter for B1/B2 relies on **`departments`** joined with company/location as in `InventoryReportingController::departmentOptions()`.
+
+### 9.7 Posted inventory movements (quantity subledger read)
+
+**Purpose:** Traceable **inbound quantity** rows aligned with **posted** GRN supplier invoice vouchers (IAS 2 / audit — same moment as inventory GL from `GrnPurchaseInvoicePostingService`).  
+**Write path:** `App\Services\Inventory\InventoryLedgerWriter::recordPurchaseInvoicePosting` (inside the posting DB transaction).  
+**Read path:** `App\Services\Inventory\InventoryMovementReports::movementRegisterBaseQuery`; UI `InventoryMovementsSearch` / `InventoryMovementsReport`.
+
+| Method | Path | Name | Component |
+|--------|------|------|-----------|
+| GET | `/inventory/reports/inventory-movements` | `inventory-movements` | `InventoryMovementsSearch` |
+| GET | `/inventory/reports/inventory-movements/report` | `inventory-movements.report` | `InventoryMovementsReport` |
+| POST | `/inventory/reports/inventory-movements/data` | `inventory-movements.data` | JSON |
+| GET | `/inventory/reports/inventory-movements/export/csv` | `inventory-movements.export.csv` | stream |
+| GET | `/inventory/reports/inventory-movements/export/excel` | `inventory-movements.export.excel` | stream |
+
+**Filters:** `date_from` / `date_to` on **`voucher_date`**; `search` (GRN #, item, numeric posted voucher id); `sort_by` ∈ `voucher_date`, `grn_number`, `item_code`, `quantity_delta`, `posted_transaction_id`, `line_value`.  
+**Menu / rights:** migration `2026_04_12_181000_inventory_movements_report_menu.php`; seeder row in `InventoryMasterCodingMenusSeeder`; permission route names `inventory.reports.inventory-movements*`.  
+**Prerequisite:** migration `2026_04_12_180000_create_inventory_transactions_table` applied — otherwise the UI shows a “run migrations” message.
 
 ---
 
@@ -360,4 +418,4 @@ npm run rag:build
 
 ## Retrieval keywords
 
-inventory item category class group coding, uom master uom conversion duplicate master-data, item master export csv, vendor master customer transporter chart of accounts level 4, tax category zone bin country brand reason code, purchase requisition purchase order prefill pr, goods receipt note prefill po approve, grn supplier invoice eligible grns preview lines post voucher invoice variant, document number configuration inventory, inventory reports goods receipt register date basis posting receipt, purchase order lines register open lines only, posted_transaction_id three way match, user_comp_id location_id, inventory.reports.data export pdf row limit.
+inventory item category class group coding, uom master uom conversion duplicate master-data, item master export csv, vendor master customer transporter chart of accounts level 4, tax category zone bin country brand reason code, purchase requisition purchase order prefill pr, goods receipt note prefill po approve, grn supplier invoice eligible grns preview lines post voucher invoice variant, document number configuration inventory, inventory reports goods receipt register date basis posting receipt, stock position GRN posted_only default posted_transaction_id GL alignment, purchase order lines register open lines only, posted_transaction_id three way match, user_comp_id location_id, inventory.reports.data export pdf row limit.

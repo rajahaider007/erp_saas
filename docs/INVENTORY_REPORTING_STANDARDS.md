@@ -51,6 +51,7 @@ Legend: **P1** = first priority (available from current transactional tables), *
 | # | Report | Standard / use | Minimum columns | Standard filters |
 |---|--------|----------------|-----------------|------------------|
 | A1 | **Goods receipt register (line detail)** | Receipt audit, IAS 2 cost build-up | GRN #, dates, PO #, vendor, item, UoM, receipt/accept/reject qty, unit cost, line amount, lot/expiry, status, posted flag | Date basis (receipt/posting), vendor, status, item, posted-only, GRN # |
+| A1b | **Stock position (GRN)** | On-hand from receipts vs GL | Item, location, accepted qty × unit cost | As-of receipt date; **posted_only default true** (only `posted_transaction_id` rows — aligns with `GrnPurchaseInvoicePostingService`); set false for QC-pending logistics view. **Optional:** quantity basis **Posted movements (subledger)** = sum of `inventory_transactions` (voucher-date as-of), aligned with Phase 3 ledger writer |
 | A2 | **Purchase order lines register** | Open commitment, delivery performance | PO #, dates, vendor, line, item, ordered/received qty, balance qty, unit price, line status, ship-to | PO date, vendor, status, item, open-lines-only |
 | A3 | **GRN vs PO variance (qty & value)** | Three-way match exception | Ordered, cumulative received (GRN), variance %, PO unit price vs GRN unit cost | Same as A1/A2 |
 | A4 | **Supplier invoice listing (GRN-linked)** | AP and tax reconciliation | Invoice #, vendor, dates, linked GRNs, status, posted id | Date, vendor, status |
@@ -94,8 +95,8 @@ Legend: **P1** = first priority (available from current transactional tables), *
 ## 5. Implementation phases (follow in order)
 
 1. **Phase 1 (implemented):** Menus under **Inventory → Reports**: hub `/inventory/reports`, **Goods Receipt Register** `/inventory/reports/goods-receipt-register`, **Purchase Order Lines Report** `/inventory/reports/purchase-order-lines`. APIs: **A1** `POST …/goods-receipt-register/data`, **A2** `POST …/purchase-order-lines/data`. Migrations: `2026_04_09_240000_add_inventory_reports_menu`, `2026_04_10_101000_inventory_reports_submenus_and_rights` (menus + `user_rights` for active users). Fresh seeds: `InventoryMasterCodingMenusSeeder` includes the same three menus and rights. Filters: dates, vendor, status, search, sort, pagination; GRN also has receipt vs posting date basis and posted-only.
-2. **Phase 2:** A3, A4, B1, B2 using same controller/service pattern; CSV/Excel export (mirror `accounts/reports` exporters).
-3. **Phase 3:** Persisted **inventory_transactions** (or subledger) for C1–C5; tie `posted_transaction_id` and average cost layers.
+2. **Phase 2 (implemented in app):** A3 GRN vs PO variance, A4 GRN supplier invoice listing, B1 PR lines register, B2 PR→PO conversion — routes under `inventory/reports/*`, CSV/Excel exports, hub cards on `/inventory/reports`. See `App\Services\Inventory\Phase2InventoryReports` + `InventoryReportingController`.
+3. **Phase 3 (in progress):** Table **`inventory_transactions`** — rows inserted when a **GRN purchase invoice** is posted (`InventoryLedgerWriter`); register **Posted inventory movements** `/inventory/reports/inventory-movements` (CSV/Excel, same cap as Phase 2). **Stock position** report can use **quantity basis = Posted movements (subledger)** to sum the same rows (voucher-date as-of). **Still to do:** issues, transfers, adjustments, valuation layers (C1–C5 full). **Planning:** `docs/INVENTORY_NEXT_PRIORITIES_ROADMAP.md`.
 4. **Phase 4:** Scheduled snapshots for month-end valuation and IFRS disclosures pack (optional).
 
 ---

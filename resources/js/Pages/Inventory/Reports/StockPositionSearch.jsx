@@ -15,7 +15,10 @@ export default function StockPositionSearch() {
   const tr = useCallback((k, r = {}) => t(`inventory.reports.stock_position.${k}`, r), [t]);
 
   const [asOfDate, setAsOfDate] = useState(initialFilters.as_of_date || todayLocalYmd());
-  const [postedOnly, setPostedOnly] = useState(Boolean(initialFilters.posted_only));
+  const [postedOnly, setPostedOnly] = useState(
+    !Object.prototype.hasOwnProperty.call(initialFilters, 'posted_only') ? true : Boolean(initialFilters.posted_only)
+  );
+  const [qtyBasis, setQtyBasis] = useState(initialFilters.qty_basis === 'subledger' ? 'subledger' : 'grn_lines');
   const [search, setSearch] = useState(initialFilters.search || '');
   const [sortBy, setSortBy] = useState(initialFilters.sort_by || 'item_code');
   const [sortOrder, setSortOrder] = useState(initialFilters.sort_order || 'asc');
@@ -24,16 +27,18 @@ export default function StockPositionSearch() {
     const qs = buildStockPositionQueryString({
       as_of_date: asOfDate,
       posted_only: postedOnly,
+      qty_basis: qtyBasis,
       search,
       sort_by: sortBy,
       sort_order: sortOrder,
     });
     router.visit(`/inventory/reports/stock-position/report?${qs}`);
-  }, [asOfDate, postedOnly, search, sortBy, sortOrder]);
+  }, [asOfDate, postedOnly, qtyBasis, search, sortBy, sortOrder]);
 
   const resetFilters = useCallback(() => {
     setAsOfDate(todayLocalYmd());
-    setPostedOnly(false);
+    setPostedOnly(true);
+    setQtyBasis('grn_lines');
     setSearch('');
     setSortBy('item_code');
     setSortOrder('asc');
@@ -109,29 +114,60 @@ export default function StockPositionSearch() {
 
                 <div className="bg-slate-700/50 rounded-xl p-5 border border-slate-600/80">
                   <label className="flex items-center gap-2 text-xs font-semibold text-blue-400 uppercase tracking-wide mb-3">
-                    {tr('as_of_date')}
+                    {qtyBasis === 'subledger' ? tr('as_of_date_subledger') : tr('as_of_date')}
                   </label>
                   <CustomDatePicker
                     selected={asOfDate || null}
                     onChange={(d) => setAsOfDate(d ? formatLocalYmd(d) : todayLocalYmd())}
                     type="date"
-                    placeholder={tr('as_of_date')}
+                    placeholder={qtyBasis === 'subledger' ? tr('as_of_date_subledger') : tr('as_of_date')}
                     className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-gray-100"
                     isClearable={false}
                   />
-                  <p className="mt-2 text-xs text-slate-400">{tr('as_of_hint')}</p>
+                  <p className="mt-2 text-xs text-slate-400">{qtyBasis === 'subledger' ? tr('as_of_hint_subledger') : tr('as_of_hint')}</p>
+                </div>
+
+                <div className="bg-slate-700/50 rounded-xl p-5 border border-slate-600/80 space-y-3">
+                  <label className="text-xs font-semibold text-blue-400 uppercase tracking-wide block">{tr('qty_basis_label')}</label>
+                  <div className="flex flex-col gap-2 text-sm text-gray-200">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="qty_basis"
+                        className="border-slate-500 text-blue-500 focus:ring-blue-500"
+                        checked={qtyBasis === 'grn_lines'}
+                        onChange={() => setQtyBasis('grn_lines')}
+                      />
+                      <span>{tr('qty_basis_grn_lines')}</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="qty_basis"
+                        className="border-slate-500 text-blue-500 focus:ring-blue-500"
+                        checked={qtyBasis === 'subledger'}
+                        onChange={() => setQtyBasis('subledger')}
+                      />
+                      <span>{tr('qty_basis_subledger')}</span>
+                    </label>
+                  </div>
+                  <p className="text-xs text-slate-400">{tr('qty_basis_hint')}</p>
                 </div>
 
                 <div className="bg-slate-700/50 rounded-xl p-5 border border-slate-600/80 flex flex-col justify-center">
-                  <label className="flex items-center gap-3 cursor-pointer text-gray-200">
+                  <label
+                    className={`flex items-center gap-3 ${qtyBasis === 'subledger' ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} text-gray-200`}
+                  >
                     <input
                       type="checkbox"
                       className="rounded border-slate-500 w-4 h-4 text-blue-500 focus:ring-blue-500"
                       checked={postedOnly}
+                      disabled={qtyBasis === 'subledger'}
                       onChange={(e) => setPostedOnly(e.target.checked)}
                     />
                     <span>{tr('posted_only')}</span>
                   </label>
+                  {qtyBasis === 'subledger' && <p className="mt-2 text-xs text-slate-400">{tr('posted_only_na_subledger')}</p>}
                 </div>
 
                 <div className="bg-slate-700/50 rounded-xl p-5 border border-slate-600/80">

@@ -578,10 +578,21 @@ class AssistantOrchestratorService
             })
             ->sum('l.ordered_qty');
 
-        $receivedQty = DB::table('goods_receipt_note_lines as l')
+        $receivedQtyOperational = DB::table('goods_receipt_note_lines as l')
             ->join('goods_receipt_notes as h', 'h.id', '=', 'l.goods_receipt_note_id')
             ->where('h.comp_id', $compId)
             ->where('h.location_id', $locationId)
+            ->whereIn('h.status', ['qc_pending', 'posted'])
+            ->when($dateRange, function ($q) use ($dateRange) {
+                $q->whereBetween('h.receipt_date', [$dateRange['from'], $dateRange['to']]);
+            })
+            ->sum('l.receipt_qty');
+
+        $receivedQtyGlPosted = DB::table('goods_receipt_note_lines as l')
+            ->join('goods_receipt_notes as h', 'h.id', '=', 'l.goods_receipt_note_id')
+            ->where('h.comp_id', $compId)
+            ->where('h.location_id', $locationId)
+            ->whereNotNull('h.posted_transaction_id')
             ->when($dateRange, function ($q) use ($dateRange) {
                 $q->whereBetween('h.receipt_date', [$dateRange['from'], $dateRange['to']]);
             })
@@ -599,8 +610,11 @@ class AssistantOrchestratorService
             'items_active' => $itemsActive,
             'requested_qty' => round((float) $requestedQty, 3),
             'ordered_qty' => round((float) $orderedQty, 3),
-            'received_qty' => round((float) $receivedQty, 3),
+            'received_qty' => round((float) $receivedQtyOperational, 3),
+            'received_qty_operational' => round((float) $receivedQtyOperational, 3),
+            'received_qty_gl_posted_scope' => round((float) $receivedQtyGlPosted, 3),
             'doc_counts' => $countsByDoc,
+            'accounting_sync_note' => 'received_qty counts GRN lines on headers in qc_pending or posted (excludes draft). received_qty_gl_posted_scope is receipt qty on GRNs with posted_transaction_id (aligned with inventory/AP GL from supplier invoice post).',
         ];
     }
 

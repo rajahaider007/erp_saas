@@ -4,7 +4,7 @@
 
 **Scope:** **Currently implemented** inventory screens (Laravel + Inertia/React), including **PR, PO, GRN**, and **GRN-linked Purchase Invoice** (see procurement guide linked below). Other transactional forms in `more_required_fields.md` that are not yet built remain out of scope here.
 
-**Last aligned to codebase:** 2026-04-09 (`routes/web.php`, prefix `inventory/*`).
+**Last aligned to codebase:** 2026-04-12 (`routes/web.php`, prefix `inventory/*`; reporting + RAHJ realtime GRN statuses aligned to `draft` / `qc_pending` / `posted`).
 
 ---
 
