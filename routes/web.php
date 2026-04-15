@@ -498,6 +498,69 @@ Route::prefix('accounts/trial-balance')->name('accounts.trial-balance.')->middle
     Route::get('/export-pdf', [App\Http\Controllers\Accounts\TrialBalanceController::class, 'exportPDF'])->name('export-pdf');
 });
 
+// ============================================================
+// SALES MODULE ROUTES
+// ============================================================
+
+// Sales Dashboard
+Route::get('/sales', function () {
+    return redirect('/sales/dashboard');
+})->middleware('web.auth');
+
+Route::get('/sales/dashboard', [App\Http\Controllers\Sales\SalesDashboardController::class, 'index'])
+    ->middleware('web.auth')
+    ->name('sales.dashboard');
+
+// Sales Customer Management Routes
+Route::prefix('sales/customer')->name('sales.customer.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\Sales\CustomerController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Sales\CustomerController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Sales\CustomerController::class, 'store'])->name('store');
+    Route::get('/{customer}/edit', [App\Http\Controllers\Sales\CustomerController::class, 'edit'])->name('edit');
+    Route::put('/{customer}', [App\Http\Controllers\Sales\CustomerController::class, 'update'])->name('update');
+    Route::delete('/{customer}', [App\Http\Controllers\Sales\CustomerController::class, 'destroy'])->name('destroy');
+});
+
+// Sales Quotation Routes
+Route::prefix('sales/quotation')->name('sales.quotation.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\Sales\QuotationController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Sales\QuotationController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Sales\QuotationController::class, 'store'])->name('store');
+    Route::get('/{quotation}/edit', [App\Http\Controllers\Sales\QuotationController::class, 'edit'])->name('edit');
+    Route::put('/{quotation}', [App\Http\Controllers\Sales\QuotationController::class, 'update'])->name('update');
+    Route::delete('/{quotation}', [App\Http\Controllers\Sales\QuotationController::class, 'destroy'])->name('destroy');
+});
+
+// Sales Order Routes
+Route::prefix('sales/order')->name('sales.order.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\Sales\SalesOrderController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Sales\SalesOrderController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Sales\SalesOrderController::class, 'store'])->name('store');
+    Route::get('/{order}/edit', [App\Http\Controllers\Sales\SalesOrderController::class, 'edit'])->name('edit');
+    Route::put('/{order}', [App\Http\Controllers\Sales\SalesOrderController::class, 'update'])->name('update');
+    Route::delete('/{order}', [App\Http\Controllers\Sales\SalesOrderController::class, 'destroy'])->name('destroy');
+});
+
+// Sales Invoice Routes
+Route::prefix('sales/invoice')->name('sales.invoice.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\Sales\InvoiceController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Sales\InvoiceController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Sales\InvoiceController::class, 'store'])->name('store');
+    Route::get('/{invoice}/edit', [App\Http\Controllers\Sales\InvoiceController::class, 'edit'])->name('edit');
+    Route::put('/{invoice}', [App\Http\Controllers\Sales\InvoiceController::class, 'update'])->name('update');
+    Route::post('/{invoice}/post', [App\Http\Controllers\Sales\InvoiceController::class, 'post'])->name('post');
+    Route::delete('/{invoice}', [App\Http\Controllers\Sales\InvoiceController::class, 'destroy'])->name('destroy');
+});
+
+// Sales Payment Routes
+Route::prefix('sales/payment')->name('sales.payment.')->middleware('web.auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\Sales\PaymentController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Sales\PaymentController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Sales\PaymentController::class, 'store'])->name('store');
+    Route::get('/{payment}', [App\Http\Controllers\Sales\PaymentController::class, 'show'])->name('show');
+    Route::delete('/{payment}', [App\Http\Controllers\Sales\PaymentController::class, 'destroy'])->name('destroy');
+});
+
 // Fiscal Year Configuration Routes
 Route::prefix('accounts/fiscal-year-configuration')->name('accounts.fiscal-year-configuration.')->middleware('web.auth')->group(function () {
     Route::get('/', [App\Http\Controllers\Accounts\FiscalYearConfigurationController::class, 'index'])->name('index');

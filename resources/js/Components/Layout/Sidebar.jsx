@@ -26,6 +26,30 @@ import {
   Receipt
 } from 'lucide-react';
 
+/**
+ * Menus from DB may store either a path (/sales/customer) or a Laravel route name (sales.customer.index).
+ * Route names without a leading slash are treated as relative URLs by the browser when the section
+ * lives under /sales/..., producing broken paths like /sales/sales/sales.customer.index — resolve via Ziggy.
+ */
+function resolveMenuHref(raw) {
+  if (raw == null) return '#';
+  const s = String(raw).trim();
+  if (s === '' || s === 'undefined' || s === 'null' || s === '#') return '#';
+  if (/^https?:\/\//i.test(s)) return s;
+  if (s.startsWith('/')) return s;
+  if (s.includes('.') && !s.includes('/') && !s.includes('\\')) {
+    const routeFn = typeof globalThis !== 'undefined' ? globalThis.route : null;
+    if (typeof routeFn === 'function') {
+      try {
+        return routeFn(s);
+      } catch {
+        return '#';
+      }
+    }
+  }
+  return `/${s.replace(/^\/+/, '')}`;
+}
+
 const menuLabel = (child, t) => {
   if (!child.menuSlug || !t) return child.name;
   const k = 'sidebar.menus.' + child.menuSlug;
@@ -314,7 +338,7 @@ const Sidebar = () => {
             return {
               name: menu.menu_name,
               menuSlug,
-              href: (menu.route && menu.route !== 'undefined' && menu.route !== 'null') ? menu.route : '#',
+              href: (menu.route && menu.route !== 'undefined' && menu.route !== 'null') ? resolveMenuHref(menu.route) : '#',
               icon: iconFromName(menu.icon)
             };
           })
@@ -369,7 +393,7 @@ const Sidebar = () => {
       sectionsMap[sectionName].children.push({
         name: menu.menu_name,
         menuSlug,
-        href: menu.route || '#',
+        href: menu.route ? resolveMenuHref(menu.route) : '#',
         icon: iconFromName(menu.icon)
       });
     });
